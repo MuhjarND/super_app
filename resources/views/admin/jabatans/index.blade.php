@@ -57,6 +57,7 @@
                             <th>Level</th>
                             <th>Parent</th>
                             <th>Unit</th>
+                            <th>Dipakai</th>
                             <th class="text-right">Aksi</th>
                         </tr>
                     </thead>
@@ -68,6 +69,7 @@
                                 <td>{{ $jabatan->level }}</td>
                                 <td>{{ optional($jabatan->parent)->nama ?? '-' }}</td>
                                 <td>{{ optional($jabatan->unit)->nama ?? '-' }}</td>
+                                <td>{{ $jabatan->users_count }}</td>
                                 <td class="text-right">
                                     <button class="btn btn-sm btn-outline-primary" data-toggle="modal"
                                         data-target="#editJabatanModal{{ $jabatan->id }}">Edit</button>
@@ -140,7 +142,7 @@
                             </div>
                         @empty
                             <tr>
-                                <td colspan="6" class="text-center text-muted py-4">Belum ada data jabatan.</td>
+                                <td colspan="7" class="text-center text-muted py-4">Belum ada data jabatan.</td>
                             </tr>
                         @endforelse
                     </tbody>

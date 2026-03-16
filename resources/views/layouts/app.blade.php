@@ -247,6 +247,25 @@
             font-size: 0.75rem;
         }
 
+        .theme-toggle-btn {
+            border: 1px solid #d1d5db;
+            background: #ffffff;
+            color: #374151;
+            border-radius: 10px;
+            padding: 8px 14px;
+            font-size: 0.82rem;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.15s ease;
+        }
+
+        .theme-toggle-btn:hover {
+            background: #f9fafb;
+            border-color: #9ca3af;
+        }
+
         .dropdown-menu {
             border: 1px solid #e5e7eb;
             border-radius: 12px;
@@ -523,6 +542,62 @@
             }
         }
 
+        /* ======================== GLOBAL LOADER ======================== */
+        .global-loader {
+            position: fixed;
+            inset: 0;
+            z-index: 20000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.72);
+            backdrop-filter: blur(3px);
+        }
+
+        .global-loader.is-visible {
+            display: flex;
+        }
+
+        .global-loader-card {
+            min-width: 220px;
+            max-width: 320px;
+            padding: 22px 24px;
+            border-radius: 18px;
+            background: rgba(255, 255, 255, 0.96);
+            border: 1px solid rgba(229, 231, 235, 0.9);
+            box-shadow: 0 22px 50px rgba(15, 23, 42, 0.16);
+            text-align: center;
+        }
+
+        .global-loader-spinner {
+            width: 52px;
+            height: 52px;
+            margin: 0 auto 14px;
+            border-radius: 50%;
+            border: 4px solid rgba(59, 130, 246, 0.18);
+            border-top-color: #2563eb;
+            animation: globalLoaderSpin 0.8s linear infinite;
+        }
+
+        .global-loader-title {
+            color: var(--text-primary);
+            font-size: 0.95rem;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .global-loader-text {
+            color: var(--text-secondary);
+            font-size: 0.82rem;
+            margin: 0;
+        }
+
+        @keyframes globalLoaderSpin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
         /* ======================== PAGE HEADER ======================== */
         .page-header-card {
             background: white;
@@ -618,6 +693,159 @@
             border-radius: 8px !important;
             margin: 0 2px;
         }
+
+        /* ======================== DARK THEME ======================== */
+        body.theme-dark {
+            --sidebar-bg: #0f172a;
+            --sidebar-border: #1f2937;
+            --body-bg: #0b1120;
+            --text-primary: #e5e7eb;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --card-shadow: 0 1px 3px rgba(15, 23, 42, 0.35), 0 1px 2px rgba(15, 23, 42, 0.25);
+            --card-hover-shadow: 0 16px 36px rgba(2, 6, 23, 0.42);
+        }
+
+        body.theme-dark .main-header,
+        body.theme-dark .main-footer,
+        body.theme-dark .dropdown-menu,
+        body.theme-dark .card,
+        body.theme-dark .modal-content,
+        body.theme-dark .page-header-card,
+        body.theme-dark .quick-action,
+        body.theme-dark .agenda-preview,
+        body.theme-dark .attendance-info-box,
+        body.theme-dark .attendance-detail-card,
+        body.theme-dark .voting-stat-card,
+        body.theme-dark .result-item-card {
+            background: #111827 !important;
+            color: #e5e7eb !important;
+            border-color: #1f2937 !important;
+        }
+
+        body.theme-dark .main-sidebar .brand-link,
+        body.theme-dark .sidebar-user,
+        body.theme-dark .card-header,
+        body.theme-dark .main-footer,
+        body.theme-dark .modal-footer,
+        body.theme-dark .table thead th,
+        body.theme-dark .table td,
+        body.theme-dark .dropdown-divider {
+            border-color: #1f2937 !important;
+        }
+
+        body.theme-dark .main-header .nav-link,
+        body.theme-dark .sidebar .nav-link,
+        body.theme-dark .sidebar-user-name,
+        body.theme-dark .dropdown-item,
+        body.theme-dark .content-header h1,
+        body.theme-dark .card-header .card-title,
+        body.theme-dark .table td,
+        body.theme-dark .form-group label,
+        body.theme-dark .main-footer,
+        body.theme-dark .text-dark {
+            color: #e5e7eb !important;
+        }
+
+        body.theme-dark .main-header .nav-link:hover,
+        body.theme-dark .sidebar .nav-link:hover,
+        body.theme-dark .dropdown-item:hover,
+        body.theme-dark .table tbody tr:hover,
+        body.theme-dark .btn-outline-secondary:hover,
+        body.theme-dark .theme-toggle-btn:hover {
+            background: #172033 !important;
+            color: #f8fafc !important;
+        }
+
+        body.theme-dark .sidebar .nav-link.active,
+        body.theme-dark .theme-toggle-btn {
+            background: #172554;
+            color: #dbeafe;
+            border-color: #1d4ed8;
+        }
+
+        body.theme-dark .table thead th,
+        body.theme-dark .text-muted,
+        body.theme-dark .sidebar-user-role,
+        body.theme-dark .dataTables_wrapper .dataTables_length,
+        body.theme-dark .dataTables_wrapper .dataTables_filter,
+        body.theme-dark .dataTables_wrapper .dataTables_info,
+        body.theme-dark small,
+        body.theme-dark .form-hint {
+            color: #94a3b8 !important;
+        }
+
+        body.theme-dark .form-control,
+        body.theme-dark .dataTables_wrapper .dataTables_filter input,
+        body.theme-dark .dataTables_wrapper .dataTables_length select,
+        body.theme-dark .page-link,
+        body.theme-dark .btn-outline-secondary {
+            background: #0f172a !important;
+            border-color: #334155 !important;
+            color: #e5e7eb !important;
+        }
+
+        body.theme-dark .form-control:focus {
+            border-color: #60a5fa !important;
+            box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.16) !important;
+        }
+
+        body.theme-dark .modal-header {
+            background: linear-gradient(135deg, #0f3a7c 0%, #1d4ed8 100%);
+        }
+
+        body.theme-dark .main-header .navbar-nav .nav-item .dropdown-toggle:hover {
+            background: #172033;
+        }
+
+        body.theme-dark .quick-action {
+            color: #cbd5e1;
+        }
+
+        body.theme-dark .quick-action:hover {
+            color: #dbeafe;
+            border-color: #3b82f6;
+        }
+
+        body.theme-dark .toast-container .custom-toast {
+            background: #111827;
+            color: #e5e7eb;
+        }
+
+        body.theme-dark .global-loader {
+            background: rgba(2, 6, 23, 0.74);
+        }
+
+        body.theme-dark .global-loader-card {
+            background: rgba(15, 23, 42, 0.96);
+            border-color: #1f2937;
+            box-shadow: 0 22px 50px rgba(2, 6, 23, 0.45);
+        }
+
+        @media (max-width: 768px) {
+            .content-header .container-fluid {
+                padding-left: 12px;
+                padding-right: 12px;
+            }
+
+            .card-header,
+            .card-body,
+            .modal-body,
+            .modal-footer {
+                padding: 16px;
+            }
+
+            .page-header-card {
+                padding: 16px;
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 12px;
+            }
+
+            .theme-toggle-btn {
+                padding: 8px 12px;
+            }
+        }
     </style>
 
     @stack('styles')
@@ -636,6 +864,12 @@
                 </li>
             </ul>
             <ul class="navbar-nav ml-auto">
+                <li class="nav-item mr-2 d-flex align-items-center">
+                    <button type="button" class="theme-toggle-btn" id="themeToggle">
+                        <i class="fas fa-moon" id="themeToggleIcon"></i>
+                        <span id="themeToggleLabel">Dark</span>
+                    </button>
+                </li>
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#">
                         <div class="topbar-avatar">
@@ -697,59 +931,61 @@
                             </a>
                         </li>
 
-                        <li class="nav-header">PERSURATAN</li>
+                        @if(Auth::user()->canAccessPersuratanMenu())
+                            <li class="nav-header">PERSURATAN</li>
 
-                        <li
-                            class="nav-item has-treeview {{ request()->routeIs('surat-masuk.*') || request()->routeIs('surat-keluar.*') || request()->routeIs('arsip.*') ? 'menu-open' : '' }}">
-                            <a href="#"
-                                class="nav-link {{ request()->routeIs('surat-masuk.*') || request()->routeIs('surat-keluar.*') || request()->routeIs('arsip.*') ? 'active' : '' }}">
-                                <i class="nav-icon fas fa-mail-bulk"></i>
-                                <p>
-                                    Persuratan
-                                    <i class="right fas fa-angle-left"></i>
-                                </p>
-                            </a>
-                            <ul class="nav nav-treeview">
-                                <li class="nav-item">
-                                    <a href="{{ route('surat-masuk.index') }}"
-                                        class="nav-link {{ request()->routeIs('surat-masuk.*') ? 'active' : '' }}">
-                                        <i class="nav-icon far fa-envelope"></i>
-                                        <p>
-                                            Surat Masuk
-                                            <span class="right badge badge-warning">{{ $sidebarSuratMasukOpenCount ?? 0 }}</span>
-                                        </p>
-                                    </a>
-                                </li>
-                                <li class="nav-item">
-                                    <a href="{{ route('surat-keluar.index') }}"
-                                        class="nav-link {{ request()->routeIs('surat-keluar.*') ? 'active' : '' }}">
-                                        <i class="nav-icon far fa-paper-plane"></i>
-                                        <p>
-                                            Surat Keluar
-                                            <span class="right badge badge-info">{{ $sidebarSuratKeluarDraftCount ?? 0 }}</span>
-                                        </p>
-                                    </a>
-                                </li>
-                                <li class="nav-item">
-                                    <a href="{{ route('arsip.index') }}"
-                                        class="nav-link {{ request()->routeIs('arsip.*') ? 'active' : '' }}">
-                                        <i class="nav-icon far fa-folder-open"></i>
-                                        <p>
-                                            Arsip
-                                            <span class="right badge badge-success">{{ $sidebarArsipCount ?? 0 }}</span>
-                                        </p>
-                                    </a>
-                                </li>
-                            </ul>
-                        </li>
+                            <li
+                                class="nav-item has-treeview {{ request()->routeIs('surat-masuk.*') || request()->routeIs('surat-keluar.*') || request()->routeIs('arsip.*') ? 'menu-open' : '' }}">
+                                <a href="#"
+                                    class="nav-link {{ request()->routeIs('surat-masuk.*') || request()->routeIs('surat-keluar.*') || request()->routeIs('arsip.*') ? 'active' : '' }}">
+                                    <i class="nav-icon fas fa-mail-bulk"></i>
+                                    <p>
+                                        Persuratan
+                                        <i class="right fas fa-angle-left"></i>
+                                    </p>
+                                </a>
+                                <ul class="nav nav-treeview">
+                                    <li class="nav-item">
+                                        <a href="{{ route('surat-masuk.index') }}"
+                                            class="nav-link {{ request()->routeIs('surat-masuk.*') ? 'active' : '' }}">
+                                            <i class="nav-icon far fa-envelope"></i>
+                                            <p>
+                                                Surat Masuk
+                                                <span class="right badge badge-warning">{{ $sidebarSuratMasukOpenCount ?? 0 }}</span>
+                                            </p>
+                                        </a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a href="{{ route('surat-keluar.index') }}"
+                                            class="nav-link {{ request()->routeIs('surat-keluar.*') ? 'active' : '' }}">
+                                            <i class="nav-icon far fa-paper-plane"></i>
+                                            <p>
+                                                Surat Keluar
+                                                <span class="right badge badge-info">{{ $sidebarSuratKeluarDraftCount ?? 0 }}</span>
+                                            </p>
+                                        </a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a href="{{ route('arsip.index') }}"
+                                            class="nav-link {{ request()->routeIs('arsip.*') ? 'active' : '' }}">
+                                            <i class="nav-icon far fa-folder-open"></i>
+                                            <p>
+                                                Arsip
+                                                <span class="right badge badge-success">{{ $sidebarArsipCount ?? 0 }}</span>
+                                            </p>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </li>
+                        @endif
 
-                        @if(Auth::user()->isSuperAdmin())
+                        @if(Auth::user()->canAccessMeetingMasterData())
                             <li class="nav-header">MASTER DATA</li>
 
                             <li
-                                class="nav-item has-treeview {{ request()->routeIs('admin.users.*') || request()->routeIs('admin.jabatans.*') || request()->routeIs('admin.units.*') || request()->routeIs('admin.kategori-surats.*') ? 'menu-open' : '' }}">
+                                class="nav-item has-treeview {{ request()->routeIs('admin.users.*') || request()->routeIs('admin.jabatans.*') || request()->routeIs('admin.units.*') || request()->routeIs('admin.bidangs.*') || request()->routeIs('admin.kategori-surats.*') || request()->routeIs('admin.kategori-rapats.*') ? 'menu-open' : '' }}">
                                 <a href="#"
-                                    class="nav-link {{ request()->routeIs('admin.users.*') || request()->routeIs('admin.jabatans.*') || request()->routeIs('admin.units.*') || request()->routeIs('admin.kategori-surats.*') ? 'active' : '' }}">
+                                class="nav-link {{ request()->routeIs('admin.users.*') || request()->routeIs('admin.jabatans.*') || request()->routeIs('admin.units.*') || request()->routeIs('admin.bidangs.*') || request()->routeIs('admin.kategori-surats.*') || request()->routeIs('admin.kategori-rapats.*') ? 'active' : '' }}">
                                     <i class="nav-icon fas fa-database"></i>
                                     <p>
                                         Master Data
@@ -775,7 +1011,14 @@
                                         <a href="{{ route('admin.units.index') }}"
                                             class="nav-link {{ request()->routeIs('admin.units.*') ? 'active' : '' }}">
                                             <i class="nav-icon far fa-building"></i>
-                                            <p>Unit</p>
+                                            <p>Unit Kerja</p>
+                                        </a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a href="{{ route('admin.bidangs.index') }}"
+                                            class="nav-link {{ request()->routeIs('admin.bidangs.*') ? 'active' : '' }}">
+                                            <i class="nav-icon fas fa-sitemap"></i>
+                                            <p>Bidang</p>
                                         </a>
                                     </li>
                                     <li class="nav-item">
@@ -785,6 +1028,88 @@
                                             <p>Kategori Surat</p>
                                         </a>
                                     </li>
+                                    <li class="nav-item">
+                                        <a href="{{ route('admin.kategori-rapats.index') }}"
+                                            class="nav-link {{ request()->routeIs('admin.kategori-rapats.*') ? 'active' : '' }}">
+                                            <i class="nav-icon far fa-comments"></i>
+                                            <p>Kategori Rapat</p>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </li>
+                        @endif
+
+                        @if(Auth::user()->canAccessMeetingModule())
+                            <li class="nav-header">RAPAT</li>
+
+                            <li
+                                class="nav-item has-treeview {{ request()->routeIs('rapat.*') ? 'menu-open' : '' }}">
+                                <a href="#"
+                                    class="nav-link {{ request()->routeIs('rapat.*') ? 'active' : '' }}">
+                                    <i class="nav-icon fas fa-users"></i>
+                                    <p>
+                                        Smart Rapat
+                                        <i class="right fas fa-angle-left"></i>
+                                    </p>
+                                </a>
+                                <ul class="nav nav-treeview">
+                                    <li class="nav-item">
+                                        <a href="{{ route('rapat.index') }}"
+                                            class="nav-link {{ request()->routeIs('rapat.index') ? 'active' : '' }}">
+                                            <i class="nav-icon far fa-calendar-alt"></i>
+                                            <p>Rapat</p>
+                                        </a>
+                                    </li>
+                                    @if(Auth::user()->canAccessMeetingMinutes())
+                                        <li class="nav-item">
+                                            <a href="{{ route('rapat.notulensi.index') }}"
+                                                class="nav-link {{ request()->routeIs('rapat.notulensi.*') ? 'active' : '' }}">
+                                                <i class="nav-icon far fa-file-alt"></i>
+                                                <p>Notulensi</p>
+                                            </a>
+                                        </li>
+                                    @endif
+                                    @if(Auth::user()->canAccessMeetingApproval())
+                                        <li class="nav-item">
+                                            <a href="{{ route('rapat.approval.index') }}"
+                                                class="nav-link {{ request()->routeIs('rapat.approval.*') ? 'active' : '' }}">
+                                                <i class="nav-icon fas fa-check-double"></i>
+                                                <p>Approval</p>
+                                            </a>
+                                        </li>
+                                    @endif
+                                    <li class="nav-item">
+                                        <a href="{{ route('rapat.absensi.index') }}"
+                                            class="nav-link {{ request()->routeIs('rapat.absensi.*') ? 'active' : '' }}">
+                                            <i class="nav-icon fas fa-clipboard-check"></i>
+                                            <p>Absensi</p>
+                                        </a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a href="{{ route('rapat.laporan.index') }}"
+                                            class="nav-link {{ request()->routeIs('rapat.laporan.*') ? 'active' : '' }}">
+                                            <i class="nav-icon far fa-file-pdf"></i>
+                                            <p>Laporan</p>
+                                        </a>
+                                    </li>
+                                    @if(Auth::user()->canAccessAgendaPimpinan())
+                                        <li class="nav-item">
+                                            <a href="{{ route('rapat.agenda.index') }}"
+                                                class="nav-link {{ request()->routeIs('rapat.agenda.*') ? 'active' : '' }}">
+                                                <i class="nav-icon fas fa-calendar-day"></i>
+                                                <p>Agenda Pimpinan</p>
+                                            </a>
+                                        </li>
+                                    @endif
+                                    @if(Auth::user()->canManageVoting())
+                                        <li class="nav-item">
+                                            <a href="{{ route('rapat.voting.index') }}"
+                                                class="nav-link {{ request()->routeIs('rapat.voting.*') ? 'active' : '' }}">
+                                                <i class="nav-icon fas fa-poll"></i>
+                                                <p>E-Voting</p>
+                                            </a>
+                                        </li>
+                                    @endif
                                 </ul>
                             </li>
                         @endif
@@ -796,14 +1121,6 @@
                                 class="nav-link {{ request()->routeIs('cuti.*') ? 'active' : '' }}">
                                 <i class="nav-icon far fa-calendar-check"></i>
                                 <p>Cuti <span class="badge badge-dev ml-auto">DEV</span></p>
-                            </a>
-                        </li>
-
-                        <li class="nav-item">
-                            <a href="{{ route('rapat.index') }}"
-                                class="nav-link {{ request()->routeIs('rapat.*') ? 'active' : '' }}">
-                                <i class="nav-icon far fa-comments"></i>
-                                <p>Rapat <span class="badge badge-dev ml-auto">DEV</span></p>
                             </a>
                         </li>
 
@@ -837,6 +1154,14 @@
         </footer>
     </div>
 
+    <div class="global-loader" id="globalLoader" aria-hidden="true">
+        <div class="global-loader-card">
+            <div class="global-loader-spinner"></div>
+            <div class="global-loader-title">Memproses...</div>
+            <p class="global-loader-text" id="globalLoaderText">Mohon tunggu sebentar.</p>
+        </div>
+    </div>
+
     <!-- Toast Container -->
     <div class="toast-container" id="toastContainer"></div>
 
@@ -850,6 +1175,126 @@
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
     <script>
+        const THEME_KEY = 'smart-theme';
+        const SIDEBAR_KEY = 'smart-sidebar-collapse';
+        const LOADER_DEFAULT_TEXT = 'Mohon tunggu sebentar.';
+
+        function applyTheme(theme) {
+            const isDark = theme === 'dark';
+            document.body.classList.toggle('theme-dark', isDark);
+            document.body.classList.toggle('theme-light', !isDark);
+
+            const icon = document.getElementById('themeToggleIcon');
+            const label = document.getElementById('themeToggleLabel');
+            if (icon) {
+                icon.className = isDark ? 'fas fa-sun' : 'fas fa-moon';
+            }
+            if (label) {
+                label.textContent = isDark ? 'Light' : 'Dark';
+            }
+        }
+
+        window.AppLoader = (function () {
+            let activeRequests = 0;
+
+            function getElements() {
+                return {
+                    loader: document.getElementById('globalLoader'),
+                    text: document.getElementById('globalLoaderText'),
+                };
+            }
+
+            function show(message = LOADER_DEFAULT_TEXT) {
+                const { loader, text } = getElements();
+                if (!loader || !text) {
+                    return;
+                }
+
+                text.textContent = message;
+                loader.classList.add('is-visible');
+                loader.setAttribute('aria-hidden', 'false');
+            }
+
+            function hide(force = false) {
+                const { loader, text } = getElements();
+                if (!loader || !text) {
+                    return;
+                }
+
+                if (force) {
+                    activeRequests = 0;
+                }
+
+                if (activeRequests > 0 && !force) {
+                    return;
+                }
+
+                loader.classList.remove('is-visible');
+                loader.setAttribute('aria-hidden', 'true');
+                text.textContent = LOADER_DEFAULT_TEXT;
+            }
+
+            function requestStarted(message = LOADER_DEFAULT_TEXT) {
+                activeRequests += 1;
+                show(message);
+            }
+
+            function requestFinished() {
+                activeRequests = Math.max(0, activeRequests - 1);
+                if (activeRequests === 0) {
+                    hide(true);
+                }
+            }
+
+            return {
+                show,
+                hide,
+                requestStarted,
+                requestFinished,
+            };
+        })();
+
+        function shouldShowLoaderForLink(element) {
+            if (!element) {
+                return false;
+            }
+
+            const href = element.getAttribute('href') || '';
+            if (!href || href === '#' || href.startsWith('#') || href.startsWith('javascript:')) {
+                return false;
+            }
+
+            if (element.hasAttribute('download') || element.dataset.skipLoader !== undefined) {
+                return false;
+            }
+
+            if (element.getAttribute('target') === '_blank' || href.startsWith('mailto:') || href.startsWith('tel:')) {
+                return false;
+            }
+
+            if (element.hasAttribute('data-toggle') || element.hasAttribute('data-bs-toggle')) {
+                return false;
+            }
+
+            if (element.classList.contains('dropdown-toggle') || element.getAttribute('role') === 'button') {
+                return false;
+            }
+
+            return true;
+        }
+
+        function shouldShowLoaderForForm(form) {
+            if (!form || form.dataset.skipLoader !== undefined) {
+                return false;
+            }
+
+            if (form.target === '_blank') {
+                return false;
+            }
+
+            return true;
+        }
+
         $.ajaxSetup({
             headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') }
         });
@@ -871,6 +1316,82 @@
 
         $(document).ready(function () {
             $('.select2').select2({ theme: 'bootstrap4', width: '100%' });
+
+            const savedTheme = localStorage.getItem(THEME_KEY) || 'light';
+            applyTheme(savedTheme);
+
+            if (localStorage.getItem(SIDEBAR_KEY) === '1') {
+                $('body').addClass('sidebar-collapse');
+            }
+
+            $('#themeToggle').on('click', function () {
+                const nextTheme = $('body').hasClass('theme-dark') ? 'light' : 'dark';
+                localStorage.setItem(THEME_KEY, nextTheme);
+                applyTheme(nextTheme);
+            });
+
+            $('[data-widget="pushmenu"]').on('click', function () {
+                setTimeout(function () {
+                    localStorage.setItem(SIDEBAR_KEY, $('body').hasClass('sidebar-collapse') ? '1' : '0');
+                }, 180);
+            });
+
+            $(document).on('click', 'a[href]', function (event) {
+                if (event.isDefaultPrevented() || !shouldShowLoaderForLink(this)) {
+                    return;
+                }
+
+                const message = this.dataset.loadingText || 'Memuat halaman...';
+                setTimeout(function () {
+                    window.AppLoader.show(message);
+                }, 0);
+            });
+
+            $(document).on('submit', 'form', function () {
+                if (!shouldShowLoaderForForm(this)) {
+                    return;
+                }
+
+                const message = this.dataset.loadingText || 'Memproses permintaan...';
+                window.AppLoader.show(message);
+            });
+
+            $(document).ajaxSend(function (_event, _xhr, settings) {
+                if (settings && settings.showLoader === false) {
+                    return;
+                }
+
+                const message = settings && settings.loadingMessage ? settings.loadingMessage : 'Memproses data...';
+                window.AppLoader.requestStarted(message);
+            });
+
+            $(document).ajaxComplete(function (_event, _xhr, settings) {
+                if (settings && settings.showLoader === false) {
+                    return;
+                }
+
+                window.AppLoader.requestFinished();
+            });
+
+            if (typeof window.fetch === 'function') {
+                const nativeFetch = window.fetch.bind(window);
+                window.fetch = function (input, init = {}) {
+                    if (init && init.showLoader === false) {
+                        return nativeFetch(input, init);
+                    }
+
+                    const message = init && init.loadingMessage ? init.loadingMessage : 'Memproses data...';
+                    window.AppLoader.requestStarted(message);
+
+                    return nativeFetch(input, init).finally(function () {
+                        window.AppLoader.requestFinished();
+                    });
+                };
+            }
+        });
+
+        window.addEventListener('pageshow', function () {
+            window.AppLoader.hide(true);
         });
     </script>
 

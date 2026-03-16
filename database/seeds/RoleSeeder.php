@@ -9,6 +9,12 @@ class RoleSeeder extends Seeder
     {
         $roles = [
             ['name' => 'super_admin', 'display_name' => 'Super Admin'],
+            ['name' => 'admin', 'display_name' => 'Admin'],
+            ['name' => 'operator', 'display_name' => 'Operator'],
+            ['name' => 'notulis', 'display_name' => 'Notulis'],
+            ['name' => 'peserta', 'display_name' => 'Peserta'],
+            ['name' => 'approval', 'display_name' => 'Approval'],
+            ['name' => 'protokoler', 'display_name' => 'Protokoler'],
             ['name' => 'operator_surat_masuk', 'display_name' => 'Operator Surat Masuk'],
             ['name' => 'admin_surat', 'display_name' => 'Admin Surat'],
             ['name' => 'sekretaris', 'display_name' => 'Sekretaris'],

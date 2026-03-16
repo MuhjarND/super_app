@@ -9,6 +9,15 @@ Route::get('/', function () {
 
 Auth::routes(['register' => false]); // Disable registration - admin adds users
 
+Route::get('/absensi/publik/{publicCode}', 'RapatAbsensiController@publicShow')->name('rapat.absensi.public.show');
+Route::post('/absensi/publik/{publicCode}', 'RapatAbsensiController@publicStore')->name('rapat.absensi.public.store');
+Route::post('/absensi/publik/{publicCode}/guest', 'RapatAbsensiController@publicStoreGuest')->name('rapat.absensi.public.guest');
+Route::get('/voting/publik/{publicCode}', 'VotingPublicController@show')->name('rapat.voting.public.show');
+Route::post('/voting/publik/{publicCode}', 'VotingPublicController@store')->name('rapat.voting.public.store');
+Route::get('/voting/publik/{publicCode}/hasil', 'VotingPublicController@results')->name('rapat.voting.public.results');
+Route::get('/voting/publik/{publicCode}/stats', 'VotingPublicController@stats')->name('rapat.voting.public.stats');
+Route::get('/verifikasi/ttd/{token}', 'RapatSignatureVerificationController@show')->name('rapat.signature.verify');
+
 // Authenticated routes
 Route::middleware(['auth'])->group(function () {
 
@@ -44,9 +53,12 @@ Route::middleware(['auth'])->group(function () {
     // Master data - super admin only
     Route::prefix('admin')->name('admin.')->middleware('role:super_admin')->group(function () {
         Route::resource('users', 'Admin\UserManagementController')->except(['show']);
+        Route::post('users/{user}/send-login-info', 'Admin\UserManagementController@sendLoginInfo')->name('users.send-login-info');
         Route::resource('jabatans', 'Admin\JabatanManagementController')->except(['show']);
         Route::resource('units', 'Admin\UnitManagementController')->except(['show']);
+        Route::resource('bidangs', 'Admin\BidangManagementController')->except(['show']);
         Route::resource('kategori-surats', 'Admin\KategoriSuratManagementController')->except(['show']);
+        Route::resource('kategori-rapats', 'Admin\KategoriRapatManagementController')->except(['show']);
     });
 
     // Placeholder modules
@@ -54,9 +66,69 @@ Route::middleware(['auth'])->group(function () {
         return view('modules.under-development', ['module' => 'Cuti', 'icon' => 'fas fa-calendar-times', 'description' => 'Modul manajemen pengajuan cuti pegawai.']);
     })->name('cuti.index');
 
-    Route::get('/rapat', function () {
-        return view('modules.under-development', ['module' => 'Rapat', 'icon' => 'fas fa-users', 'description' => 'Modul manajemen jadwal dan dokumentasi rapat.']);
-    })->name('rapat.index');
+    Route::prefix('rapat')->name('rapat.')->middleware('role:admin,operator,notulis,peserta,approval,protokoler')->group(function () {
+        Route::get('/', 'RapatController@index')->name('index');
+        Route::get('/preview-nomor', 'RapatController@previewNomorUndangan')->middleware('role:admin,operator')->name('preview-nomor');
+        Route::post('/', 'RapatController@store')->middleware('role:admin,operator')->name('store');
+        Route::put('/{rapat}', 'RapatController@update')->middleware('role:admin,operator')->name('update');
+        Route::delete('/{rapat}', 'RapatController@destroy')->middleware('role:admin,operator')->name('destroy');
+        Route::get('/{rapat}/lampiran', 'RapatController@lampiran')->name('lampiran');
+        Route::get('/{rapat}/undangan', 'RapatController@previewUndangan')->name('undangan.preview');
+
+        Route::prefix('notulensi')->middleware('role:admin,operator,notulis')->name('notulensi.')->group(function () {
+            Route::get('/', 'RapatNotulensiController@index')->name('index');
+            Route::get('/create/{rapat}', 'RapatNotulensiController@create')->name('create');
+            Route::post('/{rapat}', 'RapatNotulensiController@store')->name('store');
+            Route::post('/{rapat}/upload', 'RapatNotulensiController@uploadFromRapat')->name('upload-from-rapat');
+            Route::post('/{rapat}/skip', 'RapatNotulensiController@skip')->name('skip');
+            Route::get('/item/{notulensi}/edit', 'RapatNotulensiController@edit')->name('edit');
+            Route::put('/item/{notulensi}', 'RapatNotulensiController@update')->name('update');
+            Route::post('/item/{notulensi}/upload', 'RapatNotulensiController@upload')->name('upload');
+            Route::get('/item/{notulensi}/pdf', 'RapatNotulensiController@pdf')->name('pdf');
+            Route::get('/item/{notulensi}/file', 'RapatNotulensiController@file')->name('file');
+        });
+
+        Route::get('/approval', 'RapatApprovalController@index')->middleware('role:admin,approval')->name('approval.index');
+        Route::get('/approval/{rapatApproval}', 'RapatApprovalController@show')->middleware('role:admin,approval')->name('approval.show');
+        Route::post('/approval/{rapatApproval}/approve', 'RapatApprovalController@approve')->middleware('role:admin,approval')->name('approval.approve');
+        Route::post('/approval/{rapatApproval}/reject', 'RapatApprovalController@reject')->middleware('role:admin,approval')->name('approval.reject');
+
+        Route::prefix('agenda-pimpinan')->middleware('role:admin,protokoler')->name('agenda.')->group(function () {
+            Route::get('/', 'AgendaPimpinanController@index')->name('index');
+            Route::post('/', 'AgendaPimpinanController@store')->name('store');
+            Route::put('/{agenda}', 'AgendaPimpinanController@update')->name('update');
+            Route::post('/{agenda}/send-whatsapp', 'AgendaPimpinanController@sendWhatsapp')->name('send-whatsapp');
+            Route::delete('/{agenda}', 'AgendaPimpinanController@destroy')->name('destroy');
+        });
+
+        Route::get('/absensi', 'RapatAbsensiController@index')->name('absensi.index');
+        Route::get('/absensi/{rapat}', 'RapatAbsensiController@show')->name('absensi.show');
+        Route::post('/absensi/{rapat}/remind', 'RapatAbsensiController@remindPending')->name('absensi.remind');
+        Route::get('/absensi/rekap/signature/{attendance}', 'RapatAbsensiController@signature')->name('absensi.signature');
+
+        Route::prefix('laporan')->name('laporan.')->group(function () {
+            Route::get('/', 'RapatLaporanController@index')->name('index');
+            Route::get('/arsip', 'RapatLaporanController@arsip')->name('arsip');
+            Route::get('/{laporan}/preview', 'RapatLaporanController@preview')->name('preview');
+            Route::get('/{laporan}/download', 'RapatLaporanController@download')->name('download');
+            Route::post('/{laporan}/upload', 'RapatLaporanController@upload')->middleware('role:admin,operator,notulis')->name('upload');
+            Route::post('/{laporan}/archive', 'RapatLaporanController@archive')->middleware('role:admin,operator,notulis')->name('archive');
+            Route::post('/{laporan}/unarchive', 'RapatLaporanController@unarchive')->middleware('role:admin,operator,notulis')->name('unarchive');
+        });
+
+        Route::prefix('voting')->middleware('role:admin')->name('voting.')->group(function () {
+            Route::get('/', 'VotingController@index')->name('index');
+            Route::get('/create', 'VotingController@create')->name('create');
+            Route::post('/', 'VotingController@store')->name('store');
+            Route::get('/{voting}', 'VotingController@show')->name('show');
+            Route::get('/{voting}/edit', 'VotingController@edit')->name('edit');
+            Route::put('/{voting}', 'VotingController@update')->name('update');
+            Route::post('/{voting}/send-whatsapp', 'VotingController@sendWhatsapp')->name('send-whatsapp');
+            Route::delete('/{voting}', 'VotingController@destroy')->name('destroy');
+            Route::get('/{voting}/stats', 'VotingController@stats')->name('stats');
+            Route::get('/{voting}/pdf', 'VotingController@resultsPdf')->name('pdf');
+        });
+    });
 
     Route::get('/persediaan', function () {
         return view('modules.under-development', ['module' => 'Persediaan', 'icon' => 'fas fa-boxes', 'description' => 'Modul manajemen persediaan barang dan aset.']);

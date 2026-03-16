@@ -1,0 +1,272 @@
+@extends('layouts.app')
+
+@section('title', 'Detail Approval Rapat')
+
+@push('styles')
+    <style>
+        .approval-detail-grid {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) minmax(380px, 0.95fr);
+            gap: 18px;
+        }
+
+        .approval-detail-card {
+            border-radius: 18px;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 12px 28px rgba(15, 23, 42, 0.06);
+        }
+
+        .approval-detail-card .card-header {
+            background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+            border-bottom: 1px solid #e2e8f0;
+            padding: 16px 20px;
+        }
+
+        .approval-stage-chip {
+            display: inline-flex;
+            align-items: center;
+            padding: 6px 12px;
+            border-radius: 999px;
+            background: #eff6ff;
+            color: #1d4ed8;
+            font-size: 0.78rem;
+            font-weight: 800;
+        }
+
+        .approval-doc-title {
+            font-size: 1.08rem;
+            font-weight: 800;
+            color: #0f172a;
+            margin-bottom: 6px;
+        }
+
+        .approval-meta {
+            font-size: 0.84rem;
+            color: #64748b;
+            line-height: 1.55;
+        }
+
+        .approval-section {
+            border: 1px solid #e2e8f0;
+            border-radius: 14px;
+            background: #f8fafc;
+            padding: 14px 16px;
+            margin-bottom: 14px;
+        }
+
+        .approval-section-title {
+            font-size: 0.78rem;
+            font-weight: 800;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            color: #475569;
+            margin-bottom: 10px;
+        }
+
+        .approval-step-item {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 10px 0;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .approval-step-item:last-child {
+            border-bottom: none;
+        }
+
+        .approval-pdf-preview {
+            background: #fff;
+            border: 1px solid #e2e8f0;
+            border-radius: 16px;
+            overflow: hidden;
+            position: sticky;
+            top: 14px;
+            box-shadow: 0 12px 28px rgba(15, 23, 42, 0.06);
+        }
+
+        .approval-note {
+            min-height: 120px;
+            border-radius: 12px;
+            resize: vertical;
+        }
+
+        .approval-action-bar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .history-row {
+            padding: 10px 0;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .history-row:last-child {
+            border-bottom: none;
+        }
+
+        @media (max-width: 991.98px) {
+            .approval-detail-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .approval-pdf-preview {
+                position: static;
+            }
+        }
+    </style>
+@endpush
+
+@section('content-header')
+    <div class="content-header">
+        <div class="container-fluid d-flex justify-content-between align-items-center">
+            <div>
+                <h1 class="mb-1">Detail Approval Dokumen</h1>
+                <div class="text-muted" style="font-size: 0.82rem;">Review dokumen undangan rapat sebelum paraf atau tanda tangani.</div>
+            </div>
+            <a href="{{ route('rapat.approval.index') }}" class="btn btn-outline-secondary btn-sm">
+                <i class="fas fa-arrow-left mr-1"></i> Kembali ke Daftar
+            </a>
+        </div>
+    </div>
+@endsection
+
+@section('content')
+    <div class="approval-detail-grid">
+        <div>
+            <div class="card approval-detail-card mb-3">
+                <div class="card-header d-flex justify-content-between align-items-start">
+                    <div>
+                        <div class="approval-doc-title">{{ $rapatApproval->rapat->judul }}</div>
+                        <div class="approval-meta">{{ $rapatApproval->rapat->nomor_undangan }} | {{ optional($rapatApproval->rapat->tanggal)->translatedFormat('d F Y') }} | {{ $rapatApproval->rapat->waktu_mulai_formatted }} WIT</div>
+                        <div class="approval-meta">Approver aktif: {{ $rapatApproval->approver_name_snapshot }}</div>
+                    </div>
+                    <span class="approval-stage-chip">{{ $rapatApproval->stage_label }}</span>
+                </div>
+                <div class="card-body">
+                    <div class="approval-section">
+                        <div class="approval-section-title">Informasi Dokumen</div>
+                        <div class="approval-meta">Status Dokumen: {{ $rapatApproval->rapat->status_label }}</div>
+                        <div class="approval-meta">Kategori Surat: {{ $rapatApproval->rapat->kategori_surat_label }}</div>
+                        <div class="approval-meta">Tempat: {{ $rapatApproval->rapat->tempat }}</div>
+                        <div class="approval-meta">Pembuat: {{ optional($rapatApproval->rapat->creator)->name ?: '-' }}</div>
+                        <div class="approval-meta">Peserta: {{ $rapatApproval->rapat->pesertas->count() }} orang</div>
+                        @if($rapatApproval->rapat->lampiran_tambahan_path)
+                            <div class="approval-meta mt-2"><a href="{{ route('rapat.lampiran', $rapatApproval->rapat) }}" target="_blank">Buka lampiran tambahan</a></div>
+                        @endif
+                    </div>
+
+                    <div class="approval-section">
+                        <div class="approval-section-title">Urutan Approval</div>
+                        @foreach($rapatApproval->rapat->approvals->sortBy('step_order') as $step)
+                            @php
+                                $badgeMap = [
+                                    'pending' => ['warning', 'Pending'],
+                                    'waiting' => ['secondary', 'Waiting'],
+                                    'approved' => ['success', 'Approved'],
+                                    'rejected' => ['danger', 'Rejected'],
+                                ][$step->status] ?? ['secondary', ucfirst($step->status)];
+                            @endphp
+                            <div class="approval-step-item">
+                                <div>
+                                    <div style="font-size:0.88rem;font-weight:800;color:#0f172a;">{{ $step->stage_label }} - {{ $step->approver_name_snapshot }}</div>
+                                    <div class="approval-meta">{{ $step->approver_jabatan_snapshot ?: 'Tanpa jabatan' }}</div>
+                                    @if($step->acted_at)
+                                        <div class="approval-meta">{{ $step->acted_at->copy()->timezone('Asia/Jayapura')->format('d/m/Y H:i') }} WIT</div>
+                                    @endif
+                                    @if($step->catatan)
+                                        <div class="approval-meta">Catatan: {{ $step->catatan }}</div>
+                                    @endif
+                                </div>
+                                <div><span class="badge badge-{{ $badgeMap[0] }}">{{ $badgeMap[1] }}</span></div>
+                            </div>
+                        @endforeach
+                    </div>
+
+                    <div class="approval-section">
+                        <div class="approval-section-title">Riwayat Approval</div>
+                        @forelse($rapatApproval->rapat->approvalHistories->sortByDesc('acted_at') as $entry)
+                            <div class="history-row">
+                                <div style="font-size:0.88rem;font-weight:800;color:#0f172a;">{{ (int) $entry->step_order === 1 ? 'Paraf' : ((int) $entry->step_order === 2 ? 'Tanda Tangani' : 'Step ' . $entry->step_order) }} - {{ $entry->approver_name_snapshot }}</div>
+                                <div class="approval-meta">{{ ucfirst($entry->action) }} | {{ $entry->acted_at ? $entry->acted_at->copy()->timezone('Asia/Jayapura')->format('d/m/Y H:i') . ' WIT' : '-' }}</div>
+                                @if($entry->catatan)
+                                    <div class="approval-meta">Catatan: {{ $entry->catatan }}</div>
+                                @endif
+                            </div>
+                        @empty
+                            <div class="approval-meta">Belum ada riwayat approval.</div>
+                        @endforelse
+                    </div>
+
+                    @if($canAct)
+                        <div class="approval-section">
+                            <div class="approval-section-title">Tindakan</div>
+                            <div class="form-group mb-3">
+                                <label for="approval-note" class="mb-1">Catatan Approval / Reject</label>
+                                <textarea id="approval-note" class="form-control approval-note" placeholder="Isi catatan bila diperlukan. Untuk reject, catatan wajib diisi."></textarea>
+                            </div>
+                            <div class="approval-action-bar">
+                                <button type="button" class="btn btn-success" onclick="submitApprovalDecision({{ $rapatApproval->id }}, 'approve')">
+                                    <i class="fas fa-check mr-1"></i> {{ $rapatApproval->stage_label }}
+                                </button>
+                                <button type="button" class="btn btn-danger" onclick="submitApprovalDecision({{ $rapatApproval->id }}, 'reject')">
+                                    <i class="fas fa-times mr-1"></i> Tolak Dokumen
+                                </button>
+                            </div>
+                        </div>
+                    @else
+                        <div class="approval-section">
+                            <div class="approval-section-title">Status Tindakan</div>
+                            <div class="approval-meta">Dokumen ini tidak berada pada status yang bisa Anda proses saat ini.</div>
+                        </div>
+                    @endif
+                </div>
+            </div>
+        </div>
+
+        <div>
+            <div class="approval-pdf-preview">
+                <iframe src="{{ route('rapat.undangan.preview', $rapatApproval->rapat) }}" style="width:100%;height:920px;border:0;" title="Preview Undangan Rapat"></iframe>
+            </div>
+        </div>
+    </div>
+@endsection
+
+@push('scripts')
+    <script>
+        function submitApprovalDecision(approvalId, action) {
+            const note = $('#approval-note').val();
+            const url = action === 'approve'
+                ? '{{ url('/rapat/approval') }}/' + approvalId + '/approve'
+                : '{{ url('/rapat/approval') }}/' + approvalId + '/reject';
+
+            if (action === 'reject' && !String(note || '').trim()) {
+                showToast('Catatan reject wajib diisi.', 'error');
+                return;
+            }
+
+            $.ajax({
+                url: url,
+                method: 'POST',
+                data: {
+                    _token: '{{ csrf_token() }}',
+                    catatan: note
+                },
+                success: function (res) {
+                    showToast(res.message, 'success');
+                    window.location.href = '{{ route('rapat.approval.index') }}';
+                },
+                error: function (xhr) {
+                    const errors = xhr.responseJSON?.errors;
+                    let message = xhr.responseJSON?.message || 'Gagal memproses approval.';
+                    if (errors) {
+                        message = Object.values(errors).flat().join('<br>');
+                    }
+                    showToast(message, 'error');
+                }
+            });
+        }
+    </script>
+@endpush

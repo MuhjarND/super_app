@@ -26,7 +26,7 @@
                         <input type="text" name="search" class="form-control" value="{{ $filters['search'] ?? '' }}"
                             placeholder="Cari nama, email, NIP, HP">
                     </div>
-                    <div class="col-md-3 form-group mb-md-0">
+                    <div class="col-md-2 form-group mb-md-0">
                         <select name="role_id" class="form-control">
                             <option value="">Semua Role</option>
                             @foreach($roles as $role)
@@ -36,7 +36,7 @@
                             @endforeach
                         </select>
                     </div>
-                    <div class="col-md-3 form-group mb-md-0">
+                    <div class="col-md-2 form-group mb-md-0">
                         <select name="jabatan_id" class="form-control">
                             <option value="">Semua Jabatan</option>
                             @foreach($jabatans as $jabatan)
@@ -56,6 +56,16 @@
                             @endforeach
                         </select>
                     </div>
+                    <div class="col-md-2 form-group mb-md-0">
+                        <select name="bidang_id" class="form-control">
+                            <option value="">Semua Bidang</option>
+                            @foreach($bidangs as $bidang)
+                                <option value="{{ $bidang->id }}" {{ (string) ($filters['bidang_id'] ?? '') === (string) $bidang->id ? 'selected' : '' }}>
+                                    {{ $bidang->nama }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
                     <div class="col-md-1 d-flex" style="gap: 6px;">
                         <button type="submit" class="btn btn-primary btn-block">Filter</button>
                         <a href="{{ route('admin.users.index') }}" class="btn btn-outline-secondary">Reset</a>
@@ -71,23 +81,39 @@
                             <th>Nama</th>
                             <th>Email</th>
                             <th>Role</th>
+                            <th>Unit / Bidang</th>
                             <th>Jabatan</th>
-                            <th>Unit</th>
-                            <th>NIP</th>
+                            <th>Hirarki</th>
+                            <th>No. HP / WA</th>
                             <th class="text-right">Aksi</th>
                         </tr>
                     </thead>
                     <tbody>
                         @forelse($users as $user)
-                            @php $selectedRole = optional($user->roles->first())->id; @endphp
+                            @php $selectedRoles = $user->roles->pluck('id')->map(fn ($id) => (string) $id)->all(); @endphp
                             <tr>
-                                <td>{{ $user->name }}</td>
+                                <td>
+                                    <div>{{ $user->name }}</div>
+                                    <small class="text-muted">{{ $user->nip ?? '-' }}</small>
+                                </td>
                                 <td>{{ $user->email }}</td>
-                                <td>{{ optional($user->roles->first())->display_name ?? '-' }}</td>
-                                <td>{{ optional($user->jabatan)->nama ?? '-' }}</td>
-                                <td>{{ optional($user->unit)->nama ?? '-' }}</td>
-                                <td>{{ $user->nip ?? '-' }}</td>
+                                <td>{{ $user->roles->pluck('display_name')->implode(', ') ?: '-' }}</td>
+                                <td>
+                                    <div>{{ optional($user->unit)->nama ?? '-' }}</div>
+                                    <small class="text-muted">{{ optional($user->bidang)->nama ?? '-' }}</small>
+                                </td>
+                                <td>
+                                    <div>{{ optional($user->jabatan)->nama ?? '-' }}</div>
+                                    <small class="text-muted">{{ $user->jabatan_keterangan ?: '-' }}</small>
+                                </td>
+                                <td>{{ $user->hirarki ?? '-' }}</td>
+                                <td>{{ $user->no_hp ?? '-' }}</td>
                                 <td class="text-right">
+                                    <form action="{{ route('admin.users.send-login-info', $user) }}" method="POST" class="d-inline">
+                                        @csrf
+                                        <button type="submit" class="btn btn-sm btn-outline-success"
+                                            onclick="return confirm('Kirim informasi login ke WhatsApp user ini?')">Kirim Login</button>
+                                    </form>
                                     <button class="btn btn-sm btn-outline-primary" data-toggle="modal"
                                         data-target="#editUserModal{{ $user->id }}">Edit</button>
                                     <form action="{{ route('admin.users.destroy', $user) }}" method="POST" class="d-inline">
@@ -125,14 +151,39 @@
                                                     </div>
                                                     <div class="col-md-6 form-group">
                                                         <label>Role</label>
-                                                        <select name="role_id" class="form-control" required>
-                                                            <option value="">-- Pilih Role --</option>
+                                                        <select name="role_ids[]" class="form-control select2" multiple required>
                                                             @foreach($roles as $role)
-                                                                <option value="{{ $role->id }}" {{ (string) $selectedRole === (string) $role->id ? 'selected' : '' }}>
+                                                                <option value="{{ $role->id }}" {{ in_array((string) $role->id, $selectedRoles, true) ? 'selected' : '' }}>
                                                                     {{ $role->display_name }}
                                                                 </option>
                                                             @endforeach
                                                         </select>
+                                                    </div>
+                                                    <div class="col-md-4 form-group">
+                                                        <label>Unit Kerja</label>
+                                                        <select name="unit_id" class="form-control">
+                                                            <option value="">-- Pilih Unit --</option>
+                                                            @foreach($units as $unit)
+                                                                <option value="{{ $unit->id }}" {{ (string) $user->unit_id === (string) $unit->id ? 'selected' : '' }}>
+                                                                    {{ $unit->nama }}
+                                                                </option>
+                                                            @endforeach
+                                                        </select>
+                                                    </div>
+                                                    <div class="col-md-4 form-group">
+                                                        <label>Bidang</label>
+                                                        <select name="bidang_id" class="form-control">
+                                                            <option value="">-- Pilih Bidang --</option>
+                                                            @foreach($bidangs as $bidang)
+                                                                <option value="{{ $bidang->id }}" {{ (string) $user->bidang_id === (string) $bidang->id ? 'selected' : '' }}>
+                                                                    {{ $bidang->nama }}
+                                                                </option>
+                                                            @endforeach
+                                                        </select>
+                                                    </div>
+                                                    <div class="col-md-4 form-group">
+                                                        <label>Hirarki</label>
+                                                        <input type="number" name="hirarki" class="form-control" value="{{ $user->hirarki ?? 999 }}" min="1">
                                                     </div>
                                                     <div class="col-md-6 form-group">
                                                         <label>Jabatan</label>
@@ -146,22 +197,15 @@
                                                         </select>
                                                     </div>
                                                     <div class="col-md-6 form-group">
-                                                        <label>Unit</label>
-                                                        <select name="unit_id" class="form-control">
-                                                            <option value="">-- Pilih Unit --</option>
-                                                            @foreach($units as $unit)
-                                                                <option value="{{ $unit->id }}" {{ (string) $user->unit_id === (string) $unit->id ? 'selected' : '' }}>
-                                                                    {{ $unit->nama }}
-                                                                </option>
-                                                            @endforeach
-                                                        </select>
+                                                        <label>Jabatan Keterangan</label>
+                                                        <input type="text" name="jabatan_keterangan" class="form-control" value="{{ $user->jabatan_keterangan }}">
                                                     </div>
                                                     <div class="col-md-6 form-group">
                                                         <label>NIP</label>
                                                         <input type="text" name="nip" class="form-control" value="{{ $user->nip }}">
                                                     </div>
                                                     <div class="col-md-6 form-group">
-                                                        <label>No. HP</label>
+                                                        <label>No. HP / WA</label>
                                                         <input type="text" name="no_hp" class="form-control" value="{{ $user->no_hp }}">
                                                     </div>
                                                 </div>
@@ -176,7 +220,7 @@
                             </div>
                         @empty
                             <tr>
-                                <td colspan="7" class="text-center text-muted py-4">Belum ada data user.</td>
+                                <td colspan="8" class="text-center text-muted py-4">Belum ada data user.</td>
                             </tr>
                         @endforelse
                     </tbody>
@@ -213,12 +257,33 @@
                             </div>
                             <div class="col-md-6 form-group">
                                 <label>Role</label>
-                                <select name="role_id" class="form-control" required>
-                                    <option value="">-- Pilih Role --</option>
+                                <select name="role_ids[]" class="form-control select2" multiple required>
                                     @foreach($roles as $role)
                                         <option value="{{ $role->id }}">{{ $role->display_name }}</option>
                                     @endforeach
                                 </select>
+                            </div>
+                            <div class="col-md-4 form-group">
+                                <label>Unit Kerja</label>
+                                <select name="unit_id" class="form-control">
+                                    <option value="">-- Pilih Unit --</option>
+                                    @foreach($units as $unit)
+                                        <option value="{{ $unit->id }}">{{ $unit->nama }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="col-md-4 form-group">
+                                <label>Bidang</label>
+                                <select name="bidang_id" class="form-control">
+                                    <option value="">-- Pilih Bidang --</option>
+                                    @foreach($bidangs as $bidang)
+                                        <option value="{{ $bidang->id }}">{{ $bidang->nama }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="col-md-4 form-group">
+                                <label>Hirarki</label>
+                                <input type="number" name="hirarki" class="form-control" value="999" min="1">
                             </div>
                             <div class="col-md-6 form-group">
                                 <label>Jabatan</label>
@@ -230,20 +295,15 @@
                                 </select>
                             </div>
                             <div class="col-md-6 form-group">
-                                <label>Unit</label>
-                                <select name="unit_id" class="form-control">
-                                    <option value="">-- Pilih Unit --</option>
-                                    @foreach($units as $unit)
-                                        <option value="{{ $unit->id }}">{{ $unit->nama }}</option>
-                                    @endforeach
-                                </select>
+                                <label>Jabatan Keterangan</label>
+                                <input type="text" name="jabatan_keterangan" class="form-control">
                             </div>
                             <div class="col-md-6 form-group">
                                 <label>NIP</label>
                                 <input type="text" name="nip" class="form-control">
                             </div>
                             <div class="col-md-6 form-group">
-                                <label>No. HP</label>
+                                <label>No. HP / WA</label>
                                 <input type="text" name="no_hp" class="form-control">
                             </div>
                         </div>

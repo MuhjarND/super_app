@@ -17,7 +17,7 @@ class JabatanManagementController extends Controller
 
     public function index(Request $request)
     {
-        $query = Jabatan::with(['parent', 'unit']);
+        $query = Jabatan::with(['parent', 'unit'])->withCount('users');
 
         if ($request->filled('search')) {
             $search = trim($request->search);

@@ -393,6 +393,37 @@
         .status-dot.done {
             background: #48bb78;
         }
+
+        body.theme-dark .welcome-banner {
+            background: linear-gradient(135deg, #0f172a 0%, #172554 45%, #1d4ed8 100%);
+        }
+
+        body.theme-dark .chart-card,
+        body.theme-dark .chart-card .card-header {
+            background: #111827;
+            border-color: #1f2937;
+        }
+
+        body.theme-dark .chart-card .card-header h5,
+        body.theme-dark .activity-item .activity-title,
+        body.theme-dark .quick-action .qa-label {
+            color: #e5e7eb;
+        }
+
+        body.theme-dark .chart-card .card-header .subtitle,
+        body.theme-dark .activity-item .activity-desc,
+        body.theme-dark .activity-item .activity-time {
+            color: #94a3b8;
+        }
+
+        body.theme-dark .activity-timeline::before {
+            background: linear-gradient(180deg, #334155 0%, transparent 100%);
+        }
+
+        body.theme-dark .activity-item::before {
+            border-color: #111827;
+            box-shadow: 0 0 0 2px #334155;
+        }
     </style>
 @endpush
 
@@ -407,8 +438,8 @@
     <div class="welcome-banner">
         <div class="d-flex justify-content-between align-items-start">
             <div>
-                <h2>Selamat Datang, <span>{{ auth()->user()->name }}</span> 👋</h2>
-                <p>{{ now()->translatedFormat('l, d F Y') }} — Pengadilan Tinggi Agama Papua Barat</p>
+                <h2>Selamat Datang, <span>{{ auth()->user()->name }}</span></h2>
+                <p>{{ now()->translatedFormat('l, d F Y') }} | Pengadilan Tinggi Agama Papua Barat</p>
                 <div class="today-stats">
                     <div class="today-stat">
                         <i class="fas fa-inbox"></i>
@@ -552,7 +583,7 @@
                                         style="background: {{ $surat->opsi_pengirim == 'mahkamah_agung' ? '#48bb78' : '#ed8936' }}; color: white; padding: 1px 8px; border-radius: 4px; font-size: 0.7rem;">
                                         {{ $surat->opsi_pengirim == 'mahkamah_agung' ? 'MA' : 'Non-MA' }}
                                     </span>
-                                    {{ $surat->pengirim }} — {{ Str::limit($surat->perihal, 40) }}
+                                    {{ $surat->pengirim }} | {{ Str::limit($surat->perihal, 40) }}
                                 </div>
                                 <div class="activity-time"><i
                                         class="far fa-clock mr-1"></i>{{ $surat->created_at->diffForHumans() }}</div>

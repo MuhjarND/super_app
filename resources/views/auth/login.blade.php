@@ -46,6 +46,21 @@
             pointer-events: none;
         }
 
+        .theme-switch-login {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            z-index: 3;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(15, 38, 64, 0.32);
+            color: #ffffff;
+            border-radius: 999px;
+            padding: 10px 14px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            backdrop-filter: blur(10px);
+        }
+
         .login-left {
             flex: 1;
             display: flex;
@@ -228,6 +243,95 @@
             margin-bottom: 20px;
         }
 
+        body.theme-light {
+            background: linear-gradient(135deg, #f3f7fb 0%, #dbeafe 45%, #bfdbfe 100%);
+        }
+
+        body.theme-light::before {
+            background: radial-gradient(ellipse, rgba(30, 64, 175, 0.08) 0%, transparent 70%);
+        }
+
+        body.theme-light::after {
+            background: radial-gradient(circle, rgba(245, 158, 11, 0.12) 0%, transparent 70%);
+        }
+
+        body.theme-light .theme-switch-login {
+            background: rgba(255, 255, 255, 0.9);
+            color: #1f2937;
+            border-color: rgba(148, 163, 184, 0.5);
+        }
+
+        body.theme-light .login-left {
+            color: #0f2640;
+        }
+
+        body.theme-light .login-left p,
+        body.theme-light .feature-item span {
+            opacity: 0.85;
+            color: #334155;
+        }
+
+        body.theme-light .feature-item .icon-wrap {
+            background: rgba(255, 255, 255, 0.75);
+            color: #1e40af;
+        }
+
+        body.theme-light .login-card {
+            box-shadow: 0 24px 60px rgba(37, 99, 235, 0.15);
+        }
+
+        .login-loader {
+            position: fixed;
+            inset: 0;
+            z-index: 10;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            background: rgba(15, 23, 42, 0.48);
+            backdrop-filter: blur(3px);
+        }
+
+        .login-loader.is-visible {
+            display: flex;
+        }
+
+        .login-loader-card {
+            width: 260px;
+            padding: 24px;
+            border-radius: 18px;
+            background: rgba(255, 255, 255, 0.96);
+            text-align: center;
+            box-shadow: 0 24px 60px rgba(15, 23, 42, 0.28);
+        }
+
+        .login-loader-spinner {
+            width: 50px;
+            height: 50px;
+            margin: 0 auto 14px;
+            border-radius: 50%;
+            border: 4px solid rgba(44, 82, 130, 0.18);
+            border-top-color: #1a3a5c;
+            animation: loginLoaderSpin 0.8s linear infinite;
+        }
+
+        .login-loader-title {
+            color: #1a3a5c;
+            font-size: 0.95rem;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .login-loader-text {
+            color: #64748b;
+            font-size: 0.83rem;
+        }
+
+        @keyframes loginLoaderSpin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
         @media (max-width: 768px) {
             body {
                 flex-direction: column;
@@ -250,6 +354,18 @@
 </head>
 
 <body>
+    <div class="login-loader" id="loginLoader" aria-hidden="true">
+        <div class="login-loader-card">
+            <div class="login-loader-spinner"></div>
+            <div class="login-loader-title">Memproses login...</div>
+            <div class="login-loader-text">Mohon tunggu sebentar.</div>
+        </div>
+    </div>
+
+    <button type="button" class="theme-switch-login" id="loginThemeToggle">
+        <i class="fas fa-moon mr-1" id="loginThemeIcon"></i>
+        <span id="loginThemeLabel">Dark</span>
+    </button>
     <div class="login-left">
         <div class="logo-icon">P</div>
         <h1>Sistem Informasi <span>Persuratan</span></h1>
@@ -322,6 +438,45 @@
             </form>
         </div>
     </div>
+    <script>
+        const loginThemeKey = 'smart-theme';
+
+        function toggleLoginLoader(show) {
+            const loader = document.getElementById('loginLoader');
+            if (!loader) {
+                return;
+            }
+
+            loader.classList.toggle('is-visible', show);
+            loader.setAttribute('aria-hidden', show ? 'false' : 'true');
+        }
+
+        function applyLoginTheme(theme) {
+            const isDark = theme === 'dark';
+            document.body.classList.toggle('theme-light', !isDark);
+            const icon = document.getElementById('loginThemeIcon');
+            const label = document.getElementById('loginThemeLabel');
+            icon.className = isDark ? 'fas fa-sun mr-1' : 'fas fa-moon mr-1';
+            label.textContent = isDark ? 'Light' : 'Dark';
+        }
+
+        const initialLoginTheme = localStorage.getItem(loginThemeKey) || 'light';
+        applyLoginTheme(initialLoginTheme);
+
+        document.getElementById('loginThemeToggle').addEventListener('click', function () {
+            const nextTheme = document.body.classList.contains('theme-light') ? 'dark' : 'light';
+            localStorage.setItem(loginThemeKey, nextTheme);
+            applyLoginTheme(nextTheme);
+        });
+
+        document.querySelector('form').addEventListener('submit', function () {
+            toggleLoginLoader(true);
+        });
+
+        window.addEventListener('pageshow', function () {
+            toggleLoginLoader(false);
+        });
+    </script>
 </body>
 
 </html>

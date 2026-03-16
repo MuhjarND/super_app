@@ -23,7 +23,8 @@ class SuratKeluar extends Model
         'has_lampiran',
         'file_path',
         'status',
-        'created_by'
+        'created_by',
+        'rapat_id'
     ];
 
     protected $dates = ['tanggal_surat'];
@@ -73,6 +74,11 @@ class SuratKeluar extends Model
         return $this->belongsTo(User::class, 'created_by');
     }
 
+    public function rapat()
+    {
+        return $this->belongsTo(Rapat::class, 'rapat_id');
+    }
+
     public function penerimaInternal()
     {
         return $this->belongsToMany(User::class, 'surat_keluar_penerima');
@@ -82,6 +88,7 @@ class SuratKeluar extends Model
     {
         $map = [
             'ketua' => 'KPTA',
+            'wakil_ketua' => 'WKPTA',
             'sekretaris' => 'SEK',
             'panitera' => 'PAN',
         ];
@@ -129,9 +136,10 @@ class SuratKeluar extends Model
 
         // Backward compatibility for existing pattern:
         // {nomor}/{KPTA|SEK|PAN}/W31-A/{kode}/{bulan}/{tahun}
-        if (preg_match('#^([0-9]+)/(KPTA|SEK|PAN)/W31-A/(.+)$#', $nomor, $match)) {
+        if (preg_match('#^([0-9]+)/(KPTA|WKPTA|SEK|PAN)/W31-A/(.+)$#', $nomor, $match)) {
             $prefixMap = [
                 'KPTA' => 'KPTA.W31-A',
+                'WKPTA' => 'WKPTA.W31-A',
                 'SEK' => 'SEK.W31-A',
                 'PAN' => 'PAN.W31-A',
             ];
@@ -154,6 +162,7 @@ class SuratKeluar extends Model
     {
         $prefixMap = [
             'ketua' => 'KPTA.W31-A',
+            'wakil_ketua' => 'WKPTA.W31-A',
             'sekretaris' => 'SEK.W31-A',
             'panitera' => 'PAN.W31-A',
         ];
@@ -161,9 +170,7 @@ class SuratKeluar extends Model
         $nomorPrefix = $prefixMap[$nomenklatur] ?? 'W31-A';
 
         if ($nomorUrut === null) {
-            $lastNumber = self::where('nomenklatur_jabatan', $nomenklatur)
-                ->where('tahun_surat', $tahun)
-                ->max('nomor_urut');
+            $lastNumber = self::max('nomor_urut');
             $nextNumber = ($lastNumber ?? 0) + 1;
         } else {
             $nextNumber = (int) $nomorUrut;

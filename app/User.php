@@ -14,7 +14,10 @@ class User extends Authenticatable
         'email',
         'password',
         'jabatan_id',
+        'jabatan_keterangan',
         'unit_id',
+        'bidang_id',
+        'hirarki',
         'nip',
         'no_hp',
     ];
@@ -43,6 +46,11 @@ class User extends Authenticatable
         return $this->belongsTo(Unit::class);
     }
 
+    public function bidang()
+    {
+        return $this->belongsTo(Bidang::class);
+    }
+
     public function hasRole($role)
     {
         if (is_string($role)) {
@@ -66,7 +74,118 @@ class User extends Authenticatable
 
     public function isSuperAdmin()
     {
-        return $this->hasRole('super_admin');
+        return $this->hasAnyRole(['super_admin', 'admin']);
+    }
+
+    public function isMeetingAdmin()
+    {
+        return $this->hasRole('admin') || $this->hasRole('super_admin');
+    }
+
+    public function isMeetingOperator()
+    {
+        return $this->hasRole('operator');
+    }
+
+    public function isMeetingNotulis()
+    {
+        return $this->hasAnyRole(['notulis', 'operator']);
+    }
+
+    public function isMeetingParticipant()
+    {
+        return $this->hasAnyRole(['peserta', 'protokoler']);
+    }
+
+    public function isMeetingApproval()
+    {
+        return $this->hasRole('approval');
+    }
+
+    public function isMeetingProtokoler()
+    {
+        return $this->hasRole('protokoler');
+    }
+
+    public function hasMeetingRole()
+    {
+        return $this->isMeetingAdmin()
+            || $this->isMeetingOperator()
+            || $this->isMeetingNotulis()
+            || $this->isMeetingParticipant()
+            || $this->isMeetingApproval()
+            || $this->isMeetingProtokoler();
+    }
+
+    public function canAccessMeetingModule()
+    {
+        return $this->hasMeetingRole();
+    }
+
+    public function canManageRapat()
+    {
+        return $this->isMeetingAdmin() || $this->isMeetingOperator();
+    }
+
+    public function canAccessMeetingMasterData()
+    {
+        return $this->isMeetingAdmin();
+    }
+
+    public function canAccessMeetingMinutes()
+    {
+        return $this->isMeetingAdmin() || $this->isMeetingOperator() || $this->isMeetingNotulis();
+    }
+
+    public function canAccessMeetingApproval()
+    {
+        return $this->isMeetingAdmin() || $this->isMeetingApproval();
+    }
+
+    public function canAccessAgendaPimpinan()
+    {
+        return $this->isMeetingAdmin() || $this->isMeetingProtokoler();
+    }
+
+    public function canManageVoting()
+    {
+        return $this->isMeetingAdmin();
+    }
+
+    public function canViewRapat($rapat)
+    {
+        if ($this->canManageRapat()) {
+            return true;
+        }
+
+        if ((int) $rapat->created_by === (int) $this->id) {
+            return true;
+        }
+
+        if ((int) $rapat->approver_1_id === (int) $this->id || (int) $rapat->approver_2_id === (int) $this->id) {
+            return true;
+        }
+
+        return $rapat->pesertas()->where('users.id', $this->id)->exists();
+    }
+
+    public function canAccessPersuratanMenu()
+    {
+        if ($this->isSuperAdmin()) {
+            return true;
+        }
+
+        return $this->hasAnyRole([
+            'operator_surat_masuk',
+            'admin_surat',
+            'sekretaris',
+            'panitera',
+            'ketua',
+            'wakil_ketua',
+            'kasubag',
+            'kabag',
+            'panmud',
+        ]);
     }
 
     public function hasJabatanKode($codes)

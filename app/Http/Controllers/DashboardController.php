@@ -17,6 +17,7 @@ class DashboardController extends Controller
     public function index()
     {
         $user = auth()->user();
+        $showPersuratanDashboard = $user->canAccessPersuratanMenu();
         $suratMasukVisible = SuratMasuk::visibleTo($user);
         $suratKeluarVisible = SuratKeluar::visibleTo($user);
 
@@ -80,7 +81,8 @@ class DashboardController extends Controller
             'recentSuratMasuk',
             'recentDisposisi',
             'todayMasuk',
-            'todayKeluar'
+            'todayKeluar',
+            'showPersuratanDashboard'
         ));
     }
 }

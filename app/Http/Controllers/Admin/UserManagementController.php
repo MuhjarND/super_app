@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Bidang;
 use App\Http\Controllers\Controller;
 use App\Jabatan;
 use App\Role;
+use App\Services\WhatsAppNotificationService;
 use App\Unit;
 use App\User;
 use Illuminate\Http\Request;
@@ -14,14 +16,17 @@ use Illuminate\Validation\Rule;
 
 class UserManagementController extends Controller
 {
-    public function __construct()
+    protected $whatsAppService;
+
+    public function __construct(WhatsAppNotificationService $whatsAppService)
     {
         $this->middleware(['auth', 'role:super_admin']);
+        $this->whatsAppService = $whatsAppService;
     }
 
     public function index(Request $request)
     {
-        $query = User::with(['roles', 'jabatan', 'unit']);
+        $query = User::with(['roles', 'jabatan', 'unit', 'bidang']);
 
         if ($request->filled('search')) {
             $search = trim($request->search);
@@ -47,13 +52,18 @@ class UserManagementController extends Controller
             $query->where('unit_id', $request->unit_id);
         }
 
+        if ($request->filled('bidang_id')) {
+            $query->where('bidang_id', $request->bidang_id);
+        }
+
         $users = $query->orderBy('name')->paginate(15)->appends($request->query());
         $roles = Role::orderBy('display_name')->get();
         $jabatans = Jabatan::with('unit')->orderBy('nama')->get();
         $units = Unit::orderBy('nama')->get();
-        $filters = $request->only(['search', 'role_id', 'jabatan_id', 'unit_id']);
+        $bidangs = Bidang::orderBy('nama')->get();
+        $filters = $request->only(['search', 'role_id', 'jabatan_id', 'unit_id', 'bidang_id']);
 
-        return view('admin.users.index', compact('users', 'roles', 'jabatans', 'units', 'filters'));
+        return view('admin.users.index', compact('users', 'roles', 'jabatans', 'units', 'bidangs', 'filters'));
     }
 
     public function create()
@@ -71,12 +81,15 @@ class UserManagementController extends Controller
                 'email' => $data['email'],
                 'password' => Hash::make($data['password']),
                 'jabatan_id' => $data['jabatan_id'] ?? null,
+                'jabatan_keterangan' => $data['jabatan_keterangan'] ?? null,
                 'unit_id' => $data['unit_id'] ?? null,
+                'bidang_id' => $data['bidang_id'] ?? null,
+                'hirarki' => $data['hirarki'] ?? 999,
                 'nip' => $data['nip'] ?? null,
                 'no_hp' => $data['no_hp'] ?? null,
             ]);
 
-            $user->roles()->sync([$data['role_id']]);
+            $user->roles()->sync($data['role_ids']);
         });
 
         return redirect()->route('admin.users.index')->with('success', 'User berhasil ditambahkan.');
@@ -96,7 +109,10 @@ class UserManagementController extends Controller
                 'name' => $data['name'],
                 'email' => $data['email'],
                 'jabatan_id' => $data['jabatan_id'] ?? null,
+                'jabatan_keterangan' => $data['jabatan_keterangan'] ?? null,
                 'unit_id' => $data['unit_id'] ?? null,
+                'bidang_id' => $data['bidang_id'] ?? null,
+                'hirarki' => $data['hirarki'] ?? 999,
                 'nip' => $data['nip'] ?? null,
                 'no_hp' => $data['no_hp'] ?? null,
             ];
@@ -106,7 +122,7 @@ class UserManagementController extends Controller
             }
 
             $user->update($payload);
-            $user->roles()->sync([$data['role_id']]);
+            $user->roles()->sync($data['role_ids']);
         });
 
         return redirect()->route('admin.users.index')->with('success', 'User berhasil diperbarui.');
@@ -133,6 +149,19 @@ class UserManagementController extends Controller
         return redirect()->route('admin.users.index')->with('success', 'User berhasil dihapus.');
     }
 
+    public function sendLoginInfo(User $user)
+    {
+        $result = $this->whatsAppService->notifyLoginInfo($user);
+        $processed = $result || !$this->whatsAppService->isConfigured();
+
+        return redirect()->route('admin.users.index')->with(
+            $processed ? 'success' : 'error',
+            $processed
+                ? 'Informasi login berhasil diproses ke WhatsApp user.'
+                : 'Informasi login tidak dapat dikirim. Pastikan nomor WhatsApp user sudah tersedia.'
+        );
+    }
+
     protected function validateRequest(Request $request, $userId = null)
     {
         $passwordRules = $userId
@@ -143,9 +172,13 @@ class UserManagementController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'max:255', Rule::unique('users', 'email')->ignore($userId)],
             'password' => $passwordRules,
-            'role_id' => ['required', 'exists:roles,id'],
+            'role_ids' => ['required', 'array', 'min:1'],
+            'role_ids.*' => ['exists:roles,id'],
             'jabatan_id' => ['nullable', 'exists:jabatans,id'],
+            'jabatan_keterangan' => ['nullable', 'string', 'max:255'],
             'unit_id' => ['nullable', 'exists:units,id'],
+            'bidang_id' => ['nullable', 'exists:bidangs,id'],
+            'hirarki' => ['nullable', 'integer', 'min:1'],
             'nip' => ['nullable', 'string', 'max:50'],
             'no_hp' => ['nullable', 'string', 'max:50'],
         ]);
@@ -156,6 +189,7 @@ class UserManagementController extends Controller
         $data['roles'] = Role::orderBy('display_name')->get();
         $data['jabatans'] = Jabatan::with('unit')->orderBy('nama')->get();
         $data['units'] = Unit::orderBy('nama')->get();
+        $data['bidangs'] = Bidang::orderBy('nama')->get();
 
         return $data;
     }
