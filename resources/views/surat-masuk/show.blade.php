@@ -73,7 +73,7 @@
                         </tr>
                         <tr>
                             <td style="font-weight: 600; color: #718096;">Tanggal Surat</td>
-                            <td>{{ $suratMasuk->tanggal_surat->format('d F Y') }}</td>
+                            <td>{{ $suratMasuk->tanggal_surat->translatedFormat('d F Y') }}</td>
                         </tr>
                         <tr>
                             <td style="font-weight: 600; color: #718096;">Sifat</td>

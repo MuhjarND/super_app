@@ -20,7 +20,9 @@ class RapatNotulensi extends Model
         'susunan_agenda',
         'hasil_rapat',
         'rekomendasi',
+        'rekomendasi_items',
         'dokumentasi_rapat',
+        'dokumentasi_files',
         'catatan',
         'file_path',
         'file_nama',
@@ -35,6 +37,8 @@ class RapatNotulensi extends Model
         'approval_ready' => 'boolean',
         'file_size' => 'integer',
         'submitted_at' => 'datetime',
+        'rekomendasi_items' => 'array',
+        'dokumentasi_files' => 'array',
     ];
 
     public function rapat()
@@ -57,11 +61,33 @@ class RapatNotulensi extends Model
         return $this->belongsTo(User::class, 'updated_by');
     }
 
+    public function tindakLanjuts()
+    {
+        return $this->hasMany(RapatNotulensiTindakLanjut::class, 'rapat_notulensi_id');
+    }
+
+    public function pendingTindakLanjuts()
+    {
+        return $this->hasMany(RapatNotulensiTindakLanjut::class, 'rapat_notulensi_id')->where('status', 'pending');
+    }
+
+    public function approval()
+    {
+        return $this->hasOne(RapatNotulensiApproval::class, 'rapat_notulensi_id');
+    }
+
+    public function approvalHistories()
+    {
+        return $this->hasMany(RapatNotulensiApprovalHistory::class, 'rapat_notulensi_id')->orderByDesc('acted_at');
+    }
+
     public function getStatusBadgeAttribute()
     {
         $map = [
             'draft' => ['secondary', 'Draft'],
             'siap' => ['info', 'Siap'],
+            'pending_approval' => ['warning', 'Pending Approval'],
+            'ditolak' => ['danger', 'Ditolak'],
             'selesai' => ['success', 'Selesai'],
             'tanpa_notulen' => ['dark', 'Tanpa Notulen'],
         ];

@@ -40,6 +40,7 @@
                 <div class="text-muted" style="font-size: 0.82rem;">{{ $rapat->judul }} | {{ $rapat->nomor_undangan }}</div>
             </div>
             <div class="text-right">
+                <a href="{{ route('rapat.absensi.pdf', $rapat) }}" target="_blank" class="btn btn-outline-danger btn-sm">PDF Absensi</a>
                 <a href="{{ route('rapat.absensi.public.show', $rapat->public_code) }}" target="_blank" class="btn btn-outline-primary btn-sm">Buka Link Publik</a>
                 <div class="text-muted mt-2" style="font-size: 0.75rem;">{{ $publicAttendanceUrl }}</div>
             </div>
@@ -73,7 +74,7 @@
             <div class="font-weight-bold">{{ $rapat->internalAttendances->count() }} / {{ $rapat->pesertas->count() }}</div>
         </div>
         <div class="attendance-info-box">
-            <div class="text-muted" style="font-size: 0.75rem;">Tamu</div>
+            <div class="text-muted" style="font-size: 0.75rem;">External</div>
             <div class="font-weight-bold">{{ $guestAttendances->count() }}</div>
         </div>
         <div class="attendance-info-box">
@@ -131,7 +132,7 @@
 
     <div class="card attendance-detail-card">
         <div class="card-header bg-white">
-            <strong>Tamu / Guest</strong>
+            <strong>Peserta External</strong>
         </div>
         <div class="card-body p-0 table-responsive">
             <table class="table table-hover mb-0">
@@ -157,7 +158,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="4" class="text-center text-muted py-4">Belum ada tamu yang mengisi absensi.</td>
+                            <td colspan="4" class="text-center text-muted py-4">Belum ada peserta external yang mengisi absensi.</td>
                         </tr>
                     @endforelse
                 </tbody>

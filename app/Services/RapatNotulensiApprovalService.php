@@ -1,0 +1,147 @@
+<?php
+
+namespace App\Services;
+
+use App\RapatNotulensi;
+use App\RapatNotulensiApproval;
+use App\RapatNotulensiApprovalHistory;
+use App\User;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
+
+class RapatNotulensiApprovalService
+{
+    public function syncWorkflow(RapatNotulensi $notulensi, $isResubmission = false)
+    {
+        $notulensi->loadMissing('rapat.approver1.jabatan', 'rapat.approver2.jabatan', 'approval');
+
+        if ($notulensi->tidak_membuat_notulen) {
+            $notulensi->approval()->delete();
+            $notulensi->update(['status' => 'tanpa_notulen', 'approval_ready' => false]);
+            return;
+        }
+
+        $approver = $this->resolveApprover($notulensi);
+        if (!$approver) {
+            $notulensi->approval()->delete();
+            $notulensi->update(['status' => 'selesai', 'approval_ready' => false]);
+            return;
+        }
+
+        $approval = $notulensi->approval;
+
+        if (!$approval) {
+            RapatNotulensiApproval::create([
+                'rapat_notulensi_id' => $notulensi->id,
+                'approver_id' => $approver->id,
+                'approver_name_snapshot' => $approver->name,
+                'approver_jabatan_snapshot' => optional($approver->jabatan)->nama ?: $approver->jabatan_keterangan,
+                'status' => 'pending',
+            ]);
+        } else {
+            $payload = [
+                'approver_id' => $approver->id,
+                'approver_name_snapshot' => $approver->name,
+                'approver_jabatan_snapshot' => optional($approver->jabatan)->nama ?: $approver->jabatan_keterangan,
+            ];
+
+            if ($isResubmission || (int) $approval->approver_id !== (int) $approver->id || in_array($approval->status, ['approved', 'rejected'], true)) {
+                if ($isResubmission && $approval->status === 'rejected') {
+                    $this->logHistory($approval, 'resubmitted', 'Notulen diperbarui dan diajukan ulang.');
+                }
+
+                $payload['status'] = 'pending';
+                $payload['catatan'] = null;
+                $payload['acted_at'] = null;
+                $payload['notified_at'] = null;
+            }
+
+            $approval->update($payload);
+        }
+
+        $notulensi->update([
+            'status' => 'pending_approval',
+            'approval_ready' => true,
+        ]);
+    }
+
+    public function approve(RapatNotulensiApproval $approval, User $actor, $catatan = null)
+    {
+        DB::transaction(function () use ($approval, $actor, $catatan) {
+            $approval->refresh();
+            $this->guardDecision($approval, $actor);
+
+            $approval->update([
+                'status' => 'approved',
+                'catatan' => $catatan,
+                'acted_at' => Carbon::now('Asia/Jayapura'),
+            ]);
+
+            $this->logHistory($approval, 'approved', $catatan);
+            $approval->notulensi()->update([
+                'status' => 'selesai',
+                'approval_ready' => true,
+            ]);
+        });
+    }
+
+    public function reject(RapatNotulensiApproval $approval, User $actor, $catatan)
+    {
+        DB::transaction(function () use ($approval, $actor, $catatan) {
+            $approval->refresh();
+            $this->guardDecision($approval, $actor);
+
+            $approval->update([
+                'status' => 'rejected',
+                'catatan' => $catatan,
+                'acted_at' => Carbon::now('Asia/Jayapura'),
+            ]);
+
+            $this->logHistory($approval, 'rejected', $catatan);
+            $approval->notulensi()->update([
+                'status' => 'ditolak',
+                'approval_ready' => false,
+            ]);
+        });
+    }
+
+    protected function resolveApprover(RapatNotulensi $notulensi)
+    {
+        $rapat = $notulensi->rapat;
+
+        if ($rapat && $rapat->approver1) {
+            return $rapat->approver1;
+        }
+
+        if ($rapat && $rapat->approver2) {
+            return $rapat->approver2;
+        }
+
+        return null;
+    }
+
+    protected function logHistory(RapatNotulensiApproval $approval, $action, $catatan = null)
+    {
+        RapatNotulensiApprovalHistory::create([
+            'rapat_notulensi_id' => $approval->rapat_notulensi_id,
+            'rapat_notulensi_approval_id' => $approval->id,
+            'approver_id' => $approval->approver_id,
+            'approver_name_snapshot' => $approval->approver_name_snapshot,
+            'approver_jabatan_snapshot' => $approval->approver_jabatan_snapshot,
+            'action' => $action,
+            'catatan' => $catatan,
+            'acted_at' => Carbon::now('Asia/Jayapura'),
+        ]);
+    }
+
+    protected function guardDecision(RapatNotulensiApproval $approval, User $actor)
+    {
+        if ((int) $approval->approver_id !== (int) $actor->id && !$actor->isMeetingAdmin()) {
+            abort(403, 'Anda tidak berhak memproses approval notulen ini.');
+        }
+
+        if ($approval->status !== 'pending') {
+            abort(422, 'Approval notulen ini tidak berada pada status pending.');
+        }
+    }
+}

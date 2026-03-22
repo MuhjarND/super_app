@@ -237,6 +237,58 @@
         .alert-success { background: var(--success-soft); color: var(--success); }
         .alert-error { background: var(--danger-soft); color: var(--danger); }
 
+        .public-loader {
+            position: fixed;
+            inset: 0;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            background: rgba(15, 23, 42, 0.5);
+            backdrop-filter: blur(3px);
+            z-index: 9999;
+            padding: 20px;
+        }
+
+        .public-loader.show {
+            display: flex;
+        }
+
+        .public-loader__card {
+            width: min(100%, 320px);
+            background: rgba(255, 255, 255, 0.98);
+            border: 1px solid rgba(219, 226, 234, 0.9);
+            border-radius: 20px;
+            box-shadow: 0 18px 40px rgba(15, 23, 42, 0.2);
+            text-align: center;
+            padding: 24px 20px;
+        }
+
+        .public-loader__spinner {
+            width: 42px;
+            height: 42px;
+            margin: 0 auto 14px;
+            border-radius: 50%;
+            border: 3px solid #dbeafe;
+            border-top-color: var(--primary);
+            animation: spin 0.8s linear infinite;
+        }
+
+        .public-loader__title {
+            font-size: 0.96rem;
+            font-weight: 800;
+            margin-bottom: 6px;
+        }
+
+        .public-loader__message {
+            font-size: 0.84rem;
+            color: var(--muted);
+            line-height: 1.5;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
         @media (max-width: 640px) {
             .hero h1 { font-size: 1.3rem; }
             .panel { padding: 16px; }
@@ -246,6 +298,14 @@
     </style>
 </head>
 <body>
+    <div id="publicLoader" class="public-loader" aria-hidden="true">
+        <div class="public-loader__card">
+            <div class="public-loader__spinner"></div>
+            <div class="public-loader__title">Memproses Absensi</div>
+            <div id="publicLoaderMessage" class="public-loader__message">Mohon tunggu, data absensi sedang dikirim.</div>
+        </div>
+    </div>
+
     @php
         $attendedUserIds = $rapat->internalAttendances->pluck('user_id')->filter()->map(function ($id) {
             return (int) $id;
@@ -288,7 +348,7 @@
                 <div class="stat-pill__value">{{ $rapat->internalAttendances->count() }}</div>
             </div>
             <div class="stat-pill">
-                <div class="stat-pill__label">Guest</div>
+                <div class="stat-pill__label">External</div>
                 <div class="stat-pill__value">{{ $rapat->guestAttendances->count() }}</div>
             </div>
         </div>
@@ -298,7 +358,7 @@
 
             <div class="tabs">
                 <button type="button" class="tab-button active" data-tab="internal">Peserta Undangan</button>
-                <button type="button" class="tab-button" data-tab="guest">Tamu / Guest</button>
+                <button type="button" class="tab-button" data-tab="guest">External</button>
             </div>
 
             <div id="panel-internal" class="tab-panel active">
@@ -334,7 +394,7 @@
             <div id="panel-guest" class="tab-panel">
                 <form id="guestAttendanceForm">
                     <div class="field">
-                        <label for="guest_name">Nama Tamu</label>
+                        <label for="guest_name">Nama External</label>
                         <input type="text" name="guest_name" id="guest_name" class="input" required>
                     </div>
 
@@ -354,7 +414,7 @@
                         </div>
                     </div>
 
-                    <button type="submit" class="btn btn-primary">Kirim Absensi Tamu</button>
+                    <button type="submit" class="btn btn-primary">Kirim Absensi External</button>
                 </form>
             </div>
         </div>
@@ -364,6 +424,8 @@
         const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
         const tabButtons = document.querySelectorAll('.tab-button');
         const alertBox = document.getElementById('attendanceAlert');
+        const publicLoader = document.getElementById('publicLoader');
+        const publicLoaderMessage = document.getElementById('publicLoaderMessage');
         const canvases = {};
 
         function showAlert(message, type) {
@@ -461,23 +523,44 @@
             }
         }
 
-        async function submitForm(url, payload) {
-            const response = await fetch(url, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json',
-                    'X-CSRF-TOKEN': csrfToken
-                },
-                body: JSON.stringify(payload)
-            });
-
-            const data = await response.json().catch(() => ({}));
-            if (!response.ok) {
-                throw new Error(data.message || 'Gagal mengirim absensi.');
+        function setLoadingState(show, message) {
+            if (publicLoaderMessage && message) {
+                publicLoaderMessage.textContent = message;
             }
 
-            return data;
+            if (publicLoader) {
+                publicLoader.classList.toggle('show', show);
+                publicLoader.setAttribute('aria-hidden', show ? 'false' : 'true');
+            }
+
+            document.querySelectorAll('#internalAttendanceForm button, #guestAttendanceForm button').forEach(function (button) {
+                button.disabled = show;
+            });
+        }
+
+        async function submitForm(url, payload, message) {
+            setLoadingState(true, message || 'Mohon tunggu, data absensi sedang dikirim.');
+
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': csrfToken
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                const data = await response.json().catch(() => ({}));
+                if (!response.ok) {
+                    throw new Error(data.message || 'Gagal mengirim absensi.');
+                }
+
+                return data;
+            } finally {
+                setLoadingState(false);
+            }
         }
 
         function bindForms() {
@@ -492,7 +575,7 @@
                     const result = await submitForm('{{ route('rapat.absensi.public.store', $rapat->public_code) }}', {
                         user_id: document.getElementById('user_id').value,
                         signature_data: document.getElementById('internalCanvas').toDataURL('image/png')
-                    });
+                    }, 'Mohon tunggu, absensi peserta sedang diproses.');
                     showAlert(result.message, 'success');
                     setTimeout(function () { window.location.reload(); }, 800);
                 } catch (error) {
@@ -503,7 +586,7 @@
             document.getElementById('guestAttendanceForm').addEventListener('submit', async function (event) {
                 event.preventDefault();
                 if (!canvases.guestCanvas.state.dirty) {
-                    showAlert('Tanda tangan tamu wajib diisi.', 'error');
+                    showAlert('Tanda tangan external wajib diisi.', 'error');
                     return;
                 }
 
@@ -512,7 +595,7 @@
                         guest_name: document.getElementById('guest_name').value,
                         guest_instansi: document.getElementById('guest_instansi').value,
                         signature_data: document.getElementById('guestCanvas').toDataURL('image/png')
-                    });
+                    }, 'Mohon tunggu, absensi external sedang diproses.');
                     showAlert(result.message, 'success');
                     setTimeout(function () { window.location.reload(); }, 800);
                 } catch (error) {

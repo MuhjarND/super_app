@@ -285,6 +285,136 @@
             background: #f3f4f6;
         }
 
+        .notification-toggle {
+            position: relative;
+            width: 40px;
+            height: 40px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 12px;
+            border: 1px solid #e5e7eb;
+            background: #ffffff;
+            color: #475569 !important;
+            transition: all 0.15s ease;
+        }
+
+        .notification-toggle:hover {
+            background: #f8fafc;
+            border-color: #cbd5e1;
+            color: #0f172a !important;
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            min-width: 20px;
+            height: 20px;
+            padding: 0 6px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 999px;
+            background: #ef4444;
+            color: #fff;
+            font-size: 0.68rem;
+            font-weight: 800;
+            line-height: 1;
+            box-shadow: 0 6px 18px rgba(239, 68, 68, 0.28);
+        }
+
+        .notification-menu {
+            width: 360px;
+            max-width: calc(100vw - 24px);
+            padding: 0;
+            overflow: hidden;
+        }
+
+        .notification-menu-header {
+            padding: 14px 16px;
+            border-bottom: 1px solid #e5e7eb;
+            background: #f8fafc;
+        }
+
+        .notification-menu-title {
+            font-size: 0.86rem;
+            font-weight: 800;
+            color: #0f172a;
+        }
+
+        .notification-menu-subtitle {
+            font-size: 0.74rem;
+            color: #64748b;
+            margin-top: 2px;
+        }
+
+        .notification-list {
+            max-height: 420px;
+            overflow-y: auto;
+        }
+
+        .notification-item {
+            display: flex;
+            gap: 12px;
+            padding: 14px 16px;
+            text-decoration: none !important;
+            color: inherit !important;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .notification-item:last-child {
+            border-bottom: none;
+        }
+
+        .notification-item:hover {
+            background: #f8fafc;
+        }
+
+        .notification-item-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            font-size: 0.95rem;
+        }
+
+        .notification-item-title {
+            font-size: 0.82rem;
+            font-weight: 700;
+            color: #0f172a;
+            line-height: 1.35;
+        }
+
+        .notification-item-subtitle {
+            font-size: 0.76rem;
+            color: #334155;
+            margin-top: 2px;
+        }
+
+        .notification-item-description {
+            font-size: 0.75rem;
+            color: #64748b;
+            margin-top: 3px;
+            line-height: 1.4;
+        }
+
+        .notification-item-time {
+            font-size: 0.71rem;
+            color: #94a3b8;
+            margin-top: 5px;
+        }
+
+        .notification-empty {
+            padding: 24px 18px;
+            text-align: center;
+            color: #64748b;
+            font-size: 0.82rem;
+        }
+
         /* ======================== CONTENT ======================== */
         .content-wrapper {
             background: var(--body-bg);
@@ -812,6 +942,39 @@
             color: #e5e7eb;
         }
 
+        body.theme-dark .notification-toggle {
+            background: #111827;
+            border-color: #334155;
+            color: #cbd5e1 !important;
+        }
+
+        body.theme-dark .notification-toggle:hover,
+        body.theme-dark .notification-item:hover,
+        body.theme-dark .notification-menu-header {
+            background: #172033 !important;
+        }
+
+        body.theme-dark .notification-menu,
+        body.theme-dark .notification-item {
+            background: #111827;
+            border-color: #1f2937 !important;
+        }
+
+        body.theme-dark .notification-item-title {
+            color: #f8fafc;
+        }
+
+        body.theme-dark .notification-item-subtitle {
+            color: #cbd5e1;
+        }
+
+        body.theme-dark .notification-item-description,
+        body.theme-dark .notification-item-time,
+        body.theme-dark .notification-menu-subtitle,
+        body.theme-dark .notification-empty {
+            color: #94a3b8;
+        }
+
         body.theme-dark .global-loader {
             background: rgba(2, 6, 23, 0.74);
         }
@@ -864,6 +1027,39 @@
                 </li>
             </ul>
             <ul class="navbar-nav ml-auto">
+                <li class="nav-item dropdown mr-2 d-flex align-items-center">
+                    <a class="nav-link notification-toggle" data-toggle="dropdown" href="#" title="Tindak lanjut">
+                        <i class="fas fa-bell"></i>
+                        @if(($topbarActionCount ?? 0) > 0)
+                            <span class="notification-badge">{{ ($topbarActionCount ?? 0) > 99 ? '99+' : ($topbarActionCount ?? 0) }}</span>
+                        @endif
+                    </a>
+                    <div class="dropdown-menu dropdown-menu-right notification-menu">
+                        <div class="notification-menu-header">
+                            <div class="notification-menu-title">Tindak Lanjut</div>
+                            <div class="notification-menu-subtitle">{{ $topbarActionCount ?? 0 }} tugas memerlukan tindakan Anda</div>
+                        </div>
+                        <div class="notification-list">
+                            @forelse(($topbarActionItems ?? collect()) as $item)
+                                <a href="{{ $item['url'] }}" class="notification-item">
+                                    <div class="notification-item-icon" style="background: {{ $item['icon_bg'] }}; color: {{ $item['icon_color'] }};">
+                                        <i class="{{ $item['icon'] }}"></i>
+                                    </div>
+                                    <div style="min-width:0;">
+                                        <div class="notification-item-title">{{ $item['title'] }}</div>
+                                        <div class="notification-item-subtitle">{{ $item['subtitle'] }}</div>
+                                        <div class="notification-item-description">{{ \Illuminate\Support\Str::limit($item['description'], 90) }}</div>
+                                        <div class="notification-item-time">{{ $item['time'] ?: 'Baru saja' }}</div>
+                                    </div>
+                                </a>
+                            @empty
+                                <div class="notification-empty">
+                                    Tidak ada tindak lanjut yang perlu Anda proses saat ini.
+                                </div>
+                            @endforelse
+                        </div>
+                    </div>
+                </li>
                 <li class="nav-item mr-2 d-flex align-items-center">
                     <button type="button" class="theme-toggle-btn" id="themeToggle">
                         <i class="fas fa-moon" id="themeToggleIcon"></i>
@@ -979,13 +1175,155 @@
                             </li>
                         @endif
 
+                        @if(Auth::user()->canAccessMeetingModule())
+                            <li class="nav-header">RAPAT / AGENDA</li>
+
+                            <li
+                                class="nav-item has-treeview {{ request()->routeIs('rapat.*') ? 'menu-open' : '' }}">
+                                <a href="#"
+                                    class="nav-link {{ request()->routeIs('rapat.*') ? 'active' : '' }}">
+                                    <i class="nav-icon fas fa-users"></i>
+                                    <p>
+                                        Rapat / Agenda
+                                        <i class="right fas fa-angle-left"></i>
+                                    </p>
+                                </a>
+                                <ul class="nav nav-treeview">
+                                    <li class="nav-item">
+                                        <a href="{{ route('rapat.index') }}"
+                                            class="nav-link {{ request()->routeIs('rapat.index') ? 'active' : '' }}">
+                                            <i class="nav-icon far fa-calendar-alt"></i>
+                                            <p>Rapat</p>
+                                        </a>
+                                    </li>
+                                    @if(Auth::user()->canAccessMeetingMinutes())
+                                        <li class="nav-item">
+                                            <a href="{{ route('rapat.notulensi.index') }}"
+                                                class="nav-link {{ request()->routeIs('rapat.notulensi.*') ? 'active' : '' }}">
+                                                <i class="nav-icon far fa-file-alt"></i>
+                                                <p>Notulensi</p>
+                                            </a>
+                                        </li>
+                                    @endif
+                                    @if((!Auth::user()->canAccessMeetingMinutes()) || (($sidebarNotulensiFollowUpCount ?? 0) > 0))
+                                        <li class="nav-item">
+                                            <a href="{{ route('rapat.notulensi.follow-ups') }}"
+                                                class="nav-link {{ request()->routeIs('rapat.notulensi.follow-ups') ? 'active' : '' }}">
+                                                <i class="nav-icon fas fa-tasks"></i>
+                                                <p>
+                                                    Tindak Lanjut Notulen
+                                                    @if(($sidebarNotulensiFollowUpCount ?? 0) > 0)
+                                                        <span class="right badge badge-danger">{{ $sidebarNotulensiFollowUpCount }}</span>
+                                                    @endif
+                                                </p>
+                                            </a>
+                                        </li>
+                                    @endif
+                                    <li class="nav-item">
+                                        <a href="{{ route('rapat.absensi.index') }}"
+                                            class="nav-link {{ request()->routeIs('rapat.absensi.*') ? 'active' : '' }}">
+                                            <i class="nav-icon fas fa-clipboard-check"></i>
+                                            <p>Absensi</p>
+                                        </a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a href="{{ route('rapat.laporan.index') }}"
+                                            class="nav-link {{ request()->routeIs('rapat.laporan.*') ? 'active' : '' }}">
+                                            <i class="nav-icon far fa-file-pdf"></i>
+                                            <p>Laporan</p>
+                                        </a>
+                                    </li>
+                                    @if(Auth::user()->canAccessAgendaPimpinan())
+                                        <li class="nav-item">
+                                            <a href="{{ route('rapat.agenda.index') }}"
+                                                class="nav-link {{ request()->routeIs('rapat.agenda.*') ? 'active' : '' }}">
+                                                <i class="nav-icon fas fa-calendar-day"></i>
+                                                <p>Agenda Pimpinan</p>
+                                            </a>
+                                        </li>
+                                    @endif
+                                    @if(Auth::user()->canManageVoting())
+                                        <li class="nav-item">
+                                            <a href="{{ route('rapat.voting.index') }}"
+                                                class="nav-link {{ request()->routeIs('rapat.voting.*') ? 'active' : '' }}">
+                                                <i class="nav-icon fas fa-poll"></i>
+                                                <p>E-Voting</p>
+                                            </a>
+                                        </li>
+                                    @endif
+                                </ul>
+                            </li>
+                        @endif
+
+                        @if(Auth::user()->canAccessMeetingApproval())
+                            <li class="nav-header">APPROVAL</li>
+                            <li class="nav-item has-treeview {{ request()->routeIs('approval.*') ? 'menu-open' : '' }}">
+                                <a href="#" class="nav-link {{ request()->routeIs('approval.*') ? 'active' : '' }}">
+                                    <i class="nav-icon fas fa-check-double"></i>
+                                    <p>
+                                        Approval
+                                        @if(($sidebarApprovalTotalCount ?? 0) > 0)
+                                            <span class="right badge badge-danger">{{ $sidebarApprovalTotalCount }}</span>
+                                        @endif
+                                        <i class="right fas fa-angle-left"></i>
+                                    </p>
+                                </a>
+                                <ul class="nav nav-treeview">
+                                    <li class="nav-item">
+                                        <a href="{{ route('approval.index') }}"
+                                            class="nav-link {{ request()->routeIs('approval.index') ? 'active' : '' }}">
+                                            <i class="nav-icon fas fa-tasks"></i>
+                                            <p>Tindaklanjuti</p>
+                                        </a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a href="{{ route('approval.history') }}"
+                                            class="nav-link {{ request()->routeIs('approval.history') ? 'active' : '' }}">
+                                            <i class="nav-icon fas fa-history"></i>
+                                            <p>Riwayat Approval</p>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </li>
+                        @endif
+
+                        <li class="nav-header">CUTI</li>
+
+                        <li class="nav-item">
+                            <a href="{{ route('cuti.index') }}"
+                                class="nav-link {{ request()->routeIs('cuti.*') ? 'active' : '' }}">
+                                <i class="nav-icon far fa-calendar-check"></i>
+                                <p>Cuti <span class="badge badge-dev ml-auto">DEV</span></p>
+                            </a>
+                        </li>
+
+                        <li class="nav-header">PERSEDIAAN</li>
+
+                        <li class="nav-item">
+                            <a href="{{ route('persediaan.index') }}"
+                                class="nav-link {{ request()->routeIs('persediaan.*') ? 'active' : '' }}">
+                                <i class="nav-icon fas fa-cube"></i>
+                                <p>Persediaan <span class="badge badge-dev ml-auto">DEV</span></p>
+                            </a>
+                        </li>
+
+                        <li class="nav-header">PROGRESS ZI</li>
+
+                        <li class="nav-item">
+                            <a href="{{ route('progress-zi.index') }}"
+                                class="nav-link {{ request()->routeIs('progress-zi.*') ? 'active' : '' }}">
+                                <i class="nav-icon fas fa-chart-line"></i>
+                                <p>Progress ZI <span class="badge badge-dev ml-auto">DEV</span></p>
+                            </a>
+                        </li>
+
                         @if(Auth::user()->canAccessMeetingMasterData())
                             <li class="nav-header">MASTER DATA</li>
 
                             <li
-                                class="nav-item has-treeview {{ request()->routeIs('admin.users.*') || request()->routeIs('admin.jabatans.*') || request()->routeIs('admin.units.*') || request()->routeIs('admin.bidangs.*') || request()->routeIs('admin.kategori-surats.*') || request()->routeIs('admin.kategori-rapats.*') ? 'menu-open' : '' }}">
+                                class="nav-item has-treeview {{ request()->routeIs('admin.users.*') || request()->routeIs('admin.jabatans.*') || request()->routeIs('admin.units.*') || request()->routeIs('admin.bidangs.*') || request()->routeIs('admin.kategori-surats.*') || request()->routeIs('admin.kategori-rapats.*') || request()->routeIs('admin.dasar-hukums.*') ? 'menu-open' : '' }}">
                                 <a href="#"
-                                class="nav-link {{ request()->routeIs('admin.users.*') || request()->routeIs('admin.jabatans.*') || request()->routeIs('admin.units.*') || request()->routeIs('admin.bidangs.*') || request()->routeIs('admin.kategori-surats.*') || request()->routeIs('admin.kategori-rapats.*') ? 'active' : '' }}">
+                                class="nav-link {{ request()->routeIs('admin.users.*') || request()->routeIs('admin.jabatans.*') || request()->routeIs('admin.units.*') || request()->routeIs('admin.bidangs.*') || request()->routeIs('admin.kategori-surats.*') || request()->routeIs('admin.kategori-rapats.*') || request()->routeIs('admin.dasar-hukums.*') ? 'active' : '' }}">
                                     <i class="nav-icon fas fa-database"></i>
                                     <p>
                                         Master Data
@@ -1035,102 +1373,16 @@
                                             <p>Kategori Rapat</p>
                                         </a>
                                     </li>
+                                    <li class="nav-item">
+                                        <a href="{{ route('admin.dasar-hukums.index') }}"
+                                            class="nav-link {{ request()->routeIs('admin.dasar-hukums.*') ? 'active' : '' }}">
+                                            <i class="nav-icon fas fa-balance-scale"></i>
+                                            <p>Dasar Hukum</p>
+                                        </a>
+                                    </li>
                                 </ul>
                             </li>
                         @endif
-
-                        @if(Auth::user()->canAccessMeetingModule())
-                            <li class="nav-header">RAPAT</li>
-
-                            <li
-                                class="nav-item has-treeview {{ request()->routeIs('rapat.*') ? 'menu-open' : '' }}">
-                                <a href="#"
-                                    class="nav-link {{ request()->routeIs('rapat.*') ? 'active' : '' }}">
-                                    <i class="nav-icon fas fa-users"></i>
-                                    <p>
-                                        Smart Rapat
-                                        <i class="right fas fa-angle-left"></i>
-                                    </p>
-                                </a>
-                                <ul class="nav nav-treeview">
-                                    <li class="nav-item">
-                                        <a href="{{ route('rapat.index') }}"
-                                            class="nav-link {{ request()->routeIs('rapat.index') ? 'active' : '' }}">
-                                            <i class="nav-icon far fa-calendar-alt"></i>
-                                            <p>Rapat</p>
-                                        </a>
-                                    </li>
-                                    @if(Auth::user()->canAccessMeetingMinutes())
-                                        <li class="nav-item">
-                                            <a href="{{ route('rapat.notulensi.index') }}"
-                                                class="nav-link {{ request()->routeIs('rapat.notulensi.*') ? 'active' : '' }}">
-                                                <i class="nav-icon far fa-file-alt"></i>
-                                                <p>Notulensi</p>
-                                            </a>
-                                        </li>
-                                    @endif
-                                    @if(Auth::user()->canAccessMeetingApproval())
-                                        <li class="nav-item">
-                                            <a href="{{ route('rapat.approval.index') }}"
-                                                class="nav-link {{ request()->routeIs('rapat.approval.*') ? 'active' : '' }}">
-                                                <i class="nav-icon fas fa-check-double"></i>
-                                                <p>Approval</p>
-                                            </a>
-                                        </li>
-                                    @endif
-                                    <li class="nav-item">
-                                        <a href="{{ route('rapat.absensi.index') }}"
-                                            class="nav-link {{ request()->routeIs('rapat.absensi.*') ? 'active' : '' }}">
-                                            <i class="nav-icon fas fa-clipboard-check"></i>
-                                            <p>Absensi</p>
-                                        </a>
-                                    </li>
-                                    <li class="nav-item">
-                                        <a href="{{ route('rapat.laporan.index') }}"
-                                            class="nav-link {{ request()->routeIs('rapat.laporan.*') ? 'active' : '' }}">
-                                            <i class="nav-icon far fa-file-pdf"></i>
-                                            <p>Laporan</p>
-                                        </a>
-                                    </li>
-                                    @if(Auth::user()->canAccessAgendaPimpinan())
-                                        <li class="nav-item">
-                                            <a href="{{ route('rapat.agenda.index') }}"
-                                                class="nav-link {{ request()->routeIs('rapat.agenda.*') ? 'active' : '' }}">
-                                                <i class="nav-icon fas fa-calendar-day"></i>
-                                                <p>Agenda Pimpinan</p>
-                                            </a>
-                                        </li>
-                                    @endif
-                                    @if(Auth::user()->canManageVoting())
-                                        <li class="nav-item">
-                                            <a href="{{ route('rapat.voting.index') }}"
-                                                class="nav-link {{ request()->routeIs('rapat.voting.*') ? 'active' : '' }}">
-                                                <i class="nav-icon fas fa-poll"></i>
-                                                <p>E-Voting</p>
-                                            </a>
-                                        </li>
-                                    @endif
-                                </ul>
-                            </li>
-                        @endif
-
-                        <li class="nav-header">MODUL LAINNYA</li>
-
-                        <li class="nav-item">
-                            <a href="{{ route('cuti.index') }}"
-                                class="nav-link {{ request()->routeIs('cuti.*') ? 'active' : '' }}">
-                                <i class="nav-icon far fa-calendar-check"></i>
-                                <p>Cuti <span class="badge badge-dev ml-auto">DEV</span></p>
-                            </a>
-                        </li>
-
-                        <li class="nav-item">
-                            <a href="{{ route('persediaan.index') }}"
-                                class="nav-link {{ request()->routeIs('persediaan.*') ? 'active' : '' }}">
-                                <i class="nav-icon fas fa-cube"></i>
-                                <p>Persediaan <span class="badge badge-dev ml-auto">DEV</span></p>
-                            </a>
-                        </li>
                     </ul>
                 </nav>
             </div>

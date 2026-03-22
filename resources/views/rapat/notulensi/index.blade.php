@@ -83,8 +83,15 @@
 @section('content-header')
     <div class="content-header">
         <div class="container-fluid">
-            <h1 class="mb-1">Notulensi</h1>
-            <div class="text-muted" style="font-size: 0.82rem;">Daftar rapat yang belum memiliki notulensi dan yang sudah selesai dikerjakan.</div>
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <h1 class="mb-1">Notulensi</h1>
+                    <div class="text-muted" style="font-size: 0.82rem;">Daftar rapat yang belum memiliki notulensi dan yang sudah selesai dikerjakan.</div>
+                </div>
+                <a href="{{ route('rapat.notulensi.follow-ups') }}" class="btn btn-outline-primary btn-sm">
+                    <i class="fas fa-tasks mr-1"></i> Tindak Lanjut
+                </a>
+            </div>
         </div>
     </div>
 @endsection
@@ -168,6 +175,7 @@
                         <th>Mode</th>
                         <th>Status</th>
                         <th>Notulis</th>
+                        <th>Tindak Lanjut</th>
                         <th>Diperbarui</th>
                     </tr>
                 </thead>
@@ -184,10 +192,11 @@
                             <td>{{ strtoupper(str_replace('_', ' ', $rapat->notulensi->mode)) }}</td>
                             <td>{!! $rapat->notulensi->status_badge !!}</td>
                             <td>{{ optional($rapat->notulensi->notulis)->name ?: '-' }}</td>
+                            <td>{{ $rapat->notulensi->tindakLanjuts->where('status', 'pending')->count() }} pending</td>
                             <td>{{ optional($rapat->notulensi->updated_at)->timezone('Asia/Jayapura')->format('d/m/Y H:i') ?: '-' }}</td>
                         </tr>
                         <tr class="meeting-action-row">
-                            <td colspan="6">
+                            <td colspan="7">
                                 <div class="meeting-action-panel">
                                     <span class="meeting-action-meta">Tindakan notulensi</span>
                                     <a href="{{ route('rapat.notulensi.edit', $rapat->notulensi) }}" class="meeting-action-btn primary">
@@ -206,7 +215,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="6" class="text-center text-muted py-4">Belum ada notulensi yang dibuat.</td>
+                            <td colspan="7" class="text-center text-muted py-4">Belum ada notulensi yang dibuat.</td>
                         </tr>
                     @endforelse
                 </tbody>
@@ -228,10 +237,6 @@
                         <div class="form-group">
                             <label>File Notulensi</label>
                             <input type="file" name="notulensi_file" class="form-control-file" accept=".pdf,.doc,.docx" required>
-                        </div>
-                        <div class="form-group mb-0">
-                            <label>Catatan Upload</label>
-                            <textarea name="catatan_upload" class="form-control" rows="3"></textarea>
                         </div>
                     </div>
                     <div class="modal-footer">

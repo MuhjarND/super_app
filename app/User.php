@@ -137,6 +137,33 @@ class User extends Authenticatable
         return $this->isMeetingAdmin() || $this->isMeetingOperator() || $this->isMeetingNotulis();
     }
 
+    public function getMonitorableMeetingUnitCodesAttribute()
+    {
+        if ($this->hasJabatanKode('SEK')) {
+            return ['KESEKRETARIATAN', 'KEPEGAWAIAN', 'UMUM', 'PERSURATAN'];
+        }
+
+        if ($this->hasJabatanKode('PAN')) {
+            return ['KEPANITERAAN'];
+        }
+
+        return [];
+    }
+
+    public function canMonitorNotulensiFollowUps()
+    {
+        return !empty($this->monitorable_meeting_unit_codes);
+    }
+
+    public function canMonitorFollowUpForUser($targetUser)
+    {
+        if (!$this->canMonitorNotulensiFollowUps() || !$targetUser) {
+            return false;
+        }
+
+        return in_array(optional($targetUser->unit)->kode, $this->monitorable_meeting_unit_codes, true);
+    }
+
     public function canAccessMeetingApproval()
     {
         return $this->isMeetingAdmin() || $this->isMeetingApproval();
@@ -351,5 +378,10 @@ class User extends Authenticatable
     public function disposisiDikirim()
     {
         return $this->hasMany(Disposisi::class, 'dari_user_id');
+    }
+
+    public function tindakLanjutNotulensiItems()
+    {
+        return $this->hasMany(RapatNotulensiTindakLanjut::class, 'user_id');
     }
 }

@@ -5,6 +5,8 @@ namespace App\Services;
 use App\KategoriSurat;
 use App\KlasifikasiKode;
 use App\Rapat;
+use App\RapatNotulensi;
+use App\RapatNotulensiApproval;
 use App\SuratKeluar;
 use App\User;
 use Barryvdh\DomPDF\Facade as PDF;
@@ -287,7 +289,9 @@ class RapatDocumentService
             'issueDate' => $issueDate,
             'signatory' => $signatory,
             'signatureApprovedAt' => $approvalStep && $approvalStep->acted_at ? $approvalStep->acted_at->copy()->timezone('Asia/Jayapura') : null,
-            'signatureBarcode' => $signed && $signatory && $approvalStep && $approvalStep->status === 'approved' ? $this->makeSignatureBarcode($rapat, $signatory, $approvalStep) : null,
+            'signatureBarcode' => $signed && $signatory && $approvalStep && $approvalStep->status === 'approved'
+                ? $this->makeSignatureBarcode($rapat, ['signature' => 'approval'])
+                : null,
             'kopImage' => $this->resolveKopImage(),
             'lampiranLabel' => $this->resolveLampiranLabel($showLampiranPage, $rapat),
             'openingParagraph' => $this->buildOpeningParagraph($rapat),
@@ -408,9 +412,79 @@ class RapatDocumentService
         return KategoriSurat::whereRaw('UPPER(kode) = ?', [strtoupper($hierarchy['klasifikasi']->kode)])->first();
     }
 
-    protected function makeSignatureBarcode(Rapat $rapat, User $signatory, $historyApproval)
+    public function buildApprovalSignatureData(Rapat $rapat, $signed = null)
     {
-        $verificationUrl = $this->signatureVerificationUrl($rapat);
+        $rapat->loadMissing([
+            'creator',
+            'suratKeluar',
+            'approvals.approver.jabatan',
+            'approver1.jabatan',
+            'approver2.jabatan',
+        ]);
+
+        $signed = is_null($signed) ? $this->shouldUseSignedDocument($rapat) : (bool) $signed;
+        $signatory = $this->resolveDocumentSignatory($rapat);
+        $approvalStep = $this->resolveSignatureApprovalRecord($rapat, $signatory);
+
+        return [
+            'line1' => $this->resolveSignatoryTitle($signatory, $rapat->approval1_jabatan_manual)['line1'],
+            'line2' => $this->resolveSignatoryTitle($signatory, $rapat->approval1_jabatan_manual)['line2'],
+            'name' => optional($signatory)->name ?: '-',
+            'signed_at' => $approvalStep && $approvalStep->acted_at
+                ? $approvalStep->acted_at->copy()->timezone('Asia/Jayapura')
+                : null,
+            'barcode' => $signed && $signatory && $approvalStep && $approvalStep->status === 'approved'
+                ? $this->makeSignatureBarcode($rapat, ['signature' => 'approval'])
+                : null,
+        ];
+    }
+
+    public function buildNotulensiSignatureData(RapatNotulensi $notulensi)
+    {
+        $notulensi->loadMissing(['rapat.suratKeluar', 'notulis.jabatan']);
+
+        return [
+            'line1' => 'Notulis,',
+            'line2' => 'Pengadilan Tinggi Agama Papua Barat',
+            'name' => optional($notulensi->notulis)->name ?: '-',
+            'signed_at' => ($notulensi->submitted_at ?: $notulensi->updated_at)
+                ? ($notulensi->submitted_at ?: $notulensi->updated_at)->copy()->timezone('Asia/Jayapura')
+                : null,
+            'barcode' => $notulensi->notulis_id
+                ? $this->makeSignatureBarcode($notulensi->rapat, ['signature' => 'notulis', 'notulensi' => $notulensi->id])
+                : null,
+        ];
+    }
+
+    public function buildNotulensiApprovalSignatureData(RapatNotulensi $notulensi, $signed = null)
+    {
+        $notulensi->loadMissing([
+            'rapat.approver1.jabatan',
+            'rapat.approver2.jabatan',
+            'approval.approver.jabatan',
+        ]);
+
+        $approval = $notulensi->approval;
+        $signatory = optional($approval)->approver ?: $this->resolveDocumentSignatory($notulensi->rapat);
+        $signed = is_null($signed) ? ($approval && $approval->status === 'approved') : (bool) $signed;
+        $title = $this->resolveSignatoryTitle($signatory, $notulensi->rapat->approval1_jabatan_manual);
+
+        return [
+            'line1' => $title['line1'],
+            'line2' => $title['line2'],
+            'name' => optional($signatory)->name ?: '-',
+            'signed_at' => $approval && $approval->acted_at
+                ? $approval->acted_at->copy()->timezone('Asia/Jayapura')
+                : null,
+            'barcode' => $signed && $signatory && $approval && $approval->status === 'approved'
+                ? $this->makeSignatureBarcode($notulensi->rapat, ['signature' => 'notulensi_approval', 'notulensi' => $notulensi->id])
+                : null,
+        ];
+    }
+
+    protected function makeSignatureBarcode(Rapat $rapat, array $params = [])
+    {
+        $verificationUrl = $this->signatureVerificationUrl($rapat, $params);
         $logoPath = public_path('logo_qr.png');
         $svg = QrCode::format('svg')->size(220)->margin(1)->errorCorrection('H')->generate($verificationUrl);
 
@@ -425,7 +499,7 @@ class RapatDocumentService
         return 'data:image/svg+xml;base64,' . base64_encode($svg);
     }
 
-    public function buildSignatureVerificationData(Rapat $rapat)
+    public function buildSignatureVerificationData(Rapat $rapat, $signatureType = 'approval', RapatNotulensi $notulensi = null)
     {
         $rapat->loadMissing([
             'creator',
@@ -434,7 +508,56 @@ class RapatDocumentService
             'approvals.approver.jabatan',
             'kategoriSuratKode',
             'suratKeluar',
+            'notulensi.notulis.jabatan',
         ]);
+
+        if ($signatureType === 'notulis' && $notulensi) {
+            $notulensi->loadMissing('notulis.jabatan');
+
+            return [
+                'valid' => (bool) $notulensi->notulis_id && !$notulensi->tidak_membuat_notulen,
+                'nomor' => optional($rapat->suratKeluar)->nomor_surat ?: ($rapat->nomor_undangan ?: '-'),
+                'judul' => $notulensi->judul ?: ($rapat->judul ?: '-'),
+                'status_label' => ucfirst(str_replace('_', ' ', (string) $notulensi->status)),
+                'signatory_name' => optional($notulensi->notulis)->name ?: '-',
+                'signatory_title' => 'Notulis',
+                'signed_at' => ($notulensi->submitted_at ?: $notulensi->updated_at)
+                    ? ($notulensi->submitted_at ?: $notulensi->updated_at)->copy()->timezone('Asia/Jayapura')->translatedFormat('d F Y H:i') . ' WIT'
+                    : '-',
+                'created_by' => optional($rapat->creator)->name ?: '-',
+                'kategori' => optional($rapat->kategoriSuratKode)->kode
+                    ? ($rapat->kategoriSuratKode->kode . ' - ' . $rapat->kategoriSuratKode->nama)
+                    : '-',
+                'token' => $rapat->token_qr ?: '-',
+                'verification_url' => $this->signatureVerificationUrl($rapat, ['signature' => 'notulis', 'notulensi' => $notulensi->id]),
+            ];
+        }
+
+        if ($signatureType === 'notulensi_approval' && $notulensi) {
+            $notulensi->loadMissing('approval.approver.jabatan');
+
+            $approval = $notulensi->approval;
+            $signatory = optional($approval)->approver ?: $this->resolveDocumentSignatory($rapat);
+            $valid = $approval && $approval->status === 'approved';
+
+            return [
+                'valid' => $valid,
+                'nomor' => optional($rapat->suratKeluar)->nomor_surat ?: ($rapat->nomor_undangan ?: '-'),
+                'judul' => $notulensi->judul ?: ($rapat->judul ?: '-'),
+                'status_label' => $valid ? 'Disetujui / Final' : ucfirst(str_replace('_', ' ', (string) $notulensi->status)),
+                'signatory_name' => optional($signatory)->name ?: '-',
+                'signatory_title' => optional($signatory)->jabatan_keterangan ?: optional(optional($signatory)->jabatan)->nama ?: '-',
+                'signed_at' => $approval && $approval->acted_at
+                    ? $approval->acted_at->copy()->timezone('Asia/Jayapura')->translatedFormat('d F Y H:i') . ' WIT'
+                    : '-',
+                'created_by' => optional($rapat->creator)->name ?: '-',
+                'kategori' => optional($rapat->kategoriSuratKode)->kode
+                    ? ($rapat->kategoriSuratKode->kode . ' - ' . $rapat->kategoriSuratKode->nama)
+                    : '-',
+                'token' => $rapat->token_qr ?: '-',
+                'verification_url' => $this->signatureVerificationUrl($rapat, ['signature' => 'notulensi_approval', 'notulensi' => $notulensi->id]),
+            ];
+        }
 
         $signatory = $this->resolveDocumentSignatory($rapat);
         $approvalRecord = $this->resolveSignatureApprovalRecord($rapat, $signatory);
@@ -458,17 +581,17 @@ class RapatDocumentService
                 ? ($rapat->kategoriSuratKode->kode . ' - ' . $rapat->kategoriSuratKode->nama)
                 : '-',
             'token' => $rapat->token_qr ?: '-',
-            'verification_url' => $this->signatureVerificationUrl($rapat),
+            'verification_url' => $this->signatureVerificationUrl($rapat, ['signature' => 'approval']),
         ];
     }
 
-    public function signatureVerificationUrl(Rapat $rapat)
+    public function signatureVerificationUrl(Rapat $rapat, array $params = [])
     {
         if (!$rapat->token_qr) {
             $rapat->forceFill(['token_qr' => (string) Str::uuid()])->save();
         }
 
-        return route('rapat.signature.verify', $rapat->token_qr);
+        return route('rapat.signature.verify', array_merge(['token' => $rapat->token_qr], $params));
     }
 
     protected function resolveLampiranLabel($showLampiranDaftar, Rapat $rapat)

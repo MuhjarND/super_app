@@ -19,6 +19,7 @@ class DatabaseSeeder extends Seeder
             JabatanSeeder::class,
             KlasifikasiKodeSeeder::class,
             UserSeeder::class,
+            DasarHukumSeeder::class,
         ]);
 
         $this->seedKategoriSurat();

@@ -40,7 +40,7 @@ class RapatAttendance extends Model
     {
         $map = [
             'internal' => ['info', 'Peserta'],
-            'guest' => ['secondary', 'Tamu'],
+            'guest' => ['secondary', 'External'],
         ];
 
         $status = $map[$this->attendance_type] ?? ['secondary', ucfirst((string) $this->attendance_type)];

@@ -15,7 +15,9 @@
         table.meta td:first-child { width: 130px; }
         table.grid th, table.grid td { border: 1px solid #cbd5e1; padding: 6px; vertical-align: top; }
         table.grid th { background: #f3f4f6; }
-        .paragraph { white-space: pre-line; text-align: justify; }
+        .paragraph { text-align: justify; }
+        .paragraph p { margin: 0 0 6px; }
+        .paragraph ol, .paragraph ul { margin: 0 0 0 18px; padding: 0; }
         .note { font-size: 10px; color: #6b7280; }
     </style>
 </head>
@@ -90,10 +92,17 @@
     <div class="section">
         <div class="section-title">IV. Notulensi</div>
         @if($notulensi && !$notulensi->tidak_membuat_notulen)
-            <div class="paragraph"><strong>A. Uraian Kegiatan Rapat</strong><br>{{ $notulensi->uraian_kegiatan }}</div>
-            <div class="paragraph" style="margin-top:8px;"><strong>B. Agenda Rapat</strong><br>{{ $notulensi->agenda_rapat }}</div>
-            <div class="paragraph" style="margin-top:8px;"><strong>C. Hasil Rapat</strong><br>{{ $notulensi->hasil_rapat }}</div>
-            <div class="paragraph" style="margin-top:8px;"><strong>D. Rekomendasi</strong><br>{{ $notulensi->rekomendasi ?: '-' }}</div>
+            <div class="paragraph"><strong>A. Uraian Kegiatan Rapat</strong><br>{!! $notulensi->uraian_kegiatan ?: '<p>-</p>' !!}</div>
+            <div class="paragraph" style="margin-top:8px;"><strong>B. Agenda Rapat</strong><br>{!! $notulensi->agenda_rapat ?: '<p>-</p>' !!}</div>
+            <div class="paragraph" style="margin-top:8px;"><strong>C. Susunan Agenda</strong><br>{!! $notulensi->susunan_agenda ?: '<p>-</p>' !!}</div>
+            <div class="paragraph" style="margin-top:8px;"><strong>D. Hasil Rapat</strong><br>{!! $notulensi->hasil_rapat ?: '<p>-</p>' !!}</div>
+            <div class="paragraph" style="margin-top:8px;"><strong>E. Rekomendasi</strong><br>{!! $notulensi->rekomendasi ?: '<p>-</p>' !!}</div>
+            @if($notulensi->tindakLanjuts->isNotEmpty())
+                <div class="paragraph note" style="margin-top:8px;">
+                    Tindak lanjut ditugaskan kepada:
+                    {{ $notulensi->tindakLanjuts->map(function ($item) { return optional($item->user)->name; })->filter()->implode(', ') }}
+                </div>
+            @endif
             @if($notulensi->mode === 'upload' && $notulensi->file_nama)
                 <div class="note" style="margin-top:8px;">Notulensi final menggunakan file upload: {{ $notulensi->file_nama }}</div>
             @endif

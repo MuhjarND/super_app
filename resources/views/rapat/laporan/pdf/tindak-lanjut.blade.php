@@ -4,46 +4,152 @@
     <meta charset="utf-8">
     <title>{{ $laporan->judul }}</title>
     <style>
-        body { font-family: DejaVu Sans, sans-serif; font-size: 10.5px; color: #111827; margin: 30px 34px; line-height: 1.5; }
-        .header { text-align: center; margin-bottom: 18px; }
-        .header-title { font-size: 16px; font-weight: bold; }
-        .sub { font-size: 11px; margin-top: 4px; }
-        .section { margin-top: 16px; }
-        .section-title { font-size: 12px; font-weight: bold; border-bottom: 1px solid #111827; padding-bottom: 4px; margin-bottom: 8px; }
-        .paragraph { white-space: pre-line; text-align: justify; }
-        table.meta { width: 100%; border-collapse: collapse; }
-        table.meta td { padding: 3px 0; vertical-align: top; }
-        table.meta td:first-child { width: 130px; }
+        @page {
+            size: A4;
+            margin: 2.2cm 2.2cm 2.4cm 2.2cm;
+        }
+
+        body {
+            font-family: DejaVu Serif, serif;
+            font-size: 11px;
+            color: #111827;
+            line-height: 1.6;
+        }
+
+        .cover-page {
+            page-break-after: always;
+            text-align: center;
+            padding-top: 120px;
+        }
+
+        .cover-logo {
+            width: 120px;
+            height: auto;
+            margin: 0 auto 26px;
+        }
+
+        .cover-title {
+            font-size: 20px;
+            font-weight: bold;
+            text-transform: uppercase;
+            line-height: 1.45;
+            margin-bottom: 16px;
+        }
+
+        .cover-subtitle {
+            font-size: 14px;
+            font-weight: bold;
+            line-height: 1.55;
+        }
+
+        .chapter-title {
+            font-size: 14px;
+            font-weight: bold;
+            text-transform: uppercase;
+            text-align: center;
+            margin: 0 0 14px;
+        }
+
+        .section-title {
+            font-size: 12px;
+            font-weight: bold;
+            margin: 14px 0 8px;
+        }
+
+        .paragraph,
+        .html-content {
+            text-align: justify;
+            margin: 0 0 8px;
+        }
+
+        .html-content p {
+            margin: 0 0 8px;
+        }
+
+        .html-content ol,
+        .html-content ul {
+            margin: 0 0 8px 18px;
+            padding: 0;
+        }
+
+        .html-content li {
+            margin: 0 0 4px;
+        }
+
+        .meta-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 12px;
+        }
+
+        .meta-table td {
+            vertical-align: top;
+            padding: 2px 0;
+        }
+
+        .meta-table td:first-child {
+            width: 140px;
+            font-weight: bold;
+        }
+
+        a {
+            color: #1d4ed8;
+            text-decoration: underline;
+            word-break: break-all;
+        }
     </style>
 </head>
 <body>
-    <div class="header">
-        <div class="header-title">LAPORAN TINDAK LANJUT RAPAT</div>
-        <div class="sub">{{ $rapat->judul }}</div>
+    <div class="cover-page">
+        @if($coverLogo)
+            <img src="{{ $coverLogo }}" alt="Logo" class="cover-logo">
+        @endif
+        <div class="cover-title">Laporan Tindak Lanjut</div>
+        <div class="cover-subtitle">{{ $rapat->judul }}</div>
     </div>
 
-    <table class="meta">
-        <tr><td>Nomor Undangan</td><td>: {{ $rapat->nomor_undangan }}</td></tr>
-        <tr><td>Tanggal Rapat</td><td>: {{ optional($rapat->tanggal)->translatedFormat('d F Y') }}</td></tr>
-        <tr><td>Tempat</td><td>: {{ $rapat->tempat }}</td></tr>
-        <tr><td>Notulis</td><td>: {{ optional(optional($notulensi)->notulis)->name ?: '-' }}</td></tr>
+    <div class="chapter-title">Bab I Pendahuluan</div>
+
+    <table class="meta-table">
+        <tr>
+            <td>Judul Kegiatan</td>
+            <td>: {{ $rapat->judul }}</td>
+        </tr>
+        <tr>
+            <td>Tanggal</td>
+            <td>: {{ optional($rapat->tanggal)->translatedFormat('d F Y') ?: '-' }}</td>
+        </tr>
+        <tr>
+            <td>Tempat</td>
+            <td>: {{ $rapat->tempat ?: '-' }}</td>
+        </tr>
     </table>
 
-    <div class="section">
-        <div class="section-title">Ringkasan Hasil Rapat</div>
-        <div class="paragraph">{{ optional($notulensi)->hasil_rapat ?: 'Belum ada ringkasan hasil rapat.' }}</div>
+    <div class="section-title">I. Latar Belakang</div>
+    <div class="html-content">
+        {!! $bab1LatarBelakang ?: '<p>-</p>' !!}
     </div>
 
-    <div class="section">
-        <div class="section-title">Rekomendasi / Tindak Lanjut</div>
-        <div class="paragraph">{{ optional($notulensi)->rekomendasi ?: 'Belum ada rekomendasi tindak lanjut yang dicatat.' }}</div>
+    <div class="section-title">II. Dasar</div>
+    <div class="html-content">
+        {!! $bab1Dasar ?: '<p>-</p>' !!}
     </div>
 
-    @if(optional($notulensi)->catatan)
-        <div class="section">
-            <div class="section-title">Catatan Tambahan</div>
-            <div class="paragraph">{{ $notulensi->catatan }}</div>
-        </div>
-    @endif
+    <div class="section-title">III. Tujuan</div>
+    <div class="html-content">
+        {!! $bab1Tujuan ?: '<p>-</p>' !!}
+    </div>
+
+    <div style="page-break-before: always;"></div>
+    <div class="chapter-title">Bab II Hasil Monitoring dan Evaluasi</div>
+    <div class="html-content">
+        {!! $bab2HasilMonitoring ?: '<p>-</p>' !!}
+    </div>
+
+    <div style="page-break-before: always;"></div>
+    <div class="chapter-title">Bab III Tindak Lanjut dan Rekomendasi</div>
+    <div class="html-content">
+        {!! $bab3TindakLanjut ?: '<p>-</p>' !!}
+    </div>
 </body>
 </html>

@@ -170,7 +170,7 @@ class WhatsAppNotificationService
             'Tempat: ' . $rapat->tempat,
             'Pengusul: ' . optional($rapat->creator)->name,
             '',
-            'Preview dokumen: ' . route('rapat.approval.index'),
+            'Preview dokumen: ' . route('approval.index', ['category' => 'undangan']),
         ]);
 
         $sent = $this->sendToUser($approval->approver, $message, [

@@ -126,7 +126,7 @@
                 <h1 class="mb-1">Detail Approval Dokumen</h1>
                 <div class="text-muted" style="font-size: 0.82rem;">Review dokumen undangan rapat sebelum paraf atau tanda tangani.</div>
             </div>
-            <a href="{{ route('rapat.approval.index') }}" class="btn btn-outline-secondary btn-sm">
+            <a href="{{ route('approval.index', ['category' => 'undangan']) }}" class="btn btn-outline-secondary btn-sm">
                 <i class="fas fa-arrow-left mr-1"></i> Kembali ke Daftar
             </a>
         </div>
@@ -208,10 +208,10 @@
                                 <textarea id="approval-note" class="form-control approval-note" placeholder="Isi catatan bila diperlukan. Untuk reject, catatan wajib diisi."></textarea>
                             </div>
                             <div class="approval-action-bar">
-                                <button type="button" class="btn btn-success" onclick="submitApprovalDecision({{ $rapatApproval->id }}, 'approve')">
+                                <button type="button" class="btn btn-success approval-action-btn" onclick="submitApprovalDecision({{ $rapatApproval->id }}, 'approve')">
                                     <i class="fas fa-check mr-1"></i> {{ $rapatApproval->stage_label }}
                                 </button>
-                                <button type="button" class="btn btn-danger" onclick="submitApprovalDecision({{ $rapatApproval->id }}, 'reject')">
+                                <button type="button" class="btn btn-danger approval-action-btn" onclick="submitApprovalDecision({{ $rapatApproval->id }}, 'reject')">
                                     <i class="fas fa-times mr-1"></i> Tolak Dokumen
                                 </button>
                             </div>
@@ -236,7 +236,13 @@
 
 @push('scripts')
     <script>
+        let approvalDecisionInFlight = false;
+
         function submitApprovalDecision(approvalId, action) {
+            if (approvalDecisionInFlight) {
+                return;
+            }
+
             const note = $('#approval-note').val();
             const url = action === 'approve'
                 ? '{{ url('/rapat/approval') }}/' + approvalId + '/approve'
@@ -244,27 +250,42 @@
 
             if (action === 'reject' && !String(note || '').trim()) {
                 showToast('Catatan reject wajib diisi.', 'error');
+                $('#approval-note').focus();
                 return;
             }
+
+            if (action === 'reject' && !window.confirm('Tolak dokumen undangan rapat ini?')) {
+                return;
+            }
+
+            approvalDecisionInFlight = true;
+            $('.approval-action-btn').prop('disabled', true);
 
             $.ajax({
                 url: url,
                 method: 'POST',
+                loadingMessage: action === 'approve' ? 'Memproses approval dokumen...' : 'Memproses reject dokumen...',
                 data: {
                     _token: '{{ csrf_token() }}',
                     catatan: note
                 },
                 success: function (res) {
                     showToast(res.message, 'success');
-                    window.location.href = '{{ route('rapat.approval.index') }}';
+                    window.location.href = '{{ route('approval.index', ['category' => 'undangan']) }}';
                 },
                 error: function (xhr) {
                     const errors = xhr.responseJSON?.errors;
                     let message = xhr.responseJSON?.message || 'Gagal memproses approval.';
                     if (errors) {
-                        message = Object.values(errors).flat().join('<br>');
+                        message = Object.values(errors).flat().join(' ');
+                    } else if (xhr.responseText && !xhr.responseJSON) {
+                        message = 'Permintaan gagal diproses. Silakan muat ulang halaman dan coba lagi.';
                     }
                     showToast(message, 'error');
+                },
+                complete: function () {
+                    approvalDecisionInFlight = false;
+                    $('.approval-action-btn').prop('disabled', false);
                 }
             });
         }

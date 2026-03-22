@@ -11,6 +11,11 @@ class RapatLaporan extends Model
         'jenis',
         'judul',
         'deskripsi',
+        'bab_1_latar_belakang',
+        'bab_1_dasar',
+        'bab_1_tujuan',
+        'bab_2_hasil_monitoring',
+        'bab_3_tindak_lanjut',
         'status',
         'is_ready',
         'file_path',
@@ -18,6 +23,7 @@ class RapatLaporan extends Model
         'file_mime',
         'file_size',
         'archived_at',
+        'generated_at',
         'created_by',
         'updated_by',
     ];
@@ -26,6 +32,7 @@ class RapatLaporan extends Model
         'is_ready' => 'boolean',
         'file_size' => 'integer',
         'archived_at' => 'datetime',
+        'generated_at' => 'datetime',
     ];
 
     public function rapat()

@@ -17,6 +17,7 @@ Route::post('/voting/publik/{publicCode}', 'VotingPublicController@store')->name
 Route::get('/voting/publik/{publicCode}/hasil', 'VotingPublicController@results')->name('rapat.voting.public.results');
 Route::get('/voting/publik/{publicCode}/stats', 'VotingPublicController@stats')->name('rapat.voting.public.stats');
 Route::get('/verifikasi/ttd/{token}', 'RapatSignatureVerificationController@show')->name('rapat.signature.verify');
+Route::get('/publik/tindak-lanjut/eviden/{token}', 'PublicFollowUpEvidenceController@show')->name('rapat.notulensi.follow-ups.eviden.public');
 
 // Authenticated routes
 Route::middleware(['auth'])->group(function () {
@@ -59,6 +60,12 @@ Route::middleware(['auth'])->group(function () {
         Route::resource('bidangs', 'Admin\BidangManagementController')->except(['show']);
         Route::resource('kategori-surats', 'Admin\KategoriSuratManagementController')->except(['show']);
         Route::resource('kategori-rapats', 'Admin\KategoriRapatManagementController')->except(['show']);
+        Route::resource('dasar-hukums', 'Admin\DasarHukumManagementController')->except(['show']);
+    });
+
+    Route::middleware('role:admin,approval,super_admin')->group(function () {
+        Route::get('/approval', 'ApprovalCenterController@index')->name('approval.index');
+        Route::get('/approval/history', 'ApprovalCenterController@history')->name('approval.history');
     });
 
     // Placeholder modules
@@ -66,16 +73,24 @@ Route::middleware(['auth'])->group(function () {
         return view('modules.under-development', ['module' => 'Cuti', 'icon' => 'fas fa-calendar-times', 'description' => 'Modul manajemen pengajuan cuti pegawai.']);
     })->name('cuti.index');
 
-    Route::prefix('rapat')->name('rapat.')->middleware('role:admin,operator,notulis,peserta,approval,protokoler')->group(function () {
+    Route::get('/progress-zi', function () {
+        return view('modules.under-development', [
+            'module' => 'Progress ZI',
+            'icon' => 'fas fa-chart-line',
+            'description' => 'Modul monitoring progress Zona Integritas, eviden, dan capaian indikator kerja.'
+        ]);
+    })->name('progress-zi.index');
+
+    Route::prefix('rapat')->name('rapat.')->middleware('role:admin,operator,notulis,peserta,approval,protokoler,super_admin')->group(function () {
         Route::get('/', 'RapatController@index')->name('index');
-        Route::get('/preview-nomor', 'RapatController@previewNomorUndangan')->middleware('role:admin,operator')->name('preview-nomor');
-        Route::post('/', 'RapatController@store')->middleware('role:admin,operator')->name('store');
-        Route::put('/{rapat}', 'RapatController@update')->middleware('role:admin,operator')->name('update');
-        Route::delete('/{rapat}', 'RapatController@destroy')->middleware('role:admin,operator')->name('destroy');
+        Route::get('/preview-nomor', 'RapatController@previewNomorUndangan')->middleware('role:admin,operator,super_admin')->name('preview-nomor');
+        Route::post('/', 'RapatController@store')->middleware('role:admin,operator,super_admin')->name('store');
+        Route::put('/{rapat}', 'RapatController@update')->middleware('role:admin,operator,super_admin')->name('update');
+        Route::delete('/{rapat}', 'RapatController@destroy')->middleware('role:admin,operator,super_admin')->name('destroy');
         Route::get('/{rapat}/lampiran', 'RapatController@lampiran')->name('lampiran');
         Route::get('/{rapat}/undangan', 'RapatController@previewUndangan')->name('undangan.preview');
 
-        Route::prefix('notulensi')->middleware('role:admin,operator,notulis')->name('notulensi.')->group(function () {
+        Route::prefix('notulensi')->middleware('role:admin,operator,notulis,super_admin')->name('notulensi.')->group(function () {
             Route::get('/', 'RapatNotulensiController@index')->name('index');
             Route::get('/create/{rapat}', 'RapatNotulensiController@create')->name('create');
             Route::post('/{rapat}', 'RapatNotulensiController@store')->name('store');
@@ -84,16 +99,29 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/item/{notulensi}/edit', 'RapatNotulensiController@edit')->name('edit');
             Route::put('/item/{notulensi}', 'RapatNotulensiController@update')->name('update');
             Route::post('/item/{notulensi}/upload', 'RapatNotulensiController@upload')->name('upload');
-            Route::get('/item/{notulensi}/pdf', 'RapatNotulensiController@pdf')->name('pdf');
-            Route::get('/item/{notulensi}/file', 'RapatNotulensiController@file')->name('file');
         });
 
-        Route::get('/approval', 'RapatApprovalController@index')->middleware('role:admin,approval')->name('approval.index');
-        Route::get('/approval/{rapatApproval}', 'RapatApprovalController@show')->middleware('role:admin,approval')->name('approval.show');
-        Route::post('/approval/{rapatApproval}/approve', 'RapatApprovalController@approve')->middleware('role:admin,approval')->name('approval.approve');
-        Route::post('/approval/{rapatApproval}/reject', 'RapatApprovalController@reject')->middleware('role:admin,approval')->name('approval.reject');
+        Route::prefix('notulensi')->name('notulensi.')->group(function () {
+            Route::get('/item/{notulensi}/pdf', 'RapatNotulensiController@pdf')->name('pdf');
+            Route::get('/item/{notulensi}/file', 'RapatNotulensiController@file')->name('file');
+            Route::get('/tindak-lanjut', 'RapatNotulensiController@followUpIndex')->name('follow-ups');
+            Route::post('/tindak-lanjut/{tindakLanjut}/status', 'RapatNotulensiController@updateFollowUpStatus')->name('follow-ups.status');
+            Route::post('/tindak-lanjut/{tindakLanjut}/eviden', 'RapatNotulensiController@uploadFollowUpEvidence')->name('follow-ups.eviden');
+            Route::get('/tindak-lanjut/{tindakLanjut}/eviden', 'RapatNotulensiController@followUpEvidence')->name('follow-ups.eviden.view');
+            Route::post('/tindak-lanjut/{tindakLanjut}/complete', 'RapatNotulensiController@completeFollowUp')->name('follow-ups.complete');
+        });
 
-        Route::prefix('agenda-pimpinan')->middleware('role:admin,protokoler')->name('agenda.')->group(function () {
+        Route::get('/approval', 'RapatApprovalController@index')->middleware('role:admin,approval,super_admin')->name('approval.index');
+        Route::get('/approval/{rapatApproval}', 'RapatApprovalController@show')->middleware('role:admin,approval,super_admin')->name('approval.show');
+        Route::post('/approval/{rapatApproval}/approve', 'RapatApprovalController@approve')->middleware('role:admin,approval,super_admin')->name('approval.approve');
+        Route::post('/approval/{rapatApproval}/reject', 'RapatApprovalController@reject')->middleware('role:admin,approval,super_admin')->name('approval.reject');
+
+        Route::get('/notulensi-approval', 'RapatNotulensiApprovalController@index')->middleware('role:admin,approval,super_admin')->name('notulensi-approval.index');
+        Route::get('/notulensi-approval/{notulensiApproval}', 'RapatNotulensiApprovalController@show')->middleware('role:admin,approval,super_admin')->name('notulensi-approval.show');
+        Route::post('/notulensi-approval/{notulensiApproval}/approve', 'RapatNotulensiApprovalController@approve')->middleware('role:admin,approval,super_admin')->name('notulensi-approval.approve');
+        Route::post('/notulensi-approval/{notulensiApproval}/reject', 'RapatNotulensiApprovalController@reject')->middleware('role:admin,approval,super_admin')->name('notulensi-approval.reject');
+
+        Route::prefix('agenda-pimpinan')->middleware('role:admin,protokoler,super_admin')->name('agenda.')->group(function () {
             Route::get('/', 'AgendaPimpinanController@index')->name('index');
             Route::post('/', 'AgendaPimpinanController@store')->name('store');
             Route::put('/{agenda}', 'AgendaPimpinanController@update')->name('update');
@@ -103,20 +131,23 @@ Route::middleware(['auth'])->group(function () {
 
         Route::get('/absensi', 'RapatAbsensiController@index')->name('absensi.index');
         Route::get('/absensi/{rapat}', 'RapatAbsensiController@show')->name('absensi.show');
+        Route::get('/absensi/{rapat}/pdf', 'RapatAbsensiController@pdf')->name('absensi.pdf');
         Route::post('/absensi/{rapat}/remind', 'RapatAbsensiController@remindPending')->name('absensi.remind');
         Route::get('/absensi/rekap/signature/{attendance}', 'RapatAbsensiController@signature')->name('absensi.signature');
 
         Route::prefix('laporan')->name('laporan.')->group(function () {
             Route::get('/', 'RapatLaporanController@index')->name('index');
             Route::get('/arsip', 'RapatLaporanController@arsip')->name('arsip');
+            Route::get('/{laporan}/edit', 'RapatLaporanController@edit')->middleware('role:admin,operator,notulis,super_admin')->name('edit');
+            Route::put('/{laporan}', 'RapatLaporanController@update')->middleware('role:admin,operator,notulis,super_admin')->name('update');
             Route::get('/{laporan}/preview', 'RapatLaporanController@preview')->name('preview');
             Route::get('/{laporan}/download', 'RapatLaporanController@download')->name('download');
-            Route::post('/{laporan}/upload', 'RapatLaporanController@upload')->middleware('role:admin,operator,notulis')->name('upload');
-            Route::post('/{laporan}/archive', 'RapatLaporanController@archive')->middleware('role:admin,operator,notulis')->name('archive');
-            Route::post('/{laporan}/unarchive', 'RapatLaporanController@unarchive')->middleware('role:admin,operator,notulis')->name('unarchive');
+            Route::post('/{laporan}/upload', 'RapatLaporanController@upload')->middleware('role:admin,operator,notulis,super_admin')->name('upload');
+            Route::post('/{laporan}/archive', 'RapatLaporanController@archive')->middleware('role:admin,operator,notulis,super_admin')->name('archive');
+            Route::post('/{laporan}/unarchive', 'RapatLaporanController@unarchive')->middleware('role:admin,operator,notulis,super_admin')->name('unarchive');
         });
 
-        Route::prefix('voting')->middleware('role:admin')->name('voting.')->group(function () {
+        Route::prefix('voting')->middleware('role:admin,super_admin')->name('voting.')->group(function () {
             Route::get('/', 'VotingController@index')->name('index');
             Route::get('/create', 'VotingController@create')->name('create');
             Route::post('/', 'VotingController@store')->name('store');

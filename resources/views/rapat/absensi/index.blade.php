@@ -81,6 +81,32 @@
         }
         .meeting-action-btn.primary { background: #eff6ff; color: #1d4ed8; border-color: #bfdbfe; }
         .meeting-action-btn.secondary { background: #f8fafc; color: #475569; border-color: #cbd5e1; }
+
+        .attendance-progress {
+            margin-top: 6px;
+        }
+
+        .attendance-progress-track {
+            height: 10px;
+            border-radius: 999px;
+            background: #e2e8f0;
+            overflow: hidden;
+        }
+
+        .attendance-progress-fill {
+            height: 100%;
+            border-radius: 999px;
+            background: linear-gradient(90deg, #2563eb, #60a5fa);
+        }
+
+        .attendance-progress-meta {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            margin-top: 5px;
+            font-size: 0.76rem;
+            color: #64748b;
+        }
     </style>
 @endpush
 
@@ -88,7 +114,7 @@
     <div class="content-header">
         <div class="container-fluid">
             <h1 class="mb-1">Absensi Rapat</h1>
-            <div class="text-muted" style="font-size: 0.82rem;">Rekap peserta hadir, tamu, dan tautan absensi publik per rapat.</div>
+            <div class="text-muted" style="font-size: 0.82rem;">Rekap peserta hadir, external, dan tautan absensi publik per rapat.</div>
         </div>
     </div>
 @endsection
@@ -115,7 +141,7 @@
             <div class="attendance-stat__value">{{ $totalHadir }}</div>
         </div>
         <div class="attendance-stat">
-            <div class="attendance-stat__label">Tamu / Guest</div>
+            <div class="attendance-stat__label">External</div>
             <div class="attendance-stat__value">{{ $totalGuest }}</div>
         </div>
     </div>
@@ -131,7 +157,7 @@
                             <th>Waktu WIT</th>
                             <th>Peserta</th>
                             <th>Hadir</th>
-                            <th>Tamu</th>
+                            <th>External</th>
                             <th>Status</th>
                         </tr>
                     </thead>
@@ -142,6 +168,7 @@
                                 $attendedCount = $rapat->internalAttendances->count();
                                 $guestCount = $rapat->guestAttendances->count();
                                 $remainingCount = max($participantCount - $attendedCount, 0);
+                                $attendancePercent = $participantCount > 0 ? round(($attendedCount / $participantCount) * 100) : 0;
                             @endphp
                             <tr>
                                 <td class="meeting-action-toggle-col">
@@ -157,8 +184,16 @@
                                 </td>
                                 <td>{{ $participantCount }} undangan</td>
                                 <td>
-                                    <div class="font-weight-bold">{{ $attendedCount }}</div>
-                                    <div style="font-size: 0.78rem; color: #64748b;">{{ $remainingCount }} belum hadir</div>
+                                    <div class="font-weight-bold">{{ $attendedCount }} / {{ $participantCount }}</div>
+                                    <div class="attendance-progress">
+                                        <div class="attendance-progress-track">
+                                            <div class="attendance-progress-fill" style="width: {{ $attendancePercent }}%;"></div>
+                                        </div>
+                                        <div class="attendance-progress-meta">
+                                            <span>{{ $attendancePercent }}% hadir</span>
+                                            <span>{{ $remainingCount }} belum hadir</span>
+                                        </div>
+                                    </div>
                                 </td>
                                 <td>{{ $guestCount }}</td>
                                 <td>{!! $rapat->status_badge !!}</td>
@@ -169,6 +204,9 @@
                                         <span class="meeting-action-meta">Tindakan absensi</span>
                                         <a href="{{ route('rapat.absensi.show', $rapat) }}" class="meeting-action-btn primary">
                                             <i class="fas fa-clipboard-list"></i> Rekap
+                                        </a>
+                                        <a href="{{ route('rapat.absensi.pdf', $rapat) }}" target="_blank" class="meeting-action-btn secondary">
+                                            <i class="fas fa-file-pdf"></i> PDF
                                         </a>
                                         <button type="button" class="meeting-action-btn secondary" onclick="copyPublicLink('{{ route('rapat.absensi.public.show', $rapat->public_code) }}')">
                                             <i class="fas fa-link"></i> Link Publik

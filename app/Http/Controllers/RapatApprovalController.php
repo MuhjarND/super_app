@@ -19,46 +19,7 @@ class RapatApprovalController extends Controller
 
     public function index()
     {
-        abort_unless(auth()->user()->canAccessMeetingApproval(), 403);
-
-        $user = auth()->user();
-        $baseQuery = RapatApproval::with([
-            'approver',
-            'rapat.kategoriSuratKode.parent.parent.parent',
-            'rapat.creator',
-            'rapat.pesertas',
-            'rapat.approvals.approver',
-            'rapat.approvalHistories.approver',
-        ])->orderBy('step_order');
-
-        if (!$user->isMeetingAdmin()) {
-            $baseQuery->where('approver_id', $user->id);
-        }
-
-        $pendingApprovals = (clone $baseQuery)
-            ->where('status', 'pending')
-            ->get()
-            ->sortBy(function ($approval) {
-                return optional($approval->rapat->tanggal)->format('Ymd') . sprintf('%02d', $approval->step_order);
-            })
-            ->values();
-
-        $waitingApprovals = (clone $baseQuery)
-            ->where('status', 'waiting')
-            ->get()
-            ->values();
-
-        $historyQuery = RapatApprovalHistory::with(['rapat', 'approver', 'approval'])
-            ->orderByDesc('acted_at')
-            ->orderByDesc('id');
-
-        if (!$user->isMeetingAdmin()) {
-            $historyQuery->where('approver_id', $user->id);
-        }
-
-        $historyEntries = $historyQuery->limit(50)->get();
-
-        return view('rapat.approval.index', compact('pendingApprovals', 'waitingApprovals', 'historyEntries'));
+        return redirect()->route('approval.index', ['category' => 'undangan']);
     }
 
     public function show(RapatApproval $rapatApproval)

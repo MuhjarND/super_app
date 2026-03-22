@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Rapat;
 use App\RapatAttendance;
 use App\Services\WhatsAppNotificationService;
+use Barryvdh\DomPDF\Facade as PDF;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -67,6 +68,47 @@ class RapatAbsensiController extends Controller
         abort_unless(auth()->user()->canViewRapat($attendance->rapat), 403);
 
         return response()->file(storage_path('app/public/' . $attendance->signature_path));
+    }
+
+    public function pdf(Rapat $rapat)
+    {
+        abort_unless(auth()->user()->canViewRapat($rapat), 403);
+
+        $rapat->load([
+            'creator',
+            'kategoriSuratKode',
+            'pesertas' => function ($query) {
+                $query->orderBy('rapat_peserta.urutan');
+            },
+            'internalAttendances',
+            'guestAttendances',
+        ]);
+
+        $attendanceByUser = $rapat->internalAttendances->keyBy('user_id');
+        $internalParticipants = $rapat->pesertas->map(function ($participant) use ($attendanceByUser) {
+            $attendance = $attendanceByUser->get($participant->id);
+
+            return [
+                'user' => $participant,
+                'attendance' => $attendance,
+                'signature_data_uri' => $attendance ? $this->resolveStorageFileDataUri($attendance->signature_path) : null,
+            ];
+        });
+
+        $guestAttendances = $rapat->guestAttendances->sortBy('attended_at')->values()->map(function ($attendance) {
+            $attendance->signature_data_uri = $this->resolveStorageFileDataUri($attendance->signature_path);
+            return $attendance;
+        });
+        $kopImage = $this->resolveKopAbsenImage();
+
+        $pdf = PDF::loadView('rapat.absensi.pdf', compact(
+            'rapat',
+            'internalParticipants',
+            'guestAttendances',
+            'kopImage'
+        ))->setPaper('a4', 'portrait');
+
+        return $pdf->stream('laporan-absensi-rapat-' . $rapat->id . '.pdf');
     }
 
     public function remindPending(Rapat $rapat)
@@ -205,5 +247,39 @@ class RapatAbsensiController extends Controller
             'mime' => 'image/png',
             'size' => strlen($binary),
         ];
+    }
+
+    protected function resolveKopAbsenImage()
+    {
+        $candidates = [
+            public_path('kop_absen.jpg'),
+            public_path('kop_absen.jpeg'),
+            public_path('kop_absen.png'),
+        ];
+
+        foreach ($candidates as $candidate) {
+            if ($candidate && file_exists($candidate)) {
+                $mime = mime_content_type($candidate) ?: 'image/jpeg';
+                return 'data:' . $mime . ';base64,' . base64_encode(file_get_contents($candidate));
+            }
+        }
+
+        return null;
+    }
+
+    protected function resolveStorageFileDataUri($relativePath)
+    {
+        if (!$relativePath) {
+            return null;
+        }
+
+        $absolutePath = storage_path('app/public/' . ltrim($relativePath, '/'));
+        if (!file_exists($absolutePath)) {
+            return null;
+        }
+
+        $mime = mime_content_type($absolutePath) ?: 'image/png';
+
+        return 'data:' . $mime . ';base64,' . base64_encode(file_get_contents($absolutePath));
     }
 }

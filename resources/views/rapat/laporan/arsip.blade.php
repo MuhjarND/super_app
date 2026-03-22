@@ -14,6 +14,13 @@
         .meeting-action-btn { display: inline-flex; align-items: center; gap: 8px; border-radius: 10px; padding: 7px 12px; font-size: 0.82rem; font-weight: 700; border: 1px solid transparent; background: #fff; color: #1f2937; }
         .meeting-action-btn.primary { background: #eff6ff; color: #1d4ed8; border-color: #bfdbfe; }
         .meeting-action-btn.success { background: #ecfdf5; color: #047857; border-color: #a7f3d0; }
+        .laporan-preview-frame {
+            width: 100%;
+            height: 72vh;
+            border: none;
+            border-radius: 10px;
+            background: #f8fafc;
+        }
     </style>
 @endpush
 
@@ -61,9 +68,9 @@
                             <td colspan="5">
                                 <div class="meeting-action-panel">
                                     <span class="meeting-action-meta">Tindakan arsip</span>
-                                    <a href="{{ route('rapat.laporan.preview', $laporan) }}" target="_blank" class="meeting-action-btn primary">
+                                    <button type="button" class="meeting-action-btn primary" onclick="openLaporanPreviewModal('{{ route('rapat.laporan.preview', $laporan) }}', '{{ addslashes($laporan->judul) }}')">
                                         <i class="fas fa-eye"></i> Preview
-                                    </a>
+                                    </button>
                                     <form action="{{ route('rapat.laporan.unarchive', $laporan) }}" method="POST" class="d-inline">
                                         @csrf
                                         <button type="submit" class="meeting-action-btn success">
@@ -82,10 +89,30 @@
             </table>
         </div>
     </div>
+
+    <div class="modal fade" id="laporanPreviewModal" tabindex="-1">
+        <div class="modal-dialog modal-xl modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="laporanPreviewTitle">Preview Berkas</h5>
+                    <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+                </div>
+                <div class="modal-body p-2">
+                    <iframe id="laporanPreviewFrame" class="laporan-preview-frame" src="about:blank"></iframe>
+                </div>
+            </div>
+        </div>
+    </div>
 @endsection
 
 @push('scripts')
     <script>
+        function openLaporanPreviewModal(url, title) {
+            $('#laporanPreviewTitle').text('Preview Berkas - ' + title);
+            $('#laporanPreviewFrame').attr('src', url);
+            $('#laporanPreviewModal').modal('show');
+        }
+
         $(function () {
             $(document).on('click', '.meeting-action-toggle', function () {
                 const $button = $(this);
@@ -99,6 +126,10 @@
                     $actionRow.show();
                     $button.addClass('is-open').text('-');
                 }
+            });
+
+            $('#laporanPreviewModal').on('hidden.bs.modal', function () {
+                $('#laporanPreviewFrame').attr('src', 'about:blank');
             });
         });
     </script>

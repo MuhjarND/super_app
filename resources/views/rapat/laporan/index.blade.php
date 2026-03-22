@@ -6,6 +6,7 @@
     <style>
         .laporan-card { border-radius: 16px; border: 1px solid #e5e7eb; }
         .meeting-action-toggle-col { width: 46px; }
+        .laporan-file-col { width: 110px; white-space: nowrap; }
         .meeting-action-toggle { width: 28px; height: 28px; border: none; border-radius: 8px; background: linear-gradient(135deg, #2563eb, #3b82f6); color: #fff; font-size: 1rem; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; }
         .meeting-action-toggle.is-open { background: linear-gradient(135deg, #475569, #64748b); }
         .meeting-action-row { display: none; }
@@ -18,6 +19,26 @@
         .meeting-action-btn.secondary { background: #f8fafc; color: #475569; border-color: #cbd5e1; }
         .meeting-action-btn.info { background: #ecfeff; color: #0f766e; border-color: #a5f3fc; }
         .meeting-action-btn.dark { background: #f1f5f9; color: #334155; border-color: #cbd5e1; }
+        .laporan-file-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 10px;
+            border-radius: 999px;
+            font-size: 0.78rem;
+            font-weight: 700;
+            background: #eff6ff;
+            color: #1d4ed8;
+            border: 1px solid #bfdbfe;
+            cursor: pointer;
+        }
+        .laporan-preview-frame {
+            width: 100%;
+            height: 72vh;
+            border: none;
+            border-radius: 10px;
+            background: #f8fafc;
+        }
     </style>
 @endpush
 
@@ -47,7 +68,7 @@
                         <th>Laporan</th>
                         <th>Jenis</th>
                         <th>Rapat</th>
-                        <th>Final File</th>
+                        <th class="laporan-file-col">Final File</th>
                         <th>Status</th>
                         <th>Diperbarui</th>
                     </tr>
@@ -67,9 +88,13 @@
                                 <div>{{ $laporan->rapat->judul }}</div>
                                 <div class="text-muted" style="font-size: 0.78rem;">{{ $laporan->rapat->nomor_undangan }}</div>
                             </td>
-                            <td>
+                            <td class="laporan-file-col">
                                 @if($laporan->file_path)
-                                    <span class="badge badge-success">{{ $laporan->file_nama }}</span>
+                                    <button type="button"
+                                        class="laporan-file-link"
+                                        onclick="openLaporanPreviewModal('{{ route('rapat.laporan.preview', $laporan) }}', '{{ addslashes($laporan->judul) }}')">
+                                        <i class="fas fa-file-pdf"></i> Berkas
+                                    </button>
                                 @else
                                     <span class="badge badge-light border">Generator</span>
                                 @endif
@@ -81,10 +106,15 @@
                             <td colspan="7">
                                 <div class="meeting-action-panel">
                                     <span class="meeting-action-meta">Tindakan laporan</span>
-                                    @if($laporan->is_ready || $laporan->file_path)
-                                        <a href="{{ route('rapat.laporan.preview', $laporan) }}" target="_blank" class="meeting-action-btn primary">
-                                            <i class="fas fa-eye"></i> Preview
+                                    @if(auth()->user()->canAccessMeetingMinutes() && $laporan->jenis === 'tindak_lanjut')
+                                        <a href="{{ route('rapat.laporan.edit', $laporan) }}" class="meeting-action-btn secondary">
+                                            <i class="fas fa-edit"></i> Edit
                                         </a>
+                                    @endif
+                                    @if($laporan->is_ready || $laporan->file_path)
+                                        <button type="button" class="meeting-action-btn primary" onclick="openLaporanPreviewModal('{{ route('rapat.laporan.preview', $laporan) }}', '{{ addslashes($laporan->judul) }}')">
+                                            <i class="fas fa-eye"></i> Preview
+                                        </button>
                                         <a href="{{ route('rapat.laporan.download', $laporan) }}" class="meeting-action-btn success">
                                             <i class="fas fa-download"></i> Download
                                         </a>
@@ -143,6 +173,20 @@
             </div>
         </div>
     </div>
+
+    <div class="modal fade" id="laporanPreviewModal" tabindex="-1">
+        <div class="modal-dialog modal-xl modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="laporanPreviewTitle">Preview Berkas</h5>
+                    <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+                </div>
+                <div class="modal-body p-2">
+                    <iframe id="laporanPreviewFrame" class="laporan-preview-frame" src="about:blank"></iframe>
+                </div>
+            </div>
+        </div>
+    </div>
 @endsection
 
 @push('scripts')
@@ -151,6 +195,12 @@
             $('#uploadLaporanForm').attr('action', actionUrl);
             $('#uploadLaporanTarget').text(title);
             $('#uploadLaporanModal').modal('show');
+        }
+
+        function openLaporanPreviewModal(url, title) {
+            $('#laporanPreviewTitle').text('Preview Berkas - ' + title);
+            $('#laporanPreviewFrame').attr('src', url);
+            $('#laporanPreviewModal').modal('show');
         }
 
         $(function () {
@@ -166,6 +216,10 @@
                     $actionRow.show();
                     $button.addClass('is-open').text('-');
                 }
+            });
+
+            $('#laporanPreviewModal').on('hidden.bs.modal', function () {
+                $('#laporanPreviewFrame').attr('src', 'about:blank');
             });
         });
     </script>
