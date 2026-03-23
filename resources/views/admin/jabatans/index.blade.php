@@ -7,7 +7,7 @@
         <div class="container-fluid">
             <div class="d-flex justify-content-between align-items-center">
                 <h1>Kelola Jabatan</h1>
-                <button class="btn btn-primary" data-toggle="modal" data-target="#createJabatanModal">
+                <button class="btn app-create-btn" data-toggle="modal" data-target="#createJabatanModal">
                     <i class="fas fa-plus mr-1"></i> Tambah Jabatan
                 </button>
             </div>
@@ -70,15 +70,21 @@
                                 <td>{{ optional($jabatan->parent)->nama ?? '-' }}</td>
                                 <td>{{ optional($jabatan->unit)->nama ?? '-' }}</td>
                                 <td>{{ $jabatan->users_count }}</td>
-                                <td class="text-right">
-                                    <button class="btn btn-sm btn-outline-primary" data-toggle="modal"
-                                        data-target="#editJabatanModal{{ $jabatan->id }}">Edit</button>
+                                <td class="app-action-cell">
+                                    <div class="app-action-group">
+                                    <button class="app-icon-btn edit" data-toggle="modal"
+                                        data-target="#editJabatanModal{{ $jabatan->id }}">
+                                        <i class="fas fa-pen"></i>
+                                    </button>
                                     <form action="{{ route('admin.jabatans.destroy', $jabatan) }}" method="POST" class="d-inline">
                                         @csrf
                                         @method('DELETE')
-                                        <button type="submit" class="btn btn-sm btn-outline-danger"
-                                            onclick="return confirm('Hapus jabatan ini?')">Hapus</button>
+                                        <button type="submit" class="app-icon-btn delete"
+                                            onclick="return confirm('Hapus jabatan ini?')">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
                                     </form>
+                                    </div>
                                 </td>
                             </tr>
 

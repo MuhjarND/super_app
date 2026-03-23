@@ -3,12 +3,14 @@
 namespace App\Providers;
 
 use App\Disposisi;
+use App\LeaveApproval;
 use App\RapatApproval;
 use App\RapatNotulensiApproval;
 use App\RapatNotulensiTindakLanjut;
 use App\SuratKeluar;
 use App\SuratMasuk;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\View;
@@ -45,6 +47,7 @@ class AppServiceProvider extends ServiceProvider
                 'sidebarArsipCount' => 0,
                 'sidebarApprovalPendingCount' => 0,
                 'sidebarNotulensiApprovalPendingCount' => 0,
+                'sidebarLeaveApprovalPendingCount' => 0,
                 'sidebarApprovalTotalCount' => 0,
                 'sidebarNotulensiFollowUpCount' => 0,
                 'topbarActionCount' => 0,
@@ -173,8 +176,35 @@ class AppServiceProvider extends ServiceProvider
                 ]);
             }
 
+            if (Schema::hasTable('leave_approvals') && $user->canApproveLeave()) {
+                $pendingLeaveApprovalQuery = LeaveApproval::with(['leaveRequest.user', 'leaveRequest.leaveType'])
+                    ->where('status', 'pending');
+
+                if (!$user->isSuperAdmin()) {
+                    $pendingLeaveApprovalQuery->where('approver_id', $user->id);
+                }
+
+                $counts['sidebarLeaveApprovalPendingCount'] = (clone $pendingLeaveApprovalQuery)->count();
+
+                foreach ((clone $pendingLeaveApprovalQuery)->latest()->take(5)->get() as $approval) {
+                    $leaveRequest = $approval->leaveRequest;
+                    $actionItems->push([
+                        'type' => 'leave-approval',
+                        'icon' => 'fas fa-calendar-check',
+                        'icon_bg' => '#dcfce7',
+                        'icon_color' => '#166534',
+                        'title' => 'Approval cuti',
+                        'subtitle' => optional($leaveRequest->user)->name ?: 'Pengajuan cuti',
+                        'description' => optional($leaveRequest->leaveType)->name ?: 'Ada pengajuan cuti yang menunggu approval.',
+                        'time' => optional($approval->updated_at ?: $approval->created_at)->diffForHumans(),
+                        'url' => route('cuti.approval.show', $approval),
+                        'sort_at' => optional($approval->updated_at ?: $approval->created_at)->timestamp ?: 0,
+                    ]);
+                }
+            }
+
             $counts['sidebarNotulensiFollowUpCount'] = (clone $pendingFollowUpQuery)->count();
-            $counts['sidebarApprovalTotalCount'] = $counts['sidebarApprovalPendingCount'] + $counts['sidebarNotulensiApprovalPendingCount'];
+            $counts['sidebarApprovalTotalCount'] = $counts['sidebarApprovalPendingCount'] + $counts['sidebarNotulensiApprovalPendingCount'] + $counts['sidebarLeaveApprovalPendingCount'];
 
             $counts['topbarActionItems'] = $actionItems
                 ->sortByDesc('sort_at')
@@ -183,6 +213,7 @@ class AppServiceProvider extends ServiceProvider
             $counts['topbarActionCount'] = (clone $pendingDisposisiQuery)->count()
                 + $counts['sidebarApprovalPendingCount']
                 + $counts['sidebarNotulensiApprovalPendingCount']
+                + $counts['sidebarLeaveApprovalPendingCount']
                 + $counts['sidebarNotulensiFollowUpCount'];
 
             $view->with($counts);

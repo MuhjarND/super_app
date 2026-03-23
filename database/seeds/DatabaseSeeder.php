@@ -6,6 +6,7 @@ use App\Unit;
 use App\KategoriRapat;
 use App\KategoriSurat;
 use App\KlasifikasiKode;
+use Illuminate\Support\Facades\Schema;
 
 class DatabaseSeeder extends Seeder
 {
@@ -21,6 +22,14 @@ class DatabaseSeeder extends Seeder
             UserSeeder::class,
             DasarHukumSeeder::class,
         ]);
+
+        if (Schema::hasTable('leave_types')) {
+            $this->call([
+                LeaveTypeSeeder::class,
+                LeavePolicySeeder::class,
+                LeaveBalanceSeeder::class,
+            ]);
+        }
 
         $this->seedKategoriSurat();
         $this->seedKategoriRapat();

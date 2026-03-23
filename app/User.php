@@ -20,6 +20,12 @@ class User extends Authenticatable
         'hirarki',
         'nip',
         'no_hp',
+        'status_asn',
+        'tmt_pns',
+        'atasan_langsung_id',
+        'pejabat_berwenang_id',
+        'jumlah_anak',
+        'status_aktif_pegawai',
     ];
 
     protected $hidden = [
@@ -29,6 +35,9 @@ class User extends Authenticatable
 
     protected $casts = [
         'email_verified_at' => 'datetime',
+        'tmt_pns' => 'date',
+        'jumlah_anak' => 'integer',
+        'status_aktif_pegawai' => 'boolean',
     ];
 
     public function roles()
@@ -49,6 +58,16 @@ class User extends Authenticatable
     public function bidang()
     {
         return $this->belongsTo(Bidang::class);
+    }
+
+    public function atasanLangsung()
+    {
+        return $this->belongsTo(self::class, 'atasan_langsung_id');
+    }
+
+    public function pejabatBerwenang()
+    {
+        return $this->belongsTo(self::class, 'pejabat_berwenang_id');
     }
 
     public function hasRole($role)
@@ -119,21 +138,37 @@ class User extends Authenticatable
 
     public function canAccessMeetingModule()
     {
+        if ($this->isSuperAdmin()) {
+            return true;
+        }
+
         return $this->hasMeetingRole();
     }
 
     public function canManageRapat()
     {
+        if ($this->isSuperAdmin()) {
+            return true;
+        }
+
         return $this->isMeetingAdmin() || $this->isMeetingOperator();
     }
 
     public function canAccessMeetingMasterData()
     {
+        if ($this->isSuperAdmin()) {
+            return true;
+        }
+
         return $this->isMeetingAdmin();
     }
 
     public function canAccessMeetingMinutes()
     {
+        if ($this->isSuperAdmin()) {
+            return true;
+        }
+
         return $this->isMeetingAdmin() || $this->isMeetingOperator() || $this->isMeetingNotulis();
     }
 
@@ -152,6 +187,10 @@ class User extends Authenticatable
 
     public function canMonitorNotulensiFollowUps()
     {
+        if ($this->isSuperAdmin()) {
+            return true;
+        }
+
         return !empty($this->monitorable_meeting_unit_codes);
     }
 
@@ -166,16 +205,28 @@ class User extends Authenticatable
 
     public function canAccessMeetingApproval()
     {
+        if ($this->isSuperAdmin()) {
+            return true;
+        }
+
         return $this->isMeetingAdmin() || $this->isMeetingApproval();
     }
 
     public function canAccessAgendaPimpinan()
     {
+        if ($this->isSuperAdmin()) {
+            return true;
+        }
+
         return $this->isMeetingAdmin() || $this->isMeetingProtokoler();
     }
 
     public function canManageVoting()
     {
+        if ($this->isSuperAdmin()) {
+            return true;
+        }
+
         return $this->isMeetingAdmin();
     }
 
@@ -202,6 +253,16 @@ class User extends Authenticatable
             return true;
         }
 
+        return $this->canAccessSuratMasukMenu()
+            || $this->canAccessSuratKeluarMenu();
+    }
+
+    public function canAccessSuratMasukMenu()
+    {
+        if ($this->isSuperAdmin()) {
+            return true;
+        }
+
         return $this->hasAnyRole([
             'operator_surat_masuk',
             'admin_surat',
@@ -212,6 +273,90 @@ class User extends Authenticatable
             'kasubag',
             'kabag',
             'panmud',
+            'peserta',
+            'pegawai',
+        ]);
+    }
+
+    public function canAccessSuratKeluarMenu()
+    {
+        if ($this->isSuperAdmin()) {
+            return true;
+        }
+
+        return $this->hasAnyRole([
+            'admin_surat',
+            'sekretaris',
+            'panitera',
+            'ketua',
+            'wakil_ketua',
+            'kasubag',
+            'kabag',
+            'panmud',
+            'peserta',
+            'pegawai',
+        ]);
+    }
+
+    public function canAccessArsipMenu()
+    {
+        if ($this->isSuperAdmin()) {
+            return true;
+        }
+
+        return $this->canAccessPersuratanMenu()
+            || $this->canAccessMeetingModule()
+            || $this->canAccessLeaveModule();
+    }
+
+    public function canAccessArchiveMenu()
+    {
+        return $this->canAccessArsipMenu();
+    }
+
+    public function canAccessLeaveModule()
+    {
+        if ($this->isSuperAdmin()) {
+            return true;
+        }
+
+        return $this->hasAnyRole([
+            'pegawai',
+            'atasan_langsung',
+            'admin_kepegawaian',
+            'verifikator_dokumen',
+            'ppk',
+        ]);
+    }
+
+    public function canApproveLeave()
+    {
+        if ($this->isSuperAdmin()) {
+            return true;
+        }
+
+        return $this->hasAnyRole([
+            'atasan_langsung',
+            'verifikator_dokumen',
+            'ppk',
+            'admin_kepegawaian',
+        ]);
+    }
+
+    public function canAccessApprovalCenter()
+    {
+        return $this->canAccessMeetingApproval() || $this->canApproveLeave();
+    }
+
+    public function canManageLeaveMasterData()
+    {
+        if ($this->isSuperAdmin()) {
+            return true;
+        }
+
+        return $this->hasAnyRole([
+            'admin_kepegawaian',
+            'ppk',
         ]);
     }
 
@@ -357,6 +502,10 @@ class User extends Authenticatable
 
     public function canOpenTindakLanjutSuratMasuk($suratMasuk)
     {
+        if ($this->isSuperAdmin()) {
+            return true;
+        }
+
         return $this->isKabagAtauKasubag() && $this->hasPendingDisposisiForSurat($suratMasuk);
     }
 
@@ -383,5 +532,20 @@ class User extends Authenticatable
     public function tindakLanjutNotulensiItems()
     {
         return $this->hasMany(RapatNotulensiTindakLanjut::class, 'user_id');
+    }
+
+    public function leaveRequests()
+    {
+        return $this->hasMany(LeaveRequest::class, 'user_id');
+    }
+
+    public function leaveApprovals()
+    {
+        return $this->hasMany(LeaveApproval::class, 'approver_id');
+    }
+
+    public function leaveBalances()
+    {
+        return $this->hasMany(LeaveBalance::class, 'user_id');
     }
 }

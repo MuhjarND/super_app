@@ -17,6 +17,8 @@ Route::post('/voting/publik/{publicCode}', 'VotingPublicController@store')->name
 Route::get('/voting/publik/{publicCode}/hasil', 'VotingPublicController@results')->name('rapat.voting.public.results');
 Route::get('/voting/publik/{publicCode}/stats', 'VotingPublicController@stats')->name('rapat.voting.public.stats');
 Route::get('/verifikasi/ttd/{token}', 'RapatSignatureVerificationController@show')->name('rapat.signature.verify');
+Route::get('/verifikasi/cuti/{leaveRequest}/{approval}', 'LeaveSignatureVerificationController@show')->name('cuti.signature.verify');
+Route::get('/verifikasi/cuti/pemohon/{leaveRequest}', 'LeaveSignatureVerificationController@showApplicant')->name('cuti.signature.verify-applicant');
 Route::get('/publik/tindak-lanjut/eviden/{token}', 'PublicFollowUpEvidenceController@show')->name('rapat.notulensi.follow-ups.eviden.public');
 
 // Authenticated routes
@@ -44,7 +46,7 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/surat-keluar/{suratKeluar}/upload', 'SuratKeluarController@uploadLampiran')->name('surat-keluar.upload');
     Route::get('/surat-keluar/{suratKeluar}/file', 'SuratKeluarController@viewFile')->name('surat-keluar.file');
     Route::get('/surat-keluar/preview-nomor', 'SuratKeluarController@previewNomor')->name('surat-keluar.preview-nomor');
-    Route::get('/arsip', 'SuratKeluarController@arsip')->name('arsip.index');
+    Route::get('/arsip', 'ArchiveController@index')->name('arsip.index');
 
     // Disposisi
     Route::post('/disposisi', 'DisposisiController@store')->name('disposisi.store');
@@ -63,15 +65,60 @@ Route::middleware(['auth'])->group(function () {
         Route::resource('dasar-hukums', 'Admin\DasarHukumManagementController')->except(['show']);
     });
 
-    Route::middleware('role:admin,approval,super_admin')->group(function () {
+    Route::middleware('auth')->group(function () {
         Route::get('/approval', 'ApprovalCenterController@index')->name('approval.index');
         Route::get('/approval/history', 'ApprovalCenterController@history')->name('approval.history');
     });
 
-    // Placeholder modules
-    Route::get('/cuti', function () {
-        return view('modules.under-development', ['module' => 'Cuti', 'icon' => 'fas fa-calendar-times', 'description' => 'Modul manajemen pengajuan cuti pegawai.']);
-    })->name('cuti.index');
+    Route::prefix('cuti')->name('cuti.')->group(function () {
+        Route::get('/', 'LeaveRequestController@index')->name('index');
+        Route::get('/create', 'LeaveRequestController@create')->name('create');
+        Route::post('/', 'LeaveRequestController@store')->name('store');
+
+        Route::prefix('master')->name('master.')->group(function () {
+            Route::get('/jenis-cuti', 'LeaveTypeManagementController@index')->name('types.index');
+            Route::post('/jenis-cuti', 'LeaveTypeManagementController@store')->name('types.store');
+            Route::put('/jenis-cuti/{leaveType}', 'LeaveTypeManagementController@update')->name('types.update');
+            Route::delete('/jenis-cuti/{leaveType}', 'LeaveTypeManagementController@destroy')->name('types.destroy');
+
+            Route::get('/kebijakan', 'LeavePolicyManagementController@index')->name('policies.index');
+            Route::post('/kebijakan', 'LeavePolicyManagementController@store')->name('policies.store');
+            Route::put('/kebijakan/{leavePolicy}', 'LeavePolicyManagementController@update')->name('policies.update');
+            Route::delete('/kebijakan/{leavePolicy}', 'LeavePolicyManagementController@destroy')->name('policies.destroy');
+
+            Route::get('/cuti-bersama', 'LeaveHolidayManagementController@index')->name('holidays.index');
+            Route::post('/cuti-bersama', 'LeaveHolidayManagementController@store')->name('holidays.store');
+            Route::put('/cuti-bersama/{leaveHoliday}', 'LeaveHolidayManagementController@update')->name('holidays.update');
+            Route::delete('/cuti-bersama/{leaveHoliday}', 'LeaveHolidayManagementController@destroy')->name('holidays.destroy');
+
+            Route::get('/delegasi', 'LeaveDelegationManagementController@index')->name('delegations.index');
+            Route::post('/delegasi', 'LeaveDelegationManagementController@store')->name('delegations.store');
+            Route::put('/delegasi/{leaveDelegation}', 'LeaveDelegationManagementController@update')->name('delegations.update');
+            Route::delete('/delegasi/{leaveDelegation}', 'LeaveDelegationManagementController@destroy')->name('delegations.destroy');
+        });
+
+        Route::get('/saldo', 'LeaveReportController@balances')->name('balances.index');
+        Route::get('/saldo/pdf', 'LeaveReportController@balancesPdf')->name('balances.pdf');
+        Route::get('/saldo/excel', 'LeaveReportController@balancesExcel')->name('balances.excel');
+        Route::get('/laporan', 'LeaveReportController@index')->name('reports.index');
+        Route::get('/laporan/pdf', 'LeaveReportController@pdf')->name('reports.pdf');
+        Route::get('/laporan/excel', 'LeaveReportController@excel')->name('reports.excel');
+
+        Route::get('/approval/list', 'LeaveApprovalController@index')->name('approval.index');
+        Route::get('/approval/{leaveApproval}', 'LeaveApprovalController@show')->name('approval.show');
+        Route::post('/approval/{leaveApproval}/approve', 'LeaveApprovalController@approve')->name('approval.approve');
+        Route::post('/approval/{leaveApproval}/reject', 'LeaveApprovalController@reject')->name('approval.reject');
+        Route::post('/approval/{leaveApproval}/verify-document', 'LeaveApprovalController@verifyDocument')->name('approval.verify-document');
+
+        Route::get('/{leaveRequest}', 'LeaveRequestController@show')->name('show');
+        Route::get('/{leaveRequest}/edit', 'LeaveRequestController@edit')->name('edit');
+        Route::put('/{leaveRequest}', 'LeaveRequestController@update')->name('update');
+        Route::post('/{leaveRequest}/submit', 'LeaveRequestController@submit')->name('submit');
+        Route::post('/{leaveRequest}/cancel', 'LeaveRequestController@cancel')->name('cancel');
+        Route::post('/{leaveRequest}/revise', 'LeaveRequestController@requestRevision')->name('revise');
+        Route::get('/{leaveRequest}/surat', 'LeaveRequestController@surat')->name('surat');
+        Route::get('/{leaveRequest}/documents/{document}', 'LeaveRequestController@document')->name('documents.show');
+    });
 
     Route::get('/progress-zi', function () {
         return view('modules.under-development', [

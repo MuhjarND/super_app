@@ -85,7 +85,7 @@ class SuratMasuk extends Model
     {
         switch ($this->status) {
             case 'baru':
-                return '<span class="badge badge-info">Baru</span>';
+                return '<span class="badge badge-danger">Baru</span>';
             case 'didisposisi':
                 return '<span class="badge badge-warning">Didisposisi</span>';
             case 'selesai':

@@ -30,7 +30,7 @@
                 <h1 class="mb-1">Agenda Pimpinan</h1>
                 <div class="text-muted" style="font-size: 0.82rem;">Agenda protokoler untuk kegiatan pimpinan beserta daftar penerima dan format notifikasi formal.</div>
             </div>
-            <button class="btn btn-primary" data-toggle="modal" data-target="#createAgendaModal">
+            <button class="btn app-create-btn" data-toggle="modal" data-target="#createAgendaModal">
                 <i class="fas fa-plus mr-1"></i> Tambah Agenda
             </button>
         </div>

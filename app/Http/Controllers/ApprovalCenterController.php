@@ -2,11 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\LeaveApproval;
+use App\LeaveRequest;
 use App\RapatApproval;
 use App\RapatApprovalHistory;
 use App\RapatNotulensiApproval;
 use App\RapatNotulensiApprovalHistory;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Schema;
 
 class ApprovalCenterController extends Controller
 {
@@ -45,7 +48,7 @@ class ApprovalCenterController extends Controller
 
     public function index(Request $request)
     {
-        abort_unless(auth()->user()->canAccessMeetingApproval(), 403);
+        abort_unless(auth()->user()->canAccessApprovalCenter(), 403);
 
         $category = $request->query('category');
         $cards = $this->buildCards();
@@ -61,7 +64,7 @@ class ApprovalCenterController extends Controller
 
     public function history(Request $request)
     {
-        abort_unless(auth()->user()->canAccessMeetingApproval(), 403);
+        abort_unless(auth()->user()->canAccessApprovalCenter(), 403);
 
         $category = $request->query('category');
         $cards = $this->buildCards();
@@ -87,7 +90,7 @@ class ApprovalCenterController extends Controller
                 'key' => $key,
                 'pending_count' => $pendingCount,
                 'history_count' => $historyCount,
-                'is_active' => $pendingCount > 0 || $historyCount > 0 || in_array($key, ['undangan', 'notulensi'], true),
+                'is_active' => $pendingCount > 0 || $historyCount > 0 || in_array($key, ['undangan', 'notulensi', 'surat_cuti'], true),
             ]);
         }
 
@@ -114,6 +117,14 @@ class ApprovalCenterController extends Controller
             return $query->count();
         }
 
+        if ($category === 'surat_cuti' && Schema::hasTable('leave_approvals')) {
+            $query = LeaveApproval::where('status', 'pending');
+            if (!$user->isSuperAdmin()) {
+                $query->where('approver_id', $user->id);
+            }
+            return $query->count();
+        }
+
         return 0;
     }
 
@@ -133,6 +144,16 @@ class ApprovalCenterController extends Controller
             $query = RapatNotulensiApprovalHistory::query();
             if (!$user->isMeetingAdmin()) {
                 $query->where('approver_id', $user->id);
+            }
+            return $query->count();
+        }
+
+        if ($category === 'surat_cuti' && Schema::hasTable('leave_requests')) {
+            $query = LeaveRequest::whereIn('status', [LeaveRequest::STATUS_APPROVED, LeaveRequest::STATUS_REJECTED, LeaveRequest::STATUS_CANCELLED, LeaveRequest::STATUS_COMPLETED]);
+            if (!$user->isSuperAdmin()) {
+                $query->whereHas('approvals', function ($approvalQuery) use ($user) {
+                    $approvalQuery->where('approver_id', $user->id)->whereIn('status', ['approved', 'rejected']);
+                });
             }
             return $query->count();
         }
@@ -195,6 +216,30 @@ class ApprovalCenterController extends Controller
             });
         }
 
+        if ($category === 'surat_cuti' && Schema::hasTable('leave_approvals')) {
+            $query = LeaveApproval::with(['leaveRequest.user', 'leaveRequest.leaveType'])
+                ->where('status', 'pending')
+                ->orderByDesc('updated_at');
+
+            if (!$user->isSuperAdmin()) {
+                $query->where('approver_id', $user->id);
+            }
+
+            return $query->get()->map(function ($approval) {
+                $leaveRequest = $approval->leaveRequest;
+                return [
+                    'title' => optional($leaveRequest->user)->name ?: '-',
+                    'number' => $leaveRequest ? ($leaveRequest->request_number ?: '-') : '-',
+                    'date' => optional(optional($leaveRequest)->start_date)->translatedFormat('d F Y'),
+                    'subtitle' => optional(optional($approval->leaveRequest)->leaveType)->name ?: 'Pengajuan cuti',
+                    'meta' => 'Approver: ' . (optional($approval->approver)->name ?: '-'),
+                    'count_label' => 'Status: ' . ($leaveRequest ? $leaveRequest->status_label : '-'),
+                    'detail_url' => route('cuti.approval.show', $approval),
+                    'status_label' => $leaveRequest ? $leaveRequest->status_label : 'Pending',
+                ];
+            });
+        }
+
         return collect();
     }
 
@@ -236,6 +281,29 @@ class ApprovalCenterController extends Controller
                     'action' => ucfirst($entry->action),
                     'note' => $entry->catatan,
                     'detail_url' => $entry->approval ? route('rapat.notulensi-approval.show', $entry->approval) : null,
+                ];
+            });
+        }
+
+        if ($category === 'surat_cuti' && Schema::hasTable('leave_approvals')) {
+            $query = LeaveApproval::with(['leaveRequest.user', 'leaveRequest.leaveType', 'approver'])
+                ->whereIn('status', ['approved', 'rejected'])
+                ->orderByDesc('acted_at')
+                ->orderByDesc('id');
+
+            if (!$user->isSuperAdmin()) {
+                $query->where('approver_id', $user->id);
+            }
+
+            return $query->limit(100)->get()->map(function ($entry) {
+                return [
+                    'title' => optional(optional($entry->leaveRequest)->user)->name ?: '-',
+                    'number' => optional($entry->leaveRequest)->request_number ?: '-',
+                    'acted_at' => $entry->acted_at ? $entry->acted_at->copy()->timezone('Asia/Jayapura')->format('d/m/Y H:i') . ' WIT' : '-',
+                    'actor' => optional($entry->approver)->name ?: '-',
+                    'action' => ucfirst((string) $entry->action),
+                    'note' => $entry->note,
+                    'detail_url' => route('cuti.approval.show', $entry),
                 ];
             });
         }

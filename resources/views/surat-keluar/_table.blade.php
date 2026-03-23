@@ -41,13 +41,13 @@
                     <td>
                         @if($surat->file_path)
                             <a href="javascript:void(0)" onclick="viewFile('{{ route('surat-keluar.file', $surat) }}')"
-                                class="btn btn-sm btn-outline-success">
-                                <i class="fas fa-file mr-1"></i>Berkas
+                                class="app-icon-btn file">
+                                <i class="fas fa-file"></i>
                             </a>
                         @else
                             @if($surat->status == 'draft')
-                                <button onclick="openUpload({{ $surat->id }})" class="btn btn-sm btn-outline-warning">
-                                    <i class="fas fa-upload mr-1"></i>Upload
+                                <button onclick="openUpload({{ $surat->id }})" class="app-icon-btn upload">
+                                    <i class="fas fa-upload"></i>
                                 </button>
                             @else
                                 <span class="text-muted">-</span>
@@ -58,13 +58,15 @@
                         <small>{{ $surat->creator->name }}</small>
                     </td>
                     <td>{!! $surat->status_badge !!}</td>
-                    <td>
+                    <td class="app-action-cell">
+                        <div class="app-action-group">
                         @if($surat->status == 'draft' && !$surat->file_path)
-                            <button onclick="openUpload({{ $surat->id }})" class="btn btn-sm btn-outline-primary"
+                            <button onclick="openUpload({{ $surat->id }})" class="app-icon-btn upload"
                                 title="Upload Lampiran">
                                 <i class="fas fa-upload"></i>
                             </button>
                         @endif
+                        </div>
                     </td>
                 </tr>
             @empty

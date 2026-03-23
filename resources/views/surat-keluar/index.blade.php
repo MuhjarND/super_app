@@ -245,8 +245,8 @@
         }
 
         .status-badge.draft {
-            background: #ffe6ed;
-            color: #f43f5e;
+            background: #fee2e2;
+            color: #b91c1c;
         }
 
         .detail-row td {

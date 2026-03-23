@@ -143,8 +143,8 @@
         }
 
         .badge-new-status {
-            background: #dbeafe;
-            color: #1e40af;
+            background: #fee2e2;
+            color: #b91c1c;
             font-size: 0.65rem;
             padding: 3px 8px;
             border-radius: 4px;

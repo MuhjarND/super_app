@@ -25,7 +25,7 @@
                 <h1 class="mb-1">E-Voting</h1>
                 <div class="text-muted" style="font-size: 0.82rem;">Kelola voting, link publik, QR code, dan monitoring hasil realtime.</div>
             </div>
-            <a href="{{ route('rapat.voting.create') }}" class="btn btn-primary">
+            <a href="{{ route('rapat.voting.create') }}" class="btn app-create-btn">
                 <i class="fas fa-plus mr-1"></i> Buat Voting
             </a>
         </div>

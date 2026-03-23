@@ -223,7 +223,7 @@
                     <div class="text-muted" style="font-size: 0.82rem;">Jadwal rapat, undangan, peserta, dan lampiran tambahan.</div>
                 </div>
                 @if(auth()->user()->canManageRapat())
-                    <button class="btn btn-primary" data-toggle="modal" data-target="#createRapatModal">
+                    <button class="btn app-create-btn" data-toggle="modal" data-target="#createRapatModal">
                         <i class="fas fa-plus mr-1"></i> Tambah Rapat
                     </button>
                 @endif

@@ -282,9 +282,9 @@
                             <div class="approval-list-meta">{{ $document['count_label'] }} | Status: {{ $document['status_label'] }}</div>
                             <span class="approval-doc-chip"><i class="fas fa-check-circle"></i> Perlu tindakan sekarang</span>
                         </div>
-                        <div class="d-flex align-items-center">
-                            <a href="{{ $document['detail_url'] }}" class="btn btn-primary btn-sm">
-                                <i class="fas fa-file-signature mr-1"></i> Proses Dokumen
+                        <div class="app-action-group">
+                            <a href="{{ $document['detail_url'] }}" class="app-icon-btn process">
+                                <i class="fas fa-file-signature"></i>
                             </a>
                         </div>
                     </div>

@@ -7,7 +7,7 @@
         <div class="container-fluid">
             <div class="d-flex justify-content-between align-items-center">
                 <h1>Kelola Dasar Hukum</h1>
-                <button class="btn btn-primary" data-toggle="modal" data-target="#createDasarHukumModal">
+                <button class="btn app-create-btn" data-toggle="modal" data-target="#createDasarHukumModal">
                     <i class="fas fa-plus mr-1"></i> Tambah Dasar Hukum
                 </button>
             </div>
@@ -67,15 +67,21 @@
                                     </span>
                                 </td>
                                 <td>{{ \Illuminate\Support\Str::limit(strip_tags($item->uraian), 100) }}</td>
-                                <td class="text-right">
-                                    <button class="btn btn-sm btn-outline-primary" data-toggle="modal"
-                                        data-target="#editDasarHukumModal{{ $item->id }}">Edit</button>
+                                <td class="app-action-cell">
+                                    <div class="app-action-group">
+                                    <button class="app-icon-btn edit" data-toggle="modal"
+                                        data-target="#editDasarHukumModal{{ $item->id }}">
+                                        <i class="fas fa-pen"></i>
+                                    </button>
                                     <form action="{{ route('admin.dasar-hukums.destroy', $item) }}" method="POST" class="d-inline">
                                         @csrf
                                         @method('DELETE')
-                                        <button type="submit" class="btn btn-sm btn-outline-danger"
-                                            onclick="return confirm('Hapus dasar hukum ini?')">Hapus</button>
+                                        <button type="submit" class="app-icon-btn delete"
+                                            onclick="return confirm('Hapus dasar hukum ini?')">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
                                     </form>
+                                    </div>
                                 </td>
                             </tr>
 

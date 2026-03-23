@@ -208,10 +208,10 @@
                                 <div class="approval-list-meta">Catatan: {{ $entry['note'] }}</div>
                             @endif
                         </div>
-                        <div class="d-flex align-items-center">
+                        <div class="app-action-group">
                             @if($entry['detail_url'])
-                                <a href="{{ $entry['detail_url'] }}" class="btn btn-outline-secondary btn-sm">
-                                    <i class="fas fa-eye mr-1"></i> Lihat Detail
+                                <a href="{{ $entry['detail_url'] }}" class="app-icon-btn history">
+                                    <i class="fas fa-eye"></i>
                                 </a>
                             @endif
                         </div>

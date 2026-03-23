@@ -39,11 +39,13 @@
                         <small>{{ $surat->created_at->format('d/m/Y H:i') }}</small>
                     </td>
                     <td>{!! $surat->status_badge !!}</td>
-                    <td>
-                        <a href="{{ route('surat-masuk.show', $surat) }}" class="btn btn-sm btn-outline-primary"
+                    <td class="app-action-cell">
+                        <div class="app-action-group">
+                        <a href="{{ route('surat-masuk.show', $surat) }}" class="app-icon-btn detail"
                             title="Detail">
                             <i class="fas fa-eye"></i>
                         </a>
+                        </div>
                     </td>
                 </tr>
             @empty

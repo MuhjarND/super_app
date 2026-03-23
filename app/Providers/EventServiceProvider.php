@@ -18,6 +18,14 @@ class EventServiceProvider extends ServiceProvider
         Registered::class => [
             SendEmailVerificationNotification::class,
         ],
+        \App\Events\LeaveRequestSubmitted::class => [
+            \App\Listeners\CreateLeaveApprovalSteps::class,
+            \App\Listeners\RecordLeaveAuditTrail::class,
+        ],
+        \App\Events\LeaveRequestStatusChanged::class => [
+            \App\Listeners\RecordLeaveAuditTrail::class,
+            \App\Listeners\SendLeaveStatusNotification::class,
+        ],
     ];
 
     /**

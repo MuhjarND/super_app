@@ -98,7 +98,7 @@ class SuratKeluar extends Model
     public function getStatusBadgeAttribute()
     {
         if ($this->status == 'draft') {
-            return '<span class="badge badge-warning">Draft</span>';
+            return '<span class="badge badge-danger">Draft</span>';
         }
         return '<span class="badge badge-success">Lengkap</span>';
     }

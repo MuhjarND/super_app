@@ -133,12 +133,126 @@ class UserSeeder extends Seeder
                 'nip' => '199001010015',
                 'no_hp' => '08123456015',
             ],
+            [
+                'name' => 'Staf Kepegawaian 1',
+                'email' => 'stafkepeg1@pta-papuabarat.go.id',
+                'roles' => ['peserta'],
+                'jabatan_keterangan' => 'Staf Kepegawaian',
+                'unit_kode' => 'KEPEGAWAIAN',
+                'bidang_kode' => 'KEPEGAWAIAN',
+                'hirarki' => 200,
+                'nip' => '199001010016',
+                'no_hp' => '08123456016',
+            ],
+            [
+                'name' => 'Staf Kepegawaian 2',
+                'email' => 'stafkepeg2@pta-papuabarat.go.id',
+                'roles' => ['peserta'],
+                'jabatan_keterangan' => 'Staf Kepegawaian',
+                'unit_kode' => 'KEPEGAWAIAN',
+                'bidang_kode' => 'KEPEGAWAIAN',
+                'hirarki' => 210,
+                'nip' => '199001010017',
+                'no_hp' => '08123456017',
+            ],
+            [
+                'name' => 'Staf Perencanaan',
+                'email' => 'stafrenpro@pta-papuabarat.go.id',
+                'roles' => ['peserta'],
+                'jabatan_keterangan' => 'Staf Perencanaan',
+                'unit_kode' => 'KEPEGAWAIAN',
+                'bidang_kode' => 'PERENCANAAN',
+                'hirarki' => 220,
+                'nip' => '199001010018',
+                'no_hp' => '08123456018',
+            ],
+            [
+                'name' => 'Staf Keuangan',
+                'email' => 'stafkeuangan@pta-papuabarat.go.id',
+                'roles' => ['peserta'],
+                'jabatan_keterangan' => 'Staf Keuangan',
+                'unit_kode' => 'UMUM',
+                'bidang_kode' => 'KEUANGAN',
+                'hirarki' => 230,
+                'nip' => '199001010019',
+                'no_hp' => '08123456019',
+            ],
+            [
+                'name' => 'Staf TURT',
+                'email' => 'stafturt@pta-papuabarat.go.id',
+                'roles' => ['peserta'],
+                'jabatan_keterangan' => 'Staf TURT',
+                'unit_kode' => 'UMUM',
+                'bidang_kode' => 'TURT',
+                'hirarki' => 240,
+                'nip' => '199001010020',
+                'no_hp' => '08123456020',
+            ],
+            [
+                'name' => 'Staf Persuratan',
+                'email' => 'stafpersuratan@pta-papuabarat.go.id',
+                'roles' => ['peserta'],
+                'jabatan_keterangan' => 'Staf Persuratan',
+                'unit_kode' => 'PERSURATAN',
+                'bidang_kode' => 'PERSURATAN',
+                'hirarki' => 250,
+                'nip' => '199001010021',
+                'no_hp' => '08123456021',
+            ],
+            [
+                'name' => 'Staf Kepaniteraan 1',
+                'email' => 'stafkepaniteraan1@pta-papuabarat.go.id',
+                'roles' => ['peserta'],
+                'jabatan_keterangan' => 'Staf Kepaniteraan',
+                'unit_kode' => 'KEPANITERAAN',
+                'bidang_kode' => 'KEPANITERAAN',
+                'hirarki' => 260,
+                'nip' => '199001010022',
+                'no_hp' => '08123456022',
+            ],
+            [
+                'name' => 'Staf Kepaniteraan 2',
+                'email' => 'stafkepaniteraan2@pta-papuabarat.go.id',
+                'roles' => ['peserta'],
+                'jabatan_keterangan' => 'Staf Kepaniteraan',
+                'unit_kode' => 'KEPANITERAAN',
+                'bidang_kode' => 'KEPANITERAAN',
+                'hirarki' => 270,
+                'nip' => '199001010023',
+                'no_hp' => '08123456023',
+            ],
+            [
+                'name' => 'Panitera Pengganti 1',
+                'email' => 'pp1@pta-papuabarat.go.id',
+                'roles' => ['peserta'],
+                'jabatan_keterangan' => 'Panitera Pengganti',
+                'unit_kode' => 'KEPANITERAAN',
+                'bidang_kode' => 'KEPANITERAAN',
+                'hirarki' => 280,
+                'nip' => '199001010024',
+                'no_hp' => '08123456024',
+            ],
+            [
+                'name' => 'Panitera Pengganti 2',
+                'email' => 'pp2@pta-papuabarat.go.id',
+                'roles' => ['peserta'],
+                'jabatan_keterangan' => 'Panitera Pengganti',
+                'unit_kode' => 'KEPANITERAAN',
+                'bidang_kode' => 'KEPANITERAAN',
+                'hirarki' => 290,
+                'nip' => '199001010025',
+                'no_hp' => '08123456025',
+            ],
         ];
 
         foreach ($users as $userData) {
-            $jabatan = Jabatan::where('kode', $userData['jabatan_kode'])->first();
-            $unitId = $jabatan ? $jabatan->unit_id : null;
-            $bidang = Bidang::where('kode', $this->resolveBidangKode($userData['jabatan_kode']))->first();
+            $jabatan = Jabatan::where('kode', $userData['jabatan_kode'] ?? null)->first();
+            $unit = $jabatan
+                ? Unit::find($jabatan->unit_id)
+                : Unit::where('kode', $userData['unit_kode'] ?? null)->first();
+            $unitId = optional($unit)->id;
+            $bidangKode = $userData['bidang_kode'] ?? $this->resolveBidangKode($userData['jabatan_kode'] ?? null);
+            $bidang = Bidang::where('kode', $bidangKode)->first();
 
             $user = User::updateOrCreate(
                 ['email' => $userData['email']],
@@ -146,10 +260,10 @@ class UserSeeder extends Seeder
                     'name' => $userData['name'],
                     'password' => Hash::make('password123'),
                     'jabatan_id' => $jabatan ? $jabatan->id : null,
-                    'jabatan_keterangan' => $jabatan ? $jabatan->nama : null,
+                    'jabatan_keterangan' => $jabatan ? $jabatan->nama : ($userData['jabatan_keterangan'] ?? null),
                     'unit_id' => $unitId,
                     'bidang_id' => $bidang ? $bidang->id : null,
-                    'hirarki' => $this->resolveHirarki($userData['jabatan_kode']),
+                    'hirarki' => $userData['hirarki'] ?? $this->resolveHirarki($userData['jabatan_kode'] ?? null),
                     'nip' => $userData['nip'],
                     'no_hp' => $userData['no_hp'],
                 ]
@@ -158,9 +272,7 @@ class UserSeeder extends Seeder
             $roles = $userData['roles'] ?? [$userData['role']];
             $roleIds = Role::whereIn('name', $roles)->pluck('id')->all();
 
-            if (!empty($roleIds)) {
-                $user->roles()->syncWithoutDetaching($roleIds);
-            }
+            $user->roles()->sync($roleIds);
         }
     }
 

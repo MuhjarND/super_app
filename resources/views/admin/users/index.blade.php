@@ -7,7 +7,7 @@
         <div class="container-fluid">
             <div class="d-flex justify-content-between align-items-center">
                 <h1>Kelola User</h1>
-                <button class="btn btn-primary" data-toggle="modal" data-target="#createUserModal">
+                <button class="btn app-create-btn" data-toggle="modal" data-target="#createUserModal">
                     <i class="fas fa-plus mr-1"></i> Tambah User
                 </button>
             </div>
@@ -108,20 +108,28 @@
                                 </td>
                                 <td>{{ $user->hirarki ?? '-' }}</td>
                                 <td>{{ $user->no_hp ?? '-' }}</td>
-                                <td class="text-right">
+                                <td class="app-action-cell">
+                                    <div class="app-action-group">
                                     <form action="{{ route('admin.users.send-login-info', $user) }}" method="POST" class="d-inline">
                                         @csrf
-                                        <button type="submit" class="btn btn-sm btn-outline-success"
-                                            onclick="return confirm('Kirim informasi login ke WhatsApp user ini?')">Kirim Login</button>
+                                        <button type="submit" class="app-icon-btn send"
+                                            onclick="return confirm('Kirim informasi login ke WhatsApp user ini?')">
+                                            <i class="fas fa-key"></i>
+                                        </button>
                                     </form>
-                                    <button class="btn btn-sm btn-outline-primary" data-toggle="modal"
-                                        data-target="#editUserModal{{ $user->id }}">Edit</button>
+                                    <button class="app-icon-btn edit" data-toggle="modal"
+                                        data-target="#editUserModal{{ $user->id }}">
+                                        <i class="fas fa-pen"></i>
+                                    </button>
                                     <form action="{{ route('admin.users.destroy', $user) }}" method="POST" class="d-inline">
                                         @csrf
                                         @method('DELETE')
-                                        <button type="submit" class="btn btn-sm btn-outline-danger"
-                                            onclick="return confirm('Hapus user ini?')">Hapus</button>
+                                        <button type="submit" class="app-icon-btn delete"
+                                            onclick="return confirm('Hapus user ini?')">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
                                     </form>
+                                    </div>
                                 </td>
                             </tr>
 

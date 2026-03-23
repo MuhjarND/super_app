@@ -7,7 +7,7 @@
         <div class="container-fluid">
             <div class="d-flex justify-content-between align-items-center">
                 <h1>Kelola Kategori Surat</h1>
-                <button class="btn btn-primary" data-toggle="modal" data-target="#createKategoriModal">
+                <button class="btn app-create-btn" data-toggle="modal" data-target="#createKategoriModal">
                     <i class="fas fa-plus mr-1"></i> Tambah Kategori
                 </button>
             </div>
@@ -63,15 +63,21 @@
                                     </span>
                                 </td>
                                 <td>{{ $kategori->keterangan ?: '-' }}</td>
-                                <td class="text-right">
-                                    <button class="btn btn-sm btn-outline-primary" data-toggle="modal"
-                                        data-target="#editKategoriModal{{ $kategori->id }}">Edit</button>
+                                <td class="app-action-cell">
+                                    <div class="app-action-group">
+                                    <button class="app-icon-btn edit" data-toggle="modal"
+                                        data-target="#editKategoriModal{{ $kategori->id }}">
+                                        <i class="fas fa-pen"></i>
+                                    </button>
                                     <form action="{{ route('admin.kategori-surats.destroy', $kategori) }}" method="POST" class="d-inline">
                                         @csrf
                                         @method('DELETE')
-                                        <button type="submit" class="btn btn-sm btn-outline-danger"
-                                            onclick="return confirm('Hapus kategori surat ini?')">Hapus</button>
+                                        <button type="submit" class="app-icon-btn delete"
+                                            onclick="return confirm('Hapus kategori surat ini?')">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
                                     </form>
+                                    </div>
                                 </td>
                             </tr>
 
