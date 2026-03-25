@@ -254,7 +254,8 @@ class User extends Authenticatable
         }
 
         return $this->canAccessSuratMasukMenu()
-            || $this->canAccessSuratKeluarMenu();
+            || $this->canAccessSuratKeluarMenu()
+            || $this->canAccessSuratTemplateMenu();
     }
 
     public function canAccessSuratMasukMenu()
@@ -296,6 +297,29 @@ class User extends Authenticatable
             'peserta',
             'pegawai',
         ]);
+    }
+
+    public function canAccessSuratTemplateMenu()
+    {
+        if ($this->isSuperAdmin()) {
+            return true;
+        }
+
+        return $this->isKabagAtauKasubag();
+    }
+
+    public function canManageSuratTemplates()
+    {
+        return $this->isSuperAdmin();
+    }
+
+    public function canSubmitSuratTemplateProposal()
+    {
+        if ($this->isSuperAdmin()) {
+            return true;
+        }
+
+        return $this->isKabagAtauKasubag();
     }
 
     public function canAccessArsipMenu()
@@ -343,9 +367,18 @@ class User extends Authenticatable
         ]);
     }
 
+    public function canApproveSuratKeluarTemplate()
+    {
+        if ($this->isSuperAdmin()) {
+            return true;
+        }
+
+        return $this->hasRole('approval');
+    }
+
     public function canAccessApprovalCenter()
     {
-        return $this->canAccessMeetingApproval() || $this->canApproveLeave();
+        return $this->canAccessMeetingApproval() || $this->canApproveLeave() || $this->canApproveSuratKeluarTemplate();
     }
 
     public function canManageLeaveMasterData()

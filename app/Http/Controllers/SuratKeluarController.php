@@ -5,15 +5,19 @@ namespace App\Http\Controllers;
 use App\SuratKeluar;
 use App\KlasifikasiKode;
 use App\KategoriSurat;
+use App\Services\SuratTemplateDocumentService;
 use App\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
 class SuratKeluarController extends Controller
 {
+    protected $templateDocumentService;
+
     public function __construct()
     {
         $this->middleware('auth');
+        $this->templateDocumentService = app(SuratTemplateDocumentService::class);
     }
 
     public function index(Request $request)
@@ -21,7 +25,7 @@ class SuratKeluarController extends Controller
         $user = auth()->user();
 
         $suratKeluar = SuratKeluar::visibleTo($user)
-            ->with('klasifikasiKode', 'kategoriSurat', 'kodeFungsi', 'kodeKegiatan', 'kodeTransaksi', 'creator', 'penerimaInternal')
+            ->with('klasifikasiKode', 'kategoriSurat', 'kodeFungsi', 'kodeKegiatan', 'kodeTransaksi', 'creator', 'penerimaInternal', 'templateApproval')
             ->orderBy('created_at', 'desc')
             ->get();
         $kategoriSurats = KategoriSurat::where('aktif', true)->orderBy('kode')->get();
@@ -63,6 +67,7 @@ class SuratKeluarController extends Controller
                 'parent_id' => $k->parent_id,
             ];
         })->values();
+        $templatePrefill = session('surat_template_prefill');
         return view('surat-keluar.index', compact(
             'suratKeluar',
             'klasifikasiKodes',
@@ -74,7 +79,8 @@ class SuratKeluarController extends Controller
             'kodeFungsiOptions',
             'kodeKegiatanOptions',
             'kodeTransaksiOptions',
-            'canManageSuratKeluar'
+            'canManageSuratKeluar',
+            'templatePrefill'
         ));
     }
 
@@ -97,6 +103,11 @@ class SuratKeluarController extends Controller
             'perihal' => 'required|string',
             'tanggal_surat' => 'required|date',
             'has_lampiran' => 'required|in:ya,tidak',
+            'template_source' => 'nullable|in:template_surat',
+            'template_name' => 'nullable|string|max:255',
+            'template_slug' => 'nullable|string|max:255',
+            'template_rendered_body' => 'nullable|string',
+            'template_field_values' => 'nullable|string',
         ]);
 
         $sync = $this->syncKategoriDanKlasifikasi($request->klasifikasi_kode_id, $request->kategori_surat_id);
@@ -151,6 +162,15 @@ class SuratKeluarController extends Controller
 
         if ($request->opsi_penerima == 'internal' && $request->penerima_internal) {
             $suratKeluar->penerimaInternal()->attach($request->penerima_internal);
+        }
+
+        if ($request->template_source === 'template_surat' && $request->filled('template_rendered_body')) {
+            $this->templateDocumentService->attachGeneratedDocument($suratKeluar, [
+                'template_name' => $request->template_name,
+                'template_slug' => $request->template_slug,
+                'rendered_body' => $request->template_rendered_body,
+                'field_values' => $this->decodeTemplateFieldValues($request->template_field_values),
+            ]);
         }
 
         return response()->json([
@@ -469,5 +489,16 @@ class SuratKeluarController extends Controller
         }
 
         return KategoriSurat::whereRaw('UPPER(kode) = ?', [strtoupper(trim((string) $kode))])->first();
+    }
+
+    protected function decodeTemplateFieldValues($json)
+    {
+        if (!$json) {
+            return [];
+        }
+
+        $decoded = json_decode($json, true);
+
+        return is_array($decoded) ? $decoded : [];
     }
 }

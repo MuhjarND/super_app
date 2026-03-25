@@ -19,6 +19,7 @@ Route::get('/voting/publik/{publicCode}/stats', 'VotingPublicController@stats')-
 Route::get('/verifikasi/ttd/{token}', 'RapatSignatureVerificationController@show')->name('rapat.signature.verify');
 Route::get('/verifikasi/cuti/{leaveRequest}/{approval}', 'LeaveSignatureVerificationController@show')->name('cuti.signature.verify');
 Route::get('/verifikasi/cuti/pemohon/{leaveRequest}', 'LeaveSignatureVerificationController@showApplicant')->name('cuti.signature.verify-applicant');
+Route::get('/verifikasi/surat-keluar/{approval}', 'SuratKeluarSignatureVerificationController@show')->name('surat-keluar.signature.verify');
 Route::get('/publik/tindak-lanjut/eviden/{token}', 'PublicFollowUpEvidenceController@show')->name('rapat.notulensi.follow-ups.eviden.public');
 
 // Authenticated routes
@@ -46,6 +47,20 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/surat-keluar/{suratKeluar}/upload', 'SuratKeluarController@uploadLampiran')->name('surat-keluar.upload');
     Route::get('/surat-keluar/{suratKeluar}/file', 'SuratKeluarController@viewFile')->name('surat-keluar.file');
     Route::get('/surat-keluar/preview-nomor', 'SuratKeluarController@previewNomor')->name('surat-keluar.preview-nomor');
+    Route::get('/surat-keluar-approval/{suratKeluarApproval}', 'SuratKeluarApprovalController@show')->name('surat-keluar.approval.show');
+    Route::get('/surat-keluar-approval/{suratKeluarApproval}/preview', 'SuratKeluarApprovalController@preview')->name('surat-keluar.approval.preview');
+    Route::post('/surat-keluar-approval/{suratKeluarApproval}/approve', 'SuratKeluarApprovalController@approve')->name('surat-keluar.approval.approve');
+    Route::post('/surat-keluar-approval/{suratKeluarApproval}/reject', 'SuratKeluarApprovalController@reject')->name('surat-keluar.approval.reject');
+    Route::prefix('template-surat')->name('surat-template.')->group(function () {
+        Route::get('/', 'SuratTemplateController@index')->name('index');
+        Route::post('/', 'SuratTemplateController@store')->name('store');
+        Route::put('/{suratTemplate}', 'SuratTemplateController@update')->name('update');
+        Route::post('/{slug}/preview', 'SuratTemplateController@preview')->name('preview');
+        Route::post('/{slug}/surat-keluar', 'SuratTemplateController@handoffToSuratKeluar')->name('handoff');
+        Route::post('/proposals', 'SuratTemplateController@storeProposal')->name('proposals.store');
+        Route::post('/proposals/{proposal}/process', 'SuratTemplateController@processProposal')->name('proposals.process');
+        Route::get('/sample/{type}/{id}', 'SuratTemplateController@sample')->name('sample');
+    });
     Route::get('/arsip', 'ArchiveController@index')->name('arsip.index');
 
     // Disposisi

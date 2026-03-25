@@ -1482,6 +1482,15 @@
                                     </a>
                                 </li>
                             @endif
+                            @if($isSidebarSuperAdmin || $sidebarUser->canAccessSuratTemplateMenu())
+                                <li class="nav-item nav-item-sub">
+                                    <a href="{{ route('surat-template.index') }}"
+                                        class="nav-link {{ request()->routeIs('surat-template.*') ? 'active' : '' }}">
+                                        <i class="nav-icon far fa-file-word"></i>
+                                        <p>Template Surat</p>
+                                    </a>
+                                </li>
+                            @endif
                         @endif
 
                         @if($isSidebarSuperAdmin || $sidebarUser->canAccessMeetingModule())
@@ -1490,7 +1499,7 @@
                                 <a href="{{ route('rapat.index') }}"
                                     class="nav-link {{ request()->routeIs('rapat.index') ? 'active' : '' }}">
                                     <i class="nav-icon far fa-calendar-alt"></i>
-                                    <p>Rapat</p>
+                                    <p>Rapat/Agenda</p>
                                 </a>
                             </li>
                             @if($isSidebarSuperAdmin || $sidebarUser->canAccessMeetingMinutes())
@@ -1508,7 +1517,7 @@
                                         class="nav-link {{ request()->routeIs('rapat.notulensi.follow-ups') ? 'active' : '' }}">
                                         <i class="nav-icon fas fa-tasks"></i>
                                         <p>
-                                            Tindak Lanjut Notulen
+                                            Tindak Lanjut
                                             @if(($sidebarNotulensiFollowUpCount ?? 0) > 0)
                                                 <span class="right badge badge-danger">{{ $sidebarNotulensiFollowUpCount }}</span>
                                             @endif

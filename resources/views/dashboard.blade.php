@@ -4,425 +4,333 @@
 
 @push('styles')
     <style>
-        /* ======================== MODERN DASHBOARD STYLES ======================== */
-
-        /* Welcome Banner */
-        .welcome-banner {
-            background: linear-gradient(135deg, #1a3a5c 0%, #2c5282 50%, #3182ce 100%);
-            border-radius: 16px;
-            padding: 32px 36px;
-            color: white;
-            position: relative;
-            overflow: hidden;
-            margin-bottom: 24px;
+        .dashboard-shell {
+            display: grid;
+            gap: 18px;
         }
 
-        .welcome-banner::before {
-            content: '';
-            position: absolute;
-            top: -40%;
-            right: -15%;
-            width: 300px;
-            height: 300px;
-            background: radial-gradient(circle, rgba(232, 168, 56, 0.15) 0%, transparent 70%);
-            border-radius: 50%;
+        .dashboard-hero {
+            background: linear-gradient(135deg, #0f3352 0%, #175d8f 52%, #3b82f6 100%);
+            color: #fff;
+            border-radius: 18px;
+            padding: 26px 28px;
+            box-shadow: 0 18px 40px rgba(15, 51, 82, 0.18);
         }
 
-        .welcome-banner::after {
-            content: '';
-            position: absolute;
-            bottom: -50%;
-            right: 10%;
-            width: 200px;
-            height: 200px;
-            background: radial-gradient(circle, rgba(255, 255, 255, 0.08) 0%, transparent 70%);
-            border-radius: 50%;
-        }
-
-        .welcome-banner h2 {
-            font-size: 1.6rem;
-            font-weight: 700;
+        .dashboard-hero-title {
+            font-size: 1.55rem;
+            font-weight: 800;
             margin-bottom: 6px;
-            position: relative;
-            z-index: 1;
         }
 
-        .welcome-banner h2 span {
-            color: #e8a838;
+        .dashboard-hero-meta {
+            opacity: 0.86;
+            font-size: 0.92rem;
         }
 
-        .welcome-banner p {
-            opacity: 0.8;
-            font-size: 0.9rem;
-            margin-bottom: 0;
-            position: relative;
-            z-index: 1;
-        }
-
-        .welcome-banner .today-stats {
-            position: relative;
-            z-index: 1;
+        .hero-chip-wrap {
             display: flex;
-            gap: 20px;
-            margin-top: 16px;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 18px;
         }
 
-        .welcome-banner .today-stat {
-            background: rgba(255, 255, 255, 0.12);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            padding: 10px 20px;
-            border-radius: 10px;
-            display: flex;
+        .hero-chip {
+            display: inline-flex;
             align-items: center;
             gap: 10px;
+            background: rgba(255, 255, 255, 0.14);
+            border: 1px solid rgba(255, 255, 255, 0.16);
+            border-radius: 999px;
+            padding: 9px 14px;
+            min-height: 44px;
         }
 
-        .welcome-banner .today-stat i {
-            color: #e8a838;
-            font-size: 1.1rem;
+        .hero-chip i {
+            color: #facc15;
         }
 
-        .welcome-banner .today-stat .num {
-            font-size: 1.25rem;
-            font-weight: 700;
-        }
-
-        .welcome-banner .today-stat .lbl {
-            font-size: 0.72rem;
-            opacity: 0.7;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        /* Stat Cards */
-        .stat-card {
-            border-radius: 16px;
-            border: none;
-            padding: 24px;
-            position: relative;
-            overflow: hidden;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
-            cursor: pointer;
-        }
-
-        .stat-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
-        }
-
-        .stat-card .stat-icon {
-            width: 56px;
-            height: 56px;
-            border-radius: 14px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.4rem;
-            margin-bottom: 16px;
-        }
-
-        .stat-card .stat-number {
-            font-size: 2rem;
-            font-weight: 800;
-            line-height: 1;
-            margin-bottom: 4px;
-        }
-
-        .stat-card .stat-label {
-            font-size: 0.82rem;
-            opacity: 0.7;
-            font-weight: 500;
-        }
-
-        .stat-card .stat-badge {
-            position: absolute;
-            top: 16px;
-            right: 16px;
-            font-size: 0.7rem;
-            padding: 4px 10px;
-            border-radius: 20px;
-            font-weight: 600;
-        }
-
-        .stat-card::after {
-            content: '';
-            position: absolute;
-            bottom: -20px;
-            right: -20px;
-            width: 100px;
-            height: 100px;
-            border-radius: 50%;
-            opacity: 0.08;
-        }
-
-        /* Card variants */
-        .stat-card.card-blue {
-            background: linear-gradient(135deg, #ebf8ff 0%, #bee3f8 100%);
-            color: #1a365d;
-        }
-
-        .stat-card.card-blue .stat-icon {
-            background: linear-gradient(135deg, #3182ce, #2b6cb0);
-            color: white;
-        }
-
-        .stat-card.card-blue::after {
-            background: #2c5282;
-        }
-
-        .stat-card.card-green {
-            background: linear-gradient(135deg, #f0fff4 0%, #c6f6d5 100%);
-            color: #22543d;
-        }
-
-        .stat-card.card-green .stat-icon {
-            background: linear-gradient(135deg, #48bb78, #38a169);
-            color: white;
-        }
-
-        .stat-card.card-green::after {
-            background: #276749;
-        }
-
-        .stat-card.card-amber {
-            background: linear-gradient(135deg, #fffff0 0%, #fefcbf 100%);
-            color: #744210;
-        }
-
-        .stat-card.card-amber .stat-icon {
-            background: linear-gradient(135deg, #ecc94b, #d69e2e);
-            color: white;
-        }
-
-        .stat-card.card-amber::after {
-            background: #b7791f;
-        }
-
-        .stat-card.card-red {
-            background: linear-gradient(135deg, #fff5f5 0%, #fed7d7 100%);
-            color: #742a2a;
-        }
-
-        .stat-card.card-red .stat-icon {
-            background: linear-gradient(135deg, #fc8181, #e53e3e);
-            color: white;
-        }
-
-        .stat-card.card-red::after {
-            background: #c53030;
-        }
-
-        /* Chart Cards */
-        .chart-card {
-            border-radius: 16px;
-            border: none;
-            box-shadow: 0 2px 16px rgba(0, 0, 0, 0.06);
-            overflow: hidden;
-        }
-
-        .chart-card .card-header {
-            background: white;
-            border-bottom: 1px solid #edf2f7;
-            padding: 20px 24px;
-        }
-
-        .chart-card .card-header h5 {
-            font-weight: 700;
-            color: #1a202c;
+        .hero-chip strong {
             font-size: 1rem;
-            margin: 0;
+            line-height: 1;
+            display: block;
         }
 
-        .chart-card .card-header .subtitle {
-            font-size: 0.78rem;
-            color: #a0aec0;
-            margin: 0;
-        }
-
-        .chart-card .card-body {
-            padding: 24px;
-        }
-
-        /* Activity Timeline */
-        .activity-timeline {
-            position: relative;
-            padding-left: 24px;
-        }
-
-        .activity-timeline::before {
-            content: '';
-            position: absolute;
-            left: 7px;
-            top: 0;
-            bottom: 0;
-            width: 2px;
-            background: linear-gradient(180deg, #e2e8f0 0%, transparent 100%);
-        }
-
-        .activity-item {
-            position: relative;
-            padding-bottom: 20px;
-            padding-left: 16px;
-        }
-
-        .activity-item:last-child {
-            padding-bottom: 0;
-        }
-
-        .activity-item::before {
-            content: '';
-            position: absolute;
-            left: -20px;
-            top: 6px;
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            border: 2px solid white;
-            box-shadow: 0 0 0 2px #e2e8f0;
-        }
-
-        .activity-item.type-masuk::before {
-            background: #4299e1;
-            box-shadow: 0 0 0 2px #bee3f8;
-        }
-
-        .activity-item.type-disposisi::before {
-            background: #ed8936;
-            box-shadow: 0 0 0 2px #feebc8;
-        }
-
-        .activity-item.type-keluar::before {
-            background: #48bb78;
-            box-shadow: 0 0 0 2px #c6f6d5;
-        }
-
-        .activity-item .activity-title {
-            font-weight: 600;
-            font-size: 0.875rem;
-            color: #2d3748;
-        }
-
-        .activity-item .activity-desc {
-            font-size: 0.8rem;
-            color: #718096;
+        .hero-chip span {
+            font-size: 0.74rem;
+            opacity: 0.82;
+            display: block;
             margin-top: 2px;
         }
 
-        .activity-item .activity-time {
-            font-size: 0.72rem;
-            color: #a0aec0;
-            margin-top: 4px;
+        .module-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 18px;
         }
 
-        /* Quick Action Buttons */
-        .quick-action {
-            border-radius: 12px;
-            border: 2px solid #edf2f7;
+        .module-card {
+            background: #fff;
+            border: 1px solid #e5e7eb;
+            border-radius: 18px;
             padding: 20px;
-            text-align: center;
-            transition: all 0.2s ease;
-            background: white;
-            text-decoration: none !important;
-            display: block;
-            color: #4a5568;
+            box-shadow: 0 10px 26px rgba(15, 23, 42, 0.05);
+            display: grid;
+            gap: 16px;
         }
 
-        .quick-action:hover {
-            border-color: #4299e1;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 16px rgba(66, 153, 225, 0.15);
-            color: #2b6cb0;
-        }
-
-        .quick-action .qa-icon {
-            width: 48px;
-            height: 48px;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 10px;
-            font-size: 1.2rem;
-        }
-
-        .quick-action .qa-label {
-            font-weight: 600;
-            font-size: 0.82rem;
-        }
-
-        /* Disposisi items */
-        .disposisi-item {
-            padding: 14px 0;
-            border-bottom: 1px solid #f7fafc;
+        .module-card-head {
             display: flex;
             align-items: flex-start;
+            justify-content: space-between;
             gap: 12px;
         }
 
-        .disposisi-item:last-child {
-            border-bottom: none;
+        .module-card-title {
+            font-size: 1rem;
+            font-weight: 800;
+            color: #0f172a;
+            margin-bottom: 4px;
         }
 
-        .disposisi-avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 10px;
-            display: flex;
+        .module-card-subtitle {
+            color: #64748b;
+            font-size: 0.82rem;
+        }
+
+        .module-pill {
+            display: inline-flex;
             align-items: center;
             justify-content: center;
-            font-size: 0.85rem;
-            font-weight: 700;
+            width: 48px;
+            height: 48px;
+            border-radius: 14px;
+            font-size: 1.1rem;
+            color: #fff;
             flex-shrink: 0;
         }
 
-        /* Status pips */
-        .status-dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            display: inline-block;
-            margin-right: 6px;
+        .module-pill.persuratan { background: linear-gradient(135deg, #2563eb, #1d4ed8); }
+        .module-pill.rapat { background: linear-gradient(135deg, #0f766e, #0d9488); }
+        .module-pill.cuti { background: linear-gradient(135deg, #15803d, #16a34a); }
+
+        .metric-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 10px;
         }
 
-        .status-dot.pending {
-            background: #ecc94b;
+        .metric-box {
+            border-radius: 14px;
+            border: 1px solid #e2e8f0;
+            background: #f8fafc;
+            padding: 12px 13px;
+            min-height: 76px;
         }
 
-        .status-dot.done {
-            background: #48bb78;
+        .metric-box .value {
+            font-size: 1.35rem;
+            font-weight: 800;
+            color: #0f172a;
+            line-height: 1;
+            margin-bottom: 6px;
         }
 
-        body.theme-dark .welcome-banner {
-            background: linear-gradient(135deg, #0f172a 0%, #172554 45%, #1d4ed8 100%);
+        .metric-box .label {
+            font-size: 0.78rem;
+            color: #64748b;
+            line-height: 1.25;
         }
 
-        body.theme-dark .chart-card,
-        body.theme-dark .chart-card .card-header {
-            background: #111827;
-            border-color: #1f2937;
+        .module-link-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
         }
 
-        body.theme-dark .chart-card .card-header h5,
-        body.theme-dark .activity-item .activity-title,
-        body.theme-dark .quick-action .qa-label {
-            color: #e5e7eb;
+        .module-link-row a {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            border-radius: 10px;
+            background: #eff6ff;
+            color: #1d4ed8;
+            padding: 9px 12px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-decoration: none;
         }
 
-        body.theme-dark .chart-card .card-header .subtitle,
-        body.theme-dark .activity-item .activity-desc,
-        body.theme-dark .activity-item .activity-time {
+        .module-link-row a.alt {
+            background: #f0fdf4;
+            color: #15803d;
+        }
+
+        .dashboard-row {
+            display: grid;
+            grid-template-columns: 1.15fr 0.85fr;
+            gap: 18px;
+        }
+
+        .dash-panel {
+            background: #fff;
+            border: 1px solid #e5e7eb;
+            border-radius: 18px;
+            box-shadow: 0 10px 26px rgba(15, 23, 42, 0.05);
+            overflow: hidden;
+        }
+
+        .dash-panel-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 18px 20px 14px;
+            border-bottom: 1px solid #eef2f7;
+        }
+
+        .dash-panel-head h5 {
+            margin: 0;
+            font-size: 0.98rem;
+            font-weight: 800;
+            color: #0f172a;
+        }
+
+        .dash-panel-head p {
+            margin: 3px 0 0;
+            font-size: 0.78rem;
+            color: #64748b;
+        }
+
+        .dash-panel-body {
+            padding: 8px 20px 18px;
+        }
+
+        .action-list,
+        .recent-list,
+        .upcoming-list {
+            display: grid;
+            gap: 10px;
+        }
+
+        .action-item,
+        .recent-item,
+        .upcoming-item {
+            display: grid;
+            grid-template-columns: auto 1fr auto;
+            gap: 12px;
+            align-items: flex-start;
+            padding: 12px 0;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .recent-item,
+        .upcoming-item {
+            grid-template-columns: 1fr auto;
+        }
+
+        .action-item:last-child,
+        .recent-item:last-child,
+        .upcoming-item:last-child {
+            border-bottom: none;
+        }
+
+        .action-icon {
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.95rem;
+            color: #fff;
+            margin-top: 2px;
+        }
+
+        .tone-blue { background: linear-gradient(135deg, #3b82f6, #1d4ed8); }
+        .tone-amber { background: linear-gradient(135deg, #f59e0b, #d97706); }
+        .tone-green { background: linear-gradient(135deg, #22c55e, #15803d); }
+        .tone-red { background: linear-gradient(135deg, #ef4444, #b91c1c); }
+        .tone-purple { background: linear-gradient(135deg, #8b5cf6, #6d28d9); }
+
+        .item-title {
+            font-size: 0.87rem;
+            font-weight: 700;
+            color: #0f172a;
+            margin-bottom: 3px;
+        }
+
+        .item-subtitle {
+            font-size: 0.78rem;
+            color: #334155;
+            margin-bottom: 3px;
+        }
+
+        .item-description,
+        .item-meta {
+            font-size: 0.76rem;
+            color: #64748b;
+            line-height: 1.35;
+        }
+
+        .item-link {
+            align-self: center;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 34px;
+            height: 34px;
+            border-radius: 10px;
+            background: #eff6ff;
+            color: #1d4ed8;
+            text-decoration: none;
+            flex-shrink: 0;
+        }
+
+        .list-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 64px;
+            padding-left: 10px;
+            margin-left: 10px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 28px 12px;
             color: #94a3b8;
+            font-size: 0.86rem;
         }
 
-        body.theme-dark .activity-timeline::before {
-            background: linear-gradient(180deg, #334155 0%, transparent 100%);
+        .recent-columns {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 18px;
         }
 
-        body.theme-dark .activity-item::before {
-            border-color: #111827;
-            box-shadow: 0 0 0 2px #334155;
+        @media (max-width: 1199.98px) {
+            .module-grid,
+            .recent-columns,
+            .dashboard-row {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 767.98px) {
+            .hero-chip-wrap {
+                flex-direction: column;
+            }
+
+            .metric-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .dash-panel-head,
+            .module-card-head {
+                flex-direction: column;
+                align-items: flex-start;
+            }
         }
     </style>
 @endpush
@@ -434,387 +342,298 @@
 @endsection
 
 @section('content')
-    <!-- Welcome Banner -->
-    <div class="welcome-banner">
-        <div class="d-flex justify-content-between align-items-start">
-            <div>
-                <h2>Selamat Datang, <span>{{ auth()->user()->name }}</span></h2>
-                <p>{{ now()->translatedFormat('l, d F Y') }} | Pengadilan Tinggi Agama Papua Barat</p>
-                <div class="today-stats">
-                    <div class="today-stat">
-                        <i class="fas fa-inbox"></i>
-                        <div>
-                            <div class="num">{{ $todayMasuk }}</div>
-                            <div class="lbl">Masuk Hari Ini</div>
-                        </div>
-                    </div>
-                    <div class="today-stat">
-                        <i class="fas fa-paper-plane"></i>
-                        <div>
-                            <div class="num">{{ $todayKeluar }}</div>
-                            <div class="lbl">Keluar Hari Ini</div>
-                        </div>
-                    </div>
-                    @if($disposisiPending > 0)
-                        <div class="today-stat" style="border-color: rgba(237,137,54,0.4); background: rgba(237,137,54,0.15);">
-                            <i class="fas fa-bell" style="color: #fbd38d;"></i>
-                            <div>
-                                <div class="num">{{ $disposisiPending }}</div>
-                                <div class="lbl">Disposisi Menunggu</div>
-                            </div>
-                        </div>
-                    @endif
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Stats Cards -->
-    <div class="row mb-4">
-        <div class="col-xl-3 col-md-6 mb-3">
-            <a href="{{ route('surat-masuk.index') }}" style="text-decoration: none;">
-                <div class="stat-card card-blue">
-                    <div class="stat-icon"><i class="fas fa-inbox"></i></div>
-                    <div class="stat-number">{{ $totalSuratMasuk }}</div>
-                    <div class="stat-label">Total Surat Masuk</div>
-                    @if($suratMasukBaru > 0)
-                        <span class="stat-badge" style="background: #4299e1; color: white;">{{ $suratMasukBaru }} Baru</span>
-                    @endif
-                </div>
-            </a>
-        </div>
-        <div class="col-xl-3 col-md-6 mb-3">
-            <a href="{{ route('surat-keluar.index') }}" style="text-decoration: none;">
-                <div class="stat-card card-green">
-                    <div class="stat-icon"><i class="fas fa-paper-plane"></i></div>
-                    <div class="stat-number">{{ $totalSuratKeluar }}</div>
-                    <div class="stat-label">Total Surat Keluar</div>
-                    @if($suratKeluarDraft > 0)
-                        <span class="stat-badge" style="background: #ed8936; color: white;">{{ $suratKeluarDraft }} Draft</span>
-                    @endif
-                </div>
-            </a>
-        </div>
-        <div class="col-xl-3 col-md-6 mb-3">
-            <div class="stat-card card-amber">
-                <div class="stat-icon"><i class="fas fa-envelope-open-text"></i></div>
-                <div class="stat-number">{{ $suratMasukBaru }}</div>
-                <div class="stat-label">Surat Belum Diproses</div>
-            </div>
-        </div>
-        <div class="col-xl-3 col-md-6 mb-3">
-            <div class="stat-card card-red">
-                <div class="stat-icon"><i class="fas fa-tasks"></i></div>
-                <div class="stat-number">{{ $disposisiPending }}</div>
-                <div class="stat-label">Disposisi Menunggu</div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Charts Row -->
-    <div class="row mb-4" style="align-items: flex-start;">
-        <!-- Bar Chart: Monthly Stats -->
-        <div class="col-lg-8 mb-3">
-            <div class="card chart-card">
-                <div class="card-header d-flex justify-content-between align-items-center">
+    <div class="dashboard-shell">
+        <section class="dashboard-hero">
+            <div class="dashboard-hero-title">{{ auth()->user()->name }}</div>
+            <div class="dashboard-hero-meta">{{ now()->translatedFormat('l, d F Y') }} • Ringkasan kerja lintas modul</div>
+            <div class="hero-chip-wrap">
+                <div class="hero-chip">
+                    <i class="fas fa-bell"></i>
                     <div>
-                        <h5><i class="fas fa-chart-bar mr-2" style="color: #4299e1;"></i>Statistik Persuratan</h5>
-                        <p class="subtitle">Data 6 bulan terakhir</p>
+                        <strong>{{ $dashboardSummary['action_count'] }}</strong>
+                        <span>Tindak lanjut aktif</span>
                     </div>
                 </div>
-                <div class="card-body">
-                    <div style="position: relative; height: 280px;">
-                        <canvas id="monthlyChart"></canvas>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Doughnut Chart: Status Distribution -->
-        <div class="col-lg-4 mb-3">
-            <div class="card chart-card">
-                <div class="card-header">
-                    <h5><i class="fas fa-chart-pie mr-2" style="color: #ed8936;"></i>Status Surat Masuk</h5>
-                    <p class="subtitle">Distribusi status saat ini</p>
-                </div>
-                <div class="card-body" style="text-align: center;">
-                    <div style="position: relative; width: 180px; height: 180px; margin: 0 auto;">
-                        <canvas id="statusChart"></canvas>
-                    </div>
-                    <div class="d-flex justify-content-center gap-3 mt-3" style="gap: 16px;">
-                        <div class="text-center">
-                            <span class="status-dot" style="background: #4299e1;"></span>
-                            <small class="text-muted">Baru ({{ $statusData['baru'] }})</small>
-                        </div>
-                        <div class="text-center">
-                            <span class="status-dot" style="background: #ed8936;"></span>
-                            <small class="text-muted">Proses ({{ $statusData['didisposisi'] }})</small>
-                        </div>
-                        <div class="text-center">
-                            <span class="status-dot" style="background: #48bb78;"></span>
-                            <small class="text-muted">Selesai ({{ $statusData['selesai'] }})</small>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Bottom Row -->
-    <div class="row">
-        <!-- Activity Timeline -->
-        <div class="col-lg-5 mb-3">
-            <div class="card chart-card">
-                <div class="card-header d-flex justify-content-between align-items-center">
+                <div class="hero-chip">
+                    <i class="fas fa-inbox"></i>
                     <div>
-                        <h5><i class="fas fa-stream mr-2" style="color: #9f7aea;"></i>Aktivitas Terbaru</h5>
-                        <p class="subtitle">Surat masuk dan disposisi</p>
+                        <strong>{{ $dashboardSummary['today_masuk'] }}</strong>
+                        <span>Surat masuk hari ini</span>
                     </div>
-                    <a href="{{ route('surat-masuk.index') }}" class="btn btn-sm"
-                        style="background: #edf2f7; color: #4a5568; font-weight: 600; border-radius: 8px;">Lihat Semua</a>
                 </div>
-                <div class="card-body">
-                    <div class="activity-timeline">
-                        @forelse($recentSuratMasuk as $surat)
-                            <div class="activity-item type-masuk">
-                                <div class="activity-title">{{ $surat->nomor_surat }}</div>
-                                <div class="activity-desc">
-                                    <span
-                                        style="background: {{ $surat->opsi_pengirim == 'mahkamah_agung' ? '#48bb78' : '#ed8936' }}; color: white; padding: 1px 8px; border-radius: 4px; font-size: 0.7rem;">
-                                        {{ $surat->opsi_pengirim == 'mahkamah_agung' ? 'MA' : 'Non-MA' }}
-                                    </span>
-                                    {{ $surat->pengirim }} | {{ Str::limit($surat->perihal, 40) }}
-                                </div>
-                                <div class="activity-time"><i
-                                        class="far fa-clock mr-1"></i>{{ $surat->created_at->diffForHumans() }}</div>
-                            </div>
-                        @empty
-                            <div class="text-center text-muted py-3">
-                                <i class="fas fa-inbox mb-2 d-block" style="font-size: 1.5rem; opacity: 0.3;"></i>
-                                Belum ada aktivitas
-                            </div>
-                        @endforelse
+                <div class="hero-chip">
+                    <i class="fas fa-calendar-alt"></i>
+                    <div>
+                        <strong>{{ $dashboardSummary['upcoming_meetings'] }}</strong>
+                        <span>Rapat / agenda mendatang</span>
+                    </div>
+                </div>
+                <div class="hero-chip">
+                    <i class="fas fa-calendar-check"></i>
+                    <div>
+                        <strong>{{ $dashboardSummary['pending_leave_approvals'] }}</strong>
+                        <span>Approval cuti pending</span>
                     </div>
                 </div>
             </div>
-        </div>
+        </section>
 
-        <!-- Disposisi for current user -->
-        <div class="col-lg-4 mb-3">
-            <div class="card chart-card">
-                <div class="card-header">
-                    <h5><i class="fas fa-bell mr-2" style="color: #ed8936;"></i>Disposisi Anda</h5>
-                    <p class="subtitle">Surat yang perlu ditindaklanjuti</p>
+        <section class="module-grid">
+            @if($persuratan['enabled'])
+                <article class="module-card">
+                    <div class="module-card-head">
+                        <div>
+                            <div class="module-card-title">Persuratan</div>
+                            <div class="module-card-subtitle">Surat masuk, surat keluar, dan disposisi yang relevan dengan Anda.</div>
+                        </div>
+                        <div class="module-pill persuratan"><i class="fas fa-envelope-open-text"></i></div>
+                    </div>
+                    <div class="metric-grid">
+                        <div class="metric-box">
+                            <div class="value">{{ $persuratan['stats']['total_masuk'] }}</div>
+                            <div class="label">Total surat masuk terlihat</div>
+                        </div>
+                        <div class="metric-box">
+                            <div class="value">{{ $persuratan['stats']['surat_baru'] }}</div>
+                            <div class="label">Surat masuk baru</div>
+                        </div>
+                        <div class="metric-box">
+                            <div class="value">{{ $persuratan['stats']['disposisi_pending'] }}</div>
+                            <div class="label">Disposisi menunggu tindak lanjut</div>
+                        </div>
+                        <div class="metric-box">
+                            <div class="value">{{ $persuratan['stats']['keluar_draft'] }}</div>
+                            <div class="label">Surat keluar draft</div>
+                        </div>
+                    </div>
+                    <div class="module-link-row">
+                        <a href="{{ route('surat-masuk.index') }}"><i class="fas fa-inbox"></i> Surat Masuk</a>
+                        <a href="{{ route('surat-keluar.index') }}" class="alt"><i class="fas fa-paper-plane"></i> Surat Keluar</a>
+                    </div>
+                </article>
+            @endif
+
+            @if($meeting['enabled'])
+                <article class="module-card">
+                    <div class="module-card-head">
+                        <div>
+                            <div class="module-card-title">Rapat / Agenda</div>
+                            <div class="module-card-subtitle">Rapat, agenda pimpinan, approval undangan, dan tindak lanjut notulen.</div>
+                        </div>
+                        <div class="module-pill rapat"><i class="fas fa-calendar-week"></i></div>
+                    </div>
+                    <div class="metric-grid">
+                        <div class="metric-box">
+                            <div class="value">{{ $meeting['stats']['total_rapat'] }}</div>
+                            <div class="label">Rapat yang bisa Anda lihat</div>
+                        </div>
+                        <div class="metric-box">
+                            <div class="value">{{ $meeting['stats']['total_agenda'] }}</div>
+                            <div class="label">Agenda pimpinan terkait Anda</div>
+                        </div>
+                        <div class="metric-box">
+                            <div class="value">{{ $meeting['stats']['pending_undangan'] + $meeting['stats']['pending_notulensi'] }}</div>
+                            <div class="label">Approval undangan dan notulensi</div>
+                        </div>
+                        <div class="metric-box">
+                            <div class="value">{{ $meeting['stats']['pending_tindak_lanjut'] }}</div>
+                            <div class="label">Tindak lanjut notulen pending</div>
+                        </div>
+                    </div>
+                    <div class="module-link-row">
+                        <a href="{{ route('rapat.index') }}"><i class="fas fa-users"></i> Rapat</a>
+                        <a href="{{ route('rapat.absensi.index') }}" class="alt"><i class="fas fa-clipboard-check"></i> Absensi</a>
+                        <a href="{{ route('rapat.laporan.index') }}"><i class="fas fa-file-pdf"></i> Laporan</a>
+                    </div>
+                </article>
+            @endif
+
+            @if($leave['enabled'])
+                <article class="module-card">
+                    <div class="module-card-head">
+                        <div>
+                            <div class="module-card-title">Cuti</div>
+                            <div class="module-card-subtitle">Pengajuan cuti Anda, status proses, dan approval yang perlu ditindaklanjuti.</div>
+                        </div>
+                        <div class="module-pill cuti"><i class="fas fa-calendar-check"></i></div>
+                    </div>
+                    <div class="metric-grid">
+                        <div class="metric-box">
+                            <div class="value">{{ $leave['stats']['pengajuan_saya'] }}</div>
+                            <div class="label">Total pengajuan saya</div>
+                        </div>
+                        <div class="metric-box">
+                            <div class="value">{{ $leave['stats']['diproses'] }}</div>
+                            <div class="label">Pengajuan sedang diproses</div>
+                        </div>
+                        <div class="metric-box">
+                            <div class="value">{{ $leave['stats']['disetujui'] }}</div>
+                            <div class="label">Pengajuan disetujui / selesai</div>
+                        </div>
+                        <div class="metric-box">
+                            <div class="value">{{ $leave['stats']['approval_pending'] }}</div>
+                            <div class="label">Approval cuti pending</div>
+                        </div>
+                    </div>
+                    <div class="module-link-row">
+                        <a href="{{ route('cuti.index') }}"><i class="fas fa-calendar-alt"></i> Pengajuan Cuti</a>
+                        <a href="{{ route('cuti.reports.index') }}" class="alt"><i class="fas fa-chart-bar"></i> Laporan Cuti</a>
+                    </div>
+                </article>
+            @endif
+        </section>
+
+        <section class="dashboard-row">
+            <div class="dash-panel">
+                <div class="dash-panel-head">
+                    <div>
+                        <h5>Yang Perlu Ditindaklanjuti</h5>
+                        <p>Daftar tugas terbaru dari persuratan, rapat / agenda, dan cuti.</p>
+                    </div>
                 </div>
-                <div class="card-body">
-                    @forelse($recentDisposisi as $disposisi)
-                        <div class="disposisi-item">
-                            <div class="disposisi-avatar"
-                                style="background: linear-gradient(135deg, #ebf8ff, #bee3f8); color: #2c5282;">
-                                {{ strtoupper(substr($disposisi->dariUser->name, 0, 2)) }}
-                            </div>
-                            <div style="flex: 1; min-width: 0;">
-                                <div style="font-weight: 600; font-size: 0.85rem; color: #2d3748;">
-                                    {{ $disposisi->suratMasuk->nomor_surat }}
-                                </div>
-                                <div style="font-size: 0.78rem; color: #718096;">
-                                    Dari: {{ $disposisi->dariUser->name }}
-                                </div>
-                                @if($disposisi->catatan)
-                                    <div style="font-size: 0.75rem; color: #a0aec0; margin-top: 2px;">
-                                        <i class="fas fa-comment-alt mr-1"></i>{{ Str::limit($disposisi->catatan, 50) }}
+                <div class="dash-panel-body">
+                    @if($actionItems->isEmpty())
+                        <div class="empty-state">Tidak ada tindak lanjut aktif saat ini.</div>
+                    @else
+                        <div class="action-list">
+                            @foreach($actionItems as $item)
+                                <div class="action-item">
+                                    <div class="action-icon tone-{{ $item['tone'] }}">
+                                        <i class="{{ $item['icon'] }}"></i>
                                     </div>
-                                @endif
-                                <div style="font-size: 0.7rem; color: #cbd5e0; margin-top: 4px;">
-                                    {{ $disposisi->created_at->diffForHumans() }}
+                                    <div>
+                                        <div class="item-title">{{ $item['title'] }}</div>
+                                        <div class="item-subtitle">{{ $item['subtitle'] }}</div>
+                                        <div class="item-description">{{ $item['description'] }}</div>
+                                        <div class="item-meta">{{ $item['module'] }} • {{ $item['time'] }}</div>
+                                    </div>
+                                    <a href="{{ $item['url'] }}" class="item-link" title="Buka">
+                                        <i class="fas fa-arrow-right"></i>
+                                    </a>
                                 </div>
-                            </div>
-                            <div>
-                                @if($disposisi->status == 'pending')
-                                    <span
-                                        style="background: #fefcbf; color: #975a16; padding: 3px 10px; border-radius: 20px; font-size: 0.68rem; font-weight: 600;">Pending</span>
-                                @else
-                                    <span
-                                        style="background: #c6f6d5; color: #276749; padding: 3px 10px; border-radius: 20px; font-size: 0.68rem; font-weight: 600;">Done</span>
-                                @endif
-                            </div>
+                            @endforeach
                         </div>
-                    @empty
-                        <div class="text-center text-muted py-4">
-                            <i class="fas fa-check-circle d-block mb-2" style="font-size: 2rem; color: #c6f6d5;"></i>
-                            <span style="font-size: 0.85rem;">Tidak ada disposisi pending</span>
-                        </div>
-                    @endforelse
+                    @endif
                 </div>
             </div>
-        </div>
 
-        <!-- Quick Actions -->
-        <div class="col-lg-3 mb-3">
-            <div class="card chart-card">
-                <div class="card-header">
-                    <h5><i class="fas fa-bolt mr-2" style="color: #ecc94b;"></i>Aksi Cepat</h5>
-                    <p class="subtitle">Pintasan menu</p>
-                </div>
-                <div class="card-body">
-                    <div class="row" style="row-gap: 12px;">
-                        <div class="col-6">
-                            <a href="{{ route('surat-masuk.index') }}" class="quick-action">
-                                <div class="qa-icon"
-                                    style="background: linear-gradient(135deg, #ebf8ff, #bee3f8); color: #2b6cb0;">
-                                    <i class="fas fa-inbox"></i>
-                                </div>
-                                <div class="qa-label">Surat Masuk</div>
-                            </a>
-                        </div>
-                        <div class="col-6">
-                            <a href="{{ route('surat-keluar.index') }}" class="quick-action">
-                                <div class="qa-icon"
-                                    style="background: linear-gradient(135deg, #f0fff4, #c6f6d5); color: #276749;">
-                                    <i class="fas fa-paper-plane"></i>
-                                </div>
-                                <div class="qa-label">Surat Keluar</div>
-                            </a>
-                        </div>
-                        <div class="col-6">
-                            <a href="{{ route('arsip.index') }}" class="quick-action">
-                                <div class="qa-icon"
-                                    style="background: linear-gradient(135deg, #faf5ff, #e9d8fd); color: #6b46c1;">
-                                    <i class="fas fa-archive"></i>
-                                </div>
-                                <div class="qa-label">Arsip</div>
-                            </a>
-                        </div>
-                        <div class="col-6">
-                            <a href="#" class="quick-action">
-                                <div class="qa-icon"
-                                    style="background: linear-gradient(135deg, #fffff0, #fefcbf); color: #975a16;">
-                                    <i class="fas fa-users"></i>
-                                </div>
-                                <div class="qa-label">Rapat</div>
-                            </a>
-                        </div>
+            <div class="dash-panel">
+                <div class="dash-panel-head">
+                    <div>
+                        <h5>Jadwal Rapat / Agenda Terdekat</h5>
+                        <p>Item mendatang yang berada dalam jangkauan akses Anda.</p>
                     </div>
                 </div>
+                <div class="dash-panel-body">
+                    @if(!$meeting['enabled'] || $meeting['upcoming']->isEmpty())
+                        <div class="empty-state">Belum ada rapat atau agenda mendatang.</div>
+                    @else
+                        <div class="upcoming-list">
+                            @foreach($meeting['upcoming'] as $item)
+                                <div class="upcoming-item">
+                                    <div>
+                                        <div class="item-title">{{ $item['title'] }}</div>
+                                        <div class="item-subtitle">{{ $item['meta'] }}</div>
+                                        <div class="item-description">{{ $item['submeta'] }}</div>
+                                    </div>
+                                    <div class="list-badge">
+                                        {!! $item['badge'] !!}
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                    @endif
+                </div>
             </div>
-        </div>
+        </section>
+
+        <section class="recent-columns">
+            @if($persuratan['enabled'])
+                <div class="dash-panel">
+                    <div class="dash-panel-head">
+                        <div>
+                            <h5>Persuratan Terbaru</h5>
+                            <p>Surat masuk dan surat keluar terakhir yang relevan.</p>
+                        </div>
+                    </div>
+                    <div class="dash-panel-body">
+                        @if($persuratan['recent']->isEmpty())
+                            <div class="empty-state">Belum ada data persuratan.</div>
+                        @else
+                            <div class="recent-list">
+                                @foreach($persuratan['recent'] as $item)
+                                    <div class="recent-item">
+                                        <div>
+                                            <div class="item-title">{{ $item['title'] }}</div>
+                                            <div class="item-subtitle">{{ $item['type'] }} • {{ $item['subtitle'] }}</div>
+                                            <div class="item-meta">{{ $item['meta'] }}</div>
+                                        </div>
+                                        <div class="list-badge">{!! $item['badge'] !!}</div>
+                                    </div>
+                                @endforeach
+                            </div>
+                        @endif
+                    </div>
+                </div>
+            @endif
+
+            @if($meeting['enabled'])
+                <div class="dash-panel">
+                    <div class="dash-panel-head">
+                        <div>
+                            <h5>Rapat / Agenda Terbaru</h5>
+                            <p>Dokumen rapat dan agenda terbaru yang bisa Anda akses.</p>
+                        </div>
+                    </div>
+                    <div class="dash-panel-body">
+                        @if($meeting['recent']->isEmpty())
+                            <div class="empty-state">Belum ada data rapat atau agenda.</div>
+                        @else
+                            <div class="recent-list">
+                                @foreach($meeting['recent'] as $item)
+                                    <div class="recent-item">
+                                        <div>
+                                            <div class="item-title">{{ $item['title'] }}</div>
+                                            <div class="item-subtitle">{{ $item['type'] }} • {{ $item['subtitle'] }}</div>
+                                            <div class="item-meta">{{ $item['meta'] }}</div>
+                                        </div>
+                                        <div class="list-badge">{!! $item['badge'] !!}</div>
+                                    </div>
+                                @endforeach
+                            </div>
+                        @endif
+                    </div>
+                </div>
+            @endif
+
+            @if($leave['enabled'])
+                <div class="dash-panel">
+                    <div class="dash-panel-head">
+                        <div>
+                            <h5>Cuti Terbaru</h5>
+                            <p>Pengajuan cuti terbaru yang relevan dengan peran Anda.</p>
+                        </div>
+                    </div>
+                    <div class="dash-panel-body">
+                        @if($leave['recent']->isEmpty())
+                            <div class="empty-state">Belum ada data cuti.</div>
+                        @else
+                            <div class="recent-list">
+                                @foreach($leave['recent'] as $item)
+                                    <div class="recent-item">
+                                        <div>
+                                            <div class="item-title">{{ $item['title'] }}</div>
+                                            <div class="item-subtitle">{{ $item['subtitle'] }}</div>
+                                            <div class="item-meta">{{ $item['meta'] }}</div>
+                                        </div>
+                                        <div class="list-badge">{!! $item['badge'] !!}</div>
+                                    </div>
+                                @endforeach
+                            </div>
+                        @endif
+                    </div>
+                </div>
+            @endif
+        </section>
     </div>
 @endsection
-
-@push('scripts')
-    <!-- Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-    <script>
-        $(document).ready(function () {
-            // Chart.js defaults
-            Chart.defaults.font.family = "'Inter', sans-serif";
-            Chart.defaults.color = '#718096';
-
-            // Monthly Bar Chart
-            var monthlyCtx = document.getElementById('monthlyChart').getContext('2d');
-            var gradient1 = monthlyCtx.createLinearGradient(0, 0, 0, 280);
-            gradient1.addColorStop(0, 'rgba(66, 153, 225, 0.8)');
-            gradient1.addColorStop(1, 'rgba(66, 153, 225, 0.2)');
-            var gradient2 = monthlyCtx.createLinearGradient(0, 0, 0, 280);
-            gradient2.addColorStop(0, 'rgba(72, 187, 120, 0.8)');
-            gradient2.addColorStop(1, 'rgba(72, 187, 120, 0.2)');
-
-            new Chart(monthlyCtx, {
-                type: 'bar',
-                data: {
-                    labels: {!! json_encode(array_column($monthlyData, 'month')) !!},
-                    datasets: [
-                        {
-                            label: 'Surat Masuk',
-                            data: {!! json_encode(array_column($monthlyData, 'masuk')) !!},
-                            backgroundColor: gradient1,
-                            borderColor: '#4299e1',
-                            borderWidth: 2,
-                            borderRadius: 8,
-                            borderSkipped: false,
-                        },
-                        {
-                            label: 'Surat Keluar',
-                            data: {!! json_encode(array_column($monthlyData, 'keluar')) !!},
-                            backgroundColor: gradient2,
-                            borderColor: '#48bb78',
-                            borderWidth: 2,
-                            borderRadius: 8,
-                            borderSkipped: false,
-                        }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    interaction: { intersect: false, mode: 'index' },
-                    plugins: {
-                        legend: {
-                            position: 'top',
-                            align: 'end',
-                            labels: {
-                                usePointStyle: true,
-                                pointStyle: 'rectRounded',
-                                padding: 16,
-                                font: { weight: '600', size: 12 }
-                            }
-                        },
-                        tooltip: {
-                            backgroundColor: '#1a202c',
-                            titleFont: { weight: '600' },
-                            padding: 12,
-                            cornerRadius: 8,
-                        }
-                    },
-                    scales: {
-                        x: {
-                            grid: { display: false },
-                            ticks: { font: { weight: '500' } }
-                        },
-                        y: {
-                            beginAtZero: true,
-                            grid: { color: '#f0f4f8', drawBorder: false },
-                            ticks: {
-                                stepSize: 1,
-                                font: { weight: '500' }
-                            }
-                        }
-                    }
-                }
-            });
-
-            // Doughnut Chart
-            var statusCtx = document.getElementById('statusChart').getContext('2d');
-            new Chart(statusCtx, {
-                type: 'doughnut',
-                data: {
-                    labels: ['Baru', 'Diproses', 'Selesai'],
-                    datasets: [{
-                        data: [{{ $statusData['baru'] }}, {{ $statusData['didisposisi'] }}, {{ $statusData['selesai'] }}],
-                        backgroundColor: [
-                            '#4299e1',
-                            '#ed8936',
-                            '#48bb78'
-                        ],
-                        borderWidth: 0,
-                        hoverOffset: 8,
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    cutout: '72%',
-                    plugins: {
-                        legend: { display: false },
-                        tooltip: {
-                            backgroundColor: '#1a202c',
-                            padding: 12,
-                            cornerRadius: 8,
-                            titleFont: { weight: '600' },
-                        }
-                    }
-                }
-            });
-        });
-    </script>
-@endpush

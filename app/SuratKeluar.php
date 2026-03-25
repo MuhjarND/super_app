@@ -84,6 +84,11 @@ class SuratKeluar extends Model
         return $this->belongsToMany(User::class, 'surat_keluar_penerima');
     }
 
+    public function templateApproval()
+    {
+        return $this->hasOne(SuratKeluarApproval::class, 'surat_keluar_id');
+    }
+
     public function getNomenklaturKodeAttribute()
     {
         $map = [
@@ -97,10 +102,26 @@ class SuratKeluar extends Model
 
     public function getStatusBadgeAttribute()
     {
-        if ($this->status == 'draft') {
-            return '<span class="badge badge-danger">Draft</span>';
+        $approval = $this->relationLoaded('templateApproval')
+            ? $this->templateApproval
+            : $this->templateApproval()->first();
+
+        if ($this->status === 'lengkap') {
+            [$class, $label] = ['success', 'Lengkap'];
+        } elseif ($approval && $approval->status === 'pending') {
+            [$class, $label] = ['warning', 'Pending Approval'];
+        } elseif ($approval && $approval->status === 'rejected') {
+            [$class, $label] = ['danger', 'Ditolak'];
+        } else {
+            $map = [
+                'draft' => ['danger', 'Draft'],
+                'lengkap' => ['success', 'Lengkap'],
+            ];
+
+            [$class, $label] = $map[$this->status] ?? ['secondary', ucfirst((string) $this->status)];
         }
-        return '<span class="badge badge-success">Lengkap</span>';
+
+        return '<span class="badge badge-' . $class . '">' . $label . '</span>';
     }
 
     public function getPenerimaInfoAttribute()

@@ -401,6 +401,12 @@
         </div>
     </div>
 
+    @if(!empty($templatePrefill))
+        <div class="alert alert-info border-0 shadow-sm">
+            Draft surat keluar dari template <strong>{{ $templatePrefill['template_name'] ?? 'Template Surat' }}</strong> siap dilengkapi. Form pembuatan akan dibuka otomatis dengan data awal dari template tersebut.
+        </div>
+    @endif
+
     <div class="card surat-keluar-card">
         <div class="card-body">
             <table id="suratKeluarTable" class="table surat-keluar-style" style="width:100%">
@@ -484,11 +490,7 @@
                             </td>
                             <td class="creator-text"><?php echo e($surat->creator->name); ?></td>
                             <td>
-                                <?php if($surat->status == 'draft'): ?>
-                                    <span class="status-badge draft">Draft</span>
-                                <?php else: ?>
-                                    <span class="status-badge complete">Lengkap</span>
-                                <?php endif; ?>
+                                {!! $surat->status_badge !!}
                             </td>
                         </tr>
                     <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
@@ -507,7 +509,19 @@
                 </div>
                 <form id="createForm">
                     <?php echo csrf_field(); ?>
+                    @if(!empty($templatePrefill))
+                        <input type="hidden" name="template_source" value="{{ $templatePrefill['source'] ?? 'template_surat' }}">
+                        <input type="hidden" name="template_name" value="{{ $templatePrefill['template_name'] ?? '' }}">
+                        <input type="hidden" name="template_slug" value="{{ $templatePrefill['template_slug'] ?? '' }}">
+                        <textarea name="template_rendered_body" hidden>{{ $templatePrefill['rendered_body'] ?? '' }}</textarea>
+                        <textarea name="template_field_values" hidden>@json($templatePrefill['field_values'] ?? [])</textarea>
+                    @endif
                     <div class="modal-body">
+                        @if(!empty($templatePrefill))
+                            <div class="alert alert-light border small">
+                                Draft ini dibawa dari template surat <strong>{{ $templatePrefill['template_name'] ?? 'Template Surat' }}</strong>. Lengkapi metadata persuratan berikut sebelum disimpan.
+                            </div>
+                        @endif
                         <div class="form-group">
                             <label>Tahun Surat <span class="text-danger">*</span></label>
                             <select class="form-control nomor-input" name="tahun_surat" required>
@@ -904,6 +918,7 @@
             const transaksiOptions = <?php echo json_encode($kodeTransaksiOptions, 15, 512) ?>;
             const klasifikasiMap = <?php echo json_encode($klasifikasiKodes->map(function($item){ return ['id' => $item->id, 'kode' => strtoupper($item->kode)]; })->values(), 15, 512) ?>;
             const kategoriMap = <?php echo json_encode($kategoriSurats->map(function($item){ return ['id' => $item->id, 'kode' => strtoupper($item->kode)]; })->values(), 15, 512) ?>;
+            const suratTemplatePrefill = <?php echo json_encode($templatePrefill ?? null, 15, 512) ?>;
             const klasifikasiByKode = {};
             const kategoriByKode = {};
 
@@ -1214,6 +1229,33 @@
                 initInternalSelect('penerimaInternal', 'createModal');
                 applyKodeHierarchy('create', {});
             });
+
+            if (suratTemplatePrefill && canManageSuratKeluar) {
+                $('input[name="tahun_surat"]', '#createForm').val(suratTemplatePrefill.tahun_surat || new Date().getFullYear());
+                $('textarea[name="perihal"]', '#createForm').val(suratTemplatePrefill.perihal || suratTemplatePrefill.template_name || 'Template Surat');
+                $('input[name="tanggal_surat"]', '#createForm').val(suratTemplatePrefill.tanggal_surat || '');
+                $('select[name="has_lampiran"]', '#createForm').val('tidak');
+                $('select[name="nomenklatur_jabatan"]', '#createForm').val(suratTemplatePrefill.nomenklatur_jabatan || 'sekretaris');
+                $('select[name="opsi_penerima"]', '#createForm').val(suratTemplatePrefill.opsi_penerima || 'internal').trigger('change');
+
+                if (suratTemplatePrefill.klasifikasi_kode_id) {
+                    $('#createKlasifikasiKode').val(String(suratTemplatePrefill.klasifikasi_kode_id));
+                    applyKodeHierarchy('create', {
+                        klasifikasi: suratTemplatePrefill.klasifikasi_kode_id,
+                        fungsi: suratTemplatePrefill.kode_fungsi_id || '',
+                        kegiatan: suratTemplatePrefill.kode_kegiatan_id || '',
+                        transaksi: ''
+                    });
+                }
+
+                if (suratTemplatePrefill.kategori_surat_id) {
+                    $('#createKategoriSurat').val(String(suratTemplatePrefill.kategori_surat_id));
+                }
+
+                setTimeout(function () {
+                    $('#createModal').modal('show');
+                }, 250);
+            }
 
             $('#editModal').on('shown.bs.modal', function () {
                 initInternalSelect('editPenerimaInternal', 'editModal');

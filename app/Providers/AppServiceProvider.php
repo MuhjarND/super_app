@@ -7,6 +7,7 @@ use App\LeaveApproval;
 use App\RapatApproval;
 use App\RapatNotulensiApproval;
 use App\RapatNotulensiTindakLanjut;
+use App\SuratKeluarApproval;
 use App\SuratKeluar;
 use App\SuratMasuk;
 use Carbon\Carbon;
@@ -48,6 +49,7 @@ class AppServiceProvider extends ServiceProvider
                 'sidebarApprovalPendingCount' => 0,
                 'sidebarNotulensiApprovalPendingCount' => 0,
                 'sidebarLeaveApprovalPendingCount' => 0,
+                'sidebarSuratKeluarApprovalPendingCount' => 0,
                 'sidebarApprovalTotalCount' => 0,
                 'sidebarNotulensiFollowUpCount' => 0,
                 'topbarActionCount' => 0,
@@ -203,8 +205,35 @@ class AppServiceProvider extends ServiceProvider
                 }
             }
 
+            if (Schema::hasTable('surat_keluar_approvals') && $user->canApproveSuratKeluarTemplate()) {
+                $pendingSuratKeluarApprovalQuery = SuratKeluarApproval::with(['suratKeluar'])
+                    ->where('status', 'pending');
+
+                if (!$user->isSuperAdmin()) {
+                    $pendingSuratKeluarApprovalQuery->where('approver_id', $user->id);
+                }
+
+                $counts['sidebarSuratKeluarApprovalPendingCount'] = (clone $pendingSuratKeluarApprovalQuery)->count();
+
+                foreach ((clone $pendingSuratKeluarApprovalQuery)->latest()->take(5)->get() as $approval) {
+                    $suratKeluar = $approval->suratKeluar;
+                    $actionItems->push([
+                        'type' => 'surat-keluar-approval',
+                        'icon' => 'fas fa-paper-plane',
+                        'icon_bg' => '#fee2e2',
+                        'icon_color' => '#b91c1c',
+                        'title' => 'Approval surat keluar',
+                        'subtitle' => $approval->template_name ?: 'Surat Keluar',
+                        'description' => $suratKeluar ? ($suratKeluar->nomor_surat_formatted ?: $suratKeluar->nomor_surat) : 'Dokumen surat keluar dari template menunggu approval.',
+                        'time' => optional($approval->updated_at ?: $approval->created_at)->diffForHumans(),
+                        'url' => route('surat-keluar.approval.show', $approval),
+                        'sort_at' => optional($approval->updated_at ?: $approval->created_at)->timestamp ?: 0,
+                    ]);
+                }
+            }
+
             $counts['sidebarNotulensiFollowUpCount'] = (clone $pendingFollowUpQuery)->count();
-            $counts['sidebarApprovalTotalCount'] = $counts['sidebarApprovalPendingCount'] + $counts['sidebarNotulensiApprovalPendingCount'] + $counts['sidebarLeaveApprovalPendingCount'];
+            $counts['sidebarApprovalTotalCount'] = $counts['sidebarApprovalPendingCount'] + $counts['sidebarNotulensiApprovalPendingCount'] + $counts['sidebarLeaveApprovalPendingCount'] + $counts['sidebarSuratKeluarApprovalPendingCount'];
 
             $counts['topbarActionItems'] = $actionItems
                 ->sortByDesc('sort_at')
@@ -214,6 +243,7 @@ class AppServiceProvider extends ServiceProvider
                 + $counts['sidebarApprovalPendingCount']
                 + $counts['sidebarNotulensiApprovalPendingCount']
                 + $counts['sidebarLeaveApprovalPendingCount']
+                + $counts['sidebarSuratKeluarApprovalPendingCount']
                 + $counts['sidebarNotulensiFollowUpCount'];
 
             $view->with($counts);

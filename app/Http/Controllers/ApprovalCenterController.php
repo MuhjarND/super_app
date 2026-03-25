@@ -8,6 +8,8 @@ use App\RapatApproval;
 use App\RapatApprovalHistory;
 use App\RapatNotulensiApproval;
 use App\RapatNotulensiApprovalHistory;
+use App\SuratKeluarApproval;
+use App\SuratKeluarApprovalHistory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Schema;
 
@@ -34,10 +36,10 @@ class ApprovalCenterController extends Controller
             'description' => 'Approval dokumen cuti.',
             'icon' => 'fas fa-calendar-check',
         ],
-        'dokumen_lainnya' => [
-            'label' => 'Dokumen Lainnya',
-            'description' => 'Approval dokumen modul lain ke depannya.',
-            'icon' => 'fas fa-folder-open',
+        'surat_keluar' => [
+            'label' => 'Surat Keluar',
+            'description' => 'Approval dokumen surat keluar dari template surat.',
+            'icon' => 'fas fa-paper-plane',
         ],
     ];
 
@@ -90,7 +92,7 @@ class ApprovalCenterController extends Controller
                 'key' => $key,
                 'pending_count' => $pendingCount,
                 'history_count' => $historyCount,
-                'is_active' => $pendingCount > 0 || $historyCount > 0 || in_array($key, ['undangan', 'notulensi', 'surat_cuti'], true),
+                'is_active' => $pendingCount > 0 || $historyCount > 0 || in_array($key, ['undangan', 'notulensi', 'surat_cuti', 'surat_keluar'], true),
             ]);
         }
 
@@ -119,6 +121,14 @@ class ApprovalCenterController extends Controller
 
         if ($category === 'surat_cuti' && Schema::hasTable('leave_approvals')) {
             $query = LeaveApproval::where('status', 'pending');
+            if (!$user->isSuperAdmin()) {
+                $query->where('approver_id', $user->id);
+            }
+            return $query->count();
+        }
+
+        if ($category === 'surat_keluar' && Schema::hasTable('surat_keluar_approvals')) {
+            $query = SuratKeluarApproval::where('status', 'pending');
             if (!$user->isSuperAdmin()) {
                 $query->where('approver_id', $user->id);
             }
@@ -154,6 +164,14 @@ class ApprovalCenterController extends Controller
                 $query->whereHas('approvals', function ($approvalQuery) use ($user) {
                     $approvalQuery->where('approver_id', $user->id)->whereIn('status', ['approved', 'rejected']);
                 });
+            }
+            return $query->count();
+        }
+
+        if ($category === 'surat_keluar' && Schema::hasTable('surat_keluar_approvals')) {
+            $query = SuratKeluarApprovalHistory::query();
+            if (!$user->isSuperAdmin()) {
+                $query->where('approver_id', $user->id);
             }
             return $query->count();
         }
@@ -240,6 +258,30 @@ class ApprovalCenterController extends Controller
             });
         }
 
+        if ($category === 'surat_keluar' && Schema::hasTable('surat_keluar_approvals')) {
+            $query = SuratKeluarApproval::with(['suratKeluar.creator', 'suratKeluar.kategoriSurat', 'approver'])
+                ->where('status', 'pending')
+                ->orderByDesc('updated_at');
+
+            if (!$user->isSuperAdmin()) {
+                $query->where('approver_id', $user->id);
+            }
+
+            return $query->get()->map(function ($approval) {
+                $suratKeluar = $approval->suratKeluar;
+                return [
+                    'title' => $approval->template_name ?: 'Surat Keluar',
+                    'number' => optional($suratKeluar)->nomor_surat_formatted ?: '-',
+                    'date' => optional(optional($suratKeluar)->tanggal_surat)->translatedFormat('d F Y'),
+                    'subtitle' => optional(optional($suratKeluar)->kategoriSurat)->nama ?: 'Surat keluar template',
+                    'meta' => 'Penanda tangan: ' . ($approval->signer_name_snapshot ?: '-'),
+                    'count_label' => 'Status: ' . ($approval->status_label ?: 'Pending'),
+                    'detail_url' => route('surat-keluar.approval.show', $approval),
+                    'status_label' => $approval->status_label,
+                ];
+            });
+        }
+
         return collect();
     }
 
@@ -304,6 +346,28 @@ class ApprovalCenterController extends Controller
                     'action' => ucfirst((string) $entry->action),
                     'note' => $entry->note,
                     'detail_url' => route('cuti.approval.show', $entry),
+                ];
+            });
+        }
+
+        if ($category === 'surat_keluar' && Schema::hasTable('surat_keluar_approval_histories')) {
+            $query = SuratKeluarApprovalHistory::with(['suratKeluar', 'approver', 'approval'])
+                ->orderByDesc('acted_at')
+                ->orderByDesc('id');
+
+            if (!$user->isSuperAdmin()) {
+                $query->where('approver_id', $user->id);
+            }
+
+            return $query->limit(100)->get()->map(function ($entry) {
+                return [
+                    'title' => optional($entry->approval)->template_name ?: 'Surat Keluar',
+                    'number' => optional(optional($entry->suratKeluar)->nomor_surat_formatted) ?: optional($entry->suratKeluar)->nomor_surat ?: '-',
+                    'acted_at' => $entry->acted_at ? $entry->acted_at->copy()->timezone('Asia/Jayapura')->format('d/m/Y H:i') . ' WIT' : '-',
+                    'actor' => optional($entry->approver)->name ?: $entry->signer_name_snapshot ?: '-',
+                    'action' => ucfirst((string) $entry->action),
+                    'note' => $entry->note,
+                    'detail_url' => $entry->approval ? route('surat-keluar.approval.show', $entry->approval) : null,
                 ];
             });
         }
