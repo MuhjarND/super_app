@@ -10,26 +10,17 @@ use App\RapatNotulensiApproval;
 use App\RapatNotulensiApprovalHistory;
 use App\SuratKeluarApproval;
 use App\SuratKeluarApprovalHistory;
+use App\ZiActivityApproval;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Schema;
 
 class ApprovalCenterController extends Controller
 {
     protected $approvalCards = [
-        'undangan' => [
-            'label' => 'Undangan',
-            'description' => 'Approval dokumen undangan rapat.',
-            'icon' => 'fas fa-envelope-open-text',
-        ],
-        'notulensi' => [
-            'label' => 'Notulensi',
-            'description' => 'Approval dokumen notulen agenda.',
-            'icon' => 'fas fa-file-signature',
-        ],
-        'absensi' => [
-            'label' => 'Absensi',
-            'description' => 'Approval dokumen absensi.',
-            'icon' => 'fas fa-clipboard-check',
+        'dokumen_rapat' => [
+            'label' => 'Dokumen Rapat',
+            'description' => 'Approval undangan, absensi, dan notulensi rapat.',
+            'icon' => 'fas fa-file-alt',
         ],
         'surat_cuti' => [
             'label' => 'Surat Cuti',
@@ -40,6 +31,11 @@ class ApprovalCenterController extends Controller
             'label' => 'Surat Keluar',
             'description' => 'Approval dokumen surat keluar dari template surat.',
             'icon' => 'fas fa-paper-plane',
+        ],
+        'progress_zi' => [
+            'label' => 'Progress ZI',
+            'description' => 'Review pimpinan atas tindak lanjut sub poin Progress ZI.',
+            'icon' => 'fas fa-chart-line',
         ],
     ];
 
@@ -92,7 +88,7 @@ class ApprovalCenterController extends Controller
                 'key' => $key,
                 'pending_count' => $pendingCount,
                 'history_count' => $historyCount,
-                'is_active' => $pendingCount > 0 || $historyCount > 0 || in_array($key, ['undangan', 'notulensi', 'surat_cuti', 'surat_keluar'], true),
+                'is_active' => $pendingCount > 0 || $historyCount > 0 || in_array($key, ['dokumen_rapat', 'surat_cuti', 'surat_keluar', 'progress_zi'], true),
             ]);
         }
 
@@ -103,20 +99,16 @@ class ApprovalCenterController extends Controller
     {
         $user = auth()->user();
 
-        if ($category === 'undangan') {
+        if ($category === 'dokumen_rapat') {
             $query = RapatApproval::where('status', 'pending');
             if (!$user->isMeetingAdmin()) {
                 $query->where('approver_id', $user->id);
             }
-            return $query->count();
-        }
-
-        if ($category === 'notulensi') {
-            $query = RapatNotulensiApproval::where('status', 'pending');
+            $notulensiQuery = RapatNotulensiApproval::where('status', 'pending');
             if (!$user->isMeetingAdmin()) {
-                $query->where('approver_id', $user->id);
+                $notulensiQuery->where('approver_id', $user->id);
             }
-            return $query->count();
+            return $query->count() + $notulensiQuery->count();
         }
 
         if ($category === 'surat_cuti' && Schema::hasTable('leave_approvals')) {
@@ -135,6 +127,14 @@ class ApprovalCenterController extends Controller
             return $query->count();
         }
 
+        if ($category === 'progress_zi' && Schema::hasTable('zi_activity_approvals')) {
+            $query = ZiActivityApproval::where('status', 'pending');
+            if (!$user->isSuperAdmin()) {
+                $query->where('approver_id', $user->id);
+            }
+            return $query->count();
+        }
+
         return 0;
     }
 
@@ -142,20 +142,16 @@ class ApprovalCenterController extends Controller
     {
         $user = auth()->user();
 
-        if ($category === 'undangan') {
+        if ($category === 'dokumen_rapat') {
             $query = RapatApprovalHistory::query();
             if (!$user->isMeetingAdmin()) {
                 $query->where('approver_id', $user->id);
             }
-            return $query->count();
-        }
-
-        if ($category === 'notulensi') {
-            $query = RapatNotulensiApprovalHistory::query();
+            $notulensiQuery = RapatNotulensiApprovalHistory::query();
             if (!$user->isMeetingAdmin()) {
-                $query->where('approver_id', $user->id);
+                $notulensiQuery->where('approver_id', $user->id);
             }
-            return $query->count();
+            return $query->count() + $notulensiQuery->count();
         }
 
         if ($category === 'surat_cuti' && Schema::hasTable('leave_requests')) {
@@ -176,6 +172,14 @@ class ApprovalCenterController extends Controller
             return $query->count();
         }
 
+        if ($category === 'progress_zi' && Schema::hasTable('zi_activity_approvals')) {
+            $query = ZiActivityApproval::whereIn('status', ['approved', 'rejected']);
+            if (!$user->isSuperAdmin()) {
+                $query->where('approver_id', $user->id);
+            }
+            return $query->count();
+        }
+
         return 0;
     }
 
@@ -183,7 +187,7 @@ class ApprovalCenterController extends Controller
     {
         $user = auth()->user();
 
-        if ($category === 'undangan') {
+        if ($category === 'dokumen_rapat') {
             $query = RapatApproval::with([
                 'rapat.kategoriSuratKode',
                 'rapat.creator',
@@ -195,7 +199,7 @@ class ApprovalCenterController extends Controller
                 $query->where('approver_id', $user->id);
             }
 
-            return $query->get()->map(function ($approval) {
+            $undanganItems = $query->get()->map(function ($approval) {
                 return [
                     'title' => optional($approval->rapat)->judul ?: '-',
                     'number' => optional($approval->rapat)->nomor_undangan ?: '-',
@@ -205,11 +209,10 @@ class ApprovalCenterController extends Controller
                     'count_label' => (optional($approval->rapat)->pesertas ? $approval->rapat->pesertas->count() : 0) . ' peserta',
                     'detail_url' => route('rapat.approval.show', $approval),
                     'status_label' => optional($approval->rapat)->status_label ?: 'Pending',
+                    'sort_at' => optional($approval->updated_at)->timestamp ?: optional($approval->created_at)->timestamp ?: 0,
                 ];
             });
-        }
 
-        if ($category === 'notulensi') {
             $query = RapatNotulensiApproval::with([
                 'notulensi.rapat',
                 'notulensi.notulis',
@@ -220,7 +223,7 @@ class ApprovalCenterController extends Controller
                 $query->where('approver_id', $user->id);
             }
 
-            return $query->get()->map(function ($approval) {
+            $notulensiItems = $query->get()->map(function ($approval) {
                 return [
                     'title' => optional($approval->notulensi)->judul ?: optional(optional($approval->notulensi)->rapat)->judul ?: '-',
                     'number' => optional(optional($approval->notulensi)->rapat)->nomor_undangan ?: '-',
@@ -230,8 +233,11 @@ class ApprovalCenterController extends Controller
                     'count_label' => 'Approver: ' . ($approval->approver_name_snapshot ?: '-'),
                     'detail_url' => route('rapat.notulensi-approval.show', $approval),
                     'status_label' => optional($approval->notulensi)->status ?: 'pending_approval',
+                    'sort_at' => optional($approval->updated_at)->timestamp ?: optional($approval->created_at)->timestamp ?: 0,
                 ];
             });
+
+            return $undanganItems->merge($notulensiItems)->sortByDesc('sort_at')->values();
         }
 
         if ($category === 'surat_cuti' && Schema::hasTable('leave_approvals')) {
@@ -282,6 +288,31 @@ class ApprovalCenterController extends Controller
             });
         }
 
+        if ($category === 'progress_zi' && Schema::hasTable('zi_activity_approvals')) {
+            $query = ZiActivityApproval::with(['activity.area', 'activity.guidelineSubPoint.point', 'approver'])
+                ->where('status', 'pending')
+                ->orderByDesc('requested_at')
+                ->orderByDesc('id');
+
+            if (!$user->isSuperAdmin()) {
+                $query->where('approver_id', $user->id);
+            }
+
+            return $query->get()->map(function ($approval) {
+                $activity = $approval->activity;
+                return [
+                    'title' => optional($activity)->name ?: 'Review Progress ZI',
+                    'number' => optional(optional($activity)->area)->code ?: '-',
+                    'date' => optional($approval->requested_at)->translatedFormat('d F Y'),
+                    'subtitle' => optional(optional($activity->guidelineSubPoint)->point)->code . '.' . optional($activity->guidelineSubPoint)->code,
+                    'meta' => 'Approver: ' . (optional($approval->approver)->name ?: '-'),
+                    'count_label' => 'Status: ' . ($approval->status_label ?: 'Pending'),
+                    'detail_url' => route('progress-zi.approvals.show', $approval),
+                    'status_label' => $approval->status_label,
+                ];
+            });
+        }
+
         return collect();
     }
 
@@ -289,13 +320,13 @@ class ApprovalCenterController extends Controller
     {
         $user = auth()->user();
 
-        if ($category === 'undangan') {
+        if ($category === 'dokumen_rapat') {
             $query = RapatApprovalHistory::with(['rapat', 'approver', 'approval'])->orderByDesc('acted_at')->orderByDesc('id');
             if (!$user->isMeetingAdmin()) {
                 $query->where('approver_id', $user->id);
             }
 
-            return $query->limit(100)->get()->map(function ($entry) {
+            $undanganItems = $query->limit(100)->get()->map(function ($entry) {
                 return [
                     'title' => optional($entry->rapat)->judul ?: '-',
                     'number' => optional($entry->rapat)->nomor_undangan ?: '-',
@@ -304,17 +335,16 @@ class ApprovalCenterController extends Controller
                     'action' => ucfirst($entry->action),
                     'note' => $entry->catatan,
                     'detail_url' => $entry->approval ? route('rapat.approval.show', $entry->approval) : null,
+                    'sort_at' => optional($entry->acted_at)->timestamp ?: 0,
                 ];
             });
-        }
 
-        if ($category === 'notulensi') {
             $query = RapatNotulensiApprovalHistory::with(['notulensi.rapat', 'approver', 'approval'])->orderByDesc('acted_at')->orderByDesc('id');
             if (!$user->isMeetingAdmin()) {
                 $query->where('approver_id', $user->id);
             }
 
-            return $query->limit(100)->get()->map(function ($entry) {
+            $notulensiItems = $query->limit(100)->get()->map(function ($entry) {
                 return [
                     'title' => optional(optional($entry->notulensi)->rapat)->judul ?: optional($entry->notulensi)->judul ?: '-',
                     'number' => optional(optional($entry->notulensi)->rapat)->nomor_undangan ?: '-',
@@ -323,6 +353,28 @@ class ApprovalCenterController extends Controller
                     'action' => ucfirst($entry->action),
                     'note' => $entry->catatan,
                     'detail_url' => $entry->approval ? route('rapat.notulensi-approval.show', $entry->approval) : null,
+                    'sort_at' => optional($entry->acted_at)->timestamp ?: 0,
+                ];
+            });
+
+            return $undanganItems->merge($notulensiItems)->sortByDesc('sort_at')->take(100)->values();
+        }
+
+        if ($category === 'progress_zi' && Schema::hasTable('zi_activity_approvals')) {
+            $query = ZiActivityApproval::with(['activity.area', 'approver'])->whereIn('status', ['approved', 'rejected'])->orderByDesc('acted_at')->orderByDesc('id');
+            if (!$user->isSuperAdmin()) {
+                $query->where('approver_id', $user->id);
+            }
+
+            return $query->limit(100)->get()->map(function ($entry) {
+                return [
+                    'title' => optional($entry->activity)->name ?: 'Progress ZI',
+                    'number' => optional(optional($entry->activity)->area)->code ?: '-',
+                    'acted_at' => $entry->acted_at ? $entry->acted_at->copy()->timezone('Asia/Jayapura')->format('d/m/Y H:i') . ' WIT' : '-',
+                    'actor' => optional($entry->approver)->name ?: '-',
+                    'action' => $entry->status_label,
+                    'note' => $entry->review_notes,
+                    'detail_url' => route('progress-zi.approvals.show', $entry),
                 ];
             });
         }

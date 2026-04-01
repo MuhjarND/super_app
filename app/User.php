@@ -338,6 +338,114 @@ class User extends Authenticatable
         return $this->canAccessArsipMenu();
     }
 
+    public function canAccessProgressZiModule()
+    {
+        if ($this->isSuperAdmin()) {
+            return true;
+        }
+
+        return $this->hasAnyRole([
+            'admin',
+            'approval',
+            'sekretaris',
+            'panitera',
+            'kabag',
+            'kasubag',
+            'pegawai',
+            'peserta',
+            'admin_surat',
+            'operator_surat_masuk',
+            'operator',
+            'protokoler',
+            'panmud',
+        ]);
+    }
+
+    public function canManageProgressZiMasterData()
+    {
+        if ($this->isSuperAdmin()) {
+            return true;
+        }
+
+        return $this->hasAnyRole([
+            'admin',
+            'approval',
+            'sekretaris',
+            'panitera',
+            'kabag',
+            'kasubag',
+        ]);
+    }
+
+    public function canVerifyProgressZi()
+    {
+        if ($this->isSuperAdmin()) {
+            return true;
+        }
+
+        return $this->hasAnyRole([
+            'admin',
+            'approval',
+            'sekretaris',
+            'panitera',
+            'kabag',
+            'kasubag',
+        ]);
+    }
+
+    public function canManageProgressZiActivity($activity = null)
+    {
+        if ($this->canManageProgressZiMasterData()) {
+            return true;
+        }
+
+        if (!$activity) {
+            return false;
+        }
+
+        if ((int) data_get($activity, 'pic_user_id') === (int) $this->id) {
+            return true;
+        }
+
+        $areaPics = data_get($activity, 'area.pics');
+        if ($areaPics && $areaPics->contains('id', $this->id)) {
+            return true;
+        }
+
+        $area = data_get($activity, 'area');
+        if ($area && method_exists($area, 'pics') && $area->pics()->where('users.id', $this->id)->exists()) {
+            return true;
+        }
+
+        if ((int) data_get($activity, 'area.pic_user_id') === (int) $this->id) {
+            return true;
+        }
+
+        return false;
+    }
+
+    public function canManageProgressZiArea($area = null)
+    {
+        if ($this->canManageProgressZiMasterData()) {
+            return true;
+        }
+
+        if (!$area) {
+            return false;
+        }
+
+        $pics = data_get($area, 'pics');
+        if ($pics && $pics->contains('id', $this->id)) {
+            return true;
+        }
+
+        if (method_exists($area, 'pics') && $area->pics()->where('users.id', $this->id)->exists()) {
+            return true;
+        }
+
+        return (int) data_get($area, 'pic_user_id') === (int) $this->id;
+    }
+
     public function canAccessLeaveModule()
     {
         if ($this->isSuperAdmin()) {

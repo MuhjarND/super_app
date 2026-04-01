@@ -145,6 +145,72 @@
             font-weight: 700;
         }
 
+        .sidebar .nav-section {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .sidebar .nav-section-toggle {
+            width: calc(100% - 24px);
+            margin: 14px 12px 4px;
+            padding: 8px 10px;
+            border: 0;
+            background: transparent;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            font-size: 0.61rem;
+            letter-spacing: 1.2px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-radius: 10px;
+            transition: all 0.15s ease;
+        }
+
+        .sidebar .nav-section-toggle:hover {
+            background: #f8fafc;
+            color: #64748b;
+        }
+
+        .sidebar .nav-section-toggle.has-alert {
+            background: linear-gradient(135deg, #fef2f2, #fff1f2);
+            color: #dc2626;
+            box-shadow: inset 0 0 0 1px rgba(239, 68, 68, 0.12);
+        }
+
+        .sidebar .nav-section-toggle.has-alert:hover {
+            background: linear-gradient(135deg, #fee2e2, #ffe4e6);
+            color: #b91c1c;
+        }
+
+        .sidebar .nav-section-toggle.has-alert .section-chevron {
+            color: #dc2626;
+        }
+
+        .sidebar .nav-section-toggle .section-chevron {
+            font-size: 0.7rem;
+            transition: transform 0.18s ease;
+        }
+
+        .sidebar .nav-section.is-collapsed .section-chevron {
+            transform: rotate(-90deg);
+        }
+
+        .sidebar .nav-section-menu {
+            padding: 0;
+            margin: 0;
+            overflow: hidden;
+            transition: max-height 0.18s ease, opacity 0.18s ease;
+        }
+
+        .sidebar .nav-section.is-collapsed .nav-section-menu {
+            max-height: 0 !important;
+            opacity: 0;
+            pointer-events: none;
+        }
+
         .sidebar .nav-link {
             color: var(--text-secondary) !important;
             border-radius: 10px;
@@ -1430,280 +1496,371 @@
                         </li>
 
                         @if($isSidebarSuperAdmin || $sidebarUser->canAccessApprovalCenter())
-                            <li class="nav-header">APPROVAL</li>
-                            <li class="nav-item nav-item-sub">
-                                <a href="{{ route('approval.index') }}"
-                                    class="nav-link {{ request()->routeIs('approval.index') ? 'active' : '' }}">
-                                    <i class="nav-icon fas fa-tasks"></i>
-                                    <p>
-                                        Tindaklanjuti
-                                        @if(($sidebarApprovalTotalCount ?? 0) > 0)
-                                            <span class="right badge badge-danger">{{ $sidebarApprovalTotalCount }}</span>
-                                        @endif
-                                    </p>
-                                </a>
-                            </li>
-                            <li class="nav-item nav-item-sub">
-                                <a href="{{ route('approval.history') }}"
-                                    class="nav-link {{ request()->routeIs('approval.history') ? 'active' : '' }}">
-                                    <i class="nav-icon fas fa-history"></i>
-                                    <p>Riwayat Approval</p>
-                                </a>
+                            <li class="nav-section {{ request()->routeIs('approval.*') ? '' : 'is-collapsed' }}" data-section="approval">
+                                <button type="button" class="nav-section-toggle {{ ($sidebarApprovalTotalCount ?? 0) > 0 ? 'has-alert' : '' }}">
+                                    <span>Approval</span>
+                                    <i class="fas fa-chevron-down section-chevron"></i>
+                                </button>
+                                <ul class="nav nav-pills flex-column nav-section-menu">
+                                    <li class="nav-item nav-item-sub">
+                                        <a href="{{ route('approval.index') }}"
+                                            class="nav-link {{ request()->routeIs('approval.index') ? 'active' : '' }}">
+                                            <i class="nav-icon fas fa-tasks"></i>
+                                            <p>
+                                                Tindaklanjuti
+                                                @if(($sidebarApprovalTotalCount ?? 0) > 0)
+                                                    <span class="right badge badge-danger">{{ $sidebarApprovalTotalCount }}</span>
+                                                @endif
+                                            </p>
+                                        </a>
+                                    </li>
+                                    <li class="nav-item nav-item-sub">
+                                        <a href="{{ route('approval.history') }}"
+                                            class="nav-link {{ request()->routeIs('approval.history') ? 'active' : '' }}">
+                                            <i class="nav-icon fas fa-history"></i>
+                                            <p>Riwayat Approval</p>
+                                        </a>
+                                    </li>
+                                </ul>
                             </li>
                         @endif
 
                         @if($isSidebarSuperAdmin || $sidebarUser->canAccessPersuratanMenu())
-                            <li class="nav-header">PERSURATAN</li>
-                            @if($isSidebarSuperAdmin || $sidebarUser->canAccessSuratMasukMenu())
-                                <li class="nav-item nav-item-sub">
-                                    <a href="{{ route('surat-masuk.index') }}"
-                                        class="nav-link {{ request()->routeIs('surat-masuk.*') ? 'active' : '' }}">
-                                        <i class="nav-icon far fa-envelope"></i>
-                                        <p>
-                                            Surat Masuk
-                                            @if(($sidebarSuratMasukOpenCount ?? 0) > 0)
-                                                <span class="right badge badge-danger">{{ $sidebarSuratMasukOpenCount }}</span>
-                                            @endif
-                                        </p>
-                                    </a>
-                                </li>
-                            @endif
-                            @if($isSidebarSuperAdmin || $sidebarUser->canAccessSuratKeluarMenu())
-                                <li class="nav-item nav-item-sub">
-                                    <a href="{{ route('surat-keluar.index') }}"
-                                        class="nav-link {{ request()->routeIs('surat-keluar.*') ? 'active' : '' }}">
-                                        <i class="nav-icon far fa-paper-plane"></i>
-                                        <p>
-                                            Surat Keluar
-                                            @if(($sidebarSuratKeluarDraftCount ?? 0) > 0)
-                                                <span class="right badge badge-danger">{{ $sidebarSuratKeluarDraftCount }}</span>
-                                            @endif
-                                        </p>
-                                    </a>
-                                </li>
-                            @endif
-                            @if($isSidebarSuperAdmin || $sidebarUser->canAccessSuratTemplateMenu())
-                                <li class="nav-item nav-item-sub">
-                                    <a href="{{ route('surat-template.index') }}"
-                                        class="nav-link {{ request()->routeIs('surat-template.*') ? 'active' : '' }}">
-                                        <i class="nav-icon far fa-file-word"></i>
-                                        <p>Template Surat</p>
-                                    </a>
-                                </li>
-                            @endif
+                            <li class="nav-section {{ request()->routeIs('surat-masuk.*') || request()->routeIs('surat-keluar.*') || request()->routeIs('surat-template.*') ? '' : 'is-collapsed' }}" data-section="persuratan">
+                                <button type="button" class="nav-section-toggle {{ (($sidebarSuratMasukOpenCount ?? 0) > 0 || ($sidebarSuratKeluarDraftCount ?? 0) > 0) ? 'has-alert' : '' }}">
+                                    <span>Persuratan</span>
+                                    <i class="fas fa-chevron-down section-chevron"></i>
+                                </button>
+                                <ul class="nav nav-pills flex-column nav-section-menu">
+                                    @if($isSidebarSuperAdmin || $sidebarUser->canAccessSuratMasukMenu())
+                                        <li class="nav-item nav-item-sub">
+                                            <a href="{{ route('surat-masuk.index') }}"
+                                                class="nav-link {{ request()->routeIs('surat-masuk.*') ? 'active' : '' }}">
+                                                <i class="nav-icon far fa-envelope"></i>
+                                                <p>
+                                                    Surat Masuk
+                                                    @if(($sidebarSuratMasukOpenCount ?? 0) > 0)
+                                                        <span class="right badge badge-danger">{{ $sidebarSuratMasukOpenCount }}</span>
+                                                    @endif
+                                                </p>
+                                            </a>
+                                        </li>
+                                    @endif
+                                    @if($isSidebarSuperAdmin || $sidebarUser->canAccessSuratKeluarMenu())
+                                        <li class="nav-item nav-item-sub">
+                                            <a href="{{ route('surat-keluar.index') }}"
+                                                class="nav-link {{ request()->routeIs('surat-keluar.*') ? 'active' : '' }}">
+                                                <i class="nav-icon far fa-paper-plane"></i>
+                                                <p>
+                                                    Surat Keluar
+                                                    @if(($sidebarSuratKeluarDraftCount ?? 0) > 0)
+                                                        <span class="right badge badge-danger">{{ $sidebarSuratKeluarDraftCount }}</span>
+                                                    @endif
+                                                </p>
+                                            </a>
+                                        </li>
+                                    @endif
+                                    @if($isSidebarSuperAdmin || $sidebarUser->canAccessSuratTemplateMenu())
+                                        <li class="nav-item nav-item-sub">
+                                            <a href="{{ route('surat-template.index') }}"
+                                                class="nav-link {{ request()->routeIs('surat-template.*') ? 'active' : '' }}">
+                                                <i class="nav-icon far fa-file-word"></i>
+                                                <p>Template Surat</p>
+                                            </a>
+                                        </li>
+                                    @endif
+                                </ul>
+                            </li>
                         @endif
 
                         @if($isSidebarSuperAdmin || $sidebarUser->canAccessMeetingModule())
-                            <li class="nav-header">RAPAT / AGENDA</li>
-                            <li class="nav-item nav-item-sub">
-                                <a href="{{ route('rapat.index') }}"
-                                    class="nav-link {{ request()->routeIs('rapat.index') ? 'active' : '' }}">
-                                    <i class="nav-icon far fa-calendar-alt"></i>
-                                    <p>Rapat/Agenda</p>
-                                </a>
+                            <li class="nav-section {{ request()->routeIs('rapat.*') ? '' : 'is-collapsed' }}" data-section="rapat">
+                                <button type="button" class="nav-section-toggle {{ ($sidebarNotulensiFollowUpCount ?? 0) > 0 ? 'has-alert' : '' }}">
+                                    <span>Rapat / Agenda</span>
+                                    <i class="fas fa-chevron-down section-chevron"></i>
+                                </button>
+                                <ul class="nav nav-pills flex-column nav-section-menu">
+                                    <li class="nav-item nav-item-sub">
+                                        <a href="{{ route('rapat.index') }}"
+                                            class="nav-link {{ request()->routeIs('rapat.index') ? 'active' : '' }}">
+                                            <i class="nav-icon far fa-calendar-alt"></i>
+                                            <p>Rapat/Agenda</p>
+                                        </a>
+                                    </li>
+                                    @if($isSidebarSuperAdmin || $sidebarUser->canAccessMeetingMinutes())
+                                        <li class="nav-item nav-item-sub">
+                                            <a href="{{ route('rapat.notulensi.index') }}"
+                                                class="nav-link {{ request()->routeIs('rapat.notulensi.*') ? 'active' : '' }}">
+                                                <i class="nav-icon far fa-file-alt"></i>
+                                                <p>Notulensi</p>
+                                            </a>
+                                        </li>
+                                    @endif
+                                    @if($isSidebarSuperAdmin || (!$sidebarUser->canAccessMeetingMinutes()) || (($sidebarNotulensiFollowUpCount ?? 0) > 0))
+                                        <li class="nav-item nav-item-sub">
+                                            <a href="{{ route('rapat.notulensi.follow-ups') }}"
+                                                class="nav-link {{ request()->routeIs('rapat.notulensi.follow-ups') ? 'active' : '' }}">
+                                                <i class="nav-icon fas fa-tasks"></i>
+                                                <p>
+                                                    Tindak Lanjut
+                                                    @if(($sidebarNotulensiFollowUpCount ?? 0) > 0)
+                                                        <span class="right badge badge-danger">{{ $sidebarNotulensiFollowUpCount }}</span>
+                                                    @endif
+                                                </p>
+                                            </a>
+                                        </li>
+                                    @endif
+                                    <li class="nav-item nav-item-sub">
+                                        <a href="{{ route('rapat.absensi.index') }}"
+                                            class="nav-link {{ request()->routeIs('rapat.absensi.*') ? 'active' : '' }}">
+                                            <i class="nav-icon fas fa-clipboard-check"></i>
+                                            <p>Absensi</p>
+                                        </a>
+                                    </li>
+                                    <li class="nav-item nav-item-sub">
+                                        <a href="{{ route('rapat.laporan.index') }}"
+                                            class="nav-link {{ request()->routeIs('rapat.laporan.*') ? 'active' : '' }}">
+                                            <i class="nav-icon far fa-file-pdf"></i>
+                                            <p>Laporan</p>
+                                        </a>
+                                    </li>
+                                    @if($isSidebarSuperAdmin || $sidebarUser->canAccessAgendaPimpinan())
+                                        <li class="nav-item nav-item-sub">
+                                            <a href="{{ route('rapat.agenda.index') }}"
+                                                class="nav-link {{ request()->routeIs('rapat.agenda.*') ? 'active' : '' }}">
+                                                <i class="nav-icon fas fa-calendar-day"></i>
+                                                <p>Agenda Pimpinan</p>
+                                            </a>
+                                        </li>
+                                    @endif
+                                    @if($isSidebarSuperAdmin || $sidebarUser->canManageVoting())
+                                        <li class="nav-item nav-item-sub">
+                                            <a href="{{ route('rapat.voting.index') }}"
+                                                class="nav-link {{ request()->routeIs('rapat.voting.*') ? 'active' : '' }}">
+                                                <i class="nav-icon fas fa-poll"></i>
+                                                <p>E-Voting</p>
+                                            </a>
+                                        </li>
+                                    @endif
+                                </ul>
                             </li>
-                            @if($isSidebarSuperAdmin || $sidebarUser->canAccessMeetingMinutes())
-                                <li class="nav-item nav-item-sub">
-                                    <a href="{{ route('rapat.notulensi.index') }}"
-                                        class="nav-link {{ request()->routeIs('rapat.notulensi.*') ? 'active' : '' }}">
-                                        <i class="nav-icon far fa-file-alt"></i>
-                                        <p>Notulensi</p>
-                                    </a>
-                                </li>
-                            @endif
-                            @if($isSidebarSuperAdmin || (!$sidebarUser->canAccessMeetingMinutes()) || (($sidebarNotulensiFollowUpCount ?? 0) > 0))
-                                <li class="nav-item nav-item-sub">
-                                    <a href="{{ route('rapat.notulensi.follow-ups') }}"
-                                        class="nav-link {{ request()->routeIs('rapat.notulensi.follow-ups') ? 'active' : '' }}">
-                                        <i class="nav-icon fas fa-tasks"></i>
-                                        <p>
-                                            Tindak Lanjut
-                                            @if(($sidebarNotulensiFollowUpCount ?? 0) > 0)
-                                                <span class="right badge badge-danger">{{ $sidebarNotulensiFollowUpCount }}</span>
-                                            @endif
-                                        </p>
-                                    </a>
-                                </li>
-                            @endif
-                            <li class="nav-item nav-item-sub">
-                                <a href="{{ route('rapat.absensi.index') }}"
-                                    class="nav-link {{ request()->routeIs('rapat.absensi.*') ? 'active' : '' }}">
-                                    <i class="nav-icon fas fa-clipboard-check"></i>
-                                    <p>Absensi</p>
-                                </a>
-                            </li>
-                            <li class="nav-item nav-item-sub">
-                                <a href="{{ route('rapat.laporan.index') }}"
-                                    class="nav-link {{ request()->routeIs('rapat.laporan.*') ? 'active' : '' }}">
-                                    <i class="nav-icon far fa-file-pdf"></i>
-                                    <p>Laporan</p>
-                                </a>
-                            </li>
-                            @if($isSidebarSuperAdmin || $sidebarUser->canAccessAgendaPimpinan())
-                                <li class="nav-item nav-item-sub">
-                                    <a href="{{ route('rapat.agenda.index') }}"
-                                        class="nav-link {{ request()->routeIs('rapat.agenda.*') ? 'active' : '' }}">
-                                        <i class="nav-icon fas fa-calendar-day"></i>
-                                        <p>Agenda Pimpinan</p>
-                                    </a>
-                                </li>
-                            @endif
-                            @if($isSidebarSuperAdmin || $sidebarUser->canManageVoting())
-                                <li class="nav-item nav-item-sub">
-                                    <a href="{{ route('rapat.voting.index') }}"
-                                        class="nav-link {{ request()->routeIs('rapat.voting.*') ? 'active' : '' }}">
-                                        <i class="nav-icon fas fa-poll"></i>
-                                        <p>E-Voting</p>
-                                    </a>
-                                </li>
-                            @endif
                         @endif
 
                         @if($isSidebarSuperAdmin || $sidebarUser->canAccessLeaveModule())
-                            <li class="nav-header">CUTI</li>
-                            <li class="nav-item nav-item-sub">
-                                <a href="{{ route('cuti.index') }}"
-                                    class="nav-link {{ request()->routeIs('cuti.index') || request()->routeIs('cuti.create') || request()->routeIs('cuti.show') || request()->routeIs('cuti.edit') ? 'active' : '' }}">
-                                    <i class="nav-icon fas fa-calendar-alt"></i>
-                                    <p>Pengajuan Cuti</p>
-                                </a>
+                            <li class="nav-section {{ request()->routeIs('cuti.*') ? '' : 'is-collapsed' }}" data-section="cuti">
+                                <button type="button" class="nav-section-toggle">
+                                    <span>Cuti</span>
+                                    <i class="fas fa-chevron-down section-chevron"></i>
+                                </button>
+                                <ul class="nav nav-pills flex-column nav-section-menu">
+                                    <li class="nav-item nav-item-sub">
+                                        <a href="{{ route('cuti.index') }}"
+                                            class="nav-link {{ request()->routeIs('cuti.index') || request()->routeIs('cuti.create') || request()->routeIs('cuti.show') || request()->routeIs('cuti.edit') ? 'active' : '' }}">
+                                            <i class="nav-icon fas fa-calendar-alt"></i>
+                                            <p>Pengajuan Cuti</p>
+                                        </a>
+                                    </li>
+                                    @if($isSidebarSuperAdmin || $sidebarUser->canApproveLeave())
+                                        <li class="nav-item nav-item-sub">
+                                            <a href="{{ route('cuti.approval.index') }}"
+                                                class="nav-link {{ request()->routeIs('cuti.approval.*') ? 'active' : '' }}">
+                                                <i class="nav-icon fas fa-user-check"></i>
+                                                <p>Approval Cuti</p>
+                                            </a>
+                                        </li>
+                                    @endif
+                                    <li class="nav-item nav-item-sub">
+                                        <a href="{{ route('cuti.balances.index') }}"
+                                            class="nav-link {{ request()->routeIs('cuti.balances.*') ? 'active' : '' }}">
+                                            <i class="nav-icon fas fa-wallet"></i>
+                                            <p>Rekap Saldo</p>
+                                        </a>
+                                    </li>
+                                    <li class="nav-item nav-item-sub">
+                                        <a href="{{ route('cuti.reports.index') }}"
+                                            class="nav-link {{ request()->routeIs('cuti.reports.*') ? 'active' : '' }}">
+                                            <i class="nav-icon far fa-chart-bar"></i>
+                                            <p>Laporan Cuti</p>
+                                        </a>
+                                    </li>
+                                    @if($isSidebarSuperAdmin || $sidebarUser->canManageLeaveMasterData())
+                                        <li class="nav-item nav-item-sub">
+                                            <a href="{{ route('cuti.master.types.index') }}"
+                                                class="nav-link {{ request()->routeIs('cuti.master.types.*') ? 'active' : '' }}">
+                                                <i class="nav-icon far fa-list-alt"></i>
+                                                <p>Jenis Cuti</p>
+                                            </a>
+                                        </li>
+                                        <li class="nav-item nav-item-sub">
+                                            <a href="{{ route('cuti.master.policies.index') }}"
+                                                class="nav-link {{ request()->routeIs('cuti.master.policies.*') ? 'active' : '' }}">
+                                                <i class="nav-icon fas fa-sliders-h"></i>
+                                                <p>Kebijakan Cuti</p>
+                                            </a>
+                                        </li>
+                                        <li class="nav-item nav-item-sub">
+                                            <a href="{{ route('cuti.master.holidays.index') }}"
+                                                class="nav-link {{ request()->routeIs('cuti.master.holidays.*') ? 'active' : '' }}">
+                                                <i class="nav-icon far fa-calendar-check"></i>
+                                                <p>Cuti Bersama</p>
+                                            </a>
+                                        </li>
+                                        <li class="nav-item nav-item-sub">
+                                            <a href="{{ route('cuti.master.delegations.index') }}"
+                                                class="nav-link {{ request()->routeIs('cuti.master.delegations.*') ? 'active' : '' }}">
+                                                <i class="nav-icon fas fa-people-arrows"></i>
+                                                <p>Delegasi Approval</p>
+                                            </a>
+                                        </li>
+                                    @endif
+                                </ul>
                             </li>
-                            @if($isSidebarSuperAdmin || $sidebarUser->canApproveLeave())
-                                <li class="nav-item nav-item-sub">
-                                    <a href="{{ route('cuti.approval.index') }}"
-                                        class="nav-link {{ request()->routeIs('cuti.approval.*') ? 'active' : '' }}">
-                                        <i class="nav-icon fas fa-user-check"></i>
-                                        <p>Approval Cuti</p>
-                                    </a>
-                                </li>
-                            @endif
-                            <li class="nav-item nav-item-sub">
-                                <a href="{{ route('cuti.balances.index') }}"
-                                    class="nav-link {{ request()->routeIs('cuti.balances.*') ? 'active' : '' }}">
-                                    <i class="nav-icon fas fa-wallet"></i>
-                                    <p>Rekap Saldo</p>
-                                </a>
-                            </li>
-                            <li class="nav-item nav-item-sub">
-                                <a href="{{ route('cuti.reports.index') }}"
-                                    class="nav-link {{ request()->routeIs('cuti.reports.*') ? 'active' : '' }}">
-                                    <i class="nav-icon far fa-chart-bar"></i>
-                                    <p>Laporan Cuti</p>
-                                </a>
-                            </li>
-                            @if($isSidebarSuperAdmin || $sidebarUser->canManageLeaveMasterData())
-                                <li class="nav-item nav-item-sub">
-                                    <a href="{{ route('cuti.master.types.index') }}"
-                                        class="nav-link {{ request()->routeIs('cuti.master.types.*') ? 'active' : '' }}">
-                                        <i class="nav-icon far fa-list-alt"></i>
-                                        <p>Jenis Cuti</p>
-                                    </a>
-                                </li>
-                                <li class="nav-item nav-item-sub">
-                                    <a href="{{ route('cuti.master.policies.index') }}"
-                                        class="nav-link {{ request()->routeIs('cuti.master.policies.*') ? 'active' : '' }}">
-                                        <i class="nav-icon fas fa-sliders-h"></i>
-                                        <p>Kebijakan Cuti</p>
-                                    </a>
-                                </li>
-                                <li class="nav-item nav-item-sub">
-                                    <a href="{{ route('cuti.master.holidays.index') }}"
-                                        class="nav-link {{ request()->routeIs('cuti.master.holidays.*') ? 'active' : '' }}">
-                                        <i class="nav-icon far fa-calendar-check"></i>
-                                        <p>Cuti Bersama</p>
-                                    </a>
-                                </li>
-                                <li class="nav-item nav-item-sub">
-                                    <a href="{{ route('cuti.master.delegations.index') }}"
-                                        class="nav-link {{ request()->routeIs('cuti.master.delegations.*') ? 'active' : '' }}">
-                                        <i class="nav-icon fas fa-people-arrows"></i>
-                                        <p>Delegasi Approval</p>
-                                    </a>
-                                </li>
-                            @endif
                         @endif
 
-                        <li class="nav-header">PERSEDIAAN</li>
-
-                        <li class="nav-item">
-                            <a href="{{ route('persediaan.index') }}"
-                                class="nav-link {{ request()->routeIs('persediaan.*') ? 'active' : '' }}">
-                                <i class="nav-icon fas fa-cube"></i>
-                                <p>Persediaan <span class="badge badge-dev ml-auto">DEV</span></p>
-                            </a>
+                        <li class="nav-section {{ request()->routeIs('persediaan.*') ? '' : 'is-collapsed' }}" data-section="persediaan">
+                            <button type="button" class="nav-section-toggle">
+                                <span>Persediaan</span>
+                                <i class="fas fa-chevron-down section-chevron"></i>
+                            </button>
+                            <ul class="nav nav-pills flex-column nav-section-menu">
+                                <li class="nav-item nav-item-sub">
+                                    <a href="{{ route('persediaan.index') }}"
+                                        class="nav-link {{ request()->routeIs('persediaan.*') ? 'active' : '' }}">
+                                        <i class="nav-icon fas fa-cube"></i>
+                                        <p>Persediaan <span class="badge badge-dev ml-auto">DEV</span></p>
+                                    </a>
+                                </li>
+                            </ul>
                         </li>
 
-                        <li class="nav-header">PROGRESS ZI</li>
+                        @if($isSidebarSuperAdmin || $sidebarUser->canAccessProgressZiModule())
+                            <li class="nav-section {{ request()->routeIs('progress-zi.*') ? '' : 'is-collapsed' }}" data-section="progress-zi">
+                                <button type="button" class="nav-section-toggle {{ ($sidebarProgressZiAttentionCount ?? 0) > 0 ? 'has-alert' : '' }}">
+                                    <span>Progress ZI</span>
+                                    <i class="fas fa-chevron-down section-chevron"></i>
+                                </button>
+                                <ul class="nav nav-pills flex-column nav-section-menu">
+                                    <li class="nav-item nav-item-sub">
+                                        <a href="{{ route('progress-zi.dashboard') }}"
+                                            class="nav-link {{ request()->routeIs('progress-zi.dashboard') || request()->routeIs('progress-zi.index') ? 'active' : '' }}">
+                                            <i class="nav-icon fas fa-chart-line"></i>
+                                            <p>Rekapan ZI</p>
+                                        </a>
+                                    </li>
+                                    <li class="nav-item nav-item-sub">
+                                        <a href="{{ route('progress-zi.activities.index') }}"
+                                            class="nav-link {{ request()->routeIs('progress-zi.activities.*') ? 'active' : '' }}">
+                                            <i class="nav-icon fas fa-tasks"></i>
+                                            <p>
+                                                Monitoring Kegiatan
+                                                @if(($sidebarProgressZiAttentionCount ?? 0) > 0)
+                                                    <span class="right badge badge-danger">{{ $sidebarProgressZiAttentionCount }}</span>
+                                                @endif
+                                            </p>
+                                        </a>
+                                    </li>
+                                    <li class="nav-item nav-item-sub">
+                                        <a href="{{ route('progress-zi.guidelines.index') }}"
+                                            class="nav-link {{ request()->routeIs('progress-zi.guidelines.*') ? 'active' : '' }}">
+                                            <i class="nav-icon fas fa-book-open"></i>
+                                            <p>Pedoman ZI</p>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </li>
+                        @endif
 
-                        <li class="nav-item">
-                            <a href="{{ route('progress-zi.index') }}"
-                                class="nav-link {{ request()->routeIs('progress-zi.*') ? 'active' : '' }}">
-                                <i class="nav-icon fas fa-chart-line"></i>
-                                <p>Progress ZI <span class="badge badge-dev ml-auto">DEV</span></p>
-                            </a>
-                        </li>
-
-                        @if($isSidebarSuperAdmin || $sidebarUser->canAccessMeetingMasterData())
-                            <li class="nav-header">MASTER DATA</li>
-                            <li class="nav-item nav-item-sub">
-                                <a href="{{ route('admin.users.index') }}"
-                                    class="nav-link {{ request()->routeIs('admin.users.*') ? 'active' : '' }}">
-                                    <i class="nav-icon far fa-user"></i>
-                                    <p>User</p>
-                                </a>
-                            </li>
-                            <li class="nav-item nav-item-sub">
-                                <a href="{{ route('admin.jabatans.index') }}"
-                                    class="nav-link {{ request()->routeIs('admin.jabatans.*') ? 'active' : '' }}">
-                                    <i class="nav-icon far fa-id-badge"></i>
-                                    <p>Jabatan</p>
-                                </a>
-                            </li>
-                            <li class="nav-item nav-item-sub">
-                                <a href="{{ route('admin.units.index') }}"
-                                    class="nav-link {{ request()->routeIs('admin.units.*') ? 'active' : '' }}">
-                                    <i class="nav-icon far fa-building"></i>
-                                    <p>Unit Kerja</p>
-                                </a>
-                            </li>
-                            <li class="nav-item nav-item-sub">
-                                <a href="{{ route('admin.bidangs.index') }}"
-                                    class="nav-link {{ request()->routeIs('admin.bidangs.*') ? 'active' : '' }}">
-                                    <i class="nav-icon fas fa-sitemap"></i>
-                                    <p>Bidang</p>
-                                </a>
-                            </li>
-                            <li class="nav-item nav-item-sub">
-                                <a href="{{ route('admin.kategori-surats.index') }}"
-                                    class="nav-link {{ request()->routeIs('admin.kategori-surats.*') ? 'active' : '' }}">
-                                    <i class="nav-icon far fa-folder"></i>
-                                    <p>Kategori Surat</p>
-                                </a>
-                            </li>
-                            <li class="nav-item nav-item-sub">
-                                <a href="{{ route('admin.kategori-rapats.index') }}"
-                                    class="nav-link {{ request()->routeIs('admin.kategori-rapats.*') ? 'active' : '' }}">
-                                    <i class="nav-icon far fa-comments"></i>
-                                    <p>Kategori Rapat</p>
-                                </a>
-                            </li>
-                            <li class="nav-item nav-item-sub">
-                                <a href="{{ route('admin.dasar-hukums.index') }}"
-                                    class="nav-link {{ request()->routeIs('admin.dasar-hukums.*') ? 'active' : '' }}">
-                                    <i class="nav-icon fas fa-balance-scale"></i>
-                                    <p>Dasar Hukum</p>
-                                </a>
+                        @if($isSidebarSuperAdmin || $sidebarUser->canAccessMeetingMasterData() || $sidebarUser->canManageProgressZiMasterData())
+                            <li class="nav-section {{ request()->routeIs('admin.*') || request()->routeIs('progress-zi.periods.*') || request()->routeIs('progress-zi.areas.*') ? '' : 'is-collapsed' }}" data-section="master-data">
+                                <button type="button" class="nav-section-toggle">
+                                    <span>Master Data</span>
+                                    <i class="fas fa-chevron-down section-chevron"></i>
+                                </button>
+                                <ul class="nav nav-pills flex-column nav-section-menu">
+                                    <li class="nav-item nav-item-sub">
+                                        <a href="{{ route('admin.users.index') }}"
+                                            class="nav-link {{ request()->routeIs('admin.users.*') ? 'active' : '' }}">
+                                            <i class="nav-icon far fa-user"></i>
+                                            <p>User</p>
+                                        </a>
+                                    </li>
+                                    <li class="nav-item nav-item-sub">
+                                        <a href="{{ route('admin.jabatans.index') }}"
+                                            class="nav-link {{ request()->routeIs('admin.jabatans.*') ? 'active' : '' }}">
+                                            <i class="nav-icon far fa-id-badge"></i>
+                                            <p>Jabatan</p>
+                                        </a>
+                                    </li>
+                                    <li class="nav-item nav-item-sub">
+                                        <a href="{{ route('admin.units.index') }}"
+                                            class="nav-link {{ request()->routeIs('admin.units.*') ? 'active' : '' }}">
+                                            <i class="nav-icon far fa-building"></i>
+                                            <p>Unit Kerja</p>
+                                        </a>
+                                    </li>
+                                    <li class="nav-item nav-item-sub">
+                                        <a href="{{ route('admin.bidangs.index') }}"
+                                            class="nav-link {{ request()->routeIs('admin.bidangs.*') ? 'active' : '' }}">
+                                            <i class="nav-icon fas fa-sitemap"></i>
+                                            <p>Bidang</p>
+                                        </a>
+                                    </li>
+                                    <li class="nav-item nav-item-sub">
+                                        <a href="{{ route('admin.kategori-surats.index') }}"
+                                            class="nav-link {{ request()->routeIs('admin.kategori-surats.*') ? 'active' : '' }}">
+                                            <i class="nav-icon far fa-folder"></i>
+                                            <p>Kategori Surat</p>
+                                        </a>
+                                    </li>
+                                    <li class="nav-item nav-item-sub">
+                                        <a href="{{ route('admin.kategori-rapats.index') }}"
+                                            class="nav-link {{ request()->routeIs('admin.kategori-rapats.*') ? 'active' : '' }}">
+                                            <i class="nav-icon far fa-comments"></i>
+                                            <p>Kategori Rapat</p>
+                                        </a>
+                                    </li>
+                                    <li class="nav-item nav-item-sub">
+                                        <a href="{{ route('admin.dasar-hukums.index') }}"
+                                            class="nav-link {{ request()->routeIs('admin.dasar-hukums.*') ? 'active' : '' }}">
+                                            <i class="nav-icon fas fa-balance-scale"></i>
+                                            <p>Dasar Hukum</p>
+                                        </a>
+                                    </li>
+                                    @if($isSidebarSuperAdmin || $sidebarUser->canManageProgressZiMasterData())
+                                        <li class="nav-item nav-item-sub">
+                                            <a href="{{ route('progress-zi.periods.index') }}"
+                                                class="nav-link {{ request()->routeIs('progress-zi.periods.*') ? 'active' : '' }}">
+                                                <i class="nav-icon far fa-calendar-alt"></i>
+                                                <p>Periode ZI</p>
+                                            </a>
+                                        </li>
+                                        <li class="nav-item nav-item-sub">
+                                            <a href="{{ route('progress-zi.areas.index') }}"
+                                                class="nav-link {{ request()->routeIs('progress-zi.areas.*') ? 'active' : '' }}">
+                                                <i class="nav-icon fas fa-layer-group"></i>
+                                                <p>Area ZI</p>
+                                            </a>
+                                        </li>
+                                    @endif
+                                </ul>
                             </li>
                         @endif
 
                         @if($isSidebarSuperAdmin || $sidebarUser->canAccessArchiveMenu())
-                            <li class="nav-header">ARSIP</li>
-                            <li class="nav-item nav-item-sub">
-                                <a href="{{ route('arsip.index') }}"
-                                    class="nav-link {{ request()->routeIs('arsip.*') ? 'active' : '' }}">
-                                    <i class="nav-icon far fa-folder-open"></i>
-                                    <p>Arsip</p>
-                                </a>
+                            <li class="nav-section {{ request()->routeIs('arsip.*') ? '' : 'is-collapsed' }}" data-section="arsip">
+                                <button type="button" class="nav-section-toggle">
+                                    <span>Arsip</span>
+                                    <i class="fas fa-chevron-down section-chevron"></i>
+                                </button>
+                                <ul class="nav nav-pills flex-column nav-section-menu">
+                                    <li class="nav-item nav-item-sub">
+                                        <a href="{{ route('arsip.index') }}"
+                                            class="nav-link {{ request()->routeIs('arsip.*') ? 'active' : '' }}">
+                                            <i class="nav-icon far fa-folder-open"></i>
+                                            <p>Arsip</p>
+                                        </a>
+                                    </li>
+                                </ul>
                             </li>
                         @endif
                     </ul>
@@ -1752,6 +1909,7 @@
     <script>
         const THEME_KEY = 'smart-theme';
         const SIDEBAR_KEY = 'smart-sidebar-collapse';
+        const SIDEBAR_SECTION_KEY = 'smart-sidebar-sections';
         const LOADER_DEFAULT_TEXT = 'Mohon tunggu sebentar.';
 
         function applyTheme(theme) {
@@ -1956,6 +2114,37 @@
             if (localStorage.getItem(SIDEBAR_KEY) === '1') {
                 $('body').addClass('sidebar-collapse');
             }
+
+            let savedSections = {};
+            try {
+                savedSections = JSON.parse(localStorage.getItem(SIDEBAR_SECTION_KEY) || '{}');
+            } catch (error) {
+                savedSections = {};
+            }
+
+            $('.nav-section').each(function () {
+                const $section = $(this);
+                const sectionKey = $section.data('section');
+                if (!sectionKey) {
+                    return;
+                }
+
+                if (Object.prototype.hasOwnProperty.call(savedSections, sectionKey)) {
+                    $section.toggleClass('is-collapsed', !!savedSections[sectionKey]);
+                }
+            });
+
+            $(document).on('click', '.nav-section-toggle', function () {
+                const $section = $(this).closest('.nav-section');
+                const sectionKey = $section.data('section');
+                if (!sectionKey) {
+                    return;
+                }
+
+                $section.toggleClass('is-collapsed');
+                savedSections[sectionKey] = $section.hasClass('is-collapsed');
+                localStorage.setItem(SIDEBAR_SECTION_KEY, JSON.stringify(savedSections));
+            });
 
             $('#themeToggle').on('click', function () {
                 const nextTheme = $('body').hasClass('theme-dark') ? 'light' : 'dark';

@@ -10,6 +10,10 @@ use App\RapatNotulensiTindakLanjut;
 use App\SuratKeluarApproval;
 use App\SuratKeluar;
 use App\SuratMasuk;
+use App\ZiActivity;
+use App\ZiActivityApproval;
+use App\ZiEvidence;
+use App\ZiIndicator;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\ServiceProvider;
@@ -52,6 +56,8 @@ class AppServiceProvider extends ServiceProvider
                 'sidebarSuratKeluarApprovalPendingCount' => 0,
                 'sidebarApprovalTotalCount' => 0,
                 'sidebarNotulensiFollowUpCount' => 0,
+                'sidebarProgressZiAttentionCount' => 0,
+                'sidebarProgressZiApprovalPendingCount' => 0,
                 'topbarActionCount' => 0,
                 'topbarActionItems' => collect(),
             ];
@@ -232,8 +238,121 @@ class AppServiceProvider extends ServiceProvider
                 }
             }
 
+            if (Schema::hasTable('zi_activities') && $user->canAccessProgressZiModule()) {
+                $ziActivityQuery = ZiActivity::with(['area', 'pic'])
+                    ->where(function ($query) {
+                        $query->whereDate('target_end_date', '<', today())
+                            ->whereNotIn('status', ['sudah_terlaksana', 'selesai']);
+                    });
+
+                $ziIndicatorQuery = ZiIndicator::with(['activity.area'])
+                    ->whereIn('status', ['belum_diisi', 'belum_terpenuhi', 'sebagian_terpenuhi', 'ditolak']);
+
+                $ziEvidenceQuery = ZiEvidence::with(['realization.activity.area'])
+                    ->whereIn('status', ['terupload', 'terhubung', 'revisi', 'tidak_valid']);
+
+                if (!$user->canManageProgressZiMasterData()) {
+                    $ziActivityQuery->where(function ($query) use ($user) {
+                        $query->where('pic_user_id', $user->id)
+                            ->orWhereHas('area', function ($areaQuery) use ($user) {
+                                $areaQuery->where('pic_user_id', $user->id);
+                            });
+                    });
+
+                    $ziIndicatorQuery->whereHas('activity', function ($query) use ($user) {
+                        $query->where('pic_user_id', $user->id)
+                            ->orWhereHas('area', function ($areaQuery) use ($user) {
+                                $areaQuery->where('pic_user_id', $user->id);
+                            });
+                    });
+
+                    $ziEvidenceQuery->whereHas('realization.activity', function ($query) use ($user) {
+                        $query->where('pic_user_id', $user->id)
+                            ->orWhereHas('area', function ($areaQuery) use ($user) {
+                                $areaQuery->where('pic_user_id', $user->id);
+                            });
+                    });
+                }
+
+                foreach ((clone $ziActivityQuery)->orderBy('target_end_date')->take(4)->get() as $activity) {
+                    $actionItems->push([
+                        'type' => 'progress-zi-overdue',
+                        'icon' => 'fas fa-chart-line',
+                        'icon_bg' => '#ede9fe',
+                        'icon_color' => '#6d28d9',
+                        'title' => 'Kegiatan ZI overdue',
+                        'subtitle' => $activity->name,
+                        'description' => (optional($activity->area)->name ?: 'Progress ZI') . ' • target ' . (optional($activity->target_end_date)->translatedFormat('d F Y') ?: '-'),
+                        'time' => optional($activity->target_end_date)->diffForHumans(),
+                        'url' => route('progress-zi.activities.index', ['period_id' => $activity->zi_period_id, 'area_id' => $activity->zi_area_id]),
+                        'sort_at' => optional($activity->target_end_date)->timestamp ?: 0,
+                    ]);
+                }
+
+                if ($user->canVerifyProgressZi()) {
+                    foreach ((clone $ziIndicatorQuery)->latest()->take(3)->get() as $indicator) {
+                        $actionItems->push([
+                            'type' => 'progress-zi-indicator',
+                            'icon' => 'fas fa-clipboard-check',
+                            'icon_bg' => '#dbeafe',
+                            'icon_color' => '#1d4ed8',
+                            'title' => 'Review indikator ZI',
+                            'subtitle' => $indicator->name,
+                            'description' => optional($indicator->activity)->name ?: 'Indikator perlu review',
+                            'time' => optional($indicator->updated_at ?: $indicator->created_at)->diffForHumans(),
+                            'url' => route('progress-zi.activities.index', ['period_id' => optional($indicator->activity)->zi_period_id, 'area_id' => optional($indicator->activity)->zi_area_id]),
+                            'sort_at' => optional($indicator->updated_at ?: $indicator->created_at)->timestamp ?: 0,
+                        ]);
+                    }
+
+                    foreach ((clone $ziEvidenceQuery)->latest()->take(3)->get() as $evidence) {
+                        $actionItems->push([
+                            'type' => 'progress-zi-evidence',
+                            'icon' => 'fas fa-paperclip',
+                            'icon_bg' => '#dcfce7',
+                            'icon_color' => '#166534',
+                            'title' => 'Review eviden ZI',
+                            'subtitle' => $evidence->title,
+                            'description' => optional(optional($evidence->realization)->activity)->name ?: 'Eviden perlu review',
+                            'time' => optional($evidence->updated_at ?: $evidence->created_at)->diffForHumans(),
+                            'url' => route('progress-zi.activities.index', ['period_id' => optional(optional($evidence->realization)->activity)->zi_period_id, 'area_id' => optional(optional($evidence->realization)->activity)->zi_area_id]),
+                            'sort_at' => optional($evidence->updated_at ?: $evidence->created_at)->timestamp ?: 0,
+                        ]);
+                    }
+                }
+
+                $counts['sidebarProgressZiAttentionCount'] = (clone $ziActivityQuery)->count()
+                    + ($user->canVerifyProgressZi() ? (clone $ziIndicatorQuery)->count() + (clone $ziEvidenceQuery)->count() : 0);
+            }
+
+            if (Schema::hasTable('zi_activity_approvals') && $user->canVerifyProgressZi()) {
+                $ziApprovalQuery = ZiActivityApproval::with(['activity.area'])
+                    ->where('status', 'pending');
+
+                if (!$user->isSuperAdmin()) {
+                    $ziApprovalQuery->where('approver_id', $user->id);
+                }
+
+                $counts['sidebarProgressZiApprovalPendingCount'] = (clone $ziApprovalQuery)->count();
+
+                foreach ((clone $ziApprovalQuery)->latest('requested_at')->take(5)->get() as $approval) {
+                    $actionItems->push([
+                        'type' => 'progress-zi-approval',
+                        'icon' => 'fas fa-clipboard-check',
+                        'icon_bg' => '#fee2e2',
+                        'icon_color' => '#b91c1c',
+                        'title' => 'Review pimpinan Progress ZI',
+                        'subtitle' => optional($approval->activity)->name ?: 'Progress ZI',
+                        'description' => optional(optional($approval->activity)->area)->name ?: 'Ada tindak lanjut ZI yang menunggu review pimpinan.',
+                        'time' => optional($approval->requested_at ?: $approval->created_at)->diffForHumans(),
+                        'url' => route('progress-zi.approvals.show', $approval),
+                        'sort_at' => optional($approval->requested_at ?: $approval->created_at)->timestamp ?: 0,
+                    ]);
+                }
+            }
+
             $counts['sidebarNotulensiFollowUpCount'] = (clone $pendingFollowUpQuery)->count();
-            $counts['sidebarApprovalTotalCount'] = $counts['sidebarApprovalPendingCount'] + $counts['sidebarNotulensiApprovalPendingCount'] + $counts['sidebarLeaveApprovalPendingCount'] + $counts['sidebarSuratKeluarApprovalPendingCount'];
+            $counts['sidebarApprovalTotalCount'] = $counts['sidebarApprovalPendingCount'] + $counts['sidebarNotulensiApprovalPendingCount'] + $counts['sidebarLeaveApprovalPendingCount'] + $counts['sidebarSuratKeluarApprovalPendingCount'] + $counts['sidebarProgressZiApprovalPendingCount'];
 
             $counts['topbarActionItems'] = $actionItems
                 ->sortByDesc('sort_at')
@@ -244,7 +363,9 @@ class AppServiceProvider extends ServiceProvider
                 + $counts['sidebarNotulensiApprovalPendingCount']
                 + $counts['sidebarLeaveApprovalPendingCount']
                 + $counts['sidebarSuratKeluarApprovalPendingCount']
-                + $counts['sidebarNotulensiFollowUpCount'];
+                + $counts['sidebarProgressZiApprovalPendingCount']
+                + $counts['sidebarNotulensiFollowUpCount']
+                + $counts['sidebarProgressZiAttentionCount'];
 
             $view->with($counts);
         });

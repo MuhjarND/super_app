@@ -9,6 +9,8 @@ use App\Services\RapatApprovalService;
 use App\Services\RapatDocumentService;
 use App\Services\WhatsAppNotificationService;
 use App\User;
+use App\ZiActivity;
+use App\ZiGuidelineSubPoint;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -80,6 +82,7 @@ class RapatController extends Controller
             $this->syncPeserta($rapat, $data['peserta_ids']);
             $this->approvalService->syncWorkflow($rapat, $data['status']);
             $this->documentService->syncSuratKeluar($rapat, false);
+            $this->syncProgressZiContext($rapat, $request);
         });
 
         $this->documentService->generateAndStoreUndangan($rapat->fresh(), false);
@@ -302,5 +305,46 @@ class RapatController extends Controller
         if (in_array($rapat->status, ['terjadwal', 'disetujui'], true)) {
             $this->whatsAppService->notifyRapatParticipants($rapat);
         }
+    }
+
+    protected function syncProgressZiContext(Rapat $rapat, $request)
+    {
+        if ($request->input('zi_source_context') !== 'progress_zi') {
+            return;
+        }
+
+        $periodId = $request->input('zi_period_id');
+        $areaId = $request->input('zi_area_id');
+        $subPointId = $request->input('zi_guideline_sub_point_id');
+
+        if (!$periodId || !$areaId || !$subPointId) {
+            return;
+        }
+
+        $subPoint = ZiGuidelineSubPoint::with('point')->find($subPointId);
+        if (!$subPoint || !$subPoint->point || (int) $subPoint->point->zi_area_id !== (int) $areaId) {
+            return;
+        }
+
+        ZiActivity::updateOrCreate(
+            [
+                'source_reference_type' => 'rapat',
+                'source_reference_id' => $rapat->id,
+            ],
+            [
+                'zi_period_id' => $periodId,
+                'zi_area_id' => $areaId,
+                'zi_guideline_sub_point_id' => $subPointId,
+                'name' => $rapat->judul,
+                'description' => $rapat->deskripsi ?: 'Rapat monitoring dan evaluasi Zona Integritas.',
+                'target_start_date' => $rapat->tanggal,
+                'target_end_date' => $rapat->tanggal,
+                'pic_user_id' => auth()->id(),
+                'status' => 'dijadwalkan',
+                'source_type' => 'rapat',
+                'created_by' => auth()->id(),
+                'updated_by' => auth()->id(),
+            ]
+        );
     }
 }

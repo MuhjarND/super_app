@@ -12,6 +12,11 @@ use App\RapatNotulensiApproval;
 use App\RapatNotulensiTindakLanjut;
 use App\SuratKeluar;
 use App\SuratMasuk;
+use App\ZiActivity;
+use App\ZiArea;
+use App\ZiEvidence;
+use App\ZiIndicator;
+use App\ZiPeriod;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Schema;
@@ -30,11 +35,13 @@ class DashboardController extends Controller
         $persuratan = $this->buildPersuratanSection($user);
         $meeting = $this->buildMeetingSection($user);
         $leave = $this->buildLeaveSection($user);
+        $progressZi = $this->buildProgressZiSection($user);
 
         $actionItems = collect()
             ->merge($persuratan['actions'])
             ->merge($meeting['actions'])
             ->merge($leave['actions'])
+            ->merge($progressZi['actions'])
             ->sortByDesc('sort_at')
             ->take(10)
             ->values();
@@ -43,6 +50,7 @@ class DashboardController extends Controller
             'persuratan' => $persuratan,
             'meeting' => $meeting,
             'leave' => $leave,
+            'progressZi' => $progressZi,
             'actionItems' => $actionItems,
             'dashboardSummary' => [
                 'today_masuk' => $persuratan['today_masuk'],
@@ -52,6 +60,97 @@ class DashboardController extends Controller
                 'action_count' => $actionItems->count(),
             ],
         ]);
+    }
+
+    protected function buildProgressZiSection($user)
+    {
+        $enabled = $user->canAccessProgressZiModule() && Schema::hasTable('zi_periods');
+        if (!$enabled) {
+            return [
+                'enabled' => false,
+                'stats' => [],
+                'actions' => collect(),
+            ];
+        }
+
+        $activePeriod = ZiPeriod::where('is_active', true)->latest('year')->first();
+        $activities = ZiActivity::query()->with(['area', 'pic', 'indicators']);
+        $indicators = ZiIndicator::query();
+        $evidences = ZiEvidence::query();
+        $areas = ZiArea::query();
+
+        if ($activePeriod) {
+            $activities->where('zi_period_id', $activePeriod->id);
+            $indicators->whereHas('activity', function ($query) use ($activePeriod) {
+                $query->where('zi_period_id', $activePeriod->id);
+            });
+            $evidences->whereHas('realization.activity', function ($query) use ($activePeriod) {
+                $query->where('zi_period_id', $activePeriod->id);
+            });
+            $areas->whereHas('activities', function ($query) use ($activePeriod) {
+                $query->where('zi_period_id', $activePeriod->id);
+            });
+        }
+
+        if (!$user->canManageProgressZiMasterData()) {
+            $activities->where(function ($query) use ($user) {
+                $query->where('pic_user_id', $user->id)
+                    ->orWhereHas('area', function ($areaQuery) use ($user) {
+                        $areaQuery->where('pic_user_id', $user->id);
+                    });
+            });
+            $indicators->whereHas('activity', function ($query) use ($user) {
+                $query->where('pic_user_id', $user->id)
+                    ->orWhereHas('area', function ($areaQuery) use ($user) {
+                        $areaQuery->where('pic_user_id', $user->id);
+                    });
+            });
+            $evidences->whereHas('realization.activity', function ($query) use ($user) {
+                $query->where('pic_user_id', $user->id)
+                    ->orWhereHas('area', function ($areaQuery) use ($user) {
+                        $areaQuery->where('pic_user_id', $user->id);
+                    });
+            });
+            $areas->where('pic_user_id', $user->id);
+        }
+
+        $activityCollection = $activities->get();
+
+        $actions = $activityCollection->filter(function ($activity) {
+            return $activity->target_end_date && $activity->target_end_date->lt(today()) && !in_array($activity->status, ['sudah_terlaksana', 'selesai'], true);
+        })->sortBy('target_end_date')->take(4)->map(function ($activity) {
+            return [
+                'module' => 'Progress ZI',
+                'title' => 'Kegiatan overdue',
+                'subtitle' => $activity->name,
+                'description' => optional($activity->area)->name . ' • target ' . optional($activity->target_end_date)->translatedFormat('d F Y'),
+                'url' => route('progress-zi.activities.show', $activity),
+                'icon' => 'fas fa-chart-line',
+                'tone' => 'purple',
+                'sort_at' => optional($activity->target_end_date)->timestamp ?: 0,
+                'time' => optional($activity->target_end_date)->diffForHumans(),
+            ];
+        })->values();
+
+        $score = $activityCollection->isEmpty()
+            ? 0
+            : round($activityCollection->avg(function ($activity) {
+                return $activity->progress_score;
+            }), 1);
+
+        return [
+            'enabled' => true,
+            'stats' => [
+                'area_count' => $areas->count(),
+                'activity_count' => $activityCollection->count(),
+                'indicator_count' => (clone $indicators)->count(),
+                'evidence_count' => (clone $evidences)->count(),
+                'overdue_count' => $actions->count(),
+                'period_score' => $score,
+                'period_name' => optional($activePeriod)->name ?: 'Belum ada periode aktif',
+            ],
+            'actions' => $actions,
+        ];
     }
 
     protected function buildPersuratanSection($user)

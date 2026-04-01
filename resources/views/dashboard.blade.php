@@ -65,7 +65,7 @@
 
         .module-grid {
             display: grid;
-            grid-template-columns: repeat(3, minmax(0, 1fr));
+            grid-template-columns: repeat(4, minmax(0, 1fr));
             gap: 18px;
         }
 
@@ -113,6 +113,7 @@
         .module-pill.persuratan { background: linear-gradient(135deg, #2563eb, #1d4ed8); }
         .module-pill.rapat { background: linear-gradient(135deg, #0f766e, #0d9488); }
         .module-pill.cuti { background: linear-gradient(135deg, #15803d, #16a34a); }
+        .module-pill.zi { background: linear-gradient(135deg, #7c3aed, #4f46e5); }
 
         .metric-grid {
             display: grid;
@@ -478,6 +479,40 @@
                     <div class="module-link-row">
                         <a href="{{ route('cuti.index') }}"><i class="fas fa-calendar-alt"></i> Pengajuan Cuti</a>
                         <a href="{{ route('cuti.reports.index') }}" class="alt"><i class="fas fa-chart-bar"></i> Laporan Cuti</a>
+                    </div>
+                </article>
+            @endif
+
+            @if($progressZi['enabled'])
+                <article class="module-card">
+                    <div class="module-card-head">
+                        <div>
+                            <div class="module-card-title">Progress ZI</div>
+                            <div class="module-card-subtitle">Monitoring area perubahan, kegiatan, indikator, eviden, dan tindak lanjut verifikasi.</div>
+                        </div>
+                        <div class="module-pill zi"><i class="fas fa-chart-line"></i></div>
+                    </div>
+                    <div class="metric-grid">
+                        <div class="metric-box">
+                            <div class="value">{{ $progressZi['stats']['area_count'] }}</div>
+                            <div class="label">Area pada periode aktif</div>
+                        </div>
+                        <div class="metric-box">
+                            <div class="value">{{ $progressZi['stats']['activity_count'] }}</div>
+                            <div class="label">Kegiatan ZI terpantau</div>
+                        </div>
+                        <div class="metric-box">
+                            <div class="value">{{ $progressZi['stats']['indicator_count'] }}</div>
+                            <div class="label">Indikator aktif</div>
+                        </div>
+                        <div class="metric-box">
+                            <div class="value">{{ rtrim(rtrim(number_format($progressZi['stats']['period_score'], 1), '0'), '.') }}%</div>
+                            <div class="label">{{ $progressZi['stats']['period_name'] }}</div>
+                        </div>
+                    </div>
+                    <div class="module-link-row">
+                        <a href="{{ route('progress-zi.dashboard') }}"><i class="fas fa-chart-line"></i> Dashboard ZI</a>
+                        <a href="{{ route('progress-zi.activities.index') }}" class="alt"><i class="fas fa-tasks"></i> Monitoring</a>
                     </div>
                 </article>
             @endif

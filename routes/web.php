@@ -135,13 +135,57 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/{leaveRequest}/documents/{document}', 'LeaveRequestController@document')->name('documents.show');
     });
 
-    Route::get('/progress-zi', function () {
-        return view('modules.under-development', [
-            'module' => 'Progress ZI',
-            'icon' => 'fas fa-chart-line',
-            'description' => 'Modul monitoring progress Zona Integritas, eviden, dan capaian indikator kerja.'
-        ]);
-    })->name('progress-zi.index');
+    Route::prefix('progress-zi')->name('progress-zi.')->group(function () {
+        Route::get('/', 'ProgressZiDashboardController@index')->name('dashboard');
+        Route::get('/dashboard', 'ProgressZiDashboardController@index')->name('index');
+        Route::get('/guidelines', 'ProgressZiGuidelineController@index')->name('guidelines.index');
+        Route::post('/guidelines/areas/{ziArea}/points', 'ProgressZiGuidelineController@storePoint')->name('guidelines.points.store');
+        Route::put('/guidelines/points/{ziGuidelinePoint}', 'ProgressZiGuidelineController@updatePoint')->name('guidelines.points.update');
+        Route::delete('/guidelines/points/{ziGuidelinePoint}', 'ProgressZiGuidelineController@destroyPoint')->name('guidelines.points.destroy');
+        Route::post('/guidelines/points/{ziGuidelinePoint}/sub-points', 'ProgressZiGuidelineController@storeSubPoint')->name('guidelines.sub-points.store');
+        Route::put('/guidelines/sub-points/{ziGuidelineSubPoint}', 'ProgressZiGuidelineController@updateSubPoint')->name('guidelines.sub-points.update');
+        Route::delete('/guidelines/sub-points/{ziGuidelineSubPoint}', 'ProgressZiGuidelineController@destroySubPoint')->name('guidelines.sub-points.destroy');
+        Route::post('/guidelines/sub-points/{ziGuidelineSubPoint}/indicators', 'ProgressZiGuidelineController@storeIndicator')->name('guidelines.indicators.store');
+        Route::put('/guidelines/indicators/{ziGuidelineIndicator}', 'ProgressZiGuidelineController@updateIndicator')->name('guidelines.indicators.update');
+        Route::delete('/guidelines/indicators/{ziGuidelineIndicator}', 'ProgressZiGuidelineController@destroyIndicator')->name('guidelines.indicators.destroy');
+        Route::get('/verifications', 'ProgressZiDashboardController@verifications')->name('verifications.index');
+        Route::get('/verifications/pdf', 'ProgressZiDashboardController@verificationsPdf')->name('verifications.pdf');
+        Route::get('/verifications/excel', 'ProgressZiDashboardController@verificationsExcel')->name('verifications.excel');
+        Route::get('/reports', 'ProgressZiReportController@index')->name('reports.index');
+        Route::get('/reports/matrix', 'ProgressZiReportController@matrix')->name('reports.matrix');
+        Route::get('/reports/pdf', 'ProgressZiReportController@pdf')->name('reports.pdf');
+        Route::get('/reports/excel', 'ProgressZiReportController@excel')->name('reports.excel');
+
+        Route::get('/periods', 'ProgressZiMasterController@periods')->name('periods.index');
+        Route::post('/periods', 'ProgressZiMasterController@storePeriod')->name('periods.store');
+        Route::put('/periods/{ziPeriod}', 'ProgressZiMasterController@updatePeriod')->name('periods.update');
+
+        Route::get('/areas', 'ProgressZiMasterController@areas')->name('areas.index');
+        Route::post('/areas', 'ProgressZiMasterController@storeArea')->name('areas.store');
+        Route::put('/areas/{ziArea}', 'ProgressZiMasterController@updateArea')->name('areas.update');
+
+        Route::get('/activities', 'ProgressZiMasterController@activities')->name('activities.index');
+        Route::post('/activities', 'ProgressZiMasterController@storeActivity')->name('activities.store');
+        Route::put('/activities/{ziActivity}', 'ProgressZiMasterController@updateActivity')->name('activities.update');
+        Route::get('/activities/{ziActivity}', 'ProgressZiMasterController@showActivity')->name('activities.show');
+        Route::post('/activities/{ziActivity}/submit-review', 'ProgressZiMasterController@submitLeadershipReview')->name('activities.submit-review');
+        Route::post('/activities/{ziActivity}/evidences', 'ProgressZiRealizationController@storeEvidenceFromActivity')->name('activities.evidences.store');
+        Route::post('/sub-points/{ziGuidelineSubPoint}/evidences', 'ProgressZiRealizationController@storeEvidenceFromSubPoint')->name('sub-points.evidences.store');
+        Route::post('/activities/{ziActivity}/indicators', 'ProgressZiMasterController@storeIndicator')->name('indicators.store');
+        Route::put('/indicators/{ziIndicator}', 'ProgressZiMasterController@updateIndicator')->name('indicators.update');
+
+        Route::post('/activities/{ziActivity}/realizations', 'ProgressZiRealizationController@store')->name('realizations.store');
+        Route::put('/realizations/{ziRealization}', 'ProgressZiRealizationController@update')->name('realizations.update');
+        Route::post('/realizations/{ziRealization}/evidences', 'ProgressZiRealizationController@storeEvidence')->name('evidences.store');
+        Route::post('/indicators/{ziIndicator}/review', 'ProgressZiRealizationController@reviewIndicator')->name('indicators.review');
+        Route::post('/evidences/{ziEvidence}/review', 'ProgressZiRealizationController@reviewEvidence')->name('evidences.review');
+        Route::get('/evidences/{ziEvidence}/file', 'ProgressZiRealizationController@file')->name('evidences.file');
+        Route::get('/activities/{ziActivity}/evidences/bundle', 'ProgressZiRealizationController@bundle')->name('activities.evidences.bundle');
+        Route::get('/approvals/{ziActivityApproval}', 'ProgressZiApprovalController@show')->name('approvals.show');
+        Route::get('/approvals/{ziActivityApproval}/bundle', 'ProgressZiApprovalController@bundle')->name('approvals.bundle');
+        Route::post('/approvals/{ziActivityApproval}/approve', 'ProgressZiApprovalController@approve')->name('approvals.approve');
+        Route::post('/approvals/{ziActivityApproval}/reject', 'ProgressZiApprovalController@reject')->name('approvals.reject');
+    });
 
     Route::prefix('rapat')->name('rapat.')->middleware('role:admin,operator,notulis,peserta,approval,protokoler,super_admin')->group(function () {
         Route::get('/', 'RapatController@index')->name('index');
