@@ -111,7 +111,8 @@ class DashboardController extends Controller
         return [
             'month_label' => $monthStart->translatedFormat('F Y'),
             'event_count' => $counts['all'] ?? 0,
-            'meeting_count' => $counts['rapat'] ?? 0,
+            'meeting_count' => ($counts['rapat'] ?? 0) + ($counts['agenda_pimpinan'] ?? 0),
+            'agenda_pimpinan_count' => $counts['agenda_pimpinan'] ?? 0,
             'leave_count' => $counts['cuti'] ?? 0,
             'zi_count' => $counts['zi'] ?? 0,
             'surat_tugas_count' => $counts['surat_tugas'] ?? 0,

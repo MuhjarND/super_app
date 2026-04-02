@@ -485,6 +485,7 @@
         }
 
         .calendar-day-dot.rapat { background: #2563eb; }
+        .calendar-day-dot.agenda_pimpinan { background: #64748b; }
         .calendar-day-dot.cuti { background: #dc2626; }
         .calendar-day-dot.zi { background: #d97706; }
         .calendar-day-dot.surat_tugas { background: #16a34a; }
@@ -613,6 +614,10 @@
                     <div class="calendar-stat-card">
                         <div class="calendar-stat-value">{{ $calendarOverview['meeting_count'] }}</div>
                         <div class="calendar-stat-label">Rapat dan agenda pimpinan</div>
+                    </div>
+                    <div class="calendar-stat-card">
+                        <div class="calendar-stat-value">{{ $calendarOverview['agenda_pimpinan_count'] }}</div>
+                        <div class="calendar-stat-label">Agenda pimpinan bulan ini</div>
                     </div>
                     <div class="calendar-stat-card">
                         <div class="calendar-stat-value">{{ $calendarOverview['leave_count'] }}</div>

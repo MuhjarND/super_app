@@ -20,9 +20,11 @@ class IntegratedCalendarService
         $events = collect();
 
         if (in_array('rapat', $filters['modules'], true)) {
-            $events = $events
-                ->merge($this->buildRapatEvents($user, $filters))
-                ->merge($this->buildAgendaEvents($user, $filters));
+            $events = $events->merge($this->buildRapatEvents($user, $filters));
+        }
+
+        if (in_array('agenda_pimpinan', $filters['modules'], true)) {
+            $events = $events->merge($this->buildAgendaEvents($user, $filters));
         }
 
         if (in_array('cuti', $filters['modules'], true)) {
@@ -55,6 +57,7 @@ class IntegratedCalendarService
                 'counts' => [
                     'all' => $events->count(),
                     'rapat' => $events->where('module_key', 'rapat')->count(),
+                    'agenda_pimpinan' => $events->where('module_key', 'agenda_pimpinan')->count(),
                     'cuti' => $events->where('module_key', 'cuti')->count(),
                     'zi' => $events->where('module_key', 'zi')->count(),
                     'surat_tugas' => $events->where('module_key', 'surat_tugas')->count(),
@@ -70,16 +73,16 @@ class IntegratedCalendarService
         $start = !empty($filters['start']) ? Carbon::parse($filters['start'], 'Asia/Jayapura')->startOfDay() : now('Asia/Jayapura')->startOfMonth();
         $end = !empty($filters['end']) ? Carbon::parse($filters['end'], 'Asia/Jayapura')->endOfDay() : now('Asia/Jayapura')->endOfMonth();
 
-        $modules = collect($filters['modules'] ?? ['rapat', 'cuti', 'zi', 'surat_tugas'])
+        $modules = collect($filters['modules'] ?? ['rapat', 'agenda_pimpinan', 'cuti', 'zi', 'surat_tugas'])
             ->filter(function ($module) {
-                return in_array($module, ['rapat', 'cuti', 'zi', 'surat_tugas'], true);
+                return in_array($module, ['rapat', 'agenda_pimpinan', 'cuti', 'zi', 'surat_tugas'], true);
             })
             ->unique()
             ->values()
             ->all();
 
         if (empty($modules)) {
-            $modules = ['rapat', 'cuti', 'zi', 'surat_tugas'];
+            $modules = ['rapat', 'agenda_pimpinan', 'cuti', 'zi', 'surat_tugas'];
         }
 
         return [
@@ -179,8 +182,8 @@ class IntegratedCalendarService
 
             return $this->makeEvent([
                 'id' => 'agenda-' . $agenda->id,
-                'module_key' => 'rapat',
-                'module_label' => 'Agenda',
+                'module_key' => 'agenda_pimpinan',
+                'module_label' => 'Agenda Pimpinan',
                 'source_key' => 'agenda',
                 'title' => $agenda->judul_agenda,
                 'start' => $start,
@@ -188,7 +191,7 @@ class IntegratedCalendarService
                 'allDay' => false,
                 'status_key' => $statusKey,
                 'status_label' => $this->statusLabel($statusKey),
-                'color' => '#1d4ed8',
+                'color' => '#64748b',
                 'textColor' => '#ffffff',
                 'url' => ($user->isSuperAdmin() || $user->canAccessAgendaPimpinan()) ? route('rapat.agenda.index') : null,
                 'meta' => [

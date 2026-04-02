@@ -35,6 +35,7 @@
         .calendar-legend-label { display: inline-flex; align-items: center; gap: 8px; font-weight: 700; }
         .calendar-dot { width: 10px; height: 10px; border-radius: 999px; display: inline-block; }
         .calendar-dot.rapat { background: #2563eb; }
+        .calendar-dot.agenda-pimpinan { background: #64748b; }
         .calendar-dot.cuti { background: #dc2626; }
         .calendar-dot.zi { background: #d97706; }
         .calendar-dot.surat-tugas { background: #16a34a; }
@@ -45,6 +46,30 @@
         .fc-theme-standard th, .fc-theme-standard td, .fc-theme-standard .fc-scrollgrid { border-color: #edf2f7; }
         .fc .fc-col-header-cell-cushion, .fc .fc-daygrid-day-number { color: #334155; font-weight: 700; text-decoration: none; }
         .fc .fc-event { border: none; border-radius: 10px; padding: 2px 4px; font-size: 0.74rem; font-weight: 700; box-shadow: 0 6px 16px rgba(15, 23, 42, 0.12); }
+        .fc .fc-daygrid-dot-event {
+            display: block;
+            margin-top: 3px;
+            padding: 5px 8px;
+            border-radius: 8px;
+            background: var(--fc-event-bg-color, #2563eb);
+            color: var(--fc-event-text-color, #ffffff);
+            border: none;
+            box-shadow: 0 6px 16px rgba(15, 23, 42, 0.12);
+        }
+        .fc .fc-daygrid-dot-event:hover {
+            background: var(--fc-event-bg-color, #2563eb);
+            color: var(--fc-event-text-color, #ffffff);
+        }
+        .fc .fc-daygrid-dot-event .fc-event-title,
+        .fc .fc-daygrid-dot-event .fc-event-time {
+            color: inherit;
+        }
+        .fc .fc-daygrid-dot-event .fc-event-title {
+            font-weight: 700;
+        }
+        .fc .fc-daygrid-dot-event .fc-daygrid-event-dot {
+            display: none;
+        }
         .fc .fc-list-event-title a, .fc .fc-list-event-time { color: #0f172a; text-decoration: none; }
         .calendar-status-badge, .calendar-module-badge { display: inline-flex; align-items: center; border-radius: 999px; padding: 5px 10px; font-size: 0.72rem; font-weight: 700; }
         .calendar-module-badge { background: #eff6ff; color: #1d4ed8; }
@@ -71,7 +96,7 @@
     <div class="page-header-card">
         <div>
             <h3>Kalender Terpadu</h3>
-            <p class="text-muted mb-0">Monitoring jadwal lintas modul untuk rapat, cuti, dan Progress ZI dalam satu workspace.</p>
+            <p class="text-muted mb-0">Monitoring jadwal lintas modul untuk rapat, agenda pimpinan, cuti, surat tugas, dan Progress ZI dalam satu workspace.</p>
         </div>
     </div>
 @endsection
@@ -126,7 +151,8 @@
                     <div class="calendar-stat-grid">
                         <div class="calendar-stat-box"><div class="value" id="calendarCountAll">0</div><div class="label">Total event</div></div>
                         <div class="calendar-stat-box"><div class="value" id="calendarConflictCount">0</div><div class="label">Tanggal benturan</div></div>
-                        <div class="calendar-stat-box"><div class="value" id="calendarCountRapat">0</div><div class="label">Rapat / agenda</div></div>
+                        <div class="calendar-stat-box"><div class="value" id="calendarCountRapat">0</div><div class="label">Rapat</div></div>
+                        <div class="calendar-stat-box"><div class="value" id="calendarCountAgendaPimpinan">0</div><div class="label">Agenda pimpinan</div></div>
                         <div class="calendar-stat-box"><div class="value" id="calendarCountCuti">0</div><div class="label">Cuti</div></div>
                         <div class="calendar-stat-box"><div class="value" id="calendarCountSuratTugas">0</div><div class="label">Surat tugas</div></div>
                     </div>
@@ -134,7 +160,8 @@
                     <section>
                         <div class="calendar-side-head p-0 border-0 mb-2"><div><h5 style="font-size:0.9rem;">Legenda modul</h5><p>Ringkasan warna event dari modul yang sudah terhubung ke kalender.</p></div></div>
                         <div class="calendar-legend">
-                            <div class="calendar-legend-row"><span class="calendar-legend-label"><span class="calendar-dot rapat"></span> Rapat / Agenda</span><span id="calendarLegendRapat">0</span></div>
+                            <div class="calendar-legend-row"><span class="calendar-legend-label"><span class="calendar-dot rapat"></span> Rapat</span><span id="calendarLegendRapat">0</span></div>
+                            <div class="calendar-legend-row"><span class="calendar-legend-label"><span class="calendar-dot agenda-pimpinan"></span> Agenda Pimpinan</span><span id="calendarLegendAgendaPimpinan">0</span></div>
                             <div class="calendar-legend-row"><span class="calendar-legend-label"><span class="calendar-dot cuti"></span> Cuti</span><span id="calendarLegendCuti">0</span></div>
                             <div class="calendar-legend-row"><span class="calendar-legend-label"><span class="calendar-dot zi"></span> Progress ZI</span><span id="calendarLegendZi">0</span></div>
                             <div class="calendar-legend-row"><span class="calendar-legend-label"><span class="calendar-dot surat-tugas"></span> Surat Tugas</span><span id="calendarLegendSuratTugas">0</span></div>
@@ -210,9 +237,11 @@
                 meta = meta || { counts: {}, conflicts: [], upcoming: [] };
                 document.getElementById('calendarCountAll').textContent = meta.counts.all || 0;
                 document.getElementById('calendarCountRapat').textContent = meta.counts.rapat || 0;
+                document.getElementById('calendarCountAgendaPimpinan').textContent = meta.counts.agenda_pimpinan || 0;
                 document.getElementById('calendarCountCuti').textContent = meta.counts.cuti || 0;
                 document.getElementById('calendarCountSuratTugas').textContent = meta.counts.surat_tugas || 0;
                 document.getElementById('calendarLegendRapat').textContent = meta.counts.rapat || 0;
+                document.getElementById('calendarLegendAgendaPimpinan').textContent = meta.counts.agenda_pimpinan || 0;
                 document.getElementById('calendarLegendCuti').textContent = meta.counts.cuti || 0;
                 document.getElementById('calendarLegendZi').textContent = meta.counts.zi || 0;
                 document.getElementById('calendarLegendSuratTugas').textContent = meta.counts.surat_tugas || 0;
@@ -241,6 +270,17 @@
                 navLinks: true,
                 nowIndicator: true,
                 eventTimeFormat: { hour: '2-digit', minute: '2-digit', meridiem: false },
+                eventDidMount: function (info) {
+                    const bg = info.event.backgroundColor || info.event.extendedProps.backgroundColor || '#2563eb';
+                    const text = info.event.textColor || '#ffffff';
+                    info.el.style.backgroundColor = bg;
+                    info.el.style.borderColor = bg;
+                    info.el.style.color = text;
+
+                    info.el.querySelectorAll('.fc-event-main, .fc-event-title, .fc-event-time, .fc-list-event-title a, .fc-list-event-time').forEach(function (node) {
+                        node.style.color = text;
+                    });
+                },
                 events: function (fetchInfo, successCallback, failureCallback) {
                     const params = serializeFilters({ start: fetchInfo.startStr, end: fetchInfo.endStr });
                     fetch(`{{ route('calendar.integrated.events') }}?${params.toString()}`, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
