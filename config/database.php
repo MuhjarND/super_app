@@ -63,6 +63,25 @@ return [
             ]) : [],
         ],
 
+        'siperlatin_legacy' => [
+            'driver' => 'mysql',
+            'host' => env('SIPERLATIN_DB_HOST', env('DB_HOST', '127.0.0.1')),
+            'port' => env('SIPERLATIN_DB_PORT', env('DB_PORT', '3306')),
+            'database' => env('SIPERLATIN_DB_DATABASE', 'siperlatin'),
+            'username' => env('SIPERLATIN_DB_USERNAME', env('DB_USERNAME', 'forge')),
+            'password' => env('SIPERLATIN_DB_PASSWORD', env('DB_PASSWORD', '')),
+            'unix_socket' => env('SIPERLATIN_DB_SOCKET', ''),
+            'charset' => 'utf8mb4',
+            'collation' => 'utf8mb4_unicode_ci',
+            'prefix' => '',
+            'prefix_indexes' => true,
+            'strict' => false,
+            'engine' => null,
+            'options' => extension_loaded('pdo_mysql') ? array_filter([
+                PDO::MYSQL_ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA'),
+            ]) : [],
+        ],
+
         'pgsql' => [
             'driver' => 'pgsql',
             'url' => env('DATABASE_URL'),

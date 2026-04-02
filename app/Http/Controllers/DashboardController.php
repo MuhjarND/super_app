@@ -4,6 +4,10 @@ namespace App\Http\Controllers;
 
 use App\AgendaPimpinan;
 use App\Disposisi;
+use App\InventoryItem;
+use App\InventoryItemDetail;
+use App\InventoryMaintenanceTransaction;
+use App\InventoryRoom;
 use App\LeaveApproval;
 use App\LeaveRequest;
 use App\Rapat;
@@ -17,6 +21,7 @@ use App\ZiArea;
 use App\ZiEvidence;
 use App\ZiIndicator;
 use App\ZiPeriod;
+use App\Services\IntegratedCalendarService;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Schema;
@@ -36,12 +41,15 @@ class DashboardController extends Controller
         $meeting = $this->buildMeetingSection($user);
         $leave = $this->buildLeaveSection($user);
         $progressZi = $this->buildProgressZiSection($user);
+        $inventory = $this->buildInventorySection($user);
+        $calendarOverview = $this->buildCalendarOverviewSection($user);
 
         $actionItems = collect()
             ->merge($persuratan['actions'])
             ->merge($meeting['actions'])
             ->merge($leave['actions'])
             ->merge($progressZi['actions'])
+            ->merge($inventory['actions'])
             ->sortByDesc('sort_at')
             ->take(10)
             ->values();
@@ -51,15 +59,157 @@ class DashboardController extends Controller
             'meeting' => $meeting,
             'leave' => $leave,
             'progressZi' => $progressZi,
+            'inventory' => $inventory,
+            'calendarOverview' => $calendarOverview,
             'actionItems' => $actionItems,
             'dashboardSummary' => [
                 'today_masuk' => $persuratan['today_masuk'],
                 'today_keluar' => $persuratan['today_keluar'],
                 'upcoming_meetings' => $meeting['upcoming_count'],
                 'pending_leave_approvals' => $leave['pending_approvals'],
+                'inventory_transactions' => $inventory['stats']['maintenance_count'] ?? 0,
                 'action_count' => $actionItems->count(),
             ],
         ]);
+    }
+
+    protected function buildCalendarOverviewSection($user)
+    {
+        $service = app(IntegratedCalendarService::class);
+        $monthStart = now('Asia/Jayapura')->startOfMonth();
+        $monthEnd = now('Asia/Jayapura')->endOfMonth();
+        $today = now('Asia/Jayapura')->toDateString();
+
+        $calendar = $service->build($user, [
+            'start' => $monthStart->toDateString(),
+            'end' => $monthEnd->toDateString(),
+            'scope' => 'all',
+        ]);
+        $todayMineCalendar = $service->build($user, [
+            'start' => $today,
+            'end' => $today,
+            'scope' => 'mine',
+        ]);
+
+        $events = collect($calendar['events']);
+        $counts = $calendar['meta']['counts'] ?? [];
+        $conflicts = collect($calendar['meta']['conflicts'] ?? []);
+        $upcoming = collect($calendar['meta']['upcoming'] ?? []);
+        $todayEvents = collect($todayMineCalendar['events'])
+            ->sortBy('start')
+            ->take(5)
+            ->map(function ($event) {
+                return [
+                    'title' => $event['title'],
+                    'module' => $event['extendedProps']['module_label'] ?? '-',
+                    'status' => $event['extendedProps']['status_label'] ?? '-',
+                    'time' => $event['extendedProps']['time_label'] ?? '-',
+                ];
+            })
+            ->values();
+
+        return [
+            'month_label' => $monthStart->translatedFormat('F Y'),
+            'event_count' => $counts['all'] ?? 0,
+            'meeting_count' => $counts['rapat'] ?? 0,
+            'leave_count' => $counts['cuti'] ?? 0,
+            'zi_count' => $counts['zi'] ?? 0,
+            'conflict_count' => $conflicts->count(),
+            'days_with_events' => $events
+                ->map(function ($event) {
+                    return Carbon::parse($event['start'], 'Asia/Jayapura')->toDateString();
+                })
+                ->unique()
+                ->count(),
+            'month_days' => $this->buildCalendarMonthGrid($events, $monthStart, $monthEnd),
+            'weekday_labels' => ['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'],
+            'today_events' => $todayEvents,
+            'today_event_count' => $todayMineCalendar['meta']['counts']['all'] ?? 0,
+            'upcoming' => $upcoming->take(5)->values(),
+            'conflicts' => $conflicts->take(4)->values(),
+        ];
+    }
+
+    protected function buildCalendarMonthGrid(Collection $events, Carbon $monthStart, Carbon $monthEnd)
+    {
+        $eventMap = [];
+
+        foreach ($events as $event) {
+            foreach ($this->expandDashboardEventDates($event, $monthStart, $monthEnd) as $dateKey) {
+                if (!isset($eventMap[$dateKey])) {
+                    $eventMap[$dateKey] = [
+                        'count' => 0,
+                        'modules' => [],
+                    ];
+                }
+
+                $eventMap[$dateKey]['count']++;
+                $moduleKey = $event['module_key'] ?? null;
+                if ($moduleKey && !in_array($moduleKey, $eventMap[$dateKey]['modules'], true)) {
+                    $eventMap[$dateKey]['modules'][] = $moduleKey;
+                }
+            }
+        }
+
+        $gridStart = $monthStart->copy()->startOfWeek(Carbon::MONDAY);
+        $gridEnd = $monthEnd->copy()->endOfWeek(Carbon::SUNDAY);
+        $weeks = collect();
+        $currentWeek = [];
+        $cursor = $gridStart->copy();
+
+        while ($cursor->lte($gridEnd)) {
+            $dateKey = $cursor->toDateString();
+            $meta = $eventMap[$dateKey] ?? ['count' => 0, 'modules' => []];
+
+            $currentWeek[] = [
+                'date' => $dateKey,
+                'day' => $cursor->day,
+                'in_month' => $cursor->month === $monthStart->month,
+                'is_today' => $cursor->isToday(),
+                'event_count' => $meta['count'],
+                'module_keys' => array_slice($meta['modules'], 0, 3),
+            ];
+
+            if (count($currentWeek) === 7) {
+                $weeks->push($currentWeek);
+                $currentWeek = [];
+            }
+
+            $cursor->addDay();
+        }
+
+        return $weeks;
+    }
+
+    protected function expandDashboardEventDates(array $event, Carbon $monthStart, Carbon $monthEnd)
+    {
+        $start = Carbon::parse($event['start'], 'Asia/Jayapura')->startOfDay();
+        $end = Carbon::parse($event['end'], 'Asia/Jayapura');
+        $last = !empty($event['allDay'])
+            ? $end->copy()->subDay()->startOfDay()
+            : $end->copy()->startOfDay();
+
+        if ($last->lt($start)) {
+            $last = $start->copy();
+        }
+
+        if ($start->lt($monthStart)) {
+            $start = $monthStart->copy();
+        }
+
+        if ($last->gt($monthEnd)) {
+            $last = $monthEnd->copy();
+        }
+
+        $dates = [];
+        $cursor = $start->copy();
+
+        while ($cursor->lte($last)) {
+            $dates[] = $cursor->toDateString();
+            $cursor->addDay();
+        }
+
+        return $dates;
     }
 
     protected function buildProgressZiSection($user)
@@ -497,6 +647,48 @@ class DashboardController extends Controller
             'recent' => $recent,
             'actions' => $actions,
             'pending_approvals' => (clone $pendingLeaveApprovalQuery)->count(),
+        ];
+    }
+
+    protected function buildInventorySection($user)
+    {
+        $enabled = $user->canAccessInventoryModule() && Schema::hasTable('inventory_items');
+        if (!$enabled) {
+            return [
+                'enabled' => false,
+                'stats' => [],
+                'recent' => collect(),
+                'actions' => collect(),
+            ];
+        }
+
+        $recentTransactions = InventoryMaintenanceTransaction::with(['item', 'detail'])
+            ->latest('transaction_date')
+            ->take(6)
+            ->get()
+            ->map(function ($transaction) {
+                return [
+                    'type' => 'Perawatan Alat/Mesin',
+                    'title' => optional($transaction->item)->name ?: 'Inventaris',
+                    'subtitle' => optional($transaction->detail)->sub_code ?: '-',
+                    'meta' => optional($transaction->transaction_date)->translatedFormat('d F Y') . ' • Rp ' . number_format($transaction->amount, 0, ',', '.'),
+                    'url' => route('perawatan-alat-mesin.maintenance.index'),
+                    'badge' => $transaction->status_badge,
+                    'sort_at' => optional($transaction->created_at)->timestamp ?: 0,
+                ];
+            });
+
+        return [
+            'enabled' => true,
+            'stats' => [
+                'item_count' => InventoryItem::count(),
+                'detail_count' => InventoryItemDetail::count(),
+                'room_count' => InventoryRoom::count(),
+                'maintenance_count' => InventoryMaintenanceTransaction::count(),
+                'maintenance_total' => (float) InventoryMaintenanceTransaction::sum('amount'),
+            ],
+            'recent' => $recentTransactions,
+            'actions' => collect(),
         ];
     }
 

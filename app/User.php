@@ -338,6 +338,14 @@ class User extends Authenticatable
         return $this->canAccessArsipMenu();
     }
 
+    public function canAccessIntegratedCalendar()
+    {
+        return $this->canAccessMeetingModule()
+            || $this->canAccessLeaveModule()
+            || $this->canAccessProgressZiModule()
+            || $this->canAccessInventoryModule();
+    }
+
     public function canAccessProgressZiModule()
     {
         if ($this->isSuperAdmin()) {
@@ -444,6 +452,51 @@ class User extends Authenticatable
         }
 
         return (int) data_get($area, 'pic_user_id') === (int) $this->id;
+    }
+
+    public function canAccessInventoryModule()
+    {
+        if ($this->isSuperAdmin()) {
+            return true;
+        }
+
+        return $this->hasAnyRole([
+            'admin',
+            'sekretaris',
+            'panitera',
+            'kabag',
+            'kasubag',
+            'panmud',
+            'pegawai',
+            'peserta',
+        ]);
+    }
+
+    public function canManageInventoryMasterData()
+    {
+        if ($this->isSuperAdmin()) {
+            return true;
+        }
+
+        return $this->hasAnyRole([
+            'admin',
+            'sekretaris',
+            'kabag',
+            'kasubag',
+        ]);
+    }
+
+    public function canManageInventoryTransactions()
+    {
+        if ($this->canManageInventoryMasterData()) {
+            return true;
+        }
+
+        return $this->hasAnyRole([
+            'panmud',
+            'pegawai',
+            'peserta',
+        ]);
     }
 
     public function canAccessLeaveModule()

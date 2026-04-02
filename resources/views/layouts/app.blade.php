@@ -1495,6 +1495,16 @@
                             </a>
                         </li>
 
+                        @if($sidebarUser->canAccessIntegratedCalendar())
+                            <li class="nav-item">
+                                <a href="{{ route('calendar.integrated.index') }}"
+                                    class="nav-link {{ request()->routeIs('calendar.integrated.*') ? 'active' : '' }}">
+                                    <i class="nav-icon far fa-calendar-alt"></i>
+                                    <p>Kalender Terpadu</p>
+                                </a>
+                            </li>
+                        @endif
+
                         @if($isSidebarSuperAdmin || $sidebarUser->canAccessApprovalCenter())
                             <li class="nav-section {{ request()->routeIs('approval.*') ? '' : 'is-collapsed' }}" data-section="approval">
                                 <button type="button" class="nav-section-toggle {{ ($sidebarApprovalTotalCount ?? 0) > 0 ? 'has-alert' : '' }}">
@@ -1717,21 +1727,104 @@
                             </li>
                         @endif
 
-                        <li class="nav-section {{ request()->routeIs('persediaan.*') ? '' : 'is-collapsed' }}" data-section="persediaan">
-                            <button type="button" class="nav-section-toggle">
-                                <span>Persediaan</span>
-                                <i class="fas fa-chevron-down section-chevron"></i>
-                            </button>
-                            <ul class="nav nav-pills flex-column nav-section-menu">
-                                <li class="nav-item nav-item-sub">
-                                    <a href="{{ route('persediaan.index') }}"
-                                        class="nav-link {{ request()->routeIs('persediaan.*') ? 'active' : '' }}">
-                                        <i class="nav-icon fas fa-cube"></i>
-                                        <p>Persediaan <span class="badge badge-dev ml-auto">DEV</span></p>
-                                    </a>
-                                </li>
-                            </ul>
-                        </li>
+                        @if($isSidebarSuperAdmin || $sidebarUser->canAccessInventoryModule())
+                            <li class="nav-section {{ request()->routeIs('perawatan-alat-mesin.*') ? '' : 'is-collapsed' }}" data-section="perawatan-alat-mesin">
+                                <button type="button" class="nav-section-toggle">
+                                    <span>Perawatan Alat dan Mesin</span>
+                                    <i class="fas fa-chevron-down section-chevron"></i>
+                                </button>
+                                <ul class="nav nav-pills flex-column nav-section-menu">
+                                    <li class="nav-item nav-item-sub">
+                                        <a href="{{ route('perawatan-alat-mesin.index') }}"
+                                            class="nav-link {{ request()->routeIs('perawatan-alat-mesin.index') ? 'active' : '' }}">
+                                            <i class="nav-icon fas fa-tachometer-alt"></i>
+                                            <p>Dashboard</p>
+                                        </a>
+                                    </li>
+                                    <li class="nav-item nav-item-sub">
+                                        <a href="{{ route('perawatan-alat-mesin.items.index') }}"
+                                            class="nav-link {{ request()->routeIs('perawatan-alat-mesin.items.*') || request()->routeIs('perawatan-alat-mesin.details.*') ? 'active' : '' }}">
+                                            <i class="nav-icon fas fa-boxes"></i>
+                                            <p>Master Barang</p>
+                                        </a>
+                                    </li>
+                                    <li class="nav-item nav-item-sub">
+                                        <a href="{{ route('perawatan-alat-mesin.maintenance.index') }}"
+                                            class="nav-link {{ request()->routeIs('perawatan-alat-mesin.maintenance.*') ? 'active' : '' }}">
+                                            <i class="nav-icon fas fa-tools"></i>
+                                            <p>Transaksi Perawatan</p>
+                                        </a>
+                                    </li>
+                                    <li class="nav-item nav-item-sub">
+                                        <a href="{{ route('perawatan-alat-mesin.reports.index') }}"
+                                            class="nav-link {{ request()->routeIs('perawatan-alat-mesin.reports.*') ? 'active' : '' }}">
+                                            <i class="nav-icon fas fa-file-invoice-dollar"></i>
+                                            <p>Laporan</p>
+                                        </a>
+                                    </li>
+                                    <li class="nav-item nav-item-sub">
+                                        <a href="{{ route('perawatan-alat-mesin.qrcode.index') }}"
+                                            class="nav-link {{ request()->routeIs('perawatan-alat-mesin.qrcode.*') ? 'active' : '' }}">
+                                            <i class="nav-icon fas fa-qrcode"></i>
+                                            <p>Cetak QR Code</p>
+                                        </a>
+                                    </li>
+                                    @if($isSidebarSuperAdmin || $sidebarUser->canManageInventoryMasterData())
+                                        <li class="nav-item nav-item-sub">
+                                            <a href="{{ route('perawatan-alat-mesin.master.index', 'units') }}"
+                                                class="nav-link {{ request()->is('perawatan-alat-dan-mesin/master/units*') ? 'active' : '' }}">
+                                                <i class="nav-icon fas fa-ruler-combined"></i>
+                                                <p>Satuan Barang</p>
+                                            </a>
+                                        </li>
+                                        <li class="nav-item nav-item-sub">
+                                            <a href="{{ route('perawatan-alat-mesin.master.index', 'conditions') }}"
+                                                class="nav-link {{ request()->is('perawatan-alat-dan-mesin/master/conditions*') ? 'active' : '' }}">
+                                                <i class="nav-icon fas fa-clipboard-check"></i>
+                                                <p>Kondisi Barang</p>
+                                            </a>
+                                        </li>
+                                        <li class="nav-item nav-item-sub">
+                                            <a href="{{ route('perawatan-alat-mesin.master.index', 'rooms') }}"
+                                                class="nav-link {{ request()->is('perawatan-alat-dan-mesin/master/rooms*') ? 'active' : '' }}">
+                                                <i class="nav-icon fas fa-door-open"></i>
+                                                <p>Ruang</p>
+                                            </a>
+                                        </li>
+                                        <li class="nav-item nav-item-sub">
+                                            <a href="{{ route('perawatan-alat-mesin.master.index', 'brands') }}"
+                                                class="nav-link {{ request()->is('perawatan-alat-dan-mesin/master/brands*') ? 'active' : '' }}">
+                                                <i class="nav-icon fas fa-tags"></i>
+                                                <p>Brand / Merk</p>
+                                            </a>
+                                        </li>
+                                        <li class="nav-item nav-item-sub">
+                                            <a href="{{ route('perawatan-alat-mesin.authority.index') }}"
+                                                class="nav-link {{ request()->routeIs('perawatan-alat-mesin.authority.*') ? 'active' : '' }}">
+                                                <i class="nav-icon fas fa-user-tie"></i>
+                                                <p>Kuasa Pengguna</p>
+                                            </a>
+                                        </li>
+                                    @endif
+                                </ul>
+                            </li>
+
+                            <li class="nav-section {{ request()->routeIs('persediaan.*') ? '' : 'is-collapsed' }}" data-section="persediaan-dev">
+                                <button type="button" class="nav-section-toggle">
+                                    <span>Persediaan</span>
+                                    <i class="fas fa-chevron-down section-chevron"></i>
+                                </button>
+                                <ul class="nav nav-pills flex-column nav-section-menu">
+                                    <li class="nav-item nav-item-sub">
+                                        <a href="{{ route('persediaan.index') }}"
+                                            class="nav-link {{ request()->routeIs('persediaan.*') ? 'active' : '' }}">
+                                            <i class="nav-icon fas fa-warehouse"></i>
+                                            <p>Persediaan <span class="badge-dev ml-2">DEV</span></p>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </li>
+                        @endif
 
                         @if($isSidebarSuperAdmin || $sidebarUser->canAccessProgressZiModule())
                             <li class="nav-section {{ request()->routeIs('progress-zi.*') ? '' : 'is-collapsed' }}" data-section="progress-zi">

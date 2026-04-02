@@ -114,6 +114,7 @@
         .module-pill.rapat { background: linear-gradient(135deg, #0f766e, #0d9488); }
         .module-pill.cuti { background: linear-gradient(135deg, #15803d, #16a34a); }
         .module-pill.zi { background: linear-gradient(135deg, #7c3aed, #4f46e5); }
+        .module-pill.persediaan { background: linear-gradient(135deg, #b45309, #d97706); }
 
         .metric-grid {
             display: grid;
@@ -310,11 +311,206 @@
             gap: 18px;
         }
 
+        .calendar-stat-grid {
+            display: grid;
+            grid-template-columns: repeat(6, minmax(0, 1fr));
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .calendar-stat-card {
+            border-radius: 14px;
+            border: 1px solid #e2e8f0;
+            background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+            padding: 14px 15px;
+            min-height: 84px;
+        }
+
+        .calendar-stat-value {
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: #0f172a;
+            line-height: 1;
+            margin-bottom: 8px;
+        }
+
+        .calendar-stat-label {
+            font-size: 0.78rem;
+            color: #64748b;
+            line-height: 1.35;
+        }
+
+        .calendar-overview-grid {
+            display: grid;
+            grid-template-columns: 1.1fr 0.9fr;
+            gap: 18px;
+        }
+
+        .calendar-side-stack {
+            display: grid;
+            gap: 16px;
+        }
+
+        .calendar-section-title {
+            font-size: 0.82rem;
+            font-weight: 800;
+            color: #0f172a;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            margin-bottom: 10px;
+        }
+
+        .calendar-mini-list {
+            display: grid;
+            gap: 10px;
+        }
+
+        .calendar-mini-item {
+            border: 1px solid #edf2f7;
+            border-radius: 14px;
+            background: #fff;
+            padding: 12px 14px;
+        }
+
+        .calendar-mini-title {
+            font-size: 0.84rem;
+            font-weight: 700;
+            color: #0f172a;
+            margin-bottom: 4px;
+        }
+
+        .calendar-mini-meta {
+            font-size: 0.76rem;
+            color: #64748b;
+            line-height: 1.45;
+        }
+
+        .calendar-conflict-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 7px 10px;
+            border-radius: 999px;
+            background: #fff7ed;
+            color: #c2410c;
+            font-size: 0.74rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .calendar-month-card {
+            border: 1px solid #e2e8f0;
+            border-radius: 16px;
+            background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+            padding: 14px;
+        }
+
+        .calendar-weekday-grid,
+        .calendar-day-grid {
+            display: grid;
+            grid-template-columns: repeat(7, minmax(0, 1fr));
+            gap: 8px;
+        }
+
+        .calendar-weekday {
+            text-align: center;
+            font-size: 0.74rem;
+            font-weight: 700;
+            color: #64748b;
+            padding-bottom: 2px;
+        }
+
+        .calendar-week-row {
+            display: grid;
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .calendar-day-cell {
+            min-height: 76px;
+            border-radius: 14px;
+            border: 1px solid #e2e8f0;
+            background: #fff;
+            padding: 10px 9px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .calendar-day-cell.outside {
+            background: #f8fafc;
+            color: #94a3b8;
+        }
+
+        .calendar-day-cell.today {
+            border-color: #93c5fd;
+            box-shadow: inset 0 0 0 1px rgba(59, 130, 246, 0.18);
+        }
+
+        .calendar-day-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+        }
+
+        .calendar-day-number {
+            font-size: 0.82rem;
+            font-weight: 800;
+            color: #0f172a;
+        }
+
+        .calendar-day-cell.outside .calendar-day-number {
+            color: #94a3b8;
+        }
+
+        .calendar-day-count {
+            font-size: 0.7rem;
+            font-weight: 700;
+            color: #64748b;
+            line-height: 1;
+        }
+
+        .calendar-day-dots {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+        }
+
+        .calendar-day-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 999px;
+            flex-shrink: 0;
+        }
+
+        .calendar-day-dot.rapat { background: #2563eb; }
+        .calendar-day-dot.cuti { background: #dc2626; }
+        .calendar-day-dot.zi { background: #d97706; }
+
+        .calendar-today-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 7px 10px;
+            border-radius: 999px;
+            background: #eff6ff;
+            color: #1d4ed8;
+            font-size: 0.74rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
         @media (max-width: 1199.98px) {
             .module-grid,
             .recent-columns,
-            .dashboard-row {
+            .dashboard-row,
+            .calendar-overview-grid {
                 grid-template-columns: 1fr;
+            }
+
+            .calendar-stat-grid {
+                grid-template-columns: repeat(3, minmax(0, 1fr));
             }
         }
 
@@ -331,6 +527,20 @@
             .module-card-head {
                 flex-direction: column;
                 align-items: flex-start;
+            }
+
+            .calendar-stat-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            .calendar-weekday-grid,
+            .calendar-day-grid {
+                gap: 6px;
+            }
+
+            .calendar-day-cell {
+                min-height: 68px;
+                padding: 8px;
             }
         }
     </style>
@@ -375,6 +585,140 @@
                         <strong>{{ $dashboardSummary['pending_leave_approvals'] }}</strong>
                         <span>Approval cuti pending</span>
                     </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="dash-panel">
+            <div class="dash-panel-head">
+                <div>
+                    <h5>Kalender Bulan Ini</h5>
+                    <p>{{ $calendarOverview['month_label'] }} • ringkasan agenda lintas modul yang terlihat untuk Anda.</p>
+                </div>
+                <div class="module-link-row" style="margin: 0;">
+                    <a href="{{ route('calendar.integrated.index') }}"><i class="fas fa-calendar-alt"></i> Buka Kalender</a>
+                </div>
+            </div>
+            <div class="dash-panel-body">
+                <div class="calendar-stat-grid">
+                    <div class="calendar-stat-card">
+                        <div class="calendar-stat-value">{{ $calendarOverview['event_count'] }}</div>
+                        <div class="calendar-stat-label">Total event bulan berjalan</div>
+                    </div>
+                    <div class="calendar-stat-card">
+                        <div class="calendar-stat-value">{{ $calendarOverview['days_with_events'] }}</div>
+                        <div class="calendar-stat-label">Hari yang memiliki agenda</div>
+                    </div>
+                    <div class="calendar-stat-card">
+                        <div class="calendar-stat-value">{{ $calendarOverview['meeting_count'] }}</div>
+                        <div class="calendar-stat-label">Rapat dan agenda pimpinan</div>
+                    </div>
+                    <div class="calendar-stat-card">
+                        <div class="calendar-stat-value">{{ $calendarOverview['leave_count'] }}</div>
+                        <div class="calendar-stat-label">Rentang cuti pegawai</div>
+                    </div>
+                    <div class="calendar-stat-card">
+                        <div class="calendar-stat-value">{{ $calendarOverview['zi_count'] }}</div>
+                        <div class="calendar-stat-label">Agenda dan target Progress ZI</div>
+                    </div>
+                    <div class="calendar-stat-card">
+                        <div class="calendar-stat-value">{{ $calendarOverview['conflict_count'] }}</div>
+                        <div class="calendar-stat-label">Tanggal dengan benturan jadwal</div>
+                    </div>
+                </div>
+
+                <div class="calendar-overview-grid">
+                    <div>
+                        <div class="calendar-section-title">Kalender Mini</div>
+                        <div class="calendar-month-card">
+                            <div class="calendar-weekday-grid">
+                                @foreach($calendarOverview['weekday_labels'] as $label)
+                                    <div class="calendar-weekday">{{ $label }}</div>
+                                @endforeach
+                            </div>
+
+                            @foreach($calendarOverview['month_days'] as $week)
+                                <div class="calendar-week-row">
+                                    <div class="calendar-day-grid">
+                                        @foreach($week as $day)
+                                            <div class="calendar-day-cell {{ $day['in_month'] ? '' : 'outside' }} {{ $day['is_today'] ? 'today' : '' }}">
+                                                <div class="calendar-day-top">
+                                                    <div class="calendar-day-number">{{ $day['day'] }}</div>
+                                                    @if($day['event_count'] > 0)
+                                                        <div class="calendar-day-count">{{ $day['event_count'] }}</div>
+                                                    @endif
+                                                </div>
+                                                <div class="calendar-day-dots">
+                                                    @foreach($day['module_keys'] as $moduleKey)
+                                                        <span class="calendar-day-dot {{ $moduleKey }}"></span>
+                                                    @endforeach
+                                                </div>
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="calendar-side-stack">
+                            <div>
+                                <div class="calendar-section-title">Event Saya Hari Ini</div>
+                                @if($calendarOverview['today_events']->isEmpty())
+                                    <div class="empty-state" style="padding: 20px 12px;">Tidak ada event pribadi yang aktif hari ini.</div>
+                                @else
+                                    <div class="calendar-mini-list">
+                                        @foreach($calendarOverview['today_events'] as $item)
+                                            <div class="calendar-mini-item">
+                                                <div class="calendar-today-chip">
+                                                    <i class="fas fa-calendar-day"></i>
+                                                    {{ $item['module'] }} • {{ $item['status'] }}
+                                                </div>
+                                                <div class="calendar-mini-title">{{ $item['title'] }}</div>
+                                                <div class="calendar-mini-meta">{{ $item['time'] }}</div>
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                @endif
+                            </div>
+
+                            <div>
+                                <div class="calendar-section-title">Benturan Jadwal</div>
+                                @if($calendarOverview['conflicts']->isEmpty())
+                                    <div class="empty-state" style="padding: 20px 12px;">Belum ada benturan jadwal yang terdeteksi pada bulan ini.</div>
+                                @else
+                                    <div class="calendar-mini-list">
+                                        @foreach($calendarOverview['conflicts'] as $item)
+                                            <div class="calendar-mini-item">
+                                                <div class="calendar-conflict-chip">
+                                                    <i class="fas fa-exclamation-triangle"></i>
+                                                    {{ $item['count'] }} agenda di {{ $item['date'] }}
+                                                </div>
+                                                <div class="calendar-mini-meta">{{ implode(' • ', $item['titles']) }}</div>
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="margin-top: 18px;">
+                    <div class="calendar-section-title">Agenda Mendatang</div>
+                    @if($calendarOverview['upcoming']->isEmpty())
+                        <div class="empty-state" style="padding: 20px 12px;">Belum ada agenda mendatang pada bulan ini.</div>
+                    @else
+                        <div class="calendar-mini-list">
+                            @foreach($calendarOverview['upcoming'] as $item)
+                                <div class="calendar-mini-item">
+                                    <div class="calendar-mini-title">{{ $item['title'] }}</div>
+                                    <div class="calendar-mini-meta">{{ $item['date'] }} • {{ $item['module'] }} • {{ $item['status'] }}</div>
+                                </div>
+                            @endforeach
+                        </div>
+                    @endif
                 </div>
             </div>
         </section>
@@ -479,6 +823,40 @@
                     <div class="module-link-row">
                         <a href="{{ route('cuti.index') }}"><i class="fas fa-calendar-alt"></i> Pengajuan Cuti</a>
                         <a href="{{ route('cuti.reports.index') }}" class="alt"><i class="fas fa-chart-bar"></i> Laporan Cuti</a>
+                    </div>
+                </article>
+            @endif
+
+            @if($inventory['enabled'])
+                <article class="module-card">
+                    <div class="module-card-head">
+                        <div>
+                            <div class="module-card-title">Perawatan Alat dan Mesin</div>
+                            <div class="module-card-subtitle">Inventaris alat/mesin, sub barang, QR code, dan transaksi perawatan.</div>
+                        </div>
+                        <div class="module-pill persediaan"><i class="fas fa-boxes"></i></div>
+                    </div>
+                    <div class="metric-grid">
+                        <div class="metric-box">
+                            <div class="value">{{ $inventory['stats']['item_count'] }}</div>
+                            <div class="label">Barang induk</div>
+                        </div>
+                        <div class="metric-box">
+                            <div class="value">{{ $inventory['stats']['detail_count'] }}</div>
+                            <div class="label">Sub barang</div>
+                        </div>
+                        <div class="metric-box">
+                            <div class="value">{{ $inventory['stats']['room_count'] }}</div>
+                            <div class="label">Ruang tercatat</div>
+                        </div>
+                        <div class="metric-box">
+                            <div class="value">{{ $inventory['stats']['maintenance_count'] }}</div>
+                            <div class="label">Transaksi perawatan</div>
+                        </div>
+                    </div>
+                    <div class="module-link-row">
+                        <a href="{{ route('perawatan-alat-mesin.index') }}"><i class="fas fa-tools"></i> Modul</a>
+                        <a href="{{ route('perawatan-alat-mesin.maintenance.index') }}" class="alt"><i class="fas fa-file-medical-alt"></i> Transaksi</a>
                     </div>
                 </article>
             @endif
@@ -659,6 +1037,35 @@
                                         <div>
                                             <div class="item-title">{{ $item['title'] }}</div>
                                             <div class="item-subtitle">{{ $item['subtitle'] }}</div>
+                                            <div class="item-meta">{{ $item['meta'] }}</div>
+                                        </div>
+                                        <div class="list-badge">{!! $item['badge'] !!}</div>
+                                    </div>
+                                @endforeach
+                            </div>
+                        @endif
+                    </div>
+                </div>
+            @endif
+
+            @if($inventory['enabled'])
+                <div class="dash-panel">
+                    <div class="dash-panel-head">
+                        <div>
+                            <h5>Perawatan Alat dan Mesin Terbaru</h5>
+                            <p>Transaksi perawatan terbaru yang sudah masuk ke modul alat dan mesin.</p>
+                        </div>
+                    </div>
+                    <div class="dash-panel-body">
+                        @if($inventory['recent']->isEmpty())
+                            <div class="empty-state">Belum ada data alat, mesin, atau transaksi perawatan.</div>
+                        @else
+                            <div class="recent-list">
+                                @foreach($inventory['recent'] as $item)
+                                    <div class="recent-item">
+                                        <div>
+                                            <div class="item-title">{{ $item['title'] }}</div>
+                                            <div class="item-subtitle">{{ $item['type'] }} • {{ $item['subtitle'] }}</div>
                                             <div class="item-meta">{{ $item['meta'] }}</div>
                                         </div>
                                         <div class="list-badge">{!! $item['badge'] !!}</div>

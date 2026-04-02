@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Route;
 
 // Redirect root to login or dashboard
 Route::get('/', function () {
-    return auth()->check() ? redirect('/dashboard') : redirect('/login');
+    return auth()->check() ? redirect('/dashboard') : redirect()->route('login');
 });
 
 Auth::routes(['register' => false]); // Disable registration - admin adds users
@@ -28,6 +28,19 @@ Route::middleware(['auth'])->group(function () {
     // Dashboard
     Route::get('/dashboard', 'DashboardController@index')->name('dashboard');
     Route::get('/home', 'DashboardController@index')->name('home');
+    Route::get('/kalender-terpadu', 'IntegratedCalendarController@index')->name('calendar.integrated.index');
+    Route::get('/kalender-terpadu/events', 'IntegratedCalendarController@events')->name('calendar.integrated.events');
+    Route::prefix('persediaan')->name('persediaan.')->group(function () {
+        Route::get('/', function () {
+            abort_unless(auth()->user()->canAccessInventoryModule(), 403);
+
+            return view('persediaan-dev.index');
+        })->name('index');
+
+        Route::get('/dev', function () {
+            return redirect()->route('persediaan.index');
+        })->name('dev');
+    });
 
     // Surat Masuk
     Route::get('/surat-masuk', 'SuratMasukController@index')->name('surat-masuk.index');
@@ -267,7 +280,37 @@ Route::middleware(['auth'])->group(function () {
         });
     });
 
-    Route::get('/persediaan', function () {
-        return view('modules.under-development', ['module' => 'Persediaan', 'icon' => 'fas fa-boxes', 'description' => 'Modul manajemen persediaan barang dan aset.']);
-    })->name('persediaan.index');
+    Route::prefix('perawatan-alat-dan-mesin')->name('perawatan-alat-mesin.')->group(function () {
+        Route::get('/', 'PersediaanDashboardController@index')->name('index');
+
+        Route::get('/barang', 'PersediaanBarangController@index')->name('items.index');
+        Route::post('/barang', 'PersediaanBarangController@store')->name('items.store');
+        Route::get('/barang/{inventoryItem}', 'PersediaanBarangController@show')->name('items.show');
+        Route::put('/barang/{inventoryItem}', 'PersediaanBarangController@update')->name('items.update');
+        Route::post('/barang/{inventoryItem}/details', 'PersediaanBarangController@storeDetail')->name('details.store');
+        Route::put('/barang/{inventoryItem}/details/{inventoryItemDetail}', 'PersediaanBarangController@updateDetail')->name('details.update');
+        Route::get('/barang/details/{inventoryItemDetail}/photo', 'PersediaanBarangController@photo')->name('details.photo');
+
+        Route::get('/master/{type}', 'PersediaanMasterDataController@index')->name('master.index');
+        Route::post('/master/{type}', 'PersediaanMasterDataController@store')->name('master.store');
+        Route::put('/master/{type}/{id}', 'PersediaanMasterDataController@update')->name('master.update');
+        Route::delete('/master/{type}/{id}', 'PersediaanMasterDataController@destroy')->name('master.destroy');
+        Route::get('/kuasa-pengguna-barang', 'PersediaanMasterDataController@authority')->name('authority.index');
+        Route::post('/kuasa-pengguna-barang', 'PersediaanMasterDataController@storeAuthority')->name('authority.store');
+
+        Route::get('/transaksi-perawatan', 'PersediaanTransaksiController@index')->name('maintenance.index');
+        Route::get('/transaksi-perawatan/detail/{inventoryItemDetail}', 'PersediaanTransaksiController@show')->name('maintenance.show');
+        Route::post('/transaksi-perawatan', 'PersediaanTransaksiController@store')->name('maintenance.store');
+        Route::put('/transaksi-perawatan/{inventoryMaintenanceTransaction}', 'PersediaanTransaksiController@update')->name('maintenance.update');
+        Route::delete('/transaksi-perawatan/{inventoryMaintenanceTransaction}', 'PersediaanTransaksiController@destroy')->name('maintenance.destroy');
+        Route::get('/transaksi-perawatan/attachments/{inventoryTransactionAttachment}', 'PersediaanTransaksiController@file')->name('maintenance.attachments.file');
+
+        Route::get('/laporan', 'PersediaanLaporanController@index')->name('reports.index');
+        Route::get('/laporan/pdf', 'PersediaanLaporanController@pdf')->name('reports.pdf');
+        Route::get('/laporan/excel', 'PersediaanLaporanController@excel')->name('reports.excel');
+
+        Route::get('/qrcode', 'PersediaanQrController@index')->name('qrcode.index');
+        Route::get('/qrcode/print', 'PersediaanQrController@print')->name('qrcode.print');
+    });
 });
+
