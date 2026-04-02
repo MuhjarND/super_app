@@ -5,6 +5,7 @@ namespace App\Services;
 use App\AgendaPimpinan;
 use App\LeaveRequest;
 use App\Rapat;
+use App\SuratKeluar;
 use App\User;
 use App\ZiActivity;
 use Carbon\Carbon;
@@ -32,6 +33,10 @@ class IntegratedCalendarService
             $events = $events->merge($this->buildZiEvents($user, $filters));
         }
 
+        if (in_array('surat_tugas', $filters['modules'], true)) {
+            $events = $events->merge($this->buildSuratTugasEvents($user, $filters));
+        }
+
         if (!empty($filters['status'])) {
             $events = $events->where('status_key', $filters['status'])->values();
         }
@@ -52,6 +57,7 @@ class IntegratedCalendarService
                     'rapat' => $events->where('module_key', 'rapat')->count(),
                     'cuti' => $events->where('module_key', 'cuti')->count(),
                     'zi' => $events->where('module_key', 'zi')->count(),
+                    'surat_tugas' => $events->where('module_key', 'surat_tugas')->count(),
                 ],
                 'conflicts' => $this->buildConflicts($events),
                 'upcoming' => $this->buildUpcoming($events),
@@ -64,16 +70,16 @@ class IntegratedCalendarService
         $start = !empty($filters['start']) ? Carbon::parse($filters['start'], 'Asia/Jayapura')->startOfDay() : now('Asia/Jayapura')->startOfMonth();
         $end = !empty($filters['end']) ? Carbon::parse($filters['end'], 'Asia/Jayapura')->endOfDay() : now('Asia/Jayapura')->endOfMonth();
 
-        $modules = collect($filters['modules'] ?? ['rapat', 'cuti', 'zi'])
+        $modules = collect($filters['modules'] ?? ['rapat', 'cuti', 'zi', 'surat_tugas'])
             ->filter(function ($module) {
-                return in_array($module, ['rapat', 'cuti', 'zi'], true);
+                return in_array($module, ['rapat', 'cuti', 'zi', 'surat_tugas'], true);
             })
             ->unique()
             ->values()
             ->all();
 
         if (empty($modules)) {
-            $modules = ['rapat', 'cuti', 'zi'];
+            $modules = ['rapat', 'cuti', 'zi', 'surat_tugas'];
         }
 
         return [
@@ -115,6 +121,7 @@ class IntegratedCalendarService
             $start = Carbon::parse($rapat->tanggal->format('Y-m-d') . ' ' . ($rapat->waktu_mulai ?: '08:00:00'), 'Asia/Jayapura');
             $end = (clone $start)->addHour();
             $statusKey = $this->resolveMeetingStatus($rapat->display_status_key, $rapat->tanggal, $rapat->tanggal);
+            $participants = $this->implodeNames($rapat->pesertas->pluck('name')->all());
 
             return $this->makeEvent([
                 'id' => 'rapat-' . $rapat->id,
@@ -136,6 +143,7 @@ class IntegratedCalendarService
                     'pic' => optional($rapat->creator)->name ?: '-',
                     'location' => $rapat->tempat ?: '-',
                     'time' => $rapat->waktu_mulai_formatted !== '-' ? $rapat->waktu_mulai_formatted . ' WIT' : '-',
+                    'participants' => $participants,
                     'description' => $rapat->deskripsi ?: 'Agenda rapat internal.',
                 ],
             ]);
@@ -167,6 +175,7 @@ class IntegratedCalendarService
             $start = Carbon::parse($agenda->tanggal_kegiatan->format('Y-m-d') . ' ' . ($agenda->waktu ?: '08:00:00'), 'Asia/Jayapura');
             $end = (clone $start)->addHour();
             $statusKey = $this->resolveTimeStatus($agenda->tanggal_kegiatan, $agenda->tanggal_kegiatan);
+            $participants = $this->implodeNames($agenda->recipients->pluck('name')->all());
 
             return $this->makeEvent([
                 'id' => 'agenda-' . $agenda->id,
@@ -188,6 +197,7 @@ class IntegratedCalendarService
                     'pic' => optional($agenda->creator)->name ?: '-',
                     'location' => $agenda->tempat ?: '-',
                     'time' => $agenda->waktu_formatted !== '-' ? $agenda->waktu_formatted . ' WIT' : '-',
+                    'participants' => $participants,
                     'description' => $agenda->catatan ?: ('Yang menghadiri: ' . ($agenda->yang_menghadiri ?: '-')),
                 ],
             ]);
@@ -239,6 +249,7 @@ class IntegratedCalendarService
                     'pic' => optional($leave->user)->name ?: '-',
                     'location' => $leave->leave_address ?: '-',
                     'time' => $leave->period_label,
+                    'participants' => '-',
                     'description' => $leave->purpose ?: 'Pengajuan cuti pegawai.',
                 ],
             ]);
@@ -321,10 +332,86 @@ class IntegratedCalendarService
                     'pic' => optional($activity->pic)->name ?: optional(optional($activity->area)->pic)->name ?: '-',
                     'location' => optional($activity->guidelineSubPoint)->title ?: '-',
                     'time' => $startDate->translatedFormat('d M Y') . ' - ' . $endDate->translatedFormat('d M Y'),
+                    'participants' => '-',
                     'description' => $activity->description ?: 'Agenda kegiatan Zona Integritas.',
                 ],
             ]);
         });
+    }
+
+    protected function buildSuratTugasEvents(User $user, array $filters)
+    {
+        if (!$user->canAccessPersuratanMenu()) {
+            return collect();
+        }
+
+        $query = SuratKeluar::visibleTo($user)
+            ->with(['creator.unit', 'templateApproval', 'penerimaInternal'])
+            ->whereHas('templateApproval', function ($approvalQuery) {
+                $approvalQuery->where('template_slug', 'surat-tugas');
+            });
+
+        if ($filters['scope'] === 'mine' && ($user->canManageSuratKeluar() || $user->isSuperAdmin())) {
+            $query->where(function ($builder) use ($user) {
+                $builder->where('created_by', $user->id)
+                    ->orWhereHas('penerimaInternal', function ($recipientQuery) use ($user) {
+                        $recipientQuery->where('users.id', $user->id);
+                    });
+            });
+        }
+
+        if ($filters['unit_id']) {
+            $query->whereHas('creator', function ($creatorQuery) use ($filters) {
+                $creatorQuery->where('unit_id', $filters['unit_id']);
+            });
+        }
+
+        return $query->get()->filter(function ($surat) use ($filters) {
+            $fieldValues = optional($surat->templateApproval)->field_values ?: [];
+            $start = $fieldValues['tanggal_mulai'] ?? optional($surat->tanggal_surat)->toDateString();
+            $end = $fieldValues['tanggal_selesai'] ?? $start;
+
+            if (!$start) {
+                return false;
+            }
+
+            $startDate = Carbon::parse($start, 'Asia/Jayapura')->startOfDay();
+            $endDate = Carbon::parse($end ?: $start, 'Asia/Jayapura')->endOfDay();
+
+            return $startDate->lte($filters['end']) && $endDate->gte($filters['start']);
+        })->map(function ($surat) {
+            $fieldValues = optional($surat->templateApproval)->field_values ?: [];
+            $startDate = Carbon::parse($fieldValues['tanggal_mulai'] ?? optional($surat->tanggal_surat)->toDateString(), 'Asia/Jayapura')->startOfDay();
+            $endDate = Carbon::parse($fieldValues['tanggal_selesai'] ?? $fieldValues['tanggal_mulai'] ?? optional($surat->tanggal_surat)->toDateString(), 'Asia/Jayapura')->endOfDay();
+            $statusKey = $this->resolveTaskLetterStatus($surat, $startDate, $endDate);
+            $petugasRows = collect($fieldValues['petugas_rows'] ?? []);
+            $petugas = $this->implodeNames($petugasRows->pluck('nama')->filter()->values()->all());
+
+            return $this->makeEvent([
+                'id' => 'surat-tugas-' . $surat->id,
+                'module_key' => 'surat_tugas',
+                'module_label' => 'Surat Tugas',
+                'source_key' => 'surat_tugas',
+                'title' => $surat->perihal ?: ('Surat Tugas ' . $surat->nomor_surat_formatted),
+                'start' => $startDate,
+                'end' => (clone $endDate)->addDay()->startOfDay(),
+                'allDay' => true,
+                'status_key' => $statusKey,
+                'status_label' => $this->statusLabel($statusKey),
+                'color' => '#16a34a',
+                'textColor' => '#ffffff',
+                'url' => $surat->file_path ? route('surat-keluar.file', $surat) : route('surat-keluar.index'),
+                'meta' => [
+                    'kategori' => 'Surat Tugas',
+                    'unit' => optional(optional($surat->creator)->unit)->nama ?: '-',
+                    'pic' => optional($surat->creator)->name ?: '-',
+                    'location' => $fieldValues['dalam_rangka'] ?? '-',
+                    'time' => $startDate->translatedFormat('d M Y') . ' - ' . $endDate->translatedFormat('d M Y'),
+                    'participants' => $petugas !== '-' ? $petugas : $this->implodeNames(optional($surat->penerimaInternal)->pluck('name')->all() ?? []),
+                    'description' => $fieldValues['untuk_tugas'] ?? ($surat->perihal ?: 'Penugasan pegawai.'),
+                ],
+            ]);
+        })->values();
     }
 
     protected function makeEvent(array $data)
@@ -356,9 +443,24 @@ class IntegratedCalendarService
                 'pic' => $data['meta']['pic'],
                 'location' => $data['meta']['location'],
                 'time_label' => $data['meta']['time'],
+                'participants' => $data['meta']['participants'] ?? '-',
                 'description' => $data['meta']['description'],
             ],
         ];
+    }
+
+    protected function implodeNames(array $names)
+    {
+        $names = collect($names)->filter()->values();
+
+        if ($names->isEmpty()) {
+            return '-';
+        }
+
+        $visible = $names->take(4);
+        $suffix = $names->count() > 4 ? ' +' . ($names->count() - 4) . ' lainnya' : '';
+
+        return $visible->implode(', ') . $suffix;
     }
 
     protected function buildConflicts(Collection $events)
@@ -461,6 +563,25 @@ class IntegratedCalendarService
         }
 
         return $this->resolveTimeStatus($start, $end);
+    }
+
+    protected function resolveTaskLetterStatus(SuratKeluar $surat, Carbon $startDate, Carbon $endDate)
+    {
+        $approval = $surat->templateApproval;
+
+        if ($approval && $approval->status === 'rejected') {
+            return 'tertunda';
+        }
+
+        if ($approval && $approval->status === 'pending') {
+            return 'tertunda';
+        }
+
+        if ($surat->status === 'draft') {
+            return 'tertunda';
+        }
+
+        return $this->resolveTimeStatus($startDate, $endDate);
     }
 
     protected function resolveTimeStatus($startDate, $endDate)

@@ -114,6 +114,7 @@ class DashboardController extends Controller
             'meeting_count' => $counts['rapat'] ?? 0,
             'leave_count' => $counts['cuti'] ?? 0,
             'zi_count' => $counts['zi'] ?? 0,
+            'surat_tugas_count' => $counts['surat_tugas'] ?? 0,
             'conflict_count' => $conflicts->count(),
             'days_with_events' => $events
                 ->map(function ($event) {

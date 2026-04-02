@@ -487,6 +487,7 @@
         .calendar-day-dot.rapat { background: #2563eb; }
         .calendar-day-dot.cuti { background: #dc2626; }
         .calendar-day-dot.zi { background: #d97706; }
+        .calendar-day-dot.surat_tugas { background: #16a34a; }
 
         .calendar-today-chip {
             display: inline-flex;
@@ -620,6 +621,10 @@
                     <div class="calendar-stat-card">
                         <div class="calendar-stat-value">{{ $calendarOverview['zi_count'] }}</div>
                         <div class="calendar-stat-label">Agenda dan target Progress ZI</div>
+                    </div>
+                    <div class="calendar-stat-card">
+                        <div class="calendar-stat-value">{{ $calendarOverview['surat_tugas_count'] }}</div>
+                        <div class="calendar-stat-label">Surat tugas aktif bulan ini</div>
                     </div>
                     <div class="calendar-stat-card">
                         <div class="calendar-stat-value">{{ $calendarOverview['conflict_count'] }}</div>

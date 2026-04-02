@@ -37,6 +37,7 @@
         .calendar-dot.rapat { background: #2563eb; }
         .calendar-dot.cuti { background: #dc2626; }
         .calendar-dot.zi { background: #d97706; }
+        .calendar-dot.surat-tugas { background: #16a34a; }
         .fc .fc-toolbar.fc-header-toolbar { margin-bottom: 1rem; gap: 10px; flex-wrap: wrap; }
         .fc .fc-toolbar-title { font-size: 1.08rem; font-weight: 800; color: #0f172a; }
         .fc .fc-button { background: #fff !important; border: 1px solid #dbe4f0 !important; color: #475569 !important; box-shadow: none !important; border-radius: 10px !important; padding: 0.45rem 0.8rem !important; font-weight: 700; text-transform: capitalize; }
@@ -127,14 +128,16 @@
                         <div class="calendar-stat-box"><div class="value" id="calendarConflictCount">0</div><div class="label">Tanggal benturan</div></div>
                         <div class="calendar-stat-box"><div class="value" id="calendarCountRapat">0</div><div class="label">Rapat / agenda</div></div>
                         <div class="calendar-stat-box"><div class="value" id="calendarCountCuti">0</div><div class="label">Cuti</div></div>
+                        <div class="calendar-stat-box"><div class="value" id="calendarCountSuratTugas">0</div><div class="label">Surat tugas</div></div>
                     </div>
 
                     <section>
-                        <div class="calendar-side-head p-0 border-0 mb-2"><div><h5 style="font-size:0.9rem;">Legenda modul</h5><p>Tahap 1 aktif. Perawatan alat dan surat akan menyusul.</p></div></div>
+                        <div class="calendar-side-head p-0 border-0 mb-2"><div><h5 style="font-size:0.9rem;">Legenda modul</h5><p>Ringkasan warna event dari modul yang sudah terhubung ke kalender.</p></div></div>
                         <div class="calendar-legend">
                             <div class="calendar-legend-row"><span class="calendar-legend-label"><span class="calendar-dot rapat"></span> Rapat / Agenda</span><span id="calendarLegendRapat">0</span></div>
                             <div class="calendar-legend-row"><span class="calendar-legend-label"><span class="calendar-dot cuti"></span> Cuti</span><span id="calendarLegendCuti">0</span></div>
                             <div class="calendar-legend-row"><span class="calendar-legend-label"><span class="calendar-dot zi"></span> Progress ZI</span><span id="calendarLegendZi">0</span></div>
+                            <div class="calendar-legend-row"><span class="calendar-legend-label"><span class="calendar-dot surat-tugas"></span> Surat Tugas</span><span id="calendarLegendSuratTugas">0</span></div>
                         </div>
                     </section>
 
@@ -169,6 +172,7 @@
                         <div class="calendar-modal-meta-item"><div class="calendar-modal-meta-label">Unit / Bidang</div><div class="calendar-modal-meta-value" id="calendarEventUnit">-</div></div>
                         <div class="calendar-modal-meta-item"><div class="calendar-modal-meta-label">PIC / Pelaksana</div><div class="calendar-modal-meta-value" id="calendarEventPic">-</div></div>
                         <div class="calendar-modal-meta-item"><div class="calendar-modal-meta-label">Lokasi / Referensi</div><div class="calendar-modal-meta-value" id="calendarEventLocation">-</div></div>
+                        <div class="calendar-modal-meta-item"><div class="calendar-modal-meta-label">Petugas / Peserta</div><div class="calendar-modal-meta-value" id="calendarEventParticipants">-</div></div>
                         <div class="calendar-modal-meta-item"><div class="calendar-modal-meta-label">Aksi</div><div class="calendar-modal-meta-value"><a href="#" class="btn btn-primary btn-sm d-none" id="calendarEventLink" target="_blank" rel="noopener"><i class="fas fa-external-link-alt mr-1"></i> Buka Modul Asal</a><span id="calendarEventLinkFallback">Tidak ada tautan langsung.</span></div></div>
                     </div>
                     <div class="calendar-modal-description" id="calendarEventDescription">-</div>
@@ -207,9 +211,11 @@
                 document.getElementById('calendarCountAll').textContent = meta.counts.all || 0;
                 document.getElementById('calendarCountRapat').textContent = meta.counts.rapat || 0;
                 document.getElementById('calendarCountCuti').textContent = meta.counts.cuti || 0;
+                document.getElementById('calendarCountSuratTugas').textContent = meta.counts.surat_tugas || 0;
                 document.getElementById('calendarLegendRapat').textContent = meta.counts.rapat || 0;
                 document.getElementById('calendarLegendCuti').textContent = meta.counts.cuti || 0;
                 document.getElementById('calendarLegendZi').textContent = meta.counts.zi || 0;
+                document.getElementById('calendarLegendSuratTugas').textContent = meta.counts.surat_tugas || 0;
                 document.getElementById('calendarConflictCount').textContent = (meta.conflicts || []).length;
                 const conflictList = document.getElementById('calendarConflictList');
                 if ((meta.conflicts || []).length) {
@@ -261,6 +267,7 @@
                     document.getElementById('calendarEventUnit').textContent = props.unit || '-';
                     document.getElementById('calendarEventPic').textContent = props.pic || '-';
                     document.getElementById('calendarEventLocation').textContent = props.location || '-';
+                    document.getElementById('calendarEventParticipants').textContent = props.participants || '-';
                     document.getElementById('calendarEventDescription').textContent = props.description || '-';
                     const linkEl = document.getElementById('calendarEventLink');
                     const fallbackEl = document.getElementById('calendarEventLinkFallback');
