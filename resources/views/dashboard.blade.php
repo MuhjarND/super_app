@@ -517,8 +517,27 @@
         }
 
         @media (max-width: 767.98px) {
+            .dashboard-hero {
+                padding: 18px 16px;
+                border-radius: 16px;
+            }
+
+            .dashboard-hero-title {
+                font-size: 1.15rem;
+                line-height: 1.3;
+            }
+
+            .dashboard-hero-meta {
+                font-size: 0.82rem;
+            }
+
             .hero-chip-wrap {
                 flex-direction: column;
+            }
+
+            .hero-chip {
+                width: 100%;
+                padding: 10px 12px;
             }
 
             .metric-grid {
@@ -529,6 +548,21 @@
             .module-card-head {
                 flex-direction: column;
                 align-items: flex-start;
+            }
+
+            .module-card,
+            .dash-panel {
+                border-radius: 16px;
+            }
+
+            .module-card {
+                padding: 16px;
+            }
+
+            .action-item,
+            .recent-item,
+            .upcoming-item {
+                grid-template-columns: 1fr;
             }
 
             .calendar-stat-grid {
@@ -558,13 +592,27 @@
     <div class="dashboard-shell">
         <section class="dashboard-hero">
             <div class="dashboard-hero-title">{{ auth()->user()->name }}</div>
-            <div class="dashboard-hero-meta">{{ now()->translatedFormat('l, d F Y') }} • Ringkasan kerja lintas modul</div>
+            <div class="dashboard-hero-meta">{{ now()->translatedFormat('l, d F Y') }} &bull; Ringkasan kerja lintas modul</div>
             <div class="hero-chip-wrap">
                 <div class="hero-chip">
                     <i class="fas fa-bell"></i>
                     <div>
                         <strong>{{ $dashboardSummary['action_count'] }}</strong>
                         <span>Tindak lanjut aktif</span>
+                    </div>
+                </div>
+                <div class="hero-chip">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <div>
+                        <strong>{{ $dashboardSummary['action_high_count'] }}</strong>
+                        <span>Prioritas tinggi</span>
+                    </div>
+                </div>
+                <div class="hero-chip">
+                    <i class="fas fa-hourglass-end"></i>
+                    <div>
+                        <strong>{{ $dashboardSummary['action_overdue_count'] }}</strong>
+                        <span>Item overdue</span>
                     </div>
                 </div>
                 <div class="hero-chip">
@@ -595,7 +643,7 @@
             <div class="dash-panel-head">
                 <div>
                     <h5>Kalender Bulan Ini</h5>
-                    <p>{{ $calendarOverview['month_label'] }} • ringkasan agenda lintas modul yang terlihat untuk Anda.</p>
+                    <p>{{ $calendarOverview['month_label'] }} &bull; ringkasan agenda lintas modul yang terlihat untuk Anda.</p>
                 </div>
                 <div class="module-link-row" style="margin: 0;">
                     <a href="{{ route('calendar.integrated.index') }}"><i class="fas fa-calendar-alt"></i> Buka Kalender</a>
@@ -683,7 +731,7 @@
                                             <div class="calendar-mini-item">
                                                 <div class="calendar-today-chip">
                                                     <i class="fas fa-calendar-day"></i>
-                                                    {{ $item['module'] }} • {{ $item['status'] }}
+                                                    {{ $item['module'] }} &bull; {{ $item['status'] }}
                                                 </div>
                                                 <div class="calendar-mini-title">{{ $item['title'] }}</div>
                                                 <div class="calendar-mini-meta">{{ $item['time'] }}</div>
@@ -705,7 +753,7 @@
                                                     <i class="fas fa-exclamation-triangle"></i>
                                                     {{ $item['count'] }} agenda di {{ $item['date'] }}
                                                 </div>
-                                                <div class="calendar-mini-meta">{{ implode(' • ', $item['titles']) }}</div>
+                                                <div class="calendar-mini-meta">{{ implode(' &bull; ', $item['titles']) }}</div>
                                             </div>
                                         @endforeach
                                     </div>
@@ -724,7 +772,7 @@
                             @foreach($calendarOverview['upcoming'] as $item)
                                 <div class="calendar-mini-item">
                                     <div class="calendar-mini-title">{{ $item['title'] }}</div>
-                                    <div class="calendar-mini-meta">{{ $item['date'] }} • {{ $item['module'] }} • {{ $item['status'] }}</div>
+                                    <div class="calendar-mini-meta">{{ $item['date'] }} &bull; {{ $item['module'] }} &bull; {{ $item['status'] }}</div>
                                 </div>
                             @endforeach
                         </div>
@@ -911,7 +959,7 @@
                 <div class="dash-panel-head">
                     <div>
                         <h5>Yang Perlu Ditindaklanjuti</h5>
-                        <p>Daftar tugas terbaru dari persuratan, rapat / agenda, dan cuti.</p>
+                        <p>Daftar tugas terbaru dari inbox kerja lintas modul yang paling perlu ditindaklanjuti.</p>
                     </div>
                 </div>
                 <div class="dash-panel-body">
@@ -928,7 +976,7 @@
                                         <div class="item-title">{{ $item['title'] }}</div>
                                         <div class="item-subtitle">{{ $item['subtitle'] }}</div>
                                         <div class="item-description">{{ $item['description'] }}</div>
-                                        <div class="item-meta">{{ $item['module'] }} • {{ $item['time'] }}</div>
+                                        <div class="item-meta">{{ $item['module'] }} &bull; {{ $item['time'] }}</div>
                                     </div>
                                     <a href="{{ $item['url'] }}" class="item-link" title="Buka">
                                         <i class="fas fa-arrow-right"></i>
@@ -988,7 +1036,7 @@
                                     <div class="recent-item">
                                         <div>
                                             <div class="item-title">{{ $item['title'] }}</div>
-                                            <div class="item-subtitle">{{ $item['type'] }} • {{ $item['subtitle'] }}</div>
+                                            <div class="item-subtitle">{{ $item['type'] }} &bull; {{ $item['subtitle'] }}</div>
                                             <div class="item-meta">{{ $item['meta'] }}</div>
                                         </div>
                                         <div class="list-badge">{!! $item['badge'] !!}</div>
@@ -1017,7 +1065,7 @@
                                     <div class="recent-item">
                                         <div>
                                             <div class="item-title">{{ $item['title'] }}</div>
-                                            <div class="item-subtitle">{{ $item['type'] }} • {{ $item['subtitle'] }}</div>
+                                            <div class="item-subtitle">{{ $item['type'] }} &bull; {{ $item['subtitle'] }}</div>
                                             <div class="item-meta">{{ $item['meta'] }}</div>
                                         </div>
                                         <div class="list-badge">{!! $item['badge'] !!}</div>
@@ -1075,7 +1123,7 @@
                                     <div class="recent-item">
                                         <div>
                                             <div class="item-title">{{ $item['title'] }}</div>
-                                            <div class="item-subtitle">{{ $item['type'] }} • {{ $item['subtitle'] }}</div>
+                                            <div class="item-subtitle">{{ $item['type'] }} &bull; {{ $item['subtitle'] }}</div>
                                             <div class="item-meta">{{ $item['meta'] }}</div>
                                         </div>
                                         <div class="list-badge">{!! $item['badge'] !!}</div>

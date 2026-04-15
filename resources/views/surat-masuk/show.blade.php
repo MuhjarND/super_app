@@ -2,12 +2,109 @@
 
 @section('title', 'Detail Surat Masuk')
 
+@push('styles')
+    <style>
+        .surat-masuk-detail-table td {
+            padding: 0.72rem 0.5rem;
+            vertical-align: top;
+        }
+
+        .surat-masuk-detail-table td:first-child {
+            width: 180px;
+            font-weight: 600;
+            color: #718096;
+        }
+
+        .surat-masuk-disposisi-card,
+        .surat-masuk-history-card {
+            height: 100%;
+        }
+
+        @media (max-width: 767.98px) {
+            .content-header .breadcrumb {
+                display: none;
+            }
+
+            .surat-masuk-header-title {
+                font-size: 1.15rem;
+                line-height: 1.25;
+                gap: 8px !important;
+            }
+
+            .surat-masuk-header-title > div {
+                width: 32px !important;
+                height: 32px !important;
+                border-radius: 9px !important;
+            }
+
+            .surat-masuk-detail-card .card-header,
+            .surat-masuk-disposisi-card .card-header,
+            .surat-masuk-history-card .card-header {
+                align-items: flex-start !important;
+                gap: 8px;
+            }
+
+            .surat-masuk-detail-table,
+            .surat-masuk-detail-table tbody,
+            .surat-masuk-detail-table tr,
+            .surat-masuk-detail-table td {
+                display: block;
+                width: 100%;
+            }
+
+            .surat-masuk-detail-table tr {
+                padding: 10px 0;
+                border-bottom: 1px solid #edf2f7;
+            }
+
+            .surat-masuk-detail-table tr:last-child {
+                border-bottom: 0;
+            }
+
+            .surat-masuk-detail-table td {
+                padding: 0;
+            }
+
+            .surat-masuk-detail-table td:first-child {
+                width: auto;
+                margin-bottom: 4px;
+                font-size: 0.74rem;
+                letter-spacing: 0.06em;
+                text-transform: uppercase;
+                color: #94a3b8;
+            }
+
+            .surat-masuk-detail-table td:last-child {
+                font-size: 0.92rem;
+                line-height: 1.5;
+            }
+
+            .surat-masuk-history-card .card-body {
+                padding: 0 !important;
+            }
+
+            .surat-masuk-history-entry {
+                padding: 14px 14px 14px 16px !important;
+            }
+
+            .surat-masuk-history-entry .d-flex.justify-content-between {
+                flex-wrap: wrap;
+                gap: 8px;
+            }
+
+            .surat-masuk-back-btn {
+                margin-top: 14px;
+            }
+        }
+    </style>
+@endpush
+
 @section('content-header')
     <div class="content-header">
         <div class="container-fluid">
             <div class="row mb-2">
                 <div class="col-sm-6">
-                    <h1 style="display: flex; align-items: center; gap: 10px;">
+                    <h1 class="surat-masuk-header-title" style="display: flex; align-items: center; gap: 10px;">
                         <div
                             style="width: 36px; height: 36px; border-radius: 10px; background: linear-gradient(135deg, #eff6ff, #dbeafe); display: flex; align-items: center; justify-content: center;">
                             <i class="fas fa-envelope-open-text" style="font-size: 0.9rem; color: #3b82f6;"></i>
@@ -31,19 +128,19 @@
     <div class="row">
         <!-- Detail Card -->
         <div class="col-lg-7">
-            <div class="card" style="border-top: 4px solid var(--primary);">
+            <div class="card surat-masuk-detail-card" style="border-top: 4px solid var(--primary);">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h3 class="card-title"><i class="fas fa-info-circle mr-2"></i>Informasi Surat</h3>
                     {!! $suratMasuk->status_badge !!}
                 </div>
                 <div class="card-body">
-                    <table class="table table-borderless">
+                    <table class="table table-borderless surat-masuk-detail-table mb-0">
                         <tr>
-                            <td style="width: 180px; font-weight: 600; color: #718096;">Nomor Surat</td>
+                            <td>Nomor Surat</td>
                             <td><strong class="text-primary">{{ $suratMasuk->nomor_surat }}</strong></td>
                         </tr>
                         <tr>
-                            <td style="font-weight: 600; color: #718096;">Opsi Pengirim</td>
+                            <td>Opsi Pengirim</td>
                             <td>
                                 <span
                                     class="badge badge-{{ $suratMasuk->opsi_pengirim == 'mahkamah_agung' ? 'primary' : 'secondary' }}">
@@ -53,30 +150,30 @@
                         </tr>
                         @if($suratMasuk->klasifikasiKode)
                             <tr>
-                                <td style="font-weight: 600; color: #718096;">Kode Klasifikasi</td>
+                                <td>Kode Klasifikasi</td>
                                 <td>{{ $suratMasuk->klasifikasiKode->kode }} - {{ $suratMasuk->klasifikasiKode->nama }}</td>
                             </tr>
                         @endif
                         @if($suratMasuk->kategoriSurat)
                             <tr>
-                                <td style="font-weight: 600; color: #718096;">Kategori Surat</td>
+                                <td>Kategori Surat</td>
                                 <td>{{ $suratMasuk->kategoriSurat->kode }} - {{ $suratMasuk->kategoriSurat->nama }}</td>
                             </tr>
                         @endif
                         <tr>
-                            <td style="font-weight: 600; color: #718096;">Pengirim</td>
+                            <td>Pengirim</td>
                             <td>{{ $suratMasuk->pengirim }}</td>
                         </tr>
                         <tr>
-                            <td style="font-weight: 600; color: #718096;">Perihal / Isi Ringkas</td>
+                            <td>Perihal / Isi Ringkas</td>
                             <td>{{ $suratMasuk->perihal }}</td>
                         </tr>
                         <tr>
-                            <td style="font-weight: 600; color: #718096;">Tanggal Surat</td>
+                            <td>Tanggal Surat</td>
                             <td>{{ $suratMasuk->tanggal_surat->translatedFormat('d F Y') }}</td>
                         </tr>
                         <tr>
-                            <td style="font-weight: 600; color: #718096;">Sifat</td>
+                            <td>Sifat</td>
                             <td>
                                 @php
                                     $sifatColors = ['biasa' => 'info', 'rahasia' => 'warning', 'sangat_rahasia' => 'danger'];
@@ -88,7 +185,7 @@
                             </td>
                         </tr>
                         <tr>
-                            <td style="font-weight: 600; color: #718096;">File Lampiran</td>
+                            <td>File Lampiran</td>
                             <td>
                                 <a href="{{ route('surat-masuk.download', $suratMasuk) }}"
                                     class="btn btn-sm btn-outline-primary">
@@ -97,7 +194,7 @@
                             </td>
                         </tr>
                         <tr>
-                            <td style="font-weight: 600; color: #718096;">Di-input Oleh</td>
+                            <td>Di-input Oleh</td>
                             <td>{{ $suratMasuk->creator->name }} <small
                                     class="text-muted">{{ $suratMasuk->created_at->format('d/m/Y H:i') }}</small></td>
                         </tr>
@@ -107,7 +204,7 @@
 
             <!-- Disposition Action -->
             @if($canDisposisi)
-                <div class="card" style="border-top: 4px solid var(--accent);">
+                <div class="card surat-masuk-disposisi-card" style="border-top: 4px solid var(--accent);">
                     <div class="card-header">
                         <h3 class="card-title"><i class="fas fa-share mr-2"></i>Tindak Lanjut Surat</h3>
                     </div>
@@ -164,7 +261,7 @@
                     </div>
                 </div>
             @elseif($suratMasuk->status !== 'selesai')
-                <div class="card" style="border-top: 4px solid #d1d5db;">
+                <div class="card surat-masuk-disposisi-card" style="border-top: 4px solid #d1d5db;">
                     <div class="card-body">
                         <span class="text-muted">Surat ini tidak memiliki tindak lanjut yang tersedia untuk akun Anda saat ini.</span>
                     </div>
@@ -174,13 +271,13 @@
 
         <!-- Disposition History -->
         <div class="col-lg-5">
-            <div class="card">
+            <div class="card surat-masuk-history-card">
                 <div class="card-header">
                     <h3 class="card-title"><i class="fas fa-history mr-2"></i>Riwayat Disposisi</h3>
                 </div>
                 <div class="card-body p-0">
                     @forelse($suratMasuk->disposisis->sortByDesc('created_at') as $disposisi)
-                        <div class="p-3 border-bottom"
+                        <div class="p-3 border-bottom surat-masuk-history-entry"
                             style="border-left: 3px solid {{ $disposisi->tipe == 'naikan' ? 'var(--primary)' : 'var(--accent)' }};">
                             <div class="d-flex justify-content-between mb-1">
                                 {!! $disposisi->tipe_badge !!}
@@ -234,7 +331,7 @@
                 </div>
             </div>
 
-            <a href="{{ route('surat-masuk.index') }}" class="btn btn-secondary btn-block">
+            <a href="{{ route('surat-masuk.index') }}" class="btn btn-secondary btn-block surat-masuk-back-btn">
                 <i class="fas fa-arrow-left mr-1"></i> Kembali ke Daftar
             </a>
         </div>

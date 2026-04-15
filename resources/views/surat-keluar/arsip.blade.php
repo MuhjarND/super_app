@@ -2,6 +2,64 @@
 
 @section('title', 'Arsip Surat')
 
+@push('styles')
+    <style>
+        @media (max-width: 767.98px) {
+            .surat-arsip-filter .row {
+                display: block;
+            }
+
+            .surat-arsip-filter .btn {
+                width: 100%;
+            }
+
+            .surat-arsip-table,
+            .surat-arsip-table thead,
+            .surat-arsip-table tbody,
+            .surat-arsip-table tr,
+            .surat-arsip-table th,
+            .surat-arsip-table td {
+                display: block;
+                width: 100%;
+            }
+
+            .surat-arsip-table thead {
+                display: none;
+            }
+
+            .surat-arsip-table tbody tr {
+                padding: 14px 14px 12px;
+                border-bottom: 1px solid #e5e7eb;
+            }
+
+            .surat-arsip-table tbody tr:last-child {
+                border-bottom: 0;
+            }
+
+            .surat-arsip-table td {
+                padding: 0 0 10px;
+                border: 0;
+                max-width: none !important;
+            }
+
+            .surat-arsip-table td:last-child {
+                padding-bottom: 0;
+            }
+
+            .surat-arsip-table td::before {
+                content: attr(data-label);
+                display: block;
+                margin-bottom: 4px;
+                font-size: 0.74rem;
+                font-weight: 700;
+                letter-spacing: 0.05em;
+                text-transform: uppercase;
+                color: #94a3b8;
+            }
+        }
+    </style>
+@endpush
+
 @section('content-header')
     <div class="content-header">
         <div class="container-fluid">
@@ -22,7 +80,7 @@
 
 @section('content')
     <!-- Filter Section -->
-    <div class="filter-section">
+    <div class="filter-section surat-arsip-filter">
         <form id="filterForm">
             <div class="row">
                 <div class="col-md-6">
@@ -48,7 +106,7 @@
         </div>
         <div class="card-body p-0">
             <div class="table-responsive">
-                <table class="table table-hover mb-0">
+                <table class="table table-hover mb-0 surat-arsip-table">
                     <thead>
                         <tr>
                             <th>#</th>
@@ -63,13 +121,13 @@
                     <tbody>
                         @forelse($arsip as $index => $surat)
                             <tr>
-                                <td>{{ $arsip->firstItem() + $index }}</td>
-                                <td>
+                                <td data-label="#">{{ $arsip->firstItem() + $index }}</td>
+                                <td data-label="Nomor Surat">
                                     <strong class="text-primary">{{ $surat->nomor_surat }}</strong>
                                     <br><small class="text-muted">{{ $surat->deskripsi_kode }}</small>
                                 </td>
-                                <td style="max-width: 250px;">{{ Str::limit($surat->perihal, 60) }}</td>
-                                <td>
+                                <td style="max-width: 250px;" data-label="Perihal">{{ Str::limit($surat->perihal, 60) }}</td>
+                                <td data-label="Tujuan">
                                     <span class="badge badge-{{ $surat->opsi_penerima == 'internal' ? 'info' : 'secondary' }}">
                                         {{ ucfirst($surat->opsi_penerima) }}
                                     </span>
@@ -81,13 +139,13 @@
                                         @endif
                                     </div>
                                 </td>
-                                <td>{{ $surat->tanggal_surat->format('d/m/Y') }}</td>
-                                <td>
+                                <td data-label="Tanggal">{{ $surat->tanggal_surat->format('d/m/Y') }}</td>
+                                <td data-label="Berkas">
                                     <a href="{{ route('surat-keluar.file', $surat) }}" class="btn btn-sm btn-outline-success">
                                         <i class="fas fa-download mr-1"></i>Download
                                     </a>
                                 </td>
-                                <td><small>{{ $surat->creator->name }}</small></td>
+                                <td data-label="Dibuat Oleh"><small>{{ $surat->creator->name }}</small></td>
                             </tr>
                         @empty
                             <tr>

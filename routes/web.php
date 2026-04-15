@@ -28,6 +28,7 @@ Route::middleware(['auth'])->group(function () {
     // Dashboard
     Route::get('/dashboard', 'DashboardController@index')->name('dashboard');
     Route::get('/home', 'DashboardController@index')->name('home');
+    Route::get('/tindak-lanjut-terpadu', 'UnifiedActionCenterController@index')->name('action-center.index');
     Route::get('/kalender-terpadu', 'IntegratedCalendarController@index')->name('calendar.integrated.index');
     Route::get('/kalender-terpadu/events', 'IntegratedCalendarController@events')->name('calendar.integrated.events');
     Route::prefix('persediaan')->name('persediaan.')->group(function () {

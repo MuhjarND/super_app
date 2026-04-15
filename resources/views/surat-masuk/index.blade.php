@@ -205,10 +205,24 @@
 
         .detail-content {
             display: flex;
-            align-items: center;
-            gap: 10px;
+            flex-direction: column;
+            align-items: stretch;
+            gap: 12px;
             padding-left: 36px;
+        }
+
+        .detail-meta {
+            display: flex;
             flex-wrap: wrap;
+            align-items: center;
+            gap: 8px 16px;
+        }
+
+        .detail-actions {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 8px;
         }
 
         .detail-label {
@@ -226,15 +240,19 @@
         .action-btn {
             display: inline-flex;
             align-items: center;
-            gap: 5px;
-            padding: 5px 12px;
-            border-radius: 6px;
-            font-size: 0.78rem;
-            font-weight: 600;
+            justify-content: center;
+            gap: 6px;
+            min-height: 34px;
+            padding: 6px 12px;
+            border-radius: 10px;
+            font-size: 0.77rem;
+            font-weight: 700;
             border: none;
             cursor: pointer;
             transition: all 0.15s;
             text-decoration: none;
+            line-height: 1.2;
+            white-space: nowrap;
         }
 
         .action-btn:hover {
@@ -381,6 +399,70 @@
         .detail-info-value {
             color: #111827;
         }
+
+        .surat-masuk-table-wrap {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        #suratMasukTable {
+            min-width: 980px;
+        }
+
+        @media (max-width: 767.98px) {
+            .surat-masuk-card {
+                border-radius: 14px;
+            }
+
+            .surat-masuk-card .card-body {
+                padding-left: 14px !important;
+                padding-right: 14px !important;
+            }
+
+            .content-header .row.mb-2 {
+                gap: 12px;
+            }
+
+            .content-header .col-sm-6,
+            .content-header .col-sm-6.text-right {
+                flex: 0 0 100%;
+                max-width: 100%;
+                text-align: left !important;
+            }
+
+            .content-header h1 {
+                font-size: 1.08rem;
+                line-height: 1.3;
+            }
+
+            .btn-add-surat {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .detail-content {
+                padding-left: 0;
+                gap: 10px;
+            }
+
+            .detail-meta {
+                gap: 6px 12px;
+            }
+
+            .detail-actions {
+                display: grid;
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                width: 100%;
+                gap: 8px;
+            }
+
+            .detail-actions .action-btn {
+                width: 100%;
+                min-width: 0;
+                padding: 8px 10px;
+                font-size: 0.76rem;
+            }
+        }
     </style>
 @endpush
 
@@ -412,6 +494,7 @@
 @section('content')
     <div class="card surat-masuk-card">
         <div class="card-body" style="padding-top: 20px;">
+            <div class="table-responsive surat-masuk-table-wrap">
             <table id="suratMasukTable" class="table" style="width:100%">
                 <thead>
                     <tr>
@@ -502,6 +585,7 @@
                     @endforeach
                 </tbody>
             </table>
+            </div>
         </div>
     </div>
 
@@ -1019,7 +1103,8 @@
             function formatDetail(row) {
                 var d = $(row).data();
                 var html = '<div class="detail-content">';
-                html += '<div style="margin-right: 16px;"><span class="detail-label">Dibuat Oleh:</span> <span class="detail-value">' + d.creator + '</span></div>';
+                html += '<div class="detail-meta"><div><span class="detail-label">Dibuat Oleh:</span> <span class="detail-value">' + d.creator + '</span></div></div>';
+                html += '<div class="detail-actions">';
                 var canForward = Number(d.canForward) === 1;
                 var canEdit = Number(d.canEdit) === 1;
                 var canDelete = Number(d.canDelete) === 1;
@@ -1053,6 +1138,7 @@
                     html += '<button class="action-btn action-btn-delete" onclick="deleteSurat(' + d.suratId + ', \'' + d.deleteUrl + '\')"><i class="fas fa-trash"></i> Hapus</button>';
                 }
 
+                html += '</div>';
                 html += '</div>';
                 return html;
             }

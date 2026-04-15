@@ -201,8 +201,41 @@
         }
 
         @media (max-width: 767.98px) {
+            .approval-page-hero {
+                padding: 16px 16px 15px;
+                border-radius: 18px;
+            }
+
+            .approval-page-hero-title {
+                font-size: 1.02rem;
+            }
+
+            .approval-page-hero-subtitle {
+                font-size: 0.8rem;
+            }
+
+            .approval-card-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .approval-module-card {
+                padding: 16px;
+            }
+
             .approval-list-item {
                 flex-direction: column;
+                padding: 16px;
+            }
+
+            .approval-list-card .card-header {
+                padding: 15px 16px;
+                align-items: flex-start !important;
+                gap: 10px;
+            }
+
+            .approval-list-item .app-action-group {
+                width: 100%;
+                justify-content: flex-start;
             }
         }
     </style>
@@ -283,7 +316,7 @@
                             <span class="approval-doc-chip"><i class="fas fa-check-circle"></i> Perlu tindakan sekarang</span>
                         </div>
                         <div class="app-action-group">
-                            <a href="{{ $document['detail_url'] }}" class="app-icon-btn process">
+                            <a href="{{ $document['detail_url'] }}" class="app-icon-btn process" data-mobile-label="Proses">
                                 <i class="fas fa-file-signature"></i>
                             </a>
                         </div>

@@ -16,15 +16,15 @@
         <tbody>
             @forelse($suratKeluar as $index => $surat)
                 <tr>
-                    <td>{{ $suratKeluar->firstItem() + $index }}</td>
-                    <td>
+                    <td data-label="#">{{ $suratKeluar->firstItem() + $index }}</td>
+                    <td data-label="Nomor Surat">
                         <strong class="text-primary d-block">{{ $surat->nomor_surat }}</strong>
                         <small class="text-muted">{{ $surat->deskripsi_kode }}</small>
                     </td>
-                    <td style="max-width: 200px;">
+                    <td style="max-width: 200px;" data-label="Perihal / Isi Ringkas">
                         <span title="{{ $surat->perihal }}">{{ Str::limit($surat->perihal, 50) }}</span>
                     </td>
-                    <td>
+                    <td data-label="Tujuan / Penerima">
                         <span class="badge badge-{{ $surat->opsi_penerima == 'internal' ? 'info' : 'secondary' }}"
                             style="font-size: 0.7rem;">
                             {{ ucfirst($surat->opsi_penerima) }}
@@ -37,16 +37,16 @@
                             @endif
                         </div>
                     </td>
-                    <td>{{ $surat->tanggal_surat->format('d/m/Y') }}</td>
-                    <td>
+                    <td data-label="Tanggal">{{ $surat->tanggal_surat->format('d/m/Y') }}</td>
+                    <td data-label="Lampiran">
                         @if($surat->file_path)
                             <a href="javascript:void(0)" onclick="viewFile('{{ route('surat-keluar.file', $surat) }}')"
-                                class="app-icon-btn file">
+                                class="app-icon-btn file" data-mobile-label="Berkas">
                                 <i class="fas fa-file"></i>
                             </a>
                         @else
                             @if($surat->status == 'draft')
-                                <button onclick="openUpload({{ $surat->id }})" class="app-icon-btn upload">
+                                <button onclick="openUpload({{ $surat->id }})" class="app-icon-btn upload" data-mobile-label="Upload">
                                     <i class="fas fa-upload"></i>
                                 </button>
                             @else
@@ -54,15 +54,15 @@
                             @endif
                         @endif
                     </td>
-                    <td>
+                    <td data-label="Dibuat Oleh">
                         <small>{{ $surat->creator->name }}</small>
                     </td>
-                    <td>{!! $surat->status_badge !!}</td>
-                    <td class="app-action-cell">
+                    <td data-label="Status">{!! $surat->status_badge !!}</td>
+                    <td class="app-action-cell" data-label="Aksi">
                         <div class="app-action-group">
                         @if($surat->status == 'draft' && !$surat->file_path)
                             <button onclick="openUpload({{ $surat->id }})" class="app-icon-btn upload"
-                                title="Upload Lampiran">
+                                title="Upload Lampiran" data-mobile-label="Upload">
                                 <i class="fas fa-upload"></i>
                             </button>
                         @endif

@@ -22,6 +22,7 @@ use App\ZiEvidence;
 use App\ZiIndicator;
 use App\ZiPeriod;
 use App\Services\IntegratedCalendarService;
+use App\Services\UnifiedActionCenterService;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Schema;
@@ -43,16 +44,28 @@ class DashboardController extends Controller
         $progressZi = $this->buildProgressZiSection($user);
         $inventory = $this->buildInventorySection($user);
         $calendarOverview = $this->buildCalendarOverviewSection($user);
+        $actionCenter = app(UnifiedActionCenterService::class)->build($user, ['tab' => 'all']);
+        $actionItems = collect($actionCenter['items'] ?? [])->take(10)->map(function ($item) {
+            $toneMap = [
+                'persuratan' => 'amber',
+                'rapat' => 'blue',
+                'cuti' => 'green',
+                'progress_zi' => 'purple',
+                'perawatan' => 'cyan',
+            ];
 
-        $actionItems = collect()
-            ->merge($persuratan['actions'])
-            ->merge($meeting['actions'])
-            ->merge($leave['actions'])
-            ->merge($progressZi['actions'])
-            ->merge($inventory['actions'])
-            ->sortByDesc('sort_at')
-            ->take(10)
-            ->values();
+            return [
+                'module' => $item['module_label'] ?? '-',
+                'title' => $item['type_label'] ?? 'Tindak Lanjut',
+                'subtitle' => $item['title'] ?? '-',
+                'description' => $item['description'] ?? '-',
+                'url' => $item['action_url'] ?? route('action-center.index'),
+                'icon' => $item['module_icon'] ?? 'fas fa-tasks',
+                'tone' => $toneMap[$item['module_key'] ?? ''] ?? 'slate',
+                'sort_at' => $item['sort_at'] ?? 0,
+                'time' => !empty($item['target_at']) ? $item['target_at']->diffForHumans() : null,
+            ];
+        })->values();
 
         return view('dashboard', [
             'persuratan' => $persuratan,
@@ -68,7 +81,9 @@ class DashboardController extends Controller
                 'upcoming_meetings' => $meeting['upcoming_count'],
                 'pending_leave_approvals' => $leave['pending_approvals'],
                 'inventory_transactions' => $inventory['stats']['maintenance_count'] ?? 0,
-                'action_count' => $actionItems->count(),
+                'action_count' => $actionCenter['summary']['active_count'] ?? $actionItems->count(),
+                'action_high_count' => $actionCenter['summary']['high_count'] ?? 0,
+                'action_overdue_count' => $actionCenter['summary']['overdue_count'] ?? 0,
             ],
         ]);
     }

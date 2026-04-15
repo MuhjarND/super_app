@@ -99,6 +99,101 @@
         border-radius: 12px;
         background: #f8fafc;
     }
+
+    @media (max-width: 767.98px) {
+        .inventory-module-hero {
+            gap: 10px !important;
+        }
+
+        .inventory-module-title {
+            font-size: 1.28rem !important;
+            line-height: 1.25;
+        }
+
+        .inventory-module-subtitle {
+            font-size: 0.88rem;
+            line-height: 1.45;
+        }
+
+        .inventory-module-hero .btn {
+            width: 100%;
+        }
+
+        .inventory-module-board-body {
+            padding: 16px 14px 18px;
+        }
+
+        .history-photo {
+            width: 100%;
+            height: 190px;
+            border-radius: 14px;
+        }
+
+        .history-meta {
+            margin-top: 14px;
+            font-size: 0.92rem;
+        }
+
+        .history-action-row .btn {
+            flex: 1 1 100%;
+        }
+
+        .history-table,
+        .history-table thead,
+        .history-table tbody,
+        .history-table tr,
+        .history-table th,
+        .history-table td {
+            display: block;
+            width: 100%;
+        }
+
+        .history-table thead {
+            display: none;
+        }
+
+        .history-table tbody tr {
+            margin: 0 0 12px;
+            padding: 12px 12px 10px;
+            border: 1px solid rgba(203, 213, 225, 0.95);
+            border-radius: 14px;
+            background: #fff;
+        }
+
+        .history-table tbody tr:last-child {
+            margin-bottom: 0;
+        }
+
+        .history-table td {
+            padding: 0 0 10px;
+            border: 0;
+            font-size: 0.92rem;
+        }
+
+        .history-table td:last-child {
+            padding-bottom: 0;
+        }
+
+        .history-table td::before {
+            content: attr(data-label);
+            display: block;
+            margin-bottom: 4px;
+            font-size: 0.74rem;
+            font-weight: 700;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            color: #94a3b8;
+        }
+
+        .attachment-actions {
+            align-items: flex-start;
+            flex-direction: column;
+        }
+
+        .history-table td[data-label="Aksi"] .d-flex {
+            justify-content: flex-start !important;
+        }
+    }
 </style>
 
 <div class="inventory-module-shell">
@@ -176,11 +271,11 @@
                                     <tbody>
                                         @forelse($inventoryItemDetail->maintenanceTransactions as $transaction)
                                             <tr>
-                                                <td>{{ str_pad($transaction->id, 3, '0', STR_PAD_LEFT) }}</td>
-                                                <td>{{ optional($transaction->transaction_date)->format('Y-m-d') }}</td>
-                                                <td>{{ $transaction->description }}</td>
-                                                <td>{{ number_format((float) $transaction->amount, 2, ',', '.') }}</td>
-                                                <td>
+                                                <td data-label="Kode transaksi">{{ str_pad($transaction->id, 3, '0', STR_PAD_LEFT) }}</td>
+                                                <td data-label="Tanggal">{{ optional($transaction->transaction_date)->format('Y-m-d') }}</td>
+                                                <td data-label="Keterangan">{{ $transaction->description }}</td>
+                                                <td data-label="Nominal">{{ number_format((float) $transaction->amount, 2, ',', '.') }}</td>
+                                                <td data-label="Lampiran">
                                                     @if($transaction->attachments->count())
                                                         <div class="d-flex flex-column" style="gap: 6px;">
                                                             @foreach($transaction->attachments as $attachment)
@@ -194,7 +289,7 @@
                                                         <span class="text-muted">-</span>
                                                     @endif
                                                 </td>
-                                                <td class="text-right">
+                                                <td class="text-right" data-label="Aksi">
                                                     <div class="d-flex flex-wrap justify-content-end" style="gap: 6px;">
                                                         <button
                                                             type="button"

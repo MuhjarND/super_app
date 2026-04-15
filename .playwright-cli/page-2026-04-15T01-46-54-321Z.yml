@@ -1,0 +1,603 @@
+- generic [ref=e2]:
+  - navigation [ref=e3]:
+    - list [ref=e4]:
+      - listitem [ref=e5]:
+        - link "" [ref=e6] [cursor=pointer]:
+          - /url: "#"
+          - generic [ref=e7]: 
+    - list [ref=e8]:
+      - listitem [ref=e9]:
+        - link " 5" [ref=e10] [cursor=pointer]:
+          - /url: "#"
+          - generic [ref=e11]: 
+          - generic [ref=e12]: "5"
+        - text:     
+      - listitem [ref=e13]:
+        - button "" [ref=e14] [cursor=pointer]:
+          - generic [ref=e15]: 
+      - listitem [ref=e16]:
+        - link "S" [ref=e17] [cursor=pointer]:
+          - /url: "#"
+          - generic [ref=e18]: S
+        - text: 
+  - complementary [ref=e19]:
+    - link "P PTA Papua Barat" [ref=e20] [cursor=pointer]:
+      - /url: http://localhost:8000/dashboard
+      - generic [ref=e21]: P
+      - generic [ref=e22]: PTA Papua Barat
+    - generic [ref=e23]:
+      - generic [ref=e25]:
+        - generic [ref=e26]: SU
+        - generic [ref=e27]:
+          - generic [ref=e28]: Super Admin
+          - generic [ref=e29]: Super Admin
+      - navigation [ref=e30]:
+        - menu [ref=e31]:
+          - listitem [ref=e32]:
+            - link " Dashboard" [ref=e33] [cursor=pointer]:
+              - /url: http://localhost:8000/dashboard
+              - generic [ref=e34]: 
+              - paragraph [ref=e35]: Dashboard
+          - listitem [ref=e36]:
+            - link " Kalender Terpadu" [ref=e37] [cursor=pointer]:
+              - /url: http://localhost:8000/kalender-terpadu
+              - generic [ref=e38]: 
+              - paragraph [ref=e39]: Kalender Terpadu
+          - listitem [ref=e40]:
+            - link " Tindak Lanjut Terpadu 5" [ref=e41] [cursor=pointer]:
+              - /url: http://localhost:8000/tindak-lanjut-terpadu
+              - generic [ref=e42]: 
+              - paragraph [ref=e43]:
+                - text: Tindak Lanjut Terpadu
+                - generic [ref=e44]: "5"
+          - listitem [ref=e45]:
+            - button "Approval " [ref=e46] [cursor=pointer]:
+              - generic [ref=e47]: Approval
+              - generic [ref=e48]: 
+            - list:
+              - listitem:
+                - link " Tindaklanjuti 1":
+                  - /url: http://localhost:8000/approval
+                  - generic: 
+                  - paragraph:
+                    - text: Tindaklanjuti
+                    - generic: "1"
+              - listitem:
+                - link " Riwayat Approval":
+                  - /url: http://localhost:8000/approval/history
+                  - generic: 
+                  - paragraph: Riwayat Approval
+          - listitem [ref=e49]:
+            - button "Persuratan " [ref=e50] [cursor=pointer]:
+              - generic [ref=e51]: Persuratan
+              - generic [ref=e52]: 
+            - list [ref=e53]:
+              - listitem [ref=e54]:
+                - link " Surat Masuk 1" [ref=e55] [cursor=pointer]:
+                  - /url: http://localhost:8000/surat-masuk
+                  - generic [ref=e56]: 
+                  - paragraph [ref=e57]:
+                    - text: Surat Masuk
+                    - generic [ref=e58]: "1"
+              - listitem [ref=e59]:
+                - link " Surat Keluar" [ref=e60] [cursor=pointer]:
+                  - /url: http://localhost:8000/surat-keluar
+                  - generic [ref=e61]: 
+                  - paragraph [ref=e62]: Surat Keluar
+              - listitem [ref=e63]:
+                - link " Template Surat" [ref=e64] [cursor=pointer]:
+                  - /url: http://localhost:8000/template-surat
+                  - generic [ref=e65]: 
+                  - paragraph [ref=e66]: Template Surat
+          - listitem [ref=e67]:
+            - button "Rapat / Agenda " [ref=e68] [cursor=pointer]:
+              - generic [ref=e69]: Rapat / Agenda
+              - generic [ref=e70]: 
+            - list:
+              - listitem:
+                - link " Rapat/Agenda":
+                  - /url: http://localhost:8000/rapat
+                  - generic: 
+                  - paragraph: Rapat/Agenda
+              - listitem:
+                - link " Notulensi":
+                  - /url: http://localhost:8000/rapat/notulensi
+                  - generic: 
+                  - paragraph: Notulensi
+              - listitem:
+                - link " Tindak Lanjut":
+                  - /url: http://localhost:8000/rapat/notulensi/tindak-lanjut
+                  - generic: 
+                  - paragraph: Tindak Lanjut
+              - listitem:
+                - link " Absensi":
+                  - /url: http://localhost:8000/rapat/absensi
+                  - generic: 
+                  - paragraph: Absensi
+              - listitem:
+                - link " Laporan":
+                  - /url: http://localhost:8000/rapat/laporan
+                  - generic: 
+                  - paragraph: Laporan
+              - listitem:
+                - link " Agenda Pimpinan":
+                  - /url: http://localhost:8000/rapat/agenda-pimpinan
+                  - generic: 
+                  - paragraph: Agenda Pimpinan
+              - listitem:
+                - link " E-Voting":
+                  - /url: http://localhost:8000/rapat/voting
+                  - generic: 
+                  - paragraph: E-Voting
+          - listitem [ref=e71]:
+            - button "Cuti " [ref=e72] [cursor=pointer]:
+              - generic [ref=e73]: Cuti
+              - generic [ref=e74]: 
+            - list:
+              - listitem:
+                - link " Pengajuan Cuti":
+                  - /url: http://localhost:8000/cuti
+                  - generic: 
+                  - paragraph: Pengajuan Cuti
+              - listitem:
+                - link " Approval Cuti":
+                  - /url: http://localhost:8000/cuti/approval/list
+                  - generic: 
+                  - paragraph: Approval Cuti
+              - listitem:
+                - link " Rekap Saldo":
+                  - /url: http://localhost:8000/cuti/saldo
+                  - generic: 
+                  - paragraph: Rekap Saldo
+              - listitem:
+                - link " Laporan Cuti":
+                  - /url: http://localhost:8000/cuti/laporan
+                  - generic: 
+                  - paragraph: Laporan Cuti
+              - listitem:
+                - link " Jenis Cuti":
+                  - /url: http://localhost:8000/cuti/master/jenis-cuti
+                  - generic: 
+                  - paragraph: Jenis Cuti
+              - listitem:
+                - link " Kebijakan Cuti":
+                  - /url: http://localhost:8000/cuti/master/kebijakan
+                  - generic: 
+                  - paragraph: Kebijakan Cuti
+              - listitem:
+                - link " Cuti Bersama":
+                  - /url: http://localhost:8000/cuti/master/cuti-bersama
+                  - generic: 
+                  - paragraph: Cuti Bersama
+              - listitem:
+                - link " Delegasi Approval":
+                  - /url: http://localhost:8000/cuti/master/delegasi
+                  - generic: 
+                  - paragraph: Delegasi Approval
+          - listitem [ref=e75]:
+            - button "Perawatan Alat dan Mesin " [ref=e76] [cursor=pointer]:
+              - generic [ref=e77]: Perawatan Alat dan Mesin
+              - generic [ref=e78]: 
+            - list:
+              - listitem:
+                - link " Dashboard":
+                  - /url: http://localhost:8000/perawatan-alat-dan-mesin
+                  - generic: 
+                  - paragraph: Dashboard
+              - listitem:
+                - link " Master Barang":
+                  - /url: http://localhost:8000/perawatan-alat-dan-mesin/barang
+                  - generic: 
+                  - paragraph: Master Barang
+              - listitem:
+                - link " Transaksi Perawatan":
+                  - /url: http://localhost:8000/perawatan-alat-dan-mesin/transaksi-perawatan
+                  - generic: 
+                  - paragraph: Transaksi Perawatan
+              - listitem:
+                - link " Laporan":
+                  - /url: http://localhost:8000/perawatan-alat-dan-mesin/laporan
+                  - generic: 
+                  - paragraph: Laporan
+              - listitem:
+                - link " Cetak QR Code":
+                  - /url: http://localhost:8000/perawatan-alat-dan-mesin/qrcode
+                  - generic: 
+                  - paragraph: Cetak QR Code
+              - listitem:
+                - link " Satuan Barang":
+                  - /url: http://localhost:8000/perawatan-alat-dan-mesin/master/units
+                  - generic: 
+                  - paragraph: Satuan Barang
+              - listitem:
+                - link " Kondisi Barang":
+                  - /url: http://localhost:8000/perawatan-alat-dan-mesin/master/conditions
+                  - generic: 
+                  - paragraph: Kondisi Barang
+              - listitem:
+                - link " Ruang":
+                  - /url: http://localhost:8000/perawatan-alat-dan-mesin/master/rooms
+                  - generic: 
+                  - paragraph: Ruang
+              - listitem:
+                - link " Brand / Merk":
+                  - /url: http://localhost:8000/perawatan-alat-dan-mesin/master/brands
+                  - generic: 
+                  - paragraph: Brand / Merk
+              - listitem:
+                - link " Kuasa Pengguna":
+                  - /url: http://localhost:8000/perawatan-alat-dan-mesin/kuasa-pengguna-barang
+                  - generic: 
+                  - paragraph: Kuasa Pengguna
+          - listitem [ref=e79]:
+            - button "Persediaan " [ref=e80] [cursor=pointer]:
+              - generic [ref=e81]: Persediaan
+              - generic [ref=e82]: 
+            - list:
+              - listitem:
+                - link " Persediaan DEV":
+                  - /url: http://localhost:8000/persediaan
+                  - generic: 
+                  - paragraph: Persediaan DEV
+          - listitem [ref=e83]:
+            - button "Progress ZI " [ref=e84] [cursor=pointer]:
+              - generic [ref=e85]: Progress ZI
+              - generic [ref=e86]: 
+            - list:
+              - listitem:
+                - link " Rekapan ZI":
+                  - /url: http://localhost:8000/progress-zi
+                  - generic: 
+                  - paragraph: Rekapan ZI
+              - listitem:
+                - link " Monitoring Kegiatan 13":
+                  - /url: http://localhost:8000/progress-zi/activities
+                  - generic: 
+                  - paragraph:
+                    - text: Monitoring Kegiatan
+                    - generic: "13"
+              - listitem:
+                - link " Pedoman ZI":
+                  - /url: http://localhost:8000/progress-zi/guidelines
+                  - generic: 
+                  - paragraph: Pedoman ZI
+          - listitem [ref=e87]:
+            - button "Master Data " [ref=e88] [cursor=pointer]:
+              - generic [ref=e89]: Master Data
+              - generic [ref=e90]: 
+            - list:
+              - listitem:
+                - link " User":
+                  - /url: http://localhost:8000/admin/users
+                  - generic: 
+                  - paragraph: User
+              - listitem:
+                - link " Jabatan":
+                  - /url: http://localhost:8000/admin/jabatans
+                  - generic: 
+                  - paragraph: Jabatan
+              - listitem:
+                - link " Unit Kerja":
+                  - /url: http://localhost:8000/admin/units
+                  - generic: 
+                  - paragraph: Unit Kerja
+              - listitem:
+                - link " Bidang":
+                  - /url: http://localhost:8000/admin/bidangs
+                  - generic: 
+                  - paragraph: Bidang
+              - listitem:
+                - link " Kategori Surat":
+                  - /url: http://localhost:8000/admin/kategori-surats
+                  - generic: 
+                  - paragraph: Kategori Surat
+              - listitem:
+                - link " Kategori Rapat":
+                  - /url: http://localhost:8000/admin/kategori-rapats
+                  - generic: 
+                  - paragraph: Kategori Rapat
+              - listitem:
+                - link " Dasar Hukum":
+                  - /url: http://localhost:8000/admin/dasar-hukums
+                  - generic: 
+                  - paragraph: Dasar Hukum
+              - listitem:
+                - link " Periode ZI":
+                  - /url: http://localhost:8000/progress-zi/periods
+                  - generic: 
+                  - paragraph: Periode ZI
+              - listitem:
+                - link " Area ZI":
+                  - /url: http://localhost:8000/progress-zi/areas
+                  - generic: 
+                  - paragraph: Area ZI
+          - listitem [ref=e91]:
+            - button "Arsip " [ref=e92] [cursor=pointer]:
+              - generic [ref=e93]: Arsip
+              - generic [ref=e94]: 
+            - list:
+              - listitem:
+                - link " Arsip":
+                  - /url: http://localhost:8000/arsip
+                  - generic: 
+                  - paragraph: Arsip
+  - generic [ref=e95]:
+    - generic [ref=e98]:
+      - heading "📄  Surat Keluar" [level=1] [ref=e100]:
+        - generic [ref=e101]: 📄
+        - generic [ref=e103]: 
+        - text: Surat Keluar
+      - button " Add Surat Keluar" [ref=e105] [cursor=pointer]:
+        - generic [ref=e106]: 
+        - text: Add Surat Keluar
+    - generic [ref=e108]:
+      - generic [ref=e109]:
+        - generic [ref=e111]: 
+        - generic [ref=e112]:
+          - strong [ref=e113]: Mohon perhatian.
+          - text: Setelah dokumen dinyatakan lengkap
+          - strong [ref=e114]: JANGAN LUPA
+          - text: untuk segera di arsipkan. Terimakasih.
+      - generic [ref=e118]:
+        - generic [ref=e119]:
+          - generic [ref=e122]:
+            - text: Show
+            - combobox "Show entries" [ref=e123]:
+              - option "10" [selected]
+              - option "25"
+              - option "50"
+              - option "100"
+            - text: entries
+          - generic [ref=e126]:
+            - text: "Search:"
+            - searchbox "Search:" [ref=e127]
+        - table [ref=e130]:
+          - rowgroup [ref=e131]:
+            - 'row "Nomor Surat: activate to sort column ascending Kategori Surat: activate to sort column ascending Perihal/Isi Ringkas: activate to sort column ascending Tujuan / Penerima: activate to sort column ascending Tanggal Surat: activate to sort column ascending Diinput Tanggal: activate to sort column ascending Lampiran: activate to sort column ascending Dibuat Oleh: activate to sort column ascending Status: activate to sort column ascending" [ref=e132]':
+              - columnheader [ref=e133]
+              - 'columnheader "Nomor Surat: activate to sort column ascending" [ref=e134] [cursor=pointer]': Nomor Surat
+              - 'columnheader "Kategori Surat: activate to sort column ascending" [ref=e135] [cursor=pointer]': Kategori Surat
+              - 'columnheader "Perihal/Isi Ringkas: activate to sort column ascending" [ref=e136] [cursor=pointer]': Perihal/Isi Ringkas
+              - 'columnheader "Tujuan / Penerima: activate to sort column ascending" [ref=e137] [cursor=pointer]': Tujuan / Penerima
+              - 'columnheader "Tanggal Surat: activate to sort column ascending" [ref=e138] [cursor=pointer]': Tanggal Surat
+              - 'columnheader "Diinput Tanggal: activate to sort column ascending" [ref=e139] [cursor=pointer]': Diinput Tanggal
+              - 'columnheader "Lampiran: activate to sort column ascending" [ref=e140] [cursor=pointer]': Lampiran
+              - 'columnheader "Dibuat Oleh: activate to sort column ascending" [ref=e141] [cursor=pointer]': Dibuat Oleh
+              - 'columnheader "Status: activate to sort column ascending" [ref=e142] [cursor=pointer]': Status
+          - rowgroup [ref=e143]:
+            - row " 12/PAN.W31-A/KP3.4.3/IV/2026 Evaluasi kinerja pegawai KP - Kepegawaian Monitoring dan Evaluasi Bidang Kepaniteraaan Internal 2 orang 2026-04-02 26-04-02 Berkas Super Admin Lengkap" [ref=e144]:
+              - cell "" [ref=e145]:
+                - button "" [ref=e146] [cursor=pointer]:
+                  - generic [ref=e147]: 
+              - cell "12/PAN.W31-A/KP3.4.3/IV/2026 Evaluasi kinerja pegawai" [ref=e148]:
+                - generic [ref=e149]: 12/PAN.W31-A/KP3.4.3/IV/2026
+                - generic [ref=e150]: Evaluasi kinerja pegawai
+              - cell "KP - Kepegawaian" [ref=e151]:
+                - generic [ref=e152]: KP - Kepegawaian
+              - cell "Monitoring dan Evaluasi Bidang Kepaniteraaan" [ref=e153]:
+                - generic [ref=e154]: Monitoring dan Evaluasi Bidang Kepaniteraaan
+              - cell "Internal 2 orang" [ref=e155]:
+                - generic [ref=e156]: Internal
+                - generic [ref=e157]: 2 orang
+              - cell "2026-04-02" [ref=e158]
+              - cell "26-04-02" [ref=e159]
+              - cell "Berkas" [ref=e160]:
+                - link "Berkas" [ref=e161] [cursor=pointer]:
+                  - /url: javascript:void(0)
+              - cell "Super Admin" [ref=e162]
+              - cell "Lengkap" [ref=e163]:
+                - generic [ref=e164]: Lengkap
+            - row " 11/SEK.W31-A/KP3.4.3/III/2026 Evaluasi kinerja pegawai KP - Kepegawaian Rapat Monitoring dan Evaluasi - Unit kerja memiliki rencana kerja... Internal 3 orang 2026-03-25 26-03-25 Berkas Super Admin Lengkap" [ref=e165]:
+              - cell "" [ref=e166]:
+                - button "" [ref=e167] [cursor=pointer]:
+                  - generic [ref=e168]: 
+              - cell "11/SEK.W31-A/KP3.4.3/III/2026 Evaluasi kinerja pegawai" [ref=e169]:
+                - generic [ref=e170]: 11/SEK.W31-A/KP3.4.3/III/2026
+                - generic [ref=e171]: Evaluasi kinerja pegawai
+              - cell "KP - Kepegawaian" [ref=e172]:
+                - generic [ref=e173]: KP - Kepegawaian
+              - cell "Rapat Monitoring dan Evaluasi - Unit kerja memiliki rencana kerja..." [ref=e174]:
+                - generic [ref=e175]: Rapat Monitoring dan Evaluasi - Unit kerja memiliki rencana kerja...
+              - cell "Internal 3 orang" [ref=e176]:
+                - generic [ref=e177]: Internal
+                - generic [ref=e178]: 3 orang
+              - cell "2026-03-25" [ref=e179]
+              - cell "26-03-25" [ref=e180]
+              - cell "Berkas" [ref=e181]:
+                - link "Berkas" [ref=e182] [cursor=pointer]:
+                  - /url: javascript:void(0)
+              - cell "Super Admin" [ref=e183]
+              - cell "Lengkap" [ref=e184]:
+                - generic [ref=e185]: Lengkap
+            - row " 10/KPTA.W31-A/KP7.1/III/2026 Pelaksanaan tugas dalam jabatan - Surat Tugas - Zona Integritas (ZI) adalah predikat yang diberikan... Internal 3 orang 2026-03-25 26-03-25 Berkas Super Admin Lengkap" [ref=e186]:
+              - cell "" [ref=e187]:
+                - button "" [ref=e188] [cursor=pointer]:
+                  - generic [ref=e189]: 
+              - cell "10/KPTA.W31-A/KP7.1/III/2026 Pelaksanaan tugas dalam jabatan" [ref=e190]:
+                - generic [ref=e191]: 10/KPTA.W31-A/KP7.1/III/2026
+                - generic [ref=e192]: Pelaksanaan tugas dalam jabatan
+              - cell "-" [ref=e193]:
+                - generic [ref=e194]: "-"
+              - cell "Surat Tugas - Zona Integritas (ZI) adalah predikat yang diberikan..." [ref=e195]:
+                - generic [ref=e196]: Surat Tugas - Zona Integritas (ZI) adalah predikat yang diberikan...
+              - cell "Internal 3 orang" [ref=e197]:
+                - generic [ref=e198]: Internal
+                - generic [ref=e199]: 3 orang
+              - cell "2026-03-25" [ref=e200]
+              - cell "26-03-25" [ref=e201]
+              - cell "Berkas" [ref=e202]:
+                - link "Berkas" [ref=e203] [cursor=pointer]:
+                  - /url: javascript:void(0)
+              - cell "Super Admin" [ref=e204]
+              - cell "Lengkap" [ref=e205]:
+                - generic [ref=e206]: Lengkap
+            - row " 9/KPTA.W31-A/KP7.1/III/2026 Pelaksanaan tugas dalam jabatan - Surat Tugas - Zona Integritas (ZI) adalah predikat instansi pemer... Internal 1 orang 2026-03-23 26-03-23 Berkas Super Admin Lengkap" [ref=e207]:
+              - cell "" [ref=e208]:
+                - button "" [ref=e209] [cursor=pointer]:
+                  - generic [ref=e210]: 
+              - cell "9/KPTA.W31-A/KP7.1/III/2026 Pelaksanaan tugas dalam jabatan" [ref=e211]:
+                - generic [ref=e212]: 9/KPTA.W31-A/KP7.1/III/2026
+                - generic [ref=e213]: Pelaksanaan tugas dalam jabatan
+              - cell "-" [ref=e214]:
+                - generic [ref=e215]: "-"
+              - cell "Surat Tugas - Zona Integritas (ZI) adalah predikat instansi pemer..." [ref=e216]:
+                - generic [ref=e217]: Surat Tugas - Zona Integritas (ZI) adalah predikat instansi pemer...
+              - cell "Internal 1 orang" [ref=e218]:
+                - generic [ref=e219]: Internal
+                - generic [ref=e220]: 1 orang
+              - cell "2026-03-23" [ref=e221]
+              - cell "26-03-23" [ref=e222]
+              - cell "Berkas" [ref=e223]:
+                - link "Berkas" [ref=e224] [cursor=pointer]:
+                  - /url: javascript:void(0)
+              - cell "Super Admin" [ref=e225]
+              - cell "Lengkap" [ref=e226]:
+                - generic [ref=e227]: Lengkap
+            - row " 8/KPTA.W31-A/KP7.1/III/2026 Pelaksanaan tugas dalam jabatan - Surat Tugas - Zona Integritas (ZI) adalah predikat instansi pemer... Internal 3 orang 2026-03-23 26-03-23 Berkas Super Admin Lengkap" [ref=e228]:
+              - cell "" [ref=e229]:
+                - button "" [ref=e230] [cursor=pointer]:
+                  - generic [ref=e231]: 
+              - cell "8/KPTA.W31-A/KP7.1/III/2026 Pelaksanaan tugas dalam jabatan" [ref=e232]:
+                - generic [ref=e233]: 8/KPTA.W31-A/KP7.1/III/2026
+                - generic [ref=e234]: Pelaksanaan tugas dalam jabatan
+              - cell "-" [ref=e235]:
+                - generic [ref=e236]: "-"
+              - cell "Surat Tugas - Zona Integritas (ZI) adalah predikat instansi pemer..." [ref=e237]:
+                - generic [ref=e238]: Surat Tugas - Zona Integritas (ZI) adalah predikat instansi pemer...
+              - cell "Internal 3 orang" [ref=e239]:
+                - generic [ref=e240]: Internal
+                - generic [ref=e241]: 3 orang
+              - cell "2026-03-23" [ref=e242]
+              - cell "26-03-23" [ref=e243]
+              - cell "Berkas" [ref=e244]:
+                - link "Berkas" [ref=e245] [cursor=pointer]:
+                  - /url: javascript:void(0)
+              - cell "Super Admin" [ref=e246]
+              - cell "Lengkap" [ref=e247]:
+                - generic [ref=e248]: Lengkap
+            - row " 7/KPTA.W31-A/KP7.1/III/2026 Pelaksanaan tugas dalam jabatan - Surat Tugas - mempersiapan zi di satuan kerja lain Internal 1 orang 2026-03-23 26-03-23 Berkas Super Admin Lengkap" [ref=e249]:
+              - cell "" [ref=e250]:
+                - button "" [ref=e251] [cursor=pointer]:
+                  - generic [ref=e252]: 
+              - cell "7/KPTA.W31-A/KP7.1/III/2026 Pelaksanaan tugas dalam jabatan" [ref=e253]:
+                - generic [ref=e254]: 7/KPTA.W31-A/KP7.1/III/2026
+                - generic [ref=e255]: Pelaksanaan tugas dalam jabatan
+              - cell "-" [ref=e256]:
+                - generic [ref=e257]: "-"
+              - cell "Surat Tugas - mempersiapan zi di satuan kerja lain" [ref=e258]:
+                - generic [ref=e259]: Surat Tugas - mempersiapan zi di satuan kerja lain
+              - cell "Internal 1 orang" [ref=e260]:
+                - generic [ref=e261]: Internal
+                - generic [ref=e262]: 1 orang
+              - cell "2026-03-23" [ref=e263]
+              - cell "26-03-23" [ref=e264]
+              - cell "Berkas" [ref=e265]:
+                - link "Berkas" [ref=e266] [cursor=pointer]:
+                  - /url: javascript:void(0)
+              - cell "Super Admin" [ref=e267]
+              - cell "Lengkap" [ref=e268]:
+                - generic [ref=e269]: Lengkap
+            - row " 6/KPTA.W31-A/KP5.3/III/2026 Cuti dan izin bepergian ke luar negeri di jalur kedinasan - Permintaan dan Pemberian Cuti Sakit - Staf Kepegawaian 1 Internal 3 orang 2026-03-23 26-03-23 Berkas Staf Kepegawaian 1 Lengkap" [ref=e270]:
+              - cell "" [ref=e271]:
+                - button "" [ref=e272] [cursor=pointer]:
+                  - generic [ref=e273]: 
+              - cell "6/KPTA.W31-A/KP5.3/III/2026 Cuti dan izin bepergian ke luar negeri di jalur kedinasan" [ref=e274]:
+                - generic [ref=e275]: 6/KPTA.W31-A/KP5.3/III/2026
+                - generic [ref=e276]: Cuti dan izin bepergian ke luar negeri di jalur kedinasan
+              - cell "-" [ref=e277]:
+                - generic [ref=e278]: "-"
+              - cell "Permintaan dan Pemberian Cuti Sakit - Staf Kepegawaian 1" [ref=e279]:
+                - generic [ref=e280]: Permintaan dan Pemberian Cuti Sakit - Staf Kepegawaian 1
+              - cell "Internal 3 orang" [ref=e281]:
+                - generic [ref=e282]: Internal
+                - generic [ref=e283]: 3 orang
+              - cell "2026-03-23" [ref=e284]
+              - cell "26-03-23" [ref=e285]
+              - cell "Berkas" [ref=e286]:
+                - link "Berkas" [ref=e287] [cursor=pointer]:
+                  - /url: javascript:void(0)
+              - cell "Staf Kepegawaian 1" [ref=e288]
+              - cell "Lengkap" [ref=e289]:
+                - generic [ref=e290]: Lengkap
+            - row " 5/KPTA.W31-A/KP5.3/III/2026 Cuti dan izin bepergian ke luar negeri di jalur kedinasan - Permintaan dan Pemberian Cuti Tahunan - Staf Kepegawaian 1 Internal 3 orang 2026-03-23 26-03-23 Berkas Staf Kepegawaian 1 Lengkap" [ref=e291]:
+              - cell "" [ref=e292]:
+                - button "" [ref=e293] [cursor=pointer]:
+                  - generic [ref=e294]: 
+              - cell "5/KPTA.W31-A/KP5.3/III/2026 Cuti dan izin bepergian ke luar negeri di jalur kedinasan" [ref=e295]:
+                - generic [ref=e296]: 5/KPTA.W31-A/KP5.3/III/2026
+                - generic [ref=e297]: Cuti dan izin bepergian ke luar negeri di jalur kedinasan
+              - cell "-" [ref=e298]:
+                - generic [ref=e299]: "-"
+              - cell "Permintaan dan Pemberian Cuti Tahunan - Staf Kepegawaian 1" [ref=e300]:
+                - generic [ref=e301]: Permintaan dan Pemberian Cuti Tahunan - Staf Kepegawaian 1
+              - cell "Internal 3 orang" [ref=e302]:
+                - generic [ref=e303]: Internal
+                - generic [ref=e304]: 3 orang
+              - cell "2026-03-23" [ref=e305]
+              - cell "26-03-23" [ref=e306]
+              - cell "Berkas" [ref=e307]:
+                - link "Berkas" [ref=e308] [cursor=pointer]:
+                  - /url: javascript:void(0)
+              - cell "Staf Kepegawaian 1" [ref=e309]
+              - cell "Lengkap" [ref=e310]:
+                - generic [ref=e311]: Lengkap
+            - row " 2/KPTA.W31-A/HM1.1.2/III/2026 Pidato HM - Humas dan Protokol Undangan Buka Bersama External PT Papua Barat 2026-03-23 26-03-23 Berkas Super Admin Lengkap" [ref=e312]:
+              - cell "" [ref=e313]:
+                - button "" [ref=e314] [cursor=pointer]:
+                  - generic [ref=e315]: 
+              - cell "2/KPTA.W31-A/HM1.1.2/III/2026 Pidato" [ref=e316]:
+                - generic [ref=e317]: 2/KPTA.W31-A/HM1.1.2/III/2026
+                - generic [ref=e318]: Pidato
+              - cell "HM - Humas dan Protokol" [ref=e319]:
+                - generic [ref=e320]: HM - Humas dan Protokol
+              - cell "Undangan Buka Bersama" [ref=e321]:
+                - generic [ref=e322]: Undangan Buka Bersama
+              - cell "External PT Papua Barat" [ref=e323]:
+                - generic [ref=e324]: External
+                - generic [ref=e325]: PT Papua Barat
+              - cell "2026-03-23" [ref=e326]
+              - cell "26-03-23" [ref=e327]
+              - cell "Berkas" [ref=e328]:
+                - link "Berkas" [ref=e329] [cursor=pointer]:
+                  - /url: javascript:void(0)
+              - cell "Super Admin" [ref=e330]
+              - cell "Lengkap" [ref=e331]:
+                - generic [ref=e332]: Lengkap
+            - row " 1/SEK.W31-A/KP3.4.3/III/2026 Evaluasi kinerja pegawai KP - Kepegawaian Rapat Monitoring dan Evaluasi Bidang Kesekretariatan Internal 4 orang 2026-03-23 26-03-23 Berkas Super Admin Lengkap" [ref=e333]:
+              - cell "" [ref=e334]:
+                - button "" [ref=e335] [cursor=pointer]:
+                  - generic [ref=e336]: 
+              - cell "1/SEK.W31-A/KP3.4.3/III/2026 Evaluasi kinerja pegawai" [ref=e337]:
+                - generic [ref=e338]: 1/SEK.W31-A/KP3.4.3/III/2026
+                - generic [ref=e339]: Evaluasi kinerja pegawai
+              - cell "KP - Kepegawaian" [ref=e340]:
+                - generic [ref=e341]: KP - Kepegawaian
+              - cell "Rapat Monitoring dan Evaluasi Bidang Kesekretariatan" [ref=e342]:
+                - generic [ref=e343]: Rapat Monitoring dan Evaluasi Bidang Kesekretariatan
+              - cell "Internal 4 orang" [ref=e344]:
+                - generic [ref=e345]: Internal
+                - generic [ref=e346]: 4 orang
+              - cell "2026-03-23" [ref=e347]
+              - cell "26-03-23" [ref=e348]
+              - cell "Berkas" [ref=e349]:
+                - link "Berkas" [ref=e350] [cursor=pointer]:
+                  - /url: javascript:void(0)
+              - cell "Super Admin" [ref=e351]
+              - cell "Lengkap" [ref=e352]:
+                - generic [ref=e353]: Lengkap
+        - generic [ref=e354]:
+          - status [ref=e356]: Showing 1 to 10 of 10 entries
+          - list [ref=e359]:
+            - listitem [ref=e360]:
+              - link "Previous" [disabled]
+            - listitem [ref=e361]:
+              - link "1" [ref=e362] [cursor=pointer]:
+                - /url: "#"
+            - listitem [ref=e363]:
+              - link "Next" [disabled]
+      - text:       
+  - contentinfo [ref=e364]:
+    - generic [ref=e365]:
+      - text: © 2026
+      - strong [ref=e366]: Pengadilan Tinggi Agama Papua Barat
+      - text: . Sistem Informasi Persuratan.

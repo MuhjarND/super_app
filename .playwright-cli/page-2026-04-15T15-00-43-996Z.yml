@@ -1,0 +1,461 @@
+- generic [ref=e2]:
+  - navigation [ref=e3]:
+    - list [ref=e4]:
+      - listitem [ref=e5]:
+        - link "" [ref=e6] [cursor=pointer]:
+          - /url: "#"
+          - generic [ref=e7]: 
+    - list [ref=e8]:
+      - listitem [ref=e9]:
+        - link " 5" [ref=e10] [cursor=pointer]:
+          - /url: "#"
+          - generic [ref=e11]: 
+          - generic [ref=e12]: "5"
+        - text:     
+      - listitem [ref=e13]:
+        - button "" [ref=e14] [cursor=pointer]:
+          - generic [ref=e15]: 
+      - listitem [ref=e16]:
+        - link "S" [ref=e17] [cursor=pointer]:
+          - /url: "#"
+          - generic [ref=e18]: S
+        - text: 
+  - complementary [ref=e19]:
+    - link "P PTA Papua Barat" [ref=e20] [cursor=pointer]:
+      - /url: http://localhost/super3/public/dashboard
+      - generic [ref=e21]: P
+      - generic [ref=e22]: PTA Papua Barat
+    - generic [ref=e23]:
+      - generic [ref=e25]:
+        - generic [ref=e26]: SU
+        - generic [ref=e27]:
+          - generic [ref=e28]: Super Admin
+          - generic [ref=e29]: Super Admin
+      - navigation [ref=e30]:
+        - menu [ref=e31]:
+          - listitem [ref=e32]:
+            - link " Dashboard" [ref=e33] [cursor=pointer]:
+              - /url: http://localhost/super3/public/dashboard
+              - generic [ref=e34]: 
+              - paragraph [ref=e35]: Dashboard
+          - listitem [ref=e36]:
+            - link " Kalender Terpadu" [ref=e37] [cursor=pointer]:
+              - /url: http://localhost/super3/public/kalender-terpadu
+              - generic [ref=e38]: 
+              - paragraph [ref=e39]: Kalender Terpadu
+          - listitem [ref=e40]:
+            - link " Tindak Lanjut Terpadu 5" [ref=e41] [cursor=pointer]:
+              - /url: http://localhost/super3/public/tindak-lanjut-terpadu
+              - generic [ref=e42]: 
+              - paragraph [ref=e43]:
+                - text: Tindak Lanjut Terpadu
+                - generic [ref=e44]: "5"
+          - listitem [ref=e45]:
+            - button "Approval " [ref=e46] [cursor=pointer]:
+              - generic [ref=e47]: Approval
+              - generic [ref=e48]: 
+            - list:
+              - listitem:
+                - link " Tindaklanjuti 1":
+                  - /url: http://localhost/super3/public/approval
+                  - generic: 
+                  - paragraph:
+                    - text: Tindaklanjuti
+                    - generic: "1"
+              - listitem:
+                - link " Riwayat Approval":
+                  - /url: http://localhost/super3/public/approval/history
+                  - generic: 
+                  - paragraph: Riwayat Approval
+          - listitem [ref=e49]:
+            - button "Persuratan " [ref=e50] [cursor=pointer]:
+              - generic [ref=e51]: Persuratan
+              - generic [ref=e52]: 
+            - list:
+              - listitem:
+                - link " Surat Masuk 1":
+                  - /url: http://localhost/super3/public/surat-masuk
+                  - generic: 
+                  - paragraph:
+                    - text: Surat Masuk
+                    - generic: "1"
+              - listitem:
+                - link " Surat Keluar":
+                  - /url: http://localhost/super3/public/surat-keluar
+                  - generic: 
+                  - paragraph: Surat Keluar
+              - listitem:
+                - link " Template Surat":
+                  - /url: http://localhost/super3/public/template-surat
+                  - generic: 
+                  - paragraph: Template Surat
+          - listitem [ref=e53]:
+            - button "Rapat / Agenda " [ref=e54] [cursor=pointer]:
+              - generic [ref=e55]: Rapat / Agenda
+              - generic [ref=e56]: 
+            - list [ref=e57]:
+              - listitem [ref=e58]:
+                - link " Rapat/Agenda" [ref=e59] [cursor=pointer]:
+                  - /url: http://localhost/super3/public/rapat
+                  - generic [ref=e60]: 
+                  - paragraph [ref=e61]: Rapat/Agenda
+              - listitem [ref=e62]:
+                - link " Notulensi" [ref=e63] [cursor=pointer]:
+                  - /url: http://localhost/super3/public/rapat/notulensi
+                  - generic [ref=e64]: 
+                  - paragraph [ref=e65]: Notulensi
+              - listitem [ref=e66]:
+                - link " Tindak Lanjut" [ref=e67] [cursor=pointer]:
+                  - /url: http://localhost/super3/public/rapat/notulensi/tindak-lanjut
+                  - generic [ref=e68]: 
+                  - paragraph [ref=e69]: Tindak Lanjut
+              - listitem [ref=e70]:
+                - link " Absensi" [ref=e71] [cursor=pointer]:
+                  - /url: http://localhost/super3/public/rapat/absensi
+                  - generic [ref=e72]: 
+                  - paragraph [ref=e73]: Absensi
+              - listitem [ref=e74]:
+                - link " Laporan" [ref=e75] [cursor=pointer]:
+                  - /url: http://localhost/super3/public/rapat/laporan
+                  - generic [ref=e76]: 
+                  - paragraph [ref=e77]: Laporan
+              - listitem [ref=e78]:
+                - link " Agenda Pimpinan" [ref=e79] [cursor=pointer]:
+                  - /url: http://localhost/super3/public/rapat/agenda-pimpinan
+                  - generic [ref=e80]: 
+                  - paragraph [ref=e81]: Agenda Pimpinan
+              - listitem [ref=e82]:
+                - link " E-Voting" [ref=e83] [cursor=pointer]:
+                  - /url: http://localhost/super3/public/rapat/voting
+                  - generic [ref=e84]: 
+                  - paragraph [ref=e85]: E-Voting
+          - listitem [ref=e86]:
+            - button "Cuti " [ref=e87] [cursor=pointer]:
+              - generic [ref=e88]: Cuti
+              - generic [ref=e89]: 
+            - list:
+              - listitem:
+                - link " Pengajuan Cuti":
+                  - /url: http://localhost/super3/public/cuti
+                  - generic: 
+                  - paragraph: Pengajuan Cuti
+              - listitem:
+                - link " Approval Cuti":
+                  - /url: http://localhost/super3/public/cuti/approval/list
+                  - generic: 
+                  - paragraph: Approval Cuti
+              - listitem:
+                - link " Rekap Saldo":
+                  - /url: http://localhost/super3/public/cuti/saldo
+                  - generic: 
+                  - paragraph: Rekap Saldo
+              - listitem:
+                - link " Laporan Cuti":
+                  - /url: http://localhost/super3/public/cuti/laporan
+                  - generic: 
+                  - paragraph: Laporan Cuti
+              - listitem:
+                - link " Jenis Cuti":
+                  - /url: http://localhost/super3/public/cuti/master/jenis-cuti
+                  - generic: 
+                  - paragraph: Jenis Cuti
+              - listitem:
+                - link " Kebijakan Cuti":
+                  - /url: http://localhost/super3/public/cuti/master/kebijakan
+                  - generic: 
+                  - paragraph: Kebijakan Cuti
+              - listitem:
+                - link " Cuti Bersama":
+                  - /url: http://localhost/super3/public/cuti/master/cuti-bersama
+                  - generic: 
+                  - paragraph: Cuti Bersama
+              - listitem:
+                - link " Delegasi Approval":
+                  - /url: http://localhost/super3/public/cuti/master/delegasi
+                  - generic: 
+                  - paragraph: Delegasi Approval
+          - listitem [ref=e90]:
+            - button "Perawatan Alat dan Mesin " [ref=e91] [cursor=pointer]:
+              - generic [ref=e92]: Perawatan Alat dan Mesin
+              - generic [ref=e93]: 
+            - list:
+              - listitem:
+                - link " Dashboard":
+                  - /url: http://localhost/super3/public/perawatan-alat-dan-mesin
+                  - generic: 
+                  - paragraph: Dashboard
+              - listitem:
+                - link " Master Barang":
+                  - /url: http://localhost/super3/public/perawatan-alat-dan-mesin/barang
+                  - generic: 
+                  - paragraph: Master Barang
+              - listitem:
+                - link " Transaksi Perawatan":
+                  - /url: http://localhost/super3/public/perawatan-alat-dan-mesin/transaksi-perawatan
+                  - generic: 
+                  - paragraph: Transaksi Perawatan
+              - listitem:
+                - link " Laporan":
+                  - /url: http://localhost/super3/public/perawatan-alat-dan-mesin/laporan
+                  - generic: 
+                  - paragraph: Laporan
+              - listitem:
+                - link " Cetak QR Code":
+                  - /url: http://localhost/super3/public/perawatan-alat-dan-mesin/qrcode
+                  - generic: 
+                  - paragraph: Cetak QR Code
+              - listitem:
+                - link " Satuan Barang":
+                  - /url: http://localhost/super3/public/perawatan-alat-dan-mesin/master/units
+                  - generic: 
+                  - paragraph: Satuan Barang
+              - listitem:
+                - link " Kondisi Barang":
+                  - /url: http://localhost/super3/public/perawatan-alat-dan-mesin/master/conditions
+                  - generic: 
+                  - paragraph: Kondisi Barang
+              - listitem:
+                - link " Ruang":
+                  - /url: http://localhost/super3/public/perawatan-alat-dan-mesin/master/rooms
+                  - generic: 
+                  - paragraph: Ruang
+              - listitem:
+                - link " Brand / Merk":
+                  - /url: http://localhost/super3/public/perawatan-alat-dan-mesin/master/brands
+                  - generic: 
+                  - paragraph: Brand / Merk
+              - listitem:
+                - link " Kuasa Pengguna":
+                  - /url: http://localhost/super3/public/perawatan-alat-dan-mesin/kuasa-pengguna-barang
+                  - generic: 
+                  - paragraph: Kuasa Pengguna
+          - listitem [ref=e94]:
+            - button "Persediaan " [ref=e95] [cursor=pointer]:
+              - generic [ref=e96]: Persediaan
+              - generic [ref=e97]: 
+            - list:
+              - listitem:
+                - link " Persediaan DEV":
+                  - /url: http://localhost/super3/public/persediaan
+                  - generic: 
+                  - paragraph: Persediaan DEV
+          - listitem [ref=e98]:
+            - button "Progress ZI " [ref=e99] [cursor=pointer]:
+              - generic [ref=e100]: Progress ZI
+              - generic [ref=e101]: 
+            - list:
+              - listitem:
+                - link " Rekapan ZI":
+                  - /url: http://localhost/super3/public/progress-zi
+                  - generic: 
+                  - paragraph: Rekapan ZI
+              - listitem:
+                - link " Monitoring Kegiatan 13":
+                  - /url: http://localhost/super3/public/progress-zi/activities
+                  - generic: 
+                  - paragraph:
+                    - text: Monitoring Kegiatan
+                    - generic: "13"
+              - listitem:
+                - link " Pedoman ZI":
+                  - /url: http://localhost/super3/public/progress-zi/guidelines
+                  - generic: 
+                  - paragraph: Pedoman ZI
+          - listitem [ref=e102]:
+            - button "Master Data " [ref=e103] [cursor=pointer]:
+              - generic [ref=e104]: Master Data
+              - generic [ref=e105]: 
+            - list:
+              - listitem:
+                - link " User":
+                  - /url: http://localhost/super3/public/admin/users
+                  - generic: 
+                  - paragraph: User
+              - listitem:
+                - link " Jabatan":
+                  - /url: http://localhost/super3/public/admin/jabatans
+                  - generic: 
+                  - paragraph: Jabatan
+              - listitem:
+                - link " Unit Kerja":
+                  - /url: http://localhost/super3/public/admin/units
+                  - generic: 
+                  - paragraph: Unit Kerja
+              - listitem:
+                - link " Bidang":
+                  - /url: http://localhost/super3/public/admin/bidangs
+                  - generic: 
+                  - paragraph: Bidang
+              - listitem:
+                - link " Kategori Surat":
+                  - /url: http://localhost/super3/public/admin/kategori-surats
+                  - generic: 
+                  - paragraph: Kategori Surat
+              - listitem:
+                - link " Kategori Rapat":
+                  - /url: http://localhost/super3/public/admin/kategori-rapats
+                  - generic: 
+                  - paragraph: Kategori Rapat
+              - listitem:
+                - link " Dasar Hukum":
+                  - /url: http://localhost/super3/public/admin/dasar-hukums
+                  - generic: 
+                  - paragraph: Dasar Hukum
+              - listitem:
+                - link " Periode ZI":
+                  - /url: http://localhost/super3/public/progress-zi/periods
+                  - generic: 
+                  - paragraph: Periode ZI
+              - listitem:
+                - link " Area ZI":
+                  - /url: http://localhost/super3/public/progress-zi/areas
+                  - generic: 
+                  - paragraph: Area ZI
+          - listitem [ref=e106]:
+            - button "Arsip " [ref=e107] [cursor=pointer]:
+              - generic [ref=e108]: Arsip
+              - generic [ref=e109]: 
+            - list:
+              - listitem:
+                - link " Arsip":
+                  - /url: http://localhost/super3/public/arsip
+                  - generic: 
+                  - paragraph: Arsip
+  - generic [ref=e110]:
+    - generic [ref=e112]:
+      - heading "📝 Absensi Rapat" [level=1] [ref=e113]:
+        - generic [ref=e114]: 📝
+        - text: Absensi Rapat
+      - generic [ref=e115]: Rekap peserta hadir, external, dan tautan absensi publik per rapat.
+    - generic [ref=e117]:
+      - generic [ref=e118]:
+        - generic [ref=e119]:
+          - generic [ref=e120]: Total Rapat
+          - generic [ref=e121]: "3"
+        - generic [ref=e122]:
+          - generic [ref=e123]: Undangan Internal
+          - generic [ref=e124]: "9"
+        - generic [ref=e125]:
+          - generic [ref=e126]: Sudah Absen
+          - generic [ref=e127]: "3"
+        - generic [ref=e128]:
+          - generic [ref=e129]: External
+          - generic [ref=e130]: "1"
+      - table [ref=e134]:
+        - rowgroup [ref=e135]:
+          - row "Toggle aksi Rapat Monitoring dan Evaluasi Bidang Kepaniteraaan 12/PAN.W31-A/KP3.4.3/IV/2026 Waktu WIT 03 Apr 2026 09:00 WIT Peserta 2 undangan Hadir 0 / 2 0% hadir 2 belum hadir External 0 Status Disetujui" [ref=e136]:
+            - cell "Toggle aksi" [ref=e137]:
+              - button "Toggle aksi" [ref=e138] [cursor=pointer]: +
+            - cell "Rapat Monitoring dan Evaluasi Bidang Kepaniteraaan 12/PAN.W31-A/KP3.4.3/IV/2026" [ref=e139]:
+              - text: Rapat
+              - generic [ref=e140]: Monitoring dan Evaluasi Bidang Kepaniteraaan
+              - generic [ref=e141]: 12/PAN.W31-A/KP3.4.3/IV/2026
+            - cell "Waktu WIT 03 Apr 2026 09:00 WIT" [ref=e142]:
+              - text: Waktu WIT
+              - generic [ref=e143]: 03 Apr 2026
+              - generic [ref=e144]: 09:00 WIT
+            - cell "Peserta 2 undangan" [ref=e145]
+            - cell "Hadir 0 / 2 0% hadir 2 belum hadir" [ref=e146]:
+              - text: Hadir
+              - generic [ref=e147]: 0 / 2
+              - generic [ref=e150]:
+                - generic [ref=e151]: 0% hadir
+                - generic [ref=e152]: 2 belum hadir
+            - cell "External 0" [ref=e153]
+            - cell "Status Disetujui" [ref=e154]:
+              - text: Status
+              - generic [ref=e155]: Disetujui
+          - row "Tindakan absensi  Rekap  PDF  Link Publik" [ref=e156]:
+            - cell "Tindakan absensi  Rekap  PDF  Link Publik" [ref=e157]:
+              - generic [ref=e158]:
+                - generic [ref=e159]: Tindakan absensi
+                - link " Rekap" [ref=e160] [cursor=pointer]:
+                  - /url: http://localhost/super3/public/rapat/absensi/3
+                  - generic [ref=e161]: 
+                  - text: Rekap
+                - link " PDF" [ref=e162] [cursor=pointer]:
+                  - /url: http://localhost/super3/public/rapat/absensi/3/pdf
+                  - generic [ref=e163]: 
+                  - text: PDF
+                - button " Link Publik" [ref=e164] [cursor=pointer]:
+                  - generic [ref=e165]: 
+                  - text: Link Publik
+          - row "Toggle aksi Rapat Rapat Monitoring dan Evaluasi - Unit kerja memiliki rencana kerja pembangunan Zona Integritas. 11/SEK.W31-A/KP3.4.3/III/2026 Waktu WIT 26 Mar 2026 20:08 WIT Peserta 3 undangan Hadir 0 / 3 0% hadir 3 belum hadir External 0 Status Disetujui" [ref=e166]:
+            - cell "Toggle aksi" [ref=e167]:
+              - button "Toggle aksi" [ref=e168] [cursor=pointer]: +
+            - cell "Rapat Rapat Monitoring dan Evaluasi - Unit kerja memiliki rencana kerja pembangunan Zona Integritas. 11/SEK.W31-A/KP3.4.3/III/2026" [ref=e169]:
+              - text: Rapat
+              - generic [ref=e170]: Rapat Monitoring dan Evaluasi - Unit kerja memiliki rencana kerja pembangunan Zona Integritas.
+              - generic [ref=e171]: 11/SEK.W31-A/KP3.4.3/III/2026
+            - cell "Waktu WIT 26 Mar 2026 20:08 WIT" [ref=e172]:
+              - text: Waktu WIT
+              - generic [ref=e173]: 26 Mar 2026
+              - generic [ref=e174]: 20:08 WIT
+            - cell "Peserta 3 undangan" [ref=e175]
+            - cell "Hadir 0 / 3 0% hadir 3 belum hadir" [ref=e176]:
+              - text: Hadir
+              - generic [ref=e177]: 0 / 3
+              - generic [ref=e180]:
+                - generic [ref=e181]: 0% hadir
+                - generic [ref=e182]: 3 belum hadir
+            - cell "External 0" [ref=e183]
+            - cell "Status Disetujui" [ref=e184]:
+              - text: Status
+              - generic [ref=e185]: Disetujui
+          - row "Tindakan absensi  Rekap  PDF  Link Publik" [ref=e186]:
+            - cell "Tindakan absensi  Rekap  PDF  Link Publik" [ref=e187]:
+              - generic [ref=e188]:
+                - generic [ref=e189]: Tindakan absensi
+                - link " Rekap" [ref=e190] [cursor=pointer]:
+                  - /url: http://localhost/super3/public/rapat/absensi/2
+                  - generic [ref=e191]: 
+                  - text: Rekap
+                - link " PDF" [ref=e192] [cursor=pointer]:
+                  - /url: http://localhost/super3/public/rapat/absensi/2/pdf
+                  - generic [ref=e193]: 
+                  - text: PDF
+                - button " Link Publik" [ref=e194] [cursor=pointer]:
+                  - generic [ref=e195]: 
+                  - text: Link Publik
+          - row "Toggle aksi Rapat Rapat Monitoring dan Evaluasi Bidang Kesekretariatan 1/SEK.W31-A/KP3.4.3/III/2026 Waktu WIT 23 Mar 2026 09:42 WIT Peserta 4 undangan Hadir 3 / 4 75% hadir 1 belum hadir External 1 Status Disetujui" [ref=e196]:
+            - cell "Toggle aksi" [ref=e197]:
+              - button "Toggle aksi" [ref=e198] [cursor=pointer]: +
+            - cell "Rapat Rapat Monitoring dan Evaluasi Bidang Kesekretariatan 1/SEK.W31-A/KP3.4.3/III/2026" [ref=e199]:
+              - text: Rapat
+              - generic [ref=e200]: Rapat Monitoring dan Evaluasi Bidang Kesekretariatan
+              - generic [ref=e201]: 1/SEK.W31-A/KP3.4.3/III/2026
+            - cell "Waktu WIT 23 Mar 2026 09:42 WIT" [ref=e202]:
+              - text: Waktu WIT
+              - generic [ref=e203]: 23 Mar 2026
+              - generic [ref=e204]: 09:42 WIT
+            - cell "Peserta 4 undangan" [ref=e205]
+            - cell "Hadir 3 / 4 75% hadir 1 belum hadir" [ref=e206]:
+              - text: Hadir
+              - generic [ref=e207]: 3 / 4
+              - generic [ref=e211]:
+                - generic [ref=e212]: 75% hadir
+                - generic [ref=e213]: 1 belum hadir
+            - cell "External 1" [ref=e214]
+            - cell "Status Disetujui" [ref=e215]:
+              - text: Status
+              - generic [ref=e216]: Disetujui
+          - row "Tindakan absensi  Rekap  PDF  Link Publik" [ref=e217]:
+            - cell "Tindakan absensi  Rekap  PDF  Link Publik" [ref=e218]:
+              - generic [ref=e219]:
+                - generic [ref=e220]: Tindakan absensi
+                - link " Rekap" [ref=e221] [cursor=pointer]:
+                  - /url: http://localhost/super3/public/rapat/absensi/1
+                  - generic [ref=e222]: 
+                  - text: Rekap
+                - link " PDF" [ref=e223] [cursor=pointer]:
+                  - /url: http://localhost/super3/public/rapat/absensi/1/pdf
+                  - generic [ref=e224]: 
+                  - text: PDF
+                - button " Link Publik" [ref=e225] [cursor=pointer]:
+                  - generic [ref=e226]: 
+                  - text: Link Publik
+  - contentinfo [ref=e227]:
+    - generic [ref=e228]:
+      - text: © 2026
+      - strong [ref=e229]: Pengadilan Tinggi Agama Papua Barat
+      - text: . Sistem Informasi Persuratan.

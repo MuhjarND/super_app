@@ -220,6 +220,15 @@
                 }
 
                 @media (max-width: 991.98px) {
+                    .maintenance-hero {
+                        gap: 12px;
+                    }
+
+                    .maintenance-hero .app-create-btn {
+                        width: 100%;
+                        justify-content: center;
+                    }
+
                     .maintenance-item-header {
                         flex-direction: column;
                         align-items: stretch;
@@ -227,6 +236,46 @@
 
                     .maintenance-summary {
                         justify-content: space-between;
+                    }
+                }
+
+                @media (max-width: 767.98px) {
+                    .maintenance-hero-title {
+                        font-size: 1.12rem;
+                    }
+
+                    .maintenance-hero-subtitle,
+                    .maintenance-board-subtitle {
+                        font-size: 0.84rem;
+                    }
+
+                    .maintenance-shell {
+                        border-radius: 16px;
+                    }
+
+                    .maintenance-board {
+                        border-radius: 15px;
+                    }
+
+                    .maintenance-board-header,
+                    .maintenance-board-body,
+                    .maintenance-item-header,
+                    .maintenance-item-body {
+                        padding-left: 14px;
+                        padding-right: 14px;
+                    }
+
+                    .maintenance-item-body {
+                        padding-bottom: 14px;
+                    }
+
+                    .maintenance-chip,
+                    .maintenance-total,
+                    .maintenance-item-code,
+                    .maintenance-item-name,
+                    .maintenance-table td,
+                    .maintenance-table th {
+                        font-size: 0.82rem;
                     }
                 }
             </style>

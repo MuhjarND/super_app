@@ -2,32 +2,148 @@
 
 @section('title', 'Detail Pengajuan Cuti')
 
+@push('styles')
+<style>
+    .leave-show-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px 18px;
+    }
+
+    .leave-show-item strong {
+        display: block;
+        font-size: 0.78rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: #94a3b8;
+        margin-bottom: 4px;
+    }
+
+    .leave-show-preview-frame {
+        width: 100%;
+        height: 860px;
+        border: 0;
+        background: #fff;
+    }
+
+    .leave-show-table th {
+        background: #f8fafc;
+        color: #475569;
+        font-size: 0.8rem;
+        font-weight: 800;
+        border-bottom-color: #e2e8f0;
+    }
+
+    .leave-show-table th,
+    .leave-show-table td {
+        padding: 12px 14px;
+        vertical-align: top;
+    }
+
+    .leave-show-action-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+    }
+
+    @media (max-width: 767.98px) {
+        .leave-show-top {
+            flex-direction: column;
+            align-items: stretch !important;
+        }
+
+        .leave-show-top .app-action-group {
+            width: 100%;
+        }
+
+        .leave-show-top .app-action-group > * {
+            flex: 1 1 0;
+        }
+
+        .leave-show-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .leave-show-preview-frame {
+            height: 68vh;
+        }
+
+        .leave-show-table,
+        .leave-show-table thead,
+        .leave-show-table tbody,
+        .leave-show-table tr,
+        .leave-show-table th,
+        .leave-show-table td {
+            display: block;
+            width: 100%;
+        }
+
+        .leave-show-table thead {
+            display: none;
+        }
+
+        .leave-show-table tbody tr {
+            padding: 12px 14px 10px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .leave-show-table tbody tr:last-child {
+            border-bottom: 0;
+        }
+
+        .leave-show-table td {
+            padding: 0 0 10px;
+            border: 0;
+        }
+
+        .leave-show-table td:last-child {
+            padding-bottom: 0;
+        }
+
+        .leave-show-table td::before {
+            content: attr(data-label);
+            display: block;
+            margin-bottom: 4px;
+            font-size: 0.74rem;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            color: #94a3b8;
+        }
+
+        .leave-show-action-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+@endpush
+
 @section('content')
 @include('admin._alerts')
-<div class="d-flex justify-content-between align-items-center mb-3">
+<div class="d-flex justify-content-between align-items-center mb-3 leave-show-top" style="gap:12px;">
     <div>
         <h3 class="mb-1">Detail Pengajuan Cuti</h3>
         <p class="text-muted mb-0">{{ $leaveRequest->display_number }}</p>
     </div>
     <div class="app-action-group">
         @if(in_array($leaveRequest->status, [\App\LeaveRequest::STATUS_APPROVED, \App\LeaveRequest::STATUS_REJECTED], true))
-            <a href="{{ route('cuti.surat', $leaveRequest) }}" target="_blank" class="app-icon-btn file"><i class="fas fa-file-alt"></i></a>
+            <a href="{{ route('cuti.surat', $leaveRequest) }}" target="_blank" class="app-icon-btn file" data-mobile-label="Buka PDF"><i class="fas fa-file-alt"></i></a>
         @endif
-        <a href="{{ route('cuti.index') }}" class="app-icon-btn cancel"><i class="fas fa-arrow-left"></i></a>
+        <a href="{{ route('cuti.index') }}" class="app-icon-btn cancel" data-mobile-label="Kembali"><i class="fas fa-arrow-left"></i></a>
     </div>
 </div>
 <div class="card border-0 shadow-sm mb-3">
     <div class="card-body">
-        <div class="row">
-            <div class="col-md-6"><strong>Pegawai:</strong> {{ optional($leaveRequest->user)->name }}</div>
-            <div class="col-md-6"><strong>Jenis:</strong> {{ optional($leaveRequest->leaveType)->name }}</div>
-            <div class="col-md-6 mt-2"><strong>Periode:</strong> {{ $leaveRequest->period_label }}</div>
-            <div class="col-md-6 mt-2"><strong>Status:</strong> {!! $leaveRequest->status_badge !!}</div>
-            <div class="col-md-6 mt-2"><strong>Nomor Cuti:</strong> {{ $leaveRequest->display_number }}</div>
-            <div class="col-md-6 mt-2"><strong>Hari Kerja:</strong> {{ $leaveRequest->requested_days ?: 0 }} hari</div>
-            <div class="col-md-12 mt-2"><strong>Tujuan:</strong> {{ $leaveRequest->purpose }}</div>
-            <div class="col-md-8 mt-2"><strong>Alamat Selama Cuti:</strong> {{ $leaveRequest->leave_address ?: '-' }}</div>
-            <div class="col-md-4 mt-2"><strong>Telepon:</strong> {{ $leaveRequest->contact_phone ?: '-' }}</div>
+        <div class="leave-show-grid">
+            <div class="leave-show-item"><strong>Pegawai</strong>{{ optional($leaveRequest->user)->name }}</div>
+            <div class="leave-show-item"><strong>Jenis</strong>{{ optional($leaveRequest->leaveType)->name }}</div>
+            <div class="leave-show-item"><strong>Periode</strong>{{ $leaveRequest->period_label }}</div>
+            <div class="leave-show-item"><strong>Status</strong>{!! $leaveRequest->status_badge !!}</div>
+            <div class="leave-show-item"><strong>Nomor Cuti</strong>{{ $leaveRequest->display_number }}</div>
+            <div class="leave-show-item"><strong>Hari Kerja</strong>{{ $leaveRequest->requested_days ?: 0 }} hari</div>
+            <div class="leave-show-item" style="grid-column: 1 / -1;"><strong>Tujuan</strong>{{ $leaveRequest->purpose }}</div>
+            <div class="leave-show-item"><strong>Alamat Selama Cuti</strong>{{ $leaveRequest->leave_address ?: '-' }}</div>
+            <div class="leave-show-item"><strong>Telepon</strong>{{ $leaveRequest->contact_phone ?: '-' }}</div>
         </div>
     </div>
 </div>
@@ -35,38 +151,38 @@
     <div class="card border-0 shadow-sm mb-3">
         <div class="card-header bg-white d-flex justify-content-between align-items-center">
             <strong>Preview Form Pengajuan Cuti</strong>
-            <a href="{{ route('cuti.surat', $leaveRequest) }}" target="_blank" class="app-icon-btn preview"><i class="fas fa-eye"></i></a>
+            <a href="{{ route('cuti.surat', $leaveRequest) }}" target="_blank" class="btn btn-outline-primary btn-sm"><i class="fas fa-external-link-alt mr-1"></i> Buka PDF</a>
         </div>
         <div class="card-body p-0">
-            <iframe src="{{ route('cuti.surat', $leaveRequest) }}" style="width:100%;height:860px;border:0;"></iframe>
+            <iframe src="{{ route('cuti.surat', $leaveRequest) }}" class="leave-show-preview-frame"></iframe>
         </div>
     </div>
 @endif
 <div class="card border-0 shadow-sm mb-3">
     <div class="card-header bg-white"><strong>Dokumen Pendukung</strong></div>
     <div class="card-body p-0">
-        <table class="table mb-0">
+        <table class="table mb-0 leave-show-table">
             <thead><tr><th>Nama File</th><th>Jenis</th><th>Verifikasi</th><th>Aksi</th></tr></thead>
             <tbody>
                 @forelse($leaveRequest->documents as $document)
                     <tr>
-                        <td>{{ $document->original_name }}</td>
-                        <td>{{ $document->document_type_label }}</td>
-                        <td>
+                        <td data-label="Nama File">{{ $document->original_name }}</td>
+                        <td data-label="Jenis">{{ $document->document_type_label }}</td>
+                        <td data-label="Verifikasi">
                             <span class="badge badge-{{ $document->is_verified ? 'success' : 'warning' }}">
                                 {{ $document->is_verified ? 'Terverifikasi' : 'Belum Verifikasi' }}
                             </span>
                         </td>
-                        <td class="app-action-cell">
+                        <td class="app-action-cell" data-label="Aksi">
                             <div class="app-action-group">
-                            <a href="{{ route('cuti.documents.show', [$leaveRequest, $document]) }}" target="_blank" class="app-icon-btn file"><i class="fas fa-paperclip"></i></a>
+                            <a href="{{ route('cuti.documents.show', [$leaveRequest, $document]) }}" target="_blank" class="app-icon-btn file" data-mobile-label="Buka"><i class="fas fa-paperclip"></i></a>
                             @if(isset($leaveApproval) && in_array($leaveApproval->role_name, ['verifikator_dokumen', 'ppk'], true))
                                 <form action="{{ route('cuti.approval.verify-document', $leaveApproval) }}" method="POST" class="d-inline-block ml-2">
                                     @csrf
                                     <input type="hidden" name="document_id" value="{{ $document->id }}">
                                     <input type="hidden" name="is_verified" value="{{ $document->is_verified ? 0 : 1 }}">
                                     <input type="hidden" name="verification_note" value="{{ $document->is_verified ? 'Verifikasi dibatalkan.' : 'Dokumen valid.' }}">
-                                    <button type="submit" class="app-icon-btn {{ $document->is_verified ? 'archive' : 'approve' }}">
+                                    <button type="submit" class="app-icon-btn {{ $document->is_verified ? 'archive' : 'approve' }}" data-mobile-label="{{ $document->is_verified ? 'Batal' : 'Verifikasi' }}">
                                         <i class="fas {{ $document->is_verified ? 'fa-undo' : 'fa-check' }}"></i>
                                     </button>
                                 </form>
@@ -84,16 +200,16 @@
 <div class="card border-0 shadow-sm mb-3">
     <div class="card-header bg-white"><strong>Approval</strong></div>
     <div class="card-body p-0">
-        <table class="table mb-0">
+        <table class="table mb-0 leave-show-table">
             <thead><tr><th>Step</th><th>Role</th><th>Approver</th><th>Status</th><th>Catatan</th></tr></thead>
             <tbody>
                 @forelse($leaveRequest->approvals as $approval)
                     <tr>
-                        <td>{{ $approval->step_no }}</td>
-                        <td>{{ $approval->role_label }}</td>
-                        <td>{{ optional($approval->approver)->name ?: '-' }}</td>
-                        <td>{!! $approval->status_badge !!}</td>
-                        <td>{{ $approval->note ?: '-' }}</td>
+                        <td data-label="Step">{{ $approval->step_no }}</td>
+                        <td data-label="Role">{{ $approval->role_label }}</td>
+                        <td data-label="Approver">{{ optional($approval->approver)->name ?: '-' }}</td>
+                        <td data-label="Status">{!! $approval->status_badge !!}</td>
+                        <td data-label="Catatan">{{ $approval->note ?: '-' }}</td>
                     </tr>
                 @empty
                     <tr><td colspan="5" class="text-center text-muted">Belum ada approval.</td></tr>
@@ -105,15 +221,15 @@
 <div class="card border-0 shadow-sm mb-3">
     <div class="card-header bg-white"><strong>Audit Trail</strong></div>
     <div class="card-body p-0">
-        <table class="table mb-0">
+        <table class="table mb-0 leave-show-table">
             <thead><tr><th>Waktu</th><th>Aktor</th><th>Event</th><th>Catatan</th></tr></thead>
             <tbody>
                 @forelse($leaveRequest->audits as $audit)
                     <tr>
-                        <td>{{ optional($audit->created_at)->translatedFormat('d F Y H:i') }} WIT</td>
-                        <td>{{ optional($audit->actor)->name ?: '-' }}</td>
-                        <td>{{ ucfirst(str_replace('_', ' ', $audit->event)) }}</td>
-                        <td>{{ $audit->note ?: '-' }}</td>
+                        <td data-label="Waktu">{{ optional($audit->created_at)->translatedFormat('d F Y H:i') }} WIT</td>
+                        <td data-label="Aktor">{{ optional($audit->actor)->name ?: '-' }}</td>
+                        <td data-label="Event">{{ ucfirst(str_replace('_', ' ', $audit->event)) }}</td>
+                        <td data-label="Catatan">{{ $audit->note ?: '-' }}</td>
                     </tr>
                 @empty
                     <tr><td colspan="4" class="text-center text-muted">Belum ada audit trail.</td></tr>
@@ -122,7 +238,7 @@
         </table>
     </div>
 </div>
-<div class="d-flex flex-wrap" style="gap:8px;">
+<div class="leave-show-action-grid">
     @if(!isset($leaveApproval) && in_array($leaveRequest->status, [\App\LeaveRequest::STATUS_DRAFT, \App\LeaveRequest::STATUS_REJECTED], true))
         <a href="{{ route('cuti.index', ['edit' => $leaveRequest->id]) }}" class="btn btn-outline-secondary btn-sm">Edit Draft</a>
         <form action="{{ route('cuti.submit', $leaveRequest) }}" method="POST" class="d-inline">@csrf <button type="submit" class="btn btn-primary btn-sm">Submit Pengajuan</button></form>
@@ -131,8 +247,8 @@
         <form action="{{ route('cuti.cancel', $leaveRequest) }}" method="POST" class="d-inline">@csrf <button type="submit" class="btn btn-outline-danger btn-sm" onclick="return confirm('Batalkan pengajuan cuti ini?')">Batalkan</button></form>
     @endif
     @if(isset($leaveApproval))
-        <form action="{{ route('cuti.approval.approve', $leaveApproval) }}" method="POST" class="d-inline-block">@csrf <input type="hidden" name="action" value="approve"><textarea name="note" class="form-control mb-2" rows="3" placeholder="Catatan approval"></textarea><button type="submit" class="btn btn-success btn-sm">Approve</button></form>
-        <form action="{{ route('cuti.approval.reject', $leaveApproval) }}" method="POST" class="d-inline-block">@csrf <textarea name="note" class="form-control mb-2" rows="3" placeholder="Catatan penolakan" required></textarea><button type="submit" class="btn btn-danger btn-sm">Reject</button></form>
+        <form action="{{ route('cuti.approval.approve', $leaveApproval) }}" method="POST" class="d-inline-block card border-0 shadow-sm mb-0"><div class="card-body">@csrf <input type="hidden" name="action" value="approve"><textarea name="note" class="form-control mb-2" rows="3" placeholder="Catatan approval"></textarea><button type="submit" class="btn btn-success btn-sm btn-block">Approve</button></div></form>
+        <form action="{{ route('cuti.approval.reject', $leaveApproval) }}" method="POST" class="d-inline-block card border-0 shadow-sm mb-0"><div class="card-body">@csrf <textarea name="note" class="form-control mb-2" rows="3" placeholder="Catatan penolakan" required></textarea><button type="submit" class="btn btn-danger btn-sm btn-block">Reject</button></div></form>
     @endif
 </div>
 @endsection

@@ -2,10 +2,85 @@
 
 @section('title', 'Pengajuan Cuti')
 
+@push('styles')
+<style>
+    .leave-mobile-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 16px;
+    }
+
+    @media (max-width: 767.98px) {
+        .leave-mobile-header {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .leave-mobile-header .app-create-btn {
+            width: 100%;
+            justify-content: center;
+        }
+
+        .leave-table-card {
+            border-radius: 14px;
+        }
+
+        .leave-table-card .table-responsive {
+            padding: 0;
+        }
+
+        .leave-table-card table,
+        .leave-table-card thead,
+        .leave-table-card tbody,
+        .leave-table-card tr,
+        .leave-table-card th,
+        .leave-table-card td {
+            display: block;
+            width: 100%;
+        }
+
+        .leave-table-card thead {
+            display: none;
+        }
+
+        .leave-table-card tbody tr {
+            border-bottom: 1px solid #e5e7eb;
+            padding: 14px;
+        }
+
+        .leave-table-card tbody tr:last-child {
+            border-bottom: 0;
+        }
+
+        .leave-table-card tbody td {
+            border: 0;
+            padding: 6px 0;
+        }
+
+        .leave-table-card tbody td::before {
+            content: attr(data-label);
+            display: block;
+            font-size: 0.72rem;
+            font-weight: 700;
+            color: #64748b;
+            margin-bottom: 3px;
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
+        }
+
+        .leave-table-card .app-action-cell {
+            text-align: left;
+        }
+    }
+</style>
+@endpush
+
 @section('content')
 @include('admin._alerts')
 
-<div class="d-flex justify-content-between align-items-center mb-3">
+<div class="leave-mobile-header">
     <div>
         <h3 class="mb-1">Pengajuan Cuti</h3>
         <p class="text-muted mb-0">Daftar pengajuan cuti pegawai yang Anda buat.</p>
@@ -15,7 +90,7 @@
     </button>
 </div>
 
-<div class="card border-0 shadow-sm">
+<div class="card border-0 shadow-sm leave-table-card">
     <div class="card-body p-0">
         <div class="table-responsive">
             <table class="table table-hover mb-0">
@@ -50,11 +125,11 @@
                             data-leave-address="{{ e($leaveRequest->leave_address) }}"
                             data-documents='@json($documents)'
                         >
-                            <td>{{ $leaveRequest->display_number }}</td>
-                            <td>{{ optional($leaveRequest->leaveType)->name }}</td>
-                            <td>{{ optional($leaveRequest->start_date)->translatedFormat('d M Y') }} - {{ optional($leaveRequest->end_date)->translatedFormat('d M Y') }}</td>
-                            <td>{!! $leaveRequest->status_badge !!}</td>
-                            <td class="app-action-cell">
+                            <td data-label="Nomor">{{ $leaveRequest->display_number }}</td>
+                            <td data-label="Jenis">{{ optional($leaveRequest->leaveType)->name }}</td>
+                            <td data-label="Periode">{{ optional($leaveRequest->start_date)->translatedFormat('d M Y') }} - {{ optional($leaveRequest->end_date)->translatedFormat('d M Y') }}</td>
+                            <td data-label="Status">{!! $leaveRequest->status_badge !!}</td>
+                            <td data-label="Aksi" class="app-action-cell">
                                 <div class="app-action-group">
                                     <a href="{{ route('cuti.show', $leaveRequest) }}" class="app-icon-btn detail">
                                         <i class="fas fa-eye"></i>

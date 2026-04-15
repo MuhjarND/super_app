@@ -116,6 +116,49 @@
                 position: static;
             }
         }
+
+        @media (max-width: 767.98px) {
+            .content-header .container-fluid {
+                display: block !important;
+            }
+
+            .content-header .btn {
+                width: 100%;
+                margin-top: 10px;
+            }
+
+            .approval-detail-card .card-header {
+                padding: 14px 16px;
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .approval-doc-title {
+                font-size: 1rem;
+                line-height: 1.35;
+            }
+
+            .approval-meta {
+                font-size: 0.8rem;
+            }
+
+            .approval-section {
+                padding: 12px 13px;
+            }
+
+            .approval-step-item {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .approval-action-bar .btn {
+                width: 100%;
+            }
+
+            .approval-pdf-preview iframe {
+                height: 68vh !important;
+            }
+        }
     </style>
 @endpush
 
@@ -228,6 +271,12 @@
 
         <div>
             <div class="approval-pdf-preview">
+                <div class="card-header bg-white d-flex justify-content-between align-items-center" style="padding:14px 16px;border-bottom:1px solid #e2e8f0;">
+                    <strong>Preview Dokumen</strong>
+                    <a href="{{ route('rapat.undangan.preview', $rapatApproval->rapat) }}" target="_blank" class="btn btn-outline-primary btn-sm">
+                        <i class="fas fa-external-link-alt mr-1"></i> Buka PDF
+                    </a>
+                </div>
                 <iframe src="{{ route('rapat.undangan.preview', $rapatApproval->rapat) }}" style="width:100%;height:920px;border:0;" title="Preview Undangan Rapat"></iframe>
             </div>
         </div>

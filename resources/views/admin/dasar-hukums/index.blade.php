@@ -57,27 +57,27 @@
                     <tbody>
                         @forelse($dasarHukums as $item)
                             <tr>
-                                <td>{{ $item->tema }}</td>
-                                <td>{{ optional($item->kategoriSuratKode)->kode ? optional($item->kategoriSuratKode)->kode . ' - ' . optional($item->kategoriSuratKode)->nama : '-' }}</td>
-                                <td>{{ $item->kata_kunci ?: '-' }}</td>
-                                <td>{{ $item->urutan }}</td>
-                                <td>
+                                <td data-label="Tema">{{ $item->tema }}</td>
+                                <td data-label="Kategori Surat">{{ optional($item->kategoriSuratKode)->kode ? optional($item->kategoriSuratKode)->kode . ' - ' . optional($item->kategoriSuratKode)->nama : '-' }}</td>
+                                <td data-label="Kata Kunci">{{ $item->kata_kunci ?: '-' }}</td>
+                                <td data-label="Urutan">{{ $item->urutan }}</td>
+                                <td data-label="Status">
                                     <span class="badge badge-{{ $item->aktif ? 'success' : 'secondary' }}">
                                         {{ $item->aktif ? 'Aktif' : 'Nonaktif' }}
                                     </span>
                                 </td>
-                                <td>{{ \Illuminate\Support\Str::limit(strip_tags($item->uraian), 100) }}</td>
-                                <td class="app-action-cell">
+                                <td data-label="Uraian">{{ \Illuminate\Support\Str::limit(strip_tags($item->uraian), 100) }}</td>
+                                <td class="app-action-cell" data-label="Aksi">
                                     <div class="app-action-group">
                                     <button class="app-icon-btn edit" data-toggle="modal"
-                                        data-target="#editDasarHukumModal{{ $item->id }}">
+                                        data-target="#editDasarHukumModal{{ $item->id }}" data-mobile-label="Edit">
                                         <i class="fas fa-pen"></i>
                                     </button>
                                     <form action="{{ route('admin.dasar-hukums.destroy', $item) }}" method="POST" class="d-inline">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" class="app-icon-btn delete"
-                                            onclick="return confirm('Hapus dasar hukum ini?')">
+                                            onclick="return confirm('Hapus dasar hukum ini?')" data-mobile-label="Hapus">
                                             <i class="fas fa-trash"></i>
                                         </button>
                                     </form>

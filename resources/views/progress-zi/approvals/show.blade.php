@@ -11,13 +11,38 @@
         border-radius: 0 0 16px 16px;
         background: #fff;
     }
+
+    @media (max-width: 767.98px) {
+        .zi-approval-preview-frame {
+            height: 66vh;
+        }
+
+        .zi-approval-actions .btn {
+            width: 100%;
+        }
+
+        .zi-approval-card .card-body,
+        .zi-approval-card .card-header {
+            padding-left: 14px;
+            padding-right: 14px;
+        }
+
+        .zi-approval-preview-head {
+            align-items: flex-start !important;
+            flex-direction: column;
+        }
+
+        .zi-approval-preview-head .btn {
+            width: 100%;
+        }
+    }
 </style>
 @endpush
 
 @section('content')
 <div class="row">
     <div class="col-lg-4 mb-3 mb-lg-0">
-        <div class="card shadow-sm border-0">
+        <div class="card shadow-sm border-0 zi-approval-card">
             <div class="card-header bg-white">
                 <h3 class="card-title mb-0">Status Review</h3>
             </div>
@@ -33,7 +58,7 @@
                 @endif
 
                 @if($approval->status === 'pending')
-                    <form method="POST" action="{{ route('progress-zi.approvals.approve', $approval) }}" class="mb-3">
+                    <form method="POST" action="{{ route('progress-zi.approvals.approve', $approval) }}" class="mb-3 zi-approval-actions">
                         @csrf
                         <div class="form-group">
                             <label>Catatan Persetujuan</label>
@@ -41,7 +66,7 @@
                         </div>
                         <button class="btn btn-success btn-block">Setujui Review</button>
                     </form>
-                    <form method="POST" action="{{ route('progress-zi.approvals.reject', $approval) }}">
+                    <form method="POST" action="{{ route('progress-zi.approvals.reject', $approval) }}" class="zi-approval-actions">
                         @csrf
                         <div class="form-group">
                             <label>Catatan Perbaikan <span class="text-danger">*</span></label>
@@ -57,7 +82,7 @@
         </div>
     </div>
     <div class="col-lg-8">
-        <div class="card shadow-sm border-0">
+        <div class="card shadow-sm border-0 zi-approval-card">
             <div class="card-header bg-white">
                 <h3 class="card-title mb-0">Review Pimpinan Progress ZI</h3>
             </div>
@@ -80,12 +105,12 @@
                         <div class="text-muted mt-1">{{ $activity->description }}</div>
                     @endif
                 </div>
-                <div class="card shadow-sm border-0 mb-0">
+                <div class="card shadow-sm border-0 mb-0 zi-approval-card">
                     <div class="card-header bg-white">
-                        <div class="d-flex justify-content-between align-items-center" style="gap:12px;">
+                        <div class="d-flex justify-content-between align-items-center zi-approval-preview-head" style="gap:12px;">
                             <strong>Preview Dokumen</strong>
-                            <a href="{{ route('progress-zi.approvals.bundle', $approval) }}" target="_blank" class="btn btn-sm btn-light">
-                                <i class="fas fa-file-pdf mr-1"></i>Bundel PDF
+                            <a href="{{ route('progress-zi.approvals.bundle', $approval) }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                                <i class="fas fa-external-link-alt mr-1"></i>Buka PDF
                             </a>
                         </div>
                     </div>

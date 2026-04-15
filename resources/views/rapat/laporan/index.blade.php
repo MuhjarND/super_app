@@ -39,6 +39,78 @@
             border-radius: 10px;
             background: #f8fafc;
         }
+
+        @media (max-width: 767.98px) {
+            .content-header .container-fluid {
+                display: block !important;
+            }
+
+            .content-header .btn {
+                width: 100%;
+                margin-top: 10px;
+            }
+
+            .laporan-mobile-table,
+            .laporan-mobile-table thead,
+            .laporan-mobile-table tbody,
+            .laporan-mobile-table tr,
+            .laporan-mobile-table th,
+            .laporan-mobile-table td {
+                display: block;
+                width: 100%;
+            }
+
+            .laporan-mobile-table thead {
+                display: none;
+            }
+
+            .laporan-mobile-table tbody tr:not(.meeting-action-row) {
+                padding: 14px 14px 10px;
+                border-bottom: 1px solid #e5e7eb;
+            }
+
+            .laporan-mobile-table td {
+                padding: 0 0 10px;
+                border: 0;
+                width: 100% !important;
+            }
+
+            .laporan-mobile-table td:last-child {
+                padding-bottom: 0;
+            }
+
+            .laporan-mobile-table td::before {
+                content: attr(data-label);
+                display: block;
+                margin-bottom: 4px;
+                font-size: 0.74rem;
+                font-weight: 700;
+                letter-spacing: 0.05em;
+                text-transform: uppercase;
+                color: #94a3b8;
+            }
+
+            .meeting-action-toggle-col,
+            .laporan-file-col {
+                width: 100%;
+                white-space: normal;
+            }
+
+            .meeting-action-row td::before {
+                content: none;
+            }
+
+            .meeting-action-panel {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .meeting-action-btn,
+            .laporan-file-link {
+                width: 100%;
+                justify-content: center;
+            }
+        }
     </style>
 @endpush
 
@@ -61,7 +133,7 @@
 
     <div class="card laporan-card">
         <div class="card-body p-0 table-responsive">
-            <table class="table table-hover mb-0">
+            <table class="table table-hover mb-0 laporan-mobile-table">
                 <thead>
                     <tr>
                         <th class="meeting-action-toggle-col"></th>
@@ -76,19 +148,19 @@
                 <tbody>
                     @forelse($laporans as $laporan)
                         <tr>
-                            <td class="meeting-action-toggle-col">
+                            <td class="meeting-action-toggle-col" data-label="Aksi">
                                 <button type="button" class="meeting-action-toggle" aria-label="Toggle aksi">+</button>
                             </td>
-                            <td>
+                            <td data-label="Laporan">
                                 <div class="font-weight-bold">{{ $laporan->judul }}</div>
                                 <div class="text-muted" style="font-size: 0.78rem;">{{ $laporan->deskripsi }}</div>
                             </td>
-                            <td>{{ $laporan->jenis_label }}</td>
-                            <td>
+                            <td data-label="Jenis">{{ $laporan->jenis_label }}</td>
+                            <td data-label="Rapat">
                                 <div>{{ $laporan->rapat->judul }}</div>
                                 <div class="text-muted" style="font-size: 0.78rem;">{{ $laporan->rapat->nomor_undangan }}</div>
                             </td>
-                            <td class="laporan-file-col">
+                            <td class="laporan-file-col" data-label="Final File">
                                 @if($laporan->file_path)
                                     <button type="button"
                                         class="laporan-file-link"
@@ -99,8 +171,8 @@
                                     <span class="badge badge-light border">Generator</span>
                                 @endif
                             </td>
-                            <td>{!! $laporan->status_badge !!}</td>
-                            <td>{{ optional($laporan->updated_at)->timezone('Asia/Jayapura')->format('d/m/Y H:i') ?: '-' }}</td>
+                            <td data-label="Status">{!! $laporan->status_badge !!}</td>
+                            <td data-label="Diperbarui">{{ optional($laporan->updated_at)->timezone('Asia/Jayapura')->format('d/m/Y H:i') ?: '-' }}</td>
                         </tr>
                         <tr class="meeting-action-row">
                             <td colspan="7">

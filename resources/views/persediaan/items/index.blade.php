@@ -29,6 +29,74 @@
 @section('content')
 @include('persediaan.partials.module-styles')
 
+@push('styles')
+<style>
+    @media (max-width: 767.98px) {
+        .inventory-module-hero {
+            gap: 12px;
+        }
+
+        .inventory-module-hero form {
+            width: 100%;
+        }
+
+        .inventory-module-hero form .form-control,
+        .inventory-module-hero form .btn {
+            width: 100%;
+        }
+
+        .inventory-module-hero form {
+            display: grid !important;
+            grid-template-columns: 1fr;
+        }
+
+        .inventory-module-panel,
+        .inventory-module-board {
+            border-radius: 16px;
+        }
+
+        .inventory-items-mobile-table table,
+        .inventory-items-mobile-table thead,
+        .inventory-items-mobile-table tbody,
+        .inventory-items-mobile-table tr,
+        .inventory-items-mobile-table th,
+        .inventory-items-mobile-table td {
+            display: block;
+            width: 100%;
+        }
+
+        .inventory-items-mobile-table thead {
+            display: none;
+        }
+
+        .inventory-items-mobile-table tbody tr {
+            border-bottom: 1px solid #e5e7eb;
+            padding: 14px;
+        }
+
+        .inventory-items-mobile-table tbody tr:last-child {
+            border-bottom: 0;
+        }
+
+        .inventory-items-mobile-table tbody td {
+            border: 0;
+            padding: 6px 0;
+        }
+
+        .inventory-items-mobile-table tbody td::before {
+            content: attr(data-label);
+            display: block;
+            font-size: 0.72rem;
+            font-weight: 700;
+            color: #64748b;
+            margin-bottom: 3px;
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
+        }
+    }
+</style>
+@endpush
+
 <div class="inventory-module-shell">
     <div class="inventory-module-board">
         <div class="inventory-module-board-header">
@@ -108,7 +176,7 @@
                             </div>
                             <span class="inventory-module-chip">{{ $items->total() }} data</span>
                         </div>
-                        <div class="table-responsive">
+                        <div class="table-responsive inventory-items-mobile-table">
                             <table class="table inventory-module-table mb-0">
                                 <thead>
                                     <tr>
@@ -122,14 +190,14 @@
                                 <tbody>
                                     @forelse($items as $item)
                                         <tr>
-                                            <td><strong>{{ $item->code }}</strong></td>
-                                            <td>
+                                            <td data-label="Kode"><strong>{{ $item->code }}</strong></td>
+                                            <td data-label="Barang">
                                                 <div class="font-weight-600">{{ $item->name }}</div>
                                                 <div class="inventory-module-muted">{{ $item->description ?: 'Belum ada deskripsi barang.' }}</div>
                                             </td>
-                                            <td><span class="inventory-module-chip">{{ $item->details_count }} unit</span></td>
-                                            <td>{!! $item->status_badge !!}</td>
-                                            <td><a href="{{ route('perawatan-alat-mesin.items.show', $item) }}" class="btn btn-sm app-create-btn">Kelola</a></td>
+                                            <td data-label="Sub Barang"><span class="inventory-module-chip">{{ $item->details_count }} unit</span></td>
+                                            <td data-label="Status">{!! $item->status_badge !!}</td>
+                                            <td data-label="Aksi"><a href="{{ route('perawatan-alat-mesin.items.show', $item) }}" class="btn btn-sm app-create-btn">Kelola</a></td>
                                         </tr>
                                     @empty
                                         <tr><td colspan="5" class="text-center text-muted py-5">Belum ada barang induk.</td></tr>

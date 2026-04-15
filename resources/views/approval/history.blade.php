@@ -136,8 +136,41 @@
         }
 
         @media (max-width: 767.98px) {
+            .approval-page-hero {
+                padding: 16px 16px 15px;
+                border-radius: 18px;
+            }
+
+            .approval-page-hero-title {
+                font-size: 1.02rem;
+            }
+
+            .approval-page-hero-subtitle {
+                font-size: 0.8rem;
+            }
+
+            .approval-card-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .approval-module-card {
+                padding: 16px;
+            }
+
             .approval-list-item {
                 flex-direction: column;
+                padding: 16px;
+            }
+
+            .approval-list-card .card-header {
+                padding: 15px 16px;
+                align-items: flex-start !important;
+                gap: 10px;
+            }
+
+            .approval-list-item .app-action-group {
+                width: 100%;
+                justify-content: flex-start;
             }
         }
     </style>
@@ -210,7 +243,7 @@
                         </div>
                         <div class="app-action-group">
                             @if($entry['detail_url'])
-                                <a href="{{ $entry['detail_url'] }}" class="app-icon-btn history">
+                                <a href="{{ $entry['detail_url'] }}" class="app-icon-btn history" data-mobile-label="Detail">
                                     <i class="fas fa-eye"></i>
                                 </a>
                             @endif

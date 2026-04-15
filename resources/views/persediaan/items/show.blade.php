@@ -52,6 +52,89 @@
         gap: 6px;
         font-weight: 600;
     }
+
+    @media (max-width: 767.98px) {
+        .inventory-module-hero {
+            gap: 10px !important;
+        }
+
+        .inventory-module-title {
+            font-size: 1.3rem !important;
+            line-height: 1.25;
+        }
+
+        .inventory-module-subtitle {
+            font-size: 0.88rem;
+            line-height: 1.45;
+        }
+
+        .inventory-module-hero .btn {
+            width: 100%;
+        }
+
+        .inventory-module-board-body {
+            padding: 16px 14px 18px;
+        }
+
+        .inventory-module-panel-header.d-flex {
+            align-items: flex-start !important;
+        }
+
+        .inventory-detail-form .form-row {
+            display: block;
+        }
+
+        .inventory-detail-form .form-row > .form-group {
+            max-width: 100%;
+        }
+
+        .inventory-detail-table,
+        .inventory-detail-table thead,
+        .inventory-detail-table tbody,
+        .inventory-detail-table tr,
+        .inventory-detail-table th,
+        .inventory-detail-table td {
+            display: block;
+            width: 100%;
+        }
+
+        .inventory-detail-table thead {
+            display: none;
+        }
+
+        .inventory-detail-table tbody tr {
+            margin: 0 0 12px;
+            padding: 12px 12px 10px;
+            border: 1px solid rgba(203, 213, 225, 0.95);
+            border-radius: 14px;
+            background: #fff;
+        }
+
+        .inventory-detail-table tbody tr:last-child {
+            margin-bottom: 0;
+        }
+
+        .inventory-detail-table td {
+            padding: 0 0 10px;
+            border: 0;
+            font-size: 0.92rem;
+        }
+
+        .inventory-detail-table td:last-child {
+            padding-bottom: 0;
+        }
+
+        .inventory-detail-table td::before {
+            content: attr(data-label);
+            display: block;
+            margin-bottom: 4px;
+            font-size: 0.74rem;
+            font-weight: 700;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            color: #94a3b8;
+        }
+    }
 </style>
 
 <div class="inventory-module-shell">
@@ -232,17 +315,17 @@
                                 <tbody>
                                     @forelse($inventoryItem->details as $detail)
                                         <tr>
-                                            <td>
+                                            <td data-label="Kode / NUP">
                                                 <div class="font-weight-600">{{ $detail->sub_code }}</div>
                                                 <small class="inventory-module-muted d-block">{{ $detail->nup ?: '-' }}</small>
                                             </td>
-                                            <td>
+                                            <td data-label="Nama">
                                                 <div class="font-weight-600">{{ $detail->name }}</div>
                                                 <small class="inventory-module-muted d-block">Rp {{ number_format($detail->acquisition_value, 0, ',', '.') }}</small>
                                             </td>
-                                            <td>{{ optional($detail->condition)->name ?: '-' }}</td>
-                                            <td>{{ optional($detail->room)->name ?: '-' }}</td>
-                                            <td>
+                                            <td data-label="Kondisi">{{ optional($detail->condition)->name ?: '-' }}</td>
+                                            <td data-label="Ruang">{{ optional($detail->room)->name ?: '-' }}</td>
+                                            <td data-label="Foto">
                                                 @if($detail->photo_path)
                                                     <a href="{{ route('perawatan-alat-mesin.details.photo', $detail) }}" target="_blank" class="inventory-photo-link text-primary">
                                                         <i class="far fa-image"></i> Preview
@@ -251,7 +334,7 @@
                                                     <span class="text-muted">-</span>
                                                 @endif
                                             </td>
-                                            <td>{!! $detail->status_badge !!}</td>
+                                            <td data-label="Status">{!! $detail->status_badge !!}</td>
                                         </tr>
                                     @empty
                                         <tr><td colspan="6" class="text-center text-muted py-5">Belum ada sub barang.</td></tr>
@@ -283,11 +366,11 @@
                                 <tbody>
                                     @forelse($inventoryItem->maintenanceTransactions as $transaction)
                                         <tr>
-                                            <td>{{ optional($transaction->transaction_date)->format('d-m-Y') }}</td>
-                                            <td>{{ optional($transaction->detail)->sub_code ?: '-' }}</td>
-                                            <td>{{ $transaction->description }}</td>
-                                            <td>Rp {{ number_format($transaction->amount, 0, ',', '.') }}</td>
-                                            <td>{{ $transaction->attachments->count() }} file</td>
+                                            <td data-label="Tanggal">{{ optional($transaction->transaction_date)->format('d-m-Y') }}</td>
+                                            <td data-label="Sub Barang">{{ optional($transaction->detail)->sub_code ?: '-' }}</td>
+                                            <td data-label="Deskripsi">{{ $transaction->description }}</td>
+                                            <td data-label="Nominal">Rp {{ number_format($transaction->amount, 0, ',', '.') }}</td>
+                                            <td data-label="Lampiran">{{ $transaction->attachments->count() }} file</td>
                                         </tr>
                                     @empty
                                         <tr><td colspan="5" class="text-center text-muted py-5">Belum ada histori transaksi.</td></tr>

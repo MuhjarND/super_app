@@ -21,6 +21,74 @@
             border-radius: 10px;
             background: #f8fafc;
         }
+
+        @media (max-width: 767.98px) {
+            .content-header .container-fluid {
+                display: block !important;
+            }
+
+            .content-header .btn {
+                width: 100%;
+                margin-top: 10px;
+            }
+
+            .laporan-arsip-table,
+            .laporan-arsip-table thead,
+            .laporan-arsip-table tbody,
+            .laporan-arsip-table tr,
+            .laporan-arsip-table th,
+            .laporan-arsip-table td {
+                display: block;
+                width: 100%;
+            }
+
+            .laporan-arsip-table thead {
+                display: none;
+            }
+
+            .laporan-arsip-table tbody tr:not(.meeting-action-row) {
+                padding: 14px 14px 10px;
+                border-bottom: 1px solid #e5e7eb;
+            }
+
+            .laporan-arsip-table td {
+                padding: 0 0 10px;
+                border: 0;
+            }
+
+            .laporan-arsip-table td:last-child {
+                padding-bottom: 0;
+            }
+
+            .laporan-arsip-table td::before {
+                content: attr(data-label);
+                display: block;
+                margin-bottom: 4px;
+                font-size: 0.74rem;
+                font-weight: 700;
+                letter-spacing: 0.05em;
+                text-transform: uppercase;
+                color: #94a3b8;
+            }
+
+            .meeting-action-toggle-col {
+                width: 100%;
+            }
+
+            .meeting-action-row td::before {
+                content: none;
+            }
+
+            .meeting-action-panel {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .meeting-action-btn {
+                justify-content: center;
+                width: 100%;
+            }
+        }
     </style>
 @endpush
 
@@ -43,7 +111,7 @@
 
     <div class="card" style="border-radius:16px; border:1px solid #e5e7eb;">
         <div class="card-body p-0 table-responsive">
-            <table class="table table-hover mb-0">
+            <table class="table table-hover mb-0 laporan-arsip-table">
                 <thead>
                     <tr>
                         <th class="meeting-action-toggle-col"></th>
@@ -56,13 +124,13 @@
                 <tbody>
                     @forelse($laporans as $laporan)
                         <tr>
-                            <td class="meeting-action-toggle-col">
+                            <td class="meeting-action-toggle-col" data-label="Aksi">
                                 <button type="button" class="meeting-action-toggle" aria-label="Toggle aksi">+</button>
                             </td>
-                            <td>{{ $laporan->judul }}</td>
-                            <td>{{ $laporan->jenis_label }}</td>
-                            <td>{{ $laporan->rapat->judul }}</td>
-                            <td>{{ optional($laporan->archived_at)->timezone('Asia/Jayapura')->format('d/m/Y H:i') ?: '-' }}</td>
+                            <td data-label="Laporan">{{ $laporan->judul }}</td>
+                            <td data-label="Jenis">{{ $laporan->jenis_label }}</td>
+                            <td data-label="Rapat">{{ $laporan->rapat->judul }}</td>
+                            <td data-label="Diarsipkan">{{ optional($laporan->archived_at)->timezone('Asia/Jayapura')->format('d/m/Y H:i') ?: '-' }}</td>
                         </tr>
                         <tr class="meeting-action-row">
                             <td colspan="5">

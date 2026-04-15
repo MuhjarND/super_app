@@ -93,7 +93,7 @@
 
         .surat-keluar-card .dataTables_wrapper {
             width: 100%;
-            overflow-x: hidden;
+            overflow-x: auto;
         }
 
         .surat-keluar-style thead th {
@@ -363,6 +363,51 @@
             }
         }
 
+        .surat-keluar-table-wrap {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        #suratKeluarTable {
+            min-width: 1120px;
+        }
+
+        @media (max-width: 767.98px) {
+            .notice-banner {
+                padding: 12px 14px;
+                align-items: flex-start;
+            }
+
+            .surat-keluar-card {
+                border-radius: 14px;
+            }
+
+            .surat-keluar-card .card-body {
+                padding: 14px;
+            }
+
+            .content-header .row.mb-2 {
+                gap: 12px;
+            }
+
+            .content-header .col-sm-6,
+            .content-header .col-sm-6.text-right {
+                flex: 0 0 100%;
+                max-width: 100%;
+                text-align: left !important;
+            }
+
+            .content-header h1 {
+                font-size: 1.08rem;
+                line-height: 1.3;
+            }
+
+            .btn-add-surat {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+
     </style>
 <?php $__env->stopPush(); ?>
 
@@ -409,6 +454,7 @@
 
     <div class="card surat-keluar-card">
         <div class="card-body">
+            <div class="table-responsive surat-keluar-table-wrap">
             <table id="suratKeluarTable" class="table surat-keluar-style" style="width:100%">
                 <thead>
                     <tr>
@@ -496,6 +542,7 @@
                     <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                 </tbody>
             </table>
+            </div>
         </div>
     </div>
 

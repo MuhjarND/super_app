@@ -145,12 +145,23 @@
         }
 
         @media (max-width: 767.98px) {
+            .approval-toggle {
+                padding: 16px;
+                align-items: flex-start;
+            }
+
+            .approval-toggle-title {
+                font-size: 0.94rem;
+            }
+
             .approval-list-item {
                 flex-direction: column;
+                padding: 16px;
             }
 
             .approval-list-actions {
                 justify-content: flex-start;
+                width: 100%;
             }
         }
     </style>
@@ -193,7 +204,7 @@
                             </div>
                             <div class="approval-list-actions">
                                 <span class="approval-stage-badge">{{ $approval->stage_label }}</span>
-                                <a href="{{ route('rapat.approval.show', $approval) }}" class="btn btn-primary btn-sm">
+                                <a href="{{ route('rapat.approval.show', $approval) }}" class="btn btn-primary btn-sm" data-mobile-label="Proses">
                                     <i class="fas fa-file-signature mr-1"></i> Proses Dokumen
                                 </a>
                             </div>
@@ -230,7 +241,7 @@
                             </div>
                             <div class="approval-list-actions">
                                 <span class="approval-stage-badge">{{ $approval->stage_label }}</span>
-                                <a href="{{ route('rapat.approval.show', $approval) }}" class="btn btn-outline-primary btn-sm">
+                                <a href="{{ route('rapat.approval.show', $approval) }}" class="btn btn-outline-primary btn-sm" data-mobile-label="Detail">
                                     <i class="fas fa-eye mr-1"></i> Lihat Detail
                                 </a>
                             </div>
@@ -264,7 +275,7 @@
                             <div class="approval-list-actions">
                                 <span class="approval-stage-badge">{{ (int) $entry->step_order === 1 ? 'Paraf' : ((int) $entry->step_order === 2 ? 'Tanda Tangani' : 'Step ' . $entry->step_order) }}</span>
                                 @if($entry->approval)
-                                    <a href="{{ route('rapat.approval.show', $entry->approval) }}" class="btn btn-outline-secondary btn-sm">
+                                    <a href="{{ route('rapat.approval.show', $entry->approval) }}" class="btn btn-outline-secondary btn-sm" data-mobile-label="Detail">
                                         <i class="fas fa-history mr-1"></i> Lihat Detail
                                     </a>
                                 @endif

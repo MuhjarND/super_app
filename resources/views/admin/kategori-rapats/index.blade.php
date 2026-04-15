@@ -63,30 +63,30 @@
                     <tbody>
                         @forelse($kategoriRapats as $kategori)
                             <tr>
-                                <td>{{ $kategori->kode }}</td>
-                                <td>{{ $kategori->nama }}</td>
-                                <td>
+                                <td data-label="Kode">{{ $kategori->kode }}</td>
+                                <td data-label="Nama">{{ $kategori->nama }}</td>
+                                <td data-label="Pakaian">
                                     <span class="badge badge-{{ $kategori->butuh_pakaian ? 'warning' : 'secondary' }}">
                                         {{ $kategori->butuh_pakaian ? 'Wajib' : 'Tidak' }}
                                     </span>
                                 </td>
-                                <td>
+                                <td data-label="Status">
                                     <span class="badge badge-{{ $kategori->aktif ? 'success' : 'secondary' }}">
                                         {{ $kategori->aktif ? 'Aktif' : 'Nonaktif' }}
                                     </span>
                                 </td>
-                                <td>{{ $kategori->keterangan ?: '-' }}</td>
-                                <td class="app-action-cell">
+                                <td data-label="Keterangan">{{ $kategori->keterangan ?: '-' }}</td>
+                                <td class="app-action-cell" data-label="Aksi">
                                     <div class="app-action-group">
                                     <button class="app-icon-btn edit" data-toggle="modal"
-                                        data-target="#editKategoriRapatModal{{ $kategori->id }}">
+                                        data-target="#editKategoriRapatModal{{ $kategori->id }}" data-mobile-label="Edit">
                                         <i class="fas fa-pen"></i>
                                     </button>
                                     <form action="{{ route('admin.kategori-rapats.destroy', $kategori) }}" method="POST" class="d-inline">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" class="app-icon-btn delete"
-                                            onclick="return confirm('Hapus kategori rapat ini?')">
+                                            onclick="return confirm('Hapus kategori rapat ini?')" data-mobile-label="Hapus">
                                             <i class="fas fa-trash"></i>
                                         </button>
                                     </form>

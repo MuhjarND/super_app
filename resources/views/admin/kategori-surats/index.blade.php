@@ -2,10 +2,75 @@
 
 @section('title', 'Kelola Kategori Surat')
 
+@push('styles')
+    <style>
+        @media (max-width: 767.98px) {
+            .admin-kategori-top {
+                flex-direction: column;
+                align-items: stretch !important;
+                gap: 10px;
+            }
+
+            .admin-kategori-top .btn,
+            .admin-kategori-filter .btn {
+                width: 100%;
+            }
+
+            .admin-kategori-filter .row {
+                display: block;
+            }
+
+            .admin-kategori-filter .form-group,
+            .admin-kategori-filter .d-flex {
+                margin-bottom: 10px;
+            }
+
+            .admin-kategori-table,
+            .admin-kategori-table thead,
+            .admin-kategori-table tbody,
+            .admin-kategori-table tr,
+            .admin-kategori-table th,
+            .admin-kategori-table td {
+                display: block;
+                width: 100%;
+            }
+
+            .admin-kategori-table thead {
+                display: none;
+            }
+
+            .admin-kategori-table tbody tr {
+                padding: 14px 14px 12px;
+                border-bottom: 1px solid #e5e7eb;
+            }
+
+            .admin-kategori-table td {
+                padding: 0 0 10px;
+                border: 0;
+            }
+
+            .admin-kategori-table td:last-child {
+                padding-bottom: 0;
+            }
+
+            .admin-kategori-table td::before {
+                content: attr(data-label);
+                display: block;
+                margin-bottom: 4px;
+                font-size: 0.74rem;
+                font-weight: 700;
+                letter-spacing: 0.05em;
+                text-transform: uppercase;
+                color: #94a3b8;
+            }
+        }
+    </style>
+@endpush
+
 @section('content-header')
     <div class="content-header">
         <div class="container-fluid">
-            <div class="d-flex justify-content-between align-items-center">
+            <div class="d-flex justify-content-between align-items-center admin-kategori-top">
                 <h1>Kelola Kategori Surat</h1>
                 <button class="btn app-create-btn" data-toggle="modal" data-target="#createKategoriModal">
                     <i class="fas fa-plus mr-1"></i> Tambah Kategori
@@ -20,7 +85,7 @@
 
     <div class="card">
         <div class="card-header">
-            <form method="GET" action="{{ route('admin.kategori-surats.index') }}">
+            <form method="GET" action="{{ route('admin.kategori-surats.index') }}" class="admin-kategori-filter">
                 <div class="row">
                     <div class="col-md-7 form-group mb-md-0">
                         <input type="text" name="search" class="form-control" value="{{ $filters['search'] ?? '' }}"
@@ -42,7 +107,7 @@
         </div>
         <div class="card-body p-0">
             <div class="table-responsive">
-                <table class="table mb-0">
+                <table class="table mb-0 admin-kategori-table">
                     <thead>
                         <tr>
                             <th>Kode</th>
@@ -55,24 +120,24 @@
                     <tbody>
                         @forelse($kategoriSurats as $kategori)
                             <tr>
-                                <td>{{ $kategori->kode }}</td>
-                                <td>{{ $kategori->nama }}</td>
-                                <td>
+                                <td data-label="Kode">{{ $kategori->kode }}</td>
+                                <td data-label="Nama">{{ $kategori->nama }}</td>
+                                <td data-label="Status">
                                     <span class="badge badge-{{ $kategori->aktif ? 'success' : 'secondary' }}">
                                         {{ $kategori->aktif ? 'Aktif' : 'Nonaktif' }}
                                     </span>
                                 </td>
-                                <td>{{ $kategori->keterangan ?: '-' }}</td>
-                                <td class="app-action-cell">
+                                <td data-label="Keterangan">{{ $kategori->keterangan ?: '-' }}</td>
+                                <td class="app-action-cell" data-label="Aksi">
                                     <div class="app-action-group">
-                                    <button class="app-icon-btn edit" data-toggle="modal"
+                                    <button class="app-icon-btn edit" data-mobile-label="Edit" data-toggle="modal"
                                         data-target="#editKategoriModal{{ $kategori->id }}">
                                         <i class="fas fa-pen"></i>
                                     </button>
                                     <form action="{{ route('admin.kategori-surats.destroy', $kategori) }}" method="POST" class="d-inline">
                                         @csrf
                                         @method('DELETE')
-                                        <button type="submit" class="app-icon-btn delete"
+                                        <button type="submit" class="app-icon-btn delete" data-mobile-label="Hapus"
                                             onclick="return confirm('Hapus kategori surat ini?')">
                                             <i class="fas fa-trash"></i>
                                         </button>

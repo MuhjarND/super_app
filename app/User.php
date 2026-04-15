@@ -346,6 +346,16 @@ class User extends Authenticatable
             || $this->canAccessInventoryModule();
     }
 
+    public function canAccessUnifiedActionCenter()
+    {
+        return $this->canAccessPersuratanMenu()
+            || $this->canAccessMeetingModule()
+            || $this->canAccessLeaveModule()
+            || $this->canAccessProgressZiModule()
+            || $this->canAccessInventoryModule()
+            || $this->canAccessApprovalCenter();
+    }
+
     public function canAccessProgressZiModule()
     {
         if ($this->isSuperAdmin()) {

@@ -1,0 +1,849 @@
+- generic [ref=e2]:
+  - navigation [ref=e3]:
+    - list [ref=e4]:
+      - listitem [ref=e5]:
+        - link "" [ref=e6] [cursor=pointer]:
+          - /url: "#"
+          - generic [ref=e7]: 
+    - list [ref=e8]:
+      - listitem [ref=e9]:
+        - link " 5" [ref=e10] [cursor=pointer]:
+          - /url: "#"
+          - generic [ref=e11]: 
+          - generic [ref=e12]: "5"
+        - text:     
+      - listitem [ref=e13]:
+        - button "" [ref=e14] [cursor=pointer]:
+          - generic [ref=e15]: 
+      - listitem [ref=e16]:
+        - link "S" [ref=e17] [cursor=pointer]:
+          - /url: "#"
+          - generic [ref=e18]: S
+        - text: 
+  - complementary [ref=e19]:
+    - link "P PTA Papua Barat" [ref=e20] [cursor=pointer]:
+      - /url: http://localhost:8000/dashboard
+      - generic [ref=e21]: P
+      - generic [ref=e22]: PTA Papua Barat
+    - generic [ref=e23]:
+      - generic [ref=e25]:
+        - generic [ref=e26]: SU
+        - generic [ref=e27]:
+          - generic [ref=e28]: Super Admin
+          - generic [ref=e29]: Super Admin
+      - navigation [ref=e30]:
+        - menu [ref=e31]:
+          - listitem [ref=e32]:
+            - link " Dashboard" [ref=e33] [cursor=pointer]:
+              - /url: http://localhost:8000/dashboard
+              - generic [ref=e34]: 
+              - paragraph [ref=e35]: Dashboard
+          - listitem [ref=e36]:
+            - link " Kalender Terpadu" [ref=e37] [cursor=pointer]:
+              - /url: http://localhost:8000/kalender-terpadu
+              - generic [ref=e38]: 
+              - paragraph [ref=e39]: Kalender Terpadu
+          - listitem [ref=e40]:
+            - link " Tindak Lanjut Terpadu 5" [ref=e41] [cursor=pointer]:
+              - /url: http://localhost:8000/tindak-lanjut-terpadu
+              - generic [ref=e42]: 
+              - paragraph [ref=e43]:
+                - text: Tindak Lanjut Terpadu
+                - generic [ref=e44]: "5"
+          - listitem [ref=e45]:
+            - button "Approval " [ref=e46] [cursor=pointer]:
+              - generic [ref=e47]: Approval
+              - generic [ref=e48]: 
+            - list:
+              - listitem:
+                - link " Tindaklanjuti 1":
+                  - /url: http://localhost:8000/approval
+                  - generic: 
+                  - paragraph:
+                    - text: Tindaklanjuti
+                    - generic: "1"
+              - listitem:
+                - link " Riwayat Approval":
+                  - /url: http://localhost:8000/approval/history
+                  - generic: 
+                  - paragraph: Riwayat Approval
+          - listitem [ref=e49]:
+            - button "Persuratan " [ref=e50] [cursor=pointer]:
+              - generic [ref=e51]: Persuratan
+              - generic [ref=e52]: 
+            - list:
+              - listitem:
+                - link " Surat Masuk 1":
+                  - /url: http://localhost:8000/surat-masuk
+                  - generic: 
+                  - paragraph:
+                    - text: Surat Masuk
+                    - generic: "1"
+              - listitem:
+                - link " Surat Keluar":
+                  - /url: http://localhost:8000/surat-keluar
+                  - generic: 
+                  - paragraph: Surat Keluar
+              - listitem:
+                - link " Template Surat":
+                  - /url: http://localhost:8000/template-surat
+                  - generic: 
+                  - paragraph: Template Surat
+          - listitem [ref=e53]:
+            - button "Rapat / Agenda " [ref=e54] [cursor=pointer]:
+              - generic [ref=e55]: Rapat / Agenda
+              - generic [ref=e56]: 
+            - list:
+              - listitem:
+                - link " Rapat/Agenda":
+                  - /url: http://localhost:8000/rapat
+                  - generic: 
+                  - paragraph: Rapat/Agenda
+              - listitem:
+                - link " Notulensi":
+                  - /url: http://localhost:8000/rapat/notulensi
+                  - generic: 
+                  - paragraph: Notulensi
+              - listitem:
+                - link " Tindak Lanjut":
+                  - /url: http://localhost:8000/rapat/notulensi/tindak-lanjut
+                  - generic: 
+                  - paragraph: Tindak Lanjut
+              - listitem:
+                - link " Absensi":
+                  - /url: http://localhost:8000/rapat/absensi
+                  - generic: 
+                  - paragraph: Absensi
+              - listitem:
+                - link " Laporan":
+                  - /url: http://localhost:8000/rapat/laporan
+                  - generic: 
+                  - paragraph: Laporan
+              - listitem:
+                - link " Agenda Pimpinan":
+                  - /url: http://localhost:8000/rapat/agenda-pimpinan
+                  - generic: 
+                  - paragraph: Agenda Pimpinan
+              - listitem:
+                - link " E-Voting":
+                  - /url: http://localhost:8000/rapat/voting
+                  - generic: 
+                  - paragraph: E-Voting
+          - listitem [ref=e57]:
+            - button "Cuti " [ref=e58] [cursor=pointer]:
+              - generic [ref=e59]: Cuti
+              - generic [ref=e60]: 
+            - list:
+              - listitem:
+                - link " Pengajuan Cuti":
+                  - /url: http://localhost:8000/cuti
+                  - generic: 
+                  - paragraph: Pengajuan Cuti
+              - listitem:
+                - link " Approval Cuti":
+                  - /url: http://localhost:8000/cuti/approval/list
+                  - generic: 
+                  - paragraph: Approval Cuti
+              - listitem:
+                - link " Rekap Saldo":
+                  - /url: http://localhost:8000/cuti/saldo
+                  - generic: 
+                  - paragraph: Rekap Saldo
+              - listitem:
+                - link " Laporan Cuti":
+                  - /url: http://localhost:8000/cuti/laporan
+                  - generic: 
+                  - paragraph: Laporan Cuti
+              - listitem:
+                - link " Jenis Cuti":
+                  - /url: http://localhost:8000/cuti/master/jenis-cuti
+                  - generic: 
+                  - paragraph: Jenis Cuti
+              - listitem:
+                - link " Kebijakan Cuti":
+                  - /url: http://localhost:8000/cuti/master/kebijakan
+                  - generic: 
+                  - paragraph: Kebijakan Cuti
+              - listitem:
+                - link " Cuti Bersama":
+                  - /url: http://localhost:8000/cuti/master/cuti-bersama
+                  - generic: 
+                  - paragraph: Cuti Bersama
+              - listitem:
+                - link " Delegasi Approval":
+                  - /url: http://localhost:8000/cuti/master/delegasi
+                  - generic: 
+                  - paragraph: Delegasi Approval
+          - listitem [ref=e61]:
+            - button "Perawatan Alat dan Mesin " [ref=e62] [cursor=pointer]:
+              - generic [ref=e63]: Perawatan Alat dan Mesin
+              - generic [ref=e64]: 
+            - list:
+              - listitem:
+                - link " Dashboard":
+                  - /url: http://localhost:8000/perawatan-alat-dan-mesin
+                  - generic: 
+                  - paragraph: Dashboard
+              - listitem:
+                - link " Master Barang":
+                  - /url: http://localhost:8000/perawatan-alat-dan-mesin/barang
+                  - generic: 
+                  - paragraph: Master Barang
+              - listitem:
+                - link " Transaksi Perawatan":
+                  - /url: http://localhost:8000/perawatan-alat-dan-mesin/transaksi-perawatan
+                  - generic: 
+                  - paragraph: Transaksi Perawatan
+              - listitem:
+                - link " Laporan":
+                  - /url: http://localhost:8000/perawatan-alat-dan-mesin/laporan
+                  - generic: 
+                  - paragraph: Laporan
+              - listitem:
+                - link " Cetak QR Code":
+                  - /url: http://localhost:8000/perawatan-alat-dan-mesin/qrcode
+                  - generic: 
+                  - paragraph: Cetak QR Code
+              - listitem:
+                - link " Satuan Barang":
+                  - /url: http://localhost:8000/perawatan-alat-dan-mesin/master/units
+                  - generic: 
+                  - paragraph: Satuan Barang
+              - listitem:
+                - link " Kondisi Barang":
+                  - /url: http://localhost:8000/perawatan-alat-dan-mesin/master/conditions
+                  - generic: 
+                  - paragraph: Kondisi Barang
+              - listitem:
+                - link " Ruang":
+                  - /url: http://localhost:8000/perawatan-alat-dan-mesin/master/rooms
+                  - generic: 
+                  - paragraph: Ruang
+              - listitem:
+                - link " Brand / Merk":
+                  - /url: http://localhost:8000/perawatan-alat-dan-mesin/master/brands
+                  - generic: 
+                  - paragraph: Brand / Merk
+              - listitem:
+                - link " Kuasa Pengguna":
+                  - /url: http://localhost:8000/perawatan-alat-dan-mesin/kuasa-pengguna-barang
+                  - generic: 
+                  - paragraph: Kuasa Pengguna
+          - listitem [ref=e65]:
+            - button "Persediaan " [ref=e66] [cursor=pointer]:
+              - generic [ref=e67]: Persediaan
+              - generic [ref=e68]: 
+            - list:
+              - listitem:
+                - link " Persediaan DEV":
+                  - /url: http://localhost:8000/persediaan
+                  - generic: 
+                  - paragraph: Persediaan DEV
+          - listitem [ref=e69]:
+            - button "Progress ZI " [ref=e70] [cursor=pointer]:
+              - generic [ref=e71]: Progress ZI
+              - generic [ref=e72]: 
+            - list:
+              - listitem:
+                - link " Rekapan ZI":
+                  - /url: http://localhost:8000/progress-zi
+                  - generic: 
+                  - paragraph: Rekapan ZI
+              - listitem:
+                - link " Monitoring Kegiatan 13":
+                  - /url: http://localhost:8000/progress-zi/activities
+                  - generic: 
+                  - paragraph:
+                    - text: Monitoring Kegiatan
+                    - generic: "13"
+              - listitem:
+                - link " Pedoman ZI":
+                  - /url: http://localhost:8000/progress-zi/guidelines
+                  - generic: 
+                  - paragraph: Pedoman ZI
+          - listitem [ref=e73]:
+            - button "Master Data " [ref=e74] [cursor=pointer]:
+              - generic [ref=e75]: Master Data
+              - generic [ref=e76]: 
+            - list [ref=e77]:
+              - listitem [ref=e78]:
+                - link " User" [ref=e79] [cursor=pointer]:
+                  - /url: http://localhost:8000/admin/users
+                  - generic [ref=e80]: 
+                  - paragraph [ref=e81]: User
+              - listitem [ref=e82]:
+                - link " Jabatan" [ref=e83] [cursor=pointer]:
+                  - /url: http://localhost:8000/admin/jabatans
+                  - generic [ref=e84]: 
+                  - paragraph [ref=e85]: Jabatan
+              - listitem [ref=e86]:
+                - link " Unit Kerja" [ref=e87] [cursor=pointer]:
+                  - /url: http://localhost:8000/admin/units
+                  - generic [ref=e88]: 
+                  - paragraph [ref=e89]: Unit Kerja
+              - listitem [ref=e90]:
+                - link " Bidang" [ref=e91] [cursor=pointer]:
+                  - /url: http://localhost:8000/admin/bidangs
+                  - generic [ref=e92]: 
+                  - paragraph [ref=e93]: Bidang
+              - listitem [ref=e94]:
+                - link " Kategori Surat" [ref=e95] [cursor=pointer]:
+                  - /url: http://localhost:8000/admin/kategori-surats
+                  - generic [ref=e96]: 
+                  - paragraph [ref=e97]: Kategori Surat
+              - listitem [ref=e98]:
+                - link " Kategori Rapat" [ref=e99] [cursor=pointer]:
+                  - /url: http://localhost:8000/admin/kategori-rapats
+                  - generic [ref=e100]: 
+                  - paragraph [ref=e101]: Kategori Rapat
+              - listitem [ref=e102]:
+                - link " Dasar Hukum" [ref=e103] [cursor=pointer]:
+                  - /url: http://localhost:8000/admin/dasar-hukums
+                  - generic [ref=e104]: 
+                  - paragraph [ref=e105]: Dasar Hukum
+              - listitem [ref=e106]:
+                - link " Periode ZI" [ref=e107] [cursor=pointer]:
+                  - /url: http://localhost:8000/progress-zi/periods
+                  - generic [ref=e108]: 
+                  - paragraph [ref=e109]: Periode ZI
+              - listitem [ref=e110]:
+                - link " Area ZI" [ref=e111] [cursor=pointer]:
+                  - /url: http://localhost:8000/progress-zi/areas
+                  - generic [ref=e112]: 
+                  - paragraph [ref=e113]: Area ZI
+          - listitem [ref=e114]:
+            - button "Arsip " [ref=e115] [cursor=pointer]:
+              - generic [ref=e116]: Arsip
+              - generic [ref=e117]: 
+            - list:
+              - listitem:
+                - link " Arsip":
+                  - /url: http://localhost:8000/arsip
+                  - generic: 
+                  - paragraph: Arsip
+  - generic [ref=e118]:
+    - generic [ref=e121]:
+      - heading "⚙️ Kelola User" [level=1] [ref=e122]:
+        - generic [ref=e123]: ⚙️
+        - text: Kelola User
+      - button " Tambah User" [ref=e124] [cursor=pointer]:
+        - generic [ref=e125]: 
+        - text: Tambah User
+    - generic [ref=e128]:
+      - generic [ref=e131]:
+        - textbox "Cari nama, email, NIP, HP" [ref=e133]
+        - combobox [ref=e135]:
+          - option "Semua Role" [selected]
+          - option "Admin"
+          - option "Admin Kepegawaian"
+          - option "Admin Surat"
+          - option "Approval"
+          - option "Atasan Langsung"
+          - option "Kabag"
+          - option "Kasubag"
+          - option "Ketua"
+          - option "Notulis"
+          - option "Operator"
+          - option "Operator Surat Masuk"
+          - option "Panitera"
+          - option "Panmud"
+          - option "Pegawai"
+          - option "Peserta"
+          - option "PPK"
+          - option "Protokoler"
+          - option "Sekretaris"
+          - option "Super Admin"
+          - option "Verifikator Dokumen"
+          - option "Wakil Ketua"
+        - combobox [ref=e137]:
+          - option "Semua Jabatan" [selected]
+          - option "Admin Surat"
+          - option "Kabag Kepegawaian"
+          - option "Kabag Umum"
+          - option "Kasubag Kepegawaian"
+          - option "Kasubag Pelaporan dan Keuangan"
+          - option "Kasubag Rencana dan Program"
+          - option "Kasubag TURT"
+          - option "Ketua PTA"
+          - option "Operator Surat Masuk"
+          - option "Panitera"
+          - option "Panmud Banding"
+          - option "Panmud Hukum"
+          - option "Sekretaris"
+          - option "Wakil Ketua PTA"
+        - combobox [ref=e139]:
+          - option "Semua Unit" [selected]
+          - option "Kepaniteraan"
+          - option "Kepegawaian"
+          - option "Kesekretariatan"
+          - option "Persuratan"
+          - option "Pimpinan"
+          - option "Umum dan Keuangan"
+        - combobox [ref=e141]:
+          - option "Semua Bidang" [selected]
+          - option "Kepaniteraan"
+          - option "Kepegawaian"
+          - option "Keuangan"
+          - option "Perencanaan"
+          - option "Persuratan"
+          - option "Pimpinan"
+          - option "TURT"
+        - generic [ref=e142]:
+          - button "Filter" [ref=e143] [cursor=pointer]
+          - link "Reset" [ref=e144] [cursor=pointer]:
+            - /url: http://localhost:8000/admin/users
+      - table [ref=e147]:
+        - rowgroup [ref=e148]:
+          - row "Nama Admin Surat 199001010003 Email adminsurat@pta-papuabarat.go.id Role Admin Surat, Pegawai Unit / Bidang Persuratan Persuratan Jabatan Admin Surat Admin Surat Hirarki 130 No. HP / WA 08123456003 Aksi Kirim Edit Hapus" [ref=e149]:
+            - cell "Nama Admin Surat 199001010003" [ref=e150]:
+              - text: Nama
+              - generic [ref=e151]: Admin Surat
+              - text: "199001010003"
+            - cell "Email adminsurat@pta-papuabarat.go.id" [ref=e152]
+            - cell "Role Admin Surat, Pegawai" [ref=e153]
+            - cell "Unit / Bidang Persuratan Persuratan" [ref=e154]:
+              - text: Unit / Bidang
+              - generic [ref=e155]: Persuratan
+              - text: Persuratan
+            - cell "Jabatan Admin Surat Admin Surat" [ref=e156]:
+              - text: Jabatan
+              - generic [ref=e157]: Admin Surat
+              - text: Admin Surat
+            - cell "Hirarki 130" [ref=e158]
+            - cell "No. HP / WA 08123456003" [ref=e159]
+            - cell "Aksi Kirim Edit Hapus" [ref=e160]:
+              - text: Aksi
+              - generic [ref=e161]:
+                - button "Kirim" [ref=e163] [cursor=pointer]:
+                  - generic [ref=e164]: 
+                  - text: Kirim
+                - button "Edit" [ref=e165] [cursor=pointer]:
+                  - generic [ref=e166]: 
+                  - text: Edit
+                - button "Hapus" [ref=e168] [cursor=pointer]:
+                  - generic [ref=e169]: 
+                  - text: Hapus
+          - row "Nama Kabag Kepegawaian 199001010008 Email kabagkepeg@pta-papuabarat.go.id Role Peserta, Kabag, Pegawai, Atasan Langsung, Admin Kepegawaian, Verifikator Dokumen Unit / Bidang Kepegawaian Kepegawaian Jabatan Kabag Kepegawaian Kabag Kepegawaian Hirarki 50 No. HP / WA 08123456008 Aksi Kirim Edit Hapus" [ref=e170]:
+            - cell "Nama Kabag Kepegawaian 199001010008" [ref=e171]:
+              - text: Nama
+              - generic [ref=e172]: Kabag Kepegawaian
+              - text: "199001010008"
+            - cell "Email kabagkepeg@pta-papuabarat.go.id" [ref=e173]
+            - cell "Role Peserta, Kabag, Pegawai, Atasan Langsung, Admin Kepegawaian, Verifikator Dokumen" [ref=e174]
+            - cell "Unit / Bidang Kepegawaian Kepegawaian" [ref=e175]:
+              - text: Unit / Bidang
+              - generic [ref=e176]: Kepegawaian
+              - text: Kepegawaian
+            - cell "Jabatan Kabag Kepegawaian Kabag Kepegawaian" [ref=e177]:
+              - text: Jabatan
+              - generic [ref=e178]: Kabag Kepegawaian
+              - text: Kabag Kepegawaian
+            - cell "Hirarki 50" [ref=e179]
+            - cell "No. HP / WA 08123456008" [ref=e180]
+            - cell "Aksi Kirim Edit Hapus" [ref=e181]:
+              - text: Aksi
+              - generic [ref=e182]:
+                - button "Kirim" [ref=e184] [cursor=pointer]:
+                  - generic [ref=e185]: 
+                  - text: Kirim
+                - button "Edit" [ref=e186] [cursor=pointer]:
+                  - generic [ref=e187]: 
+                  - text: Edit
+                - button "Hapus" [ref=e189] [cursor=pointer]:
+                  - generic [ref=e190]: 
+                  - text: Hapus
+          - row "Nama Kabag Umum 199001010009 Email kabagumum@pta-papuabarat.go.id Role Peserta, Kabag, Pegawai, Atasan Langsung Unit / Bidang Umum dan Keuangan TURT Jabatan Kabag Umum Kabag Umum Hirarki 60 No. HP / WA 08123456009 Aksi Kirim Edit Hapus" [ref=e191]:
+            - cell "Nama Kabag Umum 199001010009" [ref=e192]:
+              - text: Nama
+              - generic [ref=e193]: Kabag Umum
+              - text: "199001010009"
+            - cell "Email kabagumum@pta-papuabarat.go.id" [ref=e194]
+            - cell "Role Peserta, Kabag, Pegawai, Atasan Langsung" [ref=e195]
+            - cell "Unit / Bidang Umum dan Keuangan TURT" [ref=e196]:
+              - text: Unit / Bidang
+              - generic [ref=e197]: Umum dan Keuangan
+              - text: TURT
+            - cell "Jabatan Kabag Umum Kabag Umum" [ref=e198]:
+              - text: Jabatan
+              - generic [ref=e199]: Kabag Umum
+              - text: Kabag Umum
+            - cell "Hirarki 60" [ref=e200]
+            - cell "No. HP / WA 08123456009" [ref=e201]
+            - cell "Aksi Kirim Edit Hapus" [ref=e202]:
+              - text: Aksi
+              - generic [ref=e203]:
+                - button "Kirim" [ref=e205] [cursor=pointer]:
+                  - generic [ref=e206]: 
+                  - text: Kirim
+                - button "Edit" [ref=e207] [cursor=pointer]:
+                  - generic [ref=e208]: 
+                  - text: Edit
+                - button "Hapus" [ref=e210] [cursor=pointer]:
+                  - generic [ref=e211]: 
+                  - text: Hapus
+          - row "Nama Kasubag Kepegawaian 199001010010 Email kasubagkepeg@pta-papuabarat.go.id Role Peserta, Kasubag, Pegawai, Atasan Langsung Unit / Bidang Kepegawaian Kepegawaian Jabatan Kasubag Kepegawaian Kasubag Kepegawaian Hirarki 90 No. HP / WA 08123456010 Aksi Kirim Edit Hapus" [ref=e212]:
+            - cell "Nama Kasubag Kepegawaian 199001010010" [ref=e213]:
+              - text: Nama
+              - generic [ref=e214]: Kasubag Kepegawaian
+              - text: "199001010010"
+            - cell "Email kasubagkepeg@pta-papuabarat.go.id" [ref=e215]
+            - cell "Role Peserta, Kasubag, Pegawai, Atasan Langsung" [ref=e216]
+            - cell "Unit / Bidang Kepegawaian Kepegawaian" [ref=e217]:
+              - text: Unit / Bidang
+              - generic [ref=e218]: Kepegawaian
+              - text: Kepegawaian
+            - cell "Jabatan Kasubag Kepegawaian Kasubag Kepegawaian" [ref=e219]:
+              - text: Jabatan
+              - generic [ref=e220]: Kasubag Kepegawaian
+              - text: Kasubag Kepegawaian
+            - cell "Hirarki 90" [ref=e221]
+            - cell "No. HP / WA 08123456010" [ref=e222]
+            - cell "Aksi Kirim Edit Hapus" [ref=e223]:
+              - text: Aksi
+              - generic [ref=e224]:
+                - button "Kirim" [ref=e226] [cursor=pointer]:
+                  - generic [ref=e227]: 
+                  - text: Kirim
+                - button "Edit" [ref=e228] [cursor=pointer]:
+                  - generic [ref=e229]: 
+                  - text: Edit
+                - button "Hapus" [ref=e231] [cursor=pointer]:
+                  - generic [ref=e232]: 
+                  - text: Hapus
+          - row "Nama Kasubag Pelaporan dan Keuangan 199001010012 Email kasubaglapkeu@pta-papuabarat.go.id Role Peserta, Kasubag, Pegawai, Atasan Langsung Unit / Bidang Umum dan Keuangan Keuangan Jabatan Kasubag Pelaporan dan Keuangan Kasubag Pelaporan dan Keuangan Hirarki 110 No. HP / WA 08123456012 Aksi Kirim Edit Hapus" [ref=e233]:
+            - cell "Nama Kasubag Pelaporan dan Keuangan 199001010012" [ref=e234]:
+              - text: Nama
+              - generic [ref=e235]: Kasubag Pelaporan dan Keuangan
+              - text: "199001010012"
+            - cell "Email kasubaglapkeu@pta-papuabarat.go.id" [ref=e236]
+            - cell "Role Peserta, Kasubag, Pegawai, Atasan Langsung" [ref=e237]
+            - cell "Unit / Bidang Umum dan Keuangan Keuangan" [ref=e238]:
+              - text: Unit / Bidang
+              - generic [ref=e239]: Umum dan Keuangan
+              - text: Keuangan
+            - cell "Jabatan Kasubag Pelaporan dan Keuangan Kasubag Pelaporan dan Keuangan" [ref=e240]:
+              - text: Jabatan
+              - generic [ref=e241]: Kasubag Pelaporan dan Keuangan
+              - text: Kasubag Pelaporan dan Keuangan
+            - cell "Hirarki 110" [ref=e242]
+            - cell "No. HP / WA 08123456012" [ref=e243]
+            - cell "Aksi Kirim Edit Hapus" [ref=e244]:
+              - text: Aksi
+              - generic [ref=e245]:
+                - button "Kirim" [ref=e247] [cursor=pointer]:
+                  - generic [ref=e248]: 
+                  - text: Kirim
+                - button "Edit" [ref=e249] [cursor=pointer]:
+                  - generic [ref=e250]: 
+                  - text: Edit
+                - button "Hapus" [ref=e252] [cursor=pointer]:
+                  - generic [ref=e253]: 
+                  - text: Hapus
+          - row "Nama Kasubag Rencana dan Program 199001010011 Email kasubagrenpro@pta-papuabarat.go.id Role Peserta, Kasubag, Pegawai, Atasan Langsung Unit / Bidang Kepegawaian Perencanaan Jabatan Kasubag Rencana dan Program Kasubag Rencana dan Program Hirarki 100 No. HP / WA 08123456011 Aksi Kirim Edit Hapus" [ref=e254]:
+            - cell "Nama Kasubag Rencana dan Program 199001010011" [ref=e255]:
+              - text: Nama
+              - generic [ref=e256]: Kasubag Rencana dan Program
+              - text: "199001010011"
+            - cell "Email kasubagrenpro@pta-papuabarat.go.id" [ref=e257]
+            - cell "Role Peserta, Kasubag, Pegawai, Atasan Langsung" [ref=e258]
+            - cell "Unit / Bidang Kepegawaian Perencanaan" [ref=e259]:
+              - text: Unit / Bidang
+              - generic [ref=e260]: Kepegawaian
+              - text: Perencanaan
+            - cell "Jabatan Kasubag Rencana dan Program Kasubag Rencana dan Program" [ref=e261]:
+              - text: Jabatan
+              - generic [ref=e262]: Kasubag Rencana dan Program
+              - text: Kasubag Rencana dan Program
+            - cell "Hirarki 100" [ref=e263]
+            - cell "No. HP / WA 08123456011" [ref=e264]
+            - cell "Aksi Kirim Edit Hapus" [ref=e265]:
+              - text: Aksi
+              - generic [ref=e266]:
+                - button "Kirim" [ref=e268] [cursor=pointer]:
+                  - generic [ref=e269]: 
+                  - text: Kirim
+                - button "Edit" [ref=e270] [cursor=pointer]:
+                  - generic [ref=e271]: 
+                  - text: Edit
+                - button "Hapus" [ref=e273] [cursor=pointer]:
+                  - generic [ref=e274]: 
+                  - text: Hapus
+          - row "Nama Kasubag TURT 199001010013 Email kasubagturt@pta-papuabarat.go.id Role Peserta, Protokoler, Kasubag, Pegawai, Atasan Langsung Unit / Bidang Umum dan Keuangan TURT Jabatan Kasubag TURT Kasubag TURT Hirarki 120 No. HP / WA 08123456013 Aksi Kirim Edit Hapus" [ref=e275]:
+            - cell "Nama Kasubag TURT 199001010013" [ref=e276]:
+              - text: Nama
+              - generic [ref=e277]: Kasubag TURT
+              - text: "199001010013"
+            - cell "Email kasubagturt@pta-papuabarat.go.id" [ref=e278]
+            - cell "Role Peserta, Protokoler, Kasubag, Pegawai, Atasan Langsung" [ref=e279]
+            - cell "Unit / Bidang Umum dan Keuangan TURT" [ref=e280]:
+              - text: Unit / Bidang
+              - generic [ref=e281]: Umum dan Keuangan
+              - text: TURT
+            - cell "Jabatan Kasubag TURT Kasubag TURT" [ref=e282]:
+              - text: Jabatan
+              - generic [ref=e283]: Kasubag TURT
+              - text: Kasubag TURT
+            - cell "Hirarki 120" [ref=e284]
+            - cell "No. HP / WA 08123456013" [ref=e285]
+            - cell "Aksi Kirim Edit Hapus" [ref=e286]:
+              - text: Aksi
+              - generic [ref=e287]:
+                - button "Kirim" [ref=e289] [cursor=pointer]:
+                  - generic [ref=e290]: 
+                  - text: Kirim
+                - button "Edit" [ref=e291] [cursor=pointer]:
+                  - generic [ref=e292]: 
+                  - text: Edit
+                - button "Hapus" [ref=e294] [cursor=pointer]:
+                  - generic [ref=e295]: 
+                  - text: Hapus
+          - row "Nama Ketua PTA 199001010006 Email ketua@pta-papuabarat.go.id Role Peserta, Approval, Ketua, Pegawai, PPK Unit / Bidang Pimpinan Pimpinan Jabatan Ketua PTA Ketua PTA Hirarki 10 No. HP / WA 08123456006 Aksi Kirim Edit Hapus" [ref=e296]:
+            - cell "Nama Ketua PTA 199001010006" [ref=e297]:
+              - text: Nama
+              - generic [ref=e298]: Ketua PTA
+              - text: "199001010006"
+            - cell "Email ketua@pta-papuabarat.go.id" [ref=e299]
+            - cell "Role Peserta, Approval, Ketua, Pegawai, PPK" [ref=e300]
+            - cell "Unit / Bidang Pimpinan Pimpinan" [ref=e301]:
+              - text: Unit / Bidang
+              - generic [ref=e302]: Pimpinan
+              - text: Pimpinan
+            - cell "Jabatan Ketua PTA Ketua PTA" [ref=e303]:
+              - text: Jabatan
+              - generic [ref=e304]: Ketua PTA
+              - text: Ketua PTA
+            - cell "Hirarki 10" [ref=e305]
+            - cell "No. HP / WA 08123456006" [ref=e306]
+            - cell "Aksi Kirim Edit Hapus" [ref=e307]:
+              - text: Aksi
+              - generic [ref=e308]:
+                - button "Kirim" [ref=e310] [cursor=pointer]:
+                  - generic [ref=e311]: 
+                  - text: Kirim
+                - button "Edit" [ref=e312] [cursor=pointer]:
+                  - generic [ref=e313]: 
+                  - text: Edit
+                - button "Hapus" [ref=e315] [cursor=pointer]:
+                  - generic [ref=e316]: 
+                  - text: Hapus
+          - row "Nama Operator Surat Masuk 199001010002 Email operator@pta-papuabarat.go.id Role Operator, Notulis, Operator Surat Masuk, Pegawai Unit / Bidang Persuratan Persuratan Jabatan Operator Surat Masuk Operator Surat Masuk Hirarki 140 No. HP / WA 08123456002 Aksi Kirim Edit Hapus" [ref=e317]:
+            - cell "Nama Operator Surat Masuk 199001010002" [ref=e318]:
+              - text: Nama
+              - generic [ref=e319]: Operator Surat Masuk
+              - text: "199001010002"
+            - cell "Email operator@pta-papuabarat.go.id" [ref=e320]
+            - cell "Role Operator, Notulis, Operator Surat Masuk, Pegawai" [ref=e321]
+            - cell "Unit / Bidang Persuratan Persuratan" [ref=e322]:
+              - text: Unit / Bidang
+              - generic [ref=e323]: Persuratan
+              - text: Persuratan
+            - cell "Jabatan Operator Surat Masuk Operator Surat Masuk" [ref=e324]:
+              - text: Jabatan
+              - generic [ref=e325]: Operator Surat Masuk
+              - text: Operator Surat Masuk
+            - cell "Hirarki 140" [ref=e326]
+            - cell "No. HP / WA 08123456002" [ref=e327]
+            - cell "Aksi Kirim Edit Hapus" [ref=e328]:
+              - text: Aksi
+              - generic [ref=e329]:
+                - button "Kirim" [ref=e331] [cursor=pointer]:
+                  - generic [ref=e332]: 
+                  - text: Kirim
+                - button "Edit" [ref=e333] [cursor=pointer]:
+                  - generic [ref=e334]: 
+                  - text: Edit
+                - button "Hapus" [ref=e336] [cursor=pointer]:
+                  - generic [ref=e337]: 
+                  - text: Hapus
+          - row "Nama Panitera 199001010005 Email panitera@pta-papuabarat.go.id Role Peserta, Approval, Panitera, Pegawai, Atasan Langsung Unit / Bidang Kepaniteraan Pimpinan Jabatan Panitera Panitera Hirarki 40 No. HP / WA 08123456005 Aksi Kirim Edit Hapus" [ref=e338]:
+            - cell "Nama Panitera 199001010005" [ref=e339]:
+              - text: Nama
+              - generic [ref=e340]: Panitera
+              - text: "199001010005"
+            - cell "Email panitera@pta-papuabarat.go.id" [ref=e341]
+            - cell "Role Peserta, Approval, Panitera, Pegawai, Atasan Langsung" [ref=e342]
+            - cell "Unit / Bidang Kepaniteraan Pimpinan" [ref=e343]:
+              - text: Unit / Bidang
+              - generic [ref=e344]: Kepaniteraan
+              - text: Pimpinan
+            - cell "Jabatan Panitera Panitera" [ref=e345]:
+              - text: Jabatan
+              - generic [ref=e346]: Panitera
+              - text: Panitera
+            - cell "Hirarki 40" [ref=e347]
+            - cell "No. HP / WA 08123456005" [ref=e348]
+            - cell "Aksi Kirim Edit Hapus" [ref=e349]:
+              - text: Aksi
+              - generic [ref=e350]:
+                - button "Kirim" [ref=e352] [cursor=pointer]:
+                  - generic [ref=e353]: 
+                  - text: Kirim
+                - button "Edit" [ref=e354] [cursor=pointer]:
+                  - generic [ref=e355]: 
+                  - text: Edit
+                - button "Hapus" [ref=e357] [cursor=pointer]:
+                  - generic [ref=e358]: 
+                  - text: Hapus
+          - row "Nama Panitera Pengganti 1 199001010024 Email pp1@pta-papuabarat.go.id Role Peserta, Pegawai Unit / Bidang Kepaniteraan Kepaniteraan Jabatan - Panitera Pengganti Hirarki 280 No. HP / WA 08123456024 Aksi Kirim Edit Hapus" [ref=e359]:
+            - cell "Nama Panitera Pengganti 1 199001010024" [ref=e360]:
+              - text: Nama
+              - generic [ref=e361]: Panitera Pengganti 1
+              - text: "199001010024"
+            - cell "Email pp1@pta-papuabarat.go.id" [ref=e362]
+            - cell "Role Peserta, Pegawai" [ref=e363]
+            - cell "Unit / Bidang Kepaniteraan Kepaniteraan" [ref=e364]:
+              - text: Unit / Bidang
+              - generic [ref=e365]: Kepaniteraan
+              - text: Kepaniteraan
+            - cell "Jabatan - Panitera Pengganti" [ref=e366]:
+              - text: Jabatan
+              - generic [ref=e367]: "-"
+              - text: Panitera Pengganti
+            - cell "Hirarki 280" [ref=e368]
+            - cell "No. HP / WA 08123456024" [ref=e369]
+            - cell "Aksi Kirim Edit Hapus" [ref=e370]:
+              - text: Aksi
+              - generic [ref=e371]:
+                - button "Kirim" [ref=e373] [cursor=pointer]:
+                  - generic [ref=e374]: 
+                  - text: Kirim
+                - button "Edit" [ref=e375] [cursor=pointer]:
+                  - generic [ref=e376]: 
+                  - text: Edit
+                - button "Hapus" [ref=e378] [cursor=pointer]:
+                  - generic [ref=e379]: 
+                  - text: Hapus
+          - row "Nama Panitera Pengganti 2 199001010025 Email pp2@pta-papuabarat.go.id Role Peserta, Pegawai Unit / Bidang Kepaniteraan Kepaniteraan Jabatan - Panitera Pengganti Hirarki 290 No. HP / WA 08123456025 Aksi Kirim Edit Hapus" [ref=e380]:
+            - cell "Nama Panitera Pengganti 2 199001010025" [ref=e381]:
+              - text: Nama
+              - generic [ref=e382]: Panitera Pengganti 2
+              - text: "199001010025"
+            - cell "Email pp2@pta-papuabarat.go.id" [ref=e383]
+            - cell "Role Peserta, Pegawai" [ref=e384]
+            - cell "Unit / Bidang Kepaniteraan Kepaniteraan" [ref=e385]:
+              - text: Unit / Bidang
+              - generic [ref=e386]: Kepaniteraan
+              - text: Kepaniteraan
+            - cell "Jabatan - Panitera Pengganti" [ref=e387]:
+              - text: Jabatan
+              - generic [ref=e388]: "-"
+              - text: Panitera Pengganti
+            - cell "Hirarki 290" [ref=e389]
+            - cell "No. HP / WA 08123456025" [ref=e390]
+            - cell "Aksi Kirim Edit Hapus" [ref=e391]:
+              - text: Aksi
+              - generic [ref=e392]:
+                - button "Kirim" [ref=e394] [cursor=pointer]:
+                  - generic [ref=e395]: 
+                  - text: Kirim
+                - button "Edit" [ref=e396] [cursor=pointer]:
+                  - generic [ref=e397]: 
+                  - text: Edit
+                - button "Hapus" [ref=e399] [cursor=pointer]:
+                  - generic [ref=e400]: 
+                  - text: Hapus
+          - row "Nama Panmud Banding 199001010014 Email panmudbanding@pta-papuabarat.go.id Role Peserta, Panmud, Pegawai, Atasan Langsung Unit / Bidang Kepaniteraan Kepaniteraan Jabatan Panmud Banding Panmud Banding Hirarki 70 No. HP / WA 08123456014 Aksi Kirim Edit Hapus" [ref=e401]:
+            - cell "Nama Panmud Banding 199001010014" [ref=e402]:
+              - text: Nama
+              - generic [ref=e403]: Panmud Banding
+              - text: "199001010014"
+            - cell "Email panmudbanding@pta-papuabarat.go.id" [ref=e404]
+            - cell "Role Peserta, Panmud, Pegawai, Atasan Langsung" [ref=e405]
+            - cell "Unit / Bidang Kepaniteraan Kepaniteraan" [ref=e406]:
+              - text: Unit / Bidang
+              - generic [ref=e407]: Kepaniteraan
+              - text: Kepaniteraan
+            - cell "Jabatan Panmud Banding Panmud Banding" [ref=e408]:
+              - text: Jabatan
+              - generic [ref=e409]: Panmud Banding
+              - text: Panmud Banding
+            - cell "Hirarki 70" [ref=e410]
+            - cell "No. HP / WA 08123456014" [ref=e411]
+            - cell "Aksi Kirim Edit Hapus" [ref=e412]:
+              - text: Aksi
+              - generic [ref=e413]:
+                - button "Kirim" [ref=e415] [cursor=pointer]:
+                  - generic [ref=e416]: 
+                  - text: Kirim
+                - button "Edit" [ref=e417] [cursor=pointer]:
+                  - generic [ref=e418]: 
+                  - text: Edit
+                - button "Hapus" [ref=e420] [cursor=pointer]:
+                  - generic [ref=e421]: 
+                  - text: Hapus
+          - row "Nama Panmud Hukum 199001010015 Email panmudhukum@pta-papuabarat.go.id Role Peserta, Panmud, Pegawai, Atasan Langsung Unit / Bidang Kepaniteraan Kepaniteraan Jabatan Panmud Hukum Panmud Hukum Hirarki 80 No. HP / WA 08123456015 Aksi Kirim Edit Hapus" [ref=e422]:
+            - cell "Nama Panmud Hukum 199001010015" [ref=e423]:
+              - text: Nama
+              - generic [ref=e424]: Panmud Hukum
+              - text: "199001010015"
+            - cell "Email panmudhukum@pta-papuabarat.go.id" [ref=e425]
+            - cell "Role Peserta, Panmud, Pegawai, Atasan Langsung" [ref=e426]
+            - cell "Unit / Bidang Kepaniteraan Kepaniteraan" [ref=e427]:
+              - text: Unit / Bidang
+              - generic [ref=e428]: Kepaniteraan
+              - text: Kepaniteraan
+            - cell "Jabatan Panmud Hukum Panmud Hukum" [ref=e429]:
+              - text: Jabatan
+              - generic [ref=e430]: Panmud Hukum
+              - text: Panmud Hukum
+            - cell "Hirarki 80" [ref=e431]
+            - cell "No. HP / WA 08123456015" [ref=e432]
+            - cell "Aksi Kirim Edit Hapus" [ref=e433]:
+              - text: Aksi
+              - generic [ref=e434]:
+                - button "Kirim" [ref=e436] [cursor=pointer]:
+                  - generic [ref=e437]: 
+                  - text: Kirim
+                - button "Edit" [ref=e438] [cursor=pointer]:
+                  - generic [ref=e439]: 
+                  - text: Edit
+                - button "Hapus" [ref=e441] [cursor=pointer]:
+                  - generic [ref=e442]: 
+                  - text: Hapus
+          - row "Nama Sekretaris 199001010004 Email sekretaris@pta-papuabarat.go.id Role Peserta, Approval, Sekretaris, Pegawai, Atasan Langsung Unit / Bidang Kesekretariatan Pimpinan Jabatan Sekretaris Sekretaris Hirarki 30 No. HP / WA 08123456004 Aksi Kirim Edit Hapus" [ref=e443]:
+            - cell "Nama Sekretaris 199001010004" [ref=e444]:
+              - text: Nama
+              - generic [ref=e445]: Sekretaris
+              - text: "199001010004"
+            - cell "Email sekretaris@pta-papuabarat.go.id" [ref=e446]
+            - cell "Role Peserta, Approval, Sekretaris, Pegawai, Atasan Langsung" [ref=e447]
+            - cell "Unit / Bidang Kesekretariatan Pimpinan" [ref=e448]:
+              - text: Unit / Bidang
+              - generic [ref=e449]: Kesekretariatan
+              - text: Pimpinan
+            - cell "Jabatan Sekretaris Sekretaris" [ref=e450]:
+              - text: Jabatan
+              - generic [ref=e451]: Sekretaris
+              - text: Sekretaris
+            - cell "Hirarki 30" [ref=e452]
+            - cell "No. HP / WA 08123456004" [ref=e453]
+            - cell "Aksi Kirim Edit Hapus" [ref=e454]:
+              - text: Aksi
+              - generic [ref=e455]:
+                - button "Kirim" [ref=e457] [cursor=pointer]:
+                  - generic [ref=e458]: 
+                  - text: Kirim
+                - button "Edit" [ref=e459] [cursor=pointer]:
+                  - generic [ref=e460]: 
+                  - text: Edit
+                - button "Hapus" [ref=e462] [cursor=pointer]:
+                  - generic [ref=e463]: 
+                  - text: Hapus
+      - navigation [ref=e465]:
+        - list [ref=e466]:
+          - listitem "pagination.previous" [ref=e467]:
+            - generic: ‹
+          - listitem [ref=e468]:
+            - generic [ref=e469]: "1"
+          - listitem [ref=e470]:
+            - link "2" [ref=e471] [cursor=pointer]:
+              - /url: http://localhost:8000/admin/users?page=2
+          - listitem [ref=e472]:
+            - link "pagination.next" [ref=e473] [cursor=pointer]:
+              - /url: http://localhost:8000/admin/users?page=2
+              - text: ›
+  - contentinfo [ref=e474]:
+    - generic [ref=e475]:
+      - text: © 2026
+      - strong [ref=e476]: Pengadilan Tinggi Agama Papua Barat
+      - text: . Sistem Informasi Persuratan.

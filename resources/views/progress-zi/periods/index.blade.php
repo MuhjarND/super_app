@@ -2,9 +2,63 @@
 
 @section('title', 'Master Periode ZI')
 
+@push('styles')
+<style>
+    @media (max-width: 767.98px) {
+        .zi-period-top {
+            flex-direction: column;
+            align-items: stretch !important;
+        }
+
+        .zi-period-top .app-create-btn {
+            width: 100%;
+        }
+
+        .zi-period-table,
+        .zi-period-table thead,
+        .zi-period-table tbody,
+        .zi-period-table tr,
+        .zi-period-table th,
+        .zi-period-table td {
+            display: block;
+            width: 100%;
+        }
+
+        .zi-period-table thead {
+            display: none;
+        }
+
+        .zi-period-table tbody tr {
+            padding: 14px 14px 12px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .zi-period-table td {
+            padding: 0 0 10px;
+            border: 0;
+        }
+
+        .zi-period-table td:last-child {
+            padding-bottom: 0;
+        }
+
+        .zi-period-table td::before {
+            content: attr(data-label);
+            display: block;
+            margin-bottom: 4px;
+            font-size: 0.74rem;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            color: #94a3b8;
+        }
+    }
+</style>
+@endpush
+
 @section('content')
 <div class="card shadow-sm border-0 mb-3">
-    <div class="card-body d-flex justify-content-between align-items-center flex-wrap" style="gap:12px;">
+    <div class="card-body d-flex justify-content-between align-items-center flex-wrap zi-period-top" style="gap:12px;">
         <div>
             <h4 class="mb-1">Master Periode ZI</h4>
             <div class="text-muted">Kelola periode evaluasi dan periode aktif Progress Zona Integritas.</div>
@@ -17,7 +71,7 @@
 
 <div class="card shadow-sm border-0">
     <div class="card-body table-responsive p-0">
-        <table class="table table-hover mb-0">
+        <table class="table table-hover mb-0 zi-period-table">
             <thead>
                 <tr>
                     <th>Periode</th>
@@ -30,12 +84,12 @@
             <tbody>
                 @forelse($periods as $period)
                     <tr>
-                        <td><strong>{{ $period->name }}</strong><div class="text-muted small">{{ $period->year }}</div></td>
-                        <td>{{ optional($period->target_evaluation_date)->translatedFormat('d F Y') ?: '-' }}</td>
-                        <td>{!! $period->status_badge !!}</td>
-                        <td>{{ $period->description ?: '-' }}</td>
+                        <td data-label="Periode"><strong>{{ $period->name }}</strong><div class="text-muted small">{{ $period->year }}</div></td>
+                        <td data-label="Target Evaluasi">{{ optional($period->target_evaluation_date)->translatedFormat('d F Y') ?: '-' }}</td>
+                        <td data-label="Status">{!! $period->status_badge !!}</td>
+                        <td data-label="Deskripsi">{{ $period->description ?: '-' }}</td>
                         @if($canManage)
-                            <td class="app-action-cell"><div class="app-action-group"><button class="app-icon-btn edit" data-toggle="modal" data-target="#editPeriodModal{{ $period->id }}" title="Edit"><i class="fas fa-pen"></i></button></div></td>
+                            <td class="app-action-cell" data-label="Aksi"><div class="app-action-group"><button class="app-icon-btn edit" data-mobile-label="Edit" data-toggle="modal" data-target="#editPeriodModal{{ $period->id }}" title="Edit"><i class="fas fa-pen"></i></button></div></td>
                         @endif
                     </tr>
                     @if($canManage)

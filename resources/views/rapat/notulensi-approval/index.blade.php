@@ -64,6 +64,13 @@
         @media (max-width: 767.98px) {
             .approval-item {
                 flex-direction: column;
+                padding: 16px;
+            }
+
+            .approval-wrap .card-header {
+                padding: 15px 16px;
+                align-items: flex-start !important;
+                gap: 10px;
             }
         }
     </style>
@@ -97,7 +104,7 @@
                             <div class="approval-meta">Notulis: {{ optional(optional($approval->notulensi)->notulis)->name ?: '-' }} | Approver: {{ $approval->approver_name_snapshot }}</div>
                         </div>
                         <div class="d-flex align-items-center">
-                            <a href="{{ route('rapat.notulensi-approval.show', $approval) }}" class="btn btn-primary btn-sm">
+                            <a href="{{ route('rapat.notulensi-approval.show', $approval) }}" class="btn btn-primary btn-sm" data-mobile-label="Proses">
                                 <i class="fas fa-file-signature mr-1"></i> Proses Notulen
                             </a>
                         </div>
@@ -126,7 +133,7 @@
                         </div>
                         <div class="d-flex align-items-center">
                             @if($entry->approval)
-                                <a href="{{ route('rapat.notulensi-approval.show', $entry->approval) }}" class="btn btn-outline-secondary btn-sm">
+                                <a href="{{ route('rapat.notulensi-approval.show', $entry->approval) }}" class="btn btn-outline-secondary btn-sm" data-mobile-label="Detail">
                                     <i class="fas fa-eye mr-1"></i> Detail
                                 </a>
                             @endif

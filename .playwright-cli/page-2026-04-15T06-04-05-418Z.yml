@@ -1,0 +1,742 @@
+- generic [ref=e2]:
+  - navigation [ref=e3]:
+    - list [ref=e4]:
+      - listitem [ref=e5]:
+        - link "" [ref=e6] [cursor=pointer]:
+          - /url: "#"
+          - generic [ref=e7]: 
+    - list [ref=e8]:
+      - listitem [ref=e9]:
+        - link " 5" [ref=e10] [cursor=pointer]:
+          - /url: "#"
+          - generic [ref=e11]: 
+          - generic [ref=e12]: "5"
+        - text:     
+      - listitem [ref=e13]:
+        - button "" [ref=e14] [cursor=pointer]:
+          - generic [ref=e15]: 
+      - listitem [ref=e16]:
+        - link "S" [ref=e17] [cursor=pointer]:
+          - /url: "#"
+          - generic [ref=e18]: S
+        - text: 
+  - complementary [ref=e19]:
+    - link "P PTA Papua Barat" [ref=e20] [cursor=pointer]:
+      - /url: http://localhost:8000/dashboard
+      - generic [ref=e21]: P
+      - generic [ref=e22]: PTA Papua Barat
+    - generic [ref=e23]:
+      - generic [ref=e25]:
+        - generic [ref=e26]: SU
+        - generic [ref=e27]:
+          - generic [ref=e28]: Super Admin
+          - generic [ref=e29]: Super Admin
+      - navigation [ref=e30]:
+        - menu [ref=e31]:
+          - listitem [ref=e32]:
+            - link " Dashboard" [ref=e33] [cursor=pointer]:
+              - /url: http://localhost:8000/dashboard
+              - generic [ref=e34]: 
+              - paragraph [ref=e35]: Dashboard
+          - listitem [ref=e36]:
+            - link " Kalender Terpadu" [ref=e37] [cursor=pointer]:
+              - /url: http://localhost:8000/kalender-terpadu
+              - generic [ref=e38]: 
+              - paragraph [ref=e39]: Kalender Terpadu
+          - listitem [ref=e40]:
+            - link " Tindak Lanjut Terpadu 5" [ref=e41] [cursor=pointer]:
+              - /url: http://localhost:8000/tindak-lanjut-terpadu
+              - generic [ref=e42]: 
+              - paragraph [ref=e43]:
+                - text: Tindak Lanjut Terpadu
+                - generic [ref=e44]: "5"
+          - listitem [ref=e45]:
+            - button "Approval " [ref=e46] [cursor=pointer]:
+              - generic [ref=e47]: Approval
+              - generic [ref=e48]: 
+            - list:
+              - listitem:
+                - link " Tindaklanjuti 1":
+                  - /url: http://localhost:8000/approval
+                  - generic: 
+                  - paragraph:
+                    - text: Tindaklanjuti
+                    - generic: "1"
+              - listitem:
+                - link " Riwayat Approval":
+                  - /url: http://localhost:8000/approval/history
+                  - generic: 
+                  - paragraph: Riwayat Approval
+          - listitem [ref=e49]:
+            - button "Persuratan " [ref=e50] [cursor=pointer]:
+              - generic [ref=e51]: Persuratan
+              - generic [ref=e52]: 
+            - list:
+              - listitem:
+                - link " Surat Masuk 1":
+                  - /url: http://localhost:8000/surat-masuk
+                  - generic: 
+                  - paragraph:
+                    - text: Surat Masuk
+                    - generic: "1"
+              - listitem:
+                - link " Surat Keluar":
+                  - /url: http://localhost:8000/surat-keluar
+                  - generic: 
+                  - paragraph: Surat Keluar
+              - listitem:
+                - link " Template Surat":
+                  - /url: http://localhost:8000/template-surat
+                  - generic: 
+                  - paragraph: Template Surat
+          - listitem [ref=e53]:
+            - button "Rapat / Agenda " [ref=e54] [cursor=pointer]:
+              - generic [ref=e55]: Rapat / Agenda
+              - generic [ref=e56]: 
+            - list:
+              - listitem:
+                - link " Rapat/Agenda":
+                  - /url: http://localhost:8000/rapat
+                  - generic: 
+                  - paragraph: Rapat/Agenda
+              - listitem:
+                - link " Notulensi":
+                  - /url: http://localhost:8000/rapat/notulensi
+                  - generic: 
+                  - paragraph: Notulensi
+              - listitem:
+                - link " Tindak Lanjut":
+                  - /url: http://localhost:8000/rapat/notulensi/tindak-lanjut
+                  - generic: 
+                  - paragraph: Tindak Lanjut
+              - listitem:
+                - link " Absensi":
+                  - /url: http://localhost:8000/rapat/absensi
+                  - generic: 
+                  - paragraph: Absensi
+              - listitem:
+                - link " Laporan":
+                  - /url: http://localhost:8000/rapat/laporan
+                  - generic: 
+                  - paragraph: Laporan
+              - listitem:
+                - link " Agenda Pimpinan":
+                  - /url: http://localhost:8000/rapat/agenda-pimpinan
+                  - generic: 
+                  - paragraph: Agenda Pimpinan
+              - listitem:
+                - link " E-Voting":
+                  - /url: http://localhost:8000/rapat/voting
+                  - generic: 
+                  - paragraph: E-Voting
+          - listitem [ref=e57]:
+            - button "Cuti " [ref=e58] [cursor=pointer]:
+              - generic [ref=e59]: Cuti
+              - generic [ref=e60]: 
+            - list:
+              - listitem:
+                - link " Pengajuan Cuti":
+                  - /url: http://localhost:8000/cuti
+                  - generic: 
+                  - paragraph: Pengajuan Cuti
+              - listitem:
+                - link " Approval Cuti":
+                  - /url: http://localhost:8000/cuti/approval/list
+                  - generic: 
+                  - paragraph: Approval Cuti
+              - listitem:
+                - link " Rekap Saldo":
+                  - /url: http://localhost:8000/cuti/saldo
+                  - generic: 
+                  - paragraph: Rekap Saldo
+              - listitem:
+                - link " Laporan Cuti":
+                  - /url: http://localhost:8000/cuti/laporan
+                  - generic: 
+                  - paragraph: Laporan Cuti
+              - listitem:
+                - link " Jenis Cuti":
+                  - /url: http://localhost:8000/cuti/master/jenis-cuti
+                  - generic: 
+                  - paragraph: Jenis Cuti
+              - listitem:
+                - link " Kebijakan Cuti":
+                  - /url: http://localhost:8000/cuti/master/kebijakan
+                  - generic: 
+                  - paragraph: Kebijakan Cuti
+              - listitem:
+                - link " Cuti Bersama":
+                  - /url: http://localhost:8000/cuti/master/cuti-bersama
+                  - generic: 
+                  - paragraph: Cuti Bersama
+              - listitem:
+                - link " Delegasi Approval":
+                  - /url: http://localhost:8000/cuti/master/delegasi
+                  - generic: 
+                  - paragraph: Delegasi Approval
+          - listitem [ref=e61]:
+            - button "Perawatan Alat dan Mesin " [ref=e62] [cursor=pointer]:
+              - generic [ref=e63]: Perawatan Alat dan Mesin
+              - generic [ref=e64]: 
+            - list:
+              - listitem:
+                - link " Dashboard":
+                  - /url: http://localhost:8000/perawatan-alat-dan-mesin
+                  - generic: 
+                  - paragraph: Dashboard
+              - listitem:
+                - link " Master Barang":
+                  - /url: http://localhost:8000/perawatan-alat-dan-mesin/barang
+                  - generic: 
+                  - paragraph: Master Barang
+              - listitem:
+                - link " Transaksi Perawatan":
+                  - /url: http://localhost:8000/perawatan-alat-dan-mesin/transaksi-perawatan
+                  - generic: 
+                  - paragraph: Transaksi Perawatan
+              - listitem:
+                - link " Laporan":
+                  - /url: http://localhost:8000/perawatan-alat-dan-mesin/laporan
+                  - generic: 
+                  - paragraph: Laporan
+              - listitem:
+                - link " Cetak QR Code":
+                  - /url: http://localhost:8000/perawatan-alat-dan-mesin/qrcode
+                  - generic: 
+                  - paragraph: Cetak QR Code
+              - listitem:
+                - link " Satuan Barang":
+                  - /url: http://localhost:8000/perawatan-alat-dan-mesin/master/units
+                  - generic: 
+                  - paragraph: Satuan Barang
+              - listitem:
+                - link " Kondisi Barang":
+                  - /url: http://localhost:8000/perawatan-alat-dan-mesin/master/conditions
+                  - generic: 
+                  - paragraph: Kondisi Barang
+              - listitem:
+                - link " Ruang":
+                  - /url: http://localhost:8000/perawatan-alat-dan-mesin/master/rooms
+                  - generic: 
+                  - paragraph: Ruang
+              - listitem:
+                - link " Brand / Merk":
+                  - /url: http://localhost:8000/perawatan-alat-dan-mesin/master/brands
+                  - generic: 
+                  - paragraph: Brand / Merk
+              - listitem:
+                - link " Kuasa Pengguna":
+                  - /url: http://localhost:8000/perawatan-alat-dan-mesin/kuasa-pengguna-barang
+                  - generic: 
+                  - paragraph: Kuasa Pengguna
+          - listitem [ref=e65]:
+            - button "Persediaan " [ref=e66] [cursor=pointer]:
+              - generic [ref=e67]: Persediaan
+              - generic [ref=e68]: 
+            - list:
+              - listitem:
+                - link " Persediaan DEV":
+                  - /url: http://localhost:8000/persediaan
+                  - generic: 
+                  - paragraph: Persediaan DEV
+          - listitem [ref=e69]:
+            - button "Progress ZI " [ref=e70] [cursor=pointer]:
+              - generic [ref=e71]: Progress ZI
+              - generic [ref=e72]: 
+            - list:
+              - listitem:
+                - link " Rekapan ZI":
+                  - /url: http://localhost:8000/progress-zi
+                  - generic: 
+                  - paragraph: Rekapan ZI
+              - listitem:
+                - link " Monitoring Kegiatan 13":
+                  - /url: http://localhost:8000/progress-zi/activities
+                  - generic: 
+                  - paragraph:
+                    - text: Monitoring Kegiatan
+                    - generic: "13"
+              - listitem:
+                - link " Pedoman ZI":
+                  - /url: http://localhost:8000/progress-zi/guidelines
+                  - generic: 
+                  - paragraph: Pedoman ZI
+          - listitem [ref=e73]:
+            - button "Master Data " [ref=e74] [cursor=pointer]:
+              - generic [ref=e75]: Master Data
+              - generic [ref=e76]: 
+            - list:
+              - listitem:
+                - link " User":
+                  - /url: http://localhost:8000/admin/users
+                  - generic: 
+                  - paragraph: User
+              - listitem:
+                - link " Jabatan":
+                  - /url: http://localhost:8000/admin/jabatans
+                  - generic: 
+                  - paragraph: Jabatan
+              - listitem:
+                - link " Unit Kerja":
+                  - /url: http://localhost:8000/admin/units
+                  - generic: 
+                  - paragraph: Unit Kerja
+              - listitem:
+                - link " Bidang":
+                  - /url: http://localhost:8000/admin/bidangs
+                  - generic: 
+                  - paragraph: Bidang
+              - listitem:
+                - link " Kategori Surat":
+                  - /url: http://localhost:8000/admin/kategori-surats
+                  - generic: 
+                  - paragraph: Kategori Surat
+              - listitem:
+                - link " Kategori Rapat":
+                  - /url: http://localhost:8000/admin/kategori-rapats
+                  - generic: 
+                  - paragraph: Kategori Rapat
+              - listitem:
+                - link " Dasar Hukum":
+                  - /url: http://localhost:8000/admin/dasar-hukums
+                  - generic: 
+                  - paragraph: Dasar Hukum
+              - listitem:
+                - link " Periode ZI":
+                  - /url: http://localhost:8000/progress-zi/periods
+                  - generic: 
+                  - paragraph: Periode ZI
+              - listitem:
+                - link " Area ZI":
+                  - /url: http://localhost:8000/progress-zi/areas
+                  - generic: 
+                  - paragraph: Area ZI
+          - listitem [ref=e77]:
+            - button "Arsip " [ref=e78] [cursor=pointer]:
+              - generic [ref=e79]: Arsip
+              - generic [ref=e80]: 
+            - list [ref=e81]:
+              - listitem [ref=e82]:
+                - link " Arsip" [ref=e83] [cursor=pointer]:
+                  - /url: http://localhost:8000/arsip
+                  - generic [ref=e84]: 
+                  - paragraph [ref=e85]: Arsip
+  - generic [ref=e86]:
+    - generic [ref=e90]:
+      - heading "🗂️ Arsip" [level=1] [ref=e91]:
+        - generic [ref=e92]: 🗂️
+        - text: Arsip
+      - generic [ref=e93]: Arsip gabungan surat masuk, surat keluar, rapat/agenda, dan cuti.
+    - generic [ref=e95]:
+      - generic [ref=e99]:
+        - generic [ref=e100]:
+          - generic [ref=e101]: Pencarian
+          - textbox "Cari nomor, kategori, perihal, jenis dokumen, atau pembuat..." [ref=e102]
+        - generic [ref=e103]:
+          - generic [ref=e104]: Jenis Dokumen
+          - combobox [ref=e105]:
+            - option "Semua Dokumen" [selected]
+            - option "Surat Masuk"
+            - option "Surat Keluar"
+            - option "Rapat"
+            - option "Agenda"
+            - option "Cuti"
+        - generic [ref=e106]:
+          - button "Cari" [ref=e107] [cursor=pointer]
+          - link "Reset" [ref=e108] [cursor=pointer]:
+            - /url: http://localhost:8000/arsip
+      - generic [ref=e109]:
+        - table [ref=e112]:
+          - rowgroup [ref=e113]:
+            - 'row "Dokumen Rapat / Agenda - Agenda Pimpinan Uraian Dokumen upacara bendera hari kemerdekaan Dibuat oleh: Super Admin Tujuan / Penerima Internal / 1 orang Tanggal Tanggal Surat 2026-04-03 Diinput 2026-04-02 Lampiran - Status Aktif" [ref=e114]':
+              - cell "Dokumen Rapat / Agenda - Agenda Pimpinan" [ref=e115]:
+                - text: Dokumen
+                - generic [ref=e116]: Rapat / Agenda
+                - generic [ref=e117]: "-"
+                - generic [ref=e118]: Agenda Pimpinan
+              - 'cell "Uraian Dokumen upacara bendera hari kemerdekaan Dibuat oleh: Super Admin" [ref=e119]':
+                - text: Uraian Dokumen
+                - generic [ref=e120]: upacara bendera hari kemerdekaan
+                - generic [ref=e121]: "Dibuat oleh: Super Admin"
+              - cell "Tujuan / Penerima Internal / 1 orang" [ref=e122]:
+                - text: Tujuan / Penerima
+                - generic [ref=e123]: Internal / 1 orang
+              - cell "Tanggal Tanggal Surat 2026-04-03 Diinput 2026-04-02" [ref=e124]:
+                - text: Tanggal
+                - generic [ref=e125]: Tanggal Surat
+                - generic [ref=e126]: 2026-04-03
+                - generic [ref=e127]: Diinput
+                - generic [ref=e128]: 2026-04-02
+              - cell "Lampiran -" [ref=e129]
+              - cell "Status Aktif" [ref=e130]:
+                - text: Status
+                - generic [ref=e131]: Aktif
+            - 'row "Dokumen Surat Keluar 12/PAN.W31-A/KP3.4.3/IV/2026 KP - Kepegawaian Uraian Dokumen Monitoring dan Evaluasi Bidang Kepaniteraaan Dibuat oleh: Super Admin Tujuan / Penerima Internal / 2 orang Tanggal Tanggal Surat 2026-04-02 Diinput 2026-04-02 Lampiran Berkas Status Lengkap" [ref=e132]':
+              - cell "Dokumen Surat Keluar 12/PAN.W31-A/KP3.4.3/IV/2026 KP - Kepegawaian" [ref=e133]:
+                - text: Dokumen
+                - generic [ref=e134]: Surat Keluar
+                - generic [ref=e135]: 12/PAN.W31-A/KP3.4.3/IV/2026
+                - generic [ref=e136]: KP - Kepegawaian
+              - 'cell "Uraian Dokumen Monitoring dan Evaluasi Bidang Kepaniteraaan Dibuat oleh: Super Admin" [ref=e137]':
+                - text: Uraian Dokumen
+                - generic [ref=e138]: Monitoring dan Evaluasi Bidang Kepaniteraaan
+                - generic [ref=e139]: "Dibuat oleh: Super Admin"
+              - cell "Tujuan / Penerima Internal / 2 orang" [ref=e140]:
+                - text: Tujuan / Penerima
+                - generic [ref=e141]: Internal / 2 orang
+              - cell "Tanggal Tanggal Surat 2026-04-02 Diinput 2026-04-02" [ref=e142]:
+                - text: Tanggal
+                - generic [ref=e143]: Tanggal Surat
+                - generic [ref=e144]: 2026-04-02
+                - generic [ref=e145]: Diinput
+                - generic [ref=e146]: 2026-04-02
+              - cell "Lampiran Berkas" [ref=e147]:
+                - text: Lampiran
+                - button "Berkas" [ref=e148] [cursor=pointer]
+              - cell "Status Lengkap" [ref=e149]:
+                - text: Status
+                - generic [ref=e150]: Lengkap
+            - 'row "Dokumen Rapat / Agenda 12/PAN.W31-A/KP3.4.3/IV/2026 Evaluasi kinerja pegawai Uraian Dokumen Monitoring dan Evaluasi Bidang Kepaniteraaan Dibuat oleh: Super Admin Tujuan / Penerima Internal / 2 orang Tanggal Tanggal Surat 2026-04-03 Diinput 2026-04-02 Lampiran Berkas Status Disetujui" [ref=e151]':
+              - cell "Dokumen Rapat / Agenda 12/PAN.W31-A/KP3.4.3/IV/2026 Evaluasi kinerja pegawai" [ref=e152]:
+                - text: Dokumen
+                - generic [ref=e153]: Rapat / Agenda
+                - generic [ref=e154]: 12/PAN.W31-A/KP3.4.3/IV/2026
+                - generic [ref=e155]: Evaluasi kinerja pegawai
+              - 'cell "Uraian Dokumen Monitoring dan Evaluasi Bidang Kepaniteraaan Dibuat oleh: Super Admin" [ref=e156]':
+                - text: Uraian Dokumen
+                - generic [ref=e157]: Monitoring dan Evaluasi Bidang Kepaniteraaan
+                - generic [ref=e158]: "Dibuat oleh: Super Admin"
+              - cell "Tujuan / Penerima Internal / 2 orang" [ref=e159]:
+                - text: Tujuan / Penerima
+                - generic [ref=e160]: Internal / 2 orang
+              - cell "Tanggal Tanggal Surat 2026-04-03 Diinput 2026-04-02" [ref=e161]:
+                - text: Tanggal
+                - generic [ref=e162]: Tanggal Surat
+                - generic [ref=e163]: 2026-04-03
+                - generic [ref=e164]: Diinput
+                - generic [ref=e165]: 2026-04-02
+              - cell "Lampiran Berkas" [ref=e166]:
+                - text: Lampiran
+                - button "Berkas" [ref=e167] [cursor=pointer]
+              - cell "Status Disetujui" [ref=e168]:
+                - text: Status
+                - generic [ref=e169]: Disetujui
+            - 'row "Dokumen Rapat / Agenda 11/SEK.W31-A/KP3.4.3/III/2026 Evaluasi kinerja pegawai Uraian Dokumen Rapat Monitoring dan Evaluasi - Unit kerja memiliki rencana kerja pembangunan Zona Integritas. Dibuat oleh: Super Admin Tujuan / Penerima Internal / 3 orang Tanggal Tanggal Surat 2026-03-26 Diinput 2026-03-25 Lampiran Berkas Status Disetujui" [ref=e170]':
+              - cell "Dokumen Rapat / Agenda 11/SEK.W31-A/KP3.4.3/III/2026 Evaluasi kinerja pegawai" [ref=e171]:
+                - text: Dokumen
+                - generic [ref=e172]: Rapat / Agenda
+                - generic [ref=e173]: 11/SEK.W31-A/KP3.4.3/III/2026
+                - generic [ref=e174]: Evaluasi kinerja pegawai
+              - 'cell "Uraian Dokumen Rapat Monitoring dan Evaluasi - Unit kerja memiliki rencana kerja pembangunan Zona Integritas. Dibuat oleh: Super Admin" [ref=e175]':
+                - text: Uraian Dokumen
+                - generic [ref=e176]: Rapat Monitoring dan Evaluasi - Unit kerja memiliki rencana kerja pembangunan Zona Integritas.
+                - generic [ref=e177]: "Dibuat oleh: Super Admin"
+              - cell "Tujuan / Penerima Internal / 3 orang" [ref=e178]:
+                - text: Tujuan / Penerima
+                - generic [ref=e179]: Internal / 3 orang
+              - cell "Tanggal Tanggal Surat 2026-03-26 Diinput 2026-03-25" [ref=e180]:
+                - text: Tanggal
+                - generic [ref=e181]: Tanggal Surat
+                - generic [ref=e182]: 2026-03-26
+                - generic [ref=e183]: Diinput
+                - generic [ref=e184]: 2026-03-25
+              - cell "Lampiran Berkas" [ref=e185]:
+                - text: Lampiran
+                - button "Berkas" [ref=e186] [cursor=pointer]
+              - cell "Status Disetujui" [ref=e187]:
+                - text: Status
+                - generic [ref=e188]: Disetujui
+            - 'row "Dokumen Surat Keluar 11/SEK.W31-A/KP3.4.3/III/2026 KP - Kepegawaian Uraian Dokumen Rapat Monitoring dan Evaluasi - Unit kerja memiliki rencana kerja pembangunan Zona Integritas. Dibuat oleh: Super Admin Tujuan / Penerima Internal / 3 orang Tanggal Tanggal Surat 2026-03-25 Diinput 2026-03-25 Lampiran Berkas Status Lengkap" [ref=e189]':
+              - cell "Dokumen Surat Keluar 11/SEK.W31-A/KP3.4.3/III/2026 KP - Kepegawaian" [ref=e190]:
+                - text: Dokumen
+                - generic [ref=e191]: Surat Keluar
+                - generic [ref=e192]: 11/SEK.W31-A/KP3.4.3/III/2026
+                - generic [ref=e193]: KP - Kepegawaian
+              - 'cell "Uraian Dokumen Rapat Monitoring dan Evaluasi - Unit kerja memiliki rencana kerja pembangunan Zona Integritas. Dibuat oleh: Super Admin" [ref=e194]':
+                - text: Uraian Dokumen
+                - generic [ref=e195]: Rapat Monitoring dan Evaluasi - Unit kerja memiliki rencana kerja pembangunan Zona Integritas.
+                - generic [ref=e196]: "Dibuat oleh: Super Admin"
+              - cell "Tujuan / Penerima Internal / 3 orang" [ref=e197]:
+                - text: Tujuan / Penerima
+                - generic [ref=e198]: Internal / 3 orang
+              - cell "Tanggal Tanggal Surat 2026-03-25 Diinput 2026-03-25" [ref=e199]:
+                - text: Tanggal
+                - generic [ref=e200]: Tanggal Surat
+                - generic [ref=e201]: 2026-03-25
+                - generic [ref=e202]: Diinput
+                - generic [ref=e203]: 2026-03-25
+              - cell "Lampiran Berkas" [ref=e204]:
+                - text: Lampiran
+                - button "Berkas" [ref=e205] [cursor=pointer]
+              - cell "Status Lengkap" [ref=e206]:
+                - text: Status
+                - generic [ref=e207]: Lengkap
+            - 'row "Dokumen Surat Keluar 10/KPTA.W31-A/KP7.1/III/2026 - Uraian Dokumen Surat Tugas - Zona Integritas (ZI) adalah predikat yang diberikan kepada instansi pemerintah di Indonesia yang... Dibuat oleh: Super Admin Tujuan / Penerima Internal / 3 orang Tanggal Tanggal Surat 2026-03-25 Diinput 2026-03-25 Lampiran Berkas Status Lengkap" [ref=e208]':
+              - cell "Dokumen Surat Keluar 10/KPTA.W31-A/KP7.1/III/2026 -" [ref=e209]:
+                - text: Dokumen
+                - generic [ref=e210]: Surat Keluar
+                - generic [ref=e211]: 10/KPTA.W31-A/KP7.1/III/2026
+                - generic [ref=e212]: "-"
+              - 'cell "Uraian Dokumen Surat Tugas - Zona Integritas (ZI) adalah predikat yang diberikan kepada instansi pemerintah di Indonesia yang... Dibuat oleh: Super Admin" [ref=e213]':
+                - text: Uraian Dokumen
+                - generic [ref=e214]: Surat Tugas - Zona Integritas (ZI) adalah predikat yang diberikan kepada instansi pemerintah di Indonesia yang...
+                - generic [ref=e215]: "Dibuat oleh: Super Admin"
+              - cell "Tujuan / Penerima Internal / 3 orang" [ref=e216]:
+                - text: Tujuan / Penerima
+                - generic [ref=e217]: Internal / 3 orang
+              - cell "Tanggal Tanggal Surat 2026-03-25 Diinput 2026-03-25" [ref=e218]:
+                - text: Tanggal
+                - generic [ref=e219]: Tanggal Surat
+                - generic [ref=e220]: 2026-03-25
+                - generic [ref=e221]: Diinput
+                - generic [ref=e222]: 2026-03-25
+              - cell "Lampiran Berkas" [ref=e223]:
+                - text: Lampiran
+                - button "Berkas" [ref=e224] [cursor=pointer]
+              - cell "Status Lengkap" [ref=e225]:
+                - text: Status
+                - generic [ref=e226]: Lengkap
+            - 'row "Dokumen Surat Keluar 9/KPTA.W31-A/KP7.1/III/2026 - Uraian Dokumen Surat Tugas - Zona Integritas (ZI) adalah predikat instansi pemerintah yang berkomitmen mewujudkan Wilayah Beb... Dibuat oleh: Super Admin Tujuan / Penerima Internal / 1 orang Tanggal Tanggal Surat 2026-03-23 Diinput 2026-03-23 Lampiran Berkas Status Lengkap" [ref=e227]':
+              - cell "Dokumen Surat Keluar 9/KPTA.W31-A/KP7.1/III/2026 -" [ref=e228]:
+                - text: Dokumen
+                - generic [ref=e229]: Surat Keluar
+                - generic [ref=e230]: 9/KPTA.W31-A/KP7.1/III/2026
+                - generic [ref=e231]: "-"
+              - 'cell "Uraian Dokumen Surat Tugas - Zona Integritas (ZI) adalah predikat instansi pemerintah yang berkomitmen mewujudkan Wilayah Beb... Dibuat oleh: Super Admin" [ref=e232]':
+                - text: Uraian Dokumen
+                - generic [ref=e233]: Surat Tugas - Zona Integritas (ZI) adalah predikat instansi pemerintah yang berkomitmen mewujudkan Wilayah Beb...
+                - generic [ref=e234]: "Dibuat oleh: Super Admin"
+              - cell "Tujuan / Penerima Internal / 1 orang" [ref=e235]:
+                - text: Tujuan / Penerima
+                - generic [ref=e236]: Internal / 1 orang
+              - cell "Tanggal Tanggal Surat 2026-03-23 Diinput 2026-03-23" [ref=e237]:
+                - text: Tanggal
+                - generic [ref=e238]: Tanggal Surat
+                - generic [ref=e239]: 2026-03-23
+                - generic [ref=e240]: Diinput
+                - generic [ref=e241]: 2026-03-23
+              - cell "Lampiran Berkas" [ref=e242]:
+                - text: Lampiran
+                - button "Berkas" [ref=e243] [cursor=pointer]
+              - cell "Status Lengkap" [ref=e244]:
+                - text: Status
+                - generic [ref=e245]: Lengkap
+            - 'row "Dokumen Surat Keluar 8/KPTA.W31-A/KP7.1/III/2026 - Uraian Dokumen Surat Tugas - Zona Integritas (ZI) adalah predikat instansi pemerintah yang berkomitmen mewujudkan Wilayah Beb... Dibuat oleh: Super Admin Tujuan / Penerima Internal / 3 orang Tanggal Tanggal Surat 2026-03-23 Diinput 2026-03-23 Lampiran Berkas Status Lengkap" [ref=e246]':
+              - cell "Dokumen Surat Keluar 8/KPTA.W31-A/KP7.1/III/2026 -" [ref=e247]:
+                - text: Dokumen
+                - generic [ref=e248]: Surat Keluar
+                - generic [ref=e249]: 8/KPTA.W31-A/KP7.1/III/2026
+                - generic [ref=e250]: "-"
+              - 'cell "Uraian Dokumen Surat Tugas - Zona Integritas (ZI) adalah predikat instansi pemerintah yang berkomitmen mewujudkan Wilayah Beb... Dibuat oleh: Super Admin" [ref=e251]':
+                - text: Uraian Dokumen
+                - generic [ref=e252]: Surat Tugas - Zona Integritas (ZI) adalah predikat instansi pemerintah yang berkomitmen mewujudkan Wilayah Beb...
+                - generic [ref=e253]: "Dibuat oleh: Super Admin"
+              - cell "Tujuan / Penerima Internal / 3 orang" [ref=e254]:
+                - text: Tujuan / Penerima
+                - generic [ref=e255]: Internal / 3 orang
+              - cell "Tanggal Tanggal Surat 2026-03-23 Diinput 2026-03-23" [ref=e256]:
+                - text: Tanggal
+                - generic [ref=e257]: Tanggal Surat
+                - generic [ref=e258]: 2026-03-23
+                - generic [ref=e259]: Diinput
+                - generic [ref=e260]: 2026-03-23
+              - cell "Lampiran Berkas" [ref=e261]:
+                - text: Lampiran
+                - button "Berkas" [ref=e262] [cursor=pointer]
+              - cell "Status Lengkap" [ref=e263]:
+                - text: Status
+                - generic [ref=e264]: Lengkap
+            - 'row "Dokumen Surat Keluar 7/KPTA.W31-A/KP7.1/III/2026 - Uraian Dokumen Surat Tugas - mempersiapan zi di satuan kerja lain Dibuat oleh: Super Admin Tujuan / Penerima Internal / 1 orang Tanggal Tanggal Surat 2026-03-23 Diinput 2026-03-23 Lampiran Berkas Status Lengkap" [ref=e265]':
+              - cell "Dokumen Surat Keluar 7/KPTA.W31-A/KP7.1/III/2026 -" [ref=e266]:
+                - text: Dokumen
+                - generic [ref=e267]: Surat Keluar
+                - generic [ref=e268]: 7/KPTA.W31-A/KP7.1/III/2026
+                - generic [ref=e269]: "-"
+              - 'cell "Uraian Dokumen Surat Tugas - mempersiapan zi di satuan kerja lain Dibuat oleh: Super Admin" [ref=e270]':
+                - text: Uraian Dokumen
+                - generic [ref=e271]: Surat Tugas - mempersiapan zi di satuan kerja lain
+                - generic [ref=e272]: "Dibuat oleh: Super Admin"
+              - cell "Tujuan / Penerima Internal / 1 orang" [ref=e273]:
+                - text: Tujuan / Penerima
+                - generic [ref=e274]: Internal / 1 orang
+              - cell "Tanggal Tanggal Surat 2026-03-23 Diinput 2026-03-23" [ref=e275]:
+                - text: Tanggal
+                - generic [ref=e276]: Tanggal Surat
+                - generic [ref=e277]: 2026-03-23
+                - generic [ref=e278]: Diinput
+                - generic [ref=e279]: 2026-03-23
+              - cell "Lampiran Berkas" [ref=e280]:
+                - text: Lampiran
+                - button "Berkas" [ref=e281] [cursor=pointer]
+              - cell "Status Lengkap" [ref=e282]:
+                - text: Status
+                - generic [ref=e283]: Lengkap
+            - 'row "Dokumen Cuti 6/KPTA.W31-A/KP5.3/III/2026 Cuti Sakit Uraian Dokumen Permintaan dan Pemberian Cuti Sakit - Staf Kepegawaian 1 Dibuat oleh: Staf Kepegawaian 1 Tujuan / Penerima Internal / 3 orang Tanggal Tanggal Surat 2026-03-24 Diinput 2026-03-23 Lampiran Berkas Status Disetujui" [ref=e284]':
+              - cell "Dokumen Cuti 6/KPTA.W31-A/KP5.3/III/2026 Cuti Sakit" [ref=e285]:
+                - text: Dokumen
+                - generic [ref=e286]: Cuti
+                - generic [ref=e287]: 6/KPTA.W31-A/KP5.3/III/2026
+                - generic [ref=e288]: Cuti Sakit
+              - 'cell "Uraian Dokumen Permintaan dan Pemberian Cuti Sakit - Staf Kepegawaian 1 Dibuat oleh: Staf Kepegawaian 1" [ref=e289]':
+                - text: Uraian Dokumen
+                - generic [ref=e290]: Permintaan dan Pemberian Cuti Sakit - Staf Kepegawaian 1
+                - generic [ref=e291]: "Dibuat oleh: Staf Kepegawaian 1"
+              - cell "Tujuan / Penerima Internal / 3 orang" [ref=e292]:
+                - text: Tujuan / Penerima
+                - generic [ref=e293]: Internal / 3 orang
+              - cell "Tanggal Tanggal Surat 2026-03-24 Diinput 2026-03-23" [ref=e294]:
+                - text: Tanggal
+                - generic [ref=e295]: Tanggal Surat
+                - generic [ref=e296]: 2026-03-24
+                - generic [ref=e297]: Diinput
+                - generic [ref=e298]: 2026-03-23
+              - cell "Lampiran Berkas" [ref=e299]:
+                - text: Lampiran
+                - button "Berkas" [ref=e300] [cursor=pointer]
+              - cell "Status Disetujui" [ref=e301]:
+                - text: Status
+                - generic [ref=e302]: Disetujui
+            - 'row "Dokumen Surat Keluar 6/KPTA.W31-A/KP5.3/III/2026 - Uraian Dokumen Permintaan dan Pemberian Cuti Sakit - Staf Kepegawaian 1 Dibuat oleh: Staf Kepegawaian 1 Tujuan / Penerima Internal / 3 orang Tanggal Tanggal Surat 2026-03-23 Diinput 2026-03-23 Lampiran Berkas Status Lengkap" [ref=e303]':
+              - cell "Dokumen Surat Keluar 6/KPTA.W31-A/KP5.3/III/2026 -" [ref=e304]:
+                - text: Dokumen
+                - generic [ref=e305]: Surat Keluar
+                - generic [ref=e306]: 6/KPTA.W31-A/KP5.3/III/2026
+                - generic [ref=e307]: "-"
+              - 'cell "Uraian Dokumen Permintaan dan Pemberian Cuti Sakit - Staf Kepegawaian 1 Dibuat oleh: Staf Kepegawaian 1" [ref=e308]':
+                - text: Uraian Dokumen
+                - generic [ref=e309]: Permintaan dan Pemberian Cuti Sakit - Staf Kepegawaian 1
+                - generic [ref=e310]: "Dibuat oleh: Staf Kepegawaian 1"
+              - cell "Tujuan / Penerima Internal / 3 orang" [ref=e311]:
+                - text: Tujuan / Penerima
+                - generic [ref=e312]: Internal / 3 orang
+              - cell "Tanggal Tanggal Surat 2026-03-23 Diinput 2026-03-23" [ref=e313]:
+                - text: Tanggal
+                - generic [ref=e314]: Tanggal Surat
+                - generic [ref=e315]: 2026-03-23
+                - generic [ref=e316]: Diinput
+                - generic [ref=e317]: 2026-03-23
+              - cell "Lampiran Berkas" [ref=e318]:
+                - text: Lampiran
+                - button "Berkas" [ref=e319] [cursor=pointer]
+              - cell "Status Lengkap" [ref=e320]:
+                - text: Status
+                - generic [ref=e321]: Lengkap
+            - 'row "Dokumen Surat Keluar 5/KPTA.W31-A/KP5.3/III/2026 - Uraian Dokumen Permintaan dan Pemberian Cuti Tahunan - Staf Kepegawaian 1 Dibuat oleh: Staf Kepegawaian 1 Tujuan / Penerima Internal / 3 orang Tanggal Tanggal Surat 2026-03-23 Diinput 2026-03-23 Lampiran Berkas Status Lengkap" [ref=e322]':
+              - cell "Dokumen Surat Keluar 5/KPTA.W31-A/KP5.3/III/2026 -" [ref=e323]:
+                - text: Dokumen
+                - generic [ref=e324]: Surat Keluar
+                - generic [ref=e325]: 5/KPTA.W31-A/KP5.3/III/2026
+                - generic [ref=e326]: "-"
+              - 'cell "Uraian Dokumen Permintaan dan Pemberian Cuti Tahunan - Staf Kepegawaian 1 Dibuat oleh: Staf Kepegawaian 1" [ref=e327]':
+                - text: Uraian Dokumen
+                - generic [ref=e328]: Permintaan dan Pemberian Cuti Tahunan - Staf Kepegawaian 1
+                - generic [ref=e329]: "Dibuat oleh: Staf Kepegawaian 1"
+              - cell "Tujuan / Penerima Internal / 3 orang" [ref=e330]:
+                - text: Tujuan / Penerima
+                - generic [ref=e331]: Internal / 3 orang
+              - cell "Tanggal Tanggal Surat 2026-03-23 Diinput 2026-03-23" [ref=e332]:
+                - text: Tanggal
+                - generic [ref=e333]: Tanggal Surat
+                - generic [ref=e334]: 2026-03-23
+                - generic [ref=e335]: Diinput
+                - generic [ref=e336]: 2026-03-23
+              - cell "Lampiran Berkas" [ref=e337]:
+                - text: Lampiran
+                - button "Berkas" [ref=e338] [cursor=pointer]
+              - cell "Status Lengkap" [ref=e339]:
+                - text: Status
+                - generic [ref=e340]: Lengkap
+            - 'row "Dokumen Cuti 5/KPTA.W31-A/KP5.3/III/2026 Cuti Tahunan Uraian Dokumen Permintaan dan Pemberian Cuti Tahunan - Staf Kepegawaian 1 Dibuat oleh: Staf Kepegawaian 1 Tujuan / Penerima Internal / 3 orang Tanggal Tanggal Surat 2026-04-22 Diinput 2026-03-23 Lampiran Berkas Status Disetujui" [ref=e341]':
+              - cell "Dokumen Cuti 5/KPTA.W31-A/KP5.3/III/2026 Cuti Tahunan" [ref=e342]:
+                - text: Dokumen
+                - generic [ref=e343]: Cuti
+                - generic [ref=e344]: 5/KPTA.W31-A/KP5.3/III/2026
+                - generic [ref=e345]: Cuti Tahunan
+              - 'cell "Uraian Dokumen Permintaan dan Pemberian Cuti Tahunan - Staf Kepegawaian 1 Dibuat oleh: Staf Kepegawaian 1" [ref=e346]':
+                - text: Uraian Dokumen
+                - generic [ref=e347]: Permintaan dan Pemberian Cuti Tahunan - Staf Kepegawaian 1
+                - generic [ref=e348]: "Dibuat oleh: Staf Kepegawaian 1"
+              - cell "Tujuan / Penerima Internal / 3 orang" [ref=e349]:
+                - text: Tujuan / Penerima
+                - generic [ref=e350]: Internal / 3 orang
+              - cell "Tanggal Tanggal Surat 2026-04-22 Diinput 2026-03-23" [ref=e351]:
+                - text: Tanggal
+                - generic [ref=e352]: Tanggal Surat
+                - generic [ref=e353]: 2026-04-22
+                - generic [ref=e354]: Diinput
+                - generic [ref=e355]: 2026-03-23
+              - cell "Lampiran Berkas" [ref=e356]:
+                - text: Lampiran
+                - button "Berkas" [ref=e357] [cursor=pointer]
+              - cell "Status Disetujui" [ref=e358]:
+                - text: Status
+                - generic [ref=e359]: Disetujui
+            - 'row "Dokumen Cuti 4/KPTA.W31-A/KP5.3/III/2026 Cuti Tahunan Uraian Dokumen Permintaan dan Pemberian Cuti Tahunan - Staf Kepegawaian 1 Dibuat oleh: Staf Kepegawaian 1 Tujuan / Penerima Internal / 4 orang Tanggal Tanggal Surat 2026-04-08 Diinput 2026-03-23 Lampiran Berkas Status Disetujui" [ref=e360]':
+              - cell "Dokumen Cuti 4/KPTA.W31-A/KP5.3/III/2026 Cuti Tahunan" [ref=e361]:
+                - text: Dokumen
+                - generic [ref=e362]: Cuti
+                - generic [ref=e363]: 4/KPTA.W31-A/KP5.3/III/2026
+                - generic [ref=e364]: Cuti Tahunan
+              - 'cell "Uraian Dokumen Permintaan dan Pemberian Cuti Tahunan - Staf Kepegawaian 1 Dibuat oleh: Staf Kepegawaian 1" [ref=e365]':
+                - text: Uraian Dokumen
+                - generic [ref=e366]: Permintaan dan Pemberian Cuti Tahunan - Staf Kepegawaian 1
+                - generic [ref=e367]: "Dibuat oleh: Staf Kepegawaian 1"
+              - cell "Tujuan / Penerima Internal / 4 orang" [ref=e368]:
+                - text: Tujuan / Penerima
+                - generic [ref=e369]: Internal / 4 orang
+              - cell "Tanggal Tanggal Surat 2026-04-08 Diinput 2026-03-23" [ref=e370]:
+                - text: Tanggal
+                - generic [ref=e371]: Tanggal Surat
+                - generic [ref=e372]: 2026-04-08
+                - generic [ref=e373]: Diinput
+                - generic [ref=e374]: 2026-03-23
+              - cell "Lampiran Berkas" [ref=e375]:
+                - text: Lampiran
+                - button "Berkas" [ref=e376] [cursor=pointer]
+              - cell "Status Disetujui" [ref=e377]:
+                - text: Status
+                - generic [ref=e378]: Disetujui
+            - 'row "Dokumen Cuti 001/SK-CUTI/2026 Cuti Tahunan Uraian Dokumen Permintaan dan Pemberian Cuti Tahunan - Staf Kepegawaian 1 Dibuat oleh: Staf Kepegawaian 1 Tujuan / Penerima Internal / 1 orang Tanggal Tanggal Surat 2026-03-26 Diinput 2026-03-23 Lampiran Berkas Status Disetujui" [ref=e379]':
+              - cell "Dokumen Cuti 001/SK-CUTI/2026 Cuti Tahunan" [ref=e380]:
+                - text: Dokumen
+                - generic [ref=e381]: Cuti
+                - generic [ref=e382]: 001/SK-CUTI/2026
+                - generic [ref=e383]: Cuti Tahunan
+              - 'cell "Uraian Dokumen Permintaan dan Pemberian Cuti Tahunan - Staf Kepegawaian 1 Dibuat oleh: Staf Kepegawaian 1" [ref=e384]':
+                - text: Uraian Dokumen
+                - generic [ref=e385]: Permintaan dan Pemberian Cuti Tahunan - Staf Kepegawaian 1
+                - generic [ref=e386]: "Dibuat oleh: Staf Kepegawaian 1"
+              - cell "Tujuan / Penerima Internal / 1 orang" [ref=e387]:
+                - text: Tujuan / Penerima
+                - generic [ref=e388]: Internal / 1 orang
+              - cell "Tanggal Tanggal Surat 2026-03-26 Diinput 2026-03-23" [ref=e389]:
+                - text: Tanggal
+                - generic [ref=e390]: Tanggal Surat
+                - generic [ref=e391]: 2026-03-26
+                - generic [ref=e392]: Diinput
+                - generic [ref=e393]: 2026-03-23
+              - cell "Lampiran Berkas" [ref=e394]:
+                - text: Lampiran
+                - button "Berkas" [ref=e395] [cursor=pointer]
+              - cell "Status Disetujui" [ref=e396]:
+                - text: Status
+                - generic [ref=e397]: Disetujui
+        - navigation [ref=e399]:
+          - list [ref=e400]:
+            - listitem "pagination.previous" [ref=e401]:
+              - generic: ‹
+            - listitem [ref=e402]:
+              - generic [ref=e403]: "1"
+            - listitem [ref=e404]:
+              - link "2" [ref=e405] [cursor=pointer]:
+                - /url: http://localhost:8000/arsip?page=2
+            - listitem [ref=e406]:
+              - link "pagination.next" [ref=e407] [cursor=pointer]:
+                - /url: http://localhost:8000/arsip?page=2
+                - text: ›
+      - text: 
+  - contentinfo [ref=e408]:
+    - generic [ref=e409]:
+      - text: © 2026
+      - strong [ref=e410]: Pengadilan Tinggi Agama Papua Barat
+      - text: . Sistem Informasi Persuratan.

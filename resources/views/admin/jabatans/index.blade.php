@@ -64,23 +64,23 @@
                     <tbody>
                         @forelse($jabatans as $jabatan)
                             <tr>
-                                <td>{{ $jabatan->nama }}</td>
-                                <td>{{ $jabatan->kode }}</td>
-                                <td>{{ $jabatan->level }}</td>
-                                <td>{{ optional($jabatan->parent)->nama ?? '-' }}</td>
-                                <td>{{ optional($jabatan->unit)->nama ?? '-' }}</td>
-                                <td>{{ $jabatan->users_count }}</td>
-                                <td class="app-action-cell">
+                                <td data-label="Nama">{{ $jabatan->nama }}</td>
+                                <td data-label="Kode">{{ $jabatan->kode }}</td>
+                                <td data-label="Level">{{ $jabatan->level }}</td>
+                                <td data-label="Parent">{{ optional($jabatan->parent)->nama ?? '-' }}</td>
+                                <td data-label="Unit">{{ optional($jabatan->unit)->nama ?? '-' }}</td>
+                                <td data-label="Dipakai">{{ $jabatan->users_count }}</td>
+                                <td class="app-action-cell" data-label="Aksi">
                                     <div class="app-action-group">
                                     <button class="app-icon-btn edit" data-toggle="modal"
-                                        data-target="#editJabatanModal{{ $jabatan->id }}">
+                                        data-target="#editJabatanModal{{ $jabatan->id }}" data-mobile-label="Edit">
                                         <i class="fas fa-pen"></i>
                                     </button>
                                     <form action="{{ route('admin.jabatans.destroy', $jabatan) }}" method="POST" class="d-inline">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" class="app-icon-btn delete"
-                                            onclick="return confirm('Hapus jabatan ini?')">
+                                            onclick="return confirm('Hapus jabatan ini?')" data-mobile-label="Hapus">
                                             <i class="fas fa-trash"></i>
                                         </button>
                                     </form>

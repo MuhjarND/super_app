@@ -2,10 +2,78 @@
 
 @section('title', 'Kelola User')
 
+@push('styles')
+    <style>
+        @media (max-width: 767.98px) {
+            .admin-users-top {
+                flex-direction: column;
+                align-items: stretch !important;
+                gap: 10px;
+            }
+
+            .admin-users-top .btn {
+                width: 100%;
+            }
+
+            .admin-users-filter .row {
+                display: block;
+            }
+
+            .admin-users-filter .form-group,
+            .admin-users-filter .d-flex {
+                margin-bottom: 10px;
+            }
+
+            .admin-users-table,
+            .admin-users-table thead,
+            .admin-users-table tbody,
+            .admin-users-table tr,
+            .admin-users-table th,
+            .admin-users-table td {
+                display: block;
+                width: 100%;
+            }
+
+            .admin-users-table thead {
+                display: none;
+            }
+
+            .admin-users-table tbody tr {
+                padding: 14px 14px 12px;
+                border-bottom: 1px solid #e5e7eb;
+            }
+
+            .admin-users-table td {
+                padding: 0 0 10px;
+                border: 0;
+            }
+
+            .admin-users-table td:last-child {
+                padding-bottom: 0;
+            }
+
+            .admin-users-table td::before {
+                content: attr(data-label);
+                display: block;
+                margin-bottom: 4px;
+                font-size: 0.74rem;
+                font-weight: 700;
+                letter-spacing: 0.05em;
+                text-transform: uppercase;
+                color: #94a3b8;
+            }
+
+            .admin-users-table .app-action-group {
+                justify-content: flex-start;
+            }
+        }
+    </style>
+@endpush
+
 @section('content-header')
     <div class="content-header">
         <div class="container-fluid">
-            <div class="d-flex justify-content-between align-items-center">
+            <div class="d-flex justify-content-between align-items-center admin-users-top">
                 <h1>Kelola User</h1>
                 <button class="btn app-create-btn" data-toggle="modal" data-target="#createUserModal">
                     <i class="fas fa-plus mr-1"></i> Tambah User
@@ -20,7 +88,7 @@
 
     <div class="card">
         <div class="card-header">
-            <form method="GET" action="{{ route('admin.users.index') }}">
+            <form method="GET" action="{{ route('admin.users.index') }}" class="admin-users-filter">
                 <div class="row">
                     <div class="col-md-3 form-group mb-md-0">
                         <input type="text" name="search" class="form-control" value="{{ $filters['search'] ?? '' }}"
@@ -75,7 +143,7 @@
         </div>
         <div class="card-body p-0">
             <div class="table-responsive">
-                <table class="table mb-0">
+                <table class="table mb-0 admin-users-table">
                     <thead>
                         <tr>
                             <th>Nama</th>
@@ -92,39 +160,39 @@
                         @forelse($users as $user)
                             @php $selectedRoles = $user->roles->pluck('id')->map(fn ($id) => (string) $id)->all(); @endphp
                             <tr>
-                                <td>
+                                <td data-label="Nama">
                                     <div>{{ $user->name }}</div>
                                     <small class="text-muted">{{ $user->nip ?? '-' }}</small>
                                 </td>
-                                <td>{{ $user->email }}</td>
-                                <td>{{ $user->roles->pluck('display_name')->implode(', ') ?: '-' }}</td>
-                                <td>
+                                <td data-label="Email">{{ $user->email }}</td>
+                                <td data-label="Role">{{ $user->roles->pluck('display_name')->implode(', ') ?: '-' }}</td>
+                                <td data-label="Unit / Bidang">
                                     <div>{{ optional($user->unit)->nama ?? '-' }}</div>
                                     <small class="text-muted">{{ optional($user->bidang)->nama ?? '-' }}</small>
                                 </td>
-                                <td>
+                                <td data-label="Jabatan">
                                     <div>{{ optional($user->jabatan)->nama ?? '-' }}</div>
                                     <small class="text-muted">{{ $user->jabatan_keterangan ?: '-' }}</small>
                                 </td>
-                                <td>{{ $user->hirarki ?? '-' }}</td>
-                                <td>{{ $user->no_hp ?? '-' }}</td>
-                                <td class="app-action-cell">
+                                <td data-label="Hirarki">{{ $user->hirarki ?? '-' }}</td>
+                                <td data-label="No. HP / WA">{{ $user->no_hp ?? '-' }}</td>
+                                <td class="app-action-cell" data-label="Aksi">
                                     <div class="app-action-group">
                                     <form action="{{ route('admin.users.send-login-info', $user) }}" method="POST" class="d-inline">
                                         @csrf
-                                        <button type="submit" class="app-icon-btn send"
+                                        <button type="submit" class="app-icon-btn send" data-mobile-label="Kirim"
                                             onclick="return confirm('Kirim informasi login ke WhatsApp user ini?')">
                                             <i class="fas fa-key"></i>
                                         </button>
                                     </form>
-                                    <button class="app-icon-btn edit" data-toggle="modal"
+                                    <button class="app-icon-btn edit" data-mobile-label="Edit" data-toggle="modal"
                                         data-target="#editUserModal{{ $user->id }}">
                                         <i class="fas fa-pen"></i>
                                     </button>
                                     <form action="{{ route('admin.users.destroy', $user) }}" method="POST" class="d-inline">
                                         @csrf
                                         @method('DELETE')
-                                        <button type="submit" class="app-icon-btn delete"
+                                        <button type="submit" class="app-icon-btn delete" data-mobile-label="Hapus"
                                             onclick="return confirm('Hapus user ini?')">
                                             <i class="fas fa-trash"></i>
                                         </button>

@@ -15,8 +15,8 @@
         <tbody>
             @forelse($suratMasuk as $index => $surat)
                 <tr>
-                    <td>{{ $suratMasuk->firstItem() + $index }}</td>
-                    <td>
+                    <td data-label="#">{{ $suratMasuk->firstItem() + $index }}</td>
+                    <td data-label="No. Surat">
                         <div>
                             @if($surat->klasifikasiKode)
                                 <small class="badge badge-light">{{ $surat->klasifikasiKode->kode }}</small>
@@ -24,25 +24,25 @@
                             <strong class="text-primary">{{ $surat->nomor_surat }}</strong>
                         </div>
                     </td>
-                    <td>
+                    <td data-label="Pengirim">
                         <span class="badge badge-{{ $surat->opsi_pengirim == 'mahkamah_agung' ? 'primary' : 'secondary' }}"
                             style="font-size: 0.7rem;">
                             {{ $surat->opsi_pengirim == 'mahkamah_agung' ? 'MA' : 'Non-MA' }}
                         </span>
                         <div class="mt-1">{{ $surat->pengirim }}</div>
                     </td>
-                    <td style="max-width: 250px;">
+                    <td style="max-width: 250px;" data-label="Perihal / Isi Ringkas">
                         <span title="{{ $surat->perihal }}">{{ Str::limit($surat->perihal, 60) }}</span>
                     </td>
-                    <td>{{ $surat->tanggal_surat->format('d/m/Y') }}</td>
-                    <td>
+                    <td data-label="Tanggal Surat">{{ $surat->tanggal_surat->format('d/m/Y') }}</td>
+                    <td data-label="Di-input Pada">
                         <small>{{ $surat->created_at->format('d/m/Y H:i') }}</small>
                     </td>
-                    <td>{!! $surat->status_badge !!}</td>
-                    <td class="app-action-cell">
+                    <td data-label="Status">{!! $surat->status_badge !!}</td>
+                    <td class="app-action-cell" data-label="Aksi">
                         <div class="app-action-group">
                         <a href="{{ route('surat-masuk.show', $surat) }}" class="app-icon-btn detail"
-                            title="Detail">
+                            title="Detail" data-mobile-label="Detail">
                             <i class="fas fa-eye"></i>
                         </a>
                         </div>

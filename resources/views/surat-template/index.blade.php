@@ -226,7 +226,7 @@
                             <tr>
                                 <td>
                                     <div class="font-weight-600">{{ $proposal->title }}</div>
-                                    <small class="text-muted">{{ $proposal->category }}{{ $proposal->description ? ' Ã¢â‚¬Â¢ ' . $proposal->description : '' }}</small>
+                                    <small class="text-muted">{{ $proposal->category }}{{ $proposal->description ? ' - ' . $proposal->description : '' }}</small>
                                 </td>
                                 <td>
                                     <div>{{ optional($proposal->requester)->name ?: '-' }}</div>

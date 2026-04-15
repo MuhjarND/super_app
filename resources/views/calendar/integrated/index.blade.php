@@ -84,10 +84,29 @@
         .calendar-modal-meta-value { font-size: 0.84rem; color: #0f172a; font-weight: 600; line-height: 1.45; }
         .calendar-modal-description { margin-top: 16px; border-top: 1px solid #eef2f7; padding-top: 14px; color: #475569; line-height: 1.6; font-size: 0.88rem; }
         @media (max-width: 1199.98px) { .calendar-layout { grid-template-columns: 1fr; } }
-        @media (max-width: 991.98px) { .calendar-filter-bar { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+        @media (max-width: 991.98px) {
+            .calendar-filter-bar { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            .calendar-workspace { padding: 14px; }
+            .calendar-canvas { padding: 10px; overflow-x: auto; }
+        }
         @media (max-width: 767.98px) {
+            .calendar-board,
+            .calendar-side {
+                border-radius: 16px;
+            }
+
             .calendar-filter-bar { grid-template-columns: 1fr; }
             .calendar-modal-meta, .calendar-stat-grid { grid-template-columns: 1fr; }
+            .fc .fc-toolbar.fc-header-toolbar {
+                align-items: stretch;
+            }
+            .fc .fc-toolbar-title {
+                font-size: 0.96rem;
+            }
+            .fc .fc-button {
+                padding: 0.4rem 0.6rem !important;
+                font-size: 0.76rem !important;
+            }
         }
     </style>
 @endpush
@@ -254,16 +273,20 @@
                 }
                 const upcomingList = document.getElementById('calendarUpcomingList');
                 if ((meta.upcoming || []).length) {
-                    upcomingList.innerHTML = meta.upcoming.map(function (item) { return `<div class="calendar-list-item"><div class="calendar-list-item-title">${item.title}</div><div class="calendar-list-item-meta">${item.date} Â· ${item.module} Â· ${item.status}</div></div>`; }).join('');
+                    upcomingList.innerHTML = meta.upcoming.map(function (item) { return `<div class="calendar-list-item"><div class="calendar-list-item-title">${item.title}</div><div class="calendar-list-item-meta">${item.date} &bull; ${item.module} &bull; ${item.status}</div></div>`; }).join('');
                 } else {
                     upcomingList.innerHTML = '<div class="calendar-list-item"><div class="calendar-list-item-title">Belum ada agenda</div><div class="calendar-list-item-meta">Tidak ada event mendatang untuk filter yang dipilih.</div></div>';
                 }
             }
 
+            const isMobileViewport = window.innerWidth < 768;
+
             const calendar = new FullCalendar.Calendar(calendarEl, {
                 locale: 'id',
-                initialView: 'dayGridMonth',
-                headerToolbar: { left: 'prev,next today', center: 'title', right: 'dayGridMonth,timeGridWeek,timeGridDay,listWeek' },
+                initialView: isMobileViewport ? 'listWeek' : 'dayGridMonth',
+                headerToolbar: isMobileViewport
+                    ? { left: 'prev,next', center: 'title', right: 'listWeek,timeGridDay' }
+                    : { left: 'prev,next today', center: 'title', right: 'dayGridMonth,timeGridWeek,timeGridDay,listWeek' },
                 buttonText: { today: 'Hari ini', month: 'Bulan', week: 'Minggu', day: 'Hari', list: 'Agenda' },
                 height: 'auto',
                 firstDay: 1,

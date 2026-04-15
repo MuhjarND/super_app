@@ -1,0 +1,28 @@
+- generic [ref=e2]:
+  - generic [ref=e3]:
+    - img "Logo PTA Papua Barat" [ref=e5]
+    - heading "PTA Papua Barat" [level=1] [ref=e6]
+    - paragraph [ref=e7]: Sistem Informasi Internal
+  - generic [ref=e8]:
+    - heading "Masuk ke Akun Anda" [level=1] [ref=e9]
+    - generic [ref=e10]:
+      - generic [ref=e11]:
+        - generic [ref=e12]: Email
+        - generic [ref=e13]:
+          - generic [ref=e14]: 
+          - textbox "Email" [active] [ref=e15]:
+            - /placeholder: Masukkan email Anda
+      - generic [ref=e16]:
+        - generic [ref=e17]: Password
+        - generic [ref=e18]:
+          - generic [ref=e19]: 
+          - textbox "Password" [ref=e20]:
+            - /placeholder: Masukkan password
+            - text: superadmin@pta-papuabarat.go.idpassword123
+      - generic [ref=e22]:
+        - checkbox "Ingat saya" [ref=e23]
+        - generic [ref=e24]: Ingat saya
+      - button " Masuk" [ref=e25] [cursor=pointer]:
+        - generic [ref=e26]: 
+        - generic [ref=e27]: Masuk
+  - generic [ref=e28]: Hak Cipta © PTA Papua Barat - 2026

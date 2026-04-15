@@ -2,9 +2,63 @@
 
 @section('title', 'Master Area ZI')
 
+@push('styles')
+<style>
+    @media (max-width: 767.98px) {
+        .zi-area-top {
+            flex-direction: column;
+            align-items: stretch !important;
+        }
+
+        .zi-area-top .app-create-btn {
+            width: 100%;
+        }
+
+        .zi-area-table,
+        .zi-area-table thead,
+        .zi-area-table tbody,
+        .zi-area-table tr,
+        .zi-area-table th,
+        .zi-area-table td {
+            display: block;
+            width: 100%;
+        }
+
+        .zi-area-table thead {
+            display: none;
+        }
+
+        .zi-area-table tbody tr {
+            padding: 14px 14px 12px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .zi-area-table td {
+            padding: 0 0 10px;
+            border: 0;
+        }
+
+        .zi-area-table td:last-child {
+            padding-bottom: 0;
+        }
+
+        .zi-area-table td::before {
+            content: attr(data-label);
+            display: block;
+            margin-bottom: 4px;
+            font-size: 0.74rem;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            color: #94a3b8;
+        }
+    }
+</style>
+@endpush
+
 @section('content')
 <div class="card shadow-sm border-0 mb-3">
-    <div class="card-body d-flex justify-content-between align-items-center flex-wrap" style="gap:12px;">
+    <div class="card-body d-flex justify-content-between align-items-center flex-wrap zi-area-top" style="gap:12px;">
         <div>
             <h4 class="mb-1">Master Area Perubahan</h4>
             <div class="text-muted">Kelola area perubahan, PIC area, dan deskripsi monitoring.</div>
@@ -17,18 +71,18 @@
 
 <div class="card shadow-sm border-0">
     <div class="card-body table-responsive p-0">
-        <table class="table table-hover mb-0">
+        <table class="table table-hover mb-0 zi-area-table">
             <thead><tr><th>Kode</th><th>Nama Area</th><th>PIC Area</th><th>Status</th><th>Deskripsi</th>@if($canManage)<th style="width:90px;">Aksi</th>@endif</tr></thead>
             <tbody>
                 @forelse($areas as $area)
                     <tr>
-                        <td><strong>{{ $area->code }}</strong></td>
-                        <td>{{ $area->name }}</td>
-                        <td>{{ $area->pic_names }}</td>
-                        <td>{!! $area->status_badge !!}</td>
-                        <td>{{ $area->description ?: '-' }}</td>
+                        <td data-label="Kode"><strong>{{ $area->code }}</strong></td>
+                        <td data-label="Nama Area">{{ $area->name }}</td>
+                        <td data-label="PIC Area">{{ $area->pic_names }}</td>
+                        <td data-label="Status">{!! $area->status_badge !!}</td>
+                        <td data-label="Deskripsi">{{ $area->description ?: '-' }}</td>
                         @if($canManage)
-                            <td class="app-action-cell"><div class="app-action-group"><button class="app-icon-btn edit" data-toggle="modal" data-target="#editAreaModal{{ $area->id }}" title="Edit"><i class="fas fa-pen"></i></button></div></td>
+                            <td class="app-action-cell" data-label="Aksi"><div class="app-action-group"><button class="app-icon-btn edit" data-mobile-label="Edit" data-toggle="modal" data-target="#editAreaModal{{ $area->id }}" title="Edit"><i class="fas fa-pen"></i></button></div></td>
                         @endif
                     </tr>
                     @if($canManage)

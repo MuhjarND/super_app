@@ -14,6 +14,7 @@ use App\ZiActivity;
 use App\ZiActivityApproval;
 use App\ZiEvidence;
 use App\ZiIndicator;
+use App\Services\UnifiedActionCenterService;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\ServiceProvider;
@@ -58,6 +59,7 @@ class AppServiceProvider extends ServiceProvider
                 'sidebarNotulensiFollowUpCount' => 0,
                 'sidebarProgressZiAttentionCount' => 0,
                 'sidebarProgressZiApprovalPendingCount' => 0,
+                'sidebarActionCenterCount' => 0,
                 'topbarActionCount' => 0,
                 'topbarActionItems' => collect(),
             ];
@@ -354,11 +356,11 @@ class AppServiceProvider extends ServiceProvider
             $counts['sidebarNotulensiFollowUpCount'] = (clone $pendingFollowUpQuery)->count();
             $counts['sidebarApprovalTotalCount'] = $counts['sidebarApprovalPendingCount'] + $counts['sidebarNotulensiApprovalPendingCount'] + $counts['sidebarLeaveApprovalPendingCount'] + $counts['sidebarSuratKeluarApprovalPendingCount'] + $counts['sidebarProgressZiApprovalPendingCount'];
 
-            $counts['topbarActionItems'] = $actionItems
+            $fallbackTopbarItems = $actionItems
                 ->sortByDesc('sort_at')
                 ->take(8)
                 ->values();
-            $counts['topbarActionCount'] = (clone $pendingDisposisiQuery)->count()
+            $fallbackTopbarCount = (clone $pendingDisposisiQuery)->count()
                 + $counts['sidebarApprovalPendingCount']
                 + $counts['sidebarNotulensiApprovalPendingCount']
                 + $counts['sidebarLeaveApprovalPendingCount']
@@ -367,7 +369,42 @@ class AppServiceProvider extends ServiceProvider
                 + $counts['sidebarNotulensiFollowUpCount']
                 + $counts['sidebarProgressZiAttentionCount'];
 
+            $unifiedPayload = app(UnifiedActionCenterService::class)->build($user, ['tab' => 'all']);
+            $counts['sidebarActionCenterCount'] = $unifiedPayload['summary']['active_count'] ?? 0;
+            $counts['topbarActionCount'] = $counts['sidebarActionCenterCount'] ?: $fallbackTopbarCount;
+            $counts['topbarActionItems'] = collect($unifiedPayload['items'] ?? [])->take(8)->map(function ($item) {
+                return [
+                    'type' => $item['module_key'] ?? 'action-center',
+                    'icon' => $item['module_icon'] ?? 'fas fa-tasks',
+                    'icon_bg' => $this->notificationTone($item['module_key'] ?? null)['bg'],
+                    'icon_color' => $this->notificationTone($item['module_key'] ?? null)['text'],
+                    'title' => $item['type_label'] ?? 'Tindak Lanjut',
+                    'subtitle' => $item['title'] ?? '-',
+                    'description' => $item['description'] ?? '-',
+                    'time' => !empty($item['target_at']) ? $item['target_at']->diffForHumans() : null,
+                    'url' => $item['action_url'] ?? route('action-center.index'),
+                    'sort_at' => $item['sort_at'] ?? 0,
+                ];
+            })->values();
+
+            if ($counts['topbarActionItems']->isEmpty()) {
+                $counts['topbarActionItems'] = $fallbackTopbarItems;
+            }
+
             $view->with($counts);
         });
+    }
+
+    protected function notificationTone($moduleKey)
+    {
+        $map = [
+            'persuratan' => ['bg' => '#eff6ff', 'text' => '#1d4ed8'],
+            'rapat' => ['bg' => '#eef2ff', 'text' => '#4338ca'],
+            'cuti' => ['bg' => '#fef2f2', 'text' => '#dc2626'],
+            'progress_zi' => ['bg' => '#fff7ed', 'text' => '#d97706'],
+            'perawatan' => ['bg' => '#ecfeff', 'text' => '#0f766e'],
+        ];
+
+        return $map[$moduleKey] ?? ['bg' => '#f1f5f9', 'text' => '#334155'];
     }
 }

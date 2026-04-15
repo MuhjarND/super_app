@@ -1,0 +1,435 @@
+- generic [ref=e2]:
+  - navigation [ref=e3]:
+    - list [ref=e4]:
+      - listitem [ref=e5]:
+        - link "" [ref=e6] [cursor=pointer]:
+          - /url: "#"
+          - generic [ref=e7]: 
+    - list [ref=e8]:
+      - listitem [ref=e9]:
+        - link " 5" [ref=e10] [cursor=pointer]:
+          - /url: "#"
+          - generic [ref=e11]: 
+          - generic [ref=e12]: "5"
+        - text:     
+      - listitem [ref=e13]:
+        - button "" [ref=e14] [cursor=pointer]:
+          - generic [ref=e15]: 
+      - listitem [ref=e16]:
+        - link "S" [ref=e17] [cursor=pointer]:
+          - /url: "#"
+          - generic [ref=e18]: S
+        - text: 
+  - complementary [ref=e19]:
+    - link "P PTA Papua Barat" [ref=e20] [cursor=pointer]:
+      - /url: http://localhost:8000/dashboard
+      - generic [ref=e21]: P
+      - generic [ref=e22]: PTA Papua Barat
+    - generic [ref=e23]:
+      - generic [ref=e25]:
+        - generic [ref=e26]: SU
+        - generic [ref=e27]:
+          - generic [ref=e28]: Super Admin
+          - generic [ref=e29]: Super Admin
+      - navigation [ref=e30]:
+        - menu [ref=e31]:
+          - listitem [ref=e32]:
+            - link " Dashboard" [ref=e33] [cursor=pointer]:
+              - /url: http://localhost:8000/dashboard
+              - generic [ref=e34]: 
+              - paragraph [ref=e35]: Dashboard
+          - listitem [ref=e36]:
+            - link " Kalender Terpadu" [ref=e37] [cursor=pointer]:
+              - /url: http://localhost:8000/kalender-terpadu
+              - generic [ref=e38]: 
+              - paragraph [ref=e39]: Kalender Terpadu
+          - listitem [ref=e40]:
+            - link " Tindak Lanjut Terpadu 5" [ref=e41] [cursor=pointer]:
+              - /url: http://localhost:8000/tindak-lanjut-terpadu
+              - generic [ref=e42]: 
+              - paragraph [ref=e43]:
+                - text: Tindak Lanjut Terpadu
+                - generic [ref=e44]: "5"
+          - listitem [ref=e45]:
+            - button "Approval " [ref=e46] [cursor=pointer]:
+              - generic [ref=e47]: Approval
+              - generic [ref=e48]: 
+            - list:
+              - listitem:
+                - link " Tindaklanjuti 1":
+                  - /url: http://localhost:8000/approval
+                  - generic: 
+                  - paragraph:
+                    - text: Tindaklanjuti
+                    - generic: "1"
+              - listitem:
+                - link " Riwayat Approval":
+                  - /url: http://localhost:8000/approval/history
+                  - generic: 
+                  - paragraph: Riwayat Approval
+          - listitem [ref=e49]:
+            - button "Persuratan " [ref=e50] [cursor=pointer]:
+              - generic [ref=e51]: Persuratan
+              - generic [ref=e52]: 
+            - list:
+              - listitem:
+                - link " Surat Masuk 1":
+                  - /url: http://localhost:8000/surat-masuk
+                  - generic: 
+                  - paragraph:
+                    - text: Surat Masuk
+                    - generic: "1"
+              - listitem:
+                - link " Surat Keluar":
+                  - /url: http://localhost:8000/surat-keluar
+                  - generic: 
+                  - paragraph: Surat Keluar
+              - listitem:
+                - link " Template Surat":
+                  - /url: http://localhost:8000/template-surat
+                  - generic: 
+                  - paragraph: Template Surat
+          - listitem [ref=e53]:
+            - button "Rapat / Agenda " [ref=e54] [cursor=pointer]:
+              - generic [ref=e55]: Rapat / Agenda
+              - generic [ref=e56]: 
+            - list:
+              - listitem:
+                - link " Rapat/Agenda":
+                  - /url: http://localhost:8000/rapat
+                  - generic: 
+                  - paragraph: Rapat/Agenda
+              - listitem:
+                - link " Notulensi":
+                  - /url: http://localhost:8000/rapat/notulensi
+                  - generic: 
+                  - paragraph: Notulensi
+              - listitem:
+                - link " Tindak Lanjut":
+                  - /url: http://localhost:8000/rapat/notulensi/tindak-lanjut
+                  - generic: 
+                  - paragraph: Tindak Lanjut
+              - listitem:
+                - link " Absensi":
+                  - /url: http://localhost:8000/rapat/absensi
+                  - generic: 
+                  - paragraph: Absensi
+              - listitem:
+                - link " Laporan":
+                  - /url: http://localhost:8000/rapat/laporan
+                  - generic: 
+                  - paragraph: Laporan
+              - listitem:
+                - link " Agenda Pimpinan":
+                  - /url: http://localhost:8000/rapat/agenda-pimpinan
+                  - generic: 
+                  - paragraph: Agenda Pimpinan
+              - listitem:
+                - link " E-Voting":
+                  - /url: http://localhost:8000/rapat/voting
+                  - generic: 
+                  - paragraph: E-Voting
+          - listitem [ref=e57]:
+            - button "Cuti " [ref=e58] [cursor=pointer]:
+              - generic [ref=e59]: Cuti
+              - generic [ref=e60]: 
+            - list:
+              - listitem:
+                - link " Pengajuan Cuti":
+                  - /url: http://localhost:8000/cuti
+                  - generic: 
+                  - paragraph: Pengajuan Cuti
+              - listitem:
+                - link " Approval Cuti":
+                  - /url: http://localhost:8000/cuti/approval/list
+                  - generic: 
+                  - paragraph: Approval Cuti
+              - listitem:
+                - link " Rekap Saldo":
+                  - /url: http://localhost:8000/cuti/saldo
+                  - generic: 
+                  - paragraph: Rekap Saldo
+              - listitem:
+                - link " Laporan Cuti":
+                  - /url: http://localhost:8000/cuti/laporan
+                  - generic: 
+                  - paragraph: Laporan Cuti
+              - listitem:
+                - link " Jenis Cuti":
+                  - /url: http://localhost:8000/cuti/master/jenis-cuti
+                  - generic: 
+                  - paragraph: Jenis Cuti
+              - listitem:
+                - link " Kebijakan Cuti":
+                  - /url: http://localhost:8000/cuti/master/kebijakan
+                  - generic: 
+                  - paragraph: Kebijakan Cuti
+              - listitem:
+                - link " Cuti Bersama":
+                  - /url: http://localhost:8000/cuti/master/cuti-bersama
+                  - generic: 
+                  - paragraph: Cuti Bersama
+              - listitem:
+                - link " Delegasi Approval":
+                  - /url: http://localhost:8000/cuti/master/delegasi
+                  - generic: 
+                  - paragraph: Delegasi Approval
+          - listitem [ref=e61]:
+            - button "Perawatan Alat dan Mesin " [ref=e62] [cursor=pointer]:
+              - generic [ref=e63]: Perawatan Alat dan Mesin
+              - generic [ref=e64]: 
+            - list:
+              - listitem:
+                - link " Dashboard":
+                  - /url: http://localhost:8000/perawatan-alat-dan-mesin
+                  - generic: 
+                  - paragraph: Dashboard
+              - listitem:
+                - link " Master Barang":
+                  - /url: http://localhost:8000/perawatan-alat-dan-mesin/barang
+                  - generic: 
+                  - paragraph: Master Barang
+              - listitem:
+                - link " Transaksi Perawatan":
+                  - /url: http://localhost:8000/perawatan-alat-dan-mesin/transaksi-perawatan
+                  - generic: 
+                  - paragraph: Transaksi Perawatan
+              - listitem:
+                - link " Laporan":
+                  - /url: http://localhost:8000/perawatan-alat-dan-mesin/laporan
+                  - generic: 
+                  - paragraph: Laporan
+              - listitem:
+                - link " Cetak QR Code":
+                  - /url: http://localhost:8000/perawatan-alat-dan-mesin/qrcode
+                  - generic: 
+                  - paragraph: Cetak QR Code
+              - listitem:
+                - link " Satuan Barang":
+                  - /url: http://localhost:8000/perawatan-alat-dan-mesin/master/units
+                  - generic: 
+                  - paragraph: Satuan Barang
+              - listitem:
+                - link " Kondisi Barang":
+                  - /url: http://localhost:8000/perawatan-alat-dan-mesin/master/conditions
+                  - generic: 
+                  - paragraph: Kondisi Barang
+              - listitem:
+                - link " Ruang":
+                  - /url: http://localhost:8000/perawatan-alat-dan-mesin/master/rooms
+                  - generic: 
+                  - paragraph: Ruang
+              - listitem:
+                - link " Brand / Merk":
+                  - /url: http://localhost:8000/perawatan-alat-dan-mesin/master/brands
+                  - generic: 
+                  - paragraph: Brand / Merk
+              - listitem:
+                - link " Kuasa Pengguna":
+                  - /url: http://localhost:8000/perawatan-alat-dan-mesin/kuasa-pengguna-barang
+                  - generic: 
+                  - paragraph: Kuasa Pengguna
+          - listitem [ref=e65]:
+            - button "Persediaan " [ref=e66] [cursor=pointer]:
+              - generic [ref=e67]: Persediaan
+              - generic [ref=e68]: 
+            - list:
+              - listitem:
+                - link " Persediaan DEV":
+                  - /url: http://localhost:8000/persediaan
+                  - generic: 
+                  - paragraph: Persediaan DEV
+          - listitem [ref=e69]:
+            - button "Progress ZI " [ref=e70] [cursor=pointer]:
+              - generic [ref=e71]: Progress ZI
+              - generic [ref=e72]: 
+            - list:
+              - listitem:
+                - link " Rekapan ZI":
+                  - /url: http://localhost:8000/progress-zi
+                  - generic: 
+                  - paragraph: Rekapan ZI
+              - listitem:
+                - link " Monitoring Kegiatan 13":
+                  - /url: http://localhost:8000/progress-zi/activities
+                  - generic: 
+                  - paragraph:
+                    - text: Monitoring Kegiatan
+                    - generic: "13"
+              - listitem:
+                - link " Pedoman ZI":
+                  - /url: http://localhost:8000/progress-zi/guidelines
+                  - generic: 
+                  - paragraph: Pedoman ZI
+          - listitem [ref=e73]:
+            - button "Master Data " [ref=e74] [cursor=pointer]:
+              - generic [ref=e75]: Master Data
+              - generic [ref=e76]: 
+            - list [ref=e77]:
+              - listitem [ref=e78]:
+                - link " User" [ref=e79] [cursor=pointer]:
+                  - /url: http://localhost:8000/admin/users
+                  - generic [ref=e80]: 
+                  - paragraph [ref=e81]: User
+              - listitem [ref=e82]:
+                - link " Jabatan" [ref=e83] [cursor=pointer]:
+                  - /url: http://localhost:8000/admin/jabatans
+                  - generic [ref=e84]: 
+                  - paragraph [ref=e85]: Jabatan
+              - listitem [ref=e86]:
+                - link " Unit Kerja" [ref=e87] [cursor=pointer]:
+                  - /url: http://localhost:8000/admin/units
+                  - generic [ref=e88]: 
+                  - paragraph [ref=e89]: Unit Kerja
+              - listitem [ref=e90]:
+                - link " Bidang" [ref=e91] [cursor=pointer]:
+                  - /url: http://localhost:8000/admin/bidangs
+                  - generic [ref=e92]: 
+                  - paragraph [ref=e93]: Bidang
+              - listitem [ref=e94]:
+                - link " Kategori Surat" [ref=e95] [cursor=pointer]:
+                  - /url: http://localhost:8000/admin/kategori-surats
+                  - generic [ref=e96]: 
+                  - paragraph [ref=e97]: Kategori Surat
+              - listitem [ref=e98]:
+                - link " Kategori Rapat" [ref=e99] [cursor=pointer]:
+                  - /url: http://localhost:8000/admin/kategori-rapats
+                  - generic [ref=e100]: 
+                  - paragraph [ref=e101]: Kategori Rapat
+              - listitem [ref=e102]:
+                - link " Dasar Hukum" [ref=e103] [cursor=pointer]:
+                  - /url: http://localhost:8000/admin/dasar-hukums
+                  - generic [ref=e104]: 
+                  - paragraph [ref=e105]: Dasar Hukum
+              - listitem [ref=e106]:
+                - link " Periode ZI" [ref=e107] [cursor=pointer]:
+                  - /url: http://localhost:8000/progress-zi/periods
+                  - generic [ref=e108]: 
+                  - paragraph [ref=e109]: Periode ZI
+              - listitem [ref=e110]:
+                - link " Area ZI" [ref=e111] [cursor=pointer]:
+                  - /url: http://localhost:8000/progress-zi/areas
+                  - generic [ref=e112]: 
+                  - paragraph [ref=e113]: Area ZI
+          - listitem [ref=e114]:
+            - button "Arsip " [ref=e115] [cursor=pointer]:
+              - generic [ref=e116]: Arsip
+              - generic [ref=e117]: 
+            - list:
+              - listitem:
+                - link " Arsip":
+                  - /url: http://localhost:8000/arsip
+                  - generic: 
+                  - paragraph: Arsip
+  - generic [ref=e118]:
+    - generic [ref=e121]:
+      - heading "⚙️ Kelola Unit" [level=1] [ref=e122]:
+        - generic [ref=e123]: ⚙️
+        - text: Kelola Unit
+      - button " Tambah Unit" [ref=e124] [cursor=pointer]:
+        - generic [ref=e125]: 
+        - text: Tambah Unit
+    - generic [ref=e128]:
+      - generic [ref=e131]:
+        - textbox "Cari nama, kode, atau keterangan unit" [ref=e133]
+        - generic [ref=e134]:
+          - button "Filter" [ref=e135] [cursor=pointer]
+          - link "Reset" [ref=e136] [cursor=pointer]:
+            - /url: http://localhost:8000/admin/units
+      - table [ref=e139]:
+        - rowgroup [ref=e140]:
+          - row "Nama Kepaniteraan Kode KEPANITERAAN Keterangan Panitera dan unsur kepaniteraan User 7 Jabatan 3 Aksi Edit Hapus" [ref=e141]:
+            - cell "Nama Kepaniteraan" [ref=e142]
+            - cell "Kode KEPANITERAAN" [ref=e143]
+            - cell "Keterangan Panitera dan unsur kepaniteraan" [ref=e144]
+            - cell "User 7" [ref=e145]
+            - cell "Jabatan 3" [ref=e146]
+            - cell "Aksi Edit Hapus" [ref=e147]:
+              - text: Aksi
+              - generic [ref=e148]:
+                - button "Edit" [ref=e149] [cursor=pointer]:
+                  - generic [ref=e150]: 
+                  - text: Edit
+                - button "Hapus" [ref=e152] [cursor=pointer]:
+                  - generic [ref=e153]: 
+                  - text: Hapus
+          - row "Nama Kepegawaian Kode KEPEGAWAIAN Keterangan Kabag dan Kasubag kepegawaian User 6 Jabatan 3 Aksi Edit Hapus" [ref=e154]:
+            - cell "Nama Kepegawaian" [ref=e155]
+            - cell "Kode KEPEGAWAIAN" [ref=e156]
+            - cell "Keterangan Kabag dan Kasubag kepegawaian" [ref=e157]
+            - cell "User 6" [ref=e158]
+            - cell "Jabatan 3" [ref=e159]
+            - cell "Aksi Edit Hapus" [ref=e160]:
+              - text: Aksi
+              - generic [ref=e161]:
+                - button "Edit" [ref=e162] [cursor=pointer]:
+                  - generic [ref=e163]: 
+                  - text: Edit
+                - button "Hapus" [ref=e165] [cursor=pointer]:
+                  - generic [ref=e166]: 
+                  - text: Hapus
+          - row "Nama Kesekretariatan Kode KESEKRETARIATAN Keterangan Sekretaris dan unsur pendukung kesekretariatan User 1 Jabatan 1 Aksi Edit Hapus" [ref=e167]:
+            - cell "Nama Kesekretariatan" [ref=e168]
+            - cell "Kode KESEKRETARIATAN" [ref=e169]
+            - cell "Keterangan Sekretaris dan unsur pendukung kesekretariatan" [ref=e170]
+            - cell "User 1" [ref=e171]
+            - cell "Jabatan 1" [ref=e172]
+            - cell "Aksi Edit Hapus" [ref=e173]:
+              - text: Aksi
+              - generic [ref=e174]:
+                - button "Edit" [ref=e175] [cursor=pointer]:
+                  - generic [ref=e176]: 
+                  - text: Edit
+                - button "Hapus" [ref=e178] [cursor=pointer]:
+                  - generic [ref=e179]: 
+                  - text: Hapus
+          - row "Nama Persuratan Kode PERSURATAN Keterangan Admin dan operator persuratan User 3 Jabatan 2 Aksi Edit Hapus" [ref=e180]:
+            - cell "Nama Persuratan" [ref=e181]
+            - cell "Kode PERSURATAN" [ref=e182]
+            - cell "Keterangan Admin dan operator persuratan" [ref=e183]
+            - cell "User 3" [ref=e184]
+            - cell "Jabatan 2" [ref=e185]
+            - cell "Aksi Edit Hapus" [ref=e186]:
+              - text: Aksi
+              - generic [ref=e187]:
+                - button "Edit" [ref=e188] [cursor=pointer]:
+                  - generic [ref=e189]: 
+                  - text: Edit
+                - button "Hapus" [ref=e191] [cursor=pointer]:
+                  - generic [ref=e192]: 
+                  - text: Hapus
+          - row "Nama Pimpinan Kode PIMPINAN Keterangan Ketua dan Wakil Ketua PTA User 3 Jabatan 2 Aksi Edit Hapus" [ref=e193]:
+            - cell "Nama Pimpinan" [ref=e194]
+            - cell "Kode PIMPINAN" [ref=e195]
+            - cell "Keterangan Ketua dan Wakil Ketua PTA" [ref=e196]
+            - cell "User 3" [ref=e197]
+            - cell "Jabatan 2" [ref=e198]
+            - cell "Aksi Edit Hapus" [ref=e199]:
+              - text: Aksi
+              - generic [ref=e200]:
+                - button "Edit" [ref=e201] [cursor=pointer]:
+                  - generic [ref=e202]: 
+                  - text: Edit
+                - button "Hapus" [ref=e204] [cursor=pointer]:
+                  - generic [ref=e205]: 
+                  - text: Hapus
+          - row "Nama Umum dan Keuangan Kode UMUM Keterangan Kabag umum, pelaporan, dan TURT User 5 Jabatan 3 Aksi Edit Hapus" [ref=e206]:
+            - cell "Nama Umum dan Keuangan" [ref=e207]
+            - cell "Kode UMUM" [ref=e208]
+            - cell "Keterangan Kabag umum, pelaporan, dan TURT" [ref=e209]
+            - cell "User 5" [ref=e210]
+            - cell "Jabatan 3" [ref=e211]
+            - cell "Aksi Edit Hapus" [ref=e212]:
+              - text: Aksi
+              - generic [ref=e213]:
+                - button "Edit" [ref=e214] [cursor=pointer]:
+                  - generic [ref=e215]: 
+                  - text: Edit
+                - button "Hapus" [ref=e217] [cursor=pointer]:
+                  - generic [ref=e218]: 
+                  - text: Hapus
+  - contentinfo [ref=e220]:
+    - generic [ref=e221]:
+      - text: © 2026
+      - strong [ref=e222]: Pengadilan Tinggi Agama Papua Barat
+      - text: . Sistem Informasi Persuratan.
