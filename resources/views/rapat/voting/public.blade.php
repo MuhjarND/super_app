@@ -9,7 +9,7 @@
     <style>
         body{margin:0;font-family:'Inter',sans-serif;background:linear-gradient(180deg,#0f172a,#1e293b 240px,#f8fafc 240px);color:#0f172a;}
         .container{max-width:980px;margin:0 auto;padding:20px 16px 40px;}
-        .hero{background:linear-gradient(135deg,#111827,#2563eb);color:#fff;border-radius:24px;padding:22px;box-shadow:0 20px 50px rgba(15,23,42,.25);}
+        .hero{background:linear-gradient(135deg,#111827,#4f46e5);color:#fff;border-radius:24px;padding:22px;box-shadow:0 20px 50px rgba(15,23,42,.25);}
         .hero h1{margin:12px 0 8px;font-size:1.6rem;}
         .hero p{margin:0;color:rgba(255,255,255,.82);}
         .panel{margin-top:18px;background:#fff;border:1px solid #e2e8f0;border-radius:22px;padding:18px;box-shadow:0 12px 30px rgba(15,23,42,.06);}
@@ -19,9 +19,9 @@
         .item-card{border:1px solid #e2e8f0;border-radius:18px;padding:16px;margin-bottom:14px;}
         .candidate-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin-top:10px;}
         .candidate-option{border:1px solid #cbd5e1;border-radius:16px;padding:12px;cursor:pointer;transition:.2s;background:#fff;}
-        .candidate-option.active{border-color:#2563eb;background:#eff6ff;}
+        .candidate-option.active{border-color:#4f46e5;background:#eef2ff;}
         .btn{border:0;border-radius:16px;padding:14px 16px;font-weight:800;font-size:.95rem;cursor:pointer;}
-        .btn-primary{background:#2563eb;color:#fff;width:100%;}
+        .btn-primary{background:#4f46e5;color:#fff;width:100%;}
         .alert{display:none;border-radius:14px;padding:12px 14px;margin-bottom:14px;}
         .alert.show{display:block;}
         .alert-error{background:#fee2e2;color:#991b1b;}

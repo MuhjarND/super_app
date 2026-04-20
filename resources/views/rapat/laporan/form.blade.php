@@ -5,8 +5,8 @@
 @push('styles')
     <style>
         .laporan-form-card {
-            border-radius: 16px;
-            border: 1px solid #e5e7eb;
+            border-radius: 14px;
+            border: 1px solid #e8eaed;
         }
 
         .laporan-topbar {

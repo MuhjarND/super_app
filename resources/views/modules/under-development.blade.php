@@ -9,8 +9,8 @@
                 <div class="col-sm-6">
                     <h1 style="display: flex; align-items: center; gap: 10px;">
                         <div
-                            style="width: 36px; height: 36px; border-radius: 10px; background: linear-gradient(135deg, #eff6ff, #dbeafe); display: flex; align-items: center; justify-content: center;">
-                            <i class="{{ $icon }}" style="font-size: 0.9rem; color: #3b82f6;"></i>
+                            style="width: 36px; height: 36px; border-radius: 10px; background: linear-gradient(135deg, #eef2ff, #e0e7ff); display: flex; align-items: center; justify-content: center;">
+                            <i class="{{ $icon }}" style="font-size: 0.9rem; color: #6366f1;"></i>
                         </div>
                         {{ $module }}
                     </h1>
@@ -29,11 +29,11 @@
 @section('content')
     <div class="row justify-content-center">
         <div class="col-lg-5">
-            <div class="card" style="border: 1px solid #e5e7eb; text-align: center;">
+            <div class="card" style="border: 1px solid #e8eaed; text-align: center;">
                 <div class="card-body py-5 px-4">
                     <div
-                        style="width: 80px; height: 80px; border-radius: 20px; background: linear-gradient(135deg, #eff6ff, #dbeafe); display: flex; align-items: center; justify-content: center; margin: 0 auto 24px;">
-                        <i class="{{ $icon }}" style="font-size: 2rem; color: #3b82f6;"></i>
+                        style="width: 80px; height: 80px; border-radius: 20px; background: linear-gradient(135deg, #eef2ff, #e0e7ff); display: flex; align-items: center; justify-content: center; margin: 0 auto 24px;">
+                        <i class="{{ $icon }}" style="font-size: 2rem; color: #6366f1;"></i>
                     </div>
                     <h4 style="font-weight: 700; color: #111827; margin-bottom: 8px;">Modul {{ $module }}</h4>
                     <p style="color: #6b7280; font-size: 0.9rem; margin-bottom: 24px;">{{ $description }}</p>
@@ -45,7 +45,7 @@
                     <div class="mt-4">
                         <div class="progress" style="height: 6px; border-radius: 10px; background: #f3f4f6;">
                             <div class="progress-bar" role="progressbar"
-                                style="width: 15%; background: linear-gradient(90deg, #3b82f6, #60a5fa); border-radius: 10px;"
+                                style="width: 15%; background: linear-gradient(90deg, #6366f1, #818cf8); border-radius: 10px;"
                                 aria-valuenow="15" aria-valuemin="0" aria-valuemax="100"></div>
                         </div>
                         <small style="color: #9ca3af; margin-top: 8px; display: block;">Progress: 15%</small>

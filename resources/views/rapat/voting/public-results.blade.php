@@ -8,7 +8,7 @@
     <style>
         body{margin:0;font-family:'Inter',sans-serif;background:#f8fafc;color:#0f172a;}
         .container{max-width:1080px;margin:0 auto;padding:20px 16px 40px;}
-        .hero{background:linear-gradient(135deg,#111827,#1d4ed8);color:#fff;border-radius:24px;padding:22px;}
+        .hero{background:linear-gradient(135deg,#111827,#4338ca);color:#fff;border-radius:24px;padding:22px;}
         .hero h1{margin:10px 0 6px;font-size:1.6rem;}
         .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-top:16px;}
         .stat{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.16);border-radius:16px;padding:12px 14px;}
@@ -17,7 +17,7 @@
         .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:14px;margin-top:18px;}
         .card{background:#fff;border:1px solid #e2e8f0;border-radius:18px;padding:16px;box-shadow:0 8px 24px rgba(15,23,42,.05);}
         .bar{width:100%;background:#e2e8f0;height:16px;border-radius:999px;overflow:hidden;}
-        .fill{height:100%;background:linear-gradient(90deg,#2563eb,#38bdf8);transition:width .45s ease;}
+        .fill{height:100%;background:linear-gradient(90deg,#4f46e5,#38bdf8);transition:width .45s ease;}
         .fill.leading{background:linear-gradient(90deg,#f97316,#ef4444);}
         .pending{margin-top:18px;}
     </style>

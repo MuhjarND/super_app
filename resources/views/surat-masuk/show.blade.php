@@ -106,8 +106,8 @@
                 <div class="col-sm-6">
                     <h1 class="surat-masuk-header-title" style="display: flex; align-items: center; gap: 10px;">
                         <div
-                            style="width: 36px; height: 36px; border-radius: 10px; background: linear-gradient(135deg, #eff6ff, #dbeafe); display: flex; align-items: center; justify-content: center;">
-                            <i class="fas fa-envelope-open-text" style="font-size: 0.9rem; color: #3b82f6;"></i>
+                            style="width: 36px; height: 36px; border-radius: 10px; background: linear-gradient(135deg, #eef2ff, #e0e7ff); display: flex; align-items: center; justify-content: center;">
+                            <i class="fas fa-envelope-open-text" style="font-size: 0.9rem; color: #6366f1;"></i>
                         </div>
                         Detail Surat Masuk
                     </h1>
@@ -316,7 +316,7 @@
                                 </div>
                             @endif
                             @if($disposisi->petunjuk)
-                                <div class="mt-2 p-2" style="background: #eff6ff; border-radius: 6px;">
+                                <div class="mt-2 p-2" style="background: #eef2ff; border-radius: 6px;">
                                     <small><i
                                             class="fas fa-hand-point-right text-primary mr-1"></i>{{ $disposisi->petunjuk }}</small>
                                 </div>

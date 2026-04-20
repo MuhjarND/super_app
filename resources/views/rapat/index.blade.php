@@ -6,8 +6,8 @@
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap4.min.css">
     <style>
         .rapat-card {
-            border-radius: 16px;
-            border: 1px solid #e5e7eb;
+            border-radius: 14px;
+            border: 1px solid #e8eaed;
         }
 
         .rapat-card .card-body {
@@ -81,7 +81,7 @@
             height: 28px;
             border: none;
             border-radius: 8px;
-            background: linear-gradient(135deg, #2563eb, #3b82f6);
+            background: linear-gradient(135deg, #4f46e5, #6366f1);
             color: #fff;
             font-size: 1rem;
             font-weight: 700;
@@ -89,7 +89,7 @@
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 6px 18px rgba(37, 99, 235, 0.18);
+            box-shadow: 0 2px 8px rgba(79, 70, 229, 0.18);
         }
 
         .row-toggle-btn.is-open {
@@ -133,9 +133,9 @@
         }
 
         .action-chip-btn.action-edit {
-            background: #eff6ff;
-            color: #1d4ed8;
-            border-color: #bfdbfe;
+            background: #eef2ff;
+            color: #4338ca;
+            border-color: #c7d2fe;
         }
 
         .action-chip-btn.action-delete {

@@ -20,7 +20,7 @@
     .history-photo {
         width: 220px;
         height: 220px;
-        border-radius: 16px;
+        border-radius: 14px;
         border: 1px solid rgba(203, 213, 225, 0.95);
         background: #f8fafc;
         display: flex;

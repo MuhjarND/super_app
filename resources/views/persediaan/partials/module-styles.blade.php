@@ -152,7 +152,7 @@
 
     .inventory-module-empty {
         border: 1px dashed rgba(148, 163, 184, 0.45);
-        border-radius: 16px;
+        border-radius: 14px;
         padding: 18px;
         color: #64748b;
         background: rgba(248, 250, 252, 0.85);

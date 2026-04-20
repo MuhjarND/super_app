@@ -101,9 +101,9 @@
             margin-top: 18px;
             padding: 16px 18px;
             border-radius: 14px;
-            background: #eff6ff;
-            border: 1px solid #bfdbfe;
-            color: #1e3a8a;
+            background: #eef2ff;
+            border: 1px solid #c7d2fe;
+            color: #312e81;
             font-size: 0.92rem;
             line-height: 1.55;
         }

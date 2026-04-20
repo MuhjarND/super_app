@@ -13,8 +13,8 @@
             --line: #dbe2ea;
             --text: #0f172a;
             --muted: #64748b;
-            --primary: #1d4ed8;
-            --primary-soft: #dbeafe;
+            --primary: #4338ca;
+            --primary-soft: #e0e7ff;
             --success: #166534;
             --success-soft: #dcfce7;
             --danger: #b91c1c;
@@ -26,7 +26,7 @@
         body {
             margin: 0;
             font-family: 'Inter', sans-serif;
-            background: linear-gradient(180deg, #eff6ff 0%, var(--bg) 220px);
+            background: linear-gradient(180deg, #eef2ff 0%, var(--bg) 220px);
             color: var(--text);
         }
 
@@ -37,7 +37,7 @@
         }
 
         .hero {
-            background: linear-gradient(135deg, #0f172a, #1d4ed8);
+            background: linear-gradient(135deg, #0f172a, #4338ca);
             color: #fff;
             border-radius: 24px;
             padding: 22px 20px;
@@ -77,7 +77,7 @@
         .meta-box {
             background: rgba(255, 255, 255, 0.12);
             border: 1px solid rgba(255, 255, 255, 0.14);
-            border-radius: 16px;
+            border-radius: 14px;
             padding: 12px 14px;
         }
 
@@ -122,7 +122,7 @@
         .tab-button.active {
             background: var(--primary-soft);
             color: var(--primary);
-            border-color: #bfdbfe;
+            border-color: #c7d2fe;
         }
 
         .tab-panel { display: none; }
@@ -268,7 +268,7 @@
             height: 42px;
             margin: 0 auto 14px;
             border-radius: 50%;
-            border: 3px solid #dbeafe;
+            border: 3px solid #e0e7ff;
             border-top-color: var(--primary);
             animation: spin 0.8s linear infinite;
         }

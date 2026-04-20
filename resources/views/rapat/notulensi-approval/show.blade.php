@@ -55,7 +55,7 @@
         .approval-pdf-preview {
             background: #fff;
             border: 1px solid #e2e8f0;
-            border-radius: 16px;
+            border-radius: 14px;
             overflow: hidden;
             position: sticky;
             top: 14px;

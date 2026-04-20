@@ -41,7 +41,7 @@
 
         .leave-type-table tbody tr {
             padding: 14px 14px 12px;
-            border-bottom: 1px solid #e5e7eb;
+            border-bottom: 1px solid #e8eaed;
         }
 
         .leave-type-table td {

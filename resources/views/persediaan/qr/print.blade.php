@@ -59,7 +59,7 @@
             display: block;
             font-size: 10px;
             font-weight: 700;
-            color: #1d4ed8;
+            color: #4338ca;
             margin-bottom: 4px;
             word-break: break-word;
         }

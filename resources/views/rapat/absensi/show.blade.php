@@ -5,8 +5,8 @@
 @push('styles')
     <style>
         .attendance-detail-card {
-            border-radius: 16px;
-            border: 1px solid #e5e7eb;
+            border-radius: 14px;
+            border: 1px solid #e8eaed;
         }
 
         .attendance-info-grid {
@@ -16,7 +16,7 @@
         }
 
         .attendance-info-box {
-            border: 1px solid #e5e7eb;
+            border: 1px solid #e8eaed;
             border-radius: 14px;
             padding: 12px 14px;
             background: #fff;
@@ -25,7 +25,7 @@
         .attendance-signature {
             width: 180px;
             max-width: 100%;
-            border: 1px solid #e5e7eb;
+            border: 1px solid #e8eaed;
             border-radius: 10px;
             background: #fff;
         }

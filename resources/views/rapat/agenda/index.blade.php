@@ -4,12 +4,12 @@
 
 @push('styles')
     <style>
-        .agenda-card { border-radius: 16px; border: 1px solid #e5e7eb; }
+        .agenda-card { border-radius: 14px; border: 1px solid #e8eaed; }
         .agenda-table thead th { font-size: 0.72rem; text-transform: uppercase; color: #64748b; border-top: none; }
         .agenda-table tbody td { vertical-align: top; font-size: 0.85rem; }
         .agenda-preview { white-space: pre-line; font-size: 0.8rem; color: #334155; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 12px; }
         .meeting-action-toggle-col { width: 46px; }
-        .meeting-action-toggle { width: 28px; height: 28px; border: none; border-radius: 8px; background: linear-gradient(135deg, #2563eb, #3b82f6); color: #fff; font-size: 1rem; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; }
+        .meeting-action-toggle { width: 28px; height: 28px; border: none; border-radius: 8px; background: linear-gradient(135deg, #4f46e5, #6366f1); color: #fff; font-size: 1rem; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; }
         .meeting-action-toggle.is-open { background: linear-gradient(135deg, #475569, #64748b); }
         .meeting-action-row { display: none; }
         .meeting-action-row td { background: #f8fafc; border-top: 1px solid #e2e8f0; padding: 12px 16px; }
@@ -18,7 +18,7 @@
         .meeting-action-btn { display: inline-flex; align-items: center; gap: 8px; border-radius: 10px; padding: 7px 12px; font-size: 0.82rem; font-weight: 700; border: 1px solid transparent; background: #fff; color: #1f2937; }
         .meeting-action-btn.secondary { background: #f8fafc; color: #475569; border-color: #cbd5e1; }
         .meeting-action-btn.success { background: #ecfdf5; color: #047857; border-color: #a7f3d0; }
-        .meeting-action-btn.primary { background: #eff6ff; color: #1d4ed8; border-color: #bfdbfe; }
+        .meeting-action-btn.primary { background: #eef2ff; color: #4338ca; border-color: #c7d2fe; }
         .meeting-action-btn.danger { background: #fef2f2; color: #dc2626; border-color: #fecaca; }
     </style>
 @endpush

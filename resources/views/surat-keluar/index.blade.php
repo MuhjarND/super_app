@@ -7,8 +7,8 @@
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap4.min.css">
     <style>
         .surat-keluar-card {
-            border-radius: 16px;
-            border: 1px solid #e5e7eb;
+            border-radius: 14px;
+            border: 1px solid #e8eaed;
         }
 
         .surat-keluar-card .card-header {
@@ -26,7 +26,7 @@
         }
 
         .btn-add-surat {
-            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            background: linear-gradient(135deg, #6366f1, #4f46e5);
             border: none;
             color: white;
             padding: 10px 22px;
@@ -37,10 +37,10 @@
         }
 
         .btn-add-surat:hover {
-            background: linear-gradient(135deg, #4f46e5, #7c3aed);
+            background: linear-gradient(135deg, #4f46e5, #4338ca);
             color: white;
             transform: translateY(-1px);
-            box-shadow: 0 4px 14px rgba(99, 102, 241, 0.4);
+            box-shadow: 0 4px 14px rgba(79, 70, 229, 0.25);
         }
 
         /* Warning banner */
@@ -139,8 +139,8 @@
 
         .btn-expand:hover,
         .btn-expand.expanded {
-            border-color: #3b82f6;
-            background: #3b82f6;
+            border-color: #6366f1;
+            background: #6366f1;
             color: #ffffff;
         }
 
@@ -191,7 +191,7 @@
             max-width: 100%;
             border-radius: 6px;
             padding: 4px 9px;
-            background: linear-gradient(90deg, #5738d6, #6b3fe8);
+            background: linear-gradient(135deg, #6366f1, #4f46e5);
             color: #ffffff;
             font-size: 0.72rem;
             font-weight: 700;
@@ -240,8 +240,8 @@
         }
 
         .status-badge.complete {
-            background: #e5efff;
-            color: #2563eb;
+            background: #eef2ff;
+            color: #4f46e5;
         }
 
         .status-badge.draft {
@@ -268,7 +268,7 @@
         }
 
         .detail-meta strong {
-            color: #1e3a8a;
+            color: #3730a3;
             font-weight: 700;
         }
 
@@ -890,7 +890,7 @@
                 </div>
                 <div class="modal-body text-center">
                     <iframe id="fileViewer"
-                        style="width: 100%; height: 500px; border: 1px solid #e5e7eb; border-radius: 8px;"></iframe>
+                        style="width: 100%; height: 500px; border: 1px solid #e8eaed; border-radius: 8px;"></iframe>
                 </div>
             </div>
         </div>

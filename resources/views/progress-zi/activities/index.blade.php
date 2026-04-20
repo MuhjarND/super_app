@@ -1,83 +1,80 @@
-﻿@extends('layouts.app')
+@extends('layouts.app')
 
 @section('title', 'Monitoring Kegiatan ZI')
 
 @push('styles')
 <style>
-    .zi-monitor-shell { display:grid; gap:18px; }
-    .zi-monitor-hero { background: linear-gradient(135deg, #0f3352 0%, #175d8f 52%, #3b82f6 100%); color:#fff; border-radius:18px; padding:24px 26px; box-shadow:0 18px 40px rgba(15, 51, 82, 0.18); }
-    .zi-monitor-title { font-size:1.5rem; font-weight:800; margin-bottom:6px; }
-    .zi-monitor-subtitle { opacity:.86; font-size:.9rem; max-width:900px; }
-    .zi-monitor-filter { background:#fff; border:1px solid #e5e7eb; border-radius:18px; box-shadow:0 10px 24px rgba(15,23,42,.05); padding:18px 20px; }
-    .zi-area-card { background:#fff; border:1px solid #e5e7eb; border-radius:20px; overflow:hidden; box-shadow:0 10px 24px rgba(15,23,42,.05); }
-    .zi-area-head { padding:18px 20px; display:flex; align-items:flex-start; justify-content:space-between; gap:16px; border-bottom:1px solid #eef2f7; cursor:pointer; transition:background .15s ease; }
+    .zi-monitor-shell { display:grid; gap:16px; }
+    .zi-monitor-filter { background:#fff; border:1px solid #e5e7eb; border-radius:16px; box-shadow:0 4px 12px rgba(15,23,42,.04); padding:16px 18px; }
+    .zi-area-card { background:#fff; border:1px solid #e5e7eb; border-radius:16px; overflow:hidden; box-shadow:0 4px 12px rgba(15,23,42,.04); }
+    .zi-area-head { padding:16px 18px; display:flex; align-items:center; justify-content:space-between; gap:14px; border-bottom:1px solid #eef2f7; cursor:pointer; transition:background .15s ease; }
     .zi-area-head:hover { background:#f8fbff; }
-    .zi-area-code { font-size:.74rem; font-weight:800; letter-spacing:.08em; color:#2563eb; text-transform:uppercase; }
-    .zi-area-title { font-size:1rem; font-weight:800; color:#0f172a; margin-top:4px; }
-    .zi-area-desc { font-size:.78rem; color:#64748b; margin-top:5px; line-height:1.5; }
+    .zi-area-code { font-size:.72rem; font-weight:800; letter-spacing:.06em; color:#4f46e5; text-transform:uppercase; }
+    .zi-area-title { font-size:.92rem; font-weight:800; color:#0f172a; margin-top:2px; }
     .zi-area-meta { display:flex; align-items:center; gap:8px; flex-wrap:wrap; justify-content:flex-end; }
-    .zi-area-toggle { width:34px; height:34px; display:inline-flex; align-items:center; justify-content:center; border-radius:12px; border:1px solid #dbeafe; background:#eff6ff; color:#2563eb; transition:all .18s ease; }
+    .zi-area-toggle { width:30px; height:30px; display:inline-flex; align-items:center; justify-content:center; border-radius:10px; border:1px solid #e0e7ff; background:#eef2ff; color:#4f46e5; transition:all .18s ease; font-size:.8rem; }
     .zi-area-head[aria-expanded="false"] .zi-area-toggle i { transform:rotate(-90deg); }
     .zi-area-toggle i { transition:transform .18s ease; }
-    .zi-area-body { padding:18px 20px 20px; background:#fbfdff; }
-    .zi-point-card { border:1px solid #e2e8f0; border-radius:18px; background:#fff; overflow:hidden; margin-bottom:14px; box-shadow:0 8px 20px rgba(15,23,42,.03); }
-    .zi-point-head { padding:14px 16px; background:#f8fbff; border-bottom:1px solid #edf2f7; }
-    .zi-point-line, .zi-subpoint-line { display:flex; align-items:flex-start; gap:10px; }
-    .zi-point-code-inline, .zi-subpoint-code-inline { font-weight:800; color:#1d4ed8; min-width:22px; }
+    .zi-area-body { padding:14px 18px 18px; background:#fbfdff; }
+    .zi-point-card { border:1px solid #e2e8f0; border-radius:14px; background:#fff; overflow:hidden; margin-bottom:12px; }
+    .zi-point-card:last-child { margin-bottom:0; }
+    .zi-point-head { padding:12px 14px; background:#f8fbff; border-bottom:1px solid #edf2f7; }
+    .zi-point-line, .zi-subpoint-line { display:flex; align-items:flex-start; gap:8px; }
+    .zi-point-code-inline, .zi-subpoint-code-inline { font-weight:800; color:#4338ca; min-width:20px; flex-shrink:0; }
     .zi-subpoint-code-inline { color:#0f766e; text-transform:lowercase; }
-    .zi-point-title { font-size:.95rem; font-weight:800; color:#0f172a; line-height:1.55; }
-    .zi-subpoint-row { display:grid; grid-template-columns:1.4fr 1.35fr .85fr auto; gap:14px; padding:15px 16px; border-bottom:1px solid #eef2f7; align-items:start; }
+    .zi-point-title { font-size:.88rem; font-weight:800; color:#0f172a; line-height:1.45; }
+    .zi-subpoint-row { display:flex; align-items:flex-start; justify-content:space-between; gap:12px; padding:12px 14px; border-bottom:1px solid #eef2f7; }
     .zi-subpoint-row:last-child { border-bottom:none; }
-    .zi-subpoint-title { font-size:.87rem; font-weight:700; color:#0f172a; line-height:1.6; }
-    .zi-indicator-list { display:grid; gap:8px; }
-    .zi-indicator-item { border:1px solid #dbeafe; border-radius:12px; background:#f8fbff; padding:10px 11px; }
-    .zi-indicator-title { font-size:.79rem; color:#0f172a; line-height:1.55; font-weight:700; }
-    .zi-indicator-meta { font-size:.73rem; color:#475569; line-height:1.6; margin-top:6px; }
-    .zi-indicator-meta strong { color:#1d4ed8; font-weight:800; }
-    .zi-periodic-chip { display:inline-flex; align-items:center; gap:6px; padding:4px 8px; border-radius:999px; background:#fff7ed; border:1px solid #fdba74; color:#c2410c; font-size:.67rem; font-weight:800; text-transform:uppercase; letter-spacing:.05em; margin-bottom:8px; }
-    .zi-status-wrap { display:grid; gap:8px; }
-    .zi-status-hint { font-size:.75rem; color:#64748b; line-height:1.55; }
-    .zi-preview-link { display:inline-flex; align-items:center; gap:6px; font-size:.77rem; font-weight:700; color:#2563eb; cursor:pointer; }
-    .zi-action-stack { display:grid; gap:8px; min-width:190px; }
-    .zi-empty { color:#94a3b8; font-size:.78rem; padding:8px 0; }
-    .zi-kpi-chip { display:inline-flex; align-items:center; gap:6px; padding:6px 10px; border-radius:999px; background:#fff; border:1px solid #dbeafe; color:#1e40af; font-size:.72rem; font-weight:700; }
+    .zi-subpoint-title { font-size:.84rem; font-weight:700; color:#0f172a; line-height:1.5; }
+    .zi-subpoint-left { flex:1; min-width:0; }
+    .zi-subpoint-right { display:flex; align-items:center; gap:10px; flex-shrink:0; }
+    .zi-indicator-list { display:grid; gap:6px; margin-top:8px; }
+    .zi-indicator-item { border:1px solid #e0e7ff; border-radius:10px; background:#f8fbff; padding:8px 10px; }
+    .zi-indicator-title { font-size:.76rem; color:#0f172a; line-height:1.45; font-weight:600; }
+    .zi-indicator-meta { font-size:.7rem; color:#475569; line-height:1.5; margin-top:4px; }
+    .zi-indicator-meta strong { color:#4338ca; font-weight:800; }
+    .zi-periodic-chip { display:inline-flex; align-items:center; gap:4px; padding:3px 7px; border-radius:999px; background:#fff7ed; border:1px solid #fdba74; color:#c2410c; font-size:.64rem; font-weight:800; text-transform:uppercase; letter-spacing:.04em; margin-bottom:6px; }
+    .zi-status-wrap { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+    .zi-status-hint { font-size:.73rem; color:#64748b; line-height:1.45; }
+    .zi-preview-link { display:inline-flex; align-items:center; gap:5px; font-size:.75rem; font-weight:700; color:#4f46e5; cursor:pointer; }
+    .zi-action-group { display:flex; align-items:center; gap:6px; flex-wrap:wrap; }
+    .zi-empty { color:#94a3b8; font-size:.76rem; padding:6px 0; }
+    .zi-kpi-chip { display:inline-flex; align-items:center; gap:5px; padding:5px 9px; border-radius:999px; background:#fff; border:1px solid #e0e7ff; color:#3730a3; font-size:.7rem; font-weight:700; }
     .zi-kpi-chip.is-danger { border-color:#fecaca; background:#fef2f2; color:#b91c1c; }
     .zi-kpi-chip.is-success { border-color:#bbf7d0; background:#f0fdf4; color:#15803d; }
-    .zi-kpi-chip.is-progress { border-color:#bfdbfe; background:#eff6ff; color:#1d4ed8; }
-    .zi-section-label { font-size:.7rem; font-weight:800; letter-spacing:.08em; text-transform:uppercase; color:#64748b; margin-bottom:8px; }
+    .zi-kpi-chip.is-progress { border-color:#c7d2fe; background:#eef2ff; color:#4338ca; }
+    .zi-detail-toggle { font-size:.72rem; font-weight:700; color:#4f46e5; cursor:pointer; display:inline-flex; align-items:center; gap:4px; margin-top:6px; }
+    .zi-detail-toggle:hover { text-decoration:underline; }
+    .zi-indicator-collapse { display:none; }
+    .zi-indicator-collapse.show { display:block; }
     .zi-modal-evidence-list { max-height:240px; overflow:auto; display:grid; gap:10px; }
-    .zi-modal-evidence-card { border:1px solid #e2e8f0; border-radius:12px; padding:10px 12px; background:#f8fafc; }
-    .zi-evidence-mini-title { font-size:.8rem; font-weight:700; color:#0f172a; }
-    .zi-modal-preview-frame { width:100%; height:72vh; border:none; border-radius:0 0 16px 16px; }
-    .zi-preview-layout { display:grid; grid-template-columns:280px 1fr; min-height:72vh; }
-    .zi-preview-sidebar { border-right:1px solid #e2e8f0; background:#f8fafc; overflow:auto; padding:14px; display:grid; gap:10px; }
-    .zi-preview-item { width:100%; text-align:left; border:1px solid #dbeafe; background:#fff; border-radius:12px; padding:10px 11px; }
-    .zi-preview-item.active { background:#eff6ff; border-color:#60a5fa; }
-    .zi-preview-item-title { font-size:.8rem; font-weight:700; color:#0f172a; line-height:1.45; }
-    .zi-preview-item-meta { font-size:.72rem; color:#64748b; margin-top:4px; }
+    .zi-modal-evidence-card { border:1px solid #e2e8f0; border-radius:10px; padding:10px 12px; background:#f8fafc; }
+    .zi-evidence-mini-title { font-size:.78rem; font-weight:700; color:#0f172a; }
+    .zi-modal-preview-frame { width:100%; height:72vh; border:none; border-radius:0 0 14px 14px; }
+    .zi-preview-layout { display:grid; grid-template-columns:260px 1fr; min-height:72vh; }
+    .zi-preview-sidebar { border-right:1px solid #e2e8f0; background:#f8fafc; overflow:auto; padding:12px; display:grid; gap:8px; }
+    .zi-preview-item { width:100%; text-align:left; border:1px solid #e0e7ff; background:#fff; border-radius:10px; padding:8px 10px; }
+    .zi-preview-item.active { background:#eef2ff; border-color:#818cf8; }
+    .zi-preview-item-title { font-size:.78rem; font-weight:700; color:#0f172a; line-height:1.4; }
+    .zi-preview-item-meta { font-size:.7rem; color:#64748b; margin-top:3px; }
     .zi-suggestion-list { display:grid; gap:8px; max-height:220px; overflow:auto; }
-    .zi-suggestion-btn { width:100%; text-align:left; border:1px solid #dbeafe; background:#eff6ff; color:#1e3a8a; border-radius:12px; padding:10px 12px; }
-    .zi-suggestion-btn:hover { background:#dbeafe; }
-    .zi-suggestion-type { display:inline-flex; align-items:center; gap:6px; font-size:.67rem; font-weight:800; letter-spacing:.08em; text-transform:uppercase; color:#2563eb; margin-bottom:4px; }
-    .zi-suggestion-title { font-size:.8rem; font-weight:700; color:#0f172a; line-height:1.45; }
-    .zi-suggestion-meta { font-size:.72rem; color:#64748b; margin-top:4px; }
-    @media (max-width: 1199.98px) {
-        .zi-subpoint-row { grid-template-columns:1fr; }
-        .zi-action-stack { min-width:0; }
-    }
+    .zi-suggestion-btn { width:100%; text-align:left; border:1px solid #e0e7ff; background:#eef2ff; color:#312e81; border-radius:10px; padding:8px 10px; }
+    .zi-suggestion-btn:hover { background:#e0e7ff; }
+    .zi-suggestion-type { display:inline-flex; align-items:center; gap:5px; font-size:.65rem; font-weight:800; letter-spacing:.06em; text-transform:uppercase; color:#4f46e5; margin-bottom:3px; }
+    .zi-suggestion-title { font-size:.78rem; font-weight:700; color:#0f172a; line-height:1.4; }
+    .zi-suggestion-meta { font-size:.7rem; color:#64748b; margin-top:3px; }
+    .zi-section-label { font-size:.68rem; font-weight:800; letter-spacing:.06em; text-transform:uppercase; color:#64748b; margin-bottom:6px; }
     @media (max-width: 991.98px) {
+        .zi-subpoint-row { flex-direction:column; }
+        .zi-subpoint-right { width:100%; }
         .zi-preview-layout { grid-template-columns:1fr; }
-        .zi-preview-sidebar { border-right:none; border-bottom:1px solid #e2e8f0; max-height:220px; }
+        .zi-preview-sidebar { border-right:none; border-bottom:1px solid #e2e8f0; max-height:200px; }
     }
 </style>
 @endpush
 
 @section('content')
 <div class="zi-monitor-shell">
-    <div class="zi-monitor-hero">
-        <div class="zi-monitor-title">Monitoring Kegiatan ZI</div>
-        <div class="zi-monitor-subtitle">Halaman ini menjadi pusat tindak lanjut sub poin pedoman Zona Integritas. Kegiatan dilakukan dalam bentuk rapat monitoring dan evaluasi, eviden diunggah langsung dari sini, lalu diajukan ke review pimpinan melalui approval.</div>
-    </div>
 
     <div class="zi-monitor-filter">
         <form method="GET" class="row">
@@ -153,12 +150,10 @@
                 <div>
                     <div class="zi-area-code">{{ $area->code }}</div>
                     <div class="zi-area-title">{{ $area->name }}</div>
-                    <div class="zi-area-desc">{{ $area->description ?: 'Belum ada deskripsi area.' }}</div>
                 </div>
                 <div class="zi-area-meta">
-                    <span class="zi-kpi-chip"><i class="fas fa-bookmark"></i>{{ $area->guidelinePoints->count() }} poin</span>
-                    <span class="zi-kpi-chip {{ $coverageClass }}"><i class="fas fa-stream"></i>{{ $coveredSubPoints }}/{{ $totalSubPoints }} sub poin ditindaklanjuti</span>
-                    <span class="zi-kpi-chip"><i class="fas fa-user-tie"></i>{{ $area->pic_names !== '-' ? $area->pic_names : 'PIC belum ditetapkan' }}</span>
+                    <span class="zi-kpi-chip {{ $coverageClass }}"><i class="fas fa-check-circle"></i>{{ $coveredSubPoints }}/{{ $totalSubPoints }}</span>
+                    <span class="zi-kpi-chip"><i class="fas fa-user-tie"></i>{{ $area->pic_names !== '-' ? $area->pic_names : '-' }}</span>
                     <span class="zi-area-toggle"><i class="fas fa-chevron-down"></i></span>
                 </div>
             </div>
@@ -213,101 +208,76 @@
                                     $canPreview = $statusLabel === 'Selesai' && $latestActivity && $latestActivity->monitoring_preview_url;
                                 @endphp
                                 <div class="zi-subpoint-row">
-                                    <div>
+                                    <div class="zi-subpoint-left">
                                         <div class="zi-subpoint-line">
                                             <div class="zi-subpoint-code-inline">{{ strtolower($subPoint->code) }}.</div>
-                                            <div class="zi-subpoint-title">{{ $subPoint->title }}</div>
-                                        </div>
-                                    </div>
-
-                                    <div>
-                                        <div class="zi-section-label">Indikator Patokan</div>
-                                        <div class="zi-indicator-list">
-                                            @forelse($subPoint->indicators as $indicator)
-                                                <div class="zi-indicator-item">
-                                                    @if($indicator->is_periodic)
-                                                        <div class="zi-periodic-chip"><i class="fas fa-sync-alt"></i>Berkala</div>
-                                                    @endif
-                                                    <div class="zi-indicator-title">{{ $indicator->indicator_text }}</div>
-                                                    @if($indicator->evidence_example)
-                                                        <div class="zi-indicator-meta"><strong>Contoh Eviden:</strong> {{ $indicator->evidence_example }}</div>
-                                                    @endif
-                                                    @if($indicator->implementation_note)
-                                                        <div class="zi-indicator-meta"><strong>Catatan Implementasi:</strong> {{ $indicator->implementation_note }}</div>
-                                                    @endif
-                                                </div>
-                                            @empty
-                                                <div class="zi-empty">Belum ada indikator penilaian.</div>
-                                            @endforelse
-                                        </div>
-                                    </div>
-
-                                    <div>
-                                        <div class="zi-section-label">Status</div>
-                                        <div class="zi-status-wrap">
-                                            <span class="badge badge-{{ $statusClass }} app-status-badge">{{ $statusLabel }}</span>
-                                            @if($latestActivity)
-                                                <div class="zi-status-hint">
-                                                    {{ $latestActivity->name }}<br>
-                                                    PIC {{ optional($latestActivity->pic)->name ?: '-' }} • {{ $evidenceCount }} eviden
-                                                    @if($requiresPeriodic)
-                                                        <br>Agenda berkala: {{ $rapatActivities->count() }} kali
-                                                        @if(!$periodicCompleted)
-                                                            <br>Masih membutuhkan lebih dari 1 agenda/kegiatan.
+                                            <div>
+                                                <div class="zi-subpoint-title">{{ $subPoint->title }}</div>
+                                                <div class="zi-status-wrap" style="margin-top:6px;">
+                                                    <span class="badge badge-{{ $statusClass }} app-status-badge">{{ $statusLabel }}</span>
+                                                    @if($latestActivity)
+                                                        <span class="zi-status-hint">{{ $evidenceCount }} eviden</span>
+                                                        @if($requiresPeriodic)
+                                                            <span class="zi-status-hint">• Berkala {{ $rapatActivities->count() }}x</span>
                                                         @endif
                                                     @endif
+                                                    @if($canPreview)
+                                                        <a href="#" class="zi-preview-link zi-open-preview" data-title="Preview - {{ $subPoint->title }}" data-url="{{ $latestActivity->monitoring_preview_url }}" data-preview-list="#ziPreviewListTemplate{{ $subPoint->id }}">
+                                                            <i class="fas fa-eye"></i> Preview
+                                                        </a>
+                                                        <a href="{{ route('progress-zi.activities.evidences.bundle', $latestActivity) }}" target="_blank" class="zi-preview-link">
+                                                            <i class="fas fa-file-pdf"></i> PDF
+                                                        </a>
+                                                    @endif
                                                 </div>
-                                            @else
-                                                <div class="zi-status-hint">Belum ada agenda kegiatan dan eviden.</div>
-                                            @endif
-                                            @if($canPreview)
-                                                <a href="#" class="zi-preview-link zi-open-preview" data-title="Preview Eviden - {{ $subPoint->title }}" data-url="{{ $latestActivity->monitoring_preview_url }}" data-preview-list="#ziPreviewListTemplate{{ $subPoint->id }}">
-                                                    <i class="fas fa-eye"></i> Preview Eviden
-                                                </a>
-                                                <a href="{{ route('progress-zi.activities.evidences.bundle', $latestActivity) }}" target="_blank" class="zi-preview-link">
-                                                    <i class="fas fa-file-pdf"></i> Bundel PDF
-                                                </a>
-                                            @endif
+                                                @if($subPoint->indicators->count())
+                                                    <a class="zi-detail-toggle" onclick="this.nextElementSibling.classList.toggle('show')">
+                                                        <i class="fas fa-info-circle"></i> Indikator ({{ $subPoint->indicators->count() }})
+                                                    </a>
+                                                    <div class="zi-indicator-collapse">
+                                                        <div class="zi-indicator-list">
+                                                            @foreach($subPoint->indicators as $indicator)
+                                                                <div class="zi-indicator-item">
+                                                                    @if($indicator->is_periodic)
+                                                                        <div class="zi-periodic-chip"><i class="fas fa-sync-alt"></i>Berkala</div>
+                                                                    @endif
+                                                                    <div class="zi-indicator-title">{{ $indicator->indicator_text }}</div>
+                                                                    @if($indicator->evidence_example)
+                                                                        <div class="zi-indicator-meta"><strong>Contoh:</strong> {{ $indicator->evidence_example }}</div>
+                                                                    @endif
+                                                                </div>
+                                                            @endforeach
+                                                        </div>
+                                                    </div>
+                                                @endif
+                                            </div>
                                         </div>
                                     </div>
-
-                                    <div>
-                                        <div class="zi-action-stack">
-                                            <button type="button"
-                                                    class="btn btn-primary btn-sm zi-open-meeting-modal"
-                                                    data-toggle="modal"
-                                                    data-target="#createRapatModal"
-                                                    data-area-id="{{ $area->id }}"
-                                                    data-area-name="{{ $area->code }} - {{ $area->name }}"
-                                                    data-subpoint-id="{{ $subPoint->id }}"
-                                                    data-subpoint-code="{{ strtolower($subPoint->code) }}"
-                                                    data-subpoint-title="{{ $subPoint->title }}"
-                                                    data-period-id="{{ optional($selectedPeriod)->id }}"
-                                                    data-default-title="Rapat Monitoring dan Evaluasi - {{ $subPoint->title }}"
-                                                    {{ $canCreateMeeting ? '' : 'disabled' }}>
-                                                    <i class="fas fa-calendar-plus mr-1"></i>Adakan Kegiatan
-                                                </button>
-
-                                            <button type="button"
-                                                class="btn btn-success btn-sm zi-open-evidence-modal"
-                                                data-toggle="modal"
-                                                data-target="#uploadEvidenceModal"
-                                                data-activity-id="{{ optional($latestActivity)->id }}"
-                                                data-area-id="{{ $area->id }}"
-                                                data-period-id="{{ optional($selectedPeriod)->id }}"
-                                                data-subpoint-id="{{ $subPoint->id }}"
-                                                data-area-name="{{ $area->code }} - {{ $area->name }}"
-                                                data-subpoint-title="{{ $subPoint->title }}"
+                                    <div class="zi-subpoint-right">
+                                        <div class="zi-action-group">
+                                            <button type="button" class="btn btn-primary btn-sm zi-open-meeting-modal"
+                                                data-toggle="modal" data-target="#createRapatModal"
+                                                data-area-id="{{ $area->id }}" data-area-name="{{ $area->code }} - {{ $area->name }}"
+                                                data-subpoint-id="{{ $subPoint->id }}" data-subpoint-code="{{ strtolower($subPoint->code) }}"
+                                                data-subpoint-title="{{ $subPoint->title }}" data-period-id="{{ optional($selectedPeriod)->id }}"
+                                                data-default-title="Rapat Monitoring dan Evaluasi - {{ $subPoint->title }}"
+                                                {{ $canCreateMeeting ? '' : 'disabled' }}>
+                                                <i class="fas fa-calendar-plus mr-1"></i>Kegiatan
+                                            </button>
+                                            <button type="button" class="btn btn-success btn-sm zi-open-evidence-modal"
+                                                data-toggle="modal" data-target="#uploadEvidenceModal"
+                                                data-activity-id="{{ optional($latestActivity)->id }}" data-area-id="{{ $area->id }}"
+                                                data-period-id="{{ optional($selectedPeriod)->id }}" data-subpoint-id="{{ $subPoint->id }}"
+                                                data-area-name="{{ $area->code }} - {{ $area->name }}" data-subpoint-title="{{ $subPoint->title }}"
                                                 data-existing-evidence="#ziEvidenceListTemplate{{ $subPoint->id }}"
                                                 data-recommendations="#ziRecommendationListTemplate{{ $subPoint->id }}"
                                                 {{ $canUploadEvidence ? '' : 'disabled' }}>
-                                                    <i class="fas fa-upload mr-1"></i>Upload Eviden
+                                                <i class="fas fa-upload mr-1"></i>Eviden
                                             </button>
-
-                                            <form method="POST" action="{{ $latestActivity ? route('progress-zi.activities.submit-review', $latestActivity) : '#' }}">
+                                            <form method="POST" action="{{ $latestActivity ? route('progress-zi.activities.submit-review', $latestActivity) : '#' }}" class="d-inline">
                                                 @csrf
-                                                <button type="submit" class="btn btn-warning btn-sm btn-block" {{ $canSubmitReview ? '' : 'disabled' }}>
-                                                    <i class="fas fa-clipboard-check mr-1"></i>Review Pimpinan
+                                                <button type="submit" class="btn btn-warning btn-sm" {{ $canSubmitReview ? '' : 'disabled' }}>
+                                                    <i class="fas fa-clipboard-check mr-1"></i>Review
                                                 </button>
                                             </form>
                                         </div>

@@ -5,8 +5,8 @@
 @push('styles')
     <style>
         .notulensi-card {
-            border-radius: 16px;
-            border: 1px solid #e5e7eb;
+            border-radius: 14px;
+            border: 1px solid #e8eaed;
         }
 
         .notulensi-section-title {
@@ -24,7 +24,7 @@
             height: 28px;
             border: none;
             border-radius: 8px;
-            background: linear-gradient(135deg, #2563eb, #3b82f6);
+            background: linear-gradient(135deg, #4f46e5, #6366f1);
             color: #fff;
             font-size: 1rem;
             font-weight: 700;
@@ -73,7 +73,7 @@
             color: #1f2937;
         }
 
-        .meeting-action-btn.primary { background: #eff6ff; color: #1d4ed8; border-color: #bfdbfe; }
+        .meeting-action-btn.primary { background: #eef2ff; color: #4338ca; border-color: #c7d2fe; }
         .meeting-action-btn.success { background: #ecfdf5; color: #047857; border-color: #a7f3d0; }
         .meeting-action-btn.dark { background: #f1f5f9; color: #334155; border-color: #cbd5e1; }
         .meeting-action-btn.secondary { background: #f8fafc; color: #475569; border-color: #cbd5e1; }

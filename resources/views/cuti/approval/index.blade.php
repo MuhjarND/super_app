@@ -48,8 +48,8 @@
             align-items: center;
             padding: 6px 10px;
             border-radius: 999px;
-            background: #eff6ff;
-            color: #1d4ed8;
+            background: #eef2ff;
+            color: #4338ca;
             font-size: 0.76rem;
             font-weight: 700;
         }

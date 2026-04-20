@@ -5,8 +5,8 @@
 @push('styles')
     <style>
         .followup-card {
-            border-radius: 16px;
-            border: 1px solid #e5e7eb;
+            border-radius: 14px;
+            border: 1px solid #e8eaed;
         }
 
         .followup-item-title {
@@ -154,7 +154,7 @@
         }
 
         .followup-detail-btn:hover {
-            color: #1d4ed8;
+            color: #4338ca;
             text-decoration: none;
         }
 

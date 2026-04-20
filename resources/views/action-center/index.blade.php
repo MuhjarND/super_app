@@ -5,7 +5,7 @@
 @section('content')
     @php
         $moduleToneMap = [
-            'persuratan' => ['bg' => '#eff6ff', 'text' => '#1d4ed8', 'icon' => 'fas fa-envelope-open-text'],
+            'persuratan' => ['bg' => '#eef2ff', 'text' => '#4338ca', 'icon' => 'fas fa-envelope-open-text'],
             'rapat' => ['bg' => '#eef2ff', 'text' => '#4338ca', 'icon' => 'fas fa-calendar-alt'],
             'cuti' => ['bg' => '#fef2f2', 'text' => '#dc2626', 'icon' => 'fas fa-calendar-check'],
             'progress_zi' => ['bg' => '#fff7ed', 'text' => '#d97706', 'icon' => 'fas fa-chart-line'],
@@ -14,7 +14,7 @@
 
         $statusToneMap = [
             'waiting' => ['bg' => '#fef3c7', 'text' => '#92400e'],
-            'process' => ['bg' => '#dbeafe', 'text' => '#1d4ed8'],
+            'process' => ['bg' => '#e0e7ff', 'text' => '#4338ca'],
             'revision' => ['bg' => '#fee2e2', 'text' => '#b91c1c'],
             'overdue' => ['bg' => '#fecaca', 'text' => '#991b1b'],
             'done' => ['bg' => '#dcfce7', 'text' => '#166534'],
@@ -108,7 +108,7 @@
         }
 
         .action-tab.active {
-            background: linear-gradient(135deg, #1d4ed8, #2563eb);
+            background: linear-gradient(135deg, #4338ca, #4f46e5);
             border-color: transparent;
             color: #fff;
             box-shadow: 0 10px 24px rgba(37, 99, 235, 0.2);
@@ -266,7 +266,7 @@
 
         @media (max-width: 767.98px) {
             .action-center-board {
-                border-radius: 16px;
+                border-radius: 14px;
             }
 
             .action-tab-row {
@@ -290,7 +290,7 @@
 
             .action-item {
                 padding: 15px 14px 14px;
-                border-radius: 16px;
+                border-radius: 14px;
             }
 
             .action-item-main {
@@ -310,12 +310,10 @@
             <div class="action-center-board-head">
                 <div class="d-flex flex-wrap align-items-start justify-content-between">
                     <div>
-                        <h5 class="mb-1">Inbox kerja lintas modul</h5>
-                        <p class="text-muted mb-0">Klik item untuk langsung masuk ke halaman aksi pada modul asal.</p>
+                        <h5 class="mb-1">Tindak Lanjut Terpadu</h5>
                     </div>
                     <div class="text-md-right mt-2 mt-md-0">
-                        <div class="font-weight-bold text-dark">{{ $summary['visible_count'] }} item tampil</div>
-                        <div class="text-muted small">Setelah tab dan filter diterapkan</div>
+                        <div class="font-weight-bold text-dark">{{ $summary['visible_count'] }} item</div>
                     </div>
                 </div>
 
@@ -392,8 +390,7 @@
             <div class="action-list">
                 @if($items->isEmpty())
                     <div class="action-empty">
-                        <div class="font-weight-bold text-dark mb-1">Tidak ada item tindak lanjut.</div>
-                        <div>Filter saat ini tidak menemukan item yang perlu aksi.</div>
+                        <div class="font-weight-bold text-dark mb-1">Tidak ada item.</div>
                     </div>
                 @else
                     @foreach($groupedItems as $groupLabel => $groupItems)

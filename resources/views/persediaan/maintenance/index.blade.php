@@ -190,7 +190,7 @@
 
                 .maintenance-table-wrap {
                     border: 1px solid rgba(191, 219, 254, 0.78);
-                    border-radius: 16px;
+                    border-radius: 14px;
                     overflow: hidden;
                 }
 
@@ -212,7 +212,7 @@
 
                 .maintenance-empty {
                     border: 1px dashed rgba(148, 163, 184, 0.45);
-                    border-radius: 16px;
+                    border-radius: 14px;
                     padding: 18px;
                     color: #64748b;
                     background: rgba(248, 250, 252, 0.85);
@@ -250,7 +250,7 @@
                     }
 
                     .maintenance-shell {
-                        border-radius: 16px;
+                        border-radius: 14px;
                     }
 
                     .maintenance-board {

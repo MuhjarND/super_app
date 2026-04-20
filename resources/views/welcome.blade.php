@@ -283,7 +283,7 @@
             width: 58px;
             height: 58px;
             object-fit: contain;
-            border-radius: 16px;
+            border-radius: 14px;
             background: rgba(255,255,255,0.92);
             padding: 8px;
             flex-shrink: 0;
@@ -500,7 +500,7 @@
         }
 
         .preview-kpi {
-            border-radius: 16px;
+            border-radius: 14px;
             padding: 12px;
             background: #fff;
             border: 1px solid rgba(15, 38, 64, 0.08);
@@ -600,8 +600,8 @@
         }
 
         .preview-chip.info {
-            background: #dbeafe;
-            color: #2563eb;
+            background: #e0e7ff;
+            color: #4f46e5;
         }
 
         .preview-chip.success {
@@ -612,7 +612,7 @@
         .preview-line {
             height: 10px;
             border-radius: 999px;
-            background: linear-gradient(90deg, #dbeafe, #eff6ff);
+            background: linear-gradient(90deg, #e0e7ff, #eef2ff);
         }
 
         .preview-line.short { width: 56%; }

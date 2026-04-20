@@ -84,7 +84,7 @@
 
         .leave-show-table tbody tr {
             padding: 12px 14px 10px;
-            border-bottom: 1px solid #e5e7eb;
+            border-bottom: 1px solid #e8eaed;
         }
 
         .leave-show-table tbody tr:last-child {

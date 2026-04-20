@@ -5,7 +5,7 @@
 @push('styles')
     <style>
         .approval-page-hero {
-            border: 1px solid #dbeafe;
+            border: 1px solid #e0e7ff;
             border-radius: 22px;
             padding: 20px 22px;
             margin-bottom: 18px;
@@ -48,7 +48,7 @@
         }
 
         .approval-module-card.active {
-            border-color: #2563eb;
+            border-color: #4f46e5;
             box-shadow: 0 14px 30px rgba(37, 99, 235, 0.12);
         }
 
@@ -60,12 +60,12 @@
         .approval-module-icon {
             width: 52px;
             height: 52px;
-            border-radius: 16px;
+            border-radius: 14px;
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            background: linear-gradient(180deg, #dbeafe 0%, #bfdbfe 100%);
-            color: #1d4ed8;
+            background: linear-gradient(180deg, #e0e7ff 0%, #c7d2fe 100%);
+            color: #4338ca;
             font-size: 1.1rem;
             margin-bottom: 14px;
         }
@@ -179,8 +179,7 @@
 @section('content-header')
     <div class="content-header">
         <div class="container-fluid">
-            <h1 class="mb-1">Riwayat Approval</h1>
-            <div class="text-muted" style="font-size: 0.82rem;">Pusat riwayat approval untuk seluruh jenis dokumen.</div>
+            <h1 class="mb-0">Riwayat Approval</h1>
         </div>
     </div>
 @endsection
@@ -188,10 +187,7 @@
 @section('content')
     @php($totalHistory = collect($cards)->sum('history_count'))
     <div class="approval-page-hero">
-        <div class="approval-page-hero-title">Riwayat Approval Dokumen</div>
-        <div class="approval-page-hero-subtitle">
-            Seluruh riwayat approval dikumpulkan di halaman ini. Pilih kategori dokumen untuk melihat jejak tindakan, catatan, dan hasil approval yang sudah tercatat.
-        </div>
+        <div class="approval-page-hero-title">Riwayat Approval</div>
         <div class="mt-3">
             <span class="badge badge-primary px-3 py-2" style="font-size:.82rem;">{{ $totalHistory }} riwayat approval tercatat</span>
         </div>
@@ -217,9 +213,7 @@
         <div class="card-header bg-white d-flex justify-content-between align-items-center">
             <div>
                 <strong>{{ $selectedCard['label'] ?? 'Pilih Kategori Dokumen' }}</strong>
-                <div class="text-muted" style="font-size: 0.8rem;">
-                    {{ $selectedCard ? 'Riwayat approval untuk kategori dokumen terpilih.' : 'Pilih salah satu card di atas untuk melihat riwayat approval.' }}
-                </div>
+
             </div>
             @if($selectedCard)
                 <span class="badge badge-primary">{{ $historyItems->count() }}</span>

@@ -10,11 +10,36 @@
         }
 
         .dashboard-hero {
-            background: linear-gradient(135deg, #0f3352 0%, #175d8f 52%, #3b82f6 100%);
-            color: #fff;
-            border-radius: 18px;
-            padding: 26px 28px;
-            box-shadow: 0 18px 40px rgba(15, 51, 82, 0.18);
+            background: linear-gradient(135deg, #4f46e5 0%, #6366f1 40%, #7c3aed 100%);
+            color: #ffffff;
+            border-radius: 20px;
+            padding: 30px 32px;
+            border: none;
+            box-shadow: 0 8px 32px rgba(79, 70, 229, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .dashboard-hero::before {
+            content: '';
+            position: absolute;
+            top: -30%;
+            right: -10%;
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            border-radius: 50%;
+        }
+
+        .dashboard-hero::after {
+            content: '';
+            position: absolute;
+            bottom: -40%;
+            left: 10%;
+            width: 200px;
+            height: 200px;
+            background: radial-gradient(circle, rgba(255,255,255,0.06) 0%, transparent 70%);
+            border-radius: 50%;
         }
 
         .dashboard-hero-title {
@@ -24,7 +49,7 @@
         }
 
         .dashboard-hero-meta {
-            opacity: 0.86;
+            color: rgba(255,255,255,0.75);
             font-size: 0.92rem;
         }
 
@@ -39,15 +64,24 @@
             display: inline-flex;
             align-items: center;
             gap: 10px;
-            background: rgba(255, 255, 255, 0.14);
-            border: 1px solid rgba(255, 255, 255, 0.16);
+            background: rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.2);
             border-radius: 999px;
-            padding: 9px 14px;
+            padding: 9px 16px;
             min-height: 44px;
+            backdrop-filter: blur(8px);
+            transition: all 0.2s ease;
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero-chip:hover {
+            background: rgba(255, 255, 255, 0.22);
+            transform: translateY(-1px);
         }
 
         .hero-chip i {
-            color: #facc15;
+            color: #fbbf24;
         }
 
         .hero-chip strong {
@@ -58,7 +92,7 @@
 
         .hero-chip span {
             font-size: 0.74rem;
-            opacity: 0.82;
+            color: rgba(255,255,255,0.8);
             display: block;
             margin-top: 2px;
         }
@@ -70,13 +104,20 @@
         }
 
         .module-card {
-            background: #fff;
-            border: 1px solid #e5e7eb;
+            background: linear-gradient(180deg, #ffffff 0%, #fdfcff 100%);
+            border: 1px solid #e8eaef;
             border-radius: 18px;
-            padding: 20px;
-            box-shadow: 0 10px 26px rgba(15, 23, 42, 0.05);
+            padding: 22px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
             display: grid;
             gap: 16px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .module-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 32px rgba(99, 102, 241, 0.1);
+            border-color: #c7d2fe;
         }
 
         .module-card-head {
@@ -102,15 +143,16 @@
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            width: 48px;
-            height: 48px;
+            width: 50px;
+            height: 50px;
             border-radius: 14px;
-            font-size: 1.1rem;
+            font-size: 1.15rem;
             color: #fff;
             flex-shrink: 0;
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
         }
 
-        .module-pill.persuratan { background: linear-gradient(135deg, #2563eb, #1d4ed8); }
+        .module-pill.persuratan { background: linear-gradient(135deg, #6366f1, #4f46e5); }
         .module-pill.rapat { background: linear-gradient(135deg, #0f766e, #0d9488); }
         .module-pill.cuti { background: linear-gradient(135deg, #15803d, #16a34a); }
         .module-pill.zi { background: linear-gradient(135deg, #7c3aed, #4f46e5); }
@@ -124,10 +166,16 @@
 
         .metric-box {
             border-radius: 14px;
-            border: 1px solid #e2e8f0;
-            background: #f8fafc;
-            padding: 12px 13px;
+            border: 1px solid #e8eaef;
+            background: linear-gradient(135deg, #f8fafc, #fdfcff);
+            padding: 14px 14px;
             min-height: 76px;
+            transition: all 0.2s ease;
+        }
+
+        .metric-box:hover {
+            border-color: #c7d2fe;
+            background: linear-gradient(135deg, #eef2ff, #f5f3ff);
         }
 
         .metric-box .value {
@@ -155,12 +203,26 @@
             align-items: center;
             gap: 8px;
             border-radius: 10px;
-            background: #eff6ff;
-            color: #1d4ed8;
-            padding: 9px 12px;
+            background: #eef2ff;
+            color: #4f46e5;
+            padding: 9px 14px;
             font-size: 0.8rem;
             font-weight: 700;
             text-decoration: none;
+            transition: all 0.2s ease;
+        }
+
+        .module-link-row a:hover {
+            background: #4f46e5;
+            color: #ffffff;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.25);
+        }
+
+        .module-link-row a.alt:hover {
+            background: #15803d;
+            color: #ffffff;
+            box-shadow: 0 4px 12px rgba(21, 128, 61, 0.25);
         }
 
         .module-link-row a.alt {
@@ -175,11 +237,16 @@
         }
 
         .dash-panel {
-            background: #fff;
-            border: 1px solid #e5e7eb;
+            background: linear-gradient(180deg, #ffffff 0%, #fdfcff 100%);
+            border: 1px solid #e8eaef;
             border-radius: 18px;
-            box-shadow: 0 10px 26px rgba(15, 23, 42, 0.05);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
             overflow: hidden;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .dash-panel:hover {
+            box-shadow: 0 8px 24px rgba(99, 102, 241, 0.06);
         }
 
         .dash-panel-head {
@@ -187,8 +254,9 @@
             align-items: center;
             justify-content: space-between;
             gap: 12px;
-            padding: 18px 20px 14px;
+            padding: 20px 22px 14px;
             border-bottom: 1px solid #eef2f7;
+            background: linear-gradient(135deg, #fdfcff, #f8fafc);
         }
 
         .dash-panel-head h5 {
@@ -238,18 +306,19 @@
         }
 
         .action-icon {
-            width: 42px;
-            height: 42px;
-            border-radius: 12px;
+            width: 44px;
+            height: 44px;
+            border-radius: 14px;
             display: inline-flex;
             align-items: center;
             justify-content: center;
             font-size: 0.95rem;
             color: #fff;
             margin-top: 2px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
 
-        .tone-blue { background: linear-gradient(135deg, #3b82f6, #1d4ed8); }
+        .tone-blue { background: linear-gradient(135deg, #6366f1, #4f46e5); }
         .tone-amber { background: linear-gradient(135deg, #f59e0b, #d97706); }
         .tone-green { background: linear-gradient(135deg, #22c55e, #15803d); }
         .tone-red { background: linear-gradient(135deg, #ef4444, #b91c1c); }
@@ -280,13 +349,21 @@
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            width: 34px;
-            height: 34px;
+            width: 36px;
+            height: 36px;
             border-radius: 10px;
-            background: #eff6ff;
-            color: #1d4ed8;
+            background: #eef2ff;
+            color: #4f46e5;
             text-decoration: none;
             flex-shrink: 0;
+            transition: all 0.2s ease;
+        }
+
+        .item-link:hover {
+            background: #4f46e5;
+            color: #ffffff;
+            transform: scale(1.08);
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
         }
 
         .list-badge {
@@ -320,16 +397,23 @@
 
         .calendar-stat-card {
             border-radius: 14px;
-            border: 1px solid #e2e8f0;
-            background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
-            padding: 14px 15px;
+            border: 1px solid #e8eaef;
+            background: linear-gradient(135deg, #ffffff 0%, #fdfcff 100%);
+            padding: 16px 16px;
             min-height: 84px;
+            transition: all 0.2s ease;
+        }
+
+        .calendar-stat-card:hover {
+            border-color: #c7d2fe;
+            box-shadow: 0 4px 16px rgba(99, 102, 241, 0.06);
+            transform: translateY(-2px);
         }
 
         .calendar-stat-value {
-            font-size: 1.4rem;
+            font-size: 1.5rem;
             font-weight: 800;
-            color: #0f172a;
+            color: #4f46e5;
             line-height: 1;
             margin-bottom: 8px;
         }
@@ -400,7 +484,7 @@
 
         .calendar-month-card {
             border: 1px solid #e2e8f0;
-            border-radius: 16px;
+            border-radius: 14px;
             background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
             padding: 14px;
         }
@@ -443,8 +527,9 @@
         }
 
         .calendar-day-cell.today {
-            border-color: #93c5fd;
-            box-shadow: inset 0 0 0 1px rgba(59, 130, 246, 0.18);
+            border-color: #818cf8;
+            box-shadow: inset 0 0 0 2px rgba(99, 102, 241, 0.2), 0 2px 8px rgba(99, 102, 241, 0.08);
+            background: linear-gradient(135deg, #fdfcff, #eef2ff);
         }
 
         .calendar-day-top {
@@ -484,7 +569,7 @@
             flex-shrink: 0;
         }
 
-        .calendar-day-dot.rapat { background: #2563eb; }
+        .calendar-day-dot.rapat { background: #4f46e5; }
         .calendar-day-dot.agenda_pimpinan { background: #64748b; }
         .calendar-day-dot.cuti { background: #dc2626; }
         .calendar-day-dot.zi { background: #d97706; }
@@ -496,8 +581,8 @@
             gap: 8px;
             padding: 7px 10px;
             border-radius: 999px;
-            background: #eff6ff;
-            color: #1d4ed8;
+            background: #eef2ff;
+            color: #4f46e5;
             font-size: 0.74rem;
             font-weight: 700;
             margin-bottom: 8px;
@@ -518,8 +603,8 @@
 
         @media (max-width: 767.98px) {
             .dashboard-hero {
-                padding: 18px 16px;
-                border-radius: 16px;
+                padding: 20px 18px;
+                border-radius: 14px;
             }
 
             .dashboard-hero-title {
@@ -552,7 +637,7 @@
 
             .module-card,
             .dash-panel {
-                border-radius: 16px;
+                border-radius: 14px;
             }
 
             .module-card {
@@ -592,13 +677,13 @@
     <div class="dashboard-shell">
         <section class="dashboard-hero">
             <div class="dashboard-hero-title">{{ auth()->user()->name }}</div>
-            <div class="dashboard-hero-meta">{{ now()->translatedFormat('l, d F Y') }} &bull; Ringkasan kerja lintas modul</div>
+            <div class="dashboard-hero-meta">{{ now()->translatedFormat('l, d F Y') }}</div>
             <div class="hero-chip-wrap">
                 <div class="hero-chip">
                     <i class="fas fa-bell"></i>
                     <div>
                         <strong>{{ $dashboardSummary['action_count'] }}</strong>
-                        <span>Tindak lanjut aktif</span>
+                        <span>Tindak lanjut</span>
                     </div>
                 </div>
                 <div class="hero-chip">
@@ -619,21 +704,21 @@
                     <i class="fas fa-inbox"></i>
                     <div>
                         <strong>{{ $dashboardSummary['today_masuk'] }}</strong>
-                        <span>Surat masuk hari ini</span>
+                        <span>Surat masuk</span>
                     </div>
                 </div>
                 <div class="hero-chip">
                     <i class="fas fa-calendar-alt"></i>
                     <div>
                         <strong>{{ $dashboardSummary['upcoming_meetings'] }}</strong>
-                        <span>Rapat / agenda mendatang</span>
+                        <span>Agenda mendatang</span>
                     </div>
                 </div>
                 <div class="hero-chip">
                     <i class="fas fa-calendar-check"></i>
                     <div>
                         <strong>{{ $dashboardSummary['pending_leave_approvals'] }}</strong>
-                        <span>Approval cuti pending</span>
+                        <span>Cuti pending</span>
                     </div>
                 </div>
             </div>
@@ -643,7 +728,7 @@
             <div class="dash-panel-head">
                 <div>
                     <h5>Kalender Bulan Ini</h5>
-                    <p>{{ $calendarOverview['month_label'] }} &bull; ringkasan agenda lintas modul yang terlihat untuk Anda.</p>
+                    <p>{{ $calendarOverview['month_label'] }}</p>
                 </div>
                 <div class="module-link-row" style="margin: 0;">
                     <a href="{{ route('calendar.integrated.index') }}"><i class="fas fa-calendar-alt"></i> Buka Kalender</a>
@@ -653,35 +738,35 @@
                 <div class="calendar-stat-grid">
                     <div class="calendar-stat-card">
                         <div class="calendar-stat-value">{{ $calendarOverview['event_count'] }}</div>
-                        <div class="calendar-stat-label">Total event bulan berjalan</div>
+                        <div class="calendar-stat-label">Event bulan ini</div>
                     </div>
                     <div class="calendar-stat-card">
                         <div class="calendar-stat-value">{{ $calendarOverview['days_with_events'] }}</div>
-                        <div class="calendar-stat-label">Hari yang memiliki agenda</div>
+                        <div class="calendar-stat-label">Hari dengan agenda</div>
                     </div>
                     <div class="calendar-stat-card">
                         <div class="calendar-stat-value">{{ $calendarOverview['meeting_count'] }}</div>
-                        <div class="calendar-stat-label">Rapat dan agenda pimpinan</div>
+                        <div class="calendar-stat-label">Rapat & agenda</div>
                     </div>
                     <div class="calendar-stat-card">
                         <div class="calendar-stat-value">{{ $calendarOverview['agenda_pimpinan_count'] }}</div>
-                        <div class="calendar-stat-label">Agenda pimpinan bulan ini</div>
+                        <div class="calendar-stat-label">Agenda pimpinan</div>
                     </div>
                     <div class="calendar-stat-card">
                         <div class="calendar-stat-value">{{ $calendarOverview['leave_count'] }}</div>
-                        <div class="calendar-stat-label">Rentang cuti pegawai</div>
+                        <div class="calendar-stat-label">Cuti pegawai</div>
                     </div>
                     <div class="calendar-stat-card">
                         <div class="calendar-stat-value">{{ $calendarOverview['zi_count'] }}</div>
-                        <div class="calendar-stat-label">Agenda dan target Progress ZI</div>
+                        <div class="calendar-stat-label">Progress ZI</div>
                     </div>
                     <div class="calendar-stat-card">
                         <div class="calendar-stat-value">{{ $calendarOverview['surat_tugas_count'] }}</div>
-                        <div class="calendar-stat-label">Surat tugas aktif bulan ini</div>
+                        <div class="calendar-stat-label">Surat tugas</div>
                     </div>
                     <div class="calendar-stat-card">
                         <div class="calendar-stat-value">{{ $calendarOverview['conflict_count'] }}</div>
-                        <div class="calendar-stat-label">Tanggal dengan benturan jadwal</div>
+                        <div class="calendar-stat-label">Benturan jadwal</div>
                     </div>
                 </div>
 
@@ -724,7 +809,7 @@
                             <div>
                                 <div class="calendar-section-title">Event Saya Hari Ini</div>
                                 @if($calendarOverview['today_events']->isEmpty())
-                                    <div class="empty-state" style="padding: 20px 12px;">Tidak ada event pribadi yang aktif hari ini.</div>
+                                    <div class="empty-state" style="padding: 20px 12px;">Tidak ada event hari ini.</div>
                                 @else
                                     <div class="calendar-mini-list">
                                         @foreach($calendarOverview['today_events'] as $item)
@@ -744,7 +829,7 @@
                             <div>
                                 <div class="calendar-section-title">Benturan Jadwal</div>
                                 @if($calendarOverview['conflicts']->isEmpty())
-                                    <div class="empty-state" style="padding: 20px 12px;">Belum ada benturan jadwal yang terdeteksi pada bulan ini.</div>
+                                    <div class="empty-state" style="padding: 20px 12px;">Tidak ada benturan jadwal.</div>
                                 @else
                                     <div class="calendar-mini-list">
                                         @foreach($calendarOverview['conflicts'] as $item)
@@ -766,7 +851,7 @@
                 <div style="margin-top: 18px;">
                     <div class="calendar-section-title">Agenda Mendatang</div>
                     @if($calendarOverview['upcoming']->isEmpty())
-                        <div class="empty-state" style="padding: 20px 12px;">Belum ada agenda mendatang pada bulan ini.</div>
+                        <div class="empty-state" style="padding: 20px 12px;">Tidak ada agenda mendatang.</div>
                     @else
                         <div class="calendar-mini-list">
                             @foreach($calendarOverview['upcoming'] as $item)
@@ -787,14 +872,14 @@
                     <div class="module-card-head">
                         <div>
                             <div class="module-card-title">Persuratan</div>
-                            <div class="module-card-subtitle">Surat masuk, surat keluar, dan disposisi yang relevan dengan Anda.</div>
+
                         </div>
                         <div class="module-pill persuratan"><i class="fas fa-envelope-open-text"></i></div>
                     </div>
                     <div class="metric-grid">
                         <div class="metric-box">
                             <div class="value">{{ $persuratan['stats']['total_masuk'] }}</div>
-                            <div class="label">Total surat masuk terlihat</div>
+                            <div class="label">Surat masuk</div>
                         </div>
                         <div class="metric-box">
                             <div class="value">{{ $persuratan['stats']['surat_baru'] }}</div>
@@ -802,7 +887,7 @@
                         </div>
                         <div class="metric-box">
                             <div class="value">{{ $persuratan['stats']['disposisi_pending'] }}</div>
-                            <div class="label">Disposisi menunggu tindak lanjut</div>
+                            <div class="label">Disposisi pending</div>
                         </div>
                         <div class="metric-box">
                             <div class="value">{{ $persuratan['stats']['keluar_draft'] }}</div>
@@ -821,26 +906,26 @@
                     <div class="module-card-head">
                         <div>
                             <div class="module-card-title">Rapat / Agenda</div>
-                            <div class="module-card-subtitle">Rapat, agenda pimpinan, approval undangan, dan tindak lanjut notulen.</div>
+
                         </div>
                         <div class="module-pill rapat"><i class="fas fa-calendar-week"></i></div>
                     </div>
                     <div class="metric-grid">
                         <div class="metric-box">
                             <div class="value">{{ $meeting['stats']['total_rapat'] }}</div>
-                            <div class="label">Rapat yang bisa Anda lihat</div>
+                            <div class="label">Total rapat</div>
                         </div>
                         <div class="metric-box">
                             <div class="value">{{ $meeting['stats']['total_agenda'] }}</div>
-                            <div class="label">Agenda pimpinan terkait Anda</div>
+                            <div class="label">Agenda pimpinan</div>
                         </div>
                         <div class="metric-box">
                             <div class="value">{{ $meeting['stats']['pending_undangan'] + $meeting['stats']['pending_notulensi'] }}</div>
-                            <div class="label">Approval undangan dan notulensi</div>
+                            <div class="label">Approval pending</div>
                         </div>
                         <div class="metric-box">
                             <div class="value">{{ $meeting['stats']['pending_tindak_lanjut'] }}</div>
-                            <div class="label">Tindak lanjut notulen pending</div>
+                            <div class="label">Tindak lanjut</div>
                         </div>
                     </div>
                     <div class="module-link-row">
@@ -856,26 +941,26 @@
                     <div class="module-card-head">
                         <div>
                             <div class="module-card-title">Cuti</div>
-                            <div class="module-card-subtitle">Pengajuan cuti Anda, status proses, dan approval yang perlu ditindaklanjuti.</div>
+
                         </div>
                         <div class="module-pill cuti"><i class="fas fa-calendar-check"></i></div>
                     </div>
                     <div class="metric-grid">
                         <div class="metric-box">
                             <div class="value">{{ $leave['stats']['pengajuan_saya'] }}</div>
-                            <div class="label">Total pengajuan saya</div>
+                            <div class="label">Pengajuan saya</div>
                         </div>
                         <div class="metric-box">
                             <div class="value">{{ $leave['stats']['diproses'] }}</div>
-                            <div class="label">Pengajuan sedang diproses</div>
+                            <div class="label">Sedang diproses</div>
                         </div>
                         <div class="metric-box">
                             <div class="value">{{ $leave['stats']['disetujui'] }}</div>
-                            <div class="label">Pengajuan disetujui / selesai</div>
+                            <div class="label">Disetujui</div>
                         </div>
                         <div class="metric-box">
                             <div class="value">{{ $leave['stats']['approval_pending'] }}</div>
-                            <div class="label">Approval cuti pending</div>
+                            <div class="label">Cuti pending</div>
                         </div>
                     </div>
                     <div class="module-link-row">
@@ -890,7 +975,7 @@
                     <div class="module-card-head">
                         <div>
                             <div class="module-card-title">Perawatan Alat dan Mesin</div>
-                            <div class="module-card-subtitle">Inventaris alat/mesin, sub barang, QR code, dan transaksi perawatan.</div>
+
                         </div>
                         <div class="module-pill persediaan"><i class="fas fa-boxes"></i></div>
                     </div>
@@ -905,7 +990,7 @@
                         </div>
                         <div class="metric-box">
                             <div class="value">{{ $inventory['stats']['room_count'] }}</div>
-                            <div class="label">Ruang tercatat</div>
+                            <div class="label">Ruang</div>
                         </div>
                         <div class="metric-box">
                             <div class="value">{{ $inventory['stats']['maintenance_count'] }}</div>
@@ -924,22 +1009,22 @@
                     <div class="module-card-head">
                         <div>
                             <div class="module-card-title">Progress ZI</div>
-                            <div class="module-card-subtitle">Monitoring area perubahan, kegiatan, indikator, eviden, dan tindak lanjut verifikasi.</div>
+
                         </div>
                         <div class="module-pill zi"><i class="fas fa-chart-line"></i></div>
                     </div>
                     <div class="metric-grid">
                         <div class="metric-box">
                             <div class="value">{{ $progressZi['stats']['area_count'] }}</div>
-                            <div class="label">Area pada periode aktif</div>
+                            <div class="label">Area aktif</div>
                         </div>
                         <div class="metric-box">
                             <div class="value">{{ $progressZi['stats']['activity_count'] }}</div>
-                            <div class="label">Kegiatan ZI terpantau</div>
+                            <div class="label">Kegiatan</div>
                         </div>
                         <div class="metric-box">
                             <div class="value">{{ $progressZi['stats']['indicator_count'] }}</div>
-                            <div class="label">Indikator aktif</div>
+                            <div class="label">Indikator</div>
                         </div>
                         <div class="metric-box">
                             <div class="value">{{ rtrim(rtrim(number_format($progressZi['stats']['period_score'], 1), '0'), '.') }}%</div>
@@ -959,7 +1044,6 @@
                 <div class="dash-panel-head">
                     <div>
                         <h5>Yang Perlu Ditindaklanjuti</h5>
-                        <p>Daftar tugas terbaru dari inbox kerja lintas modul yang paling perlu ditindaklanjuti.</p>
                     </div>
                 </div>
                 <div class="dash-panel-body">
@@ -991,8 +1075,7 @@
             <div class="dash-panel">
                 <div class="dash-panel-head">
                     <div>
-                        <h5>Jadwal Rapat / Agenda Terdekat</h5>
-                        <p>Item mendatang yang berada dalam jangkauan akses Anda.</p>
+                        <h5>Agenda Terdekat</h5>
                     </div>
                 </div>
                 <div class="dash-panel-body">
@@ -1024,7 +1107,6 @@
                     <div class="dash-panel-head">
                         <div>
                             <h5>Persuratan Terbaru</h5>
-                            <p>Surat masuk dan surat keluar terakhir yang relevan.</p>
                         </div>
                     </div>
                     <div class="dash-panel-body">
@@ -1053,7 +1135,6 @@
                     <div class="dash-panel-head">
                         <div>
                             <h5>Rapat / Agenda Terbaru</h5>
-                            <p>Dokumen rapat dan agenda terbaru yang bisa Anda akses.</p>
                         </div>
                     </div>
                     <div class="dash-panel-body">
@@ -1082,7 +1163,6 @@
                     <div class="dash-panel-head">
                         <div>
                             <h5>Cuti Terbaru</h5>
-                            <p>Pengajuan cuti terbaru yang relevan dengan peran Anda.</p>
                         </div>
                     </div>
                     <div class="dash-panel-body">
@@ -1110,8 +1190,7 @@
                 <div class="dash-panel">
                     <div class="dash-panel-head">
                         <div>
-                            <h5>Perawatan Alat dan Mesin Terbaru</h5>
-                            <p>Transaksi perawatan terbaru yang sudah masuk ke modul alat dan mesin.</p>
+                            <h5>Perawatan Terbaru</h5>
                         </div>
                     </div>
                     <div class="dash-panel-body">

@@ -7,8 +7,8 @@
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap4.min.css">
     <style>
         .surat-masuk-card {
-            border-radius: 16px;
-            border: 1px solid #e5e7eb;
+            border-radius: 14px;
+            border: 1px solid #e8eaed;
         }
 
         .surat-masuk-card .card-header {
@@ -26,7 +26,7 @@
         }
 
         .btn-add-surat {
-            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            background: linear-gradient(135deg, #6366f1, #4f46e5);
             border: none;
             color: white;
             padding: 10px 22px;
@@ -37,7 +37,7 @@
         }
 
         .btn-add-surat:hover {
-            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            background: linear-gradient(135deg, #4f46e5, #4338ca);
             color: white;
             transform: translateY(-1px);
             box-shadow: 0 4px 14px rgba(59, 130, 246, 0.4);
@@ -51,7 +51,7 @@
             font-size: 0.72rem;
             text-transform: uppercase;
             letter-spacing: 0.5px;
-            border-bottom: 1px solid #e5e7eb;
+            border-bottom: 1px solid #e8eaed;
             padding: 12px 14px;
             white-space: nowrap;
         }
@@ -86,13 +86,13 @@
         }
 
         .btn-expand:hover {
-            border-color: #3b82f6;
-            color: #3b82f6;
+            border-color: #6366f1;
+            color: #6366f1;
         }
 
         .btn-expand.expanded {
-            background: #3b82f6;
-            border-color: #3b82f6;
+            background: #6366f1;
+            border-color: #6366f1;
             color: white;
         }
 
@@ -116,8 +116,8 @@
         }
 
         .badge-sifat-biasa {
-            background: #eff6ff;
-            color: #1d4ed8;
+            background: #eef2ff;
+            color: #4f46e5;
             font-size: 0.65rem;
             padding: 3px 8px;
             border-radius: 4px;
@@ -261,14 +261,14 @@
         }
 
         .action-btn-disposisi {
-            background: #dbeafe;
-            color: #1e40af;
+            background: #eef2ff;
+            color: #4f46e5;
         }
 
         .action-btn-disposisi:hover {
-            background: #bfdbfe;
-            color: #1e40af;
-            box-shadow: 0 2px 8px rgba(30, 64, 175, 0.2);
+            background: #e0e7ff;
+            color: #4f46e5;
+            box-shadow: 0 2px 8px rgba(79, 70, 229, 0.15);
         }
 
         .action-btn-naikan {
@@ -351,7 +351,7 @@
         }
 
         .history-item {
-            border: 1px solid #e5e7eb;
+            border: 1px solid #e8eaed;
             border-radius: 10px;
             padding: 10px 12px;
             background: #ffffff;
@@ -473,8 +473,8 @@
                 <div class="col-sm-6">
                     <h1 style="display: flex; align-items: center; gap: 10px;">
                         <div
-                            style="width: 36px; height: 36px; border-radius: 10px; background: linear-gradient(135deg, #eff6ff, #dbeafe); display: flex; align-items: center; justify-content: center;">
-                            <i class="fas fa-inbox" style="font-size: 0.9rem; color: #3b82f6;"></i>
+                            style="width: 36px; height: 36px; border-radius: 10px; background: linear-gradient(135deg, #eef2ff, #e0e7ff); display: flex; align-items: center; justify-content: center;">
+                            <i class="fas fa-inbox" style="font-size: 0.9rem; color: #6366f1;"></i>
                         </div>
                         Surat Masuk
                     </h1>
@@ -708,7 +708,7 @@
                                     <i class="fas fa-file-pdf mr-1 text-danger"></i> Preview Lampiran
                                 </h6>
                                 <iframe id="detailFileViewer"
-                                    style="width: 100%; height: 500px; border: 1px solid #e5e7eb; border-radius: 10px; background: #f9fafb;"></iframe>
+                                    style="width: 100%; height: 500px; border: 1px solid #e8eaed; border-radius: 10px; background: #f9fafb;"></iframe>
                             </div>
                         </div>
                         <!-- Info -->
@@ -892,7 +892,7 @@
                                         <i class="fas fa-file-pdf mr-1 text-danger"></i> Preview Surat
                                     </h6>
                                     <iframe id="disposisiFileViewer"
-                                        style="width: 100%; height: 400px; border: 1px solid #e5e7eb; border-radius: 10px; background: #f9fafb;"></iframe>
+                                        style="width: 100%; height: 400px; border: 1px solid #e8eaed; border-radius: 10px; background: #f9fafb;"></iframe>
                                 </div>
                             </div>
                             <!-- Form -->
@@ -976,7 +976,7 @@
                                         <i class="fas fa-file-pdf mr-1 text-danger"></i> Preview Surat
                                     </h6>
                                     <iframe id="tindakLanjutFileViewer"
-                                        style="width: 100%; height: 400px; border: 1px solid #e5e7eb; border-radius: 10px; background: #f9fafb;"></iframe>
+                                        style="width: 100%; height: 400px; border: 1px solid #e8eaed; border-radius: 10px; background: #f9fafb;"></iframe>
                                 </div>
                             </div>
                             <div class="col-lg-6">

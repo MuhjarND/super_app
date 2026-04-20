@@ -9,7 +9,7 @@
         .result-item-card { border:1px solid #e5e7eb; border-radius:16px; padding:16px; margin-bottom:16px; background:#fff; }
         .bar-row { margin-bottom: 12px; }
         .bar-track { width:100%; background:#e5e7eb; border-radius:999px; overflow:hidden; height:16px; }
-        .bar-fill { height:100%; background:linear-gradient(90deg, #1d4ed8, #0ea5e9); transition: width .45s ease; }
+        .bar-fill { height:100%; background:linear-gradient(90deg, #4338ca, #0ea5e9); transition: width .45s ease; }
         .bar-fill.leading { background:linear-gradient(90deg, #f97316, #ef4444); }
         .pending-list { max-height: 240px; overflow:auto; }
         .qr-box svg { max-width: 100%; height: auto; }

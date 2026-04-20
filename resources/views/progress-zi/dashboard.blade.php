@@ -1,67 +1,59 @@
-﻿@extends('layouts.app')
+@extends('layouts.app')
 
 @section('title', 'Rekapan ZI')
 
 @push('styles')
 <style>
-    .zi-shell { display:grid; gap:18px; }
-    .zi-hero { background: linear-gradient(135deg, #0f3352 0%, #175d8f 52%, #3b82f6 100%); color:#fff; border-radius:18px; padding:24px 26px; box-shadow:0 18px 40px rgba(15, 51, 82, 0.18); }
-    .zi-hero-title { font-size:1.55rem; font-weight:800; margin-bottom:6px; }
-    .zi-hero-meta { opacity:.86; font-size:.92rem; }
-    .zi-kpi-grid { display:grid; grid-template-columns:repeat(6, minmax(0,1fr)); gap:16px; }
-    .zi-kpi { background:#fff; border:1px solid #e5e7eb; border-radius:18px; padding:18px; box-shadow:0 10px 26px rgba(15, 23, 42, .05); }
-    .zi-kpi .value { font-size:1.55rem; font-weight:800; color:#0f172a; line-height:1; margin-bottom:6px; }
-    .zi-kpi .label { font-size:.78rem; color:#64748b; }
-    .zi-row { display:grid; grid-template-columns:1.1fr .9fr; gap:18px; }
+    .zi-shell { display:grid; gap:16px; }
+    .zi-kpi-grid { display:grid; grid-template-columns:repeat(6, minmax(0,1fr)); gap:14px; }
+    .zi-kpi { background:#fff; border:1px solid #e5e7eb; border-radius:14px; padding:16px; box-shadow:0 4px 12px rgba(15, 23, 42, .04); }
+    .zi-kpi .value { font-size:1.4rem; font-weight:800; color:#0f172a; line-height:1; margin-bottom:5px; }
+    .zi-kpi .label { font-size:.76rem; color:#64748b; }
+    .zi-row { display:grid; grid-template-columns:1.1fr .9fr; gap:16px; }
     .zi-wide-panel { width:100%; }
-    .zi-trend-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:12px; width:100%; }
-    .zi-panel { background:#fff; border:1px solid #e5e7eb; border-radius:18px; box-shadow:0 10px 26px rgba(15,23,42,.05); overflow:hidden; }
-    .zi-panel-head { padding:18px 20px 14px; border-bottom:1px solid #eef2f7; display:flex; align-items:center; justify-content:space-between; gap:12px; }
-    .zi-panel-head h5 { margin:0; font-size:.98rem; font-weight:800; color:#0f172a; }
-    .zi-panel-head p { margin:3px 0 0; font-size:.78rem; color:#64748b; }
-    .zi-panel-body { padding:16px 20px 18px; }
-    .zi-progress-list, .zi-attention-list, .zi-trend-list { display:grid; gap:12px; }
-    .zi-progress-item { display:grid; grid-template-columns:1fr auto; gap:12px; align-items:center; padding:12px 0; border-bottom:1px solid #f1f5f9; }
+    .zi-trend-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(260px, 1fr)); gap:10px; width:100%; }
+    .zi-panel { background:#fff; border:1px solid #e5e7eb; border-radius:16px; box-shadow:0 4px 12px rgba(15,23,42,.04); overflow:hidden; }
+    .zi-panel-head { padding:14px 18px 12px; border-bottom:1px solid #eef2f7; display:flex; align-items:center; justify-content:space-between; gap:12px; }
+    .zi-panel-head h5 { margin:0; font-size:.92rem; font-weight:800; color:#0f172a; }
+    .zi-panel-body { padding:14px 18px 16px; }
+    .zi-progress-list, .zi-attention-list, .zi-trend-list { display:grid; gap:10px; }
+    .zi-progress-item { display:grid; grid-template-columns:1fr auto; gap:12px; align-items:center; padding:10px 0; border-bottom:1px solid #f1f5f9; }
     .zi-progress-item:last-child { border-bottom:none; }
-    .zi-progress-bar { width:100%; height:10px; background:#e2e8f0; border-radius:999px; overflow:hidden; margin-top:8px; }
+    .zi-progress-bar { width:100%; height:8px; background:#e2e8f0; border-radius:999px; overflow:hidden; margin-top:6px; }
     .zi-progress-bar span { display:block; height:100%; background:linear-gradient(90deg, #0d9488, #10b981); border-radius:999px; }
-    .zi-attention-item, .zi-trend-item { padding:12px 14px; border:1px solid #e2e8f0; border-radius:14px; background:#f8fafc; }
-    .zi-attention-title { font-weight:700; color:#0f172a; font-size:.86rem; }
-    .zi-attention-meta, .zi-trend-meta { font-size:.75rem; color:#64748b; margin-top:4px; }
-    .zi-chart-grid { display:grid; grid-template-columns:repeat(4, minmax(0,1fr)); gap:10px; }
-    .zi-chart-box { padding:12px; border-radius:14px; background:#f8fafc; border:1px solid #e2e8f0; text-align:center; }
-    .zi-chart-box strong { display:block; font-size:1.15rem; color:#0f172a; }
-    .zi-chart-box span { font-size:.74rem; color:#64748b; }
+    .zi-attention-item, .zi-trend-item { padding:10px 12px; border:1px solid #e2e8f0; border-radius:12px; background:#f8fafc; }
+    .zi-attention-title { font-weight:700; color:#0f172a; font-size:.82rem; }
+    .zi-attention-meta, .zi-trend-meta { font-size:.73rem; color:#64748b; margin-top:3px; }
+    .zi-chart-grid { display:grid; grid-template-columns:repeat(4, minmax(0,1fr)); gap:8px; }
+    .zi-chart-box { padding:10px; border-radius:12px; background:#f8fafc; border:1px solid #e2e8f0; text-align:center; }
+    .zi-chart-box strong { display:block; font-size:1.05rem; color:#0f172a; }
+    .zi-chart-box span { font-size:.72rem; color:#64748b; }
     .zi-trend-top { display:flex; align-items:center; justify-content:space-between; gap:12px; }
-    @media (max-width: 991.98px) { .zi-kpi-grid, .zi-row, .zi-chart-grid, .zi-trend-grid { grid-template-columns:1fr; } }
+    .zi-filter-bar { background:#fff; border:1px solid #e5e7eb; border-radius:16px; box-shadow:0 4px 12px rgba(15,23,42,.04); padding:14px 18px; display:flex; align-items:center; justify-content:space-between; gap:14px; flex-wrap:wrap; }
+    @media (max-width: 991.98px) { .zi-kpi-grid, .zi-row, .zi-chart-grid, .zi-trend-grid { grid-template-columns:1fr; } .zi-filter-bar { flex-direction:column; align-items:stretch; } }
 </style>
 @endpush
 
 @section('content')
 <div class="zi-shell">
-    <div class="zi-hero">
-        <div class="d-flex flex-wrap justify-content-between align-items-end" style="gap:16px;">
-            <div>
-                <div class="zi-hero-title">Rekapan Zona Integritas</div>
-                <div class="zi-hero-meta">Monitoring area perubahan, kegiatan, indikator, eviden, dan tren capaian periode dalam satu panel.</div>
-            </div>
-            <form method="GET" class="d-flex align-items-center" style="gap:10px; min-width:280px;">
-                <select name="period_id" class="form-control">
-                    <option value="">Semua Periode</option>
-                    @foreach($periods as $period)
-                        <option value="{{ $period->id }}" {{ optional($selectedPeriod)->id === $period->id ? 'selected' : '' }}>{{ $period->name }} ({{ $period->year }})</option>
-                    @endforeach
-                </select>
-                <button class="btn btn-light btn-sm px-3" type="submit">Terapkan</button>
-            </form>
-        </div>
+    <div class="zi-filter-bar">
+        <h5 style="margin:0; font-size:.92rem; font-weight:800; color:#0f172a;">Rekapan Zona Integritas</h5>
+        <form method="GET" class="d-flex align-items-center" style="gap:8px;">
+            <select name="period_id" class="form-control">
+                <option value="">Semua Periode</option>
+                @foreach($periods as $period)
+                    <option value="{{ $period->id }}" {{ optional($selectedPeriod)->id === $period->id ? 'selected' : '' }}>{{ $period->name }} ({{ $period->year }})</option>
+                @endforeach
+            </select>
+            <button class="btn btn-primary btn-sm px-3" type="submit">Terapkan</button>
+        </form>
     </div>
 
     <div class="zi-kpi-grid">
-        <div class="zi-kpi"><div class="value">{{ $dashboard['summary']['area_count'] }}</div><div class="label">Area Perubahan</div></div>
-        <div class="zi-kpi"><div class="value">{{ $dashboard['summary']['sub_point_covered_count'] }}/{{ $dashboard['summary']['sub_point_count'] }}</div><div class="label">Sub Poin Ditindaklanjuti</div></div>
-        <div class="zi-kpi"><div class="value">{{ $dashboard['summary']['periodic_sub_point_count'] }}</div><div class="label">Sub Poin Berkala</div></div>
-        <div class="zi-kpi"><div class="value">{{ $dashboard['summary']['activity_count'] }}</div><div class="label">Kegiatan / Program Kerja</div></div>
+        <div class="zi-kpi"><div class="value">{{ $dashboard['summary']['area_count'] }}</div><div class="label">Area</div></div>
+        <div class="zi-kpi"><div class="value">{{ $dashboard['summary']['sub_point_covered_count'] }}/{{ $dashboard['summary']['sub_point_count'] }}</div><div class="label">Sub Poin</div></div>
+        <div class="zi-kpi"><div class="value">{{ $dashboard['summary']['periodic_sub_point_count'] }}</div><div class="label">Berkala</div></div>
+        <div class="zi-kpi"><div class="value">{{ $dashboard['summary']['activity_count'] }}</div><div class="label">Kegiatan</div></div>
         <div class="zi-kpi"><div class="value">{{ $dashboard['summary']['indicator_count'] }}</div><div class="label">Indikator</div></div>
         <div class="zi-kpi"><div class="value">{{ rtrim(rtrim(number_format($dashboard['summary']['period_score'], 1), '0'), '.') }}%</div><div class="label">Nilai Periode</div></div>
     </div>
@@ -69,10 +61,7 @@
     @if(auth()->user()->isSuperAdmin() || auth()->user()->canManageProgressZiMasterData())
         <div class="zi-panel">
             <div class="zi-panel-head">
-                <div>
-                    <h5>Tren Periode</h5>
-                    <p>Perbandingan nilai progress antar periode untuk memantau arah capaian Zona Integritas.</p>
-                </div>
+                <h5>Tren Periode</h5>
                 <a href="{{ route('progress-zi.activities.index') }}" class="btn btn-light btn-sm">Buka Monitoring</a>
             </div>
             <div class="zi-panel-body">
@@ -98,11 +87,8 @@
 
     <div class="zi-panel zi-wide-panel">
         <div class="zi-panel-head">
-            <div>
-                <h5>Progress per Area</h5>
-                <p>Nilai area dihitung dari rata-rata nilai kegiatan pada area terkait, beserta coverage sub poin yang sudah ditindaklanjuti.</p>
-            </div>
-            <a href="{{ route('progress-zi.activities.index') }}" class="app-create-btn" style="padding:8px 14px;"><i class="fas fa-tasks"></i>Lihat Monitoring</a>
+            <h5>Progress per Area</h5>
+            <a href="{{ route('progress-zi.activities.index') }}" class="btn btn-light btn-sm"><i class="fas fa-tasks mr-1"></i>Monitoring</a>
         </div>
         <div class="zi-panel-body">
             <div class="zi-progress-list">
@@ -125,10 +111,7 @@
     <div class="zi-row">
         <div class="zi-panel">
             <div class="zi-panel-head">
-                <div>
-                    <h5>Ringkasan Status</h5>
-                    <p>Distribusi cepat pelaksanaan kegiatan ZI.</p>
-                </div>
+                <h5>Ringkasan Status</h5>
             </div>
             <div class="zi-panel-body">
                 <div class="zi-chart-grid mb-3">
@@ -146,7 +129,7 @@
             </div>
         </div>
         <div class="zi-panel">
-            <div class="zi-panel-head"><div><h5>Indikator & Eviden Perhatian</h5><p>Item yang perlu dipenuhi atau diperbaiki lebih dulu.</p></div><a href="{{ route('approval.index') }}" class="btn btn-light btn-sm">Buka Approval</a></div>
+            <div class="zi-panel-head"><h5>Perhatian</h5><a href="{{ route('approval.index') }}" class="btn btn-light btn-sm">Approval</a></div>
             <div class="zi-panel-body">
                 <div class="zi-attention-list">
                     @foreach($dashboard['indicator_attention'] as $indicator)
@@ -170,7 +153,7 @@
     </div>
 
     <div class="zi-panel zi-wide-panel">
-        <div class="zi-panel-head"><div><h5>Kegiatan Overdue</h5><p>Kegiatan yang melewati target akhir dan belum selesai.</p></div></div>
+        <div class="zi-panel-head"><h5>Kegiatan Overdue</h5></div>
         <div class="zi-panel-body">
             <div class="zi-attention-list">
                 @forelse($dashboard['overdue_activities'] as $activity)

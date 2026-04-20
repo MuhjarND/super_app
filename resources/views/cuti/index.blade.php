@@ -46,7 +46,7 @@
         }
 
         .leave-table-card tbody tr {
-            border-bottom: 1px solid #e5e7eb;
+            border-bottom: 1px solid #e8eaed;
             padding: 14px;
         }
 

@@ -8,11 +8,11 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <style>
         :root {
-            --navy-950: #091829;
-            --navy-900: #0f2640;
-            --navy-800: #163654;
-            --blue-500: #2c6bed;
-            --gold-500: #d9a441;
+            --navy-950: #f8fafc;
+            --navy-900: #4f46e5;
+            --navy-800: #6366f1;
+            --blue-500: #4f46e5;
+            --gold-500: #8b5cf6;
             --surface: rgba(255, 255, 255, 0.98);
             --line: rgba(15, 38, 64, 0.12);
             --text: #102132;
@@ -26,11 +26,11 @@
             margin: 0;
             min-height: 100vh;
             font-family: 'Inter', sans-serif;
-            color: #ffffff;
+            color: #0f172a;
             background:
-                radial-gradient(circle at top left, rgba(217, 164, 65, 0.14), transparent 26%),
-                radial-gradient(circle at top right, rgba(44, 107, 237, 0.14), transparent 28%),
-                linear-gradient(180deg, var(--navy-950) 0%, var(--navy-900) 48%, var(--navy-800) 100%);
+                radial-gradient(circle at top left, rgba(139, 92, 246, 0.08), transparent 30%),
+                radial-gradient(circle at bottom right, rgba(99, 102, 241, 0.08), transparent 30%),
+                linear-gradient(180deg, #f8fafc 0%, #eef2ff 50%, #f5f3ff 100%);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -49,7 +49,7 @@
             display: none;
             align-items: center;
             justify-content: center;
-            background: rgba(6, 17, 29, 0.48);
+            background: rgba(255, 255, 255, 0.6);
             backdrop-filter: blur(4px);
         }
 
@@ -71,8 +71,8 @@
             height: 48px;
             margin: 0 auto 12px;
             border-radius: 999px;
-            border: 4px solid rgba(44, 107, 237, 0.16);
-            border-top-color: var(--navy-900);
+            border: 4px solid rgba(79, 70, 229, 0.16);
+            border-top-color: #4f46e5;
             animation: spin .8s linear infinite;
         }
 
@@ -113,17 +113,17 @@
 
         .brand-subtitle {
             margin: 0;
-            color: rgba(255,255,255,0.72);
+            color: #64748b;
             font-size: 1rem;
             line-height: 1.6;
         }
 
         .login-card {
             background: var(--surface);
-            border: 1px solid rgba(255,255,255,0.08);
+            border: 1px solid #e0e7ff;
             border-radius: 28px;
             padding: 28px 26px 24px;
-            box-shadow: 0 28px 70px rgba(5, 16, 30, 0.24);
+            box-shadow: 0 20px 50px rgba(99, 102, 241, 0.08);
             text-align: left;
             max-width: 500px;
             margin: 0 auto;
@@ -135,7 +135,7 @@
             font-size: 1.72rem;
             line-height: 1;
             letter-spacing: -0.05em;
-            color: var(--navy-900);
+            color: #0f172a;
         }
 
         .alert-danger {
@@ -227,7 +227,7 @@
             min-height: 56px;
             border: none;
             border-radius: 14px;
-            background: linear-gradient(135deg, var(--navy-900), var(--navy-800));
+            background: linear-gradient(135deg, #4f46e5, #6366f1);
             color: #fff;
             font-family: 'Inter', sans-serif;
             font-size: 1rem;
@@ -237,19 +237,19 @@
             justify-content: center;
             gap: 10px;
             cursor: pointer;
-            box-shadow: 0 18px 34px rgba(15, 38, 64, 0.2);
+            box-shadow: 0 8px 24px rgba(79, 70, 229, 0.25);
             transition: transform .18s ease, box-shadow .18s ease;
         }
 
         .btn-login:hover {
             transform: translateY(-1px);
-            box-shadow: 0 22px 40px rgba(15, 38, 64, 0.26);
+            box-shadow: 0 12px 28px rgba(79, 70, 229, 0.3);
         }
 
         .login-footer {
             margin-top: 18px;
             text-align: center;
-            color: rgba(255,255,255,0.68);
+            color: #94a3b8;
             font-size: .84rem;
         }
 
@@ -286,7 +286,7 @@
     <div class="login-loader" id="loginLoader" aria-hidden="true">
         <div class="login-loader-card">
             <div class="login-loader-spinner"></div>
-            <div style="font-weight:800;color:#0c2136;margin-bottom:4px;">Memproses login...</div>
+            <div style="font-weight:800;color:#0f172a;margin-bottom:4px;">Memproses login...</div>
             <div style="color:#64748b;font-size:.84rem;">Mohon tunggu sebentar.</div>
         </div>
     </div>

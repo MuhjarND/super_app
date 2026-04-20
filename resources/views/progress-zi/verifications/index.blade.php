@@ -5,7 +5,7 @@
 @push('styles')
 <style>
     .zi-verify-shell { display:grid; gap:18px; }
-    .zi-verify-hero { background: linear-gradient(135deg, #0f3352 0%, #175d8f 55%, #2563eb 100%); color:#fff; border-radius:18px; padding:24px 26px; box-shadow:0 18px 40px rgba(15, 51, 82, 0.16); }
+    .zi-verify-hero { background: linear-gradient(135deg, #0f3352 0%, #175d8f 55%, #4f46e5 100%); color:#fff; border-radius:18px; padding:24px 26px; box-shadow:0 18px 40px rgba(15, 51, 82, 0.16); }
     .zi-verify-title { font-size:1.45rem; font-weight:800; margin-bottom:6px; }
     .zi-verify-subtitle { opacity:.84; font-size:.9rem; }
     .zi-verify-kpis { display:grid; grid-template-columns:repeat(4, minmax(0,1fr)); gap:14px; }

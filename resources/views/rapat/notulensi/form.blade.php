@@ -5,8 +5,8 @@
 @push('styles')
     <style>
         .notulensi-form-card {
-            border-radius: 16px;
-            border: 1px solid #e5e7eb;
+            border-radius: 14px;
+            border: 1px solid #e8eaed;
         }
 
         .notulensi-topbar {
@@ -36,7 +36,7 @@
 
         .notulensi-doc-item,
         .recommendation-item {
-            border: 1px solid #e5e7eb;
+            border: 1px solid #e8eaed;
             border-radius: 12px;
             padding: 12px;
             background: #f8fafc;

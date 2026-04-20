@@ -4,50 +4,47 @@
 
 @push('styles')
 <style>
-    .zi-guide-shell { display:grid; gap:18px; }
-    .zi-guide-hero { background: linear-gradient(135deg, #0f3352 0%, #175d8f 52%, #3b82f6 100%); color:#fff; border-radius:18px; padding:24px 26px; box-shadow:0 18px 40px rgba(15, 51, 82, 0.18); }
-    .zi-guide-title { font-size:1.55rem; font-weight:800; margin-bottom:6px; }
-    .zi-guide-meta { opacity:.88; font-size:.92rem; max-width:820px; }
-    .zi-guide-layout { display:grid; grid-template-columns:320px 1fr; gap:18px; align-items:start; }
-    .zi-guide-panel { background:#fff; border:1px solid #e5e7eb; border-radius:18px; box-shadow:0 10px 26px rgba(15,23,42,.05); overflow:hidden; }
-    .zi-guide-panel-head { padding:18px 20px 14px; border-bottom:1px solid #eef2f7; display:flex; align-items:flex-start; justify-content:space-between; gap:12px; }
-    .zi-guide-panel-head h5 { margin:0; font-size:1rem; font-weight:800; color:#0f172a; }
-    .zi-guide-panel-head p { margin:4px 0 0; font-size:.78rem; color:#64748b; }
-    .zi-guide-panel-body { padding:16px 20px 18px; }
-    .zi-area-list { display:grid; gap:10px; }
-    .zi-area-card { display:block; padding:14px 15px; border:1px solid #e2e8f0; border-radius:14px; background:#fff; color:#0f172a; transition:all .16s ease; }
-    .zi-area-card:hover { text-decoration:none; border-color:#93c5fd; box-shadow:0 8px 24px rgba(59,130,246,.12); transform:translateY(-1px); }
-    .zi-area-card.active { background:#eff6ff; border-color:#60a5fa; }
-    .zi-area-code { font-size:.72rem; font-weight:800; letter-spacing:.08em; color:#2563eb; text-transform:uppercase; }
-    .zi-area-name { font-size:.95rem; font-weight:800; margin-top:4px; color:#0f172a; }
-    .zi-area-desc { font-size:.75rem; color:#64748b; margin-top:6px; line-height:1.5; }
-    .zi-area-stats { display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-top:10px; }
-    .zi-count-chip { display:inline-flex; align-items:center; gap:6px; padding:6px 10px; border-radius:999px; background:#f8fafc; border:1px solid #e2e8f0; color:#334155; font-size:.72rem; font-weight:700; }
-    .zi-guide-summary { display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:12px; margin-bottom:16px; }
-    .zi-guide-kpi { padding:14px 16px; border:1px solid #e5e7eb; border-radius:16px; background:#fff; }
-    .zi-guide-kpi strong { display:block; font-size:1.35rem; color:#0f172a; line-height:1; margin-bottom:6px; }
-    .zi-guide-kpi span { font-size:.76rem; color:#64748b; font-weight:600; }
-    .zi-point-card { border:1px solid #e5e7eb; border-radius:18px; overflow:hidden; background:#fff; box-shadow:0 10px 24px rgba(15,23,42,.04); margin-bottom:16px; }
-    .zi-point-head { padding:16px 18px; background:linear-gradient(180deg, #f8fbff 0%, #ffffff 100%); border-bottom:1px solid #edf2f7; display:flex; align-items:flex-start; justify-content:space-between; gap:14px; }
-    .zi-point-label { font-size:.76rem; font-weight:800; text-transform:uppercase; letter-spacing:.08em; color:#2563eb; margin-bottom:6px; }
-    .zi-point-title { font-size:1rem; font-weight:800; color:#0f172a; line-height:1.4; }
-    .zi-point-desc { font-size:.8rem; color:#64748b; margin-top:6px; line-height:1.6; }
-    .zi-subpoint-list { display:grid; gap:14px; padding:16px 18px 18px; }
-    .zi-subpoint-card { border:1px solid #e5e7eb; border-radius:16px; background:#fcfdff; padding:14px 15px; }
-    .zi-subpoint-head { display:flex; align-items:flex-start; justify-content:space-between; gap:10px; margin-bottom:10px; }
-    .zi-subpoint-code { color:#0f766e; font-size:.75rem; font-weight:800; text-transform:uppercase; }
-    .zi-subpoint-title { font-size:.92rem; font-weight:700; color:#0f172a; line-height:1.5; }
-    .zi-subpoint-desc { font-size:.77rem; color:#64748b; line-height:1.55; margin-top:4px; }
-    .zi-indicator-list { display:grid; gap:10px; margin-top:12px; }
-    .zi-indicator-card { border:1px solid #dbeafe; background:#f8fbff; border-radius:14px; padding:12px 13px; }
-    .zi-indicator-label { font-size:.72rem; font-weight:800; color:#1d4ed8; text-transform:uppercase; letter-spacing:.08em; margin-bottom:6px; }
-    .zi-indicator-text { font-size:.84rem; color:#0f172a; line-height:1.6; font-weight:600; }
-    .zi-indicator-meta { display:grid; gap:6px; margin-top:10px; }
-    .zi-indicator-meta-item { font-size:.75rem; color:#475569; line-height:1.55; }
+    .zi-guide-shell { display:grid; gap:16px; }
+    .zi-guide-layout { display:grid; grid-template-columns:300px 1fr; gap:16px; align-items:start; }
+    .zi-guide-panel { background:#fff; border:1px solid #e5e7eb; border-radius:16px; box-shadow:0 4px 12px rgba(15,23,42,.04); overflow:hidden; }
+    .zi-guide-panel-head { padding:14px 18px 12px; border-bottom:1px solid #eef2f7; display:flex; align-items:center; justify-content:space-between; gap:12px; }
+    .zi-guide-panel-head h5 { margin:0; font-size:.92rem; font-weight:800; color:#0f172a; }
+    .zi-guide-panel-body { padding:14px 18px 16px; }
+    .zi-area-list { display:grid; gap:8px; }
+    .zi-area-card { display:block; padding:12px 14px; border:1px solid #e2e8f0; border-radius:12px; background:#fff; color:#0f172a; transition:all .16s ease; }
+    .zi-area-card:hover { text-decoration:none; border-color:#a5b4fc; box-shadow:0 6px 18px rgba(59,130,246,.1); transform:translateY(-1px); }
+    .zi-area-card.active { background:#eef2ff; border-color:#818cf8; }
+    .zi-area-code { font-size:.7rem; font-weight:800; letter-spacing:.06em; color:#4f46e5; text-transform:uppercase; }
+    .zi-area-name { font-size:.88rem; font-weight:800; margin-top:2px; color:#0f172a; }
+    .zi-area-stats { display:flex; align-items:center; gap:6px; flex-wrap:wrap; margin-top:8px; }
+    .zi-count-chip { display:inline-flex; align-items:center; gap:5px; padding:4px 8px; border-radius:999px; background:#f8fafc; border:1px solid #e2e8f0; color:#334155; font-size:.7rem; font-weight:700; }
+    .zi-guide-summary { display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:10px; margin-bottom:14px; }
+    .zi-guide-kpi { padding:12px 14px; border:1px solid #e5e7eb; border-radius:14px; background:#fff; }
+    .zi-guide-kpi strong { display:block; font-size:1.2rem; color:#0f172a; line-height:1; margin-bottom:4px; }
+    .zi-guide-kpi span { font-size:.74rem; color:#64748b; font-weight:600; }
+    .zi-point-card { border:1px solid #e5e7eb; border-radius:14px; overflow:hidden; background:#fff; margin-bottom:14px; }
+    .zi-point-card:last-child { margin-bottom:0; }
+    .zi-point-head { padding:14px 16px; background:linear-gradient(180deg, #f8fbff 0%, #ffffff 100%); border-bottom:1px solid #edf2f7; display:flex; align-items:flex-start; justify-content:space-between; gap:12px; }
+    .zi-point-label { font-size:.72rem; font-weight:800; text-transform:uppercase; letter-spacing:.06em; color:#4f46e5; margin-bottom:4px; }
+    .zi-point-title { font-size:.92rem; font-weight:800; color:#0f172a; line-height:1.4; }
+    .zi-point-desc { font-size:.78rem; color:#64748b; margin-top:4px; line-height:1.5; }
+    .zi-subpoint-list { display:grid; gap:12px; padding:14px 16px 16px; }
+    .zi-subpoint-card { border:1px solid #e5e7eb; border-radius:14px; background:#fcfdff; padding:12px 14px; }
+    .zi-subpoint-head { display:flex; align-items:flex-start; justify-content:space-between; gap:10px; margin-bottom:8px; }
+    .zi-subpoint-code { color:#0f766e; font-size:.72rem; font-weight:800; text-transform:uppercase; }
+    .zi-subpoint-title { font-size:.86rem; font-weight:700; color:#0f172a; line-height:1.45; }
+    .zi-subpoint-desc { font-size:.75rem; color:#64748b; line-height:1.5; margin-top:3px; }
+    .zi-indicator-list { display:grid; gap:8px; margin-top:10px; }
+    .zi-indicator-card { border:1px solid #e0e7ff; background:#f8fbff; border-radius:12px; padding:10px 12px; }
+    .zi-indicator-label { font-size:.7rem; font-weight:800; color:#4338ca; text-transform:uppercase; letter-spacing:.06em; margin-bottom:4px; }
+    .zi-indicator-text { font-size:.82rem; color:#0f172a; line-height:1.5; font-weight:600; }
+    .zi-indicator-meta { display:grid; gap:4px; margin-top:8px; }
+    .zi-indicator-meta-item { font-size:.73rem; color:#475569; line-height:1.45; }
     .zi-indicator-meta-item strong { color:#0f172a; }
-    .zi-periodic-chip { display:inline-flex; align-items:center; gap:6px; padding:4px 8px; border-radius:999px; background:#fff7ed; border:1px solid #fdba74; color:#c2410c; font-size:.67rem; font-weight:800; text-transform:uppercase; letter-spacing:.05em; margin:8px 0 2px; }
-    .zi-guide-empty { padding:34px 22px; text-align:center; color:#64748b; border:1px dashed #cbd5e1; border-radius:18px; background:#f8fafc; }
-    .zi-inline-actions { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+    .zi-periodic-chip { display:inline-flex; align-items:center; gap:4px; padding:3px 7px; border-radius:999px; background:#fff7ed; border:1px solid #fdba74; color:#c2410c; font-size:.64rem; font-weight:800; text-transform:uppercase; letter-spacing:.04em; margin:6px 0 2px; }
+    .zi-guide-empty { padding:28px 20px; text-align:center; color:#64748b; border:1px dashed #cbd5e1; border-radius:14px; background:#f8fafc; font-size:.82rem; }
+    .zi-inline-actions { display:flex; align-items:center; gap:6px; flex-wrap:wrap; }
+    .zi-guide-topbar { background:#fff; border:1px solid #e5e7eb; border-radius:16px; box-shadow:0 4px 12px rgba(15,23,42,.04); padding:14px 18px; display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; }
     @media (max-width: 991.98px) {
         .zi-guide-layout, .zi-guide-summary { grid-template-columns:1fr; }
     }
@@ -56,27 +53,19 @@
 
 @section('content')
 <div class="zi-guide-shell">
-    <div class="zi-guide-hero">
-        <div class="d-flex flex-wrap justify-content-between align-items-end" style="gap:16px;">
-            <div>
-                <div class="zi-guide-title">Pedoman Zona Integritas</div>
-                <div class="zi-guide-meta">Menu ini menjadi patokan pelaksanaan kegiatan Progress ZI. Struktur acuan dibaca per area, lalu diturunkan ke poin, sub poin, dan indikator penilaian agar PIC kegiatan memakai referensi yang sama saat menindaklanjuti eviden dan realisasi.</div>
-            </div>
-            @if($canManage && $selectedArea)
-                <button class="app-create-btn" data-toggle="modal" data-target="#createPointModal">
-                    <i class="fas fa-plus"></i>Tambah Poin
-                </button>
-            @endif
-        </div>
+    <div class="zi-guide-topbar">
+        <h5 style="margin:0; font-size:.92rem; font-weight:800; color:#0f172a;">Pedoman Zona Integritas</h5>
+        @if($canManage && $selectedArea)
+            <button class="app-create-btn" data-toggle="modal" data-target="#createPointModal">
+                <i class="fas fa-plus"></i>Tambah Poin
+            </button>
+        @endif
     </div>
 
     <div class="zi-guide-layout">
         <div class="zi-guide-panel">
             <div class="zi-guide-panel-head">
-                <div>
-                    <h5>Area Perubahan</h5>
-                    <p>Pilih area untuk membaca pedoman acuan pelaksanaan.</p>
-                </div>
+                <h5>Area Perubahan</h5>
             </div>
             <div class="zi-guide-panel-body">
                 <div class="zi-area-list">
@@ -93,11 +82,10 @@
                         <a href="{{ route('progress-zi.guidelines.index', ['area_id' => $area->id]) }}" class="zi-area-card {{ optional($selectedArea)->id === $area->id ? 'active' : '' }}">
                             <div class="zi-area-code">{{ $area->code }}</div>
                             <div class="zi-area-name">{{ $area->name }}</div>
-                            <div class="zi-area-desc">{{ $area->description ?: 'Belum ada deskripsi area.' }}</div>
                             <div class="zi-area-stats">
-                                <span class="zi-count-chip"><i class="fas fa-bookmark"></i>{{ $pointCount }} poin</span>
-                                <span class="zi-count-chip"><i class="fas fa-stream"></i>{{ $subPointCount }} sub poin</span>
-                                <span class="zi-count-chip"><i class="fas fa-check-circle"></i>{{ $indicatorCount }} indikator</span>
+                                <span class="zi-count-chip">{{ $pointCount }} poin</span>
+                                <span class="zi-count-chip">{{ $subPointCount }} sub</span>
+                                <span class="zi-count-chip">{{ $indicatorCount }} indikator</span>
                             </div>
                         </a>
                     @empty
@@ -109,12 +97,9 @@
 
         <div class="zi-guide-panel">
             <div class="zi-guide-panel-head">
-                <div>
-                    <h5>{{ optional($selectedArea)->name ?: 'Pedoman Area' }}</h5>
-                    <p>{{ optional($selectedArea)->description ?: 'Pilih area di panel kiri untuk melihat pedoman acuan pelaksanaannya.' }}</p>
-                </div>
+                <h5>{{ optional($selectedArea)->name ?: 'Pilih Area' }}</h5>
                 @if($selectedArea && $selectedArea->pic_names !== '-')
-                    <span class="zi-count-chip"><i class="fas fa-user-tie"></i>PIC {{ $selectedArea->pic_names }}</span>
+                    <span class="zi-count-chip"><i class="fas fa-user-tie"></i>{{ $selectedArea->pic_names }}</span>
                 @endif
             </div>
             <div class="zi-guide-panel-body">
@@ -217,12 +202,11 @@
                                                     @endif
                                                     <div class="zi-indicator-text">{{ $indicator->indicator_text }}</div>
                                                     <div class="zi-indicator-meta">
-                                                        <div class="zi-indicator-meta-item"><strong>Agenda Berkala:</strong> {{ $indicator->is_periodic ? 'Ya, wajib lebih dari 1 kali' : 'Tidak' }}</div>
                                                         @if($indicator->evidence_example)
-                                                            <div class="zi-indicator-meta-item"><strong>Contoh Eviden:</strong> {{ $indicator->evidence_example }}</div>
+                                                            <div class="zi-indicator-meta-item"><strong>Contoh:</strong> {{ $indicator->evidence_example }}</div>
                                                         @endif
                                                         @if($indicator->implementation_note)
-                                                            <div class="zi-indicator-meta-item"><strong>Catatan Implementasi:</strong> {{ $indicator->implementation_note }}</div>
+                                                            <div class="zi-indicator-meta-item"><strong>Catatan:</strong> {{ $indicator->implementation_note }}</div>
                                                         @endif
                                                     </div>
                                                 </div>
@@ -445,7 +429,7 @@
                         <div class="zi-guide-empty">Belum ada poin pedoman untuk area ini.</div>
                     @endforelse
                 @else
-                    <div class="zi-guide-empty">Pilih salah satu area perubahan di panel kiri untuk melihat pedoman ZI.</div>
+                    <div class="zi-guide-empty">Pilih area di panel kiri.</div>
                 @endif
             </div>
         </div>

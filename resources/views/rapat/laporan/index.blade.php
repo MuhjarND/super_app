@@ -4,17 +4,17 @@
 
 @push('styles')
     <style>
-        .laporan-card { border-radius: 16px; border: 1px solid #e5e7eb; }
+        .laporan-card { border-radius: 14px; border: 1px solid #e8eaed; }
         .meeting-action-toggle-col { width: 46px; }
         .laporan-file-col { width: 110px; white-space: nowrap; }
-        .meeting-action-toggle { width: 28px; height: 28px; border: none; border-radius: 8px; background: linear-gradient(135deg, #2563eb, #3b82f6); color: #fff; font-size: 1rem; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; }
+        .meeting-action-toggle { width: 28px; height: 28px; border: none; border-radius: 8px; background: linear-gradient(135deg, #4f46e5, #6366f1); color: #fff; font-size: 1rem; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; }
         .meeting-action-toggle.is-open { background: linear-gradient(135deg, #475569, #64748b); }
         .meeting-action-row { display: none; }
         .meeting-action-row td { background: #f8fafc; border-top: 1px solid #e2e8f0; padding: 12px 16px; }
         .meeting-action-panel { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
         .meeting-action-meta { color: #64748b; font-size: 0.82rem; margin-right: 10px; }
         .meeting-action-btn { display: inline-flex; align-items: center; gap: 8px; border-radius: 10px; padding: 7px 12px; font-size: 0.82rem; font-weight: 700; border: 1px solid transparent; background: #fff; color: #1f2937; }
-        .meeting-action-btn.primary { background: #eff6ff; color: #1d4ed8; border-color: #bfdbfe; }
+        .meeting-action-btn.primary { background: #eef2ff; color: #4338ca; border-color: #c7d2fe; }
         .meeting-action-btn.success { background: #ecfdf5; color: #047857; border-color: #a7f3d0; }
         .meeting-action-btn.secondary { background: #f8fafc; color: #475569; border-color: #cbd5e1; }
         .meeting-action-btn.info { background: #ecfeff; color: #0f766e; border-color: #a5f3fc; }
@@ -27,9 +27,9 @@
             border-radius: 999px;
             font-size: 0.78rem;
             font-weight: 700;
-            background: #eff6ff;
-            color: #1d4ed8;
-            border: 1px solid #bfdbfe;
+            background: #eef2ff;
+            color: #4338ca;
+            border: 1px solid #c7d2fe;
             cursor: pointer;
         }
         .laporan-preview-frame {
@@ -66,7 +66,7 @@
 
             .laporan-mobile-table tbody tr:not(.meeting-action-row) {
                 padding: 14px 14px 10px;
-                border-bottom: 1px solid #e5e7eb;
+                border-bottom: 1px solid #e8eaed;
             }
 
             .laporan-mobile-table td {

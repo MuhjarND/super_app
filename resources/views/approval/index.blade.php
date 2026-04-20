@@ -5,7 +5,7 @@
 @push('styles')
     <style>
         .approval-page-hero {
-            border: 1px solid #dbeafe;
+            border: 1px solid #e0e7ff;
             border-radius: 22px;
             padding: 20px 22px;
             margin-bottom: 18px;
@@ -42,8 +42,8 @@
             gap: 8px;
             border-radius: 999px;
             padding: 8px 12px;
-            background: #eff6ff;
-            color: #1d4ed8;
+            background: #eef2ff;
+            color: #4338ca;
             font-size: 0.8rem;
             font-weight: 800;
         }
@@ -68,7 +68,7 @@
         }
 
         .approval-module-card.active {
-            border-color: #2563eb;
+            border-color: #4f46e5;
             box-shadow: 0 14px 30px rgba(37, 99, 235, 0.12);
         }
 
@@ -84,12 +84,12 @@
         .approval-module-icon {
             width: 52px;
             height: 52px;
-            border-radius: 16px;
+            border-radius: 14px;
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            background: linear-gradient(180deg, #dbeafe 0%, #bfdbfe 100%);
-            color: #1d4ed8;
+            background: linear-gradient(180deg, #e0e7ff 0%, #c7d2fe 100%);
+            color: #4338ca;
             font-size: 1.1rem;
             margin-bottom: 14px;
             box-shadow: inset 0 1px 0 rgba(255,255,255,.6);
@@ -170,8 +170,8 @@
             gap: 6px;
             padding: 5px 10px;
             border-radius: 999px;
-            background: #eff6ff;
-            color: #1d4ed8;
+            background: #eef2ff;
+            color: #4338ca;
             font-size: 0.74rem;
             font-weight: 800;
             margin-top: 10px;
@@ -244,8 +244,7 @@
 @section('content-header')
     <div class="content-header">
         <div class="container-fluid">
-            <h1 class="mb-1">Approval</h1>
-            <div class="text-muted" style="font-size: 0.82rem;">Pusat dokumen yang perlu segera ditindaklanjuti approval.</div>
+            <h1 class="mb-0">Approval</h1>
         </div>
     </div>
 @endsection
@@ -253,10 +252,7 @@
 @section('content')
     @php($totalPending = collect($cards)->sum('pending_count'))
     <div class="approval-page-hero">
-        <div class="approval-page-hero-title">Pusat Approval Dokumen</div>
-        <div class="approval-page-hero-subtitle">
-            Seluruh dokumen yang membutuhkan approval akan masuk ke halaman ini. Pilih jenis dokumennya, lalu proses dokumen yang sedang menunggu tindakan Anda.
-        </div>
+        <div class="approval-page-hero-title">Pusat Approval</div>
         <div class="approval-summary-badges">
             <span class="approval-summary-chip"><i class="fas fa-bell"></i> {{ $totalPending }} dokumen pending</span>
             <span class="approval-summary-chip"><i class="fas fa-layer-group"></i> {{ collect($cards)->where('pending_count', '>', 0)->count() }} kategori aktif</span>
@@ -292,9 +288,7 @@
         <div class="card-header bg-white d-flex justify-content-between align-items-center">
             <div>
                 <strong>{{ $selectedCard['label'] ?? 'Pilih Kategori Dokumen' }}</strong>
-                <div class="text-muted" style="font-size: 0.8rem;">
-                    {{ $selectedCard ? 'Daftar dokumen yang harus dilakukan approval.' : 'Pilih salah satu card di atas untuk melihat daftar dokumen.' }}
-                </div>
+
             </div>
             @if($selectedCard)
                 <span class="badge badge-danger">{{ $documents->count() }}</span>
@@ -313,7 +307,7 @@
                             <div class="approval-list-meta">{{ $document['number'] }} | {{ $document['date'] ?: '-' }}</div>
                             <div class="approval-list-meta">{{ $document['subtitle'] }} | {{ $document['meta'] }}</div>
                             <div class="approval-list-meta">{{ $document['count_label'] }} | Status: {{ $document['status_label'] }}</div>
-                            <span class="approval-doc-chip"><i class="fas fa-check-circle"></i> Perlu tindakan sekarang</span>
+
                         </div>
                         <div class="app-action-group">
                             <a href="{{ $document['detail_url'] }}" class="app-icon-btn process" data-mobile-label="Proses">

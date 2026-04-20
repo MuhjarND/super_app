@@ -20,7 +20,7 @@
 .leadership-item:last-child{border-bottom:none;}
 .leadership-item-title{font-size:.86rem;font-weight:700;color:#0f172a;margin-bottom:4px;}
 .leadership-item-meta,.leadership-item-desc{font-size:.76rem;color:#64748b;line-height:1.4;}
-.leadership-chip{display:inline-flex;align-items:center;gap:8px;border-radius:999px;padding:8px 12px;font-size:.74rem;font-weight:700;background:#eff6ff;color:#1d4ed8;}
+.leadership-chip{display:inline-flex;align-items:center;gap:8px;border-radius:999px;padding:8px 12px;font-size:.74rem;font-weight:700;background:#eef2ff;color:#4338ca;}
 .leadership-chip.red{background:#fee2e2;color:#b91c1c;}
 .leadership-chip.amber{background:#fff7ed;color:#c2410c;}
 .leadership-chip.green{background:#dcfce7;color:#166534;}
@@ -35,7 +35,7 @@
         <div class="d-flex flex-wrap justify-content-between align-items-start" style="gap:12px;">
             <div>
                 <h1 class="m-0">Dashboard Pimpinan</h1>
-                <small class="text-muted">Ringkasan pengawasan persetujuan, disposisi, agenda, dan progres lintas modul.</small>
+
             </div>
         </div>
     </div>
@@ -45,12 +45,12 @@
 @section('content')
 <div class="container-fluid leadership-grid">
     <section class="leadership-stats">
-        <div class="leadership-stat"><div class="value">{{ $summary['pending_approvals'] }}</div><div class="label">Persetujuan lintas modul yang masih pending</div></div>
-        <div class="leadership-stat"><div class="value">{{ $summary['pending_dispositions'] }}</div><div class="label">Disposisi surat yang belum selesai</div></div>
-        <div class="leadership-stat"><div class="value">{{ $summary['today_agenda'] }}</div><div class="label">Agenda dan rapat hari ini</div></div>
-        <div class="leadership-stat"><div class="value">{{ $summary['active_leave'] }}</div><div class="label">Cuti aktif pada hari ini</div></div>
-        <div class="leadership-stat"><div class="value">{{ $summary['urgent_actions'] }}</div><div class="label">Item prioritas tinggi</div></div>
-        <div class="leadership-stat"><div class="value">{{ $summary['overdue_actions'] }}</div><div class="label">Item yang sudah overdue</div></div>
+        <div class="leadership-stat"><div class="value">{{ $summary['pending_approvals'] }}</div><div class="label">Approval pending</div></div>
+        <div class="leadership-stat"><div class="value">{{ $summary['pending_dispositions'] }}</div><div class="label">Disposisi pending</div></div>
+        <div class="leadership-stat"><div class="value">{{ $summary['today_agenda'] }}</div><div class="label">Agenda hari ini</div></div>
+        <div class="leadership-stat"><div class="value">{{ $summary['active_leave'] }}</div><div class="label">Cuti aktif</div></div>
+        <div class="leadership-stat"><div class="value">{{ $summary['urgent_actions'] }}</div><div class="label">Prioritas tinggi</div></div>
+        <div class="leadership-stat"><div class="value">{{ $summary['overdue_actions'] }}</div><div class="label">Overdue</div></div>
     </section>
 
     <section class="leadership-row">
@@ -58,7 +58,6 @@
             <div class="leadership-card-head">
                 <div>
                     <h3>Atensi Pimpinan</h3>
-                    <p>Daftar item lintas modul yang paling perlu segera diproses.</p>
                 </div>
                 <a href="{{ route('action-center.index') }}" class="btn btn-sm btn-primary">Buka Tindak Lanjut</a>
             </div>
@@ -86,7 +85,6 @@
             <div class="leadership-card-head">
                 <div>
                     <h3>Persetujuan Pending</h3>
-                    <p>Ringkasan pending approval dan review per modul.</p>
                 </div>
             </div>
             <div class="leadership-card-body d-grid" style="gap:10px;">
@@ -104,7 +102,6 @@
             <div class="leadership-card-head">
                 <div>
                     <h3>Disposisi Pending</h3>
-                    <p>Disposisi surat yang perlu pengawasan lebih dekat.</p>
                 </div>
                 <a href="{{ route('surat-masuk.index') }}" class="btn btn-sm btn-light border">Buka Persuratan</a>
             </div>
@@ -132,7 +129,6 @@
             <div class="leadership-card-head">
                 <div>
                     <h3>Agenda 7 Hari Ke Depan</h3>
-                    <p>Rapat, agenda pimpinan, cuti, dan agenda utama lain yang akan datang.</p>
                 </div>
                 <a href="{{ route('calendar.integrated.index') }}" class="btn btn-sm btn-light border">Buka Kalender</a>
             </div>
@@ -161,7 +157,7 @@
 
     <section class="leadership-row">
         <div class="leadership-card">
-            <div class="leadership-card-head"><div><h3>Progress ZI</h3><p>Status atensi pada periode aktif.</p></div></div>
+            <div class="leadership-card-head"><div><h3>Progress ZI</h3></div></div>
             <div class="leadership-card-body d-grid" style="gap:10px;">
                 <div class="leadership-chip">Periode Aktif <strong>{{ $ziStats['period_name'] }}</strong></div>
                 <div class="leadership-chip amber">Kegiatan Overdue <strong>{{ $ziStats['overdue_count'] }}</strong></div>
@@ -169,7 +165,7 @@
             </div>
         </div>
         <div class="leadership-card">
-            <div class="leadership-card-head"><div><h3>Perawatan Alat dan Mesin</h3><p>Ringkasan item yang masih perlu diperhatikan.</p></div></div>
+            <div class="leadership-card-head"><div><h3>Perawatan Alat dan Mesin</h3></div></div>
             <div class="leadership-card-body d-grid" style="gap:10px;">
                 <div class="leadership-chip">Draft Perawatan <strong>{{ $inventoryStats['draft_count'] }}</strong></div>
                 <div class="leadership-chip amber">Lampiran Belum Lengkap <strong>{{ $inventoryStats['attachment_pending_count'] }}</strong></div>

@@ -19,7 +19,7 @@
         .row:last-child { border-bottom:none; }
         .label { width:220px; color:#64748b; font-weight:700; flex-shrink:0; font-size:0.8rem; text-transform:uppercase; letter-spacing:.04em; }
         .value { flex:1; line-height:1.5; word-break:break-word; }
-        .note { margin-top:18px; padding:16px 18px; border-radius:14px; background:#eff6ff; border:1px solid #bfdbfe; color:#1e3a8a; font-size:0.92rem; line-height:1.55; }
+        .note { margin-top:18px; padding:16px 18px; border-radius:14px; background:#eef2ff; border:1px solid #c7d2fe; color:#312e81; font-size:0.92rem; line-height:1.55; }
         @media (max-width: 768px) {
             .page { padding: 18px 12px 26px; }
             .row { display:block; }

@@ -17,7 +17,7 @@
     .zi-matrix-table thead th { white-space:nowrap; font-size:.76rem; text-transform:uppercase; letter-spacing:.06em; color:#64748b; }
     .zi-matrix-guideline { font-weight:700; color:#0f172a; line-height:1.55; }
     .zi-matrix-indicator { color:#334155; font-size:.82rem; line-height:1.6; }
-    .zi-matrix-activity { border:1px solid #dbeafe; background:#f8fbff; border-radius:12px; padding:10px 11px; margin-bottom:8px; }
+    .zi-matrix-activity { border:1px solid #e0e7ff; background:#f8fbff; border-radius:12px; padding:10px 11px; margin-bottom:8px; }
     .zi-matrix-activity:last-child { margin-bottom:0; }
     .zi-matrix-activity-title { font-weight:700; color:#0f172a; font-size:.84rem; }
     .zi-matrix-activity-meta { color:#64748b; font-size:.74rem; margin-top:4px; line-height:1.5; }

@@ -27,8 +27,8 @@
             align-items: center;
             padding: 6px 12px;
             border-radius: 999px;
-            background: #eff6ff;
-            color: #1d4ed8;
+            background: #eef2ff;
+            color: #4338ca;
             font-size: 0.78rem;
             font-weight: 800;
         }
@@ -78,7 +78,7 @@
         .approval-pdf-preview {
             background: #fff;
             border: 1px solid #e2e8f0;
-            border-radius: 16px;
+            border-radius: 14px;
             overflow: hidden;
             position: sticky;
             top: 14px;

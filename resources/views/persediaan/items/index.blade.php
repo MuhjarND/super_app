@@ -52,7 +52,7 @@
 
         .inventory-module-panel,
         .inventory-module-board {
-            border-radius: 16px;
+            border-radius: 14px;
         }
 
         .inventory-items-mobile-table table,
@@ -70,7 +70,7 @@
         }
 
         .inventory-items-mobile-table tbody tr {
-            border-bottom: 1px solid #e5e7eb;
+            border-bottom: 1px solid #e8eaed;
             padding: 14px;
         }
 

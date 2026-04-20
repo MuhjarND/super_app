@@ -6,16 +6,16 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.css">
     <style>
         .calendar-shell { display: grid; gap: 18px; }
-        .calendar-chip { display: inline-flex; align-items: center; gap: 8px; border-radius: 999px; background: #ffffff; border: 1px solid #dbe7ff; padding: 9px 13px; color: #1e3a8a; font-size: 0.8rem; font-weight: 700; }
+        .calendar-chip { display: inline-flex; align-items: center; gap: 8px; border-radius: 999px; background: #ffffff; border: 1px solid #dbe7ff; padding: 9px 13px; color: #312e81; font-size: 0.8rem; font-weight: 700; }
         .calendar-layout { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 18px; align-items: start; }
-        .calendar-board, .calendar-side { background: #fff; border: 1px solid #e5e7eb; border-radius: 22px; box-shadow: 0 12px 28px rgba(15, 23, 42, 0.05); overflow: hidden; }
+        .calendar-board, .calendar-side { background: #fff; border: 1px solid #e8eaed; border-radius: 22px; box-shadow: 0 12px 28px rgba(15, 23, 42, 0.05); overflow: hidden; }
         .calendar-filter-bar { padding: 18px 20px; border-bottom: 1px solid #eef2f7; display: grid; grid-template-columns: 180px 220px 180px auto; gap: 12px; align-items: end; }
         .calendar-filter-group label { display: block; margin-bottom: 6px; font-size: 0.76rem; font-weight: 700; color: #475569; }
         .calendar-toggle-group { display: flex; flex-wrap: wrap; gap: 8px; min-height: 42px; align-items: center; }
         .calendar-toggle-chip { position: relative; }
         .calendar-toggle-chip input { position: absolute; opacity: 0; pointer-events: none; }
         .calendar-toggle-chip span { display: inline-flex; align-items: center; gap: 8px; border-radius: 999px; border: 1px solid #dbe4f0; background: #fff; color: #475569; padding: 9px 12px; font-size: 0.79rem; font-weight: 700; cursor: pointer; transition: all 0.15s ease; }
-        .calendar-toggle-chip input:checked + span { color: #1d4ed8; border-color: #bfdbfe; background: #eff6ff; box-shadow: inset 0 0 0 1px rgba(59, 130, 246, 0.12); }
+        .calendar-toggle-chip input:checked + span { color: #4338ca; border-color: #c7d2fe; background: #eef2ff; box-shadow: inset 0 0 0 1px rgba(59, 130, 246, 0.12); }
         .calendar-workspace { padding: 16px 18px 20px; }
         .calendar-canvas { border: 1px solid #e5edf8; border-radius: 18px; background: #fff; padding: 14px; }
         .calendar-side-head { padding: 18px 20px 14px; border-bottom: 1px solid #eef2f7; }
@@ -23,18 +23,18 @@
         .calendar-side-head p { margin: 4px 0 0; font-size: 0.78rem; color: #64748b; }
         .calendar-side-body { padding: 16px 18px 20px; display: grid; gap: 16px; }
         .calendar-stat-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
-        .calendar-stat-box { border: 1px solid #e5edf8; background: #f8fbff; border-radius: 16px; padding: 14px; }
+        .calendar-stat-box { border: 1px solid #e5edf8; background: #f8fbff; border-radius: 14px; padding: 14px; }
         .calendar-stat-box .value { font-size: 1.2rem; font-weight: 800; color: #0f172a; line-height: 1; margin-bottom: 6px; }
         .calendar-stat-box .label { font-size: 0.76rem; color: #64748b; line-height: 1.35; }
         .calendar-list { display: grid; gap: 10px; }
-        .calendar-list-item { border: 1px solid #edf2f7; border-radius: 16px; padding: 12px 13px; background: #fff; }
+        .calendar-list-item { border: 1px solid #edf2f7; border-radius: 14px; padding: 12px 13px; background: #fff; }
         .calendar-list-item-title { font-size: 0.82rem; font-weight: 700; color: #0f172a; margin-bottom: 3px; }
         .calendar-list-item-meta { font-size: 0.74rem; color: #64748b; line-height: 1.45; }
         .calendar-legend { display: grid; gap: 8px; }
         .calendar-legend-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; font-size: 0.79rem; color: #334155; }
         .calendar-legend-label { display: inline-flex; align-items: center; gap: 8px; font-weight: 700; }
         .calendar-dot { width: 10px; height: 10px; border-radius: 999px; display: inline-block; }
-        .calendar-dot.rapat { background: #2563eb; }
+        .calendar-dot.rapat { background: #4f46e5; }
         .calendar-dot.agenda-pimpinan { background: #64748b; }
         .calendar-dot.cuti { background: #dc2626; }
         .calendar-dot.zi { background: #d97706; }
@@ -42,22 +42,22 @@
         .fc .fc-toolbar.fc-header-toolbar { margin-bottom: 1rem; gap: 10px; flex-wrap: wrap; }
         .fc .fc-toolbar-title { font-size: 1.08rem; font-weight: 800; color: #0f172a; }
         .fc .fc-button { background: #fff !important; border: 1px solid #dbe4f0 !important; color: #475569 !important; box-shadow: none !important; border-radius: 10px !important; padding: 0.45rem 0.8rem !important; font-weight: 700; text-transform: capitalize; }
-        .fc .fc-button.fc-button-active, .fc .fc-button:hover { background: #eff6ff !important; color: #1d4ed8 !important; border-color: #bfdbfe !important; }
+        .fc .fc-button.fc-button-active, .fc .fc-button:hover { background: #eef2ff !important; color: #4338ca !important; border-color: #c7d2fe !important; }
         .fc-theme-standard th, .fc-theme-standard td, .fc-theme-standard .fc-scrollgrid { border-color: #edf2f7; }
         .fc .fc-col-header-cell-cushion, .fc .fc-daygrid-day-number { color: #334155; font-weight: 700; text-decoration: none; }
-        .fc .fc-event { border: none; border-radius: 10px; padding: 2px 4px; font-size: 0.74rem; font-weight: 700; box-shadow: 0 6px 16px rgba(15, 23, 42, 0.12); }
+        .fc .fc-event { border: none; border-radius: 10px; padding: 2px 4px; font-size: 0.74rem; font-weight: 700; box-shadow: none; }
         .fc .fc-daygrid-dot-event {
             display: block;
             margin-top: 3px;
             padding: 5px 8px;
             border-radius: 8px;
-            background: var(--fc-event-bg-color, #2563eb);
+            background: var(--fc-event-bg-color, #4f46e5);
             color: var(--fc-event-text-color, #ffffff);
             border: none;
-            box-shadow: 0 6px 16px rgba(15, 23, 42, 0.12);
+            box-shadow: none;
         }
         .fc .fc-daygrid-dot-event:hover {
-            background: var(--fc-event-bg-color, #2563eb);
+            background: var(--fc-event-bg-color, #4f46e5);
             color: var(--fc-event-text-color, #ffffff);
         }
         .fc .fc-daygrid-dot-event .fc-event-title,
@@ -72,9 +72,9 @@
         }
         .fc .fc-list-event-title a, .fc .fc-list-event-time { color: #0f172a; text-decoration: none; }
         .calendar-status-badge, .calendar-module-badge { display: inline-flex; align-items: center; border-radius: 999px; padding: 5px 10px; font-size: 0.72rem; font-weight: 700; }
-        .calendar-module-badge { background: #eff6ff; color: #1d4ed8; }
+        .calendar-module-badge { background: #eef2ff; color: #4338ca; }
         .calendar-status-badge.dijadwalkan { background: #e0f2fe; color: #075985; }
-        .calendar-status-badge.berjalan { background: #dbeafe; color: #1d4ed8; }
+        .calendar-status-badge.berjalan { background: #e0e7ff; color: #4338ca; }
         .calendar-status-badge.selesai { background: #dcfce7; color: #166534; }
         .calendar-status-badge.tertunda { background: #fee2e2; color: #b91c1c; }
         .calendar-status-badge.overdue { background: #ffedd5; color: #c2410c; }
@@ -92,7 +92,7 @@
         @media (max-width: 767.98px) {
             .calendar-board,
             .calendar-side {
-                border-radius: 16px;
+                border-radius: 14px;
             }
 
             .calendar-filter-bar { grid-template-columns: 1fr; }
@@ -294,7 +294,7 @@
                 nowIndicator: true,
                 eventTimeFormat: { hour: '2-digit', minute: '2-digit', meridiem: false },
                 eventDidMount: function (info) {
-                    const bg = info.event.backgroundColor || info.event.extendedProps.backgroundColor || '#2563eb';
+                    const bg = info.event.backgroundColor || info.event.extendedProps.backgroundColor || '#4f46e5';
                     const text = info.event.textColor || '#ffffff';
                     info.el.style.backgroundColor = bg;
                     info.el.style.borderColor = bg;

@@ -93,7 +93,7 @@
         }
 
         a {
-            color: #1d4ed8;
+            color: #4338ca;
             text-decoration: underline;
             word-break: break-all;
         }
