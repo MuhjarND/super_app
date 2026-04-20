@@ -3,11 +3,17 @@
 namespace App\Services;
 
 use App\AgendaPimpinan;
+use App\LeaveApproval;
+use App\LeaveRequest;
 use App\Rapat;
 use App\RapatApproval;
+use App\SuratKeluar;
+use App\SuratKeluarApproval;
 use App\User;
 use App\Voting;
 use App\WhatsAppNotificationLog;
+use App\ZiActivity;
+use App\ZiActivityApproval;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Http;
@@ -95,7 +101,8 @@ class WhatsAppNotificationService
     {
         $url = url('/surat-masuk/' . $suratMasuk->id);
         $message = $this->wrap([
-            'Informasi Surat Masuk',
+            'Yth. Bapak/Ibu,',
+            'Dengan hormat, disampaikan informasi surat masuk sebagai berikut:',
             '',
             'No. Surat: ' . $suratMasuk->nomor_surat,
             'Pengirim: ' . $suratMasuk->pengirim,
@@ -103,7 +110,8 @@ class WhatsAppNotificationService
             'Tanggal Surat: ' . $this->formatDateValue($suratMasuk->tanggal_surat),
             'Sifat: ' . ucfirst((string) $suratMasuk->sifat),
             '',
-            'Tindak lanjut: ' . $url,
+            'Silakan meninjau surat melalui tautan berikut:',
+            $url,
         ]);
 
         return $this->sendToUser($targetUser, $message, [
@@ -119,12 +127,13 @@ class WhatsAppNotificationService
         $suratMasuk = $disposisi->suratMasuk;
         $dari = $disposisi->dariUser;
         $url = url('/surat-masuk/' . $suratMasuk->id);
-        $tipe = $disposisi->tipe === 'naikan' ? 'Surat Dinaikkan' : 'Disposisi Surat';
+        $tipe = $disposisi->tipe === 'naikan' ? 'Surat dinaikkan' : 'Disposisi surat';
 
         $lines = [
-            $tipe,
+            'Yth. Bapak/Ibu,',
+            'Dengan hormat, terdapat ' . strtolower($tipe) . ' yang memerlukan tindak lanjut.',
             '',
-            'Dari: ' . optional($dari)->name,
+            'Dari: ' . (optional($dari)->name ?: '-'),
             'No. Surat: ' . $suratMasuk->nomor_surat,
             'Pengirim: ' . $suratMasuk->pengirim,
             'Perihal: ' . $suratMasuk->perihal,
@@ -138,14 +147,260 @@ class WhatsAppNotificationService
             $lines[] = 'Catatan: ' . $disposisi->catatan;
         }
 
+        if ($disposisi->priority_level) {
+            $priorityMap = ['high' => 'Tinggi', 'normal' => 'Normal', 'low' => 'Rendah'];
+            $lines[] = 'Prioritas: ' . ($priorityMap[$disposisi->priority_level] ?? 'Normal');
+        }
+
+        if ($disposisi->target_tindak_lanjut_at) {
+            $lines[] = 'Target tindak lanjut: ' . $this->formatDateTimeValue($disposisi->target_tindak_lanjut_at);
+        }
+
         $lines[] = '';
-        $lines[] = 'Tindak lanjut: ' . $url;
+        $lines[] = 'Mohon menindaklanjuti disposisi melalui tautan berikut:';
+        $lines[] = $url;
 
         return $this->sendToUser($targetUser, $this->wrap($lines), [
             'module' => 'persuratan',
             'event' => 'disposisi',
             'notifiable_type' => get_class($disposisi),
             'notifiable_id' => $disposisi->id,
+        ]);
+    }
+
+    public function notifyDisposisiReminder($disposisi, $targetUser)
+    {
+        $suratMasuk = $disposisi->suratMasuk;
+        $message = $this->wrap([
+            'Yth. Bapak/Ibu,',
+            'Dengan hormat, ini adalah pengingat tindak lanjut disposisi surat yang masih berstatus pending.',
+            '',
+            'No. Surat: ' . optional($suratMasuk)->nomor_surat,
+            'Perihal: ' . optional($suratMasuk)->perihal,
+            'Prioritas: ' . ($disposisi->priority_level === 'high' ? 'Tinggi' : ($disposisi->priority_level === 'low' ? 'Rendah' : 'Normal')),
+            'Target tindak lanjut: ' . ($disposisi->target_tindak_lanjut_at ? $this->formatDateTimeValue($disposisi->target_tindak_lanjut_at) : '-'),
+            '',
+            'Mohon segera menindaklanjuti pada aplikasi:',
+            url('/surat-masuk/' . optional($suratMasuk)->id),
+        ]);
+
+        return $this->sendToUser($targetUser, $message, [
+            'module' => 'persuratan',
+            'event' => 'disposisi_reminder',
+            'notifiable_type' => get_class($disposisi),
+            'notifiable_id' => $disposisi->id,
+        ]);
+    }
+
+    public function notifyLeaveRequestSubmitted(LeaveRequest $leaveRequest, User $targetUser)
+    {
+        $leaveRequest->loadMissing(['leaveType', 'user']);
+
+        $message = $this->wrap([
+            'Yth. Bapak/Ibu,',
+            'Dengan hormat, pengajuan cuti Bapak/Ibu telah berhasil diajukan dan saat ini menunggu proses verifikasi atau persetujuan.',
+            '',
+            'Nomor Pengajuan: ' . ($leaveRequest->request_number ?: $leaveRequest->display_number),
+            'Jenis Cuti: ' . optional($leaveRequest->leaveType)->name,
+            'Periode: ' . $leaveRequest->period_label,
+            'Keperluan: ' . trim(preg_replace('/\s+/', ' ', (string) $leaveRequest->purpose)),
+            'Status: ' . $leaveRequest->status_label,
+            '',
+            'Silakan memantau perkembangan pengajuan melalui tautan berikut:',
+            route('cuti.show', $leaveRequest),
+        ]);
+
+        return $this->sendToUser($targetUser, $message, [
+            'module' => 'cuti',
+            'event' => 'leave_submitted',
+            'notifiable_type' => get_class($leaveRequest),
+            'notifiable_id' => $leaveRequest->id,
+        ]);
+    }
+
+    public function notifyLeaveApprovalPending(LeaveApproval $approval)
+    {
+        $approval->loadMissing(['leaveRequest.user', 'leaveRequest.leaveType', 'approver']);
+
+        if (!$approval->approver) {
+            return false;
+        }
+
+        $leaveRequest = $approval->leaveRequest;
+        $message = $this->wrap([
+            'Yth. Bapak/Ibu,',
+            'Dengan hormat, terdapat pengajuan cuti yang memerlukan verifikasi atau persetujuan Bapak/Ibu.',
+            '',
+            'Tahap: ' . $approval->role_label,
+            'Pemohon: ' . optional($leaveRequest->user)->name,
+            'Nomor Pengajuan: ' . ($leaveRequest->request_number ?: $leaveRequest->display_number),
+            'Jenis Cuti: ' . optional($leaveRequest->leaveType)->name,
+            'Periode: ' . $leaveRequest->period_label,
+            'Status Saat Ini: ' . $leaveRequest->status_label,
+            '',
+            'Silakan memproses pengajuan melalui tautan berikut:',
+            route('cuti.approval.show', $approval),
+        ]);
+
+        return $this->sendToUser($approval->approver, $message, [
+            'module' => 'cuti',
+            'event' => 'leave_approval_pending',
+            'notifiable_type' => get_class($approval),
+            'notifiable_id' => $approval->id,
+        ]);
+    }
+
+    public function notifyLeaveRequestStatus(LeaveRequest $leaveRequest, User $targetUser, $title, $messageBody, $actorName = null, $note = null)
+    {
+        $leaveRequest->loadMissing(['leaveType', 'user']);
+
+        $lines = [
+            'Yth. Bapak/Ibu,',
+            'Dengan hormat, berikut disampaikan pembaruan status pengajuan cuti.',
+            '',
+            'Informasi: ' . $title,
+            'Nomor Pengajuan: ' . ($leaveRequest->request_number ?: $leaveRequest->display_number),
+            'Jenis Cuti: ' . optional($leaveRequest->leaveType)->name,
+            'Periode: ' . $leaveRequest->period_label,
+            'Status: ' . $leaveRequest->status_label,
+            'Keterangan: ' . $messageBody,
+        ];
+
+        if ($actorName) {
+            $lines[] = 'Diproses Oleh: ' . $actorName;
+        }
+
+        if ($note) {
+            $lines[] = 'Catatan: ' . trim(preg_replace('/\s+/', ' ', (string) $note));
+        }
+
+        $lines[] = '';
+        $lines[] = 'Silakan meninjau detail pengajuan pada tautan berikut:';
+        $lines[] = route('cuti.show', $leaveRequest);
+
+        return $this->sendToUser($targetUser, $this->wrap($lines), [
+            'module' => 'cuti',
+            'event' => 'leave_status_updated',
+            'notifiable_type' => get_class($leaveRequest),
+            'notifiable_id' => $leaveRequest->id,
+        ]);
+    }
+
+    public function notifySuratTugasRecipient(SuratKeluar $suratKeluar, User $targetUser, array $fieldValues = [])
+    {
+        $message = $this->wrap([
+            'Yth. Bapak/Ibu,',
+            'Dengan hormat, berikut disampaikan informasi Surat Tugas yang telah ditetapkan.',
+            '',
+            'Nomor Surat: ' . $suratKeluar->nomor_surat_formatted,
+            'Perihal: ' . ($suratKeluar->perihal ?: 'Surat Tugas'),
+            'Petugas: ' . $targetUser->name,
+            'Periode Tugas: ' . $this->formatTaskLetterPeriod($fieldValues),
+            'Uraian Tugas: ' . ($fieldValues['untuk_tugas'] ?? 'Sesuai Surat Tugas yang diterbitkan.'),
+            '',
+            'Silakan meninjau dokumen melalui tautan berikut:',
+            route('surat-keluar.signature.verify', optional($suratKeluar->templateApproval)->id),
+        ]);
+
+        return $this->sendToUser($targetUser, $message, [
+            'module' => 'surat_tugas',
+            'event' => 'surat_tugas_recipient',
+            'notifiable_type' => get_class($suratKeluar),
+            'notifiable_id' => $suratKeluar->id,
+        ]);
+    }
+
+    public function notifySuratTugasRequester(SuratKeluarApproval $approval, User $targetUser, $approved = true, $note = null)
+    {
+        $approval->loadMissing('suratKeluar');
+        $suratKeluar = $approval->suratKeluar;
+        $title = $approved ? 'Surat Tugas telah disetujui' : 'Surat Tugas perlu diperbaiki';
+        $lines = [
+            'Yth. Bapak/Ibu,',
+            'Dengan hormat, berikut disampaikan pembaruan proses Surat Tugas.',
+            '',
+            'Informasi: ' . $title,
+            'Nomor Surat: ' . optional($suratKeluar)->nomor_surat_formatted,
+            'Perihal: ' . (optional($suratKeluar)->perihal ?: 'Surat Tugas'),
+            'Status: ' . $approval->status_label,
+        ];
+
+        if ($note) {
+            $lines[] = 'Catatan: ' . trim(preg_replace('/\s+/', ' ', (string) $note));
+        }
+
+        $lines[] = '';
+        $lines[] = 'Silakan membuka modul Surat Keluar untuk tindak lanjut lebih lanjut:';
+        $lines[] = route('surat-keluar.index');
+
+        return $this->sendToUser($targetUser, $this->wrap($lines), [
+            'module' => 'surat_tugas',
+            'event' => $approved ? 'surat_tugas_approved' : 'surat_tugas_rejected',
+            'notifiable_type' => get_class($approval),
+            'notifiable_id' => $approval->id,
+        ]);
+    }
+
+    public function notifyProgressZiApprovalPending(ZiActivityApproval $approval)
+    {
+        $approval->loadMissing(['activity.area', 'activity.pic', 'requester', 'approver']);
+
+        if (!$approval->approver) {
+            return false;
+        }
+
+        $activity = $approval->activity;
+        $message = $this->wrap([
+            'Yth. Bapak/Ibu,',
+            'Dengan hormat, terdapat kegiatan Progress ZI yang memerlukan review pimpinan.',
+            '',
+            'Aktivitas: ' . optional($activity)->name,
+            'Area: ' . optional(optional($activity)->area)->name,
+            'PIC: ' . (optional(optional($activity)->pic)->name ?: optional($approval->requester)->name ?: '-'),
+            'Status: Pending Review',
+            'Catatan Pengajuan: ' . ($approval->request_notes ?: '-'),
+            '',
+            'Silakan meninjau melalui tautan berikut:',
+            route('progress-zi.approvals.show', $approval),
+        ]);
+
+        return $this->sendToUser($approval->approver, $message, [
+            'module' => 'progress_zi',
+            'event' => 'zi_review_pending',
+            'notifiable_type' => get_class($approval),
+            'notifiable_id' => $approval->id,
+        ]);
+    }
+
+    public function notifyProgressZiStatus(ZiActivity $activity, User $targetUser, $title, $messageBody, $note = null)
+    {
+        $activity->loadMissing(['area', 'period', 'pic']);
+
+        $lines = [
+            'Yth. Bapak/Ibu,',
+            'Dengan hormat, berikut disampaikan pembaruan tindak lanjut Progress ZI.',
+            '',
+            'Informasi: ' . $title,
+            'Aktivitas: ' . $activity->name,
+            'Area: ' . optional($activity->area)->name,
+            'Periode: ' . optional($activity->period)->name,
+            'Status: ' . $activity->status_label,
+            'Keterangan: ' . $messageBody,
+        ];
+
+        if ($note) {
+            $lines[] = 'Catatan Review: ' . trim(preg_replace('/\s+/', ' ', (string) $note));
+        }
+
+        $lines[] = '';
+        $lines[] = 'Silakan membuka detail kegiatan pada tautan berikut:';
+        $lines[] = route('progress-zi.activities.show', $activity);
+
+        return $this->sendToUser($targetUser, $this->wrap($lines), [
+            'module' => 'progress_zi',
+            'event' => 'zi_status_updated',
+            'notifiable_type' => get_class($activity),
+            'notifiable_id' => $activity->id,
         ]);
     }
 
@@ -159,7 +414,8 @@ class WhatsAppNotificationService
 
         $rapat = $approval->rapat;
         $message = $this->wrap([
-            'Dokumen Rapat Menunggu Approval',
+            'Yth. Bapak/Ibu,',
+            'Dengan hormat, terdapat dokumen rapat yang menunggu persetujuan.',
             '',
             'Step Approval: ' . $approval->step_order,
             'Judul Rapat: ' . $rapat->judul,
@@ -170,7 +426,8 @@ class WhatsAppNotificationService
             'Tempat: ' . $rapat->tempat,
             'Pengusul: ' . optional($rapat->creator)->name,
             '',
-            'Preview dokumen: ' . route('approval.index', ['category' => 'undangan']),
+            'Silakan meninjau dokumen melalui tautan berikut:',
+            route('approval.index', ['category' => 'undangan']),
         ]);
 
         $sent = $this->sendToUser($approval->approver, $message, [
@@ -194,7 +451,8 @@ class WhatsAppNotificationService
         $rapat->loadMissing(['creator', 'approver1', 'approver2']);
 
         $lines = [
-            'Approval Rapat Ditolak',
+            'Yth. Bapak/Ibu,',
+            'Dengan hormat, dokumen rapat berikut belum dapat disetujui.',
             '',
             'Judul Rapat: ' . $rapat->judul,
             'Nomor Undangan: ' . $rapat->nomor_undangan,
@@ -208,7 +466,7 @@ class WhatsAppNotificationService
         }
 
         $lines[] = '';
-        $lines[] = 'Silakan perbarui dokumen rapat pada aplikasi.';
+        $lines[] = 'Mohon melakukan perbaikan dokumen pada aplikasi.';
 
         return $this->sendToUser($rapat->creator, $this->wrap($lines), [
             'module' => 'rapat',
@@ -227,7 +485,8 @@ class WhatsAppNotificationService
         }
 
         $lines = [
-            'Informasi Rapat',
+            'Yth. Bapak/Ibu,',
+            'Dengan hormat, berikut disampaikan informasi rapat.',
             '',
             'Judul: ' . $rapat->judul,
             'Nomor Undangan: ' . $rapat->nomor_undangan,
@@ -251,7 +510,7 @@ class WhatsAppNotificationService
         }
 
         $lines[] = '';
-        $lines[] = 'Mohon hadir tepat waktu sesuai jadwal.';
+        $lines[] = 'Mohon kehadiran tepat waktu sesuai jadwal yang telah ditetapkan.';
 
         $message = $this->wrap($lines);
         $users = $rapat->pesertas->filter(function ($user) {
@@ -280,13 +539,15 @@ class WhatsAppNotificationService
 
         $attendanceUrl = route('rapat.absensi.public.show', $rapat->public_code);
         $message = $this->wrap([
-            'Pengingat Absensi Rapat',
+            'Yth. Bapak/Ibu,',
+            'Dengan hormat, berikut pengingat absensi rapat.',
             '',
             'Judul: ' . $rapat->judul,
             'Tanggal: ' . $this->formatDateValue($rapat->tanggal),
             'Waktu: ' . $rapat->waktu_mulai_formatted . ' WIT',
             '',
-            'Link absensi: ' . $attendanceUrl,
+            'Silakan melakukan absensi melalui tautan berikut:',
+            $attendanceUrl,
         ]);
 
         if ($users === null) {
@@ -343,13 +604,15 @@ class WhatsAppNotificationService
         }
 
         $message = $this->wrap([
-            'Informasi E-Voting',
+            'Yth. Bapak/Ibu,',
+            'Dengan hormat, berikut disampaikan informasi e-voting.',
             '',
             'Judul Voting: ' . $voting->judul,
             'Jumlah Item: ' . $voting->items->count(),
             'Status: ' . ucfirst((string) $voting->status),
             '',
-            'Link voting: ' . route('rapat.voting.public.show', $voting->public_code),
+            'Silakan mengakses e-voting melalui tautan berikut:',
+            route('rapat.voting.public.show', $voting->public_code),
         ]);
 
         $users = $voting->participantPivots
@@ -379,14 +642,16 @@ class WhatsAppNotificationService
     public function notifyLoginInfo(User $user)
     {
         $message = $this->wrap([
-            'Informasi Login Aplikasi',
+            'Yth. Bapak/Ibu,',
+            'Dengan hormat, berikut informasi akses aplikasi.',
             '',
             'Nama: ' . $user->name,
             'Email/Username: ' . $user->email,
             'Password standar: ptapabar',
             '',
-            'Jika password Anda pernah diubah sebelumnya, gunakan password terakhir yang berlaku.',
-            'Halaman login: ' . url('/login'),
+            'Apabila password pernah diubah sebelumnya, gunakan password terakhir yang masih berlaku.',
+            'Halaman login:',
+            url('/login'),
         ]);
 
         return $this->sendToUser($user, $message, [
@@ -443,7 +708,7 @@ class WhatsAppNotificationService
 
     protected function wrap(array $lines)
     {
-        return "*[SMART NOTIF]*\n" . implode("\n", $lines) . "\n\n*- SMART PTA Papua Barat*";
+        return implode("\n", $lines) . "\n\nHormat kami,\nSistem Informasi PTA Papua Barat";
     }
 
     protected function normalizePhoneNumber($phoneNumber)
@@ -480,5 +745,38 @@ class WhatsAppNotificationService
         } catch (\Throwable $e) {
             return (string) $value;
         }
+    }
+
+    protected function formatDateTimeValue($value)
+    {
+        if (!$value) {
+            return '-';
+        }
+
+        if ($value instanceof Carbon) {
+            return $value->copy()->timezone('Asia/Jayapura')->translatedFormat('d M Y H:i') . ' WIT';
+        }
+
+        try {
+            return Carbon::parse($value, 'Asia/Jayapura')->translatedFormat('d M Y H:i') . ' WIT';
+        } catch (\Throwable $e) {
+            return (string) $value;
+        }
+    }
+
+    protected function formatTaskLetterPeriod(array $fieldValues)
+    {
+        $start = $fieldValues['tanggal_mulai'] ?? null;
+        $end = $fieldValues['tanggal_selesai'] ?? null;
+
+        if ($start && $end) {
+            return $this->formatDateValue($start) . ' s.d. ' . $this->formatDateValue($end);
+        }
+
+        if ($start) {
+            return $this->formatDateValue($start);
+        }
+
+        return '-';
     }
 }

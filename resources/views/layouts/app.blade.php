@@ -1967,6 +1967,23 @@
                             </a>
                         </li>
 
+                        @if($sidebarUser->canAccessLeadershipDashboard())
+                            <li class="nav-item">
+                                <a href="{{ route('dashboard.leadership') }}"
+                                    class="nav-link {{ request()->routeIs('dashboard.leadership') ? 'active' : '' }}">
+                                    <i class="nav-icon fas fa-user-tie"></i>
+                                    <p>Dashboard Pimpinan</p>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="{{ route('audit-trail.index') }}"
+                                    class="nav-link {{ request()->routeIs('audit-trail.*') ? 'active' : '' }}">
+                                    <i class="nav-icon fas fa-history"></i>
+                                    <p>Audit Trail</p>
+                                </a>
+                            </li>
+                        @endif
+
                         @if($sidebarUser->canAccessIntegratedCalendar())
                             <li class="nav-item">
                                 <a href="{{ route('calendar.integrated.index') }}"

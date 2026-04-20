@@ -13,11 +13,13 @@ class RapatApprovalService
 {
     protected $whatsAppService;
     protected $documentService;
+    protected $auditService;
 
-    public function __construct(WhatsAppNotificationService $whatsAppService, RapatDocumentService $documentService)
+    public function __construct(WhatsAppNotificationService $whatsAppService, RapatDocumentService $documentService, ActivityAuditService $auditService)
     {
         $this->whatsAppService = $whatsAppService;
         $this->documentService = $documentService;
+        $this->auditService = $auditService;
     }
 
     public function syncWorkflow(Rapat $rapat, $fallbackStatus = 'draft', $isResubmission = false)
@@ -86,6 +88,8 @@ class RapatApprovalService
 
     public function approve(RapatApproval $approval, User $actor, $catatan = null)
     {
+        $previousStatus = $approval->status;
+
         DB::transaction(function () use ($approval, $actor, $catatan) {
             $approval->refresh();
             $this->guardDecision($approval, $actor);
@@ -109,6 +113,16 @@ class RapatApprovalService
         });
 
         $approval->rapat->refresh();
+        $this->auditService->log('rapat', 'rapat_approval_approved', $approval->fresh('rapat'), [
+            'subject_type' => 'rapat',
+            'subject_id' => optional($approval->rapat)->id,
+            'subject_title' => optional($approval->rapat)->judul,
+            'target_user_id' => $approval->approver_id,
+            'target_name' => optional($approval->approver)->name ?: $approval->approver_name_snapshot,
+            'old_values_json' => ['status' => $previousStatus],
+            'new_values_json' => ['status' => 'approved'],
+            'note' => $catatan,
+        ], $actor);
 
         if ($approval->rapat->status === 'disetujui') {
             $this->whatsAppService->notifyRapatParticipants($approval->rapat);
@@ -120,6 +134,8 @@ class RapatApprovalService
 
     public function reject(RapatApproval $approval, User $actor, $catatan)
     {
+        $previousStatus = $approval->status;
+
         DB::transaction(function () use ($approval, $actor, $catatan) {
             $approval->refresh();
             $this->guardDecision($approval, $actor);
@@ -143,6 +159,17 @@ class RapatApprovalService
             $approval->rapat->update(['status' => 'ditolak']);
             $this->documentService->generateAndStoreUndangan($approval->rapat->fresh(), false);
         });
+
+        $this->auditService->log('rapat', 'rapat_approval_rejected', $approval->fresh('rapat'), [
+            'subject_type' => 'rapat',
+            'subject_id' => optional($approval->rapat)->id,
+            'subject_title' => optional($approval->rapat)->judul,
+            'target_user_id' => $approval->approver_id,
+            'target_name' => optional($approval->approver)->name ?: $approval->approver_name_snapshot,
+            'old_values_json' => ['status' => $previousStatus],
+            'new_values_json' => ['status' => 'rejected'],
+            'note' => $catatan,
+        ], $actor);
 
         $this->whatsAppService->notifyRapatRejected($approval->rapat->fresh('creator'), $catatan);
     }

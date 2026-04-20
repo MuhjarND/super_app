@@ -61,8 +61,8 @@ class AgendaPimpinan extends Model
     public function getWhatsappPreviewAttribute()
     {
         $lines = [
-            '*[SMART NOTIF]*',
-            'Informasi Agenda Pimpinan',
+            'Yth. Bapak/Ibu,',
+            'Dengan hormat, berikut disampaikan informasi agenda pimpinan.',
             '',
             'Judul: ' . $this->judul_agenda,
             'Tanggal: ' . $this->tanggal_formatted,
@@ -87,7 +87,8 @@ class AgendaPimpinan extends Model
         }
 
         $lines[] = '';
-        $lines[] = '*- SMART PTA Papua Barat*';
+        $lines[] = 'Hormat kami,';
+        $lines[] = 'Sistem Informasi PTA Papua Barat';
 
         return implode("\n", $lines);
     }

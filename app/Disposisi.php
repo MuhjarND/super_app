@@ -16,7 +16,21 @@ class Disposisi extends Model
         'catatan',
         'catatan_tindak_lanjut',
         'tipe',
-        'status'
+        'status',
+        'priority_level',
+        'target_tindak_lanjut_at',
+        'read_at',
+        'completed_at',
+        'notification_sent_at',
+        'reminder_whatsapp_sent_at',
+    ];
+
+    protected $casts = [
+        'target_tindak_lanjut_at' => 'datetime',
+        'read_at' => 'datetime',
+        'completed_at' => 'datetime',
+        'notification_sent_at' => 'datetime',
+        'reminder_whatsapp_sent_at' => 'datetime',
     ];
 
     public const PETUNJUK_OPTIONS = [
@@ -70,8 +84,10 @@ class Disposisi extends Model
                 return '<span class="badge badge-warning">Pending</span>';
             case 'dibaca':
                 return '<span class="badge badge-info">Dibaca</span>';
+            case 'diproses':
+                return '<span class="badge badge-primary">Diproses</span>';
             case 'ditindaklanjuti':
-                return '<span class="badge badge-danger">Ditindaklanjuti</span>';
+                return '<span class="badge badge-success">Ditindaklanjuti</span>';
             default:
                 return '<span class="badge badge-secondary">' . $this->status . '</span>';
         }
@@ -92,5 +108,39 @@ class Disposisi extends Model
     public static function getPetunjukOptions()
     {
         return self::PETUNJUK_OPTIONS;
+    }
+
+    public function getPriorityBadgeAttribute()
+    {
+        switch ($this->priority_level) {
+            case 'high':
+                return '<span class="badge badge-danger">Prioritas Tinggi</span>';
+            case 'low':
+                return '<span class="badge badge-secondary">Prioritas Rendah</span>';
+            default:
+                return '<span class="badge badge-primary">Prioritas Normal</span>';
+        }
+    }
+
+    public function getTargetLabelAttribute()
+    {
+        if (!$this->target_tindak_lanjut_at) {
+            return '-';
+        }
+
+        if ($this->target_tindak_lanjut_at->isToday()) {
+            return 'Hari ini';
+        }
+
+        return $this->target_tindak_lanjut_at->translatedFormat('d M Y H:i');
+    }
+
+    public function getIsOverdueAttribute()
+    {
+        if (!$this->target_tindak_lanjut_at || $this->status === 'ditindaklanjuti') {
+            return false;
+        }
+
+        return $this->target_tindak_lanjut_at->lt(now('Asia/Jayapura'));
     }
 }

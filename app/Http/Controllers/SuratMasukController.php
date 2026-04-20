@@ -46,6 +46,8 @@ class SuratMasukController extends Controller
                         'petunjuk' => $disposisi->petunjuk,
                         'catatan' => $disposisi->catatan,
                         'catatan_tindak_lanjut' => $disposisi->catatan_tindak_lanjut,
+                        'priority_badge' => $disposisi->priority_badge,
+                        'target_label' => $disposisi->target_label,
                         'waktu' => $disposisi->created_at->format('d/m/Y H:i'),
                         'waktu_human' => $disposisi->created_at->diffForHumans(),
                     ];

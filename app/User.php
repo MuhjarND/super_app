@@ -356,6 +356,11 @@ class User extends Authenticatable
             || $this->canAccessApprovalCenter();
     }
 
+    public function canAccessLeadershipDashboard()
+    {
+        return $this->isSuperAdmin() || $this->isPimpinan();
+    }
+
     public function canAccessProgressZiModule()
     {
         if ($this->isSuperAdmin()) {

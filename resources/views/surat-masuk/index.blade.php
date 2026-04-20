@@ -922,6 +922,20 @@
                                         <textarea class="form-control" name="catatan" rows="3"
                                             placeholder="Catatan disposisi (opsional)"></textarea>
                                     </div>
+                                    <div class="form-row">
+                                        <div class="form-group col-md-6">
+                                            <label>Prioritas <span class="text-danger">*</span></label>
+                                            <select class="form-control" name="priority_level" required>
+                                                <option value="normal">Normal</option>
+                                                <option value="high">Tinggi</option>
+                                                <option value="low">Rendah</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group col-md-6">
+                                            <label>Target Tindak Lanjut</label>
+                                            <input type="datetime-local" class="form-control" name="target_tindak_lanjut_at">
+                                        </div>
+                                    </div>
                                     <div class="history-panel">
                                         <div class="history-panel-title">
                                             <i class="fas fa-history mr-1 text-primary"></i> Riwayat Surat
@@ -1061,6 +1075,9 @@
                 items.forEach(function (item) {
                     html += '<div class="history-item">';
                     html += '<div class="d-flex justify-content-between align-items-center flex-wrap">' + item.tipe_badge + item.status_badge + '</div>';
+                    if (item.priority_badge || item.target_label) {
+                        html += '<div class="history-meta mt-1">' + (item.priority_badge || '') + ' <span class="ml-1">Target: ' + (item.target_label || '-') + '</span></div>';
+                    }
                     html += '<div class="history-flow">' + (item.dari || '-') + ' <i class="fas fa-arrow-right mx-1 text-muted"></i> ' + (item.kepada || '-') + '</div>';
                     if (item.jabatan) {
                         html += '<div class="history-meta">' + item.jabatan + '</div>';

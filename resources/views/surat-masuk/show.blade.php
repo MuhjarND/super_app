@@ -254,6 +254,21 @@
                                     placeholder="Catatan disposisi (opsional)"></textarea>
                             </div>
 
+                            <div class="form-row">
+                                <div class="form-group col-md-6">
+                                    <label>Prioritas <span class="text-danger">*</span></label>
+                                    <select class="form-control" name="priority_level" required>
+                                        <option value="normal">Normal</option>
+                                        <option value="high">Tinggi</option>
+                                        <option value="low">Rendah</option>
+                                    </select>
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label>Target Tindak Lanjut</label>
+                                    <input type="datetime-local" class="form-control" name="target_tindak_lanjut_at">
+                                </div>
+                            </div>
+
                             <button type="submit" class="btn btn-accent" id="btnDisposisi">
                                 <i class="fas fa-paper-plane mr-1"></i> Kirim Disposisi
                             </button>
@@ -282,6 +297,10 @@
                             <div class="d-flex justify-content-between mb-1">
                                 {!! $disposisi->tipe_badge !!}
                                 {!! $disposisi->status_badge !!}
+                            </div>
+                            <div class="mb-2">
+                                {!! $disposisi->priority_badge !!}
+                                <small class="text-muted d-block mt-1">Target tindak lanjut: {{ $disposisi->target_label }}</small>
                             </div>
                             <div class="mb-1">
                                 <strong>{{ $disposisi->dariUser->name }}</strong>
@@ -315,9 +334,20 @@
 
                             @if($disposisi->kepada_user_id == auth()->id() && $disposisi->status == 'pending')
                                 <div class="mt-2">
+                                    <button class="btn btn-sm btn-outline-primary update-status" data-id="{{ $disposisi->id }}"
+                                        data-status="dibaca">
+                                        <i class="fas fa-book-reader mr-1"></i> Tandai Dibaca
+                                    </button>
                                     <button class="btn btn-sm btn-outline-danger update-status" data-id="{{ $disposisi->id }}"
                                         data-status="ditindaklanjuti">
                                         <i class="fas fa-check mr-1"></i> Tandai Ditindaklanjuti
+                                    </button>
+                                </div>
+                            @endif
+                            @if((auth()->user()->isSuperAdmin() || auth()->id() == $disposisi->dari_user_id) && $disposisi->status !== 'ditindaklanjuti')
+                                <div class="mt-2">
+                                    <button class="btn btn-sm btn-outline-secondary remind-disposisi" data-id="{{ $disposisi->id }}">
+                                        <i class="fab fa-whatsapp mr-1"></i> Kirim Pengingat
                                     </button>
                                 </div>
                             @endif
@@ -409,6 +439,29 @@
                     },
                     error: function (xhr) {
                         showToast('Gagal memperbarui status.', 'error');
+                        btn.prop('disabled', false);
+                    }
+                });
+            });
+
+            $('.remind-disposisi').on('click', function () {
+                let id = $(this).data('id');
+                let btn = $(this);
+                btn.prop('disabled', true);
+
+                $.ajax({
+                    url: '/disposisi/' + id + '/remind',
+                    method: 'POST',
+                    data: {
+                        _token: '{{ csrf_token() }}'
+                    },
+                    success: function (res) {
+                        showToast(res.message, 'success');
+                    },
+                    error: function (xhr) {
+                        showToast(xhr.responseJSON?.message || 'Gagal mengirim pengingat.', 'error');
+                    },
+                    complete: function () {
                         btn.prop('disabled', false);
                     }
                 });

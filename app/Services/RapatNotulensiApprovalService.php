@@ -11,6 +11,13 @@ use Illuminate\Support\Facades\DB;
 
 class RapatNotulensiApprovalService
 {
+    protected $auditService;
+
+    public function __construct(ActivityAuditService $auditService)
+    {
+        $this->auditService = $auditService;
+    }
+
     public function syncWorkflow(RapatNotulensi $notulensi, $isResubmission = false)
     {
         $notulensi->loadMissing('rapat.approver1.jabatan', 'rapat.approver2.jabatan', 'approval');
@@ -67,6 +74,8 @@ class RapatNotulensiApprovalService
 
     public function approve(RapatNotulensiApproval $approval, User $actor, $catatan = null)
     {
+        $previousStatus = $approval->status;
+
         DB::transaction(function () use ($approval, $actor, $catatan) {
             $approval->refresh();
             $this->guardDecision($approval, $actor);
@@ -83,10 +92,24 @@ class RapatNotulensiApprovalService
                 'approval_ready' => true,
             ]);
         });
+
+        $approval->loadMissing('notulensi.rapat', 'approver');
+        $this->auditService->log('rapat', 'notulensi_approval_approved', $approval, [
+            'subject_type' => 'rapat_notulensi',
+            'subject_id' => optional($approval->notulensi)->id,
+            'subject_title' => optional(optional($approval->notulensi)->rapat)->judul ?: optional($approval->notulensi)->judul,
+            'target_user_id' => $approval->approver_id,
+            'target_name' => optional($approval->approver)->name ?: $approval->approver_name_snapshot,
+            'old_values_json' => ['status' => $previousStatus],
+            'new_values_json' => ['status' => 'approved'],
+            'note' => $catatan,
+        ], $actor);
     }
 
     public function reject(RapatNotulensiApproval $approval, User $actor, $catatan)
     {
+        $previousStatus = $approval->status;
+
         DB::transaction(function () use ($approval, $actor, $catatan) {
             $approval->refresh();
             $this->guardDecision($approval, $actor);
@@ -103,6 +126,18 @@ class RapatNotulensiApprovalService
                 'approval_ready' => false,
             ]);
         });
+
+        $approval->loadMissing('notulensi.rapat', 'approver');
+        $this->auditService->log('rapat', 'notulensi_approval_rejected', $approval, [
+            'subject_type' => 'rapat_notulensi',
+            'subject_id' => optional($approval->notulensi)->id,
+            'subject_title' => optional(optional($approval->notulensi)->rapat)->judul ?: optional($approval->notulensi)->judul,
+            'target_user_id' => $approval->approver_id,
+            'target_name' => optional($approval->approver)->name ?: $approval->approver_name_snapshot,
+            'old_values_json' => ['status' => $previousStatus],
+            'new_values_json' => ['status' => 'rejected'],
+            'note' => $catatan,
+        ], $actor);
     }
 
     protected function resolveApprover(RapatNotulensi $notulensi)

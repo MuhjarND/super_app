@@ -333,13 +333,15 @@ class UnifiedActionCenterService
         $items = collect();
 
         $disposisiQuery = Disposisi::with(['suratMasuk', 'dariUser', 'kepadaUser.unit'])
-            ->where('status', 'pending');
+            ->whereIn('status', ['pending', 'dibaca', 'diproses']);
 
         if (!$user->isSuperAdmin()) {
             $disposisiQuery->where('kepada_user_id', $user->id);
         }
 
         $items = $items->merge($disposisiQuery->latest()->take(10)->get()->map(function ($disposisi) {
+            $targetAt = $disposisi->target_tindak_lanjut_at ?: $disposisi->created_at;
+
             return $this->makeItem([
                 'id' => 'persuratan-disposisi-' . $disposisi->id,
                 'module_key' => 'persuratan',
@@ -349,16 +351,16 @@ class UnifiedActionCenterService
                 'title' => optional($disposisi->suratMasuk)->nomor_surat ?: 'Surat masuk',
                 'subtitle' => optional($disposisi->suratMasuk)->perihal ?: 'Disposisi menunggu tindak lanjut',
                 'description' => 'Dari ' . (optional($disposisi->dariUser)->name ?: '-') . ' • ' . ($disposisi->petunjuk ?: 'Belum ada petunjuk'),
-                'status_key' => 'waiting',
-                'priority_key' => 'high',
-                'target_at' => optional($disposisi->created_at),
-                'is_overdue' => optional($disposisi->created_at)->lt(now('Asia/Jayapura')->subDays(2)),
+                'status_key' => in_array($disposisi->status, ['dibaca', 'diproses'], true) ? 'process' : 'waiting',
+                'priority_key' => $disposisi->priority_level ?: 'normal',
+                'target_at' => $targetAt,
+                'is_overdue' => $disposisi->is_overdue,
                 'assignee_id' => $disposisi->kepada_user_id,
                 'assignee_name' => optional($disposisi->kepadaUser)->name ?: '-',
                 'action_url' => optional($disposisi->suratMasuk) ? route('surat-masuk.show', $disposisi->suratMasuk) : route('surat-masuk.index'),
                 'action_text' => 'Buka Surat',
                 'unit_label' => optional(optional($disposisi->kepadaUser)->unit)->nama ?: '-',
-                'sort_at' => optional($disposisi->updated_at ?: $disposisi->created_at)->timestamp ?: 0,
+                'sort_at' => optional($disposisi->updated_at ?: $targetAt)->timestamp ?: 0,
             ]);
         }));
 

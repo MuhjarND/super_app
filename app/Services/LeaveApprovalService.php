@@ -15,12 +15,14 @@ class LeaveApprovalService
     protected $balanceService;
     protected $numberService;
     protected $documentService;
+    protected $auditService;
 
-    public function __construct(LeaveBalanceService $balanceService, LeaveNumberService $numberService, LeaveDocumentService $documentService)
+    public function __construct(LeaveBalanceService $balanceService, LeaveNumberService $numberService, LeaveDocumentService $documentService, ActivityAuditService $auditService)
     {
         $this->balanceService = $balanceService;
         $this->numberService = $numberService;
         $this->documentService = $documentService;
+        $this->auditService = $auditService;
     }
 
     public function buildApprovalSteps(LeaveRequest $leaveRequest)
@@ -101,6 +103,7 @@ class LeaveApprovalService
         if ($approval->status !== 'pending') {
             throw ValidationException::withMessages(['status' => 'Approval cuti ini tidak berada pada status pending.']);
         }
+        $previousStatus = $approval->status;
 
         if ($approval->role_name === 'verifikator_dokumen') {
             $unverifiedCount = $approval->leaveRequest->documents()->where('is_verified', false)->count();
@@ -137,6 +140,18 @@ class LeaveApprovalService
                 $this->documentService->syncSuratKeluar($leaveRequest->fresh(['leaveType', 'approvals', 'documents', 'user']), true);
             }
         });
+
+        $approval->loadMissing('leaveRequest.user', 'leaveRequest.leaveType', 'approver');
+        $this->auditService->log('cuti', 'leave_approval_approved', $approval, [
+            'subject_type' => 'leave_request',
+            'subject_id' => optional($approval->leaveRequest)->id,
+            'subject_title' => optional(optional($approval->leaveRequest)->user)->name . ' - ' . optional(optional($approval->leaveRequest)->leaveType)->name,
+            'target_user_id' => optional($approval->leaveRequest)->user_id,
+            'target_name' => optional(optional($approval->leaveRequest)->user)->name,
+            'old_values_json' => ['status' => $previousStatus],
+            'new_values_json' => ['status' => 'approved'],
+            'note' => $note,
+        ], $actor);
     }
 
     public function reject(LeaveApproval $approval, User $actor, $note)
@@ -144,6 +159,7 @@ class LeaveApprovalService
         if ($approval->status !== 'pending') {
             throw ValidationException::withMessages(['status' => 'Approval cuti ini tidak berada pada status pending.']);
         }
+        $previousStatus = $approval->status;
         DB::transaction(function () use ($approval, $actor, $note) {
             $approval->status = 'rejected';
             $approval->action = 'rejected';
@@ -160,6 +176,18 @@ class LeaveApprovalService
             $this->balanceService->restore($leaveRequest);
             $this->documentService->syncSuratKeluar($leaveRequest->fresh(['leaveType', 'approvals', 'documents', 'user']), true);
         });
+
+        $approval->loadMissing('leaveRequest.user', 'leaveRequest.leaveType', 'approver');
+        $this->auditService->log('cuti', 'leave_approval_rejected', $approval, [
+            'subject_type' => 'leave_request',
+            'subject_id' => optional($approval->leaveRequest)->id,
+            'subject_title' => optional(optional($approval->leaveRequest)->user)->name . ' - ' . optional(optional($approval->leaveRequest)->leaveType)->name,
+            'target_user_id' => optional($approval->leaveRequest)->user_id,
+            'target_name' => optional(optional($approval->leaveRequest)->user)->name,
+            'old_values_json' => ['status' => $previousStatus],
+            'new_values_json' => ['status' => 'rejected'],
+            'note' => $note,
+        ], $actor);
     }
 
     protected function resolveApproverId($approverId, $scope, $effectiveDate = null)

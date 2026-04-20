@@ -28,6 +28,8 @@ Route::middleware(['auth'])->group(function () {
     // Dashboard
     Route::get('/dashboard', 'DashboardController@index')->name('dashboard');
     Route::get('/home', 'DashboardController@index')->name('home');
+    Route::get('/dashboard/pimpinan', 'LeadershipDashboardController@index')->name('dashboard.leadership');
+    Route::get('/audit-trail', 'AuditTrailController@index')->name('audit-trail.index');
     Route::get('/tindak-lanjut-terpadu', 'UnifiedActionCenterController@index')->name('action-center.index');
     Route::get('/kalender-terpadu', 'IntegratedCalendarController@index')->name('calendar.integrated.index');
     Route::get('/kalender-terpadu/events', 'IntegratedCalendarController@events')->name('calendar.integrated.events');
@@ -80,6 +82,7 @@ Route::middleware(['auth'])->group(function () {
     // Disposisi
     Route::post('/disposisi', 'DisposisiController@store')->name('disposisi.store');
     Route::patch('/disposisi/{disposisi}/status', 'DisposisiController@updateStatus')->name('disposisi.update-status');
+    Route::post('/disposisi/{disposisi}/remind', 'DisposisiController@remind')->name('disposisi.remind');
     Route::get('/api/disposisi/targets', 'DisposisiController@getTargets')->name('api.disposisi.targets');
 
     // Master data - super admin only

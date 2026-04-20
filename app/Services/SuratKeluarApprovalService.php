@@ -2,19 +2,25 @@
 
 namespace App\Services;
 
+use App\Notifications\SuratTugasNotification;
 use App\SuratKeluar;
 use App\SuratKeluarApproval;
 use App\SuratKeluarApprovalHistory;
 use App\User;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class SuratKeluarApprovalService
 {
     protected $documentService;
+    protected $auditService;
+    protected $whatsAppService;
 
-    public function __construct(SuratTemplateDocumentService $documentService)
+    public function __construct(SuratTemplateDocumentService $documentService, ActivityAuditService $auditService, WhatsAppNotificationService $whatsAppService)
     {
         $this->documentService = $documentService;
+        $this->auditService = $auditService;
+        $this->whatsAppService = $whatsAppService;
     }
 
     public function syncForTemplate(SuratKeluar $suratKeluar, array $payload, User $approver, User $requester)
@@ -47,6 +53,8 @@ class SuratKeluarApprovalService
 
     public function approve(SuratKeluarApproval $approval, User $actor, $note = null)
     {
+        $previousStatus = $approval->status;
+
         DB::transaction(function () use ($approval, $actor, $note) {
             $approval->refresh();
             $this->guardDecision($approval, $actor);
@@ -78,10 +86,26 @@ class SuratKeluarApprovalService
                 'approval_signature' => $this->documentService->buildApprovalSignature($approval->fresh(['approver', 'suratKeluar'])),
             ]);
         });
+
+        $approval->loadMissing('suratKeluar', 'requester', 'approver');
+        $this->auditService->log('persuratan', 'surat_keluar_approved', $approval, [
+            'subject_type' => 'surat_keluar',
+            'subject_id' => optional($approval->suratKeluar)->id,
+            'subject_title' => optional($approval->suratKeluar)->perihal ?: $approval->template_name,
+            'target_user_id' => optional($approval->requester)->id,
+            'target_name' => optional($approval->requester)->name,
+            'old_values_json' => ['status' => $previousStatus],
+            'new_values_json' => ['status' => 'approved'],
+            'note' => $note,
+        ], $actor);
+
+        $this->notifyTemplateWorkflow($approval->fresh(['suratKeluar.penerimaInternal', 'requester', 'approver']), true, $note);
     }
 
     public function reject(SuratKeluarApproval $approval, User $actor, $note)
     {
+        $previousStatus = $approval->status;
+
         DB::transaction(function () use ($approval, $actor, $note) {
             $approval->refresh();
             $this->guardDecision($approval, $actor);
@@ -107,6 +131,20 @@ class SuratKeluarApprovalService
                 'status' => 'draft',
             ]);
         });
+
+        $approval->loadMissing('suratKeluar', 'requester', 'approver');
+        $this->auditService->log('persuratan', 'surat_keluar_rejected', $approval, [
+            'subject_type' => 'surat_keluar',
+            'subject_id' => optional($approval->suratKeluar)->id,
+            'subject_title' => optional($approval->suratKeluar)->perihal ?: $approval->template_name,
+            'target_user_id' => optional($approval->requester)->id,
+            'target_name' => optional($approval->requester)->name,
+            'old_values_json' => ['status' => $previousStatus],
+            'new_values_json' => ['status' => 'rejected'],
+            'note' => $note,
+        ], $actor);
+
+        $this->notifyTemplateWorkflow($approval->fresh(['suratKeluar.penerimaInternal', 'requester', 'approver']), false, $note);
     }
 
     protected function guardDecision(SuratKeluarApproval $approval, User $actor)
@@ -117,6 +155,62 @@ class SuratKeluarApprovalService
 
         if ($approval->status !== 'pending') {
             abort(422, 'Approval surat ini tidak berada pada status pending.');
+        }
+    }
+
+    protected function notifyTemplateWorkflow(SuratKeluarApproval $approval, $approved, $note = null)
+    {
+        if ((string) $approval->template_slug !== 'surat-tugas') {
+            return;
+        }
+
+        $suratKeluar = $approval->suratKeluar;
+        $fieldValues = $approval->field_values ?: [];
+
+        if ($approval->requester) {
+            try {
+                $approval->requester->notify(new SuratTugasNotification(
+                    $suratKeluar,
+                    $approved ? 'Surat Tugas telah disetujui' : 'Surat Tugas perlu diperbaiki',
+                    $approved
+                        ? 'Surat Tugas yang diajukan telah disetujui dan siap ditindaklanjuti.'
+                        : 'Surat Tugas yang diajukan belum dapat disetujui. Mohon meninjau catatan perbaikan.',
+                    route('surat-keluar.index'),
+                    'requester'
+                ));
+            } catch (\Throwable $e) {
+                Log::warning('Surat tugas requester notification skipped', [
+                    'approval_id' => $approval->id,
+                    'user_id' => $approval->requested_by,
+                    'error' => $e->getMessage(),
+                ]);
+            }
+
+            $this->whatsAppService->notifySuratTugasRequester($approval, $approval->requester, $approved, $note);
+        }
+
+        if (!$approved) {
+            return;
+        }
+
+        foreach ($suratKeluar->penerimaInternal->unique('id') as $recipient) {
+            try {
+                $recipient->notify(new SuratTugasNotification(
+                    $suratKeluar,
+                    'Surat Tugas untuk Anda telah tersedia',
+                    'Terdapat Surat Tugas yang menetapkan Bapak/Ibu sebagai petugas pelaksana.',
+                    route('surat-keluar.signature.verify', $approval),
+                    'recipient'
+                ));
+            } catch (\Throwable $e) {
+                Log::warning('Surat tugas recipient notification skipped', [
+                    'approval_id' => $approval->id,
+                    'user_id' => $recipient->id,
+                    'error' => $e->getMessage(),
+                ]);
+            }
+
+            $this->whatsAppService->notifySuratTugasRecipient($suratKeluar, $recipient, $fieldValues);
         }
     }
 }
