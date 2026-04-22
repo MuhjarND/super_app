@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class SuratKeluar extends Model
 {
     protected $fillable = [
+        'legacy_source_id',
         'nomor_surat',
         'nomor_urut',
         'tahun_surat',

@@ -437,15 +437,6 @@
 <?php $__env->stopSection(); ?>
 
 <?php $__env->startSection('content'); ?>
-    <!-- Notice Banner -->
-    <div class="notice-banner">
-        <div class="notice-icon"><i class="fas fa-check" style="font-size: 0.8rem;"></i></div>
-        <div class="notice-text">
-            <strong>Mohon perhatian.</strong> Setelah dokumen dinyatakan lengkap <strong>JANGAN LUPA</strong> untuk segera
-            di arsipkan. Terimakasih.
-        </div>
-    </div>
-
     @if(!empty($templatePrefill))
         <div class="alert alert-info border-0 shadow-sm">
             Draft surat keluar dari template <strong>{{ $templatePrefill['template_name'] ?? 'Template Surat' }}</strong> siap dilengkapi. Form pembuatan akan dibuka otomatis dengan data awal dari template tersebut.
@@ -460,9 +451,8 @@
                     <tr>
                         <th style="width: 3%;"></th>
                         <th style="width: 20%;">Nomor Surat</th>
-                        <th style="width: 13%;">Kategori Surat</th>
-                        <th style="width: 17%;">Perihal/Isi Ringkas</th>
-                        <th style="width: 14%;">Tujuan / Penerima</th>
+                        <th style="width: 24%;">Perihal/Isi Ringkas</th>
+                        <th style="width: 20%;">Tujuan / Penerima</th>
                         <th style="width: 10%;">Tanggal Surat</th>
                         <th style="width: 10%;">Diinput Tanggal</th>
                         <th style="width: 8%;">Lampiran</th>
@@ -499,11 +489,6 @@
                             <td>
                                 <div class="nomor-surat-text"><?php echo e($surat->nomor_surat_formatted); ?></div>
                                 <div class="nomor-kode"><?php echo e($surat->deskripsi_kode ?: '-'); ?></div>
-                            </td>
-                            <td>
-                                <div class="perihal-text">
-                                    <?php echo e($surat->kategoriSurat ? $surat->kategoriSurat->kode . ' - ' . $surat->kategoriSurat->nama : '-'); ?>
-                                </div>
                             </td>
                             <td>
                                 <div class="perihal-text"><?php echo e(Str::limit($surat->perihal, 65)); ?></div>

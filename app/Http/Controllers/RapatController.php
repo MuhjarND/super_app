@@ -56,12 +56,11 @@ class RapatController extends Controller
 
         $kategoriSuratOptions = $this->documentService->getKategoriSuratLeafOptions();
         $participants = User::with(['unit', 'bidang', 'jabatan', 'roles'])
-            ->orderBy('hirarki')
-            ->orderBy('name')
+            ->ordered()
             ->get();
         $approvers = User::whereHas('roles', function ($query) {
             $query->whereIn('name', ['admin', 'approval', 'super_admin']);
-        })->with('jabatan')->orderBy('hirarki')->orderBy('name')->get();
+        })->with('jabatan')->ordered()->get();
 
         return view('rapat.index', compact('rapats', 'kategoriSuratOptions', 'participants', 'approvers'));
     }
@@ -279,8 +278,7 @@ class RapatController extends Controller
     protected function syncPeserta(Rapat $rapat, array $participantIds)
     {
         $orderedUsers = User::whereIn('id', $participantIds)
-            ->orderBy('hirarki')
-            ->orderBy('name')
+            ->ordered()
             ->get();
 
         $syncData = [];

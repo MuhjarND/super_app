@@ -280,7 +280,7 @@ class ProgressZiReportController extends Controller
         }
 
         $areas = ZiArea::orderBy('code')->get();
-        $users = User::orderBy('name')->get();
+        $users = User::ordered()->get();
 
         return [$activities, $filters, $summary, $areaScores, $periods, $areas, $users];
     }

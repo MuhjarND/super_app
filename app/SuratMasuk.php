@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class SuratMasuk extends Model
 {
     protected $fillable = [
+        'legacy_source_id',
         'nomor_surat',
         'opsi_pengirim',
         'klasifikasi_kode_id',

@@ -6,6 +6,7 @@
 <style>
     .zi-shell { display:grid; gap:16px; }
     .zi-kpi-grid { display:grid; grid-template-columns:repeat(6, minmax(0,1fr)); gap:14px; }
+    .zi-group-grid { display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:16px; }
     .zi-kpi { background:#fff; border:1px solid #e5e7eb; border-radius:14px; padding:16px; box-shadow:0 4px 12px rgba(15, 23, 42, .04); }
     .zi-kpi .value { font-size:1.4rem; font-weight:800; color:#0f172a; line-height:1; margin-bottom:5px; }
     .zi-kpi .label { font-size:.76rem; color:#64748b; }
@@ -30,7 +31,7 @@
     .zi-chart-box span { font-size:.72rem; color:#64748b; }
     .zi-trend-top { display:flex; align-items:center; justify-content:space-between; gap:12px; }
     .zi-filter-bar { background:#fff; border:1px solid #e5e7eb; border-radius:16px; box-shadow:0 4px 12px rgba(15,23,42,.04); padding:14px 18px; display:flex; align-items:center; justify-content:space-between; gap:14px; flex-wrap:wrap; }
-    @media (max-width: 991.98px) { .zi-kpi-grid, .zi-row, .zi-chart-grid, .zi-trend-grid { grid-template-columns:1fr; } .zi-filter-bar { flex-direction:column; align-items:stretch; } }
+    @media (max-width: 991.98px) { .zi-kpi-grid, .zi-group-grid, .zi-row, .zi-chart-grid, .zi-trend-grid { grid-template-columns:1fr; } .zi-filter-bar { flex-direction:column; align-items:stretch; } }
 </style>
 @endpush
 
@@ -50,12 +51,69 @@
     </div>
 
     <div class="zi-kpi-grid">
+        <div class="zi-kpi"><div class="value">{{ $dashboard['summary']['group_count'] }}</div><div class="label">Kelompok</div></div>
         <div class="zi-kpi"><div class="value">{{ $dashboard['summary']['area_count'] }}</div><div class="label">Area</div></div>
         <div class="zi-kpi"><div class="value">{{ $dashboard['summary']['sub_point_covered_count'] }}/{{ $dashboard['summary']['sub_point_count'] }}</div><div class="label">Sub Poin</div></div>
         <div class="zi-kpi"><div class="value">{{ $dashboard['summary']['periodic_sub_point_count'] }}</div><div class="label">Berkala</div></div>
         <div class="zi-kpi"><div class="value">{{ $dashboard['summary']['activity_count'] }}</div><div class="label">Kegiatan</div></div>
-        <div class="zi-kpi"><div class="value">{{ $dashboard['summary']['indicator_count'] }}</div><div class="label">Indikator</div></div>
         <div class="zi-kpi"><div class="value">{{ rtrim(rtrim(number_format($dashboard['summary']['period_score'], 1), '0'), '.') }}%</div><div class="label">Nilai Periode</div></div>
+    </div>
+
+    <div class="zi-panel zi-wide-panel">
+        <div class="zi-panel-head">
+            <h5>Struktur Kelompok ZI</h5>
+        </div>
+        <div class="zi-panel-body">
+            <div class="zi-chart-grid">
+                @foreach($dashboard['group_summary'] as $group)
+                    <div class="zi-chart-box">
+                        <strong>{{ $group['area_count'] }}</strong>
+                        <span>{{ $group['group_label'] }} &bull; {{ $group['sub_point_covered_count'] }}/{{ $group['sub_point_count'] }} sub poin &bull; {{ rtrim(rtrim(number_format($group['score'], 1), '0'), '.') }}%</span>
+                    </div>
+                @endforeach
+            </div>
+        </div>
+    </div>
+
+    <div class="zi-group-grid">
+        @foreach($dashboard['group_summary'] as $groupType => $group)
+            @php
+                $groupAreas = $dashboard['group_area_progress']->get($groupType, collect());
+            @endphp
+            <div class="zi-panel">
+                <div class="zi-panel-head">
+                    <h5>{{ $group['group_label'] }}</h5>
+                    <span class="badge badge-light">{{ $group['area_count'] }} area</span>
+                </div>
+                <div class="zi-panel-body">
+                    <div class="zi-chart-grid mb-3" style="grid-template-columns:repeat(2, minmax(0,1fr));">
+                        <div class="zi-chart-box">
+                            <strong>{{ $group['sub_point_covered_count'] }}/{{ $group['sub_point_count'] }}</strong>
+                            <span>Sub Poin</span>
+                        </div>
+                        <div class="zi-chart-box">
+                            <strong>{{ rtrim(rtrim(number_format($group['score'], 1), '0'), '.') }}%</strong>
+                            <span>Skor</span>
+                        </div>
+                    </div>
+                    <div class="zi-progress-list">
+                        @forelse($groupAreas as $item)
+                            <div class="zi-progress-item">
+                                <div>
+                                    <div class="zi-attention-title">{{ $item['name'] }}</div>
+                                    <div class="zi-trend-meta">{{ $item['code'] }}</div>
+                                    <div class="zi-attention-meta">PIC: {{ $item['pic'] ?: '-' }} &bull; {{ $item['coverage']['covered'] }}/{{ $item['coverage']['total'] }} sub poin</div>
+                                    <div class="zi-progress-bar"><span style="width: {{ min(100, max(0, $item['score'])) }}%"></span></div>
+                                </div>
+                                <div>{!! '<span class="badge badge-' . ($item['score'] >= 100 ? 'success' : ($item['score'] >= 50 ? 'warning' : 'secondary')) . ' app-status-badge">' . rtrim(rtrim(number_format($item['score'], 1), '0'), '.') . '%</span>' !!}</div>
+                            </div>
+                        @empty
+                            <div class="text-muted">Belum ada data area pada bagian ini.</div>
+                        @endforelse
+                    </div>
+                </div>
+            </div>
+        @endforeach
     </div>
 
     @if(auth()->user()->isSuperAdmin() || auth()->user()->canManageProgressZiMasterData())
@@ -71,7 +129,7 @@
                             <div class="zi-trend-top">
                                 <div>
                                     <div class="zi-attention-title">{{ $trend['name'] }}</div>
-                                    <div class="zi-trend-meta">{{ $trend['activity_count'] }} kegiatan • {{ $trend['indicator_count'] }} indikator</div>
+                                    <div class="zi-trend-meta">{{ $trend['activity_count'] }} kegiatan &bull; {{ $trend['indicator_count'] }} indikator</div>
                                 </div>
                                 <div>{!! '<span class="badge badge-' . ($trend['score'] >= 100 ? 'success' : ($trend['score'] >= 50 ? 'warning' : 'secondary')) . ' app-status-badge">' . rtrim(rtrim(number_format($trend['score'], 1), '0'), '.') . '%</span>' !!}</div>
                             </div>
@@ -96,7 +154,8 @@
                     <div class="zi-progress-item">
                         <div>
                             <div class="zi-attention-title">{{ $item['name'] }}</div>
-                            <div class="zi-attention-meta">PIC: {{ $item['pic'] ?: '-' }} • {{ $item['coverage']['covered'] }}/{{ $item['coverage']['total'] }} sub poin</div>
+                            <div class="zi-trend-meta">{{ $item['group_label'] }} &bull; {{ $item['code'] }}</div>
+                            <div class="zi-attention-meta">PIC: {{ $item['pic'] ?: '-' }} &bull; {{ $item['coverage']['covered'] }}/{{ $item['coverage']['total'] }} sub poin</div>
                             <div class="zi-progress-bar"><span style="width: {{ min(100, max(0, $item['score'])) }}%"></span></div>
                         </div>
                         <div>{!! '<span class="badge badge-' . ($item['score'] >= 100 ? 'success' : ($item['score'] >= 50 ? 'warning' : 'secondary')) . ' app-status-badge">' . rtrim(rtrim(number_format($item['score'], 1), '0'), '.') . '%</span>' !!}</div>
@@ -135,13 +194,13 @@
                     @foreach($dashboard['indicator_attention'] as $indicator)
                         <div class="zi-attention-item">
                             <div class="zi-attention-title">Indikator: {{ $indicator->name }}</div>
-                            <div class="zi-attention-meta">{{ optional(optional($indicator->activity)->area)->name }} • {{ optional($indicator->activity)->name }} • {!! $indicator->status_badge !!}</div>
+                            <div class="zi-attention-meta">{{ optional(optional($indicator->activity)->area)->name }} &bull; {{ optional($indicator->activity)->name }} &bull; {!! $indicator->status_badge !!}</div>
                         </div>
                     @endforeach
                     @foreach($dashboard['evidence_attention'] as $evidence)
                         <div class="zi-attention-item">
                             <div class="zi-attention-title">Eviden: {{ $evidence->title }}</div>
-                            <div class="zi-attention-meta">{{ optional(optional($evidence->realization)->activity)->name }} • {{ $evidence->source_reference_label }} • {!! $evidence->status_badge !!}</div>
+                            <div class="zi-attention-meta">{{ optional(optional($evidence->realization)->activity)->name }} &bull; {{ $evidence->source_reference_label }} &bull; {!! $evidence->status_badge !!}</div>
                         </div>
                     @endforeach
                     @if($dashboard['indicator_attention']->isEmpty() && $dashboard['evidence_attention']->isEmpty())
@@ -159,7 +218,7 @@
                 @forelse($dashboard['overdue_activities'] as $activity)
                     <div class="zi-attention-item">
                         <div class="zi-attention-title"><a href="{{ route('progress-zi.activities.show', $activity) }}">{{ $activity->name }}</a></div>
-                        <div class="zi-attention-meta">{{ optional($activity->area)->name }} • target {{ optional($activity->target_end_date)->translatedFormat('d F Y') }} • PIC {{ optional($activity->pic)->name ?: '-' }}</div>
+                        <div class="zi-attention-meta">{{ optional($activity->area)->name }} &bull; target {{ optional($activity->target_end_date)->translatedFormat('d F Y') }} &bull; PIC {{ optional($activity->pic)->name ?: '-' }}</div>
                     </div>
                 @empty
                     <div class="text-muted">Tidak ada kegiatan overdue.</div>
@@ -170,3 +229,4 @@
 
 </div>
 @endsection
+

@@ -97,6 +97,35 @@ class WhatsAppNotificationService
         return $this->send($targetUser->no_hp, $message, $context);
     }
 
+    public function notifyTwoFactorStatusChanged(User $targetUser, $enabled = true, $recoveryCodeCount = null)
+    {
+        $lines = [
+            'Yth. Bapak/Ibu,',
+            'Dengan hormat, berikut disampaikan pembaruan pengaturan keamanan akun Anda.',
+            '',
+            'Informasi: ' . ($enabled ? 'Authenticator 2 faktor telah diaktifkan.' : 'Authenticator 2 faktor telah dinonaktifkan.'),
+            'Akun: ' . ($targetUser->username ?: $targetUser->email ?: $targetUser->name),
+            'Waktu: ' . $this->formatDateTimeValue(now()),
+        ];
+
+        if ($enabled && $recoveryCodeCount !== null) {
+            $lines[] = 'Backup recovery code aktif: ' . $recoveryCodeCount . ' kode.';
+            $lines[] = 'Mohon simpan recovery code tersebut di tempat yang aman dan jangan dibagikan kepada pihak lain.';
+        }
+
+        $lines[] = '';
+        $lines[] = 'Silakan meninjau pengaturan keamanan melalui tautan berikut:';
+        $lines[] = route('two-factor.edit');
+        $lines[] = '';
+        $lines[] = 'Apabila perubahan ini bukan dilakukan oleh Anda, mohon segera ubah password akun dan hubungi administrator.';
+
+        return $this->sendToUser($targetUser, $this->wrap($lines), [
+            'module' => 'security',
+            'event' => $enabled ? 'two_factor_enabled' : 'two_factor_disabled',
+            'target_user_id' => $targetUser->id,
+        ]);
+    }
+
     public function notifySuratMasuk($suratMasuk, $targetUser)
     {
         $url = url('/surat-masuk/' . $suratMasuk->id);
@@ -646,7 +675,8 @@ class WhatsAppNotificationService
             'Dengan hormat, berikut informasi akses aplikasi.',
             '',
             'Nama: ' . $user->name,
-            'Email/Username: ' . $user->email,
+            'Email: ' . $user->email,
+            'Username: ' . ($user->username ?: '-'),
             'Password standar: ptapabar',
             '',
             'Apabila password pernah diubah sebelumnya, gunakan password terakhir yang masih berlaku.',

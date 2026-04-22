@@ -5,6 +5,14 @@
 @push('styles')
 <style>
     .zi-monitor-shell { display:grid; gap:16px; }
+    .zi-group-grid { display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:12px; }
+    .zi-group-card { display:block; padding:16px 18px; border:1px solid #dbeafe; border-radius:16px; background:linear-gradient(180deg, #f8fbff 0%, #ffffff 100%); color:#0f172a; box-shadow:0 4px 12px rgba(15,23,42,.04); transition:all .16s ease; }
+    .zi-group-card:hover { text-decoration:none; border-color:#93c5fd; box-shadow:0 10px 22px rgba(59,130,246,.12); transform:translateY(-1px); }
+    .zi-group-card.active { border-color:#2563eb; background:linear-gradient(180deg, #eff6ff 0%, #dbeafe 100%); box-shadow:0 14px 28px rgba(37,99,235,.14); }
+    .zi-group-eyebrow { font-size:.7rem; font-weight:800; letter-spacing:.08em; text-transform:uppercase; color:#475569; }
+    .zi-group-title { font-size:1rem; font-weight:800; color:#0f172a; margin-top:4px; }
+    .zi-group-meta { display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-top:10px; }
+    .zi-group-stat { display:inline-flex; align-items:center; gap:5px; padding:5px 9px; border-radius:999px; background:#fff; border:1px solid #dbeafe; color:#1d4ed8; font-size:.7rem; font-weight:800; }
     .zi-monitor-filter { background:#fff; border:1px solid #e5e7eb; border-radius:16px; box-shadow:0 4px 12px rgba(15,23,42,.04); padding:16px 18px; }
     .zi-area-card { background:#fff; border:1px solid #e5e7eb; border-radius:16px; overflow:hidden; box-shadow:0 4px 12px rgba(15,23,42,.04); }
     .zi-area-head { padding:16px 18px; display:flex; align-items:center; justify-content:space-between; gap:14px; border-bottom:1px solid #eef2f7; cursor:pointer; transition:background .15s ease; }
@@ -65,6 +73,7 @@
     .zi-suggestion-meta { font-size:.7rem; color:#64748b; margin-top:3px; }
     .zi-section-label { font-size:.68rem; font-weight:800; letter-spacing:.06em; text-transform:uppercase; color:#64748b; margin-bottom:6px; }
     @media (max-width: 991.98px) {
+        .zi-group-grid { grid-template-columns:1fr; }
         .zi-subpoint-row { flex-direction:column; }
         .zi-subpoint-right { width:100%; }
         .zi-preview-layout { grid-template-columns:1fr; }
@@ -75,9 +84,25 @@
 
 @section('content')
 <div class="zi-monitor-shell">
+    <div class="zi-group-grid">
+        @foreach($groupOptions as $groupType => $groupLabel)
+            @php
+                $groupAreas = $groupedAreas->get($groupType, collect());
+            @endphp
+            <a href="{{ route('progress-zi.activities.index', ['group_type' => $groupType]) }}" class="zi-group-card {{ $selectedGroupType === $groupType ? 'active' : '' }}">
+                <div class="zi-group-eyebrow">Kelompok ZI</div>
+                <div class="zi-group-title">{{ $groupLabel }}</div>
+                <div class="zi-group-meta">
+                    <span class="zi-group-stat"><i class="fas fa-layer-group"></i>{{ $groupAreas->count() }} area</span>
+                    <span class="zi-group-stat"><i class="fas fa-tasks"></i>{{ $groupAreas->sum(function ($area) { return $area->activities->count(); }) }} kegiatan</span>
+                </div>
+            </a>
+        @endforeach
+    </div>
 
     <div class="zi-monitor-filter">
         <form method="GET" class="row">
+            <input type="hidden" name="group_type" value="{{ $selectedGroupType }}">
             <div class="col-md-3 form-group mb-md-0">
                 <label>Periode</label>
                 <select class="form-control" name="period_id">
@@ -91,7 +116,7 @@
                 <label>Area</label>
                 <select class="form-control" name="area_id">
                     <option value="">Semua Area</option>
-                    @foreach($areas as $area)
+                    @foreach($visibleAreas as $area)
                         <option value="{{ $area->id }}" {{ (string) ($filters['area_id'] ?? '') === (string) $area->id ? 'selected' : '' }}>{{ $area->code }} - {{ $area->name }}</option>
                     @endforeach
                 </select>
@@ -116,51 +141,62 @@
             </div>
             <div class="col-md-2 form-group d-flex align-items-end mb-0" style="gap:10px;">
                 <button class="btn btn-primary">Filter</button>
-                <a href="{{ route('progress-zi.activities.index') }}" class="btn btn-light">Reset</a>
+                <a href="{{ route('progress-zi.activities.index', ['group_type' => $selectedGroupType]) }}" class="btn btn-light">Reset</a>
             </div>
         </form>
     </div>
 
-    @forelse($areas as $area)
-        @php
-            $totalSubPoints = $area->guidelinePoints->sum(function ($point) { return $point->subPoints->count(); });
-            $coveredSubPoints = $area->guidelinePoints->sum(function ($point) use ($area) {
-                return $point->subPoints->filter(function ($subPoint) use ($area) {
-                    $subPointActivities = $area->activities->where('zi_guideline_sub_point_id', $subPoint->id)->values();
-                    $rapatActivities = $subPointActivities->filter(function ($activity) {
-                        return $activity->source_type === 'rapat' || $activity->source_reference_type === 'rapat';
-                    });
-                    $requiresPeriodic = $subPoint->indicators->contains(function ($indicator) {
-                        return (bool) $indicator->is_periodic;
-                    });
-
-                    if ($requiresPeriodic) {
-                        return $rapatActivities->count() > 1;
-                    }
-
-                    return $subPointActivities->isNotEmpty();
-                })->count();
-            });
-            $coverageClass = $coveredSubPoints === 0 ? 'is-danger' : ($coveredSubPoints === $totalSubPoints && $totalSubPoints > 0 ? 'is-success' : 'is-progress');
-            $canManageArea = auth()->user()->canManageProgressZiArea($area);
-            $canCreateMeeting = $canManageArea && auth()->user()->canManageRapat();
-        @endphp
-        <div class="zi-area-card">
-            <div class="zi-area-head" data-toggle="collapse" data-target="#ziAreaBody{{ $area->id }}" aria-expanded="false" aria-controls="ziAreaBody{{ $area->id }}">
-                <div>
-                    <div class="zi-area-code">{{ $area->code }}</div>
-                    <div class="zi-area-title">{{ $area->name }}</div>
-                </div>
-                <div class="zi-area-meta">
-                    <span class="zi-kpi-chip {{ $coverageClass }}"><i class="fas fa-check-circle"></i>{{ $coveredSubPoints }}/{{ $totalSubPoints }}</span>
-                    <span class="zi-kpi-chip"><i class="fas fa-user-tie"></i>{{ $area->pic_names !== '-' ? $area->pic_names : '-' }}</span>
-                    <span class="zi-area-toggle"><i class="fas fa-chevron-down"></i></span>
-                </div>
+    @if($visibleAreas->isEmpty())
+        <div class="card shadow-sm border-0">
+            <div class="card-body text-center text-muted py-4">Belum ada area atau pedoman yang bisa dimonitor.</div>
+        </div>
+    @else
+        <div class="d-flex align-items-center justify-content-between mt-2 mb-2">
+            <div class="text-uppercase text-muted" style="font-size:.72rem; font-weight:800; letter-spacing:.08em;">
+                {{ $groupOptions[$selectedGroupType] ?? 'Kelompok ZI' }}
             </div>
+            <div class="small text-muted">{{ $visibleAreas->count() }} area</div>
+        </div>
+        @foreach($visibleAreas as $area)
+                @php
+                    $totalSubPoints = $area->guidelinePoints->sum(function ($point) { return $point->subPoints->count(); });
+                    $coveredSubPoints = $area->guidelinePoints->sum(function ($point) use ($area) {
+                        return $point->subPoints->filter(function ($subPoint) use ($area) {
+                            $subPointActivities = $area->activities->where('zi_guideline_sub_point_id', $subPoint->id)->values();
+                            $rapatActivities = $subPointActivities->filter(function ($activity) {
+                                return $activity->source_type === 'rapat' || $activity->source_reference_type === 'rapat';
+                            });
+                            $requiresPeriodic = $subPoint->indicators->contains(function ($indicator) {
+                                return (bool) $indicator->is_periodic;
+                            });
 
-            <div id="ziAreaBody{{ $area->id }}" class="collapse">
-                <div class="zi-area-body">
-                    @forelse($area->guidelinePoints as $point)
+                            if ($requiresPeriodic) {
+                                return $rapatActivities->count() > 1;
+                            }
+
+                            return $subPointActivities->isNotEmpty();
+                        })->count();
+                    });
+                    $coverageClass = $coveredSubPoints === 0 ? 'is-danger' : ($coveredSubPoints === $totalSubPoints && $totalSubPoints > 0 ? 'is-success' : 'is-progress');
+                    $canManageArea = auth()->user()->canManageProgressZiArea($area);
+                    $canCreateMeeting = $canManageArea && auth()->user()->canManageRapat();
+                @endphp
+                <div class="zi-area-card">
+                    <div class="zi-area-head" data-toggle="collapse" data-target="#ziAreaBody{{ $area->id }}" aria-expanded="false" aria-controls="ziAreaBody{{ $area->id }}">
+                        <div>
+                            <div class="zi-area-code">{{ $area->group_label }} &bull; {{ $area->code }}</div>
+                            <div class="zi-area-title">{{ $area->name }}</div>
+                        </div>
+                        <div class="zi-area-meta">
+                            <span class="zi-kpi-chip {{ $coverageClass }}"><i class="fas fa-check-circle"></i>{{ $coveredSubPoints }}/{{ $totalSubPoints }}</span>
+                            <span class="zi-kpi-chip"><i class="fas fa-user-tie"></i>{{ $area->pic_names !== '-' ? $area->pic_names : '-' }}</span>
+                            <span class="zi-area-toggle"><i class="fas fa-chevron-down"></i></span>
+                        </div>
+                    </div>
+
+                    <div id="ziAreaBody{{ $area->id }}" class="collapse">
+                        <div class="zi-area-body">
+                            @forelse($area->guidelinePoints as $point)
                         <div class="zi-point-card">
                             <div class="zi-point-head">
                                 <div class="zi-point-line">
@@ -305,7 +341,11 @@
                                     @endforelse
                                 </div>
                                 <div class="d-none" id="ziPreviewListTemplate{{ $subPoint->id }}">
-                                    @php($previewableEvidences = $allEvidences->filter(function ($evidence) { return !empty($evidence->preview_url); })->values())
+                                    @php
+                                        $previewableEvidences = $allEvidences->filter(function ($evidence) {
+                                            return !empty($evidence->preview_url);
+                                        })->values();
+                                    @endphp
                                     @forelse($previewableEvidences as $evidence)
                                         <button type="button" class="zi-preview-item" data-url="{{ $evidence->preview_url }}" data-title="{{ $evidence->title }}">
                                             <div class="zi-preview-item-title">{{ $evidence->title }}</div>
@@ -316,7 +356,9 @@
                                     @endforelse
                                 </div>
                                 <div class="d-none" id="ziRecommendationListTemplate{{ $subPoint->id }}">
-                                    @php($recommendations = $subPointRecommendations[$subPoint->id] ?? [])
+                                    @php
+                                        $recommendations = $subPointRecommendations[$subPoint->id] ?? [];
+                                    @endphp
                                     @forelse($recommendations as $recommendation)
                                         <button type="button"
                                             class="zi-suggestion-btn zi-apply-recommendation"
@@ -337,17 +379,14 @@
                                 <div class="px-3 py-4 text-center text-muted">Belum ada sub poin pedoman pada poin ini.</div>
                             @endforelse
                         </div>
-                    @empty
-                        <div class="text-center text-muted py-4">Belum ada poin pedoman untuk area ini.</div>
-                    @endforelse
+                            @empty
+                                <div class="text-center text-muted py-4">Belum ada poin pedoman untuk area ini.</div>
+                            @endforelse
+                        </div>
+                    </div>
                 </div>
-            </div>
-        </div>
-    @empty
-        <div class="card shadow-sm border-0">
-            <div class="card-body text-center text-muted py-4">Belum ada area atau pedoman yang bisa dimonitor.</div>
-        </div>
-    @endforelse
+        @endforeach
+    @endif
 </div>
 
 @if(auth()->user()->canManageRapat())
@@ -623,3 +662,5 @@
     })();
 </script>
 @endpush
+
+

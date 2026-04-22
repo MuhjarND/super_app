@@ -97,10 +97,10 @@ class SuratTemplateController extends Controller
             'proposalModuleReady' => $proposalModuleReady,
             'canManageTemplates' => $this->canManage(),
             'canSubmitProposal' => auth()->user()->canSubmitSuratTemplateProposal(),
-            'templateUsers' => User::with('jabatan')->orderBy('hirarki')->orderBy('name')->get(),
+            'templateUsers' => User::with('jabatan')->ordered()->get(),
             'templateSignerUsers' => User::with('jabatan')->whereHas('roles', function ($query) {
                 $query->where('name', 'approval');
-            })->orderBy('hirarki')->orderBy('name')->get(),
+            })->ordered()->get(),
         ]);
     }
 

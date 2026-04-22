@@ -26,19 +26,42 @@ class ProgressZiGuidelineController extends Controller
             return $this->progressZiSetupResponse('Pedoman ZI Belum Diaktifkan');
         }
 
+        $groupOptions = ZiArea::groupOptions();
         $selectedAreaId = $request->filled('area_id') ? (int) $request->area_id : null;
         $areas = ZiArea::with([
             'pic',
             'pics',
             'guidelinePoints.subPoints.indicators',
-        ])->orderBy('code')->get();
+        ])->orderByRaw("FIELD(group_type, 'pengungkit', 'reform', 'hasil')")
+            ->orderBy('code')
+            ->get();
 
-        $selectedArea = $selectedAreaId
-            ? $areas->firstWhere('id', $selectedAreaId)
-            : $areas->first();
+        $groupedAreas = ZiArea::grouped($areas);
+        $selectedArea = $selectedAreaId ? $areas->firstWhere('id', $selectedAreaId) : null;
+        $selectedGroupType = $request->filled('group_type') && isset($groupOptions[$request->group_type])
+            ? $request->group_type
+            : optional($selectedArea)->group_type;
+
+        if (!$selectedGroupType) {
+            $selectedGroupType = collect(array_keys($groupOptions))->first(function ($groupType) use ($groupedAreas) {
+                return $groupedAreas->get($groupType, collect())->isNotEmpty();
+            });
+        }
+
+        $visibleAreas = $selectedGroupType
+            ? $groupedAreas->get($selectedGroupType, collect())
+            : collect();
+
+        if (!$selectedArea || ($selectedGroupType && $selectedArea->group_type !== $selectedGroupType)) {
+            $selectedArea = $visibleAreas->first();
+        }
 
         return view('progress-zi.guidelines.index', [
             'areas' => $areas,
+            'groupedAreas' => $groupedAreas,
+            'visibleAreas' => $visibleAreas,
+            'selectedGroupType' => $selectedGroupType,
+            'groupOptions' => $groupOptions,
             'selectedArea' => $selectedArea,
             'canManage' => auth()->user()->canManageProgressZiMasterData(),
         ]);

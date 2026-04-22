@@ -27,8 +27,7 @@ class AgendaPimpinanController extends Controller
             ->get();
 
         $users = User::with(['jabatan', 'unit', 'bidang'])
-            ->orderBy('hirarki')
-            ->orderBy('name')
+            ->ordered()
             ->get();
 
         return view('rapat.agenda.index', compact('agendas', 'users'));
@@ -128,8 +127,7 @@ class AgendaPimpinanController extends Controller
     protected function syncRecipients(AgendaPimpinan $agenda, array $recipientIds)
     {
         $orderedUsers = User::whereIn('id', $recipientIds)
-            ->orderBy('hirarki')
-            ->orderBy('name')
+            ->ordered()
             ->get();
 
         $syncData = [];

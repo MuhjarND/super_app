@@ -11,8 +11,14 @@ class User extends Authenticatable
 
     protected $fillable = [
         'name',
+        'username',
         'email',
         'password',
+        'profile_photo_path',
+        'two_factor_secret',
+        'two_factor_enabled',
+        'two_factor_confirmed_at',
+        'two_factor_recovery_codes',
         'jabatan_id',
         'jabatan_keterangan',
         'unit_id',
@@ -31,6 +37,8 @@ class User extends Authenticatable
     protected $hidden = [
         'password',
         'remember_token',
+        'two_factor_secret',
+        'two_factor_recovery_codes',
     ];
 
     protected $casts = [
@@ -38,6 +46,8 @@ class User extends Authenticatable
         'tmt_pns' => 'date',
         'jumlah_anak' => 'integer',
         'status_aktif_pegawai' => 'boolean',
+        'two_factor_enabled' => 'boolean',
+        'two_factor_confirmed_at' => 'datetime',
     ];
 
     public function roles()
@@ -68,6 +78,24 @@ class User extends Authenticatable
     public function pejabatBerwenang()
     {
         return $this->belongsTo(self::class, 'pejabat_berwenang_id');
+    }
+
+    public function getDisplayJabatanAttribute()
+    {
+        return $this->jabatan_keterangan ?: optional($this->jabatan)->nama ?: '-';
+    }
+
+    public function hasTwoFactorEnabled()
+    {
+        return (bool) $this->two_factor_enabled && !empty($this->two_factor_secret) && !is_null($this->two_factor_confirmed_at);
+    }
+
+    public function scopeOrdered($query)
+    {
+        return $query
+            ->orderByRaw('CASE WHEN hirarki IS NULL THEN 1 ELSE 0 END')
+            ->orderBy('hirarki')
+            ->orderBy('name');
     }
 
     public function hasRole($role)

@@ -8,6 +8,8 @@ Route::get('/', function () {
 });
 
 Auth::routes(['register' => false]); // Disable registration - admin adds users
+Route::get('/login/2fa', 'Auth\TwoFactorChallengeController@show')->name('two-factor.challenge.show');
+Route::post('/login/2fa', 'Auth\TwoFactorChallengeController@store')->name('two-factor.challenge.store');
 
 Route::get('/absensi/publik/{publicCode}', 'RapatAbsensiController@publicShow')->name('rapat.absensi.public.show');
 Route::post('/absensi/publik/{publicCode}', 'RapatAbsensiController@publicStore')->name('rapat.absensi.public.store');
@@ -24,6 +26,15 @@ Route::get('/publik/tindak-lanjut/eviden/{token}', 'PublicFollowUpEvidenceContro
 
 // Authenticated routes
 Route::middleware(['auth'])->group(function () {
+
+    Route::get('/profil', 'ProfileController@edit')->name('profile.edit');
+    Route::put('/profil', 'ProfileController@update')->name('profile.update');
+    Route::put('/profil/password', 'ProfileController@updatePassword')->name('profile.password.update');
+    Route::get('/profil/2fa', 'TwoFactorController@edit')->name('two-factor.edit');
+    Route::post('/profil/2fa/setup', 'TwoFactorController@setup')->name('two-factor.setup');
+    Route::post('/profil/2fa/enable', 'TwoFactorController@enable')->name('two-factor.enable');
+    Route::post('/profil/2fa/recovery-codes', 'TwoFactorController@regenerateRecoveryCodes')->name('two-factor.recovery-codes.regenerate');
+    Route::delete('/profil/2fa', 'TwoFactorController@disable')->name('two-factor.disable');
 
     // Dashboard
     Route::get('/dashboard', 'DashboardController@index')->name('dashboard');

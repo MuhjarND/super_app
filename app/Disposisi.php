@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class Disposisi extends Model
 {
     protected $fillable = [
+        'legacy_source_id',
         'surat_masuk_id',
         'dari_user_id',
         'kepada_user_id',

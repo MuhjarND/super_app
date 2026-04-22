@@ -5,6 +5,14 @@
 @push('styles')
 <style>
     .zi-guide-shell { display:grid; gap:16px; }
+    .zi-group-grid { display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:12px; }
+    .zi-group-card { display:block; padding:16px 18px; border:1px solid #dbeafe; border-radius:16px; background:linear-gradient(180deg, #f8fbff 0%, #ffffff 100%); color:#0f172a; box-shadow:0 4px 12px rgba(15,23,42,.04); transition:all .16s ease; }
+    .zi-group-card:hover { text-decoration:none; border-color:#93c5fd; box-shadow:0 10px 22px rgba(59,130,246,.12); transform:translateY(-1px); }
+    .zi-group-card.active { border-color:#2563eb; background:linear-gradient(180deg, #eff6ff 0%, #dbeafe 100%); box-shadow:0 14px 28px rgba(37,99,235,.14); }
+    .zi-group-eyebrow { font-size:.7rem; font-weight:800; letter-spacing:.08em; text-transform:uppercase; color:#475569; }
+    .zi-group-title { font-size:1rem; font-weight:800; color:#0f172a; margin-top:4px; }
+    .zi-group-meta { display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-top:10px; }
+    .zi-group-stat { display:inline-flex; align-items:center; gap:5px; padding:5px 9px; border-radius:999px; background:#fff; border:1px solid #dbeafe; color:#1d4ed8; font-size:.7rem; font-weight:800; }
     .zi-guide-layout { display:grid; grid-template-columns:300px 1fr; gap:16px; align-items:start; }
     .zi-guide-panel { background:#fff; border:1px solid #e5e7eb; border-radius:16px; box-shadow:0 4px 12px rgba(15,23,42,.04); overflow:hidden; }
     .zi-guide-panel-head { padding:14px 18px 12px; border-bottom:1px solid #eef2f7; display:flex; align-items:center; justify-content:space-between; gap:12px; }
@@ -16,6 +24,7 @@
     .zi-area-card.active { background:#eef2ff; border-color:#818cf8; }
     .zi-area-code { font-size:.7rem; font-weight:800; letter-spacing:.06em; color:#4f46e5; text-transform:uppercase; }
     .zi-area-name { font-size:.88rem; font-weight:800; margin-top:2px; color:#0f172a; }
+    .zi-area-pic { font-size:.72rem; color:#64748b; font-weight:700; line-height:1.45; margin-top:7px; }
     .zi-area-stats { display:flex; align-items:center; gap:6px; flex-wrap:wrap; margin-top:8px; }
     .zi-count-chip { display:inline-flex; align-items:center; gap:5px; padding:4px 8px; border-radius:999px; background:#f8fafc; border:1px solid #e2e8f0; color:#334155; font-size:.7rem; font-weight:700; }
     .zi-guide-summary { display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:10px; margin-bottom:14px; }
@@ -46,13 +55,29 @@
     .zi-inline-actions { display:flex; align-items:center; gap:6px; flex-wrap:wrap; }
     .zi-guide-topbar { background:#fff; border:1px solid #e5e7eb; border-radius:16px; box-shadow:0 4px 12px rgba(15,23,42,.04); padding:14px 18px; display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; }
     @media (max-width: 991.98px) {
-        .zi-guide-layout, .zi-guide-summary { grid-template-columns:1fr; }
+        .zi-group-grid, .zi-guide-layout, .zi-guide-summary { grid-template-columns:1fr; }
     }
 </style>
 @endpush
 
 @section('content')
 <div class="zi-guide-shell">
+    <div class="zi-group-grid">
+        @foreach($groupOptions as $groupType => $groupLabel)
+            @php
+                $groupAreas = $groupedAreas->get($groupType, collect());
+            @endphp
+            <a href="{{ route('progress-zi.guidelines.index', ['group_type' => $groupType]) }}" class="zi-group-card {{ $selectedGroupType === $groupType ? 'active' : '' }}">
+                <div class="zi-group-eyebrow">Kelompok ZI</div>
+                <div class="zi-group-title">{{ $groupLabel }}</div>
+                <div class="zi-group-meta">
+                    <span class="zi-group-stat"><i class="fas fa-layer-group"></i>{{ $groupAreas->count() }} area</span>
+                    <span class="zi-group-stat"><i class="fas fa-book-open"></i>{{ $groupAreas->sum(function ($area) { return $area->guidelinePoints->count(); }) }} poin</span>
+                </div>
+            </a>
+        @endforeach
+    </div>
+
     <div class="zi-guide-topbar">
         <h5 style="margin:0; font-size:.92rem; font-weight:800; color:#0f172a;">Pedoman Zona Integritas</h5>
         @if($canManage && $selectedArea)
@@ -65,32 +90,35 @@
     <div class="zi-guide-layout">
         <div class="zi-guide-panel">
             <div class="zi-guide-panel-head">
-                <h5>Area Perubahan</h5>
+                <h5>{{ $groupOptions[$selectedGroupType] ?? 'Area ZI' }}</h5>
             </div>
             <div class="zi-guide-panel-body">
                 <div class="zi-area-list">
-                    @forelse($areas as $area)
-                        @php
-                            $pointCount = $area->guidelinePoints->count();
-                            $subPointCount = $area->guidelinePoints->sum(function ($point) { return $point->subPoints->count(); });
-                            $indicatorCount = $area->guidelinePoints->sum(function ($point) {
-                                return $point->subPoints->sum(function ($subPoint) {
-                                    return $subPoint->indicators->count();
+                    @if($visibleAreas->isEmpty())
+                        <div class="zi-guide-empty">Belum ada area ZI yang tersedia.</div>
+                    @else
+                        @foreach($visibleAreas as $area)
+                            @php
+                                $pointCount = $area->guidelinePoints->count();
+                                $subPointCount = $area->guidelinePoints->sum(function ($point) { return $point->subPoints->count(); });
+                                $indicatorCount = $area->guidelinePoints->sum(function ($point) {
+                                    return $point->subPoints->sum(function ($subPoint) {
+                                        return $subPoint->indicators->count();
+                                    });
                                 });
-                            });
-                        @endphp
-                        <a href="{{ route('progress-zi.guidelines.index', ['area_id' => $area->id]) }}" class="zi-area-card {{ optional($selectedArea)->id === $area->id ? 'active' : '' }}">
-                            <div class="zi-area-code">{{ $area->code }}</div>
-                            <div class="zi-area-name">{{ $area->name }}</div>
-                            <div class="zi-area-stats">
-                                <span class="zi-count-chip">{{ $pointCount }} poin</span>
-                                <span class="zi-count-chip">{{ $subPointCount }} sub</span>
-                                <span class="zi-count-chip">{{ $indicatorCount }} indikator</span>
-                            </div>
-                        </a>
-                    @empty
-                        <div class="zi-guide-empty">Belum ada area perubahan yang tersedia.</div>
-                    @endforelse
+                            @endphp
+                            <a href="{{ route('progress-zi.guidelines.index', ['group_type' => $selectedGroupType, 'area_id' => $area->id]) }}" class="zi-area-card {{ optional($selectedArea)->id === $area->id ? 'active' : '' }}">
+                                <div class="zi-area-code">{{ $area->code }}</div>
+                                <div class="zi-area-name">{{ $area->name }}</div>
+                                <div class="zi-area-pic"><i class="fas fa-user-tie mr-1"></i>{{ $area->pic_names !== '-' ? $area->pic_names : 'PIC belum ditentukan' }}</div>
+                                <div class="zi-area-stats">
+                                    <span class="zi-count-chip">{{ $pointCount }} poin</span>
+                                    <span class="zi-count-chip">{{ $subPointCount }} sub</span>
+                                    <span class="zi-count-chip">{{ $indicatorCount }} indikator</span>
+                                </div>
+                            </a>
+                        @endforeach
+                    @endif
                 </div>
             </div>
         </div>

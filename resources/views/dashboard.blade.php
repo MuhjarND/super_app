@@ -603,26 +603,43 @@
 
         @media (max-width: 767.98px) {
             .dashboard-hero {
-                padding: 20px 18px;
+                padding: 16px 14px;
                 border-radius: 14px;
             }
 
             .dashboard-hero-title {
-                font-size: 1.15rem;
+                font-size: 1.05rem;
                 line-height: 1.3;
+                margin-bottom: 4px;
             }
 
             .dashboard-hero-meta {
-                font-size: 0.82rem;
+                font-size: 0.76rem;
             }
 
             .hero-chip-wrap {
-                flex-direction: column;
+                display: grid;
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 8px;
+                margin-top: 14px;
             }
 
             .hero-chip {
                 width: 100%;
-                padding: 10px 12px;
+                min-height: 0;
+                padding: 9px 10px;
+                border-radius: 16px;
+                gap: 8px;
+                align-items: flex-start;
+            }
+
+            .hero-chip strong {
+                font-size: 0.94rem;
+            }
+
+            .hero-chip span {
+                font-size: 0.7rem;
+                line-height: 1.25;
             }
 
             .metric-grid {
@@ -668,7 +685,7 @@
 @endpush
 
 @section('content-header')
-    <div class="content-header" style="padding-bottom: 0;">
+    <div class="content-header" style="padding-bottom: 0; min-height: 0;">
         <div class="container-fluid"></div>
     </div>
 @endsection

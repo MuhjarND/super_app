@@ -72,27 +72,68 @@ class ProgressZiMasterController extends Controller
     {
         $this->abortUnlessCanAccessProgressZi();
         if (!$this->progressZiModuleReady()) { return $this->progressZiSetupResponse(); }
-        return view('progress-zi.areas.index', ['areas' => ZiArea::with(['pic', 'pics'])->orderBy('code')->get(), 'users' => User::orderBy('name')->get(), 'canManage' => auth()->user()->canManageProgressZiMasterData()]);
+        $areas = ZiArea::with(['pic', 'pics'])
+            ->orderByRaw("FIELD(group_type, 'pengungkit', 'reform', 'hasil')")
+            ->orderBy('code')
+            ->get();
+
+        return view('progress-zi.areas.index', [
+            'areas' => $areas,
+            'groupedAreas' => ZiArea::grouped($areas),
+            'groupOptions' => ZiArea::groupOptions(),
+            'users' => User::ordered()->get(),
+            'canManage' => auth()->user()->canManageProgressZiMasterData(),
+        ]);
     }
 
     public function storeArea(Request $request)
     {
         $this->abortUnlessCanManageProgressZiMaster();
-        $request->validate(['code' => 'required|string|max:30|unique:zi_areas,code', 'name' => 'required|string|max:255', 'description' => 'nullable|string', 'pic_user_ids' => 'nullable|array', 'pic_user_ids.*' => 'exists:users,id', 'is_active' => 'nullable|boolean']);
+        $request->validate([
+            'code' => 'required|string|max:30|unique:zi_areas,code',
+            'name' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'group_type' => 'required|in:pengungkit,reform,hasil',
+            'pic_user_ids' => 'nullable|array',
+            'pic_user_ids.*' => 'exists:users,id',
+            'is_active' => 'nullable|boolean',
+        ]);
         $picUserIds = collect($request->input('pic_user_ids', []))->filter()->unique()->values();
-        $area = ZiArea::create(['code' => strtoupper($request->code), 'name' => $request->name, 'description' => $request->description, 'pic_user_id' => $picUserIds->first(), 'is_active' => $request->boolean('is_active', true)]);
+        $area = ZiArea::create([
+            'code' => strtoupper($request->code),
+            'name' => $request->name,
+            'description' => $request->description,
+            'group_type' => $request->group_type,
+            'pic_user_id' => $picUserIds->first(),
+            'is_active' => $request->boolean('is_active', true),
+        ]);
         $area->pics()->sync($picUserIds->all());
-        return redirect()->route('progress-zi.areas.index')->with('success', 'Area perubahan berhasil ditambahkan.');
+        return redirect()->route('progress-zi.areas.index')->with('success', 'Area ZI berhasil ditambahkan.');
     }
 
     public function updateArea(Request $request, ZiArea $ziArea)
     {
         $this->abortUnlessCanManageProgressZiMaster();
-        $request->validate(['code' => 'required|string|max:30|unique:zi_areas,code,' . $ziArea->id, 'name' => 'required|string|max:255', 'description' => 'nullable|string', 'pic_user_ids' => 'nullable|array', 'pic_user_ids.*' => 'exists:users,id', 'is_active' => 'nullable|boolean']);
+        $request->validate([
+            'code' => 'required|string|max:30|unique:zi_areas,code,' . $ziArea->id,
+            'name' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'group_type' => 'required|in:pengungkit,reform,hasil',
+            'pic_user_ids' => 'nullable|array',
+            'pic_user_ids.*' => 'exists:users,id',
+            'is_active' => 'nullable|boolean',
+        ]);
         $picUserIds = collect($request->input('pic_user_ids', []))->filter()->unique()->values();
-        $ziArea->update(['code' => strtoupper($request->code), 'name' => $request->name, 'description' => $request->description, 'pic_user_id' => $picUserIds->first(), 'is_active' => $request->boolean('is_active', true)]);
+        $ziArea->update([
+            'code' => strtoupper($request->code),
+            'name' => $request->name,
+            'description' => $request->description,
+            'group_type' => $request->group_type,
+            'pic_user_id' => $picUserIds->first(),
+            'is_active' => $request->boolean('is_active', true),
+        ]);
         $ziArea->pics()->sync($picUserIds->all());
-        return redirect()->route('progress-zi.areas.index')->with('success', 'Area perubahan berhasil diperbarui.');
+        return redirect()->route('progress-zi.areas.index')->with('success', 'Area ZI berhasil diperbarui.');
     }
 
     public function activities(Request $request)
@@ -100,6 +141,7 @@ class ProgressZiMasterController extends Controller
         $this->abortUnlessCanAccessProgressZi();
         if (!$this->progressZiModuleReady()) { return $this->progressZiSetupResponse(); }
 
+        $groupOptions = ZiArea::groupOptions();
         $periods = ZiPeriod::orderByDesc('year')->orderByDesc('is_active')->get();
         $selectedPeriod = $request->filled('period_id')
             ? ZiPeriod::find($request->period_id)
@@ -125,13 +167,20 @@ class ProgressZiMasterController extends Controller
             'activities.indicators',
             'activities.realizations.evidences',
             'activities.latestApproval',
-        ])->orderBy('code');
+        ])->orderByRaw("FIELD(group_type, 'pengungkit', 'reform', 'hasil')")
+            ->orderBy('code');
 
         if ($request->filled('area_id')) {
             $areasQuery->where('id', $request->area_id);
         }
 
         $areas = $areasQuery->get();
+        $groupedAreas = ZiArea::grouped($areas);
+        $selectedGroupType = $request->filled('group_type') && isset($groupOptions[$request->group_type])
+            ? $request->group_type
+            : collect(array_keys($groupOptions))->first(function ($groupType) use ($groupedAreas) {
+                return $groupedAreas->get($groupType, collect())->isNotEmpty();
+            });
 
         if (!auth()->user()->canManageProgressZiMasterData()) {
             $areas = $areas->filter(function ($area) {
@@ -143,6 +192,13 @@ class ProgressZiMasterController extends Controller
                     return auth()->user()->canManageProgressZiActivity($activity);
                 });
             })->values();
+            $groupedAreas = ZiArea::grouped($areas);
+
+            if ($selectedGroupType && $groupedAreas->get($selectedGroupType, collect())->isEmpty()) {
+                $selectedGroupType = collect(array_keys($groupOptions))->first(function ($groupType) use ($groupedAreas) {
+                    return $groupedAreas->get($groupType, collect())->isNotEmpty();
+                });
+            }
         }
 
         $subPointRecommendations = [];
@@ -163,18 +219,22 @@ class ProgressZiMasterController extends Controller
 
         return view('progress-zi.activities.index', [
             'areas' => $areas,
+            'groupedAreas' => $groupedAreas,
+            'visibleAreas' => $selectedGroupType ? $groupedAreas->get($selectedGroupType, collect()) : collect(),
+            'selectedGroupType' => $selectedGroupType,
+            'groupOptions' => $groupOptions,
             'periods' => $periods,
             'selectedPeriod' => $selectedPeriod,
-            'users' => User::orderBy('name')->get(),
+            'users' => User::ordered()->get(),
             'guidelineSubPoints' => $this->guidelineSubPointOptions(),
             'evidenceSourceOptions' => $evidenceSourceOptions,
             'kategoriSuratOptions' => $this->rapatDocumentService->getKategoriSuratLeafOptions(),
-            'meetingParticipants' => User::with(['unit', 'bidang', 'jabatan', 'roles'])->orderBy('hirarki')->orderBy('name')->get(),
+            'meetingParticipants' => User::with(['unit', 'bidang', 'jabatan', 'roles'])->ordered()->get(),
             'meetingApprovers' => User::whereHas('roles', function ($query) {
                 $query->whereIn('name', ['admin', 'approval', 'super_admin']);
-            })->with('jabatan')->orderBy('hirarki')->orderBy('name')->get(),
+            })->with('jabatan')->ordered()->get(),
             'subPointRecommendations' => $subPointRecommendations,
-            'filters' => $request->only(['period_id', 'area_id', 'status', 'pic_user_id']),
+            'filters' => $request->only(['period_id', 'area_id', 'status', 'pic_user_id', 'group_type']),
             'canManage' => auth()->user()->canManageProgressZiMasterData(),
         ]);
     }

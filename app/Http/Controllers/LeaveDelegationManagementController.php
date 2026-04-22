@@ -37,7 +37,7 @@ class LeaveDelegationManagementController extends Controller
         }
 
         $delegations = $query->orderByDesc('id')->paginate(15)->appends($request->query());
-        $users = User::orderBy('name')->get();
+        $users = User::ordered()->get();
         $filters = $request->only(['scope', 'search']);
 
         return view('cuti.master.delegations.index', compact('delegations', 'users', 'filters'));

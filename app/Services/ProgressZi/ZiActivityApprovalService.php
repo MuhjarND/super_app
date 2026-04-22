@@ -149,8 +149,7 @@ class ZiActivityApprovalService
         return User::whereHas('roles', function ($query) {
             $query->whereIn('name', ['approval', 'super_admin']);
         })
-            ->orderBy('hirarki')
-            ->orderBy('name')
+            ->ordered()
             ->first();
     }
 

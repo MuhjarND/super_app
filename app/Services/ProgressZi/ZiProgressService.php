@@ -144,16 +144,41 @@ class ZiProgressService
                 }
             },
             'activities.latestApproval',
-        ])->whereHas('guidelinePoints.subPoints')->get();
+        ])->whereHas('guidelinePoints.subPoints')
+            ->orderByRaw("FIELD(group_type, 'pengungkit', 'reform', 'hasil')")
+            ->orderBy('code')
+            ->get();
         $coverage = $this->buildSubPointCoverage($areas);
         $areaProgress = $areas->map(function ($area) use ($period) {
             return [
+                'group_type' => $area->group_type,
+                'group_label' => $area->group_label,
                 'name' => $area->name,
+                'code' => $area->code,
                 'score' => $this->calculateAreaScore($area, $period),
                 'pic' => $area->pic_names,
                 'coverage' => $this->buildSubPointCoverage(collect([$area])),
             ];
         })->sortByDesc('score')->values();
+        $groupAreaProgress = collect([
+            \App\ZiArea::GROUP_PENGUNGKIT => $areaProgress->where('group_type', \App\ZiArea::GROUP_PENGUNGKIT)->values(),
+            \App\ZiArea::GROUP_REFORM => $areaProgress->where('group_type', \App\ZiArea::GROUP_REFORM)->values(),
+            \App\ZiArea::GROUP_HASIL => $areaProgress->where('group_type', \App\ZiArea::GROUP_HASIL)->values(),
+        ]);
+        $groupSummary = $areas->groupBy('group_type')->map(function ($groupedAreas, $groupType) use ($period) {
+            $coverage = $this->buildSubPointCoverage($groupedAreas);
+
+            return [
+                'group_type' => $groupType,
+                'group_label' => optional($groupedAreas->first())->group_label ?: ucfirst((string) $groupType),
+                'area_count' => $groupedAreas->count(),
+                'sub_point_count' => $coverage['total'],
+                'sub_point_covered_count' => $coverage['covered'],
+                'score' => round($groupedAreas->avg(function ($area) use ($period) {
+                    return $this->calculateAreaScore($area, $period);
+                }), 1),
+            ];
+        });
         $overdueActivities = $activities->filter(function ($activity) { return $activity->target_end_date && $activity->target_end_date->lt(today()) && !in_array($activity->status, ['sudah_terlaksana', 'selesai'], true); })->sortBy('target_end_date')->values();
         $indicatorAttention = $indicators->filter(function ($indicator) { return in_array($indicator->status, ['belum_diisi', 'belum_terpenuhi', 'sebagian_terpenuhi', 'ditolak'], true); })->take(8)->values();
         $evidenceAttention = $evidences->filter(function ($evidence) { return in_array($evidence->status, ['belum_ada', 'terupload', 'terhubung', 'revisi', 'tidak_valid'], true); })->take(8)->values();
@@ -167,11 +192,39 @@ class ZiProgressService
                 'activity_count' => $activities->count(),
                 'indicator_count' => $indicators->count(),
                 'evidence_count' => $evidences->count(),
+                'group_count' => $groupSummary->count(),
                 'period_score' => round($periodScore, 1),
                 'overdue_count' => $overdueActivities->count(),
                 'indicator_attention_count' => $indicatorAttention->count(),
                 'evidence_attention_count' => $evidenceAttention->count()
             ],
+            'group_summary' => collect([
+                \App\ZiArea::GROUP_PENGUNGKIT => $groupSummary->get(\App\ZiArea::GROUP_PENGUNGKIT, [
+                    'group_type' => \App\ZiArea::GROUP_PENGUNGKIT,
+                    'group_label' => 'Pengungkit',
+                    'area_count' => 0,
+                    'sub_point_count' => 0,
+                    'sub_point_covered_count' => 0,
+                    'score' => 0,
+                ]),
+                \App\ZiArea::GROUP_REFORM => $groupSummary->get(\App\ZiArea::GROUP_REFORM, [
+                    'group_type' => \App\ZiArea::GROUP_REFORM,
+                    'group_label' => 'Reform',
+                    'area_count' => 0,
+                    'sub_point_count' => 0,
+                    'sub_point_covered_count' => 0,
+                    'score' => 0,
+                ]),
+                \App\ZiArea::GROUP_HASIL => $groupSummary->get(\App\ZiArea::GROUP_HASIL, [
+                    'group_type' => \App\ZiArea::GROUP_HASIL,
+                    'group_label' => 'Hasil',
+                    'area_count' => 0,
+                    'sub_point_count' => 0,
+                    'sub_point_covered_count' => 0,
+                    'score' => 0,
+                ]),
+            ]),
+            'group_area_progress' => $groupAreaProgress,
             'area_progress' => $areaProgress,
             'overdue_activities' => $overdueActivities,
             'indicator_attention' => $indicatorAttention,

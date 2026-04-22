@@ -313,12 +313,12 @@
             <form method="POST" action="{{ route('login') }}">
                 @csrf
                 <div class="form-group">
-                    <label for="email">Email</label>
+                    <label for="login">Email atau Username</label>
                     <div class="input-shell">
-                        <i class="fas fa-envelope"></i>
-                        <input id="email" type="email" class="form-control" name="email" value="{{ old('email') }}" placeholder="Masukkan email Anda" required autofocus>
+                        <i class="fas fa-user"></i>
+                        <input id="login" type="text" class="form-control" name="login" value="{{ old('login') }}" placeholder="Masukkan email atau username" required autofocus>
                     </div>
-                    @error('email')
+                    @error('login')
                         <div class="error-msg">{{ $message }}</div>
                     @enderror
                 </div>

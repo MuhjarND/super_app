@@ -56,7 +56,7 @@ class UserManagementController extends Controller
             $query->where('bidang_id', $request->bidang_id);
         }
 
-        $users = $query->orderBy('name')->paginate(15)->appends($request->query());
+        $users = $query->ordered()->paginate(15)->appends($request->query());
         $roles = Role::orderBy('display_name')->get();
         $jabatans = Jabatan::with('unit')->orderBy('nama')->get();
         $units = Unit::orderBy('nama')->get();
