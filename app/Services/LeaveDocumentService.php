@@ -9,9 +9,12 @@ use App\LeaveType;
 use App\KlasifikasiKode;
 use App\SuratKeluar;
 use Barryvdh\DomPDF\Facade as PDF;
+use Carbon\Carbon;
+use DateTimeInterface;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\URL;
+use Illuminate\Support\Optional;
 use Illuminate\Support\Str;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
 use setasign\Fpdi\Fpdi;
@@ -238,7 +241,7 @@ class LeaveDocumentService
             'ppkBarcode' => $this->makeApprovalBarcode($leaveRequest, $ppk),
             'annualLeaveRows' => $this->buildAnnualLeaveRows($leaveRequest),
             'attachmentNames' => $leaveRequest->documents->pluck('original_name')->filter()->values(),
-            'workPeriodText' => $this->buildWorkPeriodText(optional(optional($leaveRequest->user)->tmt_pns), $leaveRequest->start_date),
+            'workPeriodText' => $this->buildWorkPeriodText(optional($leaveRequest->user)->tmt_pns, $leaveRequest->start_date),
         ];
     }
 
@@ -342,12 +345,15 @@ class LeaveDocumentService
 
     protected function buildWorkPeriodText($tmtPns, $referenceDate)
     {
-        if (!$tmtPns || !$referenceDate) {
+        $start = $this->normalizeDate($tmtPns);
+        $end = $this->normalizeDate($referenceDate);
+
+        if (!$start || !$end) {
             return '-';
         }
 
-        $start = $tmtPns->copy()->startOfDay();
-        $end = $referenceDate->copy()->startOfDay();
+        $start = $start->startOfDay();
+        $end = $end->startOfDay();
 
         if ($start->gt($end)) {
             return '-';
@@ -358,6 +364,27 @@ class LeaveDocumentService
         $months = $shifted->diffInMonths($end);
 
         return sprintf('%d tahun %02d bulan', $years, $months);
+    }
+
+    protected function normalizeDate($value)
+    {
+        if ($value instanceof Optional) {
+            $value = $value->toDateString() ?: $value->toDateTimeString() ?: null;
+        }
+
+        if ($value instanceof Carbon) {
+            return $value->copy();
+        }
+
+        if ($value instanceof DateTimeInterface) {
+            return Carbon::instance($value);
+        }
+
+        if ($value === null || $value === '') {
+            return null;
+        }
+
+        return Carbon::parse($value);
     }
 
     protected function nextLetterSequence()

@@ -8,6 +8,8 @@ use App\LeaveRequest;
 use App\LeaveType;
 use App\User;
 use Carbon\Carbon;
+use DateTimeInterface;
+use Illuminate\Support\Optional;
 use Illuminate\Validation\ValidationException;
 
 class LeaveValidationService
@@ -46,8 +48,15 @@ class LeaveValidationService
 
     public function countWorkingDays($startDate, $endDate)
     {
-        $start = Carbon::parse($startDate)->startOfDay();
-        $end = Carbon::parse($endDate)->startOfDay();
+        $start = $this->normalizeDate($startDate);
+        $end = $this->normalizeDate($endDate);
+
+        if (!$start || !$end) {
+            throw ValidationException::withMessages(['start_date' => 'Tanggal mulai dan selesai cuti wajib diisi.']);
+        }
+
+        $start = $start->startOfDay();
+        $end = $end->startOfDay();
         $days = 0;
         while ($start->lte($end)) {
             if (!$start->isWeekend() && !$this->isHoliday($start)) {
@@ -64,7 +73,14 @@ class LeaveValidationService
         if ($yearsRequired < 1 || empty($user->tmt_pns)) {
             return;
         }
-        if (Carbon::parse($user->tmt_pns)->diffInYears(Carbon::parse($startDate)) < $yearsRequired) {
+
+        $tmtPns = $this->normalizeDate($user->tmt_pns);
+        $start = $this->normalizeDate($startDate);
+        if (!$tmtPns || !$start) {
+            return;
+        }
+
+        if ($tmtPns->diffInYears($start) < $yearsRequired) {
             throw ValidationException::withMessages(['start_date' => 'Masa kerja belum memenuhi syarat untuk jenis cuti ini.']);
         }
     }
@@ -74,7 +90,12 @@ class LeaveValidationService
         if (!$leaveType->requires_balance) {
             return;
         }
-        $balance = $this->balanceService->getBalanceSnapshot($user, $leaveType, Carbon::parse($startDate)->year);
+        $start = $this->normalizeDate($startDate);
+        if (!$start) {
+            throw ValidationException::withMessages(['start_date' => 'Tanggal mulai cuti wajib diisi.']);
+        }
+
+        $balance = $this->balanceService->getBalanceSnapshot($user, $leaveType, $start->year);
         if (($balance['remaining_balance'] ?? 0) < $requestedDays) {
             throw ValidationException::withMessages(['start_date' => 'Saldo cuti tidak mencukupi.']);
         }
@@ -149,5 +170,26 @@ class LeaveValidationService
     {
         $policy = LeavePolicy::where('leave_type_id', $leaveType->id)->where('key', $key)->where('is_active', true)->latest('id')->first();
         return $policy ? data_get($policy->value_json, 'value', $default) : $default;
+    }
+
+    protected function normalizeDate($value)
+    {
+        if ($value instanceof Optional) {
+            $value = $value->toDateString() ?: $value->toDateTimeString() ?: null;
+        }
+
+        if ($value instanceof Carbon) {
+            return $value->copy();
+        }
+
+        if ($value instanceof DateTimeInterface) {
+            return Carbon::instance($value);
+        }
+
+        if ($value === null || $value === '') {
+            return null;
+        }
+
+        return Carbon::parse($value);
     }
 }

@@ -3,7 +3,9 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Verifikasi 2 Faktor | PTA Papua Barat</title>
+    <title>Verifikasi 2 Faktor | SIMANTAP</title>
+    <link rel="icon" type="image/png" href="{{ asset('logo_app.png') }}">
+    <link rel="shortcut icon" href="{{ asset('logo_app.png') }}">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         body{margin:0;min-height:100vh;font-family:'Inter',sans-serif;background:linear-gradient(180deg,#f8fafc 0%,#eef2ff 55%,#f5f3ff 100%);display:flex;align-items:center;justify-content:center;padding:20px;color:#0f172a}

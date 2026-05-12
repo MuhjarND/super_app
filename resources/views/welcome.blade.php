@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="utf-8">
@@ -816,7 +816,7 @@
         <div class="container site-header-inner">
             <a href="{{ url('/') }}" class="brand">
                 <div class="brand-mark">
-                    <img src="{{ asset('logo_qr.png') }}" alt="Logo PTA Papua Barat">
+                    <img src="{{ asset('logo_app.png') }}" alt="Logo Sistem Informasi Terpadu PTA Papua Barat">
                 </div>
                 <div class="brand-text">
                     <strong>Sistem Informasi PTA Papua Barat</strong>
@@ -838,10 +838,10 @@
                 <section class="hero-card">
                     <div class="eyebrow"><i class="fas fa-landmark"></i>PTA Papua Barat</div>
                     <div class="hero-brand-strip">
-                        <img src="{{ asset('logo_qr.png') }}" alt="Logo Resmi PTA Papua Barat">
+                        <img src="{{ asset('logo_app.png') }}" alt="Logo Resmi PTA Papua Barat">
                         <div>
                             <strong>Pengadilan Tinggi Agama Papua Barat</strong>
-                            <span>Sistem informasi internal untuk persuratan, rapat, layanan kepegawaian, dan rekapan Zona Integritas.</span>
+                            <span>Sistem informasi terpadu untuk persuratan, rapat, layanan kepegawaian, dan rekapan Zona Integritas.</span>
                         </div>
                     </div>
                     <h1 class="hero-title">Satu pintu kerja digital untuk <span>persuratan</span>, <span>rapat</span>, <span>cuti</span>, dan <span>Zona Integritas</span>.</h1>
@@ -863,7 +863,7 @@
                             <span>Pusat approval untuk tindak lanjut dokumen, review, dan persetujuan pimpinan.</span>
                         </div>
                         <div class="stat-card">
-                            <strong>∞</strong>
+                            <strong>âˆž</strong>
                             <span>Siap dikembangkan untuk template surat, integrasi eviden, dan dashboard lintas unit.</span>
                         </div>
                     </div>
@@ -1125,8 +1125,9 @@
     <footer class="site-footer">
         <div class="container site-footer-inner">
             <div>Pengadilan Tinggi Agama Papua Barat</div>
-            <div>Sistem Informasi Internal • {{ now()->format('Y') }}</div>
+            <div>Sistem Informasi Terpadu &bull; {{ now()->format('Y') }}</div>
         </div>
     </footer>
 </body>
 </html>
+

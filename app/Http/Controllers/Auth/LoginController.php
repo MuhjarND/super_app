@@ -53,16 +53,19 @@ class LoginController extends Controller
         $request->validate([
             'login' => 'required|string',
             'password' => 'required|string',
+        ], [], [
+            'login' => 'NIP pegawai',
+            'password' => 'password',
         ]);
     }
 
     protected function credentials(Request $request)
     {
-        $login = trim((string) $request->input('login'));
-        $field = filter_var($login, FILTER_VALIDATE_EMAIL) ? 'email' : 'username';
+        $nip = preg_replace('/\D+/', '', (string) $request->input('login'));
+        $nip = $nip !== '' ? $nip : trim((string) $request->input('login'));
 
         return [
-            $field => $field === 'email' ? strtolower($login) : $login,
+            'nip' => $nip,
             'password' => $request->input('password'),
         ];
     }

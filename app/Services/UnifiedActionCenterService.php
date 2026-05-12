@@ -15,7 +15,9 @@ use App\User;
 use App\ZiActivity;
 use App\ZiActivityApproval;
 use Carbon\Carbon;
+use DateTimeInterface;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Optional;
 use Illuminate\Support\Facades\Schema;
 
 class UnifiedActionCenterService
@@ -80,10 +82,7 @@ class UnifiedActionCenterService
 
     protected function normalizeItem(array $item)
     {
-        $targetAt = $item['target_at'] ?? null;
-        $targetAt = $targetAt instanceof Carbon
-            ? $targetAt->copy()->timezone('Asia/Jayapura')
-            : ($targetAt ? Carbon::parse($targetAt, 'Asia/Jayapura') : null);
+        $targetAt = $this->normalizeDateTime($item['target_at'] ?? null);
 
         $statusMap = [
             'waiting' => 'Menunggu Aksi',
@@ -148,6 +147,27 @@ class UnifiedActionCenterService
             'unit_label' => $item['unit_label'] ?? '-',
             'assignee_name' => $item['assignee_name'] ?? '-',
         ]);
+    }
+
+    protected function normalizeDateTime($value)
+    {
+        if ($value instanceof Carbon) {
+            return $value->copy()->timezone('Asia/Jayapura');
+        }
+
+        if ($value instanceof DateTimeInterface) {
+            return Carbon::instance($value)->timezone('Asia/Jayapura');
+        }
+
+        if ($value instanceof Optional) {
+            $value = $value->toDateTimeString() ?: $value->toDateString() ?: null;
+        }
+
+        if ($value === null || $value === '') {
+            return null;
+        }
+
+        return Carbon::parse($value, 'Asia/Jayapura');
     }
 
     protected function applyBaseFilters(Collection $items, array $filters)

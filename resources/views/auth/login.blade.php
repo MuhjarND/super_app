@@ -3,38 +3,38 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Login | PTA Papua Barat</title>
+    <title>Login | SIMANTAP</title>
+    <link rel="icon" type="image/png" href="{{ asset('logo_app.png') }}">
+    <link rel="shortcut icon" href="{{ asset('logo_app.png') }}">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <style>
         :root {
-            --navy-950: #f8fafc;
-            --navy-900: #4f46e5;
-            --navy-800: #6366f1;
-            --blue-500: #4f46e5;
-            --gold-500: #8b5cf6;
-            --surface: rgba(255, 255, 255, 0.98);
-            --line: rgba(15, 38, 64, 0.12);
-            --text: #102132;
+            --brand: #5b21b6;
+            --brand-dark: #3b0764;
+            --brand-mid: #6d28d9;
+            --brand-soft: #ede9fe;
+            --line: #dbe4f0;
+            --text: #111827;
             --muted: #64748b;
             --danger: #dc2626;
         }
 
-        * { box-sizing: border-box; }
+        * {
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            min-height: 100%;
+        }
 
         body {
             margin: 0;
             min-height: 100vh;
             font-family: 'Inter', sans-serif;
-            color: #0f172a;
-            background:
-                radial-gradient(circle at top left, rgba(139, 92, 246, 0.08), transparent 30%),
-                radial-gradient(circle at bottom right, rgba(99, 102, 241, 0.08), transparent 30%),
-                linear-gradient(180deg, #f8fafc 0%, #eef2ff 50%, #f5f3ff 100%);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 24px;
+            color: var(--text);
+            background: #ffffff;
         }
 
         a {
@@ -49,7 +49,7 @@
             display: none;
             align-items: center;
             justify-content: center;
-            background: rgba(255, 255, 255, 0.6);
+            background: rgba(255, 255, 255, 0.76);
             backdrop-filter: blur(4px);
         }
 
@@ -60,10 +60,10 @@
         .login-loader-card {
             width: 250px;
             padding: 22px;
-            border-radius: 20px;
-            background: rgba(255,255,255,0.98);
+            border-radius: 18px;
+            background: rgba(255, 255, 255, 0.98);
             text-align: center;
-            box-shadow: 0 24px 50px rgba(15, 23, 42, 0.24);
+            box-shadow: 0 24px 50px rgba(15, 23, 42, 0.18);
         }
 
         .login-loader-spinner {
@@ -71,213 +71,298 @@
             height: 48px;
             margin: 0 auto 12px;
             border-radius: 999px;
-            border: 4px solid rgba(79, 70, 229, 0.16);
-            border-top-color: #4f46e5;
+            border: 4px solid rgba(91, 33, 182, 0.16);
+            border-top-color: var(--brand);
             animation: spin .8s linear infinite;
         }
 
         @keyframes spin {
-            to { transform: rotate(360deg); }
+            to {
+                transform: rotate(360deg);
+            }
         }
 
-        .login-shell {
-            width: min(100%, 560px);
+        .login-page {
+            min-height: 100vh;
+            display: grid;
+            grid-template-columns: minmax(0, 58vw) minmax(560px, 42vw);
+            background: #ffffff;
+        }
+
+        .brand-side {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 48px;
+            color: #ffffff;
             text-align: center;
+            background:
+                radial-gradient(circle at 44% 48%, rgba(167, 139, 250, 0.34), transparent 0 170px),
+                radial-gradient(circle at 50% 60%, rgba(255, 255, 255, 0.08), transparent 0 360px),
+                linear-gradient(135deg, var(--brand-dark) 0%, var(--brand) 52%, var(--brand-mid) 100%);
         }
 
-        .brand-block {
-            margin-bottom: 28px;
+        .brand-content {
+            width: min(100%, 560px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
 
         .brand-logo {
-            width: 86px;
-            height: 86px;
-            margin: 0 auto 18px;
-            overflow: hidden;
+            width: 126px;
+            height: 126px;
+            margin-bottom: 28px;
         }
 
         .brand-logo img {
             width: 100%;
             height: 100%;
             object-fit: contain;
-            padding: 12px;
             display: block;
         }
 
         .brand-title {
-            margin: 0 0 8px;
-            font-size: 2.2rem;
+            margin: 0;
+            color: #ffffff;
+            font-size: 2.3rem;
+            line-height: 1.1;
             font-weight: 800;
-            letter-spacing: -0.05em;
+            letter-spacing: 0;
         }
 
         .brand-subtitle {
+            margin: 14px 0 0;
+            color: rgba(255, 255, 255, 0.82);
+            font-size: 1.05rem;
+            line-height: 1.55;
+            font-weight: 500;
+        }
+
+        .brand-divider {
+            width: 76px;
+            height: 4px;
+            margin: 28px auto 24px;
+            border-radius: 999px;
+            background: #ffffff;
+            opacity: .72;
+        }
+
+        .brand-description {
             margin: 0;
-            color: #64748b;
-            font-size: 1rem;
-            line-height: 1.6;
+            max-width: 430px;
+            color: rgba(255, 255, 255, 0.72);
+            font-size: .98rem;
+            line-height: 1.65;
+            font-weight: 500;
         }
 
-        .login-card {
-            background: var(--surface);
-            border: 1px solid #e0e7ff;
-            border-radius: 28px;
-            padding: 28px 26px 24px;
-            box-shadow: 0 20px 50px rgba(99, 102, 241, 0.08);
-            text-align: left;
-            max-width: 500px;
-            margin: 0 auto;
+        .form-side {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 48px 72px;
+            background: #ffffff;
         }
 
-        .login-card h1 {
-            margin: 0 0 24px;
-            text-align: center;
+        .form-wrap {
+            width: min(100%, 600px);
+        }
+
+        .form-heading {
+            margin-bottom: 34px;
+        }
+
+        .form-heading h1 {
+            margin: 0 0 8px;
+            color: var(--brand-dark);
             font-size: 1.72rem;
-            line-height: 1;
-            letter-spacing: -0.05em;
-            color: #0f172a;
+            line-height: 1.15;
+            font-weight: 800;
+            letter-spacing: 0;
+        }
+
+        .form-heading p {
+            margin: 0;
+            color: var(--muted);
+            font-size: .96rem;
+            line-height: 1.55;
         }
 
         .alert-danger {
             margin-bottom: 18px;
-            padding: 14px 16px;
-            border-radius: 16px;
+            padding: 13px 15px;
+            border-radius: 8px;
             background: #fff1f2;
             border: 1px solid #fecdd3;
             color: #be123c;
             font-size: .86rem;
-            line-height: 1.6;
+            line-height: 1.55;
         }
 
         .form-group {
-            margin-bottom: 20px;
+            margin-bottom: 24px;
         }
 
         .form-group label {
             display: block;
-            margin-bottom: 8px;
+            margin-bottom: 9px;
+            color: #1f2937;
             font-size: .9rem;
-            font-weight: 700;
-            color: var(--text);
+            font-weight: 800;
         }
 
-        .input-shell {
-            position: relative;
+        .input-group {
+            display: grid;
+            grid-template-columns: 58px 1fr;
+            min-height: 58px;
+            border: 1.5px solid var(--line);
+            border-radius: 8px;
+            background: #ffffff;
+            overflow: hidden;
+            transition: border-color .18s ease, box-shadow .18s ease;
         }
 
-        .input-shell i {
-            position: absolute;
-            left: 16px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #94a3b8;
-            font-size: .95rem;
+        .input-group:focus-within {
+            border-color: var(--brand);
+            box-shadow: 0 0 0 4px rgba(91, 33, 182, 0.1);
+        }
+
+        .input-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #f8fafc;
+            border-right: 1px solid var(--line);
+            color: #9ca3af;
+            font-size: 1rem;
         }
 
         .form-control {
             width: 100%;
-            min-height: 54px;
-            padding: 14px 16px 14px 46px;
-            border-radius: 14px;
-            border: 1.5px solid #dbe4f0;
-            background: #fff;
+            min-width: 0;
+            border: 0;
+            outline: none;
+            padding: 14px 16px;
             color: var(--text);
             font-family: 'Inter', sans-serif;
-            font-size: .98rem;
-            outline: none;
-            transition: border-color .18s ease, box-shadow .18s ease;
+            font-size: 1rem;
+            background: transparent;
         }
 
-        .form-control:focus {
-            border-color: var(--blue-500);
-            box-shadow: 0 0 0 4px rgba(44, 107, 237, 0.12);
+        .form-control::placeholder {
+            color: #9ca3af;
         }
 
         .error-msg {
-            margin-top: 6px;
+            margin-top: 7px;
             color: var(--danger);
             font-size: .82rem;
         }
 
         .remember-row {
-            margin: 4px 0 22px;
+            margin: 4px 0 30px;
             display: flex;
             align-items: center;
             justify-content: space-between;
             gap: 12px;
-            font-size: .84rem;
-            color: var(--muted);
+            color: #4b5563;
+            font-size: .9rem;
         }
 
         .remember-check {
             display: inline-flex;
             align-items: center;
             gap: 10px;
-            color: #475569;
-            font-weight: 600;
+            font-weight: 500;
         }
 
         .remember-check input {
-            width: 16px;
-            height: 16px;
+            width: 18px;
+            height: 18px;
+            accent-color: var(--brand);
+        }
+
+        .forgot-link {
+            color: var(--brand);
+            font-weight: 800;
         }
 
         .btn-login {
             width: 100%;
             min-height: 56px;
-            border: none;
-            border-radius: 14px;
-            background: linear-gradient(135deg, #4f46e5, #6366f1);
-            color: #fff;
+            border: 0;
+            border-radius: 8px;
+            background: linear-gradient(135deg, var(--brand), var(--brand-mid));
+            color: #ffffff;
             font-family: 'Inter', sans-serif;
             font-size: 1rem;
             font-weight: 800;
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            gap: 10px;
+            gap: 9px;
             cursor: pointer;
-            box-shadow: 0 8px 24px rgba(79, 70, 229, 0.25);
+            box-shadow: 0 14px 26px rgba(91, 33, 182, 0.24);
             transition: transform .18s ease, box-shadow .18s ease;
         }
 
         .btn-login:hover {
             transform: translateY(-1px);
-            box-shadow: 0 12px 28px rgba(79, 70, 229, 0.3);
+            box-shadow: 0 18px 34px rgba(91, 33, 182, 0.3);
         }
 
         .login-footer {
-            margin-top: 18px;
-            text-align: center;
+            margin-top: 22px;
             color: #94a3b8;
-            font-size: .84rem;
+            text-align: center;
+            font-size: .82rem;
+            line-height: 1.55;
         }
 
-        @media (max-width: 640px) {
-            body {
-                padding: 16px;
+        @media (max-width: 980px) {
+            .login-page {
+                grid-template-columns: 1fr;
+            }
+
+            .brand-side,
+            .form-side {
+                min-height: auto;
+            }
+
+            .brand-side {
+                padding: 34px 22px 30px;
+            }
+
+            .brand-logo {
+                width: 92px;
+                height: 92px;
+                margin-bottom: 18px;
             }
 
             .brand-title {
-                font-size: 1.85rem;
+                font-size: 1.9rem;
             }
 
-            .brand-subtitle {
-                font-size: .94rem;
+            .brand-divider {
+                margin: 20px auto 16px;
             }
 
-            .login-card {
-                padding: 24px 18px 20px;
-                border-radius: 24px;
+            .form-side {
+                padding: 34px 22px 38px;
             }
+        }
 
-            .login-card h1 {
-                font-size: 1.7rem;
+        @media (max-width: 520px) {
+            .brand-description {
+                display: none;
             }
 
             .remember-row {
-                flex-direction: column;
                 align-items: flex-start;
+                flex-direction: column;
             }
         }
     </style>
@@ -291,65 +376,81 @@
         </div>
     </div>
 
-    <div class="login-shell">
-        <div class="brand-block">
-            <div class="brand-logo">
-                <img src="{{ asset('logo_qr.png') }}" alt="Logo PTA Papua Barat">
+    <main class="login-page">
+        <section class="brand-side">
+            <div class="brand-content">
+                <div class="brand-logo">
+                    <img src="{{ asset('logo_app.png') }}" alt="Logo SIMANTAP">
+                </div>
+                <h1 class="brand-title">SIMANTAP</h1>
+                <p class="brand-subtitle">Sistem Manajemen Terpadu PTA Papua Barat</p>
+                <div class="brand-divider"></div>
+                <p class="brand-description">Portal kerja terpadu untuk persuratan, rapat, cuti, Zona Integritas, perawatan aset, dan tindak lanjut internal.</p>
             </div>
-            <h1 class="brand-title">PTA Papua Barat</h1>
-            <p class="brand-subtitle">Sistem Informasi Internal</p>
-        </div>
+        </section>
 
-        <div class="login-card">
-            <h1>Masuk ke Akun Anda</h1>
-
-            @if($errors->any())
-                <div class="alert-danger">
-                    <i class="fas fa-exclamation-circle"></i>
-                    {{ $errors->first() }}
+        <section class="form-side">
+            <div class="form-wrap">
+                <div class="form-heading">
+                    <h1>Selamat Datang</h1>
+                    <p>Masuk ke akun Anda untuk melanjutkan.</p>
                 </div>
-            @endif
 
-            <form method="POST" action="{{ route('login') }}">
-                @csrf
-                <div class="form-group">
-                    <label for="login">Email atau Username</label>
-                    <div class="input-shell">
-                        <i class="fas fa-user"></i>
-                        <input id="login" type="text" class="form-control" name="login" value="{{ old('login') }}" placeholder="Masukkan email atau username" required autofocus>
+                @if($errors->any())
+                    <div class="alert-danger">
+                        <i class="fas fa-exclamation-circle"></i>
+                        {{ $errors->first() }}
                     </div>
-                    @error('login')
-                        <div class="error-msg">{{ $message }}</div>
-                    @enderror
-                </div>
+                @endif
 
-                <div class="form-group">
-                    <label for="password">Password</label>
-                    <div class="input-shell">
-                        <i class="fas fa-lock"></i>
-                        <input id="password" type="password" class="form-control" name="password" placeholder="Masukkan password" required>
+                <form method="POST" action="{{ route('login') }}">
+                    @csrf
+                    <div class="form-group">
+                        <label for="login">NIP</label>
+                        <div class="input-group">
+                            <div class="input-icon">
+                                <i class="fas fa-id-card"></i>
+                            </div>
+                            <input id="login" type="text" inputmode="numeric" autocomplete="username" class="form-control" name="login" value="{{ old('login') }}" placeholder="Masukkan NIP Anda" required autofocus>
+                        </div>
+                        @error('login')
+                            <div class="error-msg">{{ $message }}</div>
+                        @enderror
                     </div>
-                    @error('password')
-                        <div class="error-msg">{{ $message }}</div>
-                    @enderror
-                </div>
 
-                <div class="remember-row">
-                    <label class="remember-check" for="remember">
-                        <input type="checkbox" name="remember" id="remember" {{ old('remember') ? 'checked' : '' }}>
-                        <span>Ingat saya</span>
-                    </label>
-                </div>
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <div class="input-group">
+                            <div class="input-icon">
+                                <i class="fas fa-lock"></i>
+                            </div>
+                            <input id="password" type="password" class="form-control" name="password" placeholder="Masukkan password" required>
+                        </div>
+                        @error('password')
+                            <div class="error-msg">{{ $message }}</div>
+                        @enderror
+                    </div>
 
-                <button type="submit" class="btn-login">
-                    <i class="fas fa-sign-in-alt"></i>
-                    <span>Masuk</span>
-                </button>
-            </form>
-        </div>
+                    <div class="remember-row">
+                        <label class="remember-check" for="remember">
+                            <input type="checkbox" name="remember" id="remember" {{ old('remember') ? 'checked' : '' }}>
+                            <span>Ingat Saya</span>
+                        </label>
+                        @if (Route::has('password.request'))
+                            <a class="forgot-link" href="{{ route('password.request') }}">Lupa Password?</a>
+                        @endif
+                    </div>
 
-        <div class="login-footer">Hak Cipta &copy; PTA Papua Barat - {{ now()->format('Y') }}</div>
-    </div>
+                    <button type="submit" class="btn-login">
+                        <i class="fas fa-sign-in-alt"></i>
+                        <span>Masuk</span>
+                    </button>
+                </form>
+
+                <div class="login-footer">Akses dilindungi untuk kebutuhan kerja internal PTA Papua Barat.</div>
+            </div>
+        </section>
+    </main>
 
     <script>
         function toggleLoginLoader(show) {
@@ -359,7 +460,9 @@
             loader.setAttribute('aria-hidden', show ? 'false' : 'true');
         }
 
-        document.querySelector('form').addEventListener('submit', function () {
+        document.addEventListener('submit', function (event) {
+            const form = event.target;
+            if (!form || form.tagName !== 'FORM') return;
             toggleLoginLoader(true);
         });
 
