@@ -199,11 +199,16 @@ class VotingController extends Controller
         abort_unless(auth()->user()->canManageVoting(), 403);
 
         $voting->load(['items.candidates.votes', 'participantPivots.user']);
+        $verifier = app(\App\Services\PdfVerificationService::class);
+        $verification = $verifier->begin('rapat', 'hasil_voting', $voting->id, 'Hasil Voting - ' . ($voting->judul ?: $voting->id), [], [
+            'voting_id' => $voting->id,
+        ]);
+        $pdfVerification = $verifier->viewData($verification);
 
-        $pdf = PDF::loadView('rapat.voting.pdf.results', compact('voting'))
+        $pdf = PDF::loadView('rapat.voting.pdf.results', compact('voting', 'pdfVerification'))
             ->setPaper('a4', 'portrait');
 
-        return $pdf->stream('hasil-voting-' . $voting->id . '.pdf');
+        return $verifier->response($pdf->output(), $verification, 'hasil-voting-' . $voting->id . '.pdf');
     }
 
     public function sendWhatsapp(Voting $voting)

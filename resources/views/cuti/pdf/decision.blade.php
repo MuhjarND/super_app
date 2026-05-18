@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="id">
 <head>
 <meta charset="utf-8">
@@ -26,7 +26,7 @@ body { margin: 0; }
 .address-cell { vertical-align: top; height: 56px; }
 .signature-cell { vertical-align: top; }
 .signature-inner { text-align: center; font-size: 7.72px; line-height: 1.035; }
-.signature-qr { height: 60px; margin: 1px auto 1px auto; display: block; }
+.signature-pad-img { height: 42px; max-width: 115px; margin: 1px auto 1px auto; display: block; object-fit: contain; }
 .signature-name { font-weight: bold; }
 .blank-area { height: 46px; }
 .decision-label { text-align: center; font-size: 7.72px; text-transform: uppercase; }
@@ -39,6 +39,7 @@ body { margin: 0; }
 </style>
 </head>
 <body>
+@include('partials.pdf-verification-badge', ['pdfVerification' => $pdfVerification ?? null])
 @php
     $statusAtasan = optional($formData['atasan'])->status;
     $statusPpk = optional($formData['ppk'])->status;
@@ -80,21 +81,21 @@ body { margin: 0; }
         <tr class="section-head"><td colspan="4">II. &nbsp; JENIS CUTI YANG DIAMBIL **</td></tr>
         <tr>
             <td class="type-label">1. CUTI TAHUNAN</td>
-            <td class="type-mark"><span class="checkbox">{{ $formData['selectedTypeCode'] === 'CT' ? '√' : '' }}</span></td>
+            <td class="type-mark"><span class="checkbox">{{ $formData['selectedTypeCode'] === 'CT' ? 'v' : '' }}</span></td>
             <td class="type-label">2. CUTI BESAR</td>
-            <td class="type-mark"><span class="checkbox">{{ $formData['selectedTypeCode'] === 'CB' ? '√' : '' }}</span></td>
+            <td class="type-mark"><span class="checkbox">{{ $formData['selectedTypeCode'] === 'CB' ? 'v' : '' }}</span></td>
         </tr>
         <tr>
             <td class="type-label">3. CUTI SAKIT</td>
-            <td class="type-mark"><span class="checkbox">{{ $formData['selectedTypeCode'] === 'CS' ? '√' : '' }}</span></td>
+            <td class="type-mark"><span class="checkbox">{{ $formData['selectedTypeCode'] === 'CS' ? 'v' : '' }}</span></td>
             <td class="type-label">4. CUTI MELAHIRKAN</td>
-            <td class="type-mark"><span class="checkbox">{{ $formData['selectedTypeCode'] === 'CM' ? '√' : '' }}</span></td>
+            <td class="type-mark"><span class="checkbox">{{ $formData['selectedTypeCode'] === 'CM' ? 'v' : '' }}</span></td>
         </tr>
         <tr>
             <td class="type-label">5. CUTI KARENA ALASAN PENTING</td>
-            <td class="type-mark"><span class="checkbox">{{ $formData['selectedTypeCode'] === 'CAP' ? '√' : '' }}</span></td>
+            <td class="type-mark"><span class="checkbox">{{ $formData['selectedTypeCode'] === 'CAP' ? 'v' : '' }}</span></td>
             <td class="type-label">6. CUTI DI LUAR TANGGUNGAN NEGARA</td>
-            <td class="type-mark"><span class="checkbox">{{ $formData['selectedTypeCode'] === 'CLTN' ? '√' : '' }}</span></td>
+            <td class="type-mark"><span class="checkbox">{{ $formData['selectedTypeCode'] === 'CLTN' ? 'v' : '' }}</span></td>
         </tr>
     </table>
 
@@ -172,7 +173,7 @@ body { margin: 0; }
             <td colspan="2" class="signature-cell" style="height:37px;">
                 <div class="signature-inner">
                     <div style="font-size:7px; margin-bottom:1px;">Hormat Saya,</div>
-                    @if(!empty($formData['pemohonBarcode']))<img class="signature-qr" src="{{ $formData['pemohonBarcode'] }}">@endif
+                    @if(!empty($formData['pemohonSignature']))<img class="signature-pad-img" src="{{ $formData['pemohonSignature'] }}">@endif
                     <div class="signature-name">({{ optional($leaveRequest->user)->name ?: '-' }})</div>
                     <div>NIP. {{ optional($leaveRequest->user)->nip ?: '-' }}</div>
                 </div>
@@ -189,16 +190,16 @@ body { margin: 0; }
             <td class="decision-label" width="41%">TIDAK DISETUJUI ****</td>
         </tr>
         <tr>
-            <td class="decision-mark">{{ $statusAtasan === 'approved' ? '√' : '' }}</td>
+            <td class="decision-mark">{{ $statusAtasan === 'approved' ? 'v' : '' }}</td>
             <td class="decision-mark"></td>
             <td class="decision-mark"></td>
-            <td class="decision-mark">{{ $statusAtasan === 'rejected' ? '√' : '' }}</td>
+            <td class="decision-mark">{{ $statusAtasan === 'rejected' ? 'v' : '' }}</td>
         </tr>
         <tr>
             <td colspan="3" class="blank-area"></td>
             <td class="signature-cell">
                 <div class="signature-inner">
-                    @if(!empty($formData['atasanBarcode']))<img class="signature-qr" src="{{ $formData['atasanBarcode'] }}">@endif
+                    @if(!empty($formData['atasanSignature']))<img class="signature-pad-img" src="{{ $formData['atasanSignature'] }}">@endif
                     <div>{{ optional(optional(optional($formData['atasan'])->approver)->jabatan)->nama ?: optional(optional($leaveRequest->user)->atasanLangsung)->jabatan_keterangan ?: '-' }}</div>
                     <div class="signature-name">({{ optional(optional($formData['atasan'])->approver)->name ?: optional(optional($leaveRequest->user)->atasanLangsung)->name ?: '-' }})</div>
                     <div>NIP. {{ optional(optional($formData['atasan'])->approver)->nip ?: optional(optional($leaveRequest->user)->atasanLangsung)->nip ?: '-' }}</div>
@@ -216,16 +217,16 @@ body { margin: 0; }
             <td class="decision-label" width="41%">TIDAK DISETUJUI ****</td>
         </tr>
         <tr>
-            <td class="decision-mark">{{ $statusPpk === 'approved' ? '√' : '' }}</td>
+            <td class="decision-mark">{{ $statusPpk === 'approved' ? 'v' : '' }}</td>
             <td class="decision-mark"></td>
             <td class="decision-mark"></td>
-            <td class="decision-mark">{{ $statusPpk === 'rejected' ? '√' : '' }}</td>
+            <td class="decision-mark">{{ $statusPpk === 'rejected' ? 'v' : '' }}</td>
         </tr>
         <tr>
             <td colspan="3" class="blank-area"></td>
             <td class="signature-cell">
                 <div class="signature-inner">
-                    @if(!empty($formData['ppkBarcode']))<img class="signature-qr" src="{{ $formData['ppkBarcode'] }}">@endif
+                    @if(!empty($formData['ppkSignature']))<img class="signature-pad-img" src="{{ $formData['ppkSignature'] }}">@endif
                     <div>{{ optional(optional(optional($formData['ppk'])->approver)->jabatan)->nama ?: (optional(optional($formData['ppk'])->approver)->jabatan_keterangan ?: '-') }}</div>
                     <div class="signature-name">({{ optional(optional($formData['ppk'])->approver)->name ?: '-' }})</div>
                     <div>NIP. {{ optional(optional($formData['ppk'])->approver)->nip ?: '-' }}</div>
@@ -237,7 +238,7 @@ body { margin: 0; }
     <div class="note">
         <strong>Catatan :</strong><br>
         * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Coret yang tidak perlu<br>
-        ** &nbsp;&nbsp;&nbsp;Pilih salah satu dengan memberikan tanda centang (√)<br>
+        ** &nbsp;&nbsp;&nbsp;Pilih salah satu dengan memberikan tanda centang (v)<br>
         *** &nbsp;&nbsp;Diisi oleh pejabat yang menangani bidang kepegawaian sebelum PNS mengajukan cuti<br>
         **** Diberi tanda centang dan alasannya
     </div>

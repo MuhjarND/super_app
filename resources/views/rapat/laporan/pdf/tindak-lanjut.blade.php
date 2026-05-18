@@ -100,6 +100,7 @@
     </style>
 </head>
 <body>
+@include('partials.pdf-verification-badge', ['pdfVerification' => $pdfVerification ?? null])
     <div class="cover-page">
         @if($coverLogo)
             <img src="{{ $coverLogo }}" alt="Logo" class="cover-logo">

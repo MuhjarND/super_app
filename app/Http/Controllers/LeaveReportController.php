@@ -37,9 +37,12 @@ class LeaveReportController extends Controller
         }
 
         [$balances, $filters] = $this->buildBalanceReport($request, false);
-        $pdf = PDF::loadView('cuti.reports.pdf.balances', compact('balances', 'filters'))->setPaper('a4', 'landscape');
+        $verifier = app(\App\Services\PdfVerificationService::class);
+        $verification = $verifier->begin('cuti', 'rekap_saldo_cuti', null, 'Rekap Saldo Cuti', [], $filters);
+        $pdfVerification = $verifier->viewData($verification);
+        $pdf = PDF::loadView('cuti.reports.pdf.balances', compact('balances', 'filters', 'pdfVerification'))->setPaper('a4', 'landscape');
 
-        return $pdf->stream('rekap-saldo-cuti.pdf');
+        return $verifier->response($pdf->output(), $verification, 'rekap-saldo-cuti.pdf');
     }
 
     public function balancesExcel(Request $request)
@@ -78,9 +81,12 @@ class LeaveReportController extends Controller
         }
 
         [$leaveRequests, $filters] = $this->buildRequestReport($request, false);
-        $pdf = PDF::loadView('cuti.reports.pdf.requests', compact('leaveRequests', 'filters'))->setPaper('a4', 'landscape');
+        $verifier = app(\App\Services\PdfVerificationService::class);
+        $verification = $verifier->begin('cuti', 'laporan_pengajuan_cuti', null, 'Laporan Pengajuan Cuti', [], $filters);
+        $pdfVerification = $verifier->viewData($verification);
+        $pdf = PDF::loadView('cuti.reports.pdf.requests', compact('leaveRequests', 'filters', 'pdfVerification'))->setPaper('a4', 'landscape');
 
-        return $pdf->stream('laporan-pengajuan-cuti.pdf');
+        return $verifier->response($pdf->output(), $verification, 'laporan-pengajuan-cuti.pdf');
     }
 
     public function excel(Request $request)

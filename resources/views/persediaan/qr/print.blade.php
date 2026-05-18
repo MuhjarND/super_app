@@ -80,6 +80,7 @@
     </style>
 </head>
 <body>
+@include('partials.pdf-verification-badge', ['pdfVerification' => $pdfVerification ?? null])
     <div class="page-title">QR Code Alat dan Mesin</div>
     <div class="page-subtitle">Daftar QR sub barang untuk kebutuhan identifikasi dan pelacakan inventaris.</div>
 

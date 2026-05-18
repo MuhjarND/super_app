@@ -84,7 +84,6 @@ class RapatController extends Controller
             $this->syncProgressZiContext($rapat, $request);
         });
 
-        $this->documentService->generateAndStoreUndangan($rapat->fresh(), false);
         $this->dispatchCreateOrUpdateNotifications($rapat->fresh(['pesertas', 'approvals', 'kategoriSuratKode', 'creator']));
 
         return response()->json([
@@ -111,7 +110,6 @@ class RapatController extends Controller
             $this->documentService->syncSuratKeluar($rapat, false);
         });
 
-        $this->documentService->generateAndStoreUndangan($rapat->fresh(), false);
         $this->dispatchCreateOrUpdateNotifications(
             $rapat->fresh(['pesertas', 'approvals', 'kategoriSuratKode', 'creator']),
             $wasApproved
@@ -183,10 +181,7 @@ class RapatController extends Controller
     {
         abort_unless(auth()->user()->canViewRapat($rapat) || auth()->user()->canAccessMeetingApproval(), 403);
 
-        $suratKeluar = $this->documentService->ensureUndanganPdf($rapat);
-        abort_unless($suratKeluar && $suratKeluar->file_path, 404);
-
-        return response()->file(storage_path('app/public/' . $suratKeluar->file_path));
+        return $this->documentService->streamUndanganPdf($rapat);
     }
 
     protected function payloadFromRequest($request, array $data, Rapat $rapat = null)

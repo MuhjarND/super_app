@@ -403,7 +403,7 @@ class IntegratedCalendarService
                 'status_label' => $this->statusLabel($statusKey),
                 'color' => '#16a34a',
                 'textColor' => '#ffffff',
-                'url' => $surat->file_path ? route('surat-keluar.file', $surat) : route('surat-keluar.index'),
+                'url' => ($surat->file_path || $surat->templateApproval) ? route('surat-keluar.file', $surat) : route('surat-keluar.index'),
                 'meta' => [
                     'kategori' => 'Surat Tugas',
                     'unit' => optional(optional($surat->creator)->unit)->nama ?: '-',

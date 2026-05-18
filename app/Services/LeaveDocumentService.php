@@ -16,11 +16,19 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Optional;
 use Illuminate\Support\Str;
-use SimpleSoftwareIO\QrCode\Facades\QrCode;
 use setasign\Fpdi\Fpdi;
 
 class LeaveDocumentService
 {
+    protected $signaturePadService;
+    protected $pdfVerificationService;
+
+    public function __construct(SignaturePadService $signaturePadService, PdfVerificationService $pdfVerificationService)
+    {
+        $this->signaturePadService = $signaturePadService;
+        $this->pdfVerificationService = $pdfVerificationService;
+    }
+
     public function storeUploadedDocuments(LeaveRequest $leaveRequest, array $files = [])
     {
         foreach ($files as $file) {
@@ -104,14 +112,7 @@ class LeaveDocumentService
             'created_by' => $leaveRequest->created_by ?: $leaveRequest->user_id,
         ];
 
-        if ($markComplete) {
-            $payload['file_path'] = $this->storeFinalPdf($leaveRequest);
-        } else {
-            if ($suratKeluar && $suratKeluar->file_path && Storage::disk('public')->exists($suratKeluar->file_path)) {
-                Storage::disk('public')->delete($suratKeluar->file_path);
-            }
-            $payload['file_path'] = null;
-        }
+        $payload['file_path'] = null;
 
         if ($suratKeluar) {
             $suratKeluar->update($payload);
@@ -235,10 +236,10 @@ class LeaveDocumentService
             'verifier' => $verifier,
             'atasan' => $atasan,
             'ppk' => $ppk,
-            'pemohonBarcode' => $this->makeApplicantBarcode($leaveRequest),
+            'pemohonSignature' => null,
             'verifierParaf' => $this->buildParaf($verifier),
-            'atasanBarcode' => $this->makeApprovalBarcode($leaveRequest, $atasan),
-            'ppkBarcode' => $this->makeApprovalBarcode($leaveRequest, $ppk),
+            'atasanSignature' => $this->makeApprovalSignatureImage($atasan),
+            'ppkSignature' => $this->makeApprovalSignatureImage($ppk),
             'annualLeaveRows' => $this->buildAnnualLeaveRows($leaveRequest),
             'attachmentNames' => $leaveRequest->documents->pluck('original_name')->filter()->values(),
             'workPeriodText' => $this->buildWorkPeriodText(optional($leaveRequest->user)->tmt_pns, $leaveRequest->start_date),
@@ -286,46 +287,13 @@ class LeaveDocumentService
         ];
     }
 
-    protected function makeApprovalBarcode(LeaveRequest $leaveRequest, $approval = null)
+    protected function makeApprovalSignatureImage($approval = null)
     {
         if (!$approval || $approval->status !== 'approved') {
             return null;
         }
 
-        $url = $this->signatureVerificationUrl($leaveRequest, $approval);
-        $logoPath = public_path('logo_qr.png');
-        $svg = QrCode::format('svg')->size(180)->margin(1)->errorCorrection('H')->generate($url);
-
-        if (file_exists($logoPath)) {
-            $logoData = $this->fileToDataUri($logoPath);
-            if ($logoData) {
-                $logoSvg = '<image x="69" y="69" width="42" height="42" href="' . $logoData . '" xlink:href="' . $logoData . '" preserveAspectRatio="xMidYMid meet" />';
-                $svg = str_replace('</svg>', $logoSvg . '</svg>', $svg);
-            }
-        }
-
-        return 'data:image/svg+xml;base64,' . base64_encode($svg);
-    }
-
-    protected function makeApplicantBarcode(LeaveRequest $leaveRequest)
-    {
-        if (!$leaveRequest->user_id) {
-            return null;
-        }
-
-        $url = $this->applicantSignatureVerificationUrl($leaveRequest);
-        $logoPath = public_path('logo_qr.png');
-        $svg = QrCode::format('svg')->size(180)->margin(1)->errorCorrection('H')->generate($url);
-
-        if (file_exists($logoPath)) {
-            $logoData = $this->fileToDataUri($logoPath);
-            if ($logoData) {
-                $logoSvg = '<image x="69" y="69" width="42" height="42" href="' . $logoData . '" xlink:href="' . $logoData . '" preserveAspectRatio="xMidYMid meet" />';
-                $svg = str_replace('</svg>', $logoSvg . '</svg>', $svg);
-            }
-        }
-
-        return 'data:image/svg+xml;base64,' . base64_encode($svg);
+        return $this->signaturePadService->toDataUri($approval->signature_path);
     }
 
     protected function signatureVerificationUrl(LeaveRequest $leaveRequest, LeaveApproval $approval)
@@ -403,23 +371,28 @@ class LeaveDocumentService
         return max($suratKeluarMax, $leaveMax) + 1;
     }
 
-    protected function storeFinalPdf(LeaveRequest $leaveRequest)
-    {
-        $path = $this->buildStorageFilename($leaveRequest);
-        Storage::disk('public')->put($path, $this->buildDecisionPdfContent($leaveRequest));
-
-        return $path;
-    }
-
     protected function buildDecisionPdfContent(LeaveRequest $leaveRequest)
     {
         $tempFiles = [];
+        $verification = $this->pdfVerificationService->begin(
+            'cuti',
+            'formulir_cuti',
+            $leaveRequest->id,
+            'Formulir Permintaan dan Pemberian Cuti - ' . (optional($leaveRequest->user)->name ?: 'Pegawai'),
+            $this->buildApprovalSigners($leaveRequest),
+            [
+                'nomor' => $leaveRequest->letter_number ?: $leaveRequest->request_number,
+                'periode' => $leaveRequest->period_label,
+                'jenis_cuti' => optional($leaveRequest->leaveType)->name,
+            ]
+        );
 
         try {
             $baseTempPath = $this->makeTempPdfPath('cuti-form-' . $leaveRequest->id);
             $basePdf = PDF::loadView('cuti.pdf.decision', [
                 'leaveRequest' => $leaveRequest,
                 'formData' => $this->buildFormViewData($leaveRequest),
+                'pdfVerification' => $this->pdfVerificationService->viewData($verification),
             ])->setPaper([0, 0, 595.2, 843.56]);
             File::put($baseTempPath, $basePdf->output());
             $tempFiles[] = $baseTempPath;
@@ -435,14 +408,18 @@ class LeaveDocumentService
             }
 
             if (count($sourceFiles) === 1) {
-                return File::get($baseTempPath);
+                $content = File::get($baseTempPath);
+                $this->pdfVerificationService->finalize($verification, $content, $this->buildFilename($leaveRequest));
+                return $content;
             }
 
             $mergedTempPath = $this->makeTempPdfPath('cuti-merged-' . $leaveRequest->id);
             $this->mergePdfFiles($sourceFiles, $mergedTempPath);
             $tempFiles[] = $mergedTempPath;
 
-            return File::get($mergedTempPath);
+            $content = File::get($mergedTempPath);
+            $this->pdfVerificationService->finalize($verification, $content, $this->buildFilename($leaveRequest));
+            return $content;
         } finally {
             foreach ($tempFiles as $tempFile) {
                 if ($tempFile && file_exists($tempFile)) {
@@ -450,6 +427,22 @@ class LeaveDocumentService
                 }
             }
         }
+    }
+
+    protected function buildApprovalSigners(LeaveRequest $leaveRequest)
+    {
+        return $leaveRequest->approvals
+            ->where('status', 'approved')
+            ->map(function ($approval) {
+                return [
+                    'name' => optional($approval->approver)->name ?: '-',
+                    'role' => $approval->role_label,
+                    'title' => optional(optional($approval->approver)->jabatan)->nama ?: optional($approval->approver)->jabatan_keterangan,
+                    'signed_at' => $approval->acted_at ? $approval->acted_at->copy()->timezone('Asia/Jayapura')->translatedFormat('d F Y H:i') . ' WIT' : '-',
+                ];
+            })
+            ->values()
+            ->all();
     }
 
     protected function resolveLeaveClassification()

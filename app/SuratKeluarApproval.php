@@ -19,6 +19,9 @@ class SuratKeluarApproval extends Model
         'status',
         'note',
         'acted_at',
+        'signature_path',
+        'signature_mime',
+        'signature_size',
     ];
 
     protected $casts = [

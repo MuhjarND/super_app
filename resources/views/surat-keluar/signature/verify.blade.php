@@ -48,7 +48,7 @@
                 <div class="row"><div class="label">Waktu Tanda Tangan</div><div class="value">{{ $data['acted_at'] }}</div></div>
                 <div class="note">
                     @if($data['valid'])
-                        QR pada surat keluar ini sah dan mengarah ke data approval final yang tersimpan di sistem. Halaman publik ini hanya menampilkan informasi verifikasi dokumen dan penanda tangan.
+                        Tanda tangan digital pada surat keluar ini sah dan tercatat pada data approval final yang tersimpan di sistem. Halaman publik ini hanya menampilkan informasi verifikasi dokumen dan penanda tangan.
                     @else
                         Dokumen ini belum berada pada status final yang sah untuk tanda tangan elektronik, atau tautan verifikasinya tidak memenuhi syarat validasi.
                     @endif

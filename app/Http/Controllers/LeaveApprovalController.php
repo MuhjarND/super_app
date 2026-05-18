@@ -35,8 +35,13 @@ class LeaveApprovalController extends Controller
     {
         abort_unless(auth()->user()->canApproveLeave(), 403);
         abort_unless((int) $leaveApproval->approver_id === (int) auth()->id() || auth()->user()->isSuperAdmin(), 403);
+        $request->validate([
+            'signature_data' => ['required', 'string'],
+        ], [
+            'signature_data.required' => 'Tanda tangan wajib diisi.',
+        ]);
         $oldStatus = $leaveApproval->leaveRequest->status;
-        $this->approvalService->approve($leaveApproval, auth()->user(), $request->note);
+        $this->approvalService->approve($leaveApproval, auth()->user(), $request->note, $request->signature_data);
         event(new LeaveRequestStatusChanged($leaveApproval->leaveRequest->fresh(), auth()->user(), $oldStatus, $leaveApproval->leaveRequest->fresh()->status, 'approved'));
         return back()->with('success', 'Approval cuti berhasil diproses.');
     }

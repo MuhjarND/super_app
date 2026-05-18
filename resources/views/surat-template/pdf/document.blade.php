@@ -24,6 +24,7 @@
     </style>
 </head>
 <body>
+@include('partials.pdf-verification-badge', ['pdfVerification' => $pdfVerification ?? null])
     <div class="letter-wrap">
         @if($templateSlug === 'surat-tugas')
             @include('surat-template.pdf.surat-tugas', [

@@ -30,9 +30,9 @@
     .st-sign { width:245px; margin-left:auto; text-align:center; margin-top:16px; }
     .st-sign-city { margin-bottom:2px; }
     .st-sign-role { display:block; margin-bottom:8px; }
-    .st-sign-qr-wrap { width:100%; text-align:center; margin:0 auto 6px; }
-    .st-sign-qr { width:104px; height:104px; display:block; margin:0 auto; }
-    .st-sign-placeholder { display:block; height:104px; }
+    .st-sign-image-wrap { width:100%; text-align:center; margin:0 auto 6px; }
+    .st-sign-image { width:150px; height:72px; display:block; margin:0 auto; object-fit:contain; }
+    .st-sign-placeholder { display:block; height:72px; }
     .st-sign-name { display:block; font-weight:700; line-height:1.2; margin-top:2px; }
     .st-sign-nip { display:block; margin-top:4px; }
 </style>
@@ -121,9 +121,9 @@
     <div class="st-sign">
         <div class="st-sign-city">{{ $kotaTtd }}, {{ $tanggalSurat }}</div>
         <span class="st-sign-role">{{ $penandaTangan['jabatan_ttd'] ?? 'Ketua' }},</span>
-        <div class="st-sign-qr-wrap">
-            @if(!empty($approvalSignature['barcode']))
-                <img class="st-sign-qr" src="{{ $approvalSignature['barcode'] }}" alt="Barcode TTD">
+        <div class="st-sign-image-wrap">
+            @if(!empty($approvalSignature['image']))
+                <img class="st-sign-image" src="{{ $approvalSignature['image'] }}" alt="Tanda Tangan Digital">
             @else
                 <span class="st-sign-placeholder"></span>
             @endif

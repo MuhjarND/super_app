@@ -14,11 +14,19 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
-use SimpleSoftwareIO\QrCode\Facades\QrCode;
 use setasign\Fpdi\Fpdi;
 
 class RapatDocumentService
 {
+    protected $signaturePadService;
+    protected $pdfVerificationService;
+
+    public function __construct(SignaturePadService $signaturePadService, PdfVerificationService $pdfVerificationService)
+    {
+        $this->signaturePadService = $signaturePadService;
+        $this->pdfVerificationService = $pdfVerificationService;
+    }
+
     public function getKategoriSuratLeafOptions()
     {
         $leafs = KlasifikasiKode::with('parent.parent.parent')
@@ -164,11 +172,94 @@ class RapatDocumentService
         ]);
 
         $suratKeluar = $this->syncSuratKeluar($rapat, $signed);
-        $filename = 'rapat/undangan/undangan-rapat-' . $rapat->id . '.pdf';
+        $verification = $this->pdfVerificationService->begin(
+            'rapat',
+            'undangan_rapat',
+            $rapat->id,
+            'Undangan Rapat - ' . ($rapat->judul ?: 'Rapat'),
+            $this->buildRapatSigners($rapat),
+            ['nomor' => $suratKeluar->nomor_surat ?: $rapat->nomor_undangan]
+        );
+
+        $content = $this->buildUndanganPdfContent($rapat, $signed, $verification);
+        $this->pdfVerificationService->finalize($verification, $content, 'undangan-rapat-' . $rapat->id . '.pdf');
+
+        $suratKeluar->update([
+            'status' => $signed ? 'lengkap' : 'draft',
+        ]);
+
+        return $suratKeluar->fresh();
+    }
+
+    public function streamUndanganPdf(Rapat $rapat)
+    {
+        $rapat->loadMissing([
+            'pesertas.jabatan',
+            'pesertas.unit',
+            'approvals',
+            'approver1.jabatan',
+            'approver2.jabatan',
+            'creator',
+            'kategoriSuratKode.parent.parent.parent',
+            'suratKeluar',
+        ]);
+
+        $signed = $this->shouldUseSignedDocument($rapat);
+        $suratKeluar = $this->syncSuratKeluar($rapat, $signed);
+        $verification = $this->pdfVerificationService->begin(
+            'rapat',
+            'undangan_rapat',
+            $rapat->id,
+            'Undangan Rapat - ' . ($rapat->judul ?: 'Rapat'),
+            $this->buildRapatSigners($rapat),
+            ['nomor' => $suratKeluar->nomor_surat ?: $rapat->nomor_undangan]
+        );
+        $filename = 'undangan-rapat-' . $rapat->id . '.pdf';
+        $content = $this->buildUndanganPdfContent($rapat, $signed, $verification);
+
+        return $this->pdfVerificationService->response($content, $verification, $filename);
+    }
+
+    public function createUndanganTempFile(Rapat $rapat, $prefix = 'undangan-rapat')
+    {
+        $rapat->loadMissing([
+            'pesertas.jabatan',
+            'pesertas.unit',
+            'approvals',
+            'approver1.jabatan',
+            'approver2.jabatan',
+            'creator',
+            'kategoriSuratKode.parent.parent.parent',
+            'suratKeluar',
+        ]);
+
+        $signed = $this->shouldUseSignedDocument($rapat);
+        $suratKeluar = $this->syncSuratKeluar($rapat, $signed);
+        $verification = $this->pdfVerificationService->begin(
+            'rapat',
+            'undangan_rapat',
+            $rapat->id,
+            'Undangan Rapat - ' . ($rapat->judul ?: 'Rapat'),
+            $this->buildRapatSigners($rapat),
+            ['nomor' => $suratKeluar->nomor_surat ?: $rapat->nomor_undangan]
+        );
+        $content = $this->buildUndanganPdfContent($rapat, $signed, $verification);
+        $this->pdfVerificationService->finalize($verification, $content, 'undangan-rapat-' . $rapat->id . '.pdf');
+        $path = $this->makeTempPdfPath($prefix . '-' . $rapat->id);
+        File::put($path, $content);
+
+        return [
+            'path' => $path,
+            'temporary' => true,
+        ];
+    }
+
+    protected function buildUndanganPdfContent(Rapat $rapat, $signed, $verification)
+    {
         $tempFiles = [];
 
         try {
-            $basePdf = PDF::loadView('rapat.pdf.undangan', $this->buildPdfViewData($rapat, $signed))
+            $basePdf = PDF::loadView('rapat.pdf.undangan', $this->buildPdfViewData($rapat, $signed, $this->pdfVerificationService->viewData($verification)))
                 ->setPaper('a4', 'portrait');
 
             $baseTempPath = $this->makeTempPdfPath('undangan-base-' . $rapat->id);
@@ -190,11 +281,7 @@ class RapatDocumentService
                 $finalPdfContent = File::get($mergedTempPath);
             }
 
-            if ($suratKeluar->file_path && $suratKeluar->file_path !== $filename) {
-                Storage::disk('public')->delete($suratKeluar->file_path);
-            }
-
-            Storage::disk('public')->put($filename, $finalPdfContent);
+            return $finalPdfContent;
         } finally {
             foreach ($tempFiles as $tempFile) {
                 if ($tempFile && file_exists($tempFile)) {
@@ -202,13 +289,6 @@ class RapatDocumentService
                 }
             }
         }
-
-        $suratKeluar->update([
-            'file_path' => $filename,
-            'status' => $signed ? 'lengkap' : 'draft',
-        ]);
-
-        return $suratKeluar->fresh();
     }
 
     public function ensureUndanganPdf(Rapat $rapat)
@@ -216,13 +296,7 @@ class RapatDocumentService
         $rapat->loadMissing('suratKeluar', 'approvals');
 
         $signed = $this->shouldUseSignedDocument($rapat);
-        $suratKeluar = $rapat->suratKeluar;
-
-        if (!$suratKeluar || !$suratKeluar->file_path || !Storage::disk('public')->exists($suratKeluar->file_path)) {
-            $suratKeluar = $this->generateAndStoreUndangan($rapat, $signed);
-        }
-
-        return $suratKeluar;
+        return $this->syncSuratKeluar($rapat, $signed);
     }
 
     public function shouldUseSignedDocument(Rapat $rapat)
@@ -238,7 +312,7 @@ class RapatDocumentService
         return in_array($rapat->status, ['disetujui', 'selesai'], true);
     }
 
-    public function buildPdfViewData(Rapat $rapat, $signed = false)
+    public function buildPdfViewData(Rapat $rapat, $signed = false, array $pdfVerification = null)
     {
         $rapat->loadMissing([
             'pesertas.jabatan',
@@ -289,14 +363,33 @@ class RapatDocumentService
             'issueDate' => $issueDate,
             'signatory' => $signatory,
             'signatureApprovedAt' => $approvalStep && $approvalStep->acted_at ? $approvalStep->acted_at->copy()->timezone('Asia/Jayapura') : null,
-            'signatureBarcode' => $signed && $signatory && $approvalStep && $approvalStep->status === 'approved'
-                ? $this->makeSignatureBarcode($rapat, ['signature' => 'approval'])
+            'signatureImage' => $signed && $signatory && $approvalStep && $approvalStep->status === 'approved'
+                ? $this->signaturePadService->toDataUri($approvalStep->signature_path)
                 : null,
             'kopImage' => $this->resolveKopImage(),
             'lampiranLabel' => $this->resolveLampiranLabel($showLampiranPage, $rapat),
             'openingParagraph' => $this->buildOpeningParagraph($rapat),
             'signatoryTitle' => $this->resolveSignatoryTitle($signatory, $rapat->approval1_jabatan_manual),
+            'pdfVerification' => $pdfVerification,
         ];
+    }
+
+    protected function buildRapatSigners(Rapat $rapat)
+    {
+        $rapat->loadMissing('approvals.approver.jabatan');
+
+        return $rapat->approvals
+            ->where('status', 'approved')
+            ->map(function ($approval) {
+                return [
+                    'name' => optional($approval->approver)->name ?: $approval->approver_name_snapshot ?: '-',
+                    'role' => $approval->stage_label ?: 'Approval Rapat',
+                    'title' => optional(optional($approval->approver)->jabatan)->nama ?: '-',
+                    'signed_at' => $approval->acted_at ? $approval->acted_at->copy()->timezone('Asia/Jayapura')->translatedFormat('d F Y H:i') . ' WIT' : '-',
+                ];
+            })
+            ->values()
+            ->all();
     }
 
     public function resolveDocumentSignatory(Rapat $rapat)
@@ -433,8 +526,8 @@ class RapatDocumentService
             'signed_at' => $approvalStep && $approvalStep->acted_at
                 ? $approvalStep->acted_at->copy()->timezone('Asia/Jayapura')
                 : null,
-            'barcode' => $signed && $signatory && $approvalStep && $approvalStep->status === 'approved'
-                ? $this->makeSignatureBarcode($rapat, ['signature' => 'approval'])
+            'image' => $signed && $signatory && $approvalStep && $approvalStep->status === 'approved'
+                ? $this->signaturePadService->toDataUri($approvalStep->signature_path)
                 : null,
         ];
     }
@@ -450,9 +543,7 @@ class RapatDocumentService
             'signed_at' => ($notulensi->submitted_at ?: $notulensi->updated_at)
                 ? ($notulensi->submitted_at ?: $notulensi->updated_at)->copy()->timezone('Asia/Jayapura')
                 : null,
-            'barcode' => $notulensi->notulis_id
-                ? $this->makeSignatureBarcode($notulensi->rapat, ['signature' => 'notulis', 'notulensi' => $notulensi->id])
-                : null,
+            'image' => $this->signaturePadService->toDataUri($notulensi->notulis_signature_path),
         ];
     }
 
@@ -476,27 +567,10 @@ class RapatDocumentService
             'signed_at' => $approval && $approval->acted_at
                 ? $approval->acted_at->copy()->timezone('Asia/Jayapura')
                 : null,
-            'barcode' => $signed && $signatory && $approval && $approval->status === 'approved'
-                ? $this->makeSignatureBarcode($notulensi->rapat, ['signature' => 'notulensi_approval', 'notulensi' => $notulensi->id])
+            'image' => $signed && $signatory && $approval && $approval->status === 'approved'
+                ? $this->signaturePadService->toDataUri($approval->signature_path)
                 : null,
         ];
-    }
-
-    protected function makeSignatureBarcode(Rapat $rapat, array $params = [])
-    {
-        $verificationUrl = $this->signatureVerificationUrl($rapat, $params);
-        $logoPath = public_path('logo_qr.png');
-        $svg = QrCode::format('svg')->size(220)->margin(1)->errorCorrection('H')->generate($verificationUrl);
-
-        if (file_exists($logoPath)) {
-            $logoData = $this->fileToDataUri($logoPath);
-            if ($logoData) {
-                $logoSvg = '<image x="84" y="84" width="52" height="52" href="' . $logoData . '" xlink:href="' . $logoData . '" preserveAspectRatio="xMidYMid meet" />';
-                $svg = str_replace('</svg>', $logoSvg . '</svg>', $svg);
-            }
-        }
-
-        return 'data:image/svg+xml;base64,' . base64_encode($svg);
     }
 
     public function buildSignatureVerificationData(Rapat $rapat, $signatureType = 'approval', RapatNotulensi $notulensi = null)

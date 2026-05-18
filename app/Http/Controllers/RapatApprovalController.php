@@ -53,11 +53,17 @@ class RapatApprovalController extends Controller
     public function approve(Request $request, RapatApproval $rapatApproval)
     {
         abort_unless(auth()->user()->canAccessMeetingApproval(), 403);
+        $request->validate([
+            'signature_data' => ['required', 'string'],
+        ], [
+            'signature_data.required' => 'Tanda tangan wajib diisi.',
+        ]);
 
         $this->approvalService->approve(
             $rapatApproval->load('rapat'),
             auth()->user(),
-            $request->input('catatan')
+            $request->input('catatan'),
+            $request->input('signature_data')
         );
 
         return response()->json([

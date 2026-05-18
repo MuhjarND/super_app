@@ -175,7 +175,7 @@
 
                 <div class="note">
                     @if($data['valid'])
-                        QR pada formulir cuti ini sah dan mengarah ke data approval final yang tersimpan di sistem. Halaman publik ini hanya menampilkan informasi verifikasi dokumen dan penanda tangan tanpa memuat data sensitif pegawai.
+                        Tanda tangan digital pada formulir cuti ini sah dan tercatat pada data approval final yang tersimpan di sistem. Halaman publik ini hanya menampilkan informasi verifikasi dokumen dan penanda tangan tanpa memuat data sensitif pegawai.
                     @else
                         Dokumen ini belum berada pada status final yang sah untuk tanda tangan elektronik, atau tautan verifikasinya tidak memenuhi syarat validasi.
                     @endif

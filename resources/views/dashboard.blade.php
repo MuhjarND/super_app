@@ -158,6 +158,88 @@
         .module-pill.zi { background: linear-gradient(135deg, #7c3aed, #4f46e5); }
         .module-pill.persediaan { background: linear-gradient(135deg, #b45309, #d97706); }
 
+        .mobile-app-launcher {
+            display: none;
+        }
+
+        .mobile-app-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 12px;
+        }
+
+        .mobile-app-tile {
+            position: relative;
+            min-height: 104px;
+            padding: 14px 10px 12px;
+            border-radius: 20px;
+            border: 1px solid #e2e8f0;
+            background: rgba(255, 255, 255, 0.92);
+            color: #0f172a;
+            text-decoration: none !important;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            box-shadow: 0 14px 34px rgba(15, 23, 42, 0.07);
+            transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+        }
+
+        .mobile-app-tile:active {
+            transform: scale(0.97);
+        }
+
+        .mobile-app-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 17px;
+            color: #ffffff;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.15rem;
+            box-shadow: 0 10px 24px rgba(79, 70, 229, 0.20);
+        }
+
+        .mobile-app-title {
+            min-height: 28px;
+            color: #172033;
+            font-size: 0.76rem;
+            font-weight: 800;
+            line-height: 1.18;
+            text-align: center;
+        }
+
+        .mobile-app-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            min-width: 20px;
+            height: 20px;
+            padding: 0 6px;
+            border-radius: 999px;
+            background: #ef4444;
+            color: #ffffff;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.62rem;
+            font-weight: 900;
+            border: 2px solid #ffffff;
+        }
+
+        .mobile-app-icon.dashboard { background: linear-gradient(135deg, #4f46e5, #8b5cf6); }
+        .mobile-app-icon.action { background: linear-gradient(135deg, #ef4444, #f97316); }
+        .mobile-app-icon.calendar { background: linear-gradient(135deg, #2563eb, #06b6d4); }
+        .mobile-app-icon.approval { background: linear-gradient(135deg, #0f766e, #14b8a6); }
+        .mobile-app-icon.mail { background: linear-gradient(135deg, #4f46e5, #2563eb); }
+        .mobile-app-icon.meeting { background: linear-gradient(135deg, #0891b2, #0f766e); }
+        .mobile-app-icon.leave { background: linear-gradient(135deg, #dc2626, #ef4444); }
+        .mobile-app-icon.asset { background: linear-gradient(135deg, #d97706, #f59e0b); }
+        .mobile-app-icon.zi { background: linear-gradient(135deg, #7c3aed, #4f46e5); }
+        .mobile-app-icon.archive { background: linear-gradient(135deg, #475569, #0f172a); }
+
         .metric-grid {
             display: grid;
             grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -602,6 +684,26 @@
         }
 
         @media (max-width: 767.98px) {
+            .dashboard-shell {
+                gap: 14px;
+            }
+
+            .mobile-app-launcher {
+                display: block;
+            }
+
+            .dashboard-shell > .dashboard-hero,
+            .dashboard-shell > .dash-panel,
+            .dashboard-shell > .module-grid,
+            .dashboard-shell > .dashboard-row,
+            .dashboard-shell > .recent-columns {
+                display: none;
+            }
+
+            .mobile-app-grid {
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+            }
+
             .dashboard-hero {
                 padding: 16px 14px;
                 border-radius: 14px;
@@ -681,6 +783,30 @@
                 padding: 8px;
             }
         }
+
+        @media (max-width: 390px) {
+            .mobile-app-grid {
+                gap: 10px;
+            }
+
+            .mobile-app-tile {
+                min-height: 98px;
+                padding-left: 8px;
+                padding-right: 8px;
+            }
+
+            .mobile-app-icon {
+                width: 44px;
+                height: 44px;
+                border-radius: 15px;
+                font-size: 1.05rem;
+            }
+
+            .mobile-app-title {
+                font-size: 0.7rem;
+            }
+
+        }
     </style>
 @endpush
 
@@ -690,8 +816,91 @@
     </div>
 @endsection
 
+
 @section('content')
     <div class="dashboard-shell">
+        @php($dashboardUser = auth()->user())
+        @php($dashboardIsSuperAdmin = $dashboardUser && $dashboardUser->isSuperAdmin())
+        <section class="mobile-app-launcher">
+            <div class="mobile-app-grid">
+                <a href="{{ route('mobile.menu.show', 'dashboard') }}" class="mobile-app-tile">
+                    <span class="mobile-app-icon dashboard"><i class="fas fa-th-large"></i></span>
+                    <span class="mobile-app-title">Dashboard</span>
+                </a>
+
+                @if($dashboardUser && $dashboardUser->canAccessUnifiedActionCenter())
+                    <a href="{{ route('mobile.menu.show', 'action') }}" class="mobile-app-tile">
+                        @if(($dashboardSummary['action_count'] ?? 0) > 0)
+                            <span class="mobile-app-badge">{{ ($dashboardSummary['action_count'] ?? 0) > 99 ? '99+' : ($dashboardSummary['action_count'] ?? 0) }}</span>
+                        @endif
+                        <span class="mobile-app-icon action"><i class="fas fa-bell"></i></span>
+                        <span class="mobile-app-title">Tindak Lanjut</span>
+                    </a>
+                @endif
+
+                @if($dashboardUser && $dashboardUser->canAccessIntegratedCalendar())
+                    <a href="{{ route('mobile.menu.show', 'calendar') }}" class="mobile-app-tile">
+                        <span class="mobile-app-icon calendar"><i class="far fa-calendar-alt"></i></span>
+                        <span class="mobile-app-title">Kalender</span>
+                    </a>
+                @endif
+
+                @if($dashboardIsSuperAdmin || ($dashboardUser && $dashboardUser->canAccessApprovalCenter()))
+                    <a href="{{ route('mobile.menu.show', 'approval') }}" class="mobile-app-tile">
+                        <span class="mobile-app-icon approval"><i class="fas fa-check-double"></i></span>
+                        <span class="mobile-app-title">Approval</span>
+                    </a>
+                @endif
+
+                @if($persuratan['enabled'])
+                    <a href="{{ route('mobile.menu.show', 'persuratan') }}" class="mobile-app-tile">
+                        @if(($dashboardSummary['today_masuk'] ?? 0) > 0)
+                            <span class="mobile-app-badge">{{ ($dashboardSummary['today_masuk'] ?? 0) > 99 ? '99+' : ($dashboardSummary['today_masuk'] ?? 0) }}</span>
+                        @endif
+                        <span class="mobile-app-icon mail"><i class="fas fa-envelope-open-text"></i></span>
+                        <span class="mobile-app-title">Persuratan</span>
+                    </a>
+                @endif
+
+                @if($meeting['enabled'])
+                    <a href="{{ route('mobile.menu.show', 'rapat') }}" class="mobile-app-tile">
+                        <span class="mobile-app-icon meeting"><i class="fas fa-users"></i></span>
+                        <span class="mobile-app-title">Rapat</span>
+                    </a>
+                @endif
+
+                @if($leave['enabled'])
+                    <a href="{{ route('mobile.menu.show', 'cuti') }}" class="mobile-app-tile">
+                        @if(($dashboardSummary['pending_leave_approvals'] ?? 0) > 0)
+                            <span class="mobile-app-badge">{{ ($dashboardSummary['pending_leave_approvals'] ?? 0) > 99 ? '99+' : ($dashboardSummary['pending_leave_approvals'] ?? 0) }}</span>
+                        @endif
+                        <span class="mobile-app-icon leave"><i class="fas fa-calendar-check"></i></span>
+                        <span class="mobile-app-title">Cuti</span>
+                    </a>
+                @endif
+
+                @if($inventory['enabled'])
+                    <a href="{{ route('mobile.menu.show', 'perawatan') }}" class="mobile-app-tile">
+                        <span class="mobile-app-icon asset"><i class="fas fa-tools"></i></span>
+                        <span class="mobile-app-title">Perawatan</span>
+                    </a>
+                @endif
+
+                @if($progressZi['enabled'])
+                    <a href="{{ route('mobile.menu.show', 'zi') }}" class="mobile-app-tile">
+                        <span class="mobile-app-icon zi"><i class="fas fa-chart-line"></i></span>
+                        <span class="mobile-app-title">Progress ZI</span>
+                    </a>
+                @endif
+
+                @if($dashboardIsSuperAdmin || ($dashboardUser && $dashboardUser->canAccessArchiveMenu()))
+                    <a href="{{ route('mobile.menu.show', 'arsip') }}" class="mobile-app-tile">
+                        <span class="mobile-app-icon archive"><i class="far fa-folder-open"></i></span>
+                        <span class="mobile-app-title">Arsip</span>
+                    </a>
+                @endif
+            </div>
+        </section>
         <section class="dashboard-hero">
             <div class="dashboard-hero-title">{{ auth()->user()->name }}</div>
             <div class="dashboard-hero-meta">{{ now()->translatedFormat('l, d F Y') }}</div>

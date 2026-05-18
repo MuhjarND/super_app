@@ -102,7 +102,7 @@ class ArchiveController extends Controller
     protected function buildSuratKeluarItems($user)
     {
         return SuratKeluar::visibleTo($user)
-            ->with(['kategoriSurat', 'creator', 'penerimaInternal'])
+            ->with(['kategoriSurat', 'creator', 'penerimaInternal', 'templateApproval', 'pdfVerifications', 'rapat', 'leaveRequest'])
             ->where('status', 'lengkap')
             ->get()
             ->map(function ($surat) {
@@ -123,8 +123,8 @@ class ArchiveController extends Controller
                     'recipient_plain' => $recipientText,
                     'date' => optional($surat->tanggal_surat)->translatedFormat('Y-m-d'),
                     'input_date' => optional($surat->created_at)->translatedFormat('Y-m-d'),
-                    'file_url' => $surat->file_path ? route('surat-keluar.file', $surat) : null,
-                    'file_label' => $surat->file_path ? 'Berkas' : '-',
+                    'file_url' => ($surat->file_path || $surat->templateApproval || $surat->rapat || $surat->leaveRequest || $surat->pdfVerifications->isNotEmpty()) ? route('surat-keluar.file', $surat) : null,
+                    'file_label' => ($surat->file_path || $surat->templateApproval || $surat->rapat || $surat->leaveRequest || $surat->pdfVerifications->isNotEmpty()) ? 'Berkas' : '-',
                     'creator' => e(optional($surat->creator)->name ?: '-'),
                     'creator_plain' => optional($surat->creator)->name ?: '-',
                     'status_html' => $surat->status_badge,

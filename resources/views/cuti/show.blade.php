@@ -247,8 +247,36 @@
         <form action="{{ route('cuti.cancel', $leaveRequest) }}" method="POST" class="d-inline">@csrf <button type="submit" class="btn btn-outline-danger btn-sm" onclick="return confirm('Batalkan pengajuan cuti ini?')">Batalkan</button></form>
     @endif
     @if(isset($leaveApproval))
-        <form action="{{ route('cuti.approval.approve', $leaveApproval) }}" method="POST" class="d-inline-block card border-0 shadow-sm mb-0"><div class="card-body">@csrf <input type="hidden" name="action" value="approve"><textarea name="note" class="form-control mb-2" rows="3" placeholder="Catatan approval"></textarea><button type="submit" class="btn btn-success btn-sm btn-block">Approve</button></div></form>
+        <div class="d-inline-block card border-0 shadow-sm mb-0"><div class="card-body"><button type="button" class="btn btn-success btn-sm btn-block" data-toggle="modal" data-target="#leaveApprovalSignatureModal">Approve</button></div></div>
         <form action="{{ route('cuti.approval.reject', $leaveApproval) }}" method="POST" class="d-inline-block card border-0 shadow-sm mb-0"><div class="card-body">@csrf <textarea name="note" class="form-control mb-2" rows="3" placeholder="Catatan penolakan" required></textarea><button type="submit" class="btn btn-danger btn-sm btn-block">Reject</button></div></form>
     @endif
 </div>
+
+@if(isset($leaveApproval))
+    <div class="modal fade" id="leaveApprovalSignatureModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Approve Cuti</h5>
+                    <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+                </div>
+                <form action="{{ route('cuti.approval.approve', $leaveApproval) }}" method="POST" class="requires-signature-pad">
+                    @csrf
+                    <div class="modal-body">
+                        <input type="hidden" name="action" value="approve">
+                        <div class="form-group">
+                            <label>Catatan Approval</label>
+                            <textarea name="note" class="form-control" rows="3" placeholder="Catatan approval"></textarea>
+                        </div>
+                        @include('partials.signature-pad', ['id' => 'leaveApprovalSignaturePad', 'name' => 'signature_data', 'label' => 'Bubuhkan Tanda Tangan', 'required' => true])
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-success">Simpan & Approve</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+@endif
 @endsection

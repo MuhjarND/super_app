@@ -48,8 +48,13 @@ class RapatNotulensiApprovalController extends Controller
     public function approve(Request $request, RapatNotulensiApproval $notulensiApproval)
     {
         abort_unless(auth()->user()->canAccessMeetingApproval(), 403);
+        $request->validate([
+            'signature_data' => ['required', 'string'],
+        ], [
+            'signature_data.required' => 'Tanda tangan wajib diisi.',
+        ]);
 
-        $this->approvalService->approve($notulensiApproval, auth()->user(), $request->input('catatan'));
+        $this->approvalService->approve($notulensiApproval, auth()->user(), $request->input('catatan'), $request->input('signature_data'));
 
         return response()->json([
             'success' => true,

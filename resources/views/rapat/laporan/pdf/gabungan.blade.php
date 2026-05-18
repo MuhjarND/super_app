@@ -22,6 +22,7 @@
     </style>
 </head>
 <body>
+@include('partials.pdf-verification-badge', ['pdfVerification' => $pdfVerification ?? null])
     <div class="header">
         <div class="header-title">LAPORAN GABUNGAN RAPAT</div>
         <div class="sub">{{ $rapat->judul }}</div>

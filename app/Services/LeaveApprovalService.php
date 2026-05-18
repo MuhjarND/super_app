@@ -16,13 +16,15 @@ class LeaveApprovalService
     protected $numberService;
     protected $documentService;
     protected $auditService;
+    protected $signaturePadService;
 
-    public function __construct(LeaveBalanceService $balanceService, LeaveNumberService $numberService, LeaveDocumentService $documentService, ActivityAuditService $auditService)
+    public function __construct(LeaveBalanceService $balanceService, LeaveNumberService $numberService, LeaveDocumentService $documentService, ActivityAuditService $auditService, SignaturePadService $signaturePadService)
     {
         $this->balanceService = $balanceService;
         $this->numberService = $numberService;
         $this->documentService = $documentService;
         $this->auditService = $auditService;
+        $this->signaturePadService = $signaturePadService;
     }
 
     public function buildApprovalSteps(LeaveRequest $leaveRequest)
@@ -98,7 +100,7 @@ class LeaveApprovalService
         });
     }
 
-    public function approve(LeaveApproval $approval, User $actor, $note = null)
+    public function approve(LeaveApproval $approval, User $actor, $note = null, $signatureData = null)
     {
         if ($approval->status !== 'pending') {
             throw ValidationException::withMessages(['status' => 'Approval cuti ini tidak berada pada status pending.']);
@@ -112,16 +114,23 @@ class LeaveApprovalService
             }
         }
 
-        DB::transaction(function () use ($approval, $actor, $note) {
+        DB::transaction(function () use ($approval, $actor, $note, $signatureData) {
+            $signature = $this->signaturePadService->storeDataUri($signatureData, 'cuti/approval-signatures');
             $approval->status = 'approved';
             $approval->action = 'approved';
             $approval->acted_at = Carbon::now();
+            $approval->signature_path = $signature['path'];
+            $approval->signature_mime = $signature['mime'];
+            $approval->signature_size = $signature['size'];
             $approval->note = $note;
             $approval->save();
             $leaveRequest = $approval->leaveRequest;
             $next = $leaveRequest->approvals()->where('step_no', '>', $approval->step_no)->orderBy('step_no')->first();
             if ($next) {
                 $next->status = 'pending';
+                $next->signature_path = null;
+                $next->signature_mime = null;
+                $next->signature_size = null;
                 $next->save();
                 $leaveRequest->status = $approval->role_name === 'verifikator_dokumen'
                     ? LeaveRequest::STATUS_VERIFIED
@@ -164,6 +173,9 @@ class LeaveApprovalService
             $approval->status = 'rejected';
             $approval->action = 'rejected';
             $approval->acted_at = Carbon::now();
+            $approval->signature_path = null;
+            $approval->signature_mime = null;
+            $approval->signature_size = null;
             $approval->note = $note;
             $approval->save();
             $leaveRequest = $approval->leaveRequest;

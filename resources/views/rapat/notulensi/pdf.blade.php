@@ -141,13 +141,13 @@
             margin-bottom: 8px;
         }
 
-        .signature-qr {
+        .signature-pad-image {
             margin: 8px auto 6px;
-            width: 110px;
-            height: 110px;
+            width: 145px;
+            height: 72px;
         }
 
-        .signature-qr img {
+        .signature-pad-image img {
             width: 100%;
             height: 100%;
             object-fit: contain;
@@ -167,6 +167,7 @@
     </style>
 </head>
 <body>
+@include('partials.pdf-verification-badge', ['pdfVerification' => $pdfVerification ?? null])
     @if($kopImage)
         <div class="kop">
             <img src="{{ $kopImage }}" alt="Kop Notulen">
@@ -257,9 +258,9 @@
                 @if(!empty($notulisSignature['line2']))
                     <div class="signature-line-2">{{ $notulisSignature['line2'] }}</div>
                 @endif
-                @if(!empty($notulisSignature['barcode']))
-                    <div class="signature-qr">
-                        <img src="{{ $notulisSignature['barcode'] }}" alt="Barcode TTD Notulis">
+                @if(!empty($notulisSignature['image']))
+                    <div class="signature-pad-image">
+                        <img src="{{ $notulisSignature['image'] }}" alt="Tanda Tangan Notulis">
                     </div>
                 @endif
                 <div class="signature-meta">
@@ -272,9 +273,9 @@
                 @if(!empty($approvalSignature['line2']))
                     <div class="signature-line-2">{{ $approvalSignature['line2'] }}</div>
                 @endif
-                @if(!empty($approvalSignature['barcode']))
-                    <div class="signature-qr">
-                        <img src="{{ $approvalSignature['barcode'] }}" alt="Barcode TTD Approval">
+                @if(!empty($approvalSignature['image']))
+                    <div class="signature-pad-image">
+                        <img src="{{ $approvalSignature['image'] }}" alt="Tanda Tangan Approval">
                     </div>
                 @endif
                 <div class="signature-meta">

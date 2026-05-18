@@ -39,7 +39,7 @@
                     </td>
                     <td data-label="Tanggal">{{ $surat->tanggal_surat->format('d/m/Y') }}</td>
                     <td data-label="Lampiran">
-                        @if($surat->file_path)
+                        @if($surat->file_path || $surat->templateApproval || $surat->rapat || $surat->leaveRequest || ($surat->relationLoaded('pdfVerifications') && $surat->pdfVerifications->isNotEmpty()))
                             <a href="javascript:void(0)" onclick="viewFile('{{ route('surat-keluar.file', $surat) }}')"
                                 class="app-icon-btn file" data-mobile-label="Berkas">
                                 <i class="fas fa-file"></i>

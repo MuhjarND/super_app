@@ -5,20 +5,31 @@ namespace App\Services;
 use App\SuratKeluarApproval;
 use App\SuratKeluar;
 use Barryvdh\DomPDF\Facade as PDF;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\URL;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
-use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
 class SuratTemplateDocumentService
 {
+    protected $signaturePadService;
+    protected $pdfVerificationService;
+
+    public function __construct(SignaturePadService $signaturePadService, PdfVerificationService $pdfVerificationService)
+    {
+        $this->signaturePadService = $signaturePadService;
+        $this->pdfVerificationService = $pdfVerificationService;
+    }
+
     public function attachGeneratedDocument(SuratKeluar $suratKeluar, array $payload, array $options = [])
     {
-        $filename = 'surat-keluar/template/' . now()->format('Y/m') . '/' . Str::slug($payload['template_name'] ?? 'template-surat', '-') . '-' . $suratKeluar->id . '.pdf';
-
-        if ($suratKeluar->file_path && Storage::disk('public')->exists($suratKeluar->file_path)) {
-            Storage::disk('public')->delete($suratKeluar->file_path);
-        }
+        $filename = Str::slug($payload['template_name'] ?? 'template-surat', '-') . '-' . $suratKeluar->id . '.pdf';
+        $verification = $this->pdfVerificationService->begin(
+            'surat_keluar',
+            $payload['template_slug'] ?? 'template_surat',
+            $suratKeluar->id,
+            ($payload['template_name'] ?? 'Template Surat') . ' - ' . ($suratKeluar->nomor_surat ?: $suratKeluar->id),
+            $this->buildSuratSigners($options['approval_signature'] ?? null),
+            ['nomor' => $suratKeluar->nomor_surat]
+        );
 
         $pdf = PDF::loadView('surat-template.pdf.document', [
             'suratKeluar' => $suratKeluar,
@@ -29,12 +40,13 @@ class SuratTemplateDocumentService
             'kopImage' => $this->resolveKopImage(),
             'signatoryTitle' => $this->resolveSignatoryTitle($suratKeluar),
             'approvalSignature' => $options['approval_signature'] ?? null,
+            'pdfVerification' => $this->pdfVerificationService->viewData($verification),
         ])->setPaper('a4', 'portrait');
 
-        Storage::disk('public')->put($filename, $pdf->output());
+        $content = $pdf->output();
+        $this->pdfVerificationService->finalize($verification, $content, $filename);
 
         $suratKeluar->update([
-            'file_path' => $filename,
             'status' => $options['status'] ?? 'lengkap',
         ]);
 
@@ -50,10 +62,11 @@ class SuratTemplateDocumentService
         }
 
         return [
-            'barcode' => $this->makeApprovalBarcode($approval),
+            'image' => $this->signaturePadService->toDataUri($approval->signature_path),
             'name' => $approval->signer_name_snapshot ?: optional($approval->approver)->name ?: '-',
             'title' => $approval->signer_title_snapshot ?: optional(optional($approval->approver)->jabatan)->nama ?: '-',
             'nip' => optional($approval->approver)->nip ?: '-',
+            'signed_at' => $approval->acted_at ? $approval->acted_at->copy()->timezone('Asia/Jayapura')->translatedFormat('d F Y H:i') . ' WIT' : '-',
         ];
     }
 
@@ -61,6 +74,14 @@ class SuratTemplateDocumentService
     {
         $approval->loadMissing('suratKeluar');
         $suratKeluar = $approval->suratKeluar;
+        $verification = $this->pdfVerificationService->begin(
+            'surat_keluar',
+            $approval->template_slug ?: 'template_surat',
+            $suratKeluar->id,
+            ($approval->template_name ?: 'Template Surat') . ' - ' . ($suratKeluar->nomor_surat ?: $suratKeluar->id),
+            $this->buildSuratSigners($approval->status === 'approved' ? $this->buildApprovalSignature($approval) : null),
+            ['nomor' => $suratKeluar->nomor_surat]
+        );
 
         $content = PDF::loadView('surat-template.pdf.document', [
             'suratKeluar' => $suratKeluar,
@@ -71,12 +92,70 @@ class SuratTemplateDocumentService
             'kopImage' => $this->resolveKopImage(),
             'signatoryTitle' => $this->resolveSignatoryTitle($suratKeluar),
             'approvalSignature' => $approval->status === 'approved' ? $this->buildApprovalSignature($approval) : null,
+            'pdfVerification' => $this->pdfVerificationService->viewData($verification),
         ])->setPaper('a4', 'portrait')->output();
 
-        return response($content, 200, [
-            'Content-Type' => 'application/pdf',
-            'Content-Disposition' => 'inline; filename="surat-keluar-' . $suratKeluar->id . '.pdf"',
-        ]);
+        return $this->pdfVerificationService->response($content, $verification, 'surat-keluar-' . $suratKeluar->id . '.pdf');
+    }
+
+    public function createGeneratedTempFile(SuratKeluar $suratKeluar, $prefix = 'surat-keluar')
+    {
+        $suratKeluar->loadMissing('templateApproval');
+        $approval = $suratKeluar->templateApproval;
+
+        if (!$approval) {
+            return null;
+        }
+
+        $verification = $this->pdfVerificationService->begin(
+            'surat_keluar',
+            $approval->template_slug ?: 'template_surat',
+            $suratKeluar->id,
+            ($approval->template_name ?: 'Template Surat') . ' - ' . ($suratKeluar->nomor_surat ?: $suratKeluar->id),
+            $this->buildSuratSigners($approval->status === 'approved' ? $this->buildApprovalSignature($approval) : null),
+            ['nomor' => $suratKeluar->nomor_surat]
+        );
+
+        $content = PDF::loadView('surat-template.pdf.document', [
+            'suratKeluar' => $suratKeluar,
+            'templateName' => $approval->template_name ?: 'Template Surat',
+            'templateSlug' => $approval->template_slug,
+            'renderedBody' => $approval->rendered_body ?: '',
+            'fieldValues' => $approval->field_values ?: [],
+            'kopImage' => $this->resolveKopImage(),
+            'signatoryTitle' => $this->resolveSignatoryTitle($suratKeluar),
+            'approvalSignature' => $approval->status === 'approved' ? $this->buildApprovalSignature($approval) : null,
+            'pdfVerification' => $this->pdfVerificationService->viewData($verification),
+        ])->setPaper('a4', 'portrait')->output();
+
+        $this->pdfVerificationService->finalize($verification, $content, 'surat-keluar-' . $suratKeluar->id . '.pdf');
+
+        $dir = storage_path('app/temp/surat-keluar');
+        if (!is_dir($dir)) {
+            File::makeDirectory($dir, 0755, true, true);
+        }
+
+        $path = $dir . DIRECTORY_SEPARATOR . $prefix . '-' . $suratKeluar->id . '-' . Str::uuid() . '.pdf';
+        File::put($path, $content);
+
+        return [
+            'path' => $path,
+            'temporary' => true,
+        ];
+    }
+
+    protected function buildSuratSigners($approvalSignature = null)
+    {
+        if (!$approvalSignature) {
+            return [];
+        }
+
+        return [[
+            'name' => $approvalSignature['name'] ?? '-',
+            'role' => 'Penandatangan Surat',
+            'title' => $approvalSignature['title'] ?? '-',
+            'signed_at' => $approvalSignature['signed_at'] ?? '-',
+        ]];
     }
 
     protected function resolveKopImage()
@@ -112,22 +191,4 @@ class SuratTemplateDocumentService
         ];
     }
 
-    protected function makeApprovalBarcode(SuratKeluarApproval $approval)
-    {
-        $url = URL::signedRoute('surat-keluar.signature.verify', [
-            'approval' => $approval->id,
-        ]);
-
-        $svg = QrCode::format('svg')->size(180)->margin(1)->errorCorrection('H')->generate($url);
-        $logoPath = public_path('logo_qr.png');
-
-        if (file_exists($logoPath)) {
-            $mime = mime_content_type($logoPath) ?: 'image/png';
-            $logoData = 'data:' . $mime . ';base64,' . base64_encode(file_get_contents($logoPath));
-            $logoSvg = '<image x="69" y="69" width="42" height="42" href="' . $logoData . '" xlink:href="' . $logoData . '" preserveAspectRatio="xMidYMid meet" />';
-            $svg = str_replace('</svg>', $logoSvg . '</svg>', $svg);
-        }
-
-        return 'data:image/svg+xml;base64,' . base64_encode($svg);
-    }
 }

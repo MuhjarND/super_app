@@ -28,9 +28,12 @@ class PersediaanLaporanController extends Controller
         abort_unless(auth()->user()->canAccessInventoryModule(), 403);
 
         $data = $this->buildReportData($request);
+        $verifier = app(\App\Services\PdfVerificationService::class);
+        $verification = $verifier->begin('perawatan_alat_mesin', 'laporan_perawatan', null, 'Laporan Perawatan Alat dan Mesin', [], $data['filters']);
+        $data['pdfVerification'] = $verifier->viewData($verification);
         $pdf = PDF::loadView('persediaan.reports.pdf', $data)->setPaper('a4', 'landscape');
 
-        return $pdf->stream('laporan-perawatan-alat-dan-mesin.pdf');
+        return $verifier->response($pdf->output(), $verification, 'laporan-perawatan-alat-dan-mesin.pdf');
     }
 
     public function excel(Request $request)

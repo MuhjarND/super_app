@@ -9,6 +9,7 @@ use App\RapatNotulensi;
 use App\RapatNotulensiTindakLanjut;
 use App\Services\RapatDocumentService;
 use App\Services\RapatNotulensiApprovalService;
+use App\Services\SignaturePadService;
 use Barryvdh\DomPDF\Facade as PDF;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -19,11 +20,13 @@ use Illuminate\Support\Str;
 class RapatNotulensiController extends Controller
 {
     protected $notulensiApprovalService;
+    protected $signaturePadService;
 
-    public function __construct(RapatNotulensiApprovalService $notulensiApprovalService)
+    public function __construct(RapatNotulensiApprovalService $notulensiApprovalService, SignaturePadService $signaturePadService)
     {
         $this->middleware('auth');
         $this->notulensiApprovalService = $notulensiApprovalService;
+        $this->signaturePadService = $signaturePadService;
     }
 
     public function index()
@@ -90,6 +93,7 @@ class RapatNotulensiController extends Controller
         $recommendationItems = $this->normalizeRecommendationItems($rapat, $data['rekomendasi_items'] ?? []);
 
         $notulensi = DB::transaction(function () use ($rapat, $data, $request, $recommendationItems) {
+            $signature = $this->signaturePadService->storeDataUri($data['signature_data'], 'rapat/notulis-signatures');
             $notulensi = RapatNotulensi::create([
                 'rapat_id' => $rapat->id,
                 'notulis_id' => auth()->id(),
@@ -105,6 +109,9 @@ class RapatNotulensiController extends Controller
                 'rekomendasi' => $this->buildRecommendationHtml($recommendationItems),
                 'rekomendasi_items' => $recommendationItems,
                 'dokumentasi_rapat' => null,
+                'notulis_signature_path' => $signature['path'],
+                'notulis_signature_mime' => $signature['mime'],
+                'notulis_signature_size' => $signature['size'],
                 'approval_ready' => false,
                 'submitted_at' => Carbon::now('Asia/Jayapura'),
             ]);
@@ -165,6 +172,7 @@ class RapatNotulensiController extends Controller
 
         DB::transaction(function () use ($notulensi, $data, $request, $recommendationItems) {
             $rapat = $notulensi->rapat;
+            $signature = $this->signaturePadService->storeDataUri($data['signature_data'], 'rapat/notulis-signatures');
 
             $notulensi->update([
                 'notulis_id' => auth()->id(),
@@ -179,6 +187,9 @@ class RapatNotulensiController extends Controller
                 'rekomendasi' => $this->buildRecommendationHtml($recommendationItems),
                 'rekomendasi_items' => $recommendationItems,
                 'dokumentasi_rapat' => null,
+                'notulis_signature_path' => $signature['path'],
+                'notulis_signature_mime' => $signature['mime'],
+                'notulis_signature_size' => $signature['size'],
                 'approval_ready' => false,
                 'submitted_at' => Carbon::now('Asia/Jayapura'),
             ]);
@@ -256,7 +267,28 @@ class RapatNotulensiController extends Controller
             return response()->file(storage_path('app/public/' . $notulensi->file_path));
         }
 
-        $notulensi->load('rapat.kategoriSuratKode', 'rapat.creator', 'rapat.pesertas.jabatan', 'rapat.approver1', 'notulis', 'tindakLanjuts.user');
+        $notulensi->load('rapat.kategoriSuratKode', 'rapat.creator', 'rapat.pesertas.jabatan', 'rapat.approver1', 'notulis', 'approval.approver', 'tindakLanjuts.user');
+        $verifier = app(\App\Services\PdfVerificationService::class);
+        $signers = [[
+            'name' => optional($notulensi->notulis)->name ?: '-',
+            'role' => 'Notulis',
+            'signed_at' => ($notulensi->submitted_at ?: $notulensi->updated_at)
+                ? ($notulensi->submitted_at ?: $notulensi->updated_at)->copy()->timezone('Asia/Jayapura')->translatedFormat('d F Y H:i') . ' WIT'
+                : '-',
+        ]];
+        if ($notulensi->approval && $notulensi->approval->status === 'approved') {
+            $signers[] = [
+                'name' => optional($notulensi->approval->approver)->name ?: '-',
+                'role' => 'Approval Notulen',
+                'signed_at' => $notulensi->approval->acted_at
+                    ? $notulensi->approval->acted_at->copy()->timezone('Asia/Jayapura')->translatedFormat('d F Y H:i') . ' WIT'
+                    : '-',
+            ];
+        }
+        $verification = $verifier->begin('rapat', 'notulensi', $notulensi->id, 'Notulensi - ' . ($notulensi->rapat->judul ?: $notulensi->id), $signers, [
+            'rapat_id' => $notulensi->rapat_id,
+        ]);
+        $pdfVerification = $verifier->viewData($verification);
 
         $pdf = PDF::loadView('rapat.notulensi.pdf', [
             'notulensi' => $notulensi,
@@ -266,9 +298,10 @@ class RapatNotulensiController extends Controller
             'uraianKegiatanRows' => $this->resolveUraianKegiatanRows($notulensi),
             'notulisSignature' => app(RapatDocumentService::class)->buildNotulensiSignatureData($notulensi),
             'approvalSignature' => app(RapatDocumentService::class)->buildNotulensiApprovalSignatureData($notulensi),
+            'pdfVerification' => $pdfVerification,
         ])->setPaper('a4', 'portrait');
 
-        return $pdf->stream('notulensi-' . $notulensi->rapat->id . '.pdf');
+        return $verifier->response($pdf->output(), $verification, 'notulensi-' . $notulensi->rapat->id . '.pdf');
     }
 
     public function file(RapatNotulensi $notulensi)

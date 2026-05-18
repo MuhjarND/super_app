@@ -187,7 +187,7 @@
                                 <textarea id="approval-note" class="form-control approval-note" placeholder="Isi catatan bila diperlukan. Untuk reject, catatan wajib diisi."></textarea>
                             </div>
                             <div class="approval-action-bar">
-                                <button type="button" class="btn btn-success approval-action-btn" onclick="submitNotulensiApprovalDecision({{ $notulensiApproval->id }}, 'approve')">
+                                <button type="button" class="btn btn-success approval-action-btn" onclick="openNotulensiSignatureModal()">
                                     <i class="fas fa-check mr-1"></i> Tanda Tangani Notulen
                                 </button>
                                 <button type="button" class="btn btn-danger approval-action-btn" onclick="submitNotulensiApprovalDecision({{ $notulensiApproval->id }}, 'reject')">
@@ -217,11 +217,42 @@
             </div>
         </div>
     </div>
+
+    @if($canAct)
+        <div class="modal fade" id="notulensiApprovalSignatureModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Tanda Tangan Digital</h5>
+                        <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+                    </div>
+                    <div class="modal-body">
+                        @include('partials.signature-pad', [
+                            'id' => 'notulensiApprovalSignaturePad',
+                            'name' => 'signature_data',
+                            'label' => 'Bubuhkan Tanda Tangan',
+                            'required' => true,
+                        ])
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Batal</button>
+                        <button type="button" class="btn btn-success approval-action-btn" onclick="submitNotulensiApprovalDecision({{ $notulensiApproval->id }}, 'approve')">
+                            Simpan & Approve
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    @endif
 @endsection
 
 @push('scripts')
     <script>
         let approvalDecisionInFlight = false;
+
+        function openNotulensiSignatureModal() {
+            $('#notulensiApprovalSignatureModal').modal('show');
+        }
 
         function submitNotulensiApprovalDecision(approvalId, action) {
             if (approvalDecisionInFlight) {
@@ -239,6 +270,16 @@
                 return;
             }
 
+            let signatureData = null;
+            if (action === 'approve') {
+                const signatureField = document.querySelector('#notulensiApprovalSignatureModal .js-signature-pad');
+                if (!window.AppSignaturePad.sync(signatureField)) {
+                    showToast('Tanda tangan wajib diisi sebelum menyetujui dokumen.', 'error');
+                    return;
+                }
+                signatureData = signatureField.querySelector('input[name="signature_data"]').value;
+            }
+
             if (action === 'reject' && !window.confirm('Tolak dokumen notulen ini?')) {
                 return;
             }
@@ -252,7 +293,8 @@
                 loadingMessage: action === 'approve' ? 'Memproses approval notulen...' : 'Memproses reject notulen...',
                 data: {
                     _token: '{{ csrf_token() }}',
-                    catatan: note
+                    catatan: note,
+                    signature_data: signatureData
                 },
                 success: function (res) {
                     showToast(res.message, 'success');

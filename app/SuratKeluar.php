@@ -80,6 +80,11 @@ class SuratKeluar extends Model
         return $this->belongsTo(Rapat::class, 'rapat_id');
     }
 
+    public function leaveRequest()
+    {
+        return $this->hasOne(LeaveRequest::class, 'letter_number', 'nomor_surat');
+    }
+
     public function penerimaInternal()
     {
         return $this->belongsToMany(User::class, 'surat_keluar_penerima');
@@ -88,6 +93,11 @@ class SuratKeluar extends Model
     public function templateApproval()
     {
         return $this->hasOne(SuratKeluarApproval::class, 'surat_keluar_id');
+    }
+
+    public function pdfVerifications()
+    {
+        return $this->hasMany(PdfVerification::class, 'document_id', 'id')->where('module', 'surat_keluar');
     }
 
     public function getNomenklaturKodeAttribute()

@@ -29,6 +29,7 @@ class StoreRapatNotulensiRequest extends FormRequest
             'dokumentasi_files.*' => ['file', 'image', 'max:5120'],
             'remove_dokumentasi_files' => ['nullable', 'array'],
             'remove_dokumentasi_files.*' => ['string'],
+            'signature_data' => ['required', 'string'],
         ];
     }
 
@@ -39,6 +40,7 @@ class StoreRapatNotulensiRequest extends FormRequest
             'dokumentasi_files.min' => 'Dokumentasi kegiatan minimal 1 file.',
             'dokumentasi_files.*.image' => 'Dokumentasi kegiatan harus berupa file gambar.',
             'dokumentasi_files.*.max' => 'Ukuran dokumentasi maksimal 5MB per file.',
+            'signature_data.required' => 'Tanda tangan notulis wajib diisi.',
         ];
     }
 }

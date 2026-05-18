@@ -12,10 +12,12 @@ use Illuminate\Support\Facades\DB;
 class RapatNotulensiApprovalService
 {
     protected $auditService;
+    protected $signaturePadService;
 
-    public function __construct(ActivityAuditService $auditService)
+    public function __construct(ActivityAuditService $auditService, SignaturePadService $signaturePadService)
     {
         $this->auditService = $auditService;
+        $this->signaturePadService = $signaturePadService;
     }
 
     public function syncWorkflow(RapatNotulensi $notulensi, $isResubmission = false)
@@ -60,6 +62,9 @@ class RapatNotulensiApprovalService
                 $payload['status'] = 'pending';
                 $payload['catatan'] = null;
                 $payload['acted_at'] = null;
+                $payload['signature_path'] = null;
+                $payload['signature_mime'] = null;
+                $payload['signature_size'] = null;
                 $payload['notified_at'] = null;
             }
 
@@ -72,18 +77,22 @@ class RapatNotulensiApprovalService
         ]);
     }
 
-    public function approve(RapatNotulensiApproval $approval, User $actor, $catatan = null)
+    public function approve(RapatNotulensiApproval $approval, User $actor, $catatan = null, $signatureData = null)
     {
         $previousStatus = $approval->status;
 
-        DB::transaction(function () use ($approval, $actor, $catatan) {
+        DB::transaction(function () use ($approval, $actor, $catatan, $signatureData) {
             $approval->refresh();
             $this->guardDecision($approval, $actor);
+            $signature = $this->signaturePadService->storeDataUri($signatureData, 'rapat/notulensi-approval-signatures');
 
             $approval->update([
                 'status' => 'approved',
                 'catatan' => $catatan,
                 'acted_at' => Carbon::now('Asia/Jayapura'),
+                'signature_path' => $signature['path'],
+                'signature_mime' => $signature['mime'],
+                'signature_size' => $signature['size'],
             ]);
 
             $this->logHistory($approval, 'approved', $catatan);
@@ -118,6 +127,9 @@ class RapatNotulensiApprovalService
                 'status' => 'rejected',
                 'catatan' => $catatan,
                 'acted_at' => Carbon::now('Asia/Jayapura'),
+                'signature_path' => null,
+                'signature_mime' => null,
+                'signature_size' => null,
             ]);
 
             $this->logHistory($approval, 'rejected', $catatan);

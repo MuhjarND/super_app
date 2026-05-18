@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class LeaveApproval extends Model
 {
-    protected $fillable = ['leave_request_id','step_no','role_name','approver_id','delegated_to_id','status','action','acted_at','note','meta_json'];
+    protected $fillable = ['leave_request_id','step_no','role_name','approver_id','delegated_to_id','status','action','acted_at','signature_path','signature_mime','signature_size','note','meta_json'];
     protected $casts = ['step_no' => 'integer','acted_at' => 'datetime','meta_json' => 'array'];
     public function leaveRequest() { return $this->belongsTo(LeaveRequest::class); }
     public function approver() { return $this->belongsTo(User::class, 'approver_id'); }

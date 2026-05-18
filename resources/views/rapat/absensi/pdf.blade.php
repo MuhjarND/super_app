@@ -94,6 +94,7 @@
     </style>
 </head>
 <body>
+@include('partials.pdf-verification-badge', ['pdfVerification' => $pdfVerification ?? null])
     @if($kopImage)
         <div class="kop">
             <img src="{{ $kopImage }}" alt="Kop Absensi">

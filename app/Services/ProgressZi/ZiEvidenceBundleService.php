@@ -7,6 +7,7 @@ use App\Rapat;
 use App\RapatLaporan;
 use App\RapatNotulensi;
 use App\Services\RapatDocumentService;
+use App\Services\SuratTemplateDocumentService;
 use App\SuratKeluar;
 use App\SuratMasuk;
 use App\ZiActivity;
@@ -88,19 +89,19 @@ class ZiEvidenceBundleService
                     : $this->renderNoticePdf($evidence->title, 'File surat masuk tidak tersedia di storage.');
             case 'surat_keluar':
                 $suratKeluar = SuratKeluar::find($evidence->source_reference_id);
-                return $suratKeluar && $suratKeluar->file_path
-                    ? $this->resolveStorageAttachmentPath($suratKeluar->file_path, $suratKeluar->nomor_surat ?: $evidence->title)
-                    : $this->renderNoticePdf($evidence->title, 'File surat keluar tidak tersedia di storage.');
+                if ($suratKeluar && $suratKeluar->file_path) {
+                    return $this->resolveStorageAttachmentPath($suratKeluar->file_path, $suratKeluar->nomor_surat ?: $evidence->title);
+                }
+
+                if ($suratKeluar && $suratKeluar->templateApproval) {
+                    return app(SuratTemplateDocumentService::class)->createGeneratedTempFile($suratKeluar, 'zi-surat-keluar');
+                }
+
+                return $this->renderNoticePdf($evidence->title, 'File surat keluar tidak tersedia di storage.');
             case 'rapat':
                 $rapat = Rapat::find($evidence->source_reference_id);
                 if ($rapat) {
-                    $suratKeluar = $this->rapatDocumentService->ensureUndanganPdf($rapat);
-                    if ($suratKeluar && $suratKeluar->file_path && Storage::disk('public')->exists($suratKeluar->file_path)) {
-                        return [
-                            'path' => storage_path('app/public/' . $suratKeluar->file_path),
-                            'temporary' => false,
-                        ];
-                    }
+                    return $this->rapatDocumentService->createUndanganTempFile($rapat, 'zi-undangan-rapat');
                 }
 
                 return $this->renderNoticePdf($evidence->title, 'Undangan rapat belum tersedia sebagai file PDF lokal.');

@@ -69,9 +69,12 @@ class ProgressZiDashboardController extends Controller
 
         [$periodId, $indicators, $evidences] = $this->buildVerificationData($request);
         $period = $periodId ? ZiPeriod::find($periodId) : null;
-        $pdf = PDF::loadView('progress-zi.verifications.pdf', compact('period', 'indicators', 'evidences'))->setPaper('a4', 'landscape');
+        $verifier = app(\App\Services\PdfVerificationService::class);
+        $verification = $verifier->begin('progress_zi', 'rekap_verifikasi', $periodId, 'Rekap Verifikasi Progress ZI', [], ['periode' => optional($period)->name]);
+        $pdfVerification = $verifier->viewData($verification);
+        $pdf = PDF::loadView('progress-zi.verifications.pdf', compact('period', 'indicators', 'evidences', 'pdfVerification'))->setPaper('a4', 'landscape');
 
-        return $pdf->stream('rekap-verifikasi-progress-zi.pdf');
+        return $verifier->response($pdf->output(), $verification, 'rekap-verifikasi-progress-zi.pdf');
     }
 
     public function verificationsExcel(Request $request)

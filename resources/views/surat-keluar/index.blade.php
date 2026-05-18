@@ -465,7 +465,7 @@
                         <tr class="main-row" data-surat-id="<?php echo e($surat->id); ?>"
                             data-update-url="<?php echo e(route('surat-keluar.update', $surat)); ?>"
                             data-delete-url="<?php echo e(route('surat-keluar.destroy', $surat)); ?>"
-                            data-file-url="<?php echo e($surat->file_path ? route('surat-keluar.file', $surat) : ''); ?>"
+                            data-file-url="<?php echo e(($surat->file_path || $surat->templateApproval || $surat->rapat || $surat->leaveRequest || ($surat->relationLoaded('pdfVerifications') && $surat->pdfVerifications->isNotEmpty())) ? route('surat-keluar.file', $surat) : ''); ?>"
                             data-creator="<?php echo e($surat->creator->name); ?>"
                             data-tahun-surat="<?php echo e($surat->tahun_surat); ?>"
                             data-nomenklatur-jabatan="<?php echo e($surat->nomenklatur_jabatan); ?>"
@@ -512,7 +512,7 @@
                                 <?php echo e($surat->created_at->format('y-m-d')); ?>
                             </td>
                             <td>
-                                <?php if($surat->file_path): ?>
+                                <?php if($surat->file_path || $surat->templateApproval || $surat->rapat || $surat->leaveRequest || ($surat->relationLoaded('pdfVerifications') && $surat->pdfVerifications->isNotEmpty())): ?>
                                     <a href="javascript:void(0)" class="lampiran-badge exists"
                                         onclick="viewFile('<?php echo e(route('surat-keluar.file', $surat)); ?>')">Berkas</a>
                                 <?php else: ?>

@@ -22,6 +22,8 @@ Route::get('/verifikasi/ttd/{token}', 'RapatSignatureVerificationController@show
 Route::get('/verifikasi/cuti/{leaveRequest}/{approval}', 'LeaveSignatureVerificationController@show')->name('cuti.signature.verify');
 Route::get('/verifikasi/cuti/pemohon/{leaveRequest}', 'LeaveSignatureVerificationController@showApplicant')->name('cuti.signature.verify-applicant');
 Route::get('/verifikasi/surat-keluar/{approval}', 'SuratKeluarSignatureVerificationController@show')->name('surat-keluar.signature.verify');
+Route::get('/verifikasi/pdf/{token}', 'PdfVerificationController@show')->name('pdf-verification.show');
+Route::get('/verifikasi/pdf/{token}/preview', 'PdfVerificationController@preview')->name('pdf-verification.preview');
 Route::get('/publik/tindak-lanjut/eviden/{token}', 'PublicFollowUpEvidenceController@show')->name('rapat.notulensi.follow-ups.eviden.public');
 
 // Authenticated routes
@@ -39,6 +41,7 @@ Route::middleware(['auth'])->group(function () {
     // Dashboard
     Route::get('/dashboard', 'DashboardController@index')->name('dashboard');
     Route::get('/home', 'DashboardController@index')->name('home');
+    Route::get('/mobile/menu/{module}', 'MobileModuleMenuController@show')->name('mobile.menu.show');
     Route::get('/dashboard/pimpinan', 'LeadershipDashboardController@index')->name('dashboard.leadership');
     Route::get('/audit-trail', 'AuditTrailController@index')->name('audit-trail.index');
     Route::get('/tindak-lanjut-terpadu', 'UnifiedActionCenterController@index')->name('action-center.index');

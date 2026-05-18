@@ -18,6 +18,7 @@
     </style>
 </head>
 <body>
+@include('partials.pdf-verification-badge', ['pdfVerification' => $pdfVerification ?? null])
     <div class="header">
         <div class="kop-small">PENGADILAN TINGGI AGAMA PAPUA BARAT</div>
         <div class="title">HASIL E-VOTING</div>

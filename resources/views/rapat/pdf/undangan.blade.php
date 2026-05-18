@@ -129,14 +129,15 @@
             margin-left: auto;
         }
 
-        .qr {
+        .signature-pad-image {
             margin: 8pt 0 4pt 0;
         }
 
-        .qr img {
-            width: 84pt;
-            height: 84pt;
+        .signature-pad-image img {
+            width: 118pt;
+            height: 58pt;
             display: block;
+            object-fit: contain;
         }
 
         .nama-ttd {
@@ -184,6 +185,7 @@
     </style>
 </head>
 <body>
+@include('partials.pdf-verification-badge', ['pdfVerification' => $pdfVerification ?? null])
     @php
         $recipientSummary = $displayRecipients->map(function ($recipient) {
             return $recipient->jabatan_keterangan ?: optional($recipient->jabatan)->nama;
@@ -307,12 +309,12 @@
                 <div class="ttd-box">
                     <div>{{ $signatoryTitle['line1'] }}</div>
                     <div><strong>{{ $signatoryTitle['line2'] }}</strong></div>
-                    @if($signatureBarcode && $signatureApprovedAt)
-                        <div class="qr">
-                            <img src="{{ $signatureBarcode }}" alt="Barcode Verifikasi">
+                    @if(!empty($signatureImage) && $signatureApprovedAt)
+                        <div class="signature-pad-image">
+                            <img src="{{ $signatureImage }}" alt="Tanda Tangan Digital">
                         </div>
                     @else
-                        <div style="height: 94pt;"></div>
+                        <div style="height: 68pt;"></div>
                     @endif
                     <div class="nama-ttd">{{ optional($signatory)->name ?? '(menunggu approval 1)' }}</div>
                 </div>
@@ -352,12 +354,12 @@
                     <div class="ttd-box">
                         <div>{{ $signatoryTitle['line1'] }}</div>
                         <div><strong>{{ $signatoryTitle['line2'] }}</strong></div>
-                        @if($signatureBarcode && $signatureApprovedAt)
-                            <div class="qr">
-                                <img src="{{ $signatureBarcode }}" alt="Barcode Verifikasi">
+                        @if(!empty($signatureImage) && $signatureApprovedAt)
+                            <div class="signature-pad-image">
+                                <img src="{{ $signatureImage }}" alt="Tanda Tangan Digital">
                             </div>
                         @else
-                            <div style="height: 94pt;"></div>
+                            <div style="height: 68pt;"></div>
                         @endif
                         <div class="nama-ttd">{{ optional($signatory)->name ?? '(menunggu approval 1)' }}</div>
                     </div>

@@ -175,7 +175,7 @@
 
                 <div class="note">
                     @if($verification['valid'])
-                        Barcode/QR pada dokumen ini sah dan mengarah ke data asli yang tersimpan di sistem. Informasi penandatangan, status approval, dan nomor dokumen sesuai dengan data final yang berlaku.
+                        Tanda tangan digital pada dokumen ini sah dan tercatat pada data asli yang tersimpan di sistem. Informasi penandatangan, status approval, dan nomor dokumen sesuai dengan data final yang berlaku.
                     @else
                         Dokumen ini belum berada pada status final yang sah untuk tanda tangan elektronik, atau data verifikasinya tidak memenuhi syarat validasi dokumen final.
                     @endif

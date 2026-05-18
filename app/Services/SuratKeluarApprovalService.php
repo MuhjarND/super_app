@@ -15,12 +15,14 @@ class SuratKeluarApprovalService
     protected $documentService;
     protected $auditService;
     protected $whatsAppService;
+    protected $signaturePadService;
 
-    public function __construct(SuratTemplateDocumentService $documentService, ActivityAuditService $auditService, WhatsAppNotificationService $whatsAppService)
+    public function __construct(SuratTemplateDocumentService $documentService, ActivityAuditService $auditService, WhatsAppNotificationService $whatsAppService, SignaturePadService $signaturePadService)
     {
         $this->documentService = $documentService;
         $this->auditService = $auditService;
         $this->whatsAppService = $whatsAppService;
+        $this->signaturePadService = $signaturePadService;
     }
 
     public function syncForTemplate(SuratKeluar $suratKeluar, array $payload, User $approver, User $requester)
@@ -40,29 +42,34 @@ class SuratKeluarApprovalService
                     'status' => 'pending',
                     'note' => null,
                     'acted_at' => null,
+                    'signature_path' => null,
+                    'signature_mime' => null,
+                    'signature_size' => null,
                 ]
             );
 
-            $this->documentService->attachGeneratedDocument($suratKeluar, $payload, [
-                'status' => 'draft',
-            ]);
+            $suratKeluar->update(['status' => 'draft']);
 
             return $approval;
         });
     }
 
-    public function approve(SuratKeluarApproval $approval, User $actor, $note = null)
+    public function approve(SuratKeluarApproval $approval, User $actor, $note = null, $signatureData = null)
     {
         $previousStatus = $approval->status;
 
-        DB::transaction(function () use ($approval, $actor, $note) {
+        DB::transaction(function () use ($approval, $actor, $note, $signatureData) {
             $approval->refresh();
             $this->guardDecision($approval, $actor);
+            $signature = $this->signaturePadService->storeDataUri($signatureData, 'surat-keluar/approval-signatures');
 
             $approval->update([
                 'status' => 'approved',
                 'note' => $note,
                 'acted_at' => now(),
+                'signature_path' => $signature['path'],
+                'signature_mime' => $signature['mime'],
+                'signature_size' => $signature['size'],
             ]);
 
             SuratKeluarApprovalHistory::create([
@@ -76,15 +83,7 @@ class SuratKeluarApprovalService
                 'acted_at' => now(),
             ]);
 
-            $this->documentService->attachGeneratedDocument($approval->suratKeluar, [
-                'template_name' => $approval->template_name,
-                'template_slug' => $approval->template_slug,
-                'rendered_body' => $approval->rendered_body,
-                'field_values' => $approval->field_values ?: [],
-            ], [
-                'status' => 'lengkap',
-                'approval_signature' => $this->documentService->buildApprovalSignature($approval->fresh(['approver', 'suratKeluar'])),
-            ]);
+            $approval->suratKeluar()->update(['status' => 'lengkap']);
         });
 
         $approval->loadMissing('suratKeluar', 'requester', 'approver');
@@ -114,6 +113,9 @@ class SuratKeluarApprovalService
                 'status' => 'rejected',
                 'note' => $note,
                 'acted_at' => now(),
+                'signature_path' => null,
+                'signature_mime' => null,
+                'signature_size' => null,
             ]);
 
             SuratKeluarApprovalHistory::create([

@@ -6,6 +6,8 @@ use App\SuratKeluar;
 use App\KlasifikasiKode;
 use App\KategoriSurat;
 use App\Services\SuratTemplateDocumentService;
+use App\Services\LeaveDocumentService;
+use App\Services\RapatDocumentService;
 use App\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -25,7 +27,7 @@ class SuratKeluarController extends Controller
         $user = auth()->user();
 
         $suratKeluar = SuratKeluar::visibleTo($user)
-            ->with('klasifikasiKode', 'kategoriSurat', 'kodeFungsi', 'kodeKegiatan', 'kodeTransaksi', 'creator', 'penerimaInternal', 'templateApproval')
+            ->with('klasifikasiKode', 'kategoriSurat', 'kodeFungsi', 'kodeKegiatan', 'kodeTransaksi', 'creator', 'penerimaInternal', 'templateApproval', 'pdfVerifications', 'rapat', 'leaveRequest')
             ->orderBy('created_at', 'desc')
             ->get();
         $kategoriSurats = KategoriSurat::where('aktif', true)->orderBy('kode')->get();
@@ -340,16 +342,39 @@ class SuratKeluarController extends Controller
     {
         abort_unless(auth()->user()->canViewSuratKeluar($suratKeluar), 403);
 
-        if (!$suratKeluar->file_path) {
-            abort(404, 'File tidak ditemukan.');
+        if ($suratKeluar->file_path) {
+            return response()->file(storage_path('app/public/' . $suratKeluar->file_path));
         }
-        return response()->file(storage_path('app/public/' . $suratKeluar->file_path));
+
+        $suratKeluar->loadMissing('templateApproval', 'rapat', 'leaveRequest');
+        if ($suratKeluar->templateApproval) {
+            return $this->templateDocumentService->streamApprovalPreview($suratKeluar->templateApproval);
+        }
+
+        if ($suratKeluar->rapat) {
+            return app(RapatDocumentService::class)->streamUndanganPdf($suratKeluar->rapat);
+        }
+
+        if ($suratKeluar->leaveRequest) {
+            return app(LeaveDocumentService::class)->streamDecisionLetter($suratKeluar->leaveRequest);
+        }
+
+        $verification = \App\PdfVerification::where('module', 'surat_keluar')
+            ->where('document_id', (string) $suratKeluar->id)
+            ->latest()
+            ->first();
+
+        if ($verification && $verification->file_path) {
+            return response()->file(storage_path('app/public/' . $verification->file_path));
+        }
+
+        abort(404, 'File tidak ditemukan.');
     }
 
     public function arsip(Request $request)
     {
         $query = SuratKeluar::visibleTo(auth()->user())
-            ->with('klasifikasiKode', 'creator', 'penerimaInternal')
+            ->with('klasifikasiKode', 'creator', 'penerimaInternal', 'templateApproval', 'pdfVerifications', 'rapat', 'leaveRequest')
             ->where('status', 'lengkap');
 
         if ($request->filled('search')) {

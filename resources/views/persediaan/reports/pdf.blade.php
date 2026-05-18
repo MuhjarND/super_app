@@ -13,6 +13,7 @@
     </style>
 </head>
 <body>
+@include('partials.pdf-verification-badge', ['pdfVerification' => $pdfVerification ?? null])
     <h1>Laporan Transaksi Perawatan</h1>
     <p>Periode: {{ $filters['from'] ?: '-' }} s/d {{ $filters['to'] ?: '-' }}</p>
 

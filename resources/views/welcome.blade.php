@@ -933,7 +933,7 @@
                     <article class="feature-card">
                         <div class="module-icon"><i class="fas fa-paper-plane"></i></div>
                         <h3>Surat Keluar</h3>
-                        <p>Nomor surat, template, file final, approval penandatangan, QR verifikasi, dan bundel dokumen saat diperlukan.</p>
+                        <p>Nomor surat, template, file final, approval penandatangan, verifikasi tanda tangan digital, dan bundel dokumen saat diperlukan.</p>
                     </article>
                     <article class="feature-card">
                         <div class="module-icon"><i class="fas fa-handshake"></i></div>

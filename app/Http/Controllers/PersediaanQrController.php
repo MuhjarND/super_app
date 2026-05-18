@@ -31,8 +31,11 @@ class PersediaanQrController extends Controller
             return $detail;
         });
 
-        $pdf = PDF::loadView('persediaan.qr.print', compact('details'))->setPaper('a4');
+        $verifier = app(\App\Services\PdfVerificationService::class);
+        $verification = $verifier->begin('perawatan_alat_mesin', 'qr_sub_barang', null, 'Cetak QR Code Alat dan Mesin', [], ['jumlah_sub_barang' => $details->count()]);
+        $pdfVerification = $verifier->viewData($verification);
+        $pdf = PDF::loadView('persediaan.qr.print', compact('details', 'pdfVerification'))->setPaper('a4');
 
-        return $pdf->stream('qrcode-alat-dan-mesin.pdf');
+        return $verifier->response($pdf->output(), $verification, 'qrcode-alat-dan-mesin.pdf');
     }
 }

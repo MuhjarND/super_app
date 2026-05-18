@@ -14,12 +14,14 @@ class RapatApprovalService
     protected $whatsAppService;
     protected $documentService;
     protected $auditService;
+    protected $signaturePadService;
 
-    public function __construct(WhatsAppNotificationService $whatsAppService, RapatDocumentService $documentService, ActivityAuditService $auditService)
+    public function __construct(WhatsAppNotificationService $whatsAppService, RapatDocumentService $documentService, ActivityAuditService $auditService, SignaturePadService $signaturePadService)
     {
         $this->whatsAppService = $whatsAppService;
         $this->documentService = $documentService;
         $this->auditService = $auditService;
+        $this->signaturePadService = $signaturePadService;
     }
 
     public function syncWorkflow(Rapat $rapat, $fallbackStatus = 'draft', $isResubmission = false)
@@ -30,7 +32,7 @@ class RapatApprovalService
             $rapat->approvals()->delete();
             $rapat->status = in_array($fallbackStatus, ['draft', 'terjadwal', 'dibatalkan', 'selesai']) ? $fallbackStatus : 'draft';
             $rapat->save();
-            $this->documentService->generateAndStoreUndangan($rapat->fresh(), $this->documentService->shouldUseSignedDocument($rapat));
+            $this->documentService->syncSuratKeluar($rapat->fresh(), $this->documentService->shouldUseSignedDocument($rapat));
 
             return;
         }
@@ -49,6 +51,9 @@ class RapatApprovalService
                     'status' => 'waiting',
                     'catatan' => null,
                     'acted_at' => null,
+                    'signature_path' => null,
+                    'signature_mime' => null,
+                    'signature_size' => null,
                     'notified_at' => null,
                 ]);
                 continue;
@@ -73,6 +78,9 @@ class RapatApprovalService
                     'status' => 'waiting',
                     'catatan' => null,
                     'acted_at' => null,
+                    'signature_path' => null,
+                    'signature_mime' => null,
+                    'signature_size' => null,
                     'notified_at' => null,
                 ]);
             }
@@ -86,18 +94,22 @@ class RapatApprovalService
         $this->refreshRapatStatus($rapat, $fallbackStatus);
     }
 
-    public function approve(RapatApproval $approval, User $actor, $catatan = null)
+    public function approve(RapatApproval $approval, User $actor, $catatan = null, $signatureData = null)
     {
         $previousStatus = $approval->status;
 
-        DB::transaction(function () use ($approval, $actor, $catatan) {
+        DB::transaction(function () use ($approval, $actor, $catatan, $signatureData) {
             $approval->refresh();
             $this->guardDecision($approval, $actor);
+            $signature = $this->signaturePadService->storeDataUri($signatureData, 'rapat/approval-signatures');
 
             $approval->update([
                 'status' => 'approved',
                 'catatan' => $catatan,
                 'acted_at' => Carbon::now('Asia/Jayapura'),
+                'signature_path' => $signature['path'],
+                'signature_mime' => $signature['mime'],
+                'signature_size' => $signature['size'],
             ]);
 
             $this->logHistory($approval, 'approved', $catatan);
@@ -105,11 +117,11 @@ class RapatApprovalService
             $approval->rapat->refresh();
 
             if ($approval->rapat->status === 'disetujui') {
-                $this->documentService->generateAndStoreUndangan($approval->rapat->fresh(), true);
+                $this->documentService->syncSuratKeluar($approval->rapat->fresh(), true);
                 return;
             }
 
-            $this->documentService->generateAndStoreUndangan($approval->rapat->fresh(), false);
+            $this->documentService->syncSuratKeluar($approval->rapat->fresh(), false);
         });
 
         $approval->rapat->refresh();
@@ -144,6 +156,9 @@ class RapatApprovalService
                 'status' => 'rejected',
                 'catatan' => $catatan,
                 'acted_at' => Carbon::now('Asia/Jayapura'),
+                'signature_path' => null,
+                'signature_mime' => null,
+                'signature_size' => null,
             ]);
 
             $approval->rapat->approvals()
@@ -153,11 +168,14 @@ class RapatApprovalService
                     'status' => 'waiting',
                     'catatan' => null,
                     'acted_at' => null,
+                    'signature_path' => null,
+                    'signature_mime' => null,
+                    'signature_size' => null,
                 ]);
 
             $this->logHistory($approval, 'rejected', $catatan);
             $approval->rapat->update(['status' => 'ditolak']);
-            $this->documentService->generateAndStoreUndangan($approval->rapat->fresh(), false);
+            $this->documentService->syncSuratKeluar($approval->rapat->fresh(), false);
         });
 
         $this->auditService->log('rapat', 'rapat_approval_rejected', $approval->fresh('rapat'), [
@@ -247,6 +265,9 @@ class RapatApprovalService
                     'status' => $desiredStatus,
                     'catatan' => null,
                     'acted_at' => null,
+                    'signature_path' => null,
+                    'signature_mime' => null,
+                    'signature_size' => null,
                     'notified_at' => $desiredStatus === 'pending' ? null : $approval->notified_at,
                 ]);
             }
@@ -270,6 +291,9 @@ class RapatApprovalService
                 'status' => 'pending',
                 'catatan' => null,
                 'acted_at' => null,
+                'signature_path' => null,
+                'signature_mime' => null,
+                'signature_size' => null,
                 'notified_at' => null,
             ]);
         }

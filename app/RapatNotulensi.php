@@ -28,6 +28,9 @@ class RapatNotulensi extends Model
         'file_nama',
         'file_mime',
         'file_size',
+        'notulis_signature_path',
+        'notulis_signature_mime',
+        'notulis_signature_size',
         'approval_ready',
         'submitted_at',
     ];
@@ -36,6 +39,7 @@ class RapatNotulensi extends Model
         'tidak_membuat_notulen' => 'boolean',
         'approval_ready' => 'boolean',
         'file_size' => 'integer',
+        'notulis_signature_size' => 'integer',
         'submitted_at' => 'datetime',
         'rekomendasi_items' => 'array',
         'dokumentasi_files' => 'array',

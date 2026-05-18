@@ -15,6 +15,9 @@ class RapatApproval extends Model
         'status',
         'catatan',
         'acted_at',
+        'signature_path',
+        'signature_mime',
+        'signature_size',
         'notified_at',
     ];
 

@@ -141,9 +141,13 @@
                                 </td>
                                 <td data-label="Tanggal">{{ $surat->tanggal_surat->format('d/m/Y') }}</td>
                                 <td data-label="Berkas">
-                                    <a href="{{ route('surat-keluar.file', $surat) }}" class="btn btn-sm btn-outline-success">
-                                        <i class="fas fa-download mr-1"></i>Download
-                                    </a>
+                                    @if($surat->file_path || $surat->templateApproval || $surat->rapat || $surat->leaveRequest || ($surat->relationLoaded('pdfVerifications') && $surat->pdfVerifications->isNotEmpty()))
+                                        <a href="{{ route('surat-keluar.file', $surat) }}" class="btn btn-sm btn-outline-success">
+                                            <i class="fas fa-download mr-1"></i>Download
+                                        </a>
+                                    @else
+                                        <span class="text-muted">-</span>
+                                    @endif
                                 </td>
                                 <td data-label="Dibuat Oleh"><small>{{ $surat->creator->name }}</small></td>
                             </tr>

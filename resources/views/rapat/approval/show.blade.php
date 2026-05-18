@@ -251,7 +251,7 @@
                                 <textarea id="approval-note" class="form-control approval-note" placeholder="Isi catatan bila diperlukan. Untuk reject, catatan wajib diisi."></textarea>
                             </div>
                             <div class="approval-action-bar">
-                                <button type="button" class="btn btn-success approval-action-btn" onclick="submitApprovalDecision({{ $rapatApproval->id }}, 'approve')">
+                                <button type="button" class="btn btn-success approval-action-btn" onclick="openApprovalSignatureModal()">
                                     <i class="fas fa-check mr-1"></i> {{ $rapatApproval->stage_label }}
                                 </button>
                                 <button type="button" class="btn btn-danger approval-action-btn" onclick="submitApprovalDecision({{ $rapatApproval->id }}, 'reject')">
@@ -281,11 +281,42 @@
             </div>
         </div>
     </div>
+
+    @if($canAct)
+        <div class="modal fade" id="rapatApprovalSignatureModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Tanda Tangan Digital</h5>
+                        <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+                    </div>
+                    <div class="modal-body">
+                        @include('partials.signature-pad', [
+                            'id' => 'rapatApprovalSignaturePad',
+                            'name' => 'signature_data',
+                            'label' => 'Bubuhkan Tanda Tangan',
+                            'required' => true,
+                        ])
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Batal</button>
+                        <button type="button" class="btn btn-success approval-action-btn" onclick="submitApprovalDecision({{ $rapatApproval->id }}, 'approve')">
+                            Simpan & Approve
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    @endif
 @endsection
 
 @push('scripts')
     <script>
         let approvalDecisionInFlight = false;
+
+        function openApprovalSignatureModal() {
+            $('#rapatApprovalSignatureModal').modal('show');
+        }
 
         function submitApprovalDecision(approvalId, action) {
             if (approvalDecisionInFlight) {
@@ -303,6 +334,16 @@
                 return;
             }
 
+            let signatureData = null;
+            if (action === 'approve') {
+                const signatureField = document.querySelector('#rapatApprovalSignatureModal .js-signature-pad');
+                if (!window.AppSignaturePad.sync(signatureField)) {
+                    showToast('Tanda tangan wajib diisi sebelum menyetujui dokumen.', 'error');
+                    return;
+                }
+                signatureData = signatureField.querySelector('input[name="signature_data"]').value;
+            }
+
             if (action === 'reject' && !window.confirm('Tolak dokumen undangan rapat ini?')) {
                 return;
             }
@@ -316,7 +357,8 @@
                 loadingMessage: action === 'approve' ? 'Memproses approval dokumen...' : 'Memproses reject dokumen...',
                 data: {
                     _token: '{{ csrf_token() }}',
-                    catatan: note
+                    catatan: note,
+                    signature_data: signatureData
                 },
                 success: function (res) {
                     showToast(res.message, 'success');

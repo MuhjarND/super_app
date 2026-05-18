@@ -53,10 +53,13 @@ class ProgressZiReportController extends Controller
         }
 
         [$activities, $filters, $summary, $areaScores] = $this->buildReport($request, false);
-        $pdf = PDF::loadView('progress-zi.reports.pdf', compact('activities', 'filters', 'summary', 'areaScores'))
+        $verifier = app(\App\Services\PdfVerificationService::class);
+        $verification = $verifier->begin('progress_zi', 'laporan_progress_zi', null, 'Laporan Progress ZI', [], $filters);
+        $pdfVerification = $verifier->viewData($verification);
+        $pdf = PDF::loadView('progress-zi.reports.pdf', compact('activities', 'filters', 'summary', 'areaScores', 'pdfVerification'))
             ->setPaper('a4', 'landscape');
 
-        return $pdf->stream('laporan-progress-zi.pdf');
+        return $verifier->response($pdf->output(), $verification, 'laporan-progress-zi.pdf');
     }
 
     public function excel(Request $request)

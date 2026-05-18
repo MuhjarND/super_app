@@ -106,24 +106,23 @@ class RapatLaporanService
 
         $rapat = $laporan->rapat;
         $documentService = app(RapatDocumentService::class);
-        $suratKeluar = $rapat->suratKeluar;
-
-        if (!$suratKeluar || !$suratKeluar->file_path || !Storage::disk('public')->exists($suratKeluar->file_path)) {
-            if ($rapat->kategori_surat_kode_id) {
-                try {
-                    $suratKeluar = $documentService->ensureUndanganPdf($rapat);
-                } catch (\Throwable $e) {
-                    $suratKeluar = $rapat->suratKeluar;
-                }
-            }
-        }
 
         $sourceFiles = [];
         $tempFiles = [];
+        $verifier = app(PdfVerificationService::class);
+        $verification = $verifier->begin('rapat', 'laporan_tindak_lanjut_final', $laporan->id, $laporan->judul ?: 'Laporan Tindak Lanjut', [], [
+            'rapat_id' => $rapat->id,
+        ]);
 
         try {
-            if ($suratKeluar && $suratKeluar->file_path && Storage::disk('public')->exists($suratKeluar->file_path)) {
-                $sourceFiles[] = storage_path('app/public/' . $suratKeluar->file_path);
+            if ($rapat->kategori_surat_kode_id) {
+                try {
+                    $undanganTemp = $documentService->createUndanganTempFile($rapat, 'laporan-undangan');
+                    $sourceFiles[] = $undanganTemp['path'];
+                    $tempFiles[] = $undanganTemp['path'];
+                } catch (\Throwable $e) {
+                    // Laporan tetap dapat dibuat meskipun undangan gagal dirender.
+                }
             }
 
             $absensiTempPath = $this->makeTempPdfPath('laporan-absensi-' . $laporan->id);
@@ -140,7 +139,7 @@ class RapatLaporanService
             }
 
             $laporanTempPath = $this->makeTempPdfPath('laporan-manual-' . $laporan->id);
-            File::put($laporanTempPath, $this->renderLaporanTindakLanjutPdf($laporan));
+            File::put($laporanTempPath, $this->renderLaporanTindakLanjutPdf($laporan, $verifier->viewData($verification)));
             $tempFiles[] = $laporanTempPath;
             $sourceFiles[] = $laporanTempPath;
 
@@ -150,15 +149,11 @@ class RapatLaporanService
 
             $filename = 'rapat/laporan/laporan-tindak-lanjut-' . $laporan->id . '.pdf';
 
-            if ($laporan->file_path && $laporan->file_path !== $filename) {
-                Storage::disk('public')->delete($laporan->file_path);
-            }
-
             $binary = File::get($mergedTempPath);
-            Storage::disk('public')->put($filename, $binary);
+            $verifier->finalize($verification, $binary, basename($filename));
 
             $laporan->update([
-                'file_path' => $filename,
+                'file_path' => null,
                 'file_nama' => 'laporan-tindak-lanjut-' . Str::slug($rapat->judul) . '.pdf',
                 'file_mime' => 'application/pdf',
                 'file_size' => strlen($binary),
@@ -250,7 +245,7 @@ class RapatLaporanService
         ];
     }
 
-    protected function renderLaporanTindakLanjutPdf(RapatLaporan $laporan)
+    protected function renderLaporanTindakLanjutPdf(RapatLaporan $laporan, array $pdfVerification = null)
     {
         $rapat = $laporan->rapat;
 
@@ -263,6 +258,7 @@ class RapatLaporanService
             'bab1Tujuan' => $laporan->bab_1_tujuan,
             'bab2HasilMonitoring' => $laporan->bab_2_hasil_monitoring,
             'bab3TindakLanjut' => $laporan->bab_3_tindak_lanjut,
+            'pdfVerification' => $pdfVerification,
         ])->setPaper('a4', 'portrait')->output();
     }
 

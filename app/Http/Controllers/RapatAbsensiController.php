@@ -100,15 +100,21 @@ class RapatAbsensiController extends Controller
             return $attendance;
         });
         $kopImage = $this->resolveKopAbsenImage();
+        $verifier = app(\App\Services\PdfVerificationService::class);
+        $verification = $verifier->begin('rapat', 'laporan_absensi', $rapat->id, 'Laporan Absensi Rapat - ' . ($rapat->judul ?: $rapat->id), [], [
+            'tanggal' => optional($rapat->tanggal)->toDateString(),
+        ]);
+        $pdfVerification = $verifier->viewData($verification);
 
         $pdf = PDF::loadView('rapat.absensi.pdf', compact(
             'rapat',
             'internalParticipants',
             'guestAttendances',
-            'kopImage'
+            'kopImage',
+            'pdfVerification'
         ))->setPaper('a4', 'portrait');
 
-        return $pdf->stream('laporan-absensi-rapat-' . $rapat->id . '.pdf');
+        return $verifier->response($pdf->output(), $verification, 'laporan-absensi-rapat-' . $rapat->id . '.pdf');
     }
 
     public function remindPending(Rapat $rapat)

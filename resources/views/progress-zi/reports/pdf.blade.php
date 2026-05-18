@@ -16,6 +16,7 @@
     </style>
 </head>
 <body>
+@include('partials.pdf-verification-badge', ['pdfVerification' => $pdfVerification ?? null])
     <div class="title">Laporan Progress Zona Integritas</div>
     <div class="meta">Periode: {{ $summary['period_name'] }} | Dicetak: {{ now()->translatedFormat('d F Y H:i') }} WIT</div>
 

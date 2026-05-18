@@ -154,7 +154,7 @@
         <div class="card-header bg-white">
             <strong>Form Notulen Template A</strong>
         </div>
-        <form action="{{ $formAction }}" method="POST" enctype="multipart/form-data" novalidate>
+        <form id="notulensiForm" action="{{ $formAction }}" method="POST" enctype="multipart/form-data" class="requires-signature-pad" novalidate>
             @csrf
             @if($formMethod === 'PUT')
                 @method('PUT')
@@ -283,7 +283,29 @@
                 <div class="text-muted" style="font-size: 0.78rem;">
                     Status saat ini: {!! $notulensi->exists ? $notulensi->status_badge : '<span class="badge badge-secondary">Draft</span>' !!}
                 </div>
-                <button type="submit" class="btn btn-primary">Simpan Notulen</button>
+                <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#notulisSignatureModal">Simpan Notulen</button>
+            </div>
+            <div class="modal fade" id="notulisSignatureModal" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Tanda Tangan Notulis</h5>
+                            <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+                        </div>
+                        <div class="modal-body">
+                            @include('partials.signature-pad', [
+                                'id' => 'notulisSignaturePad',
+                                'name' => 'signature_data',
+                                'label' => 'Bubuhkan Tanda Tangan Notulis',
+                                'required' => true,
+                            ])
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Batal</button>
+                            <button type="submit" class="btn btn-primary">Simpan & Tanda Tangani</button>
+                        </div>
+                    </div>
+                </div>
             </div>
         </form>
     </div>

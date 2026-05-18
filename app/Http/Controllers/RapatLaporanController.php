@@ -70,12 +70,21 @@ class RapatLaporanController extends Controller
     {
         abort_unless(auth()->user()->canViewRapat($laporan->rapat), 403);
 
-        if ($laporan->jenis === 'tindak_lanjut' && !$laporan->file_path) {
-            $laporan = $this->laporanService->generateMergedTindakLanjutPdf($laporan);
-        }
-
         if ($laporan->file_path) {
             return response()->file(storage_path('app/public/' . $laporan->file_path));
+        }
+
+        if ($laporan->jenis === 'tindak_lanjut') {
+            $this->laporanService->generateMergedTindakLanjutPdf($laporan);
+            $verification = \App\PdfVerification::where('module', 'rapat')
+                ->where('document_type', 'laporan_tindak_lanjut_final')
+                ->where('document_id', (string) $laporan->id)
+                ->latest()
+                ->first();
+
+            if ($verification && $verification->file_path) {
+                return response()->file(storage_path('app/public/' . $verification->file_path));
+            }
         }
 
         return $this->buildPdfResponse($laporan, false);
@@ -85,12 +94,21 @@ class RapatLaporanController extends Controller
     {
         abort_unless(auth()->user()->canViewRapat($laporan->rapat), 403);
 
-        if ($laporan->jenis === 'tindak_lanjut' && !$laporan->file_path) {
-            $laporan = $this->laporanService->generateMergedTindakLanjutPdf($laporan);
-        }
-
         if ($laporan->file_path) {
             return response()->download(storage_path('app/public/' . $laporan->file_path), $laporan->file_nama ?: basename($laporan->file_path));
+        }
+
+        if ($laporan->jenis === 'tindak_lanjut') {
+            $this->laporanService->generateMergedTindakLanjutPdf($laporan);
+            $verification = \App\PdfVerification::where('module', 'rapat')
+                ->where('document_type', 'laporan_tindak_lanjut_final')
+                ->where('document_id', (string) $laporan->id)
+                ->latest()
+                ->first();
+
+            if ($verification && $verification->file_path) {
+                return response()->download(storage_path('app/public/' . $verification->file_path), $laporan->file_nama ?: basename($verification->file_path));
+            }
         }
 
         return $this->buildPdfResponse($laporan, true);
@@ -165,6 +183,12 @@ class RapatLaporanController extends Controller
             $view = 'rapat.laporan.pdf.gabungan';
         }
 
+        $verifier = app(\App\Services\PdfVerificationService::class);
+        $verification = $verifier->begin('rapat', 'laporan_tindak_lanjut', $laporan->id, $laporan->judul ?: 'Laporan Tindak Lanjut', [], [
+            'rapat_id' => optional($laporan->rapat)->id,
+        ]);
+        $pdfVerification = $verifier->viewData($verification);
+
         $pdf = PDF::loadView($view, [
             'laporan' => $laporan,
             'rapat' => $laporan->rapat,
@@ -176,11 +200,12 @@ class RapatLaporanController extends Controller
             'tujuanLaporan' => $this->buildTujuan($laporan->rapat),
             'tindakLanjutOpening' => $this->buildTindakLanjutOpening($laporan->rapat),
             'rekomendasiItems' => $this->buildRecommendationEvidenceMap($laporan->rapat->notulensi),
+            'pdfVerification' => $pdfVerification,
         ])->setPaper('a4', 'portrait');
 
         $filename = str_replace(' ', '-', strtolower($laporan->judul)) . '.pdf';
 
-        return $download ? $pdf->download($filename) : $pdf->stream($filename);
+        return $verifier->response($pdf->output(), $verification, $filename, $download ? 'attachment' : 'inline');
     }
 
     public function edit(RapatLaporan $laporan)

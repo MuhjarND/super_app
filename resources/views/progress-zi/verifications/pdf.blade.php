@@ -14,6 +14,7 @@
     </style>
 </head>
 <body>
+@include('partials.pdf-verification-badge', ['pdfVerification' => $pdfVerification ?? null])
     <div class="title">Rekap Verifikasi Progress ZI</div>
     <div class="meta">Periode: {{ optional($period)->name ?: 'Semua Periode' }} | Dicetak: {{ now()->translatedFormat('d F Y H:i') }} WIT</div>
 
