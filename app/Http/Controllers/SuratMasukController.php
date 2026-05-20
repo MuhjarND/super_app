@@ -3,12 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\SuratMasuk;
+use App\AgendaPimpinan;
 use App\KlasifikasiKode;
 use App\KategoriSurat;
 use App\User;
 use App\Disposisi;
 use App\Services\WhatsAppNotificationService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
 class SuratMasukController extends Controller
@@ -26,7 +28,7 @@ class SuratMasukController extends Controller
         $user = auth()->user();
 
         $suratMasuk = SuratMasuk::visibleTo($user)
-            ->with('klasifikasiKode', 'kategoriSurat', 'creator', 'disposisis.dariUser', 'disposisis.kepadaUser', 'disposisis.kepadaJabatan')
+            ->with('klasifikasiKode', 'kategoriSurat', 'creator', 'agendaPimpinan', 'disposisis.dariUser', 'disposisis.kepadaUser', 'disposisis.kepadaJabatan')
             ->orderBy('created_at', 'desc')
             ->get();
         $klasifikasiKodes = $this->getKlasifikasiHuruf();
@@ -79,6 +81,10 @@ class SuratMasukController extends Controller
             'tanggal_surat' => 'required|date',
             'sifat' => 'required|in:biasa,rahasia,sangat_rahasia',
             'file' => 'required|file|mimes:pdf,doc,docx,jpg,jpeg,png|max:10240',
+            'agenda_pimpinan' => 'nullable|boolean',
+            'agenda_tanggal_kegiatan' => 'required_if:agenda_pimpinan,1|nullable|date',
+            'agenda_waktu' => 'required_if:agenda_pimpinan,1|nullable|date_format:H:i',
+            'agenda_tempat' => 'required_if:agenda_pimpinan,1|nullable|string|max:255',
         ]);
 
         $sync = $this->syncKategoriDanKlasifikasi(
@@ -89,19 +95,35 @@ class SuratMasukController extends Controller
 
         $filePath = $request->file('file')->store('surat-masuk', 'public');
 
-        $suratMasuk = SuratMasuk::create([
-            'nomor_surat' => $request->nomor_surat,
-            'opsi_pengirim' => $request->opsi_pengirim,
-            'klasifikasi_kode_id' => $sync['klasifikasi_kode_id'],
-            'kategori_surat_id' => $sync['kategori_surat_id'],
-            'pengirim' => $request->pengirim,
-            'perihal' => $request->perihal,
-            'tanggal_surat' => $request->tanggal_surat,
-            'sifat' => $request->sifat,
-            'file_path' => $filePath,
-            'status' => 'baru',
-            'created_by' => auth()->id(),
-        ]);
+        $agenda = null;
+
+        try {
+            DB::beginTransaction();
+
+            $suratMasuk = SuratMasuk::create([
+                'nomor_surat' => $request->nomor_surat,
+                'opsi_pengirim' => $request->opsi_pengirim,
+                'klasifikasi_kode_id' => $sync['klasifikasi_kode_id'],
+                'kategori_surat_id' => $sync['kategori_surat_id'],
+                'pengirim' => $request->pengirim,
+                'perihal' => $request->perihal,
+                'tanggal_surat' => $request->tanggal_surat,
+                'sifat' => $request->sifat,
+                'file_path' => $filePath,
+                'status' => 'baru',
+                'created_by' => auth()->id(),
+            ]);
+
+            if ($request->boolean('agenda_pimpinan')) {
+                $agenda = $this->createAgendaPimpinanFromSuratMasuk($suratMasuk, $request);
+            }
+
+            DB::commit();
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            Storage::disk('public')->delete($filePath);
+            throw $e;
+        }
 
         // Send WA notification to admin surat
         $adminSurat = User::whereHas('roles', function ($q) {
@@ -112,15 +134,21 @@ class SuratMasukController extends Controller
             $this->waService->notifySuratMasuk($suratMasuk, $admin);
         }
 
+        if ($agenda) {
+            $this->notifyProtokolerAgendaPimpinan($agenda);
+        }
+
         return response()->json([
             'success' => true,
-            'message' => 'Surat masuk berhasil disimpan.',
+            'message' => $agenda
+                ? 'Surat masuk dan agenda pimpinan berhasil disimpan.'
+                : 'Surat masuk berhasil disimpan.',
         ]);
     }
 
     public function show(SuratMasuk $suratMasuk)
     {
-        $suratMasuk->load('klasifikasiKode', 'kategoriSurat', 'creator', 'disposisis.dariUser', 'disposisis.kepadaUser', 'disposisis.kepadaJabatan');
+        $suratMasuk->load('klasifikasiKode', 'kategoriSurat', 'creator', 'agendaPimpinan', 'disposisis.dariUser', 'disposisis.kepadaUser', 'disposisis.kepadaJabatan');
 
         $user = auth()->user();
         abort_unless($user->canViewSuratMasuk($suratMasuk), 403);
@@ -178,6 +206,35 @@ class SuratMasukController extends Controller
     protected function getPetunjukOptions()
     {
         return collect(Disposisi::getPetunjukOptions());
+    }
+
+    protected function createAgendaPimpinanFromSuratMasuk(SuratMasuk $suratMasuk, Request $request)
+    {
+        return AgendaPimpinan::create([
+            'surat_masuk_id' => $suratMasuk->id,
+            'tanggal_kegiatan' => $request->agenda_tanggal_kegiatan,
+            'judul_agenda' => $suratMasuk->perihal,
+            'tempat' => $request->agenda_tempat,
+            'waktu' => $request->agenda_waktu,
+            'nomor_naskah_dinas' => $suratMasuk->nomor_surat,
+            'lampiran_link' => route('surat-masuk.preview', $suratMasuk),
+            'catatan' => 'Agenda dibuat otomatis dari input Surat Masuk.',
+            'created_by' => auth()->id(),
+            'updated_by' => auth()->id(),
+        ]);
+    }
+
+    protected function notifyProtokolerAgendaPimpinan(AgendaPimpinan $agenda)
+    {
+        $protokolerUsers = User::whereHas('roles', function ($query) {
+            $query->where('name', 'protokoler');
+        })->get();
+
+        $agenda->loadMissing('suratMasuk');
+
+        foreach ($protokolerUsers as $protokoler) {
+            $this->waService->notifyAgendaPimpinanCreatedForProtokoler($agenda, $protokoler);
+        }
     }
 
     public function update(Request $request, SuratMasuk $suratMasuk)

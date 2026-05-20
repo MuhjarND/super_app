@@ -450,6 +450,7 @@ class DashboardController extends Controller
             ->orderBy('waktu_mulai')
             ->take(4)
             ->get()
+            ->toBase()
             ->map(function ($rapat) {
                 return [
                     'type' => 'Rapat',
@@ -468,6 +469,7 @@ class DashboardController extends Controller
             ->orderBy('waktu')
             ->take(4)
             ->get()
+            ->toBase()
             ->map(function ($agenda) {
                 return [
                     'type' => 'Agenda',

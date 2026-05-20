@@ -70,6 +70,11 @@ class SuratMasuk extends Model
         return $this->hasOne(Disposisi::class, 'surat_masuk_id')->latest();
     }
 
+    public function agendaPimpinan()
+    {
+        return $this->hasOne(AgendaPimpinan::class, 'surat_masuk_id');
+    }
+
     public function getNomorSuratLengkapAttribute()
     {
         $klasifikasi = $this->klasifikasiKode ? $this->klasifikasiKode->kode . ' / ' : '';

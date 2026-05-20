@@ -68,34 +68,6 @@
             background: #f9fafb;
         }
 
-        /* Expand */
-        .btn-expand {
-            width: 22px;
-            height: 22px;
-            border-radius: 4px;
-            border: 2px solid #d1d5db;
-            background: white;
-            color: #9ca3af;
-            font-size: 0.7rem;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: all 0.15s;
-            padding: 0;
-        }
-
-        .btn-expand:hover {
-            border-color: #6366f1;
-            color: #6366f1;
-        }
-
-        .btn-expand.expanded {
-            background: #6366f1;
-            border-color: #6366f1;
-            color: white;
-        }
-
         /* Badges */
         .badge-ma {
             background: #22c55e;
@@ -225,6 +197,65 @@
             gap: 8px;
         }
 
+        .surat-actions-cell {
+            min-width: 120px;
+        }
+
+        .surat-action-dropdown .dropdown-toggle {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            min-height: 34px;
+            padding: 7px 13px;
+            border: none;
+            border-radius: 11px;
+            background: linear-gradient(135deg, #4f46e5, #6366f1);
+            color: #ffffff;
+            font-size: 0.78rem;
+            font-weight: 800;
+            box-shadow: 0 8px 18px rgba(79, 70, 229, 0.18);
+        }
+
+        .surat-action-dropdown .dropdown-toggle:hover,
+        .surat-action-dropdown.show .dropdown-toggle {
+            background: linear-gradient(135deg, #4338ca, #4f46e5);
+            color: #ffffff;
+        }
+
+        .surat-action-menu {
+            min-width: 210px;
+            border: 1px solid #e5e7eb;
+            border-radius: 14px;
+            padding: 8px;
+            box-shadow: 0 18px 40px rgba(15, 23, 42, 0.14);
+        }
+
+        .surat-action-menu .dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            border-radius: 10px;
+            padding: 9px 11px;
+            color: #1f2937;
+            font-size: 0.8rem;
+            font-weight: 700;
+        }
+
+        .surat-action-menu .dropdown-item i {
+            width: 16px;
+            text-align: center;
+            color: #6366f1;
+        }
+
+        .surat-action-menu .dropdown-item:hover {
+            background: #eef2ff;
+            color: #4338ca;
+        }
+
+        .surat-action-menu .dropdown-item.text-danger i {
+            color: #dc2626;
+        }
+
         .detail-label {
             color: #9ca3af;
             font-size: 0.8rem;
@@ -331,6 +362,28 @@
             transform: none !important;
         }
 
+        .agenda-pimpinan-box {
+            border: 1px solid #dbeafe;
+            border-radius: 14px;
+            background: linear-gradient(180deg, #f8fbff, #ffffff);
+            padding: 14px 16px;
+            margin-top: 8px;
+        }
+
+        .agenda-pimpinan-fields {
+            display: none;
+            margin-top: 14px;
+            padding-top: 14px;
+            border-top: 1px dashed #bfdbfe;
+        }
+
+        .agenda-pimpinan-note {
+            color: #64748b;
+            font-size: 0.78rem;
+            line-height: 1.45;
+            margin-top: 4px;
+        }
+
         .history-panel {
             margin-top: 16px;
             border-top: 1px solid #e5e7eb;
@@ -406,7 +459,7 @@
         }
 
         #suratMasukTable {
-            min-width: 980px;
+            min-width: 1120px;
         }
 
         @media (max-width: 767.98px) {
@@ -498,13 +551,14 @@
             <table id="suratMasukTable" class="table" style="width:100%">
                 <thead>
                     <tr>
-                        <th style="width: 30px;"></th>
                         <th>No. Surat</th>
                         <th>Pengirim</th>
                         <th>Perihal / Isi Ringkas</th>
                         <th>Tanggal Surat</th>
                         <th>Diinput Pada</th>
+                        <th>Dibuat Oleh</th>
                         <th>Status</th>
+                        <th>Aksi</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -517,7 +571,7 @@
                                 ->sortByDesc('created_at')
                                 ->first();
                         @endphp
-                        <tr class="main-row" data-surat-id="{{ $surat->id }}" data-creator="{{ $surat->creator->name }}"
+                        <tr class="main-row" data-surat-id="{{ $surat->id }}" data-creator="{{ optional($surat->creator)->name ?: '-' }}"
                             data-show-url="{{ route('surat-masuk.show', $surat) }}"
                             data-download-url="{{ route('surat-masuk.download', $surat) }}"
                             data-preview-url="{{ route('surat-masuk.preview', $surat) }}"
@@ -530,16 +584,16 @@
                             data-perihal="{{ $surat->perihal }}" data-tanggal="{{ $surat->tanggal_surat->format('Y-m-d') }}"
                             data-sifat="{{ $surat->sifat }}" data-status="{{ $surat->status }}"
                             data-file-path="{{ $surat->file_path }}"
+                            data-agenda-title="{{ optional($surat->agendaPimpinan)->judul_agenda }}"
+                            data-agenda-date="{{ optional(optional($surat->agendaPimpinan)->tanggal_kegiatan)->format('Y-m-d') }}"
+                            data-agenda-time="{{ optional($surat->agendaPimpinan)->waktu_formatted }}"
+                            data-agenda-place="{{ optional($surat->agendaPimpinan)->tempat }}"
+                            data-agenda-clothing="{{ optional($surat->agendaPimpinan)->seragam_pakaian }}"
                             data-can-forward="{{ auth()->user()->canForwardSuratMasuk($surat) ? 1 : 0 }}"
                             data-can-edit="{{ auth()->user()->canEditSuratMasuk($surat) ? 1 : 0 }}"
                             data-can-delete="{{ auth()->user()->canDeleteSuratMasuk($surat) ? 1 : 0 }}"
                             data-can-follow-up="{{ auth()->user()->canOpenTindakLanjutSuratMasuk($surat) ? 1 : 0 }}"
                             data-pending-disposisi-id="{{ $pendingForMe ? $pendingForMe->id : '' }}">
-                            <td>
-                                <button class="btn-expand dt-expand">
-                                    <i class="fas fa-plus" style="font-size: 9px;"></i>
-                                </button>
-                            </td>
                             <td>
                                 @if($surat->klasifikasiKode)
                                     <span class="klasifikasi-prefix">{{ $surat->klasifikasiKode->kode }} -
@@ -564,6 +618,7 @@
                             </td>
                             <td>{{ $surat->tanggal_surat->format('Y-m-d') }}</td>
                             <td>{{ $surat->created_at->format('Y-m-d') }}</td>
+                            <td>{{ optional($surat->creator)->name ?: '-' }}</td>
                             <td>
                                 @if($surat->status == 'baru')
                                     <span class="status-text">Baru</span><br>
@@ -580,6 +635,53 @@
                                     <span class="status-text">Selesai</span><br>
                                     <span class="badge-done">Done</span>
                                 @endif
+                            </td>
+                            <td class="surat-actions-cell">
+                                <div class="dropdown surat-action-dropdown">
+                                    <button class="btn dropdown-toggle" type="button" id="suratMasukAction{{ $surat->id }}" data-toggle="dropdown" data-boundary="window" aria-haspopup="true" aria-expanded="false">
+                                        <i class="fas fa-ellipsis-h"></i> Aksi
+                                    </button>
+                                    <div class="dropdown-menu dropdown-menu-right surat-action-menu" aria-labelledby="suratMasukAction{{ $surat->id }}">
+                                        @if(auth()->user()->canForwardSuratMasuk($surat))
+                                            @if(auth()->user()->isKasubagTurt())
+                                                <button type="button" class="dropdown-item" onclick="openDisposisi({{ $surat->id }}, 'teruskan')">
+                                                    <i class="fas fa-share"></i> Teruskan
+                                                </button>
+                                            @else
+                                                <button type="button" class="dropdown-item" onclick="openDisposisi({{ $surat->id }}, 'disposisi')">
+                                                    <i class="fas fa-share"></i> Disposisi
+                                                </button>
+                                                <button type="button" class="dropdown-item" onclick="openDisposisi({{ $surat->id }}, 'naikan')">
+                                                    <i class="fas fa-level-up-alt"></i> Naikan
+                                                </button>
+                                            @endif
+                                            <div class="dropdown-divider"></div>
+                                        @endif
+
+                                        @if(auth()->user()->canOpenTindakLanjutSuratMasuk($surat))
+                                            <button type="button" class="dropdown-item" onclick="openTindakLanjut({{ $surat->id }})">
+                                                <i class="fas fa-flag"></i> Tindaklanjuti
+                                            </button>
+                                        @endif
+
+                                        <button type="button" class="dropdown-item" onclick="openDetail({{ $surat->id }})">
+                                            <i class="fas fa-eye"></i> Detail
+                                        </button>
+
+                                        @if(auth()->user()->canEditSuratMasuk($surat))
+                                            <button type="button" class="dropdown-item" onclick="openEdit({{ $surat->id }})">
+                                                <i class="fas fa-edit"></i> Edit
+                                            </button>
+                                        @endif
+
+                                        @if(auth()->user()->canDeleteSuratMasuk($surat))
+                                            <div class="dropdown-divider"></div>
+                                            <button type="button" class="dropdown-item text-danger" data-delete-url="{{ route('surat-masuk.destroy', $surat) }}" onclick="deleteSurat({{ $surat->id }}, this.dataset.deleteUrl)">
+                                                <i class="fas fa-trash"></i> Hapus
+                                            </button>
+                                        @endif
+                                    </div>
+                                </div>
                             </td>
                         </tr>
                     @endforeach
@@ -679,6 +781,34 @@
                                 </div>
                             </div>
                         </div>
+
+                        <div class="agenda-pimpinan-box">
+                            <div class="custom-control custom-checkbox">
+                                <input type="checkbox" class="custom-control-input" id="createAgendaPimpinan" name="agenda_pimpinan" value="1">
+                                <label class="custom-control-label font-weight-bold" for="createAgendaPimpinan">
+                                    Jadikan sebagai agenda pimpinan
+                                </label>
+                            </div>
+                            <div class="agenda-pimpinan-note">
+                                Jika dicentang, sistem akan otomatis membuat agenda pimpinan dari surat masuk ini dan mengirim notifikasi ke role Protokoler untuk mengatur peserta kegiatan.
+                            </div>
+                            <div class="agenda-pimpinan-fields" id="createAgendaPimpinanFields">
+                                <div class="form-row">
+                                    <div class="form-group col-md-6">
+                                        <label>Tanggal Kegiatan <span class="text-danger">*</span></label>
+                                        <input type="date" class="form-control agenda-required" name="agenda_tanggal_kegiatan" id="createAgendaTanggal" value="{{ date('Y-m-d') }}">
+                                    </div>
+                                    <div class="form-group col-md-6">
+                                        <label>Waktu Kegiatan (WIT) <span class="text-danger">*</span></label>
+                                        <input type="time" class="form-control agenda-required" name="agenda_waktu" id="createAgendaWaktu" step="60" value="{{ now()->timezone('Asia/Jayapura')->format('H:i') }}">
+                                    </div>
+                                </div>
+                                <div class="form-group mb-0">
+                                    <label>Tempat <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control agenda-required" name="agenda_tempat" id="createAgendaTempat" placeholder="Tempat kegiatan">
+                                </div>
+                            </div>
+                        </div>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Batal</button>
@@ -754,6 +884,10 @@
                                         <td class="detail-info-label">Di-input Oleh</td>
                                         <td class="detail-info-value" id="detailCreator">-</td>
                                     </tr>
+                                    <tr id="detailAgendaRow" style="display: none;">
+                                        <td class="detail-info-label">Agenda Pimpinan</td>
+                                        <td class="detail-info-value" id="detailAgendaInfo">-</td>
+                                    </tr>
                                 </table>
                                 <div class="mt-3 d-flex" style="gap: 8px;">
                                     <a href="#" id="detailDownloadBtn" class="btn btn-sm btn-primary">
@@ -771,6 +905,7 @@
                                 </div>
                             </div>
                         </div>
+
                     </div>
                 </div>
             </div>
@@ -1112,72 +1247,8 @@
                     paginate: { first: "First", last: "Last", next: "Next", previous: "Previous" }
                 },
                 columnDefs: [
-                    { orderable: false, targets: 0 }
+                    { orderable: false, targets: -1 }
                 ]
-            });
-
-            // Format child row with direct action buttons
-            function formatDetail(row) {
-                var d = $(row).data();
-                var html = '<div class="detail-content">';
-                html += '<div class="detail-meta"><div><span class="detail-label">Dibuat Oleh:</span> <span class="detail-value">' + d.creator + '</span></div></div>';
-                html += '<div class="detail-actions">';
-                var canForward = Number(d.canForward) === 1;
-                var canEdit = Number(d.canEdit) === 1;
-                var canDelete = Number(d.canDelete) === 1;
-                var canFollowUp = Number(d.canFollowUp) === 1;
-
-                if (canForward) {
-                    if (isKasubagTurt) {
-                        html += '<button class="action-btn action-btn-disposisi" onclick="openDisposisi(' + d.suratId + ', \'teruskan\')"><i class="fas fa-share"></i> Teruskan</button>';
-                    } else {
-                        html += '<button class="action-btn action-btn-disposisi" onclick="openDisposisi(' + d.suratId + ', \'disposisi\')"><i class="fas fa-share"></i> Disposisi</button>';
-                        html += '<button class="action-btn action-btn-naikan" onclick="openDisposisi(' + d.suratId + ', \'naikan\')"><i class="fas fa-level-up-alt"></i> Naikan</button>';
-                    }
-                } else {
-                    if (isKasubagTurt) {
-                        html += '<button class="action-btn action-btn-disposisi action-btn-disabled" type="button"><i class="fas fa-share"></i> Teruskan</button>';
-                    } else {
-                        html += '<button class="action-btn action-btn-disposisi action-btn-disabled" type="button"><i class="fas fa-share"></i> Disposisi</button>';
-                        html += '<button class="action-btn action-btn-naikan action-btn-disabled" type="button"><i class="fas fa-level-up-alt"></i> Naikan</button>';
-                    }
-                }
-                if (canFollowUp) {
-                    html += '<button class="action-btn action-btn-follow-up" onclick="openTindakLanjut(' + d.suratId + ')"><i class="fas fa-flag"></i> Tindaklanjuti</button>';
-                }
-                html += '<button class="action-btn action-btn-detail" onclick="openDetail(' + d.suratId + ')"><i class="fas fa-eye"></i> Detail</button>';
-                if (canEdit) {
-                    html += '<button class="action-btn action-btn-edit" onclick="openEdit(' + d.suratId + ')"><i class="fas fa-edit"></i> Edit</button>';
-                } else {
-                    html += '<button class="action-btn action-btn-edit action-btn-disabled" type="button"><i class="fas fa-edit"></i> Edit</button>';
-                }
-                if (canDelete) {
-                    html += '<button class="action-btn action-btn-delete" onclick="deleteSurat(' + d.suratId + ', \'' + d.deleteUrl + '\')"><i class="fas fa-trash"></i> Hapus</button>';
-                }
-
-                html += '</div>';
-                html += '</div>';
-                return html;
-            }
-
-            // Expand/collapse
-            $('#suratMasukTable tbody').on('click', '.dt-expand', function () {
-                var tr = $(this).closest('tr');
-                var row = table.row(tr);
-                var btn = $(this);
-                var icon = btn.find('i');
-
-                if (row.child.isShown()) {
-                    row.child.hide();
-                    tr.removeClass('shown');
-                    icon.removeClass('fa-minus').addClass('fa-plus');
-                    btn.removeClass('expanded');
-                } else {
-                    row.child(formatDetail(tr), 'detail-row').show();
-                    tr.addClass('shown');
-                    icon.removeClass('fa-plus').addClass('fa-minus');
-                    btn.addClass('expanded');
-                }
             });
 
             // Toggle klasifikasi
@@ -1203,6 +1274,22 @@
                 }
             });
 
+            function toggleCreateAgendaFields() {
+                const checked = $('#createAgendaPimpinan').is(':checked');
+                if (checked) {
+                    $('#createAgendaPimpinanFields').stop(true, true).slideDown();
+                } else {
+                    $('#createAgendaPimpinanFields').stop(true, true).slideUp();
+                }
+                $('#createAgendaPimpinanFields .agenda-required').prop('required', checked);
+                if (!checked) {
+                    $('#createAgendaTempat').val('');
+                }
+            }
+
+            $('#createAgendaPimpinan').on('change', toggleCreateAgendaFields);
+            toggleCreateAgendaFields();
+
             // Create form
             $('#createForm').on('submit', function (e) {
                 e.preventDefault();
@@ -1227,6 +1314,8 @@
                         $('#klasifikasiGroup').hide();
                         $('#createKategoriSurat').val('');
                         $('#klasifikasiKode').val('').trigger('change');
+                        $('#createAgendaPimpinan').prop('checked', false);
+                        toggleCreateAgendaFields();
                         location.reload();
                     },
                     error: function (xhr) {
@@ -1364,6 +1453,10 @@
             });
         });
 
+        function escapeHtml(value) {
+            return $('<div>').text(value || '-').html();
+        }
+
         // Open Detail Modal
         function openDetail(suratId) {
             var row = $('tr[data-surat-id="' + suratId + '"]');
@@ -1378,6 +1471,19 @@
             $('#detailSifat').text(d.sifat);
             $('#detailStatus').text(d.status);
             $('#detailCreator').text(d.creator);
+            if (d.agendaTitle) {
+                var agendaInfo = '<div class="font-weight-bold">' + escapeHtml(d.agendaTitle) + '</div>';
+                agendaInfo += '<div class="text-muted small">' + escapeHtml(d.agendaDate) + ' ' + escapeHtml(d.agendaTime) + ' WIT</div>';
+                agendaInfo += '<div class="text-muted small">Tempat: ' + escapeHtml(d.agendaPlace) + '</div>';
+                if (d.agendaClothing) {
+                    agendaInfo += '<div class="text-muted small">Pakaian: ' + escapeHtml(d.agendaClothing) + '</div>';
+                }
+                $('#detailAgendaInfo').html(agendaInfo);
+                $('#detailAgendaRow').show();
+            } else {
+                $('#detailAgendaInfo').text('-');
+                $('#detailAgendaRow').hide();
+            }
             $('#detailDownloadBtn').attr('href', d.downloadUrl);
             $('#detailShowBtn').attr('href', d.showUrl);
             window.renderSuratHistory(String(suratId), '#detailHistory');

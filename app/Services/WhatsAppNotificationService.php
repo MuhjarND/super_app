@@ -624,6 +624,45 @@ class WhatsAppNotificationService
         return $result;
     }
 
+    public function notifyAgendaPimpinanCreatedForProtokoler(AgendaPimpinan $agenda, User $targetUser)
+    {
+        $agenda->loadMissing('suratMasuk');
+
+        $suratMasuk = $agenda->suratMasuk;
+        $lines = [
+            'Yth. Bapak/Ibu Protokoler,',
+            'Dengan hormat, terdapat agenda pimpinan baru yang dibuat dari Surat Masuk dan memerlukan pengisian daftar peserta kegiatan.',
+            '',
+            'Judul Agenda: ' . $agenda->judul_agenda,
+            'Tanggal Kegiatan: ' . $agenda->tanggal_formatted,
+            'Waktu: ' . $agenda->waktu_formatted . ' WIT',
+            'Tempat: ' . $agenda->tempat,
+        ];
+
+        if ($agenda->seragam_pakaian) {
+            $lines[] = 'Seragam/Pakaian: ' . $agenda->seragam_pakaian;
+        }
+
+        if ($suratMasuk) {
+            $lines[] = '';
+            $lines[] = 'Sumber Surat Masuk:';
+            $lines[] = 'No. Surat: ' . $suratMasuk->nomor_surat;
+            $lines[] = 'Pengirim: ' . $suratMasuk->pengirim;
+            $lines[] = 'Perihal: ' . $suratMasuk->perihal;
+        }
+
+        $lines[] = '';
+        $lines[] = 'Mohon menginput daftar peserta kegiatan melalui tautan berikut:';
+        $lines[] = route('rapat.agenda.index');
+
+        return $this->sendToUser($targetUser, $this->wrap($lines), [
+            'module' => 'agenda_pimpinan',
+            'event' => 'agenda_created_for_protokoler',
+            'notifiable_type' => get_class($agenda),
+            'notifiable_id' => $agenda->id,
+        ]);
+    }
+
     public function notifyVotingParticipants(Voting $voting)
     {
         $voting->loadMissing(['participantPivots.user', 'items']);

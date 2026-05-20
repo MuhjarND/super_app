@@ -193,6 +193,27 @@
                                 </a>
                             </td>
                         </tr>
+                        @if($suratMasuk->agendaPimpinan)
+                            <tr>
+                                <td>Agenda Pimpinan</td>
+                                <td>
+                                    <div class="font-weight-bold">{{ $suratMasuk->agendaPimpinan->judul_agenda }}</div>
+                                    <div class="text-muted small">
+                                        {{ $suratMasuk->agendaPimpinan->tanggal_formatted }}
+                                        {{ $suratMasuk->agendaPimpinan->waktu_formatted }} WIT
+                                    </div>
+                                    <div class="text-muted small">Tempat: {{ $suratMasuk->agendaPimpinan->tempat }}</div>
+                                    @if($suratMasuk->agendaPimpinan->seragam_pakaian)
+                                        <div class="text-muted small">Pakaian: {{ $suratMasuk->agendaPimpinan->seragam_pakaian }}</div>
+                                    @endif
+                                    @if(auth()->user()->canAccessAgendaPimpinan())
+                                        <a href="{{ route('rapat.agenda.index') }}" class="btn btn-sm btn-outline-primary mt-2">
+                                            <i class="fas fa-calendar-day mr-1"></i> Buka Agenda
+                                        </a>
+                                    @endif
+                                </td>
+                            </tr>
+                        @endif
                         <tr>
                             <td>Di-input Oleh</td>
                             <td>{{ $suratMasuk->creator->name }} <small

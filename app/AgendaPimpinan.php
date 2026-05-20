@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class AgendaPimpinan extends Model
 {
     protected $fillable = [
+        'surat_masuk_id',
         'tanggal_kegiatan',
         'judul_agenda',
         'tempat',
@@ -37,6 +38,11 @@ class AgendaPimpinan extends Model
         return $this->belongsTo(User::class, 'updated_by');
     }
 
+    public function suratMasuk()
+    {
+        return $this->belongsTo(SuratMasuk::class, 'surat_masuk_id');
+    }
+
     public function recipients()
     {
         return $this->belongsToMany(User::class, 'agenda_pimpinan_user')
@@ -46,9 +52,23 @@ class AgendaPimpinan extends Model
 
     public function getWaktuFormattedAttribute()
     {
-        return $this->waktu
-            ? Carbon::createFromFormat('H:i:s', $this->waktu, 'Asia/Jayapura')->format('H:i')
-            : '-';
+        if (!$this->waktu) {
+            return '-';
+        }
+
+        foreach (['H:i:s', 'H:i'] as $format) {
+            try {
+                return Carbon::createFromFormat($format, $this->waktu, 'Asia/Jayapura')->format('H:i');
+            } catch (\Throwable $e) {
+                // Continue to the next supported time format.
+            }
+        }
+
+        try {
+            return Carbon::parse($this->waktu, 'Asia/Jayapura')->format('H:i');
+        } catch (\Throwable $e) {
+            return (string) $this->waktu;
+        }
     }
 
     public function getTanggalFormattedAttribute()

@@ -21,7 +21,7 @@ class AgendaPimpinanController extends Controller
     {
         abort_unless(auth()->user()->canAccessAgendaPimpinan(), 403);
 
-        $agendas = AgendaPimpinan::with(['creator', 'recipients.jabatan'])
+        $agendas = AgendaPimpinan::with(['creator', 'suratMasuk', 'recipients.jabatan'])
             ->orderByDesc('tanggal_kegiatan')
             ->orderByDesc('waktu')
             ->get();
@@ -35,7 +35,7 @@ class AgendaPimpinanController extends Controller
 
     public function store(Request $request)
     {
-        abort_unless(auth()->user()->canAccessAgendaPimpinan(), 403);
+        abort_unless($this->canManageAgendaDetails(auth()->user()), 403);
 
         $data = $this->validateData($request);
 
@@ -44,8 +44,6 @@ class AgendaPimpinanController extends Controller
             'judul_agenda' => $data['judul_agenda'],
             'tempat' => $data['tempat'],
             'waktu' => $data['waktu'],
-            'yang_menghadiri' => $data['yang_menghadiri'] ?? null,
-            'seragam_pakaian' => $data['seragam_pakaian'] ?? null,
             'nomor_naskah_dinas' => $data['nomor_naskah_dinas'] ?? null,
             'lampiran_link' => $data['lampiran_link'] ?? null,
             'catatan' => $data['catatan'] ?? null,
@@ -53,14 +51,17 @@ class AgendaPimpinanController extends Controller
             'updated_by' => auth()->id(),
         ]);
 
-        $this->syncRecipients($agenda, $data['recipient_ids'] ?? []);
+        $orderedRecipients = $this->syncRecipients($agenda, $data['recipient_ids'] ?? []);
+        $agenda->update([
+            'yang_menghadiri' => $this->formatAttendeeNames($orderedRecipients),
+        ]);
 
         return back()->with('success', 'Agenda pimpinan berhasil disimpan.');
     }
 
     public function update(Request $request, AgendaPimpinan $agenda)
     {
-        abort_unless(auth()->user()->canAccessAgendaPimpinan(), 403);
+        abort_unless($this->canManageAgendaDetails(auth()->user()), 403);
 
         $data = $this->validateData($request);
 
@@ -69,27 +70,49 @@ class AgendaPimpinanController extends Controller
             'judul_agenda' => $data['judul_agenda'],
             'tempat' => $data['tempat'],
             'waktu' => $data['waktu'],
-            'yang_menghadiri' => $data['yang_menghadiri'] ?? null,
-            'seragam_pakaian' => $data['seragam_pakaian'] ?? null,
             'nomor_naskah_dinas' => $data['nomor_naskah_dinas'] ?? null,
             'lampiran_link' => $data['lampiran_link'] ?? null,
             'catatan' => $data['catatan'] ?? null,
             'updated_by' => auth()->id(),
         ]);
 
-        $this->syncRecipients($agenda, $data['recipient_ids'] ?? []);
+        $orderedRecipients = $this->syncRecipients($agenda, $data['recipient_ids'] ?? []);
+        $agenda->update([
+            'yang_menghadiri' => $this->formatAttendeeNames($orderedRecipients),
+        ]);
 
         return back()->with('success', 'Agenda pimpinan berhasil diperbarui.');
     }
 
     public function destroy(AgendaPimpinan $agenda)
     {
-        abort_unless(auth()->user()->canAccessAgendaPimpinan(), 403);
+        abort_unless($this->canManageAgendaDetails(auth()->user()), 403);
 
         $agenda->recipients()->detach();
         $agenda->delete();
 
         return back()->with('success', 'Agenda pimpinan berhasil dihapus.');
+    }
+
+    public function updateParticipants(Request $request, AgendaPimpinan $agenda)
+    {
+        abort_unless(auth()->user()->canAccessAgendaPimpinan(), 403);
+
+        $data = $request->validate([
+            'seragam_pakaian' => ['nullable', 'string', 'max:255'],
+            'recipient_ids' => ['nullable', 'array'],
+            'recipient_ids.*' => ['exists:users,id'],
+        ]);
+
+        $orderedRecipients = $this->syncRecipients($agenda, $data['recipient_ids'] ?? []);
+
+        $agenda->update([
+            'yang_menghadiri' => $this->formatAttendeeNames($orderedRecipients),
+            'seragam_pakaian' => $data['seragam_pakaian'] ?? null,
+            'updated_by' => auth()->id(),
+        ]);
+
+        return back()->with('success', 'Peserta agenda pimpinan berhasil diperbarui.');
     }
 
     public function sendWhatsapp(AgendaPimpinan $agenda)
@@ -114,8 +137,6 @@ class AgendaPimpinanController extends Controller
             'judul_agenda' => ['required', 'string', 'max:255'],
             'tempat' => ['required', 'string', 'max:255'],
             'waktu' => ['required', 'date_format:H:i'],
-            'yang_menghadiri' => ['nullable', 'string'],
-            'seragam_pakaian' => ['nullable', 'string', 'max:255'],
             'nomor_naskah_dinas' => ['nullable', 'string', 'max:255'],
             'lampiran_link' => ['nullable', 'url', 'max:1000'],
             'catatan' => ['nullable', 'string'],
@@ -136,5 +157,21 @@ class AgendaPimpinanController extends Controller
         }
 
         $agenda->recipients()->sync($syncData);
+
+        return $orderedUsers;
+    }
+
+    protected function formatAttendeeNames($users)
+    {
+        if ($users->isEmpty()) {
+            return null;
+        }
+
+        return $users->pluck('name')->implode(', ');
+    }
+
+    protected function canManageAgendaDetails($user)
+    {
+        return $user && ($user->isSuperAdmin() || $user->isMeetingAdmin());
     }
 }

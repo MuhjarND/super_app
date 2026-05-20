@@ -36,19 +36,8 @@
                     </div>
 
                     <div class="form-group">
-                        <label>Yang Menghadiri</label>
-                        <textarea name="yang_menghadiri" id="{{ $prefix }}YangMenghadiri" class="form-control" rows="2" placeholder="Contoh: Ketua, Wakil Ketua, Sekretaris"></textarea>
-                    </div>
-
-                    <div class="form-row">
-                        <div class="form-group col-md-6">
-                            <label>Seragam / Pakaian</label>
-                            <input type="text" name="seragam_pakaian" id="{{ $prefix }}SeragamPakaian" class="form-control" placeholder="Contoh: PSL atau Batik Korpri">
-                        </div>
-                        <div class="form-group col-md-6">
-                            <label>Nomor Naskah Dinas</label>
-                            <input type="text" name="nomor_naskah_dinas" id="{{ $prefix }}NomorNaskahDinas" class="form-control">
-                        </div>
+                        <label>Nomor Naskah Dinas</label>
+                        <input type="text" name="nomor_naskah_dinas" id="{{ $prefix }}NomorNaskahDinas" class="form-control">
                     </div>
 
                     <div class="form-group">
@@ -58,7 +47,7 @@
                     </div>
 
                     <div class="form-group">
-                        <label>Peserta Penerima</label>
+                        <label>Peserta Kegiatan</label>
                         <select name="recipient_ids[]" id="{{ $prefix }}RecipientIds" class="form-control select2" multiple>
                             @foreach($users as $user)
                                 <option value="{{ $user->id }}">
@@ -66,7 +55,7 @@
                                 </option>
                             @endforeach
                         </select>
-                        <small class="form-text text-muted">Urutan penerima akan mengikuti hirarki user.</small>
+                        <small class="form-text text-muted">Peserta yang dipilih otomatis menjadi yang menghadiri sekaligus penerima notifikasi WhatsApp. Urutan mengikuti hirarki user.</small>
                     </div>
 
                     <div class="form-group mb-0">
