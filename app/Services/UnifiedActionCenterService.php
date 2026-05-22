@@ -566,7 +566,7 @@ class UnifiedActionCenterService
 
         $items = collect();
 
-        if ($user->canApproveLeave() || $user->isSuperAdmin()) {
+        if ($user->canAccessLeaveApproval() || $user->isSuperAdmin()) {
             $approvalQuery = LeaveApproval::with(['leaveRequest.user.unit', 'leaveRequest.leaveType'])
                 ->whereIn('status', ['waiting', 'pending']);
 

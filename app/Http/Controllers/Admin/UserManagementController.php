@@ -26,7 +26,7 @@ class UserManagementController extends Controller
 
     public function index(Request $request)
     {
-        $query = User::with(['roles', 'jabatan', 'unit', 'bidang']);
+        $query = User::with(['roles', 'jabatan', 'unit', 'bidang', 'atasanLangsung', 'pejabatBerwenang']);
 
         if ($request->filled('search')) {
             $search = trim($request->search);
@@ -61,9 +61,10 @@ class UserManagementController extends Controller
         $jabatans = Jabatan::with('unit')->orderBy('nama')->get();
         $units = Unit::orderBy('nama')->get();
         $bidangs = Bidang::orderBy('nama')->get();
+        $supervisorOptions = User::with('jabatan')->ordered()->get(['id', 'name', 'nip', 'jabatan_id', 'hirarki']);
         $filters = $request->only(['search', 'role_id', 'jabatan_id', 'unit_id', 'bidang_id']);
 
-        return view('admin.users.index', compact('users', 'roles', 'jabatans', 'units', 'bidangs', 'filters'));
+        return view('admin.users.index', compact('users', 'roles', 'jabatans', 'units', 'bidangs', 'supervisorOptions', 'filters'));
     }
 
     public function create()
@@ -87,6 +88,8 @@ class UserManagementController extends Controller
                 'hirarki' => $data['hirarki'] ?? 999,
                 'nip' => $data['nip'] ?? null,
                 'no_hp' => $data['no_hp'] ?? null,
+                'atasan_langsung_id' => $data['atasan_langsung_id'] ?? null,
+                'pejabat_berwenang_id' => $data['pejabat_berwenang_id'] ?? null,
             ]);
 
             $user->roles()->sync($data['role_ids']);
@@ -115,6 +118,8 @@ class UserManagementController extends Controller
                 'hirarki' => $data['hirarki'] ?? 999,
                 'nip' => $data['nip'] ?? null,
                 'no_hp' => $data['no_hp'] ?? null,
+                'atasan_langsung_id' => $data['atasan_langsung_id'] ?? null,
+                'pejabat_berwenang_id' => $data['pejabat_berwenang_id'] ?? null,
             ];
 
             if (!empty($data['password'])) {
@@ -181,6 +186,8 @@ class UserManagementController extends Controller
             'hirarki' => ['nullable', 'integer', 'min:1'],
             'nip' => ['nullable', 'string', 'max:50'],
             'no_hp' => ['nullable', 'string', 'max:50'],
+            'atasan_langsung_id' => array_filter(['nullable', 'exists:users,id', $userId ? Rule::notIn([$userId]) : null]),
+            'pejabat_berwenang_id' => array_filter(['nullable', 'exists:users,id', $userId ? Rule::notIn([$userId]) : null]),
         ]);
     }
 
@@ -190,6 +197,7 @@ class UserManagementController extends Controller
         $data['jabatans'] = Jabatan::with('unit')->orderBy('nama')->get();
         $data['units'] = Unit::orderBy('nama')->get();
         $data['bidangs'] = Bidang::orderBy('nama')->get();
+        $data['supervisorOptions'] = User::with('jabatan')->ordered()->get(['id', 'name', 'nip', 'jabatan_id', 'hirarki']);
 
         return $data;
     }

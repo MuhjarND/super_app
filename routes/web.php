@@ -49,11 +49,21 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/kalender-terpadu/events', 'IntegratedCalendarController@events')->name('calendar.integrated.events');
     Route::prefix('persediaan')->name('persediaan.')->group(function () {
         Route::get('/', function () {
-            abort_unless(auth()->user()->canAccessInventoryModule(), 403);
+            abort_unless(auth()->user()->canAccessSupplyModule(), 403);
 
-            return view('persediaan-dev.index');
+            return redirect()->route('persediaan.requests.create');
         })->name('index');
-
+        Route::get('/barang', 'SupplyItemController@index')->name('items.index');
+        Route::post('/barang', 'SupplyItemController@store')->name('items.store');
+        Route::put('/barang/{supplyItem}', 'SupplyItemController@update')->name('items.update');
+        Route::get('/pengajuan', 'SupplyRequestController@index')->name('requests.index');
+        Route::get('/pengajuan/create', 'SupplyRequestController@create')->name('requests.create');
+        Route::post('/pengajuan', 'SupplyRequestController@store')->name('requests.store');
+        Route::get('/pengajuan/{supplyRequest}', 'SupplyRequestController@show')->name('requests.show');
+        Route::post('/pengajuan/{supplyRequest}/fulfill', 'SupplyRequestController@fulfill')->name('requests.fulfill');
+        Route::post('/pengajuan/{supplyRequest}/reject', 'SupplyRequestController@reject')->name('requests.reject');
+        Route::post('/pengajuan/{supplyRequest}/cancel', 'SupplyRequestController@cancel')->name('requests.cancel');
+        Route::get('/barang-diambil', 'SupplyPickupController@index')->name('pickups.index');
         Route::get('/dev', function () {
             return redirect()->route('persediaan.index');
         })->name('dev');

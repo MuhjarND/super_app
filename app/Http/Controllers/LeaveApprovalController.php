@@ -17,7 +17,7 @@ class LeaveApprovalController extends Controller
 
     public function index()
     {
-        abort_unless(auth()->user()->canApproveLeave(), 403);
+        abort_unless(auth()->user()->canAccessLeaveApproval(), 403);
         if (!$this->moduleReady()) { return response()->view('cuti.setup', ['title' => 'Approval Cuti Belum Diaktifkan', 'message' => 'Tabel modul cuti belum dijalankan.']); }
         $approvals = LeaveApproval::with(['leaveRequest.user', 'leaveRequest.leaveType'])->where('status', 'pending')->where('approver_id', auth()->id())->orderBy('step_no')->paginate(20);
         return view('cuti.approval.index', compact('approvals'));
@@ -25,7 +25,7 @@ class LeaveApprovalController extends Controller
 
     public function show(LeaveApproval $leaveApproval)
     {
-        abort_unless(auth()->user()->canApproveLeave(), 403);
+        abort_unless(auth()->user()->canAccessLeaveApproval(), 403);
         abort_unless((int) $leaveApproval->approver_id === (int) auth()->id() || auth()->user()->isSuperAdmin(), 403);
         $leaveApproval->load(['leaveRequest.user', 'leaveRequest.leaveType', 'leaveRequest.documents.verifier', 'leaveRequest.approvals.approver', 'leaveRequest.audits.actor']);
         return view('cuti.show', ['leaveRequest' => $leaveApproval->leaveRequest, 'leaveApproval' => $leaveApproval]);
@@ -33,7 +33,7 @@ class LeaveApprovalController extends Controller
 
     public function approve(ApprovalActionRequest $request, LeaveApproval $leaveApproval)
     {
-        abort_unless(auth()->user()->canApproveLeave(), 403);
+        abort_unless(auth()->user()->canAccessLeaveApproval(), 403);
         abort_unless((int) $leaveApproval->approver_id === (int) auth()->id() || auth()->user()->isSuperAdmin(), 403);
         $request->validate([
             'signature_data' => ['required', 'string'],
@@ -48,7 +48,7 @@ class LeaveApprovalController extends Controller
 
     public function reject(ApprovalActionRequest $request, LeaveApproval $leaveApproval)
     {
-        abort_unless(auth()->user()->canApproveLeave(), 403);
+        abort_unless(auth()->user()->canAccessLeaveApproval(), 403);
         abort_unless((int) $leaveApproval->approver_id === (int) auth()->id() || auth()->user()->isSuperAdmin(), 403);
         $request->validate(['note' => 'required|string|max:2000']);
         $oldStatus = $leaveApproval->leaveRequest->status;
@@ -59,7 +59,7 @@ class LeaveApprovalController extends Controller
 
     public function verifyDocument(VerifyLeaveDocumentRequest $request, LeaveApproval $leaveApproval)
     {
-        abort_unless(auth()->user()->canApproveLeave(), 403);
+        abort_unless(auth()->user()->canAccessLeaveApproval(), 403);
         abort_unless((int) $leaveApproval->approver_id === (int) auth()->id() || auth()->user()->isSuperAdmin(), 403);
         $document = LeaveRequestDocument::where('leave_request_id', $leaveApproval->leave_request_id)->findOrFail($request->document_id);
         $document->is_verified = (bool) $request->is_verified;

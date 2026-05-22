@@ -13,9 +13,13 @@
     <div class="inventory-module-hero d-flex justify-content-between align-items-center flex-wrap gap-3">
         <div>
             <h1 class="inventory-module-title mb-1">{{ $inventoryItem->name }}</h1>
-            <p class="inventory-module-subtitle mb-0">Kode {{ $inventoryItem->code }} | Total sub barang {{ $detailCount }} | Nominal perawatan Rp {{ number_format($maintenanceTotal, 0, ',', '.') }}</p>
+            <div class="d-flex gap-2 flex-wrap mt-1" style="font-size:.82rem;color:#64748b">
+                <span><i class="fas fa-barcode mr-1"></i>{{ $inventoryItem->code }}</span>
+                <span><i class="fas fa-layer-group mr-1"></i>{{ $detailCount }} sub</span>
+                <span><i class="fas fa-coins mr-1"></i>Rp {{ number_format($maintenanceTotal, 0, ',', '.') }}</span>
+            </div>
         </div>
-        <a href="{{ route('perawatan-alat-mesin.items.index') }}" class="btn btn-outline-primary">Kembali</a>
+        <a href="{{ route('perawatan-alat-mesin.items.index') }}" class="btn btn-outline-primary"><i class="fas fa-arrow-left mr-1"></i> Kembali</a>
     </div>
 </div>
 @endsection
@@ -24,26 +28,26 @@
 @include('persediaan.partials.module-styles')
 <style>
     .inventory-detail-form label {
-        font-size: 0.92rem;
-        margin-bottom: 6px;
-        color: #334155;
+        font-size: 0.84rem;
+        margin-bottom: 4px;
+        color: #475569;
         font-weight: 600;
     }
 
     .inventory-detail-table thead th {
         background: #edf4ff;
         color: #21427e;
-        font-size: 0.88rem;
+        font-size: 0.82rem;
         font-weight: 700;
         border-bottom: 1px solid rgba(191, 219, 254, 0.82);
     }
 
     .inventory-detail-table td,
     .inventory-detail-table th {
-        padding: 13px 16px;
+        padding: 11px 14px;
         vertical-align: middle;
         border-color: rgba(226, 232, 240, 0.9);
-        font-size: 0.95rem;
+        font-size: 0.88rem;
     }
 
     .inventory-photo-link {
@@ -138,10 +142,9 @@
 </style>
 
 <div class="inventory-module-shell">
-    <div class="inventory-module-board">
+    <div>
         <div class="inventory-module-board-header">
-            <div class="inventory-module-board-title">Detail barang alat dan mesin</div>
-            <div class="inventory-module-board-subtitle">Kelola barang induk, sub barang, foto, dan histori perawatan.</div>
+            <div class="inventory-module-board-title">Detail Barang</div>
         </div>
         <div class="inventory-module-board-body">
             <div class="row mb-4">
@@ -149,38 +152,33 @@
                     <div class="inventory-module-stat">
                         <div class="inventory-module-stat-label">Sub Barang</div>
                         <div class="inventory-module-stat-value">{{ $detailCount }}</div>
-                        <div class="inventory-module-stat-note">Total NUP / unit detail</div>
                     </div>
                 </div>
                 <div class="col-md-3 col-6 mb-3">
                     <div class="inventory-module-stat">
                         <div class="inventory-module-stat-label">Aktif</div>
                         <div class="inventory-module-stat-value text-success">{{ $activeDetailCount }}</div>
-                        <div class="inventory-module-stat-note">Unit tersedia</div>
                     </div>
                 </div>
                 <div class="col-md-3 col-6 mb-3">
                     <div class="inventory-module-stat">
                         <div class="inventory-module-stat-label">Nonaktif</div>
                         <div class="inventory-module-stat-value text-danger">{{ $inactiveDetailCount }}</div>
-                        <div class="inventory-module-stat-note">Perlu pembaruan</div>
                     </div>
                 </div>
                 <div class="col-md-3 col-6 mb-3">
                     <div class="inventory-module-stat">
                         <div class="inventory-module-stat-label">Perawatan</div>
-                        <div class="inventory-module-stat-value text-primary" style="font-size: 1.45rem;">Rp {{ number_format($maintenanceTotal, 0, ',', '.') }}</div>
-                        <div class="inventory-module-stat-note">Akumulasi biaya</div>
+                        <div class="inventory-module-stat-value text-primary" style="font-size: 1.35rem;">Rp {{ number_format($maintenanceTotal, 0, ',', '.') }}</div>
                     </div>
                 </div>
             </div>
 
             <div class="row">
                 <div class="col-lg-4 mb-4">
-                    <div class="inventory-module-panel mb-4">
+                    <div class="inventory-module-panel mb-3">
                         <div class="inventory-module-panel-header">
-                            <div class="inventory-module-panel-title">Perbarui Barang Induk</div>
-                            <p class="inventory-module-panel-subtitle">Sunting identitas utama barang induk.</p>
+                            <div class="inventory-module-panel-title"><i class="fas fa-pen text-muted mr-1" style="font-size:.78rem"></i> Edit Barang</div>
                         </div>
                         <div class="inventory-module-panel-body inventory-detail-form">
                             <form method="POST" action="{{ route('perawatan-alat-mesin.items.update', $inventoryItem) }}">
@@ -196,21 +194,20 @@
                                 </div>
                                 <div class="form-group">
                                     <label>Deskripsi</label>
-                                    <textarea name="description" class="form-control" rows="4">{{ $inventoryItem->description }}</textarea>
+                                    <textarea name="description" class="form-control" rows="3">{{ $inventoryItem->description }}</textarea>
                                 </div>
                                 <div class="custom-control custom-switch mb-3">
                                     <input type="checkbox" name="is_active" id="item_edit_active" class="custom-control-input" value="1" {{ $inventoryItem->is_active ? 'checked' : '' }}>
-                                    <label class="custom-control-label" for="item_edit_active">Barang aktif</label>
+                                    <label class="custom-control-label" for="item_edit_active">Aktif</label>
                                 </div>
-                                <button class="btn app-create-btn btn-block">Simpan Perubahan</button>
+                                <button class="btn app-create-btn btn-block">Simpan</button>
                             </form>
                         </div>
                     </div>
 
                     <div class="inventory-module-panel">
                         <div class="inventory-module-panel-header">
-                            <div class="inventory-module-panel-title">Tambah Sub Barang</div>
-                            <p class="inventory-module-panel-subtitle">Tambahkan unit detail untuk barang induk ini.</p>
+                            <div class="inventory-module-panel-title"><i class="fas fa-plus-circle text-muted mr-1" style="font-size:.78rem"></i> Tambah Sub Barang</div>
                         </div>
                         <div class="inventory-module-panel-body inventory-detail-form">
                             <form method="POST" action="{{ route('perawatan-alat-mesin.details.store', $inventoryItem) }}" enctype="multipart/form-data">
@@ -285,7 +282,7 @@
                                     <label>Keterangan</label>
                                     <textarea name="notes" class="form-control" rows="3" placeholder="Catatan kondisi atau lokasi barang"></textarea>
                                 </div>
-                                <button class="btn app-create-btn btn-block">Simpan Sub Barang</button>
+                                <button class="btn app-create-btn btn-block">Simpan</button>
                             </form>
                         </div>
                     </div>
@@ -293,12 +290,9 @@
 
                 <div class="col-lg-8 mb-4">
                     <div class="inventory-module-panel mb-4">
-                        <div class="inventory-module-panel-header d-flex justify-content-between align-items-center flex-wrap gap-2">
-                            <div>
-                                <div class="inventory-module-panel-title">Sub Barang / Detail Barang</div>
-                                <p class="inventory-module-panel-subtitle">Daftar unit detail yang sudah terdaftar untuk barang ini.</p>
-                            </div>
-                            <span class="inventory-module-chip">{{ $detailCount }} data</span>
+                        <div class="inventory-module-panel-header d-flex justify-content-between align-items-center">
+                            <div class="inventory-module-panel-title"><i class="fas fa-layer-group text-muted mr-1" style="font-size:.78rem"></i> Sub Barang</div>
+                            <span class="inventory-module-chip">{{ $detailCount }}</span>
                         </div>
                         <div class="table-responsive">
                             <table class="table inventory-detail-table mb-0">
@@ -327,9 +321,7 @@
                                             <td data-label="Ruang">{{ optional($detail->room)->name ?: '-' }}</td>
                                             <td data-label="Foto">
                                                 @if($detail->photo_path)
-                                                    <a href="{{ route('perawatan-alat-mesin.details.photo', $detail) }}" target="_blank" class="inventory-photo-link text-primary">
-                                                        <i class="far fa-image"></i> Preview
-                                                    </a>
+                                                    <a href="{{ route('perawatan-alat-mesin.details.photo', $detail) }}" target="_blank" class="text-primary" title="Lihat foto"><i class="far fa-image"></i></a>
                                                 @else
                                                     <span class="text-muted">-</span>
                                                 @endif
@@ -337,7 +329,7 @@
                                             <td data-label="Status">{!! $detail->status_badge !!}</td>
                                         </tr>
                                     @empty
-                                        <tr><td colspan="6" class="text-center text-muted py-5">Belum ada sub barang.</td></tr>
+                                        <tr><td colspan="6" class="text-center text-muted py-4" style="font-size:.86rem"><i class="far fa-folder-open d-block mb-1" style="font-size:1.1rem;opacity:.4"></i>Belum ada sub barang</td></tr>
                                     @endforelse
                                 </tbody>
                             </table>
@@ -345,12 +337,9 @@
                     </div>
 
                     <div class="inventory-module-panel">
-                        <div class="inventory-module-panel-header d-flex justify-content-between align-items-center flex-wrap gap-2">
-                            <div>
-                                <div class="inventory-module-panel-title">Histori Transaksi Perawatan</div>
-                                <p class="inventory-module-panel-subtitle">Ringkasan transaksi perawatan untuk seluruh sub barang pada item ini.</p>
-                            </div>
-                            <span class="inventory-module-chip">{{ $inventoryItem->maintenanceTransactions->count() }} transaksi</span>
+                        <div class="inventory-module-panel-header d-flex justify-content-between align-items-center">
+                            <div class="inventory-module-panel-title"><i class="fas fa-history text-muted mr-1" style="font-size:.78rem"></i> Histori Perawatan</div>
+                            <span class="inventory-module-chip">{{ $inventoryItem->maintenanceTransactions->count() }}</span>
                         </div>
                         <div class="table-responsive">
                             <table class="table inventory-detail-table mb-0">
@@ -360,7 +349,7 @@
                                         <th>Sub Barang</th>
                                         <th>Deskripsi</th>
                                         <th>Nominal</th>
-                                        <th>Lampiran</th>
+                                        <th style="width:50px"><i class="fas fa-paperclip"></i></th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -370,10 +359,10 @@
                                             <td data-label="Sub Barang">{{ optional($transaction->detail)->sub_code ?: '-' }}</td>
                                             <td data-label="Deskripsi">{{ $transaction->description }}</td>
                                             <td data-label="Nominal">Rp {{ number_format($transaction->amount, 0, ',', '.') }}</td>
-                                            <td data-label="Lampiran">{{ $transaction->attachments->count() }} file</td>
+                                            <td data-label="Lampiran"><span class="inventory-module-chip">{{ $transaction->attachments->count() }}</span></td>
                                         </tr>
                                     @empty
-                                        <tr><td colspan="5" class="text-center text-muted py-5">Belum ada histori transaksi.</td></tr>
+                                        <tr><td colspan="5" class="text-center text-muted py-4" style="font-size:.86rem"><i class="far fa-folder-open d-block mb-1" style="font-size:1.1rem;opacity:.4"></i>Belum ada histori</td></tr>
                                     @endforelse
                                 </tbody>
                             </table>

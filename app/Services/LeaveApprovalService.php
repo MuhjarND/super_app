@@ -8,6 +8,8 @@ use App\LeaveRequest;
 use App\User;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
 class LeaveApprovalService
@@ -30,7 +32,7 @@ class LeaveApprovalService
     public function buildApprovalSteps(LeaveRequest $leaveRequest)
     {
         $steps = [];
-        $leaveRequest->loadMissing(['user.atasanLangsung.atasanLangsung']);
+        $leaveRequest->loadMissing(['user.atasanLangsung.atasanLangsung', 'user.unit', 'user.roles']);
 
         $verifikator = User::whereHas('roles', function ($q) {
             $q->where('name', 'verifikator_dokumen');
@@ -44,7 +46,7 @@ class LeaveApprovalService
             ];
         }
 
-        $directSupervisorId = optional($leaveRequest->user)->atasan_langsung_id;
+        $directSupervisorId = $this->resolveDirectSupervisorId($leaveRequest);
         if ($directSupervisorId) {
             $steps[] = [
                 'step_no' => count($steps) + 1,
@@ -72,32 +74,56 @@ class LeaveApprovalService
         return $steps;
     }
 
-    public function submit(LeaveRequest $leaveRequest)
+    public function submit(LeaveRequest $leaveRequest, $applicantSignatureData = null)
     {
-        DB::transaction(function () use ($leaveRequest) {
-            $steps = $this->buildApprovalSteps($leaveRequest);
-            if (empty($steps)) {
-                throw ValidationException::withMessages(['status' => 'Rantai approval cuti belum terbentuk.']);
+        $oldSignaturePath = $leaveRequest->applicant_signature_path;
+        $newSignaturePath = null;
+
+        try {
+            DB::transaction(function () use ($leaveRequest, $applicantSignatureData, &$newSignaturePath) {
+                $steps = $this->buildApprovalSteps($leaveRequest);
+                if (empty($steps)) {
+                    throw ValidationException::withMessages(['status' => 'Rantai approval cuti belum terbentuk.']);
+                }
+                if (empty($leaveRequest->request_number)) {
+                    $number = $this->numberService->next('leave_request', optional($leaveRequest->start_date)->year ?: date('Y'), 'CUTI');
+                    $leaveRequest->request_number = $number['formatted'];
+                }
+
+                if ($applicantSignatureData) {
+                    $signature = $this->signaturePadService->storeDataUri($applicantSignatureData, 'cuti/applicant-signatures');
+                    $newSignaturePath = $signature['path'];
+                    $leaveRequest->applicant_signature_path = $signature['path'];
+                    $leaveRequest->applicant_signature_mime = $signature['mime'];
+                    $leaveRequest->applicant_signature_size = $signature['size'];
+                }
+
+                $leaveRequest->status = LeaveRequest::STATUS_SUBMITTED;
+                $leaveRequest->submitted_at = Carbon::now();
+                $leaveRequest->approver_chain_snapshot = $steps;
+                $leaveRequest->save();
+                $leaveRequest->approvals()->delete();
+                foreach ($steps as $index => $step) {
+                    $leaveRequest->approvals()->create([
+                        'step_no' => $step['step_no'],
+                        'role_name' => $step['role_name'],
+                        'approver_id' => $step['approver_id'],
+                        'status' => $index === 0 ? 'pending' : 'waiting',
+                    ]);
+                }
+                $this->balanceService->reserve($leaveRequest);
+            });
+        } catch (\Throwable $exception) {
+            if ($newSignaturePath) {
+                Storage::disk('public')->delete($newSignaturePath);
             }
-            if (empty($leaveRequest->request_number)) {
-                $number = $this->numberService->next('leave_request', optional($leaveRequest->start_date)->year ?: date('Y'), 'CUTI');
-                $leaveRequest->request_number = $number['formatted'];
-            }
-            $leaveRequest->status = LeaveRequest::STATUS_SUBMITTED;
-            $leaveRequest->submitted_at = Carbon::now();
-            $leaveRequest->approver_chain_snapshot = $steps;
-            $leaveRequest->save();
-            $leaveRequest->approvals()->delete();
-            foreach ($steps as $index => $step) {
-                $leaveRequest->approvals()->create([
-                    'step_no' => $step['step_no'],
-                    'role_name' => $step['role_name'],
-                    'approver_id' => $step['approver_id'],
-                    'status' => $index === 0 ? 'pending' : 'waiting',
-                ]);
-            }
-            $this->balanceService->reserve($leaveRequest);
-        });
+
+            throw $exception;
+        }
+
+        if ($newSignaturePath && $oldSignaturePath && $oldSignaturePath !== $newSignaturePath) {
+            Storage::disk('public')->delete($oldSignaturePath);
+        }
     }
 
     public function approve(LeaveApproval $approval, User $actor, $note = null, $signatureData = null)
@@ -219,5 +245,61 @@ class LeaveApprovalService
             ->first();
 
         return $delegation ? $delegation->delegate_id : $approverId;
+    }
+
+    protected function resolveDirectSupervisorId(LeaveRequest $leaveRequest)
+    {
+        $user = $leaveRequest->user;
+        if (!$user) {
+            return null;
+        }
+
+        if ($user->atasan_langsung_id && (int) $user->atasan_langsung_id !== (int) $user->id) {
+            return $user->atasan_langsung_id;
+        }
+
+        $unitName = Str::lower((string) optional($user->unit)->nama);
+
+        if (Str::contains($unitName, 'kepaniteraan')) {
+            $panitera = $this->firstRoleUser(['panitera'], $user->id);
+            if ($panitera) {
+                return $panitera->id;
+            }
+        }
+
+        if (Str::contains($unitName, 'kesekretariatan')) {
+            $sekretaris = $this->firstRoleUser(['sekretaris'], $user->id);
+            if ($sekretaris) {
+                return $sekretaris->id;
+            }
+        }
+
+        $supervisor = User::where('id', '<>', $user->id)
+            ->whereHas('roles', function ($query) {
+                $query->whereIn('name', ['atasan_langsung', 'sekretaris', 'panitera', 'wakil_ketua', 'ketua']);
+            })
+            ->when($user->hirarki, function ($query) use ($user) {
+                $query->whereNotNull('hirarki')->where('hirarki', '<', $user->hirarki);
+            })
+            ->orderByRaw('CASE WHEN hirarki IS NULL THEN 1 ELSE 0 END')
+            ->orderByDesc('hirarki')
+            ->orderBy('name')
+            ->first();
+
+        return optional($supervisor)->id;
+    }
+
+    protected function firstRoleUser(array $roles, $excludeUserId = null)
+    {
+        return User::whereHas('roles', function ($query) use ($roles) {
+                $query->whereIn('name', $roles);
+            })
+            ->when($excludeUserId, function ($query) use ($excludeUserId) {
+                $query->where('id', '<>', $excludeUserId);
+            })
+            ->orderByRaw('CASE WHEN hirarki IS NULL THEN 1 ELSE 0 END')
+            ->orderBy('hirarki')
+            ->orderBy('name')
+            ->first();
     }
 }

@@ -237,6 +237,7 @@
         .mobile-app-icon.meeting { background: linear-gradient(135deg, #0891b2, #0f766e); }
         .mobile-app-icon.leave { background: linear-gradient(135deg, #dc2626, #ef4444); }
         .mobile-app-icon.asset { background: linear-gradient(135deg, #d97706, #f59e0b); }
+        .mobile-app-icon.supply { background: linear-gradient(135deg, #059669, #10b981); }
         .mobile-app-icon.zi { background: linear-gradient(135deg, #7c3aed, #4f46e5); }
         .mobile-app-icon.archive { background: linear-gradient(135deg, #475569, #0f172a); }
 
@@ -883,6 +884,13 @@
                     <a href="{{ route('mobile.menu.show', 'perawatan') }}" class="mobile-app-tile">
                         <span class="mobile-app-icon asset"><i class="fas fa-tools"></i></span>
                         <span class="mobile-app-title">Perawatan</span>
+                    </a>
+                @endif
+
+                @if($dashboardIsSuperAdmin || ($dashboardUser && $dashboardUser->canAccessSupplyModule()))
+                    <a href="{{ route('mobile.menu.show', 'persediaan') }}" class="mobile-app-tile">
+                        <span class="mobile-app-icon supply"><i class="fas fa-warehouse"></i></span>
+                        <span class="mobile-app-title">Persediaan</span>
                     </a>
                 @endif
 

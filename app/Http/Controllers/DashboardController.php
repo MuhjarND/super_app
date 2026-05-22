@@ -599,7 +599,7 @@ class DashboardController extends Controller
             ->where('user_id', $user->id);
 
         $relevantLeaveQuery = LeaveRequest::with(['leaveType', 'user', 'approvals']);
-        if (!$user->isSuperAdmin() && !$user->canApproveLeave()) {
+        if (!$user->isSuperAdmin() && !$user->canAccessLeaveApproval()) {
             $relevantLeaveQuery->where('user_id', $user->id);
         } elseif (!$user->isSuperAdmin()) {
             $relevantLeaveQuery->where(function ($query) use ($user) {

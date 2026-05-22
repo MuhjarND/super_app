@@ -542,6 +542,34 @@ class User extends Authenticatable
         ]);
     }
 
+    public function canAccessSupplyModule()
+    {
+        if ($this->isSuperAdmin()) {
+            return true;
+        }
+
+        return $this->hasAnyRole([
+            'operator_persediaan',
+            'admin',
+            'sekretaris',
+            'panitera',
+            'kabag',
+            'kasubag',
+            'panmud',
+            'pegawai',
+            'peserta',
+        ]);
+    }
+
+    public function canManageSupplyModule()
+    {
+        if ($this->isSuperAdmin()) {
+            return true;
+        }
+
+        return $this->hasRole('operator_persediaan');
+    }
+
     public function canAccessLeaveModule()
     {
         if ($this->isSuperAdmin()) {
@@ -571,6 +599,26 @@ class User extends Authenticatable
         ]);
     }
 
+    public function hasLeaveApprovalAssignment($statuses = null)
+    {
+        if (!$this->exists || !\Illuminate\Support\Facades\Schema::hasTable('leave_approvals')) {
+            return false;
+        }
+
+        $query = LeaveApproval::where('approver_id', $this->id);
+
+        if ($statuses) {
+            $query->whereIn('status', (array) $statuses);
+        }
+
+        return $query->exists();
+    }
+
+    public function canAccessLeaveApproval()
+    {
+        return $this->canApproveLeave() || $this->hasLeaveApprovalAssignment();
+    }
+
     public function canApproveSuratKeluarTemplate()
     {
         if ($this->isSuperAdmin()) {
@@ -582,7 +630,7 @@ class User extends Authenticatable
 
     public function canAccessApprovalCenter()
     {
-        return $this->canAccessMeetingApproval() || $this->canApproveLeave() || $this->canApproveSuratKeluarTemplate();
+        return $this->canAccessMeetingApproval() || $this->canAccessLeaveApproval() || $this->canApproveSuratKeluarTemplate();
     }
 
     public function canManageLeaveMasterData()
@@ -784,5 +832,15 @@ class User extends Authenticatable
     public function leaveBalances()
     {
         return $this->hasMany(LeaveBalance::class, 'user_id');
+    }
+
+    public function supplyRequests()
+    {
+        return $this->hasMany(SupplyRequest::class, 'user_id');
+    }
+
+    public function supplyPickups()
+    {
+        return $this->hasMany(SupplyPickup::class, 'user_id');
     }
 }

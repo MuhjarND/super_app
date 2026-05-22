@@ -29,6 +29,7 @@ class RoleSeeder extends Seeder
             ['name' => 'admin_kepegawaian', 'display_name' => 'Admin Kepegawaian'],
             ['name' => 'verifikator_dokumen', 'display_name' => 'Verifikator Dokumen'],
             ['name' => 'ppk', 'display_name' => 'PPK'],
+            ['name' => 'operator_persediaan', 'display_name' => 'Operator Persediaan'],
         ];
 
         foreach ($roles as $role) {

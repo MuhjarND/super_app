@@ -5,11 +5,8 @@
 @section('content-header')
 <div class="container-fluid">
     <div class="inventory-module-hero d-flex justify-content-between align-items-center flex-wrap gap-3">
-        <div>
-            <h1 class="inventory-module-title mb-1">History Transaksi Perawatan</h1>
-            <p class="inventory-module-subtitle mb-0">Detail sub barang dan histori transaksi perawatan.</p>
-        </div>
-        <a href="{{ route('perawatan-alat-mesin.maintenance.index') }}" class="btn btn-outline-secondary">Kembali</a>
+        <h1 class="inventory-module-title mb-0">Histori Perawatan</h1>
+        <a href="{{ route('perawatan-alat-mesin.maintenance.index') }}" class="btn btn-outline-secondary"><i class="fas fa-arrow-left mr-1"></i> Kembali</a>
     </div>
 </div>
 @endsection
@@ -41,10 +38,10 @@
     }
 
     .history-meta {
-        margin-top: 18px;
-        line-height: 1.55;
+        margin-top: 14px;
+        line-height: 1.5;
         color: #0f172a;
-        font-size: 0.95rem;
+        font-size: 0.86rem;
     }
 
     .history-meta strong {
@@ -61,17 +58,17 @@
     .history-table thead th {
         background: #edf4ff;
         color: #21427e;
-        font-size: 0.88rem;
+        font-size: 0.82rem;
         font-weight: 700;
         border-bottom: 1px solid rgba(191, 219, 254, 0.82);
     }
 
     .history-table td,
     .history-table th {
-        padding: 13px 16px;
+        padding: 10px 14px;
         vertical-align: middle;
         border-color: rgba(226, 232, 240, 0.9);
-        font-size: 0.95rem;
+        font-size: 0.86rem;
     }
 
     .history-chip {
@@ -197,18 +194,16 @@
 </style>
 
 <div class="inventory-module-shell">
-    <div class="inventory-module-board">
+    <div>
         <div class="inventory-module-board-header">
-            <div class="inventory-module-board-title">History transaksi perawatan</div>
-            <div class="inventory-module-board-subtitle">Pantau detail sub barang dan seluruh histori perawatannya dalam satu halaman.</div>
+            <div class="inventory-module-board-title">Detail & Histori</div>
         </div>
         <div class="inventory-module-board-body">
             <div class="row">
                 <div class="col-lg-4 mb-4">
                     <div class="inventory-module-panel h-100">
                         <div class="inventory-module-panel-header">
-                            <div class="inventory-module-panel-title">Detail Barang</div>
-                            <p class="inventory-module-panel-subtitle">Identitas sub barang yang sedang ditinjau.</p>
+                            <div class="inventory-module-panel-title"><i class="fas fa-cube text-muted mr-1" style="font-size:.78rem"></i> Sub Barang</div>
                         </div>
                         <div class="inventory-module-panel-body">
                             <div class="history-photo">
@@ -220,22 +215,22 @@
                             </div>
 
                             <div class="history-meta">
-                                <div><strong>Barang :</strong> {{ optional($inventoryItemDetail->item)->name ?: '-' }}</div>
-                                <div><strong>NUP / Kode sub barang :</strong> {{ $inventoryItemDetail->sub_code ?: ($inventoryItemDetail->nup ?: '-') }}</div>
-                                <div><strong>Sub barang :</strong> {{ $inventoryItemDetail->name ?: '-' }}</div>
-                                <div><strong>Tanggal perolehan :</strong> {{ optional($inventoryItemDetail->acquisition_date)->format('Y-m-d') ?: '-' }}</div>
-                                <div><strong>Harga perolehan :</strong> {{ $inventoryItemDetail->acquisition_value !== null ? number_format((float) $inventoryItemDetail->acquisition_value, 2, ',', '.') : '-' }}</div>
-                                <div><strong>Satuan :</strong> {{ optional($inventoryItemDetail->unit)->name ?: '-' }}</div>
-                                <div><strong>Lokasi/Ruang :</strong> {{ optional($inventoryItemDetail->room)->name ?: '-' }}</div>
-                                <div><strong>Brand/merk :</strong> {{ optional($inventoryItemDetail->brand)->name ?: '-' }}</div>
-                                <div><strong>Kondisi barang :</strong>
+                                <div><strong>Barang</strong> {{ optional($inventoryItemDetail->item)->name ?: '-' }}</div>
+                                <div><strong>Kode</strong> {{ $inventoryItemDetail->sub_code ?: ($inventoryItemDetail->nup ?: '-') }}</div>
+                                <div><strong>Nama</strong> {{ $inventoryItemDetail->name ?: '-' }}</div>
+                                <div><strong>Perolehan</strong> {{ optional($inventoryItemDetail->acquisition_date)->format('d/m/Y') ?: '-' }}</div>
+                                <div><strong>Harga</strong> {{ $inventoryItemDetail->acquisition_value !== null ? 'Rp ' . number_format((float) $inventoryItemDetail->acquisition_value, 0, ',', '.') : '-' }}</div>
+                                <div><strong>Satuan</strong> {{ optional($inventoryItemDetail->unit)->name ?: '-' }}</div>
+                                <div><strong>Ruang</strong> {{ optional($inventoryItemDetail->room)->name ?: '-' }}</div>
+                                <div><strong>Merk</strong> {{ optional($inventoryItemDetail->brand)->name ?: '-' }}</div>
+                                <div><strong>Kondisi</strong>
                                     @if(optional($inventoryItemDetail->condition)->name)
                                         <span class="history-chip">{{ $inventoryItemDetail->condition->name }}</span>
                                     @else
                                         -
                                     @endif
                                 </div>
-                                <div class="mt-2 text-success font-weight-700"><strong>Total perawatan :</strong> Rp {{ number_format($transactionTotal, 2, ',', '.') }}</div>
+                                <div class="mt-2 text-success font-weight-700"><strong>Total</strong> Rp {{ number_format($transactionTotal, 0, ',', '.') }}</div>
                             </div>
                         </div>
                     </div>
@@ -243,29 +238,25 @@
 
                 <div class="col-lg-8 mb-4">
                     <div class="inventory-module-panel h-100">
-                        <div class="inventory-module-panel-header d-flex justify-content-between align-items-center flex-wrap gap-2">
-                            <div>
-                                <div class="inventory-module-panel-title">Daftar History Transaksi</div>
-                                <p class="inventory-module-panel-subtitle">Tambah, edit, hapus, dan preview lampiran dari sub barang ini.</p>
-                            </div>
-                            <span class="inventory-module-chip">{{ $inventoryItemDetail->maintenanceTransactions->count() }} transaksi</span>
+                        <div class="inventory-module-panel-header d-flex justify-content-between align-items-center">
+                            <div class="inventory-module-panel-title"><i class="fas fa-history text-muted mr-1" style="font-size:.78rem"></i> Transaksi</div>
+                            <span class="inventory-module-chip">{{ $inventoryItemDetail->maintenanceTransactions->count() }}</span>
                         </div>
                         <div class="inventory-module-panel-body">
                             <div class="history-action-row">
-                                <button type="button" class="btn app-create-btn btn-sm" data-toggle="modal" data-target="#maintenanceCreateModal">Tambah</button>
-                                <a href="{{ route('perawatan-alat-mesin.maintenance.index') }}" class="btn btn-outline-secondary btn-sm">Kembali</a>
+                                <button type="button" class="btn app-create-btn btn-sm" data-toggle="modal" data-target="#maintenanceCreateModal"><i class="fas fa-plus mr-1"></i> Tambah</button>
                             </div>
 
                             <div class="table-responsive">
                                 <table class="table table-bordered history-table mb-0">
                                     <thead>
                                         <tr>
-                                            <th>Kode transaksi</th>
+                                            <th>ID</th>
                                             <th>Tanggal</th>
                                             <th>Keterangan</th>
                                             <th>Nominal</th>
-                                            <th>Lampiran</th>
-                                            <th width="148"></th>
+                                            <th><i class="fas fa-paperclip"></i></th>
+                                            <th width="100"></th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -280,8 +271,8 @@
                                                         <div class="d-flex flex-column" style="gap: 6px;">
                                                             @foreach($transaction->attachments as $attachment)
                                                                 <div class="attachment-actions">
-                                                                    <button type="button" class="btn btn-sm btn-outline-primary js-preview-attachment" data-url="{{ route('perawatan-alat-mesin.maintenance.attachments.file', $attachment) }}" data-name="{{ $attachment->original_name ?: basename($attachment->file_path) }}">Preview</button>
-                                                                    <a href="{{ route('perawatan-alat-mesin.maintenance.attachments.file', $attachment) }}" target="_blank">{{ $attachment->original_name ?: basename($attachment->file_path) }}</a>
+                                                                    <button type="button" class="btn btn-sm btn-outline-primary js-preview-attachment" data-url="{{ route('perawatan-alat-mesin.maintenance.attachments.file', $attachment) }}" data-name="{{ $attachment->original_name ?: basename($attachment->file_path) }}" title="Preview"><i class="fas fa-eye"></i></button>
+                                                                    <a href="{{ route('perawatan-alat-mesin.maintenance.attachments.file', $attachment) }}" target="_blank" style="font-size:.8rem">{{ Str::limit($attachment->original_name ?: basename($attachment->file_path), 20) }}</a>
                                                                 </div>
                                                             @endforeach
                                                         </div>
@@ -301,19 +292,19 @@
                                                             data-description="{{ e($transaction->description) }}"
                                                             data-amount="{{ $transaction->amount }}"
                                                             data-update-url="{{ route('perawatan-alat-mesin.maintenance.update', $transaction) }}"
-                                                        >Edit</button>
+                                                        title="Edit"><i class="fas fa-pen"></i></button>
                                                         <form method="POST" action="{{ route('perawatan-alat-mesin.maintenance.destroy', $transaction) }}" onsubmit="return confirm('Hapus transaksi ini?')">
                                                             @csrf
                                                             @method('DELETE')
                                                             <input type="hidden" name="redirect_detail_id" value="{{ $inventoryItemDetail->id }}">
-                                                            <button type="submit" class="btn btn-sm btn-danger">Hapus</button>
+                                                            <button type="submit" class="btn btn-sm btn-danger" title="Hapus"><i class="fas fa-trash"></i></button>
                                                         </form>
                                                     </div>
                                                 </td>
                                             </tr>
                                         @empty
                                             <tr>
-                                                <td colspan="6"><div class="inventory-module-empty">Belum ada histori transaksi perawatan untuk sub barang ini.</div></td>
+                                                <td colspan="6"><div class="inventory-module-empty"><i class="far fa-folder-open" style="margin-right:4px"></i> Belum ada transaksi</div></td>
                                             </tr>
                                         @endforelse
                                     </tbody>
@@ -334,7 +325,7 @@
                 @csrf
                 <input type="hidden" name="redirect_detail_id" value="{{ $inventoryItemDetail->id }}">
                 <div class="modal-header">
-                    <h5 class="modal-title">Tambah Transaksi Perawatan</h5>
+                    <h5 class="modal-title">Tambah Transaksi</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
                 </div>
                 <div class="modal-body">
@@ -372,11 +363,11 @@
                     </div>
                     <div class="form-group mb-0">
                         <label>Keterangan</label>
-                        <textarea name="description" class="form-control" rows="4" required></textarea>
+                        <textarea name="description" class="form-control" rows="3" required></textarea>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Tutup</button>
+                    <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Batal</button>
                     <button type="submit" class="btn app-create-btn">Simpan</button>
                 </div>
             </form>
@@ -392,7 +383,7 @@
                 @method('PUT')
                 <input type="hidden" name="redirect_detail_id" value="{{ $inventoryItemDetail->id }}">
                 <div class="modal-header">
-                    <h5 class="modal-title">Edit Transaksi Perawatan</h5>
+                    <h5 class="modal-title">Edit Transaksi</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
                 </div>
                 <div class="modal-body">
@@ -430,12 +421,12 @@
                     </div>
                     <div class="form-group mb-0">
                         <label>Keterangan</label>
-                        <textarea name="description" id="maintenance_edit_description" class="form-control" rows="4" required></textarea>
+                        <textarea name="description" id="maintenance_edit_description" class="form-control" rows="3" required></textarea>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Tutup</button>
-                    <button type="submit" class="btn app-create-btn">Simpan Perubahan</button>
+                    <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn app-create-btn">Simpan</button>
                 </div>
             </form>
         </div>

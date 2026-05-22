@@ -3029,7 +3029,7 @@
                                             <p>Pengajuan Cuti</p>
                                         </a>
                                     </li>
-                                    @if($isSidebarSuperAdmin || $sidebarUser->canApproveLeave())
+                                    @if($isSidebarSuperAdmin || $sidebarUser->canAccessLeaveApproval())
                                         <li class="nav-item nav-item-sub">
                                             <a href="{{ route('cuti.approval.index') }}"
                                                 class="nav-link {{ request()->routeIs('cuti.approval.*') ? 'active' : '' }}">
@@ -3168,19 +3168,45 @@
                                 </ul>
                             </li>
 
-                            <li class="nav-section " data-section="persediaan-dev">
+                        @endif
+
+                        @if($isSidebarSuperAdmin || $sidebarUser->canAccessSupplyModule())
+                            <li class="nav-section " data-section="persediaan">
                                 <button type="button" class="nav-section-toggle">
                                     <span>Persediaan</span>
                                     <i class="fas fa-chevron-down section-chevron"></i>
                                 </button>
                                 <ul class="nav nav-pills flex-column nav-section-menu">
                                     <li class="nav-item nav-item-sub">
-                                        <a href="{{ route('persediaan.index') }}"
-                                            class="nav-link {{ request()->routeIs('persediaan.*') ? 'active' : '' }}">
-                                            <i class="nav-icon fas fa-warehouse"></i>
-                                            <p>Persediaan <span class="badge-dev ml-2">DEV</span></p>
+                                        <a href="{{ route('persediaan.requests.create') }}"
+                                            class="nav-link {{ request()->routeIs('persediaan.requests.create') ? 'active' : '' }}">
+                                            <i class="nav-icon fas fa-shopping-cart"></i>
+                                            <p>Ajukan Barang</p>
                                         </a>
                                     </li>
+                                    <li class="nav-item nav-item-sub">
+                                        <a href="{{ route('persediaan.requests.index') }}"
+                                            class="nav-link {{ request()->routeIs('persediaan.requests.index') || request()->routeIs('persediaan.requests.show') ? 'active' : '' }}">
+                                            <i class="nav-icon fas fa-clipboard-list"></i>
+                                            <p>Daftar Pengajuan</p>
+                                        </a>
+                                    </li>
+                                    <li class="nav-item nav-item-sub">
+                                        <a href="{{ route('persediaan.pickups.index') }}"
+                                            class="nav-link {{ request()->routeIs('persediaan.pickups.*') ? 'active' : '' }}">
+                                            <i class="nav-icon fas fa-box-open"></i>
+                                            <p>Barang Diambil</p>
+                                        </a>
+                                    </li>
+                                    @if($isSidebarSuperAdmin || $sidebarUser->canManageSupplyModule())
+                                        <li class="nav-item nav-item-sub">
+                                            <a href="{{ route('persediaan.items.index') }}"
+                                                class="nav-link {{ request()->routeIs('persediaan.items.*') ? 'active' : '' }}">
+                                                <i class="nav-icon fas fa-boxes"></i>
+                                                <p>Master Barang</p>
+                                            </a>
+                                        </li>
+                                    @endif
                                 </ul>
                             </li>
                         @endif
@@ -3950,7 +3976,7 @@
             $(document).on('submit', 'form.requires-signature-pad', function (event) {
                 if (!window.AppSignaturePad.sync(this)) {
                     event.preventDefault();
-                    showToast('Tanda tangan wajib diisi sebelum menyetujui dokumen.', 'error');
+                    showToast('Tanda tangan wajib diisi sebelum dokumen diproses.', 'error');
                 }
             });
 

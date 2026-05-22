@@ -102,7 +102,7 @@ class MobileModuleMenuController extends Controller
                 'tone' => 'red',
                 'items' => ($isSuperAdmin || $user->canAccessLeaveModule()) ? array_values(array_filter([
                     $this->item('Pengajuan', route('cuti.index'), 'fas fa-calendar-alt', 'red'),
-                    ($isSuperAdmin || $user->canApproveLeave()) ? $this->item('Approval', route('cuti.approval.index'), 'fas fa-user-check', 'teal') : null,
+                    ($isSuperAdmin || $user->canAccessLeaveApproval()) ? $this->item('Approval', route('cuti.approval.index'), 'fas fa-user-check', 'teal') : null,
                     $this->item('Rekap Saldo', route('cuti.balances.index'), 'fas fa-wallet', 'blue'),
                     $this->item('Laporan', route('cuti.reports.index'), 'far fa-chart-bar', 'orange'),
                     ($isSuperAdmin || $user->canManageLeaveMasterData()) ? $this->item('Jenis Cuti', route('cuti.master.types.index'), 'far fa-list-alt', 'indigo') : null,
@@ -127,6 +127,18 @@ class MobileModuleMenuController extends Controller
                     ($isSuperAdmin || $user->canManageInventoryMasterData()) ? $this->item('Ruang', route('perawatan-alat-mesin.master.index', 'rooms'), 'fas fa-door-open', 'indigo') : null,
                     ($isSuperAdmin || $user->canManageInventoryMasterData()) ? $this->item('Brand / Merk', route('perawatan-alat-mesin.master.index', 'brands'), 'fas fa-tags', 'orange') : null,
                     ($isSuperAdmin || $user->canManageInventoryMasterData()) ? $this->item('Kuasa Pengguna', route('perawatan-alat-mesin.authority.index'), 'fas fa-user-tie', 'slate') : null,
+                ])) : [],
+            ],
+            'persediaan' => [
+                'title' => 'Persediaan',
+                'subtitle' => 'Ajukan ATK dan lihat riwayat.',
+                'icon' => 'fas fa-warehouse',
+                'tone' => 'green',
+                'items' => ($isSuperAdmin || $user->canAccessSupplyModule()) ? array_values(array_filter([
+                    $this->item('Ajukan Barang', route('persediaan.requests.create'), 'fas fa-shopping-cart', 'indigo'),
+                    $this->item('Pengajuan', route('persediaan.requests.index'), 'fas fa-clipboard-list', 'blue'),
+                    $this->item('Barang Diambil', route('persediaan.pickups.index'), 'fas fa-box-open', 'orange'),
+                    ($isSuperAdmin || $user->canManageSupplyModule()) ? $this->item('Master Barang', route('persediaan.items.index'), 'fas fa-boxes', 'slate') : null,
                 ])) : [],
             ],
             'zi' => [

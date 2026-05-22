@@ -7,6 +7,7 @@ use App\LeaveApproval;
 use App\LeaveRequest;
 use App\Rapat;
 use App\RapatApproval;
+use App\SupplyRequest;
 use App\SuratKeluar;
 use App\SuratKeluarApproval;
 use App\User;
@@ -705,6 +706,61 @@ class WhatsAppNotificationService
         }
 
         return $result['success'] > 0;
+    }
+
+    public function notifySupplyRequestSubmitted(SupplyRequest $supplyRequest, User $targetUser)
+    {
+        $supplyRequest->loadMissing(['requester', 'items']);
+
+        $message = $this->wrap([
+            'Yth. Bapak/Ibu Operator Persediaan,',
+            'Dengan hormat, terdapat pengajuan persediaan baru yang memerlukan tindak lanjut.',
+            '',
+            'Nomor Pengajuan: ' . $supplyRequest->request_number,
+            'Pemohon: ' . (optional($supplyRequest->requester)->name ?: '-'),
+            'Barang: ' . ($supplyRequest->items_summary ?: '-'),
+            'Jumlah: ' . $supplyRequest->quantity_summary,
+            'Keperluan: ' . trim(preg_replace('/\s+/', ' ', (string) $supplyRequest->purpose)),
+            'Status: ' . $supplyRequest->status_label,
+            '',
+            'Silakan memproses pengajuan melalui tautan berikut:',
+            route('persediaan.requests.show', $supplyRequest),
+        ]);
+
+        return $this->sendToUser($targetUser, $message, [
+            'module' => 'persediaan',
+            'event' => 'supply_request_submitted',
+            'notifiable_type' => get_class($supplyRequest),
+            'notifiable_id' => $supplyRequest->id,
+        ]);
+    }
+
+    public function notifySupplyRequestStatus(SupplyRequest $supplyRequest, User $targetUser, $title, $messageBody)
+    {
+        $supplyRequest->loadMissing(['requester', 'items']);
+
+        $message = $this->wrap([
+            'Yth. Bapak/Ibu,',
+            'Dengan hormat, berikut disampaikan pembaruan pengajuan persediaan.',
+            '',
+            'Informasi: ' . $title,
+            'Nomor Pengajuan: ' . $supplyRequest->request_number,
+            'Barang: ' . ($supplyRequest->items_summary ?: '-'),
+            'Jumlah: ' . $supplyRequest->quantity_summary,
+            'Keperluan: ' . trim(preg_replace('/\s+/', ' ', (string) $supplyRequest->purpose)),
+            'Status: ' . $supplyRequest->status_label,
+            'Keterangan: ' . $messageBody,
+            '',
+            'Silakan meninjau detail pengajuan melalui tautan berikut:',
+            route('persediaan.requests.show', $supplyRequest),
+        ]);
+
+        return $this->sendToUser($targetUser, $message, [
+            'module' => 'persediaan',
+            'event' => 'supply_request_status',
+            'notifiable_type' => get_class($supplyRequest),
+            'notifiable_id' => $supplyRequest->id,
+        ]);
     }
 
     public function notifyLoginInfo(User $user)

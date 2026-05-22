@@ -37,7 +37,7 @@ class LeaveRequestController extends Controller
     {
         $this->abortIfUnauthorized();
         if (!$this->moduleReady()) { return $this->setupResponse('Modul Cuti Belum Diaktifkan'); }
-        $leaveRequests = LeaveRequest::with(['leaveType', 'approvals', 'documents'])->where('user_id', auth()->id())->latest('id')->paginate(15);
+        $leaveRequests = LeaveRequest::with(['leaveType', 'approvals.approver', 'audits.actor', 'documents'])->where('user_id', auth()->id())->latest('id')->paginate(15);
         $leaveTypes = LeaveType::where('status', 'active')->orderBy('name')->get();
         return view('cuti.index', compact('leaveRequests', 'leaveTypes'));
     }
@@ -108,16 +108,21 @@ class LeaveRequestController extends Controller
         return redirect()->route('cuti.show', $leaveRequest)->with('success', 'Draft cuti diperbarui.');
     }
 
-    public function submit(LeaveRequest $leaveRequest)
+    public function submit(Request $request, LeaveRequest $leaveRequest)
     {
         $this->abortIfUnauthorized();
         if (!$this->moduleReady()) { return $this->setupResponse('Modul Cuti Belum Diaktifkan'); }
         $this->authorize('submit', $leaveRequest);
+        $request->validate([
+            'signature_data' => ['required', 'string'],
+        ], [
+            'signature_data.required' => 'Tanda tangan pemohon wajib diisi sebelum pengajuan cuti disubmit.',
+        ]);
         $leaveRequest->load(['user', 'leaveType', 'documents']);
         $this->validator->validateForSubmit($leaveRequest);
         $leaveRequest->approved_days = $leaveRequest->requested_days;
         $leaveRequest->save();
-        $this->approvalService->submit($leaveRequest);
+        $this->approvalService->submit($leaveRequest, $request->input('signature_data'));
         $this->documentService->syncSuratKeluar($leaveRequest->fresh(['leaveType', 'approvals', 'documents', 'user']), false);
         event(new LeaveRequestSubmitted($leaveRequest, auth()->user()));
         return redirect()->route('cuti.show', $leaveRequest)->with('success', 'Pengajuan cuti berhasil disubmit.');

@@ -177,7 +177,7 @@ class LeaveDocumentService
         $leaveRequest->loadMissing(['user.jabatan', 'leaveType']);
 
         return [
-            'valid' => !is_null($leaveRequest->id),
+            'valid' => !empty($leaveRequest->applicant_signature_path),
             'document_number' => $leaveRequest->letter_number ?: $leaveRequest->request_number ?: '-',
             'document_type' => 'Formulir Permintaan dan Pemberian Cuti',
             'leave_type' => optional($leaveRequest->leaveType)->name ?: '-',
@@ -186,7 +186,7 @@ class LeaveDocumentService
             'signer_name' => optional($leaveRequest->user)->name ?: '-',
             'signer_title' => optional(optional($leaveRequest->user)->jabatan)->nama ?: (optional($leaveRequest->user)->jabatan_keterangan ?: '-'),
             'acted_at' => optional($leaveRequest->submitted_at ?: $leaveRequest->created_at)->translatedFormat('d F Y H:i') . ' WIT',
-            'status' => $leaveRequest->status_label,
+            'status' => !empty($leaveRequest->applicant_signature_path) ? 'Ditandatangani Pemohon' : 'Belum Ditandatangani',
             'verification_url' => $this->applicantSignatureVerificationUrl($leaveRequest),
         ];
     }
@@ -222,6 +222,7 @@ class LeaveDocumentService
         $verifier = $approvals->get('verifikator_dokumen');
         $atasan = $approvals->get('atasan_langsung');
         $ppk = $approvals->get('ppk');
+        $approvalSignatures = $this->buildApprovalSignatureRows($leaveRequest);
 
         return [
             'allTypes' => [
@@ -236,14 +237,40 @@ class LeaveDocumentService
             'verifier' => $verifier,
             'atasan' => $atasan,
             'ppk' => $ppk,
-            'pemohonSignature' => null,
+            'pemohonSignature' => $this->signaturePadService->toDataUri($leaveRequest->applicant_signature_path),
             'verifierParaf' => $this->buildParaf($verifier),
             'atasanSignature' => $this->makeApprovalSignatureImage($atasan),
             'ppkSignature' => $this->makeApprovalSignatureImage($ppk),
+            'approvalSignatures' => $approvalSignatures,
+            'additionalApprovalSignatures' => $approvalSignatures->reject(function ($signature) {
+                return in_array($signature['role_name'], ['atasan_langsung', 'ppk'], true);
+            })->values(),
             'annualLeaveRows' => $this->buildAnnualLeaveRows($leaveRequest),
             'attachmentNames' => $leaveRequest->documents->pluck('original_name')->filter()->values(),
             'workPeriodText' => $this->buildWorkPeriodText(optional($leaveRequest->user)->tmt_pns, $leaveRequest->start_date),
         ];
+    }
+
+    protected function buildApprovalSignatureRows(LeaveRequest $leaveRequest)
+    {
+        return $leaveRequest->approvals
+            ->filter(function ($approval) {
+                return $approval->status === 'approved'
+                    && $approval->role_name !== 'verifikator_dokumen'
+                    && !empty($approval->signature_path);
+            })
+            ->map(function ($approval) {
+                return [
+                    'role_name' => $approval->role_name,
+                    'role_label' => $approval->role_label,
+                    'signature' => $this->makeApprovalSignatureImage($approval),
+                    'name' => optional($approval->approver)->name ?: '-',
+                    'nip' => optional($approval->approver)->nip ?: '-',
+                    'title' => optional(optional($approval->approver)->jabatan)->nama ?: (optional($approval->approver)->jabatan_keterangan ?: '-'),
+                    'acted_at' => optional($approval->acted_at)->translatedFormat('d/m/Y'),
+                ];
+            })
+            ->values();
     }
 
     protected function buildAnnualLeaveRows(LeaveRequest $leaveRequest)
@@ -275,13 +302,8 @@ class LeaveDocumentService
             return null;
         }
 
-        $parts = preg_split('/\s+/', trim((string) $approval->approver->name));
-        $initials = collect($parts)->map(function ($part) {
-            return Str::upper(Str::substr($part, 0, 1));
-        })->implode('');
-
         return [
-            'initials' => Str::limit($initials, 4, ''),
+            'checked' => true,
             'name' => $approval->approver->name,
             'acted_at' => optional($approval->acted_at)->translatedFormat('d/m/Y'),
         ];
@@ -393,7 +415,7 @@ class LeaveDocumentService
                 'leaveRequest' => $leaveRequest,
                 'formData' => $this->buildFormViewData($leaveRequest),
                 'pdfVerification' => $this->pdfVerificationService->viewData($verification),
-            ])->setPaper([0, 0, 595.2, 843.56]);
+            ])->setPaper('a4', 'portrait');
             File::put($baseTempPath, $basePdf->output());
             $tempFiles[] = $baseTempPath;
 
@@ -431,7 +453,18 @@ class LeaveDocumentService
 
     protected function buildApprovalSigners(LeaveRequest $leaveRequest)
     {
-        return $leaveRequest->approvals
+        $signers = collect();
+
+        if (!empty($leaveRequest->applicant_signature_path)) {
+            $signers->push([
+                'name' => optional($leaveRequest->user)->name ?: '-',
+                'role' => 'Pemohon Cuti',
+                'title' => optional(optional($leaveRequest->user)->jabatan)->nama ?: optional($leaveRequest->user)->jabatan_keterangan,
+                'signed_at' => $leaveRequest->submitted_at ? $leaveRequest->submitted_at->copy()->timezone('Asia/Jayapura')->translatedFormat('d F Y H:i') . ' WIT' : '-',
+            ]);
+        }
+
+        return $signers->merge($leaveRequest->approvals
             ->where('status', 'approved')
             ->map(function ($approval) {
                 return [
@@ -441,6 +474,7 @@ class LeaveDocumentService
                     'signed_at' => $approval->acted_at ? $approval->acted_at->copy()->timezone('Asia/Jayapura')->translatedFormat('d F Y H:i') . ' WIT' : '-',
                 ];
             })
+            ->values())
             ->values()
             ->all();
     }

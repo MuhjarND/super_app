@@ -173,6 +173,8 @@
                                 <td data-label="Jabatan">
                                     <div>{{ optional($user->jabatan)->nama ?? '-' }}</div>
                                     <small class="text-muted">{{ $user->jabatan_keterangan ?: '-' }}</small>
+                                    <small class="text-muted d-block">Atasan: {{ optional($user->atasanLangsung)->name ?: '-' }}</small>
+                                    <small class="text-muted d-block">Pejabat: {{ optional($user->pejabatBerwenang)->name ?: '-' }}</small>
                                 </td>
                                 <td data-label="Hirarki">{{ $user->hirarki ?? '-' }}</td>
                                 <td data-label="No. HP / WA">{{ $user->no_hp ?? '-' }}</td>
@@ -284,6 +286,32 @@
                                                         <label>No. HP / WA</label>
                                                         <input type="text" name="no_hp" class="form-control" value="{{ $user->no_hp }}">
                                                     </div>
+                                                    <div class="col-md-6 form-group">
+                                                        <label>Atasan Langsung</label>
+                                                        <select name="atasan_langsung_id" class="form-control select2">
+                                                            <option value="">-- Pilih Atasan Langsung --</option>
+                                                            @foreach($supervisorOptions as $option)
+                                                                @if((int) $option->id !== (int) $user->id)
+                                                                    <option value="{{ $option->id }}" {{ (string) $user->atasan_langsung_id === (string) $option->id ? 'selected' : '' }}>
+                                                                        {{ $option->name }}{{ optional($option->jabatan)->nama ? ' - ' . optional($option->jabatan)->nama : '' }}
+                                                                    </option>
+                                                                @endif
+                                                            @endforeach
+                                                        </select>
+                                                    </div>
+                                                    <div class="col-md-6 form-group">
+                                                        <label>Pejabat Berwenang Cuti</label>
+                                                        <select name="pejabat_berwenang_id" class="form-control select2">
+                                                            <option value="">-- Pilih Pejabat Berwenang --</option>
+                                                            @foreach($supervisorOptions as $option)
+                                                                @if((int) $option->id !== (int) $user->id)
+                                                                    <option value="{{ $option->id }}" {{ (string) $user->pejabat_berwenang_id === (string) $option->id ? 'selected' : '' }}>
+                                                                        {{ $option->name }}{{ optional($option->jabatan)->nama ? ' - ' . optional($option->jabatan)->nama : '' }}
+                                                                    </option>
+                                                                @endif
+                                                            @endforeach
+                                                        </select>
+                                                    </div>
                                                 </div>
                                             </div>
                                             <div class="modal-footer">
@@ -381,6 +409,28 @@
                             <div class="col-md-6 form-group">
                                 <label>No. HP / WA</label>
                                 <input type="text" name="no_hp" class="form-control">
+                            </div>
+                            <div class="col-md-6 form-group">
+                                <label>Atasan Langsung</label>
+                                <select name="atasan_langsung_id" class="form-control select2">
+                                    <option value="">-- Pilih Atasan Langsung --</option>
+                                    @foreach($supervisorOptions as $option)
+                                        <option value="{{ $option->id }}">
+                                            {{ $option->name }}{{ optional($option->jabatan)->nama ? ' - ' . optional($option->jabatan)->nama : '' }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="col-md-6 form-group">
+                                <label>Pejabat Berwenang Cuti</label>
+                                <select name="pejabat_berwenang_id" class="form-control select2">
+                                    <option value="">-- Pilih Pejabat Berwenang --</option>
+                                    @foreach($supervisorOptions as $option)
+                                        <option value="{{ $option->id }}">
+                                            {{ $option->name }}{{ optional($option->jabatan)->nama ? ' - ' . optional($option->jabatan)->nama : '' }}
+                                        </option>
+                                    @endforeach
+                                </select>
                             </div>
                         </div>
                     </div>

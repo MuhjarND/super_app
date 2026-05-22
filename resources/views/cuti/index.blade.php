@@ -12,6 +12,49 @@
         margin-bottom: 16px;
     }
 
+    .leave-table-card .table {
+        min-width: 1080px;
+    }
+
+    .leave-flow-list,
+    .leave-history-list {
+        display: grid;
+        gap: 7px;
+        min-width: 220px;
+    }
+
+    .leave-flow-item,
+    .leave-history-item {
+        padding: 8px 10px;
+        border: 1px solid #edf2f7;
+        border-radius: 12px;
+        background: #fbfdff;
+    }
+
+    .leave-flow-title,
+    .leave-history-title {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        margin-bottom: 3px;
+        font-size: 0.78rem;
+        font-weight: 800;
+        color: #0f172a;
+        line-height: 1.25;
+    }
+
+    .leave-flow-meta,
+    .leave-history-meta {
+        color: #64748b;
+        font-size: 0.74rem;
+        line-height: 1.35;
+    }
+
+    .leave-flow-status {
+        margin-left: auto;
+        white-space: nowrap;
+    }
+
     @media (max-width: 767.98px) {
         .leave-mobile-header {
             flex-direction: column;
@@ -73,6 +116,15 @@
         .leave-table-card .app-action-cell {
             text-align: left;
         }
+
+        .leave-table-card .table {
+            min-width: 0;
+        }
+
+        .leave-flow-list,
+        .leave-history-list {
+            min-width: 0;
+        }
     }
 </style>
 @endpush
@@ -100,6 +152,8 @@
                         <th>Jenis</th>
                         <th>Periode</th>
                         <th>Status</th>
+                        <th>Alur Approval</th>
+                        <th>Riwayat Singkat</th>
                         <th>Aksi</th>
                     </tr>
                 </thead>
@@ -129,6 +183,37 @@
                             <td data-label="Jenis">{{ optional($leaveRequest->leaveType)->name }}</td>
                             <td data-label="Periode">{{ optional($leaveRequest->start_date)->translatedFormat('d M Y') }} - {{ optional($leaveRequest->end_date)->translatedFormat('d M Y') }}</td>
                             <td data-label="Status">{!! $leaveRequest->status_badge !!}</td>
+                            <td data-label="Alur Approval">
+                                <div class="leave-flow-list">
+                                    @forelse($leaveRequest->approvals as $approval)
+                                        <div class="leave-flow-item">
+                                            <div class="leave-flow-title">
+                                                <span>Step {{ $approval->step_no }} - {{ $approval->role_label }}</span>
+                                                <span class="leave-flow-status">{!! $approval->status_badge !!}</span>
+                                            </div>
+                                            <div class="leave-flow-meta">{{ optional($approval->approver)->name ?: 'Belum ditentukan' }}</div>
+                                        </div>
+                                    @empty
+                                        <div class="leave-flow-meta">Belum ada alur approval.</div>
+                                    @endforelse
+                                </div>
+                            </td>
+                            <td data-label="Riwayat Singkat">
+                                <div class="leave-history-list">
+                                    @forelse($leaveRequest->audits->take(2) as $audit)
+                                        <div class="leave-history-item">
+                                            <div class="leave-history-title">{{ ucfirst(str_replace('_', ' ', $audit->event)) }}</div>
+                                            <div class="leave-history-meta">
+                                                {{ optional($audit->created_at)->translatedFormat('d M Y H:i') }} WIT
+                                                <br>
+                                                {{ optional($audit->actor)->name ?: '-' }}
+                                            </div>
+                                        </div>
+                                    @empty
+                                        <div class="leave-history-meta">Belum ada riwayat.</div>
+                                    @endforelse
+                                </div>
+                            </td>
                             <td data-label="Aksi" class="app-action-cell">
                                 <div class="app-action-group">
                                     <a href="{{ route('cuti.show', $leaveRequest) }}" class="app-icon-btn detail">
@@ -149,7 +234,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="5" class="text-center text-muted py-4">Belum ada pengajuan cuti.</td>
+                            <td colspan="7" class="text-center text-muted py-4">Belum ada pengajuan cuti.</td>
                         </tr>
                     @endforelse
                 </tbody>

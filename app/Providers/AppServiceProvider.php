@@ -186,7 +186,7 @@ class AppServiceProvider extends ServiceProvider
                 ]);
             }
 
-            if (Schema::hasTable('leave_approvals') && $user->canApproveLeave()) {
+            if (Schema::hasTable('leave_approvals') && $user->canAccessLeaveApproval()) {
                 $pendingLeaveApprovalQuery = LeaveApproval::with(['leaveRequest.user', 'leaveRequest.leaveType'])
                     ->where('status', 'pending');
 

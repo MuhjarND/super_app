@@ -5,9 +5,9 @@
 @push('styles')
     <style>
         .leave-approval-board {
-            border-radius: 20px;
+            border-radius: 16px;
             border: 1px solid #e2e8f0;
-            box-shadow: 0 12px 28px rgba(15, 23, 42, 0.05);
+            box-shadow: 0 10px 24px rgba(15, 23, 42, 0.04);
             overflow: hidden;
         }
 
@@ -15,7 +15,7 @@
             display: flex;
             justify-content: space-between;
             gap: 16px;
-            padding: 18px 20px;
+            padding: 15px 18px;
             border-bottom: 1px solid #eef2f7;
         }
 
@@ -24,14 +24,14 @@
         }
 
         .leave-approval-title {
-            font-size: 0.98rem;
+            font-size: 0.94rem;
             font-weight: 800;
             color: #0f172a;
             margin-bottom: 6px;
         }
 
         .leave-approval-meta {
-            font-size: 0.82rem;
+            font-size: 0.8rem;
             color: #64748b;
             line-height: 1.55;
         }
@@ -78,7 +78,7 @@
     <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap" style="gap:12px;">
         <div>
             <h3 class="mb-1">Approval Cuti</h3>
-            <p class="text-muted mb-0">Daftar pengajuan cuti yang menunggu tindakan Anda.</p>
+            <p class="text-muted mb-0">Pengajuan cuti yang menunggu tindakan Anda.</p>
         </div>
     </div>
 
@@ -96,8 +96,8 @@
                         </div>
                     </div>
                     <div class="leave-approval-actions app-action-group">
-                        <a href="{{ route('cuti.approval.show', $approval) }}" class="app-icon-btn process" data-mobile-label="Proses">
-                            <i class="fas fa-file-signature"></i>
+                        <a href="{{ route('cuti.approval.show', $approval) }}" class="btn btn-primary btn-sm">
+                            <i class="fas fa-file-signature mr-1"></i> Proses
                         </a>
                     </div>
                 </div>
