@@ -1,0 +1,33 @@
+- main [ref=e2]:
+  - generic [ref=e4]:
+    - img "Logo SIMANTAP" [ref=e6]
+    - heading "SIMANTAP" [level=1] [ref=e7]
+    - paragraph [ref=e8]: Sistem Manajemen Terpadu PTA Papua Barat
+    - paragraph [ref=e10]: Portal kerja terpadu untuk persuratan, rapat, cuti, Zona Integritas, perawatan aset, dan tindak lanjut internal.
+  - generic [ref=e12]:
+    - generic [ref=e13]:
+      - heading "Selamat Datang" [level=1] [ref=e14]
+      - paragraph [ref=e15]: Masuk ke akun Anda untuk melanjutkan.
+    - generic [ref=e16]:
+      - generic [ref=e17]:
+        - generic [ref=e18]: NIP
+        - generic [ref=e19]:
+          - generic [ref=e21]: 
+          - textbox "NIP" [active] [ref=e22]:
+            - /placeholder: Masukkan NIP Anda
+      - generic [ref=e23]:
+        - generic [ref=e24]: Password
+        - generic [ref=e25]:
+          - generic [ref=e27]: 
+          - textbox "Password" [ref=e28]:
+            - /placeholder: Masukkan password
+      - generic [ref=e29]:
+        - generic [ref=e30]:
+          - checkbox "Ingat Saya" [ref=e31]
+          - generic [ref=e32]: Ingat Saya
+        - link "Lupa Password?" [ref=e33] [cursor=pointer]:
+          - /url: http://localhost:8000/password/reset
+      - button " Masuk" [ref=e34] [cursor=pointer]:
+        - generic [ref=e35]: 
+        - generic [ref=e36]: Masuk
+    - generic [ref=e37]: Akses dilindungi untuk kebutuhan kerja internal PTA Papua Barat.

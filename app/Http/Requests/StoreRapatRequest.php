@@ -37,7 +37,7 @@ class StoreRapatRequest extends FormRequest
             'meeting_passcode' => ['nullable', 'required_if:is_virtual,1', 'string', 'max:255'],
             'gunakan_lampiran_tambahan' => ['nullable', 'boolean'],
             'lampiran_tambahan' => ['nullable', 'required_if:gunakan_lampiran_tambahan,1', 'file', 'max:10240', 'mimes:pdf,jpg,jpeg,png'],
-            'status' => ['required', 'in:draft,terjadwal,pending_approval,disetujui,ditolak,dibatalkan,selesai'],
+            'status' => ['nullable', 'in:draft,terjadwal,pending_approval,disetujui,ditolak,dibatalkan,selesai'],
             'is_recurring' => ['nullable', 'boolean'],
             'recurring_pattern' => ['nullable', 'required_if:is_recurring,1', 'in:harian,mingguan,bulanan'],
             'recurring_until' => ['nullable', 'required_if:is_recurring,1', 'date', 'after_or_equal:tanggal'],

@@ -79,7 +79,7 @@ class RapatController extends Controller
             ]));
 
             $this->syncPeserta($rapat, $data['peserta_ids']);
-            $this->approvalService->syncWorkflow($rapat, $data['status']);
+            $this->approvalService->syncWorkflow($rapat, $rapat->status);
             $this->documentService->syncSuratKeluar($rapat, false);
             $this->syncProgressZiContext($rapat, $request);
         });
@@ -104,7 +104,7 @@ class RapatController extends Controller
             $this->syncPeserta($rapat, $data['peserta_ids']);
             $this->approvalService->syncWorkflow(
                 $rapat,
-                $data['status'],
+                $rapat->status,
                 $rapat->approvals()->where('status', 'rejected')->exists()
             );
             $this->documentService->syncSuratKeluar($rapat, false);
@@ -204,7 +204,7 @@ class RapatController extends Controller
             'is_virtual' => (bool) ($data['is_virtual'] ?? false),
             'meeting_id' => $data['meeting_id'] ?? null,
             'meeting_passcode' => $data['meeting_passcode'] ?? null,
-            'status' => $data['status'],
+            'status' => $data['status'] ?? ($rapat ? $rapat->status : 'terjadwal'),
             'is_recurring' => (bool) ($data['is_recurring'] ?? false),
             'recurring_pattern' => $data['recurring_pattern'] ?? null,
             'recurring_until' => $data['recurring_until'] ?? null,

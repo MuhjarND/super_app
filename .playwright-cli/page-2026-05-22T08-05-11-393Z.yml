@@ -1,0 +1,475 @@
+- generic [ref=e2]:
+  - navigation [ref=e3]:
+    - list [ref=e4]:
+      - listitem [ref=e5]:
+        - link "" [ref=e6] [cursor=pointer]:
+          - /url: "#"
+          - generic [ref=e7]: 
+    - list [ref=e8]:
+      - listitem [ref=e9]:
+        - link " 28" [ref=e10] [cursor=pointer]:
+          - /url: "#"
+          - generic [ref=e11]: 
+          - generic [ref=e12]: "28"
+        - text:        
+      - listitem [ref=e13]:
+        - link "" [ref=e14] [cursor=pointer]:
+          - /url: http://localhost:8000/profil/2fa
+          - generic [ref=e15]: 
+      - listitem [ref=e16]:
+        - link "Super Admin 2 Super Admin 2" [ref=e17] [cursor=pointer]:
+          - /url: "#"
+          - img "Super Admin 2" [ref=e19]
+          - generic [ref=e20]: Super Admin 2
+        - text:  
+  - complementary [ref=e21]:
+    - link "P PTA Papua Barat" [ref=e22] [cursor=pointer]:
+      - /url: http://localhost:8000/dashboard
+      - generic [ref=e23]: P
+      - generic [ref=e24]: PTA Papua Barat
+    - generic [ref=e25]:
+      - generic [ref=e27]:
+        - img "Super Admin 2" [ref=e29]
+        - generic [ref=e30]:
+          - generic [ref=e31]: Super Admin 2
+          - generic [ref=e32]: Super Admin
+      - navigation [ref=e33]:
+        - menu [ref=e34]:
+          - listitem [ref=e35]:
+            - link " Dashboard" [ref=e36] [cursor=pointer]:
+              - /url: http://localhost:8000/dashboard
+              - generic [ref=e37]: 
+              - paragraph [ref=e38]: Dashboard
+          - listitem [ref=e39]:
+            - link " Dashboard Pimpinan" [ref=e40] [cursor=pointer]:
+              - /url: http://localhost:8000/dashboard/pimpinan
+              - generic [ref=e41]: 
+              - paragraph [ref=e42]: Dashboard Pimpinan
+          - listitem [ref=e43]:
+            - link " Audit Trail" [ref=e44] [cursor=pointer]:
+              - /url: http://localhost:8000/audit-trail
+              - generic [ref=e45]: 
+              - paragraph [ref=e46]: Audit Trail
+          - listitem [ref=e47]:
+            - link " Kalender Terpadu" [ref=e48] [cursor=pointer]:
+              - /url: http://localhost:8000/kalender-terpadu
+              - generic [ref=e49]: 
+              - paragraph [ref=e50]: Kalender Terpadu
+          - listitem [ref=e51]:
+            - link " Tindak Lanjut Terpadu 28" [ref=e52] [cursor=pointer]:
+              - /url: http://localhost:8000/tindak-lanjut-terpadu
+              - generic [ref=e53]: 
+              - paragraph [ref=e54]:
+                - text: Tindak Lanjut Terpadu
+                - generic [ref=e55]: "28"
+          - listitem [ref=e56]:
+            - button "Approval " [ref=e57] [cursor=pointer]:
+              - generic [ref=e58]: Approval
+              - generic [ref=e59]: 
+            - list [ref=e60]:
+              - listitem [ref=e61]:
+                - link " Tindaklanjuti" [ref=e62] [cursor=pointer]:
+                  - /url: http://localhost:8000/approval
+                  - generic [ref=e63]: 
+                  - paragraph [ref=e64]: Tindaklanjuti
+              - listitem [ref=e65]:
+                - link " Riwayat Approval" [ref=e66] [cursor=pointer]:
+                  - /url: http://localhost:8000/approval/history
+                  - generic [ref=e67]: 
+                  - paragraph [ref=e68]: Riwayat Approval
+          - listitem [ref=e69]:
+            - button "Persuratan " [ref=e70] [cursor=pointer]:
+              - generic [ref=e71]: Persuratan
+              - generic [ref=e72]: 
+            - list [ref=e73]:
+              - listitem [ref=e74]:
+                - link " Surat Masuk 802" [ref=e75] [cursor=pointer]:
+                  - /url: http://localhost:8000/surat-masuk
+                  - generic [ref=e76]: 
+                  - paragraph [ref=e77]:
+                    - text: Surat Masuk
+                    - generic [ref=e78]: "802"
+              - listitem [ref=e79]:
+                - link " Surat Keluar 1058" [ref=e80] [cursor=pointer]:
+                  - /url: http://localhost:8000/surat-keluar
+                  - generic [ref=e81]: 
+                  - paragraph [ref=e82]:
+                    - text: Surat Keluar
+                    - generic [ref=e83]: "1058"
+              - listitem [ref=e84]:
+                - link " Template Surat" [ref=e85] [cursor=pointer]:
+                  - /url: http://localhost:8000/template-surat
+                  - generic [ref=e86]: 
+                  - paragraph [ref=e87]: Template Surat
+          - listitem [ref=e88]:
+            - button "Rapat / Agenda " [ref=e89] [cursor=pointer]:
+              - generic [ref=e90]: Rapat / Agenda
+              - generic [ref=e91]: 
+            - list [ref=e92]:
+              - listitem [ref=e93]:
+                - link " Rapat/Agenda" [ref=e94] [cursor=pointer]:
+                  - /url: http://localhost:8000/rapat
+                  - generic [ref=e95]: 
+                  - paragraph [ref=e96]: Rapat/Agenda
+              - listitem [ref=e97]:
+                - link " Notulensi" [ref=e98] [cursor=pointer]:
+                  - /url: http://localhost:8000/rapat/notulensi
+                  - generic [ref=e99]: 
+                  - paragraph [ref=e100]: Notulensi
+              - listitem [ref=e101]:
+                - link " Tindak Lanjut" [ref=e102] [cursor=pointer]:
+                  - /url: http://localhost:8000/rapat/notulensi/tindak-lanjut
+                  - generic [ref=e103]: 
+                  - paragraph [ref=e104]: Tindak Lanjut
+              - listitem [ref=e105]:
+                - link " Absensi" [ref=e106] [cursor=pointer]:
+                  - /url: http://localhost:8000/rapat/absensi
+                  - generic [ref=e107]: 
+                  - paragraph [ref=e108]: Absensi
+              - listitem [ref=e109]:
+                - link " Laporan" [ref=e110] [cursor=pointer]:
+                  - /url: http://localhost:8000/rapat/laporan
+                  - generic [ref=e111]: 
+                  - paragraph [ref=e112]: Laporan
+              - listitem [ref=e113]:
+                - link " Agenda Pimpinan" [ref=e114] [cursor=pointer]:
+                  - /url: http://localhost:8000/rapat/agenda-pimpinan
+                  - generic [ref=e115]: 
+                  - paragraph [ref=e116]: Agenda Pimpinan
+              - listitem [ref=e117]:
+                - link " E-Voting" [ref=e118] [cursor=pointer]:
+                  - /url: http://localhost:8000/rapat/voting
+                  - generic [ref=e119]: 
+                  - paragraph [ref=e120]: E-Voting
+          - listitem [ref=e121]:
+            - button "Cuti " [ref=e122] [cursor=pointer]:
+              - generic [ref=e123]: Cuti
+              - generic [ref=e124]: 
+            - list [ref=e125]:
+              - listitem [ref=e126]:
+                - link " Pengajuan Cuti" [ref=e127] [cursor=pointer]:
+                  - /url: http://localhost:8000/cuti
+                  - generic [ref=e128]: 
+                  - paragraph [ref=e129]: Pengajuan Cuti
+              - listitem [ref=e130]:
+                - link " Approval Cuti" [ref=e131] [cursor=pointer]:
+                  - /url: http://localhost:8000/cuti/approval/list
+                  - generic [ref=e132]: 
+                  - paragraph [ref=e133]: Approval Cuti
+              - listitem [ref=e134]:
+                - link " Rekap Saldo" [ref=e135] [cursor=pointer]:
+                  - /url: http://localhost:8000/cuti/saldo
+                  - generic [ref=e136]: 
+                  - paragraph [ref=e137]: Rekap Saldo
+              - listitem [ref=e138]:
+                - link " Laporan Cuti" [ref=e139] [cursor=pointer]:
+                  - /url: http://localhost:8000/cuti/laporan
+                  - generic [ref=e140]: 
+                  - paragraph [ref=e141]: Laporan Cuti
+              - listitem [ref=e142]:
+                - link " Jenis Cuti" [ref=e143] [cursor=pointer]:
+                  - /url: http://localhost:8000/cuti/master/jenis-cuti
+                  - generic [ref=e144]: 
+                  - paragraph [ref=e145]: Jenis Cuti
+              - listitem [ref=e146]:
+                - link " Kebijakan Cuti" [ref=e147] [cursor=pointer]:
+                  - /url: http://localhost:8000/cuti/master/kebijakan
+                  - generic [ref=e148]: 
+                  - paragraph [ref=e149]: Kebijakan Cuti
+              - listitem [ref=e150]:
+                - link " Cuti Bersama" [ref=e151] [cursor=pointer]:
+                  - /url: http://localhost:8000/cuti/master/cuti-bersama
+                  - generic [ref=e152]: 
+                  - paragraph [ref=e153]: Cuti Bersama
+              - listitem [ref=e154]:
+                - link " Delegasi Approval" [ref=e155] [cursor=pointer]:
+                  - /url: http://localhost:8000/cuti/master/delegasi
+                  - generic [ref=e156]: 
+                  - paragraph [ref=e157]: Delegasi Approval
+          - listitem [ref=e158]:
+            - button "Perawatan Alat dan Mesin " [ref=e159] [cursor=pointer]:
+              - generic [ref=e160]: Perawatan Alat dan Mesin
+              - generic [ref=e161]: 
+            - list [ref=e162]:
+              - listitem [ref=e163]:
+                - link " Dashboard" [ref=e164] [cursor=pointer]:
+                  - /url: http://localhost:8000/perawatan-alat-dan-mesin
+                  - generic [ref=e165]: 
+                  - paragraph [ref=e166]: Dashboard
+              - listitem [ref=e167]:
+                - link " Master Barang" [ref=e168] [cursor=pointer]:
+                  - /url: http://localhost:8000/perawatan-alat-dan-mesin/barang
+                  - generic [ref=e169]: 
+                  - paragraph [ref=e170]: Master Barang
+              - listitem [ref=e171]:
+                - link " Transaksi Perawatan" [ref=e172] [cursor=pointer]:
+                  - /url: http://localhost:8000/perawatan-alat-dan-mesin/transaksi-perawatan
+                  - generic [ref=e173]: 
+                  - paragraph [ref=e174]: Transaksi Perawatan
+              - listitem [ref=e175]:
+                - link " Laporan" [ref=e176] [cursor=pointer]:
+                  - /url: http://localhost:8000/perawatan-alat-dan-mesin/laporan
+                  - generic [ref=e177]: 
+                  - paragraph [ref=e178]: Laporan
+              - listitem [ref=e179]:
+                - link " Cetak QR Code" [ref=e180] [cursor=pointer]:
+                  - /url: http://localhost:8000/perawatan-alat-dan-mesin/qrcode
+                  - generic [ref=e181]: 
+                  - paragraph [ref=e182]: Cetak QR Code
+              - listitem [ref=e183]:
+                - link " Satuan Barang" [ref=e184] [cursor=pointer]:
+                  - /url: http://localhost:8000/perawatan-alat-dan-mesin/master/units
+                  - generic [ref=e185]: 
+                  - paragraph [ref=e186]: Satuan Barang
+              - listitem [ref=e187]:
+                - link " Kondisi Barang" [ref=e188] [cursor=pointer]:
+                  - /url: http://localhost:8000/perawatan-alat-dan-mesin/master/conditions
+                  - generic [ref=e189]: 
+                  - paragraph [ref=e190]: Kondisi Barang
+              - listitem [ref=e191]:
+                - link " Ruang" [ref=e192] [cursor=pointer]:
+                  - /url: http://localhost:8000/perawatan-alat-dan-mesin/master/rooms
+                  - generic [ref=e193]: 
+                  - paragraph [ref=e194]: Ruang
+              - listitem [ref=e195]:
+                - link " Brand / Merk" [ref=e196] [cursor=pointer]:
+                  - /url: http://localhost:8000/perawatan-alat-dan-mesin/master/brands
+                  - generic [ref=e197]: 
+                  - paragraph [ref=e198]: Brand / Merk
+              - listitem [ref=e199]:
+                - link " Kuasa Pengguna" [ref=e200] [cursor=pointer]:
+                  - /url: http://localhost:8000/perawatan-alat-dan-mesin/kuasa-pengguna-barang
+                  - generic [ref=e201]: 
+                  - paragraph [ref=e202]: Kuasa Pengguna
+          - listitem [ref=e203]:
+            - button "Persediaan " [ref=e204] [cursor=pointer]:
+              - generic [ref=e205]: Persediaan
+              - generic [ref=e206]: 
+            - list [ref=e207]:
+              - listitem [ref=e208]:
+                - link " Ajukan Barang" [ref=e209] [cursor=pointer]:
+                  - /url: http://localhost:8000/persediaan/pengajuan/create
+                  - generic [ref=e210]: 
+                  - paragraph [ref=e211]: Ajukan Barang
+              - listitem [ref=e212]:
+                - link " Daftar Pengajuan" [ref=e213] [cursor=pointer]:
+                  - /url: http://localhost:8000/persediaan/pengajuan
+                  - generic [ref=e214]: 
+                  - paragraph [ref=e215]: Daftar Pengajuan
+              - listitem [ref=e216]:
+                - link " Barang Diambil" [ref=e217] [cursor=pointer]:
+                  - /url: http://localhost:8000/persediaan/barang-diambil
+                  - generic [ref=e218]: 
+                  - paragraph [ref=e219]: Barang Diambil
+              - listitem [ref=e220]:
+                - link " Master Barang" [ref=e221] [cursor=pointer]:
+                  - /url: http://localhost:8000/persediaan/barang
+                  - generic [ref=e222]: 
+                  - paragraph [ref=e223]: Master Barang
+          - listitem [ref=e224]:
+            - button "Progress ZI " [ref=e225] [cursor=pointer]:
+              - generic [ref=e226]: Progress ZI
+              - generic [ref=e227]: 
+            - list [ref=e228]:
+              - listitem [ref=e229]:
+                - link " Rekapan ZI" [ref=e230] [cursor=pointer]:
+                  - /url: http://localhost:8000/progress-zi
+                  - generic [ref=e231]: 
+                  - paragraph [ref=e232]: Rekapan ZI
+              - listitem [ref=e233]:
+                - link " Monitoring Kegiatan 37" [ref=e234] [cursor=pointer]:
+                  - /url: http://localhost:8000/progress-zi/activities
+                  - generic [ref=e235]: 
+                  - paragraph [ref=e236]:
+                    - text: Monitoring Kegiatan
+                    - generic [ref=e237]: "37"
+              - listitem [ref=e238]:
+                - link " Pedoman ZI" [ref=e239] [cursor=pointer]:
+                  - /url: http://localhost:8000/progress-zi/guidelines
+                  - generic [ref=e240]: 
+                  - paragraph [ref=e241]: Pedoman ZI
+          - listitem [ref=e242]:
+            - button "Master Data " [ref=e243] [cursor=pointer]:
+              - generic [ref=e244]: Master Data
+              - generic [ref=e245]: 
+            - list [ref=e246]:
+              - listitem [ref=e247]:
+                - link " User" [ref=e248] [cursor=pointer]:
+                  - /url: http://localhost:8000/admin/users
+                  - generic [ref=e249]: 
+                  - paragraph [ref=e250]: User
+              - listitem [ref=e251]:
+                - link " Jabatan" [ref=e252] [cursor=pointer]:
+                  - /url: http://localhost:8000/admin/jabatans
+                  - generic [ref=e253]: 
+                  - paragraph [ref=e254]: Jabatan
+              - listitem [ref=e255]:
+                - link " Unit Kerja" [ref=e256] [cursor=pointer]:
+                  - /url: http://localhost:8000/admin/units
+                  - generic [ref=e257]: 
+                  - paragraph [ref=e258]: Unit Kerja
+              - listitem [ref=e259]:
+                - link " Bidang" [ref=e260] [cursor=pointer]:
+                  - /url: http://localhost:8000/admin/bidangs
+                  - generic [ref=e261]: 
+                  - paragraph [ref=e262]: Bidang
+              - listitem [ref=e263]:
+                - link " Kategori Surat" [ref=e264] [cursor=pointer]:
+                  - /url: http://localhost:8000/admin/kategori-surats
+                  - generic [ref=e265]: 
+                  - paragraph [ref=e266]: Kategori Surat
+              - listitem [ref=e267]:
+                - link " Kategori Rapat" [ref=e268] [cursor=pointer]:
+                  - /url: http://localhost:8000/admin/kategori-rapats
+                  - generic [ref=e269]: 
+                  - paragraph [ref=e270]: Kategori Rapat
+              - listitem [ref=e271]:
+                - link " Dasar Hukum" [ref=e272] [cursor=pointer]:
+                  - /url: http://localhost:8000/admin/dasar-hukums
+                  - generic [ref=e273]: 
+                  - paragraph [ref=e274]: Dasar Hukum
+              - listitem [ref=e275]:
+                - link " Periode ZI" [ref=e276] [cursor=pointer]:
+                  - /url: http://localhost:8000/progress-zi/periods
+                  - generic [ref=e277]: 
+                  - paragraph [ref=e278]: Periode ZI
+              - listitem [ref=e279]:
+                - link " Area ZI" [ref=e280] [cursor=pointer]:
+                  - /url: http://localhost:8000/progress-zi/areas
+                  - generic [ref=e281]: 
+                  - paragraph [ref=e282]: Area ZI
+          - listitem [ref=e283]:
+            - button "Arsip " [ref=e284] [cursor=pointer]:
+              - generic [ref=e285]: Arsip
+              - generic [ref=e286]: 
+            - list [ref=e287]:
+              - listitem [ref=e288]:
+                - link " Arsip" [ref=e289] [cursor=pointer]:
+                  - /url: http://localhost:8000/arsip
+                  - generic [ref=e290]: 
+                  - paragraph [ref=e291]: Arsip
+  - generic [ref=e292]:
+    - generic [ref=e295]:
+      - generic [ref=e296]:
+        - heading "📝 Rapat" [level=1] [ref=e297]:
+          - generic [ref=e298]: 📝
+          - text: Rapat
+        - generic [ref=e299]: Jadwal rapat, undangan, peserta, dan lampiran tambahan.
+      - button " Tambah Rapat" [ref=e300] [cursor=pointer]:
+        - generic [ref=e301]: 
+        - text: Tambah Rapat
+    - generic [ref=e303]:
+      - generic [ref=e306]:
+        - generic [ref=e307]:
+          - generic [ref=e310]:
+            - text: Show
+            - combobox "Show entries" [ref=e311]:
+              - option "10" [selected]
+              - option "25"
+              - option "50"
+              - option "100"
+            - text: entries
+          - generic [ref=e314]:
+            - text: "Search:"
+            - searchbox "Search:" [ref=e315]
+        - table [ref=e318]:
+          - rowgroup [ref=e319]:
+            - 'row ": activate to sort column ascending Nomor / Judul: activate to sort column ascending Kategori Surat: activate to sort column ascending Waktu WIT: activate to sort column ascending Tempat: activate to sort column ascending Peserta: activate to sort column ascending Approver: activate to sort column ascending Status: activate to sort column ascending" [ref=e320]':
+              - 'columnheader ": activate to sort column ascending" [ref=e321] [cursor=pointer]'
+              - 'columnheader "Nomor / Judul: activate to sort column ascending" [ref=e322] [cursor=pointer]': Nomor / Judul
+              - 'columnheader "Kategori Surat: activate to sort column ascending" [ref=e323] [cursor=pointer]': Kategori Surat
+              - 'columnheader "Waktu WIT: activate to sort column ascending" [ref=e324] [cursor=pointer]': Waktu WIT
+              - 'columnheader "Tempat: activate to sort column ascending" [ref=e325] [cursor=pointer]': Tempat
+              - 'columnheader "Peserta: activate to sort column ascending" [ref=e326] [cursor=pointer]': Peserta
+              - 'columnheader "Approver: activate to sort column ascending" [ref=e327] [cursor=pointer]': Approver
+              - 'columnheader "Status: activate to sort column ascending" [ref=e328] [cursor=pointer]': Status
+          - rowgroup [ref=e329]:
+            - row "Toggle aksi Rapat Monitoring dan Evaluasi - Unit kerja memiliki rencana kerja pembangunan Zona Integritas. 11/SEK.W31-A/KP3.4.3/III/2026 Rapat monitoring dan evaluasi untuk tindak lanjut sub poin a. Unit kerja memilik... Evaluasi kinerja pegawai KP3.4.3 26 Mar 2026 20:08 WIT PTA Papua Barat 3 peserta Kabag Kepegawaian, Kasubag Pelaporan dan Keuangan... Wakil Ketua PTA Sekretaris Disetujui Lihat riwayat approval" [ref=e330]:
+              - cell "Toggle aksi" [ref=e331]:
+                - button "Toggle aksi" [ref=e332] [cursor=pointer]: +
+              - cell "Rapat Monitoring dan Evaluasi - Unit kerja memiliki rencana kerja pembangunan Zona Integritas. 11/SEK.W31-A/KP3.4.3/III/2026 Rapat monitoring dan evaluasi untuk tindak lanjut sub poin a. Unit kerja memilik..." [ref=e333]:
+                - generic [ref=e334]: Rapat Monitoring dan Evaluasi - Unit kerja memiliki rencana kerja pembangunan Zona Integritas.
+                - generic [ref=e335]: 11/SEK.W31-A/KP3.4.3/III/2026
+                - generic [ref=e336]: Rapat monitoring dan evaluasi untuk tindak lanjut sub poin a. Unit kerja memilik...
+              - cell "Evaluasi kinerja pegawai KP3.4.3" [ref=e337]:
+                - generic [ref=e338]: Evaluasi kinerja pegawai
+                - generic [ref=e339]: KP3.4.3
+              - cell "26 Mar 2026 20:08 WIT" [ref=e340]:
+                - generic [ref=e341]: 26 Mar 2026
+                - generic [ref=e342]: 20:08 WIT
+              - cell "PTA Papua Barat" [ref=e343]
+              - cell "3 peserta Kabag Kepegawaian, Kasubag Pelaporan dan Keuangan..." [ref=e344]:
+                - generic [ref=e345]: 3 peserta
+                - generic [ref=e346]: Kabag Kepegawaian, Kasubag Pelaporan dan Keuangan...
+              - cell "Wakil Ketua PTA Sekretaris" [ref=e347]:
+                - generic [ref=e348]: Wakil Ketua PTA
+                - generic [ref=e349]: Sekretaris
+              - cell "Disetujui Lihat riwayat approval" [ref=e350]:
+                - button "Disetujui Lihat riwayat approval" [ref=e351] [cursor=pointer]:
+                  - generic [ref=e352]: Disetujui
+                  - generic [ref=e353]: Lihat riwayat approval
+            - row "Toggle aksi Rapat Monitoring dan Evaluasi Bidang Kesekretariatan 1/SEK.W31-A/KP3.4.3/III/2026 Rapat Monitoring dan Evaluasi Bidang Kesekretariatan Triwulan II Evaluasi kinerja pegawai KP3.4.3 23 Mar 2026 09:42 WIT PTA Papua Barat 4 peserta Kabag Kepegawaian, Kabag Umum... Sekretaris Panitera Disetujui Lihat riwayat approval" [ref=e354]:
+              - cell "Toggle aksi" [ref=e355]:
+                - button "Toggle aksi" [ref=e356] [cursor=pointer]: +
+              - cell "Rapat Monitoring dan Evaluasi Bidang Kesekretariatan 1/SEK.W31-A/KP3.4.3/III/2026 Rapat Monitoring dan Evaluasi Bidang Kesekretariatan Triwulan II" [ref=e357]:
+                - generic [ref=e358]: Rapat Monitoring dan Evaluasi Bidang Kesekretariatan
+                - generic [ref=e359]: 1/SEK.W31-A/KP3.4.3/III/2026
+                - generic [ref=e360]: Rapat Monitoring dan Evaluasi Bidang Kesekretariatan Triwulan II
+              - cell "Evaluasi kinerja pegawai KP3.4.3" [ref=e361]:
+                - generic [ref=e362]: Evaluasi kinerja pegawai
+                - generic [ref=e363]: KP3.4.3
+              - cell "23 Mar 2026 09:42 WIT" [ref=e364]:
+                - generic [ref=e365]: 23 Mar 2026
+                - generic [ref=e366]: 09:42 WIT
+              - cell "PTA Papua Barat" [ref=e367]
+              - cell "4 peserta Kabag Kepegawaian, Kabag Umum..." [ref=e368]:
+                - generic [ref=e369]: 4 peserta
+                - generic [ref=e370]: Kabag Kepegawaian, Kabag Umum...
+              - cell "Sekretaris Panitera" [ref=e371]:
+                - generic [ref=e372]: Sekretaris
+                - generic [ref=e373]: Panitera
+              - cell "Disetujui Lihat riwayat approval" [ref=e374]:
+                - button "Disetujui Lihat riwayat approval" [ref=e375] [cursor=pointer]:
+                  - generic [ref=e376]: Disetujui
+                  - generic [ref=e377]: Lihat riwayat approval
+            - row "Toggle aksi Monitoring dan Evaluasi Bidang Kepaniteraaan 12/PAN.W31-A/KP3.4.3/IV/2026 Monitoring dan Evaluasi Bidang Kepaniteraaan Evaluasi kinerja pegawai KP3.4.3 03 Apr 2026 09:00 WIT PTA Papua Barat 2 peserta Kabag Kepegawaian, Kabag Umum Sekretaris Panitera Disetujui Lihat riwayat approval" [ref=e378]:
+              - cell "Toggle aksi" [ref=e379]:
+                - button "Toggle aksi" [ref=e380] [cursor=pointer]: +
+              - cell "Monitoring dan Evaluasi Bidang Kepaniteraaan 12/PAN.W31-A/KP3.4.3/IV/2026 Monitoring dan Evaluasi Bidang Kepaniteraaan" [ref=e381]:
+                - generic [ref=e382]: Monitoring dan Evaluasi Bidang Kepaniteraaan
+                - generic [ref=e383]: 12/PAN.W31-A/KP3.4.3/IV/2026
+                - generic [ref=e384]: Monitoring dan Evaluasi Bidang Kepaniteraaan
+              - cell "Evaluasi kinerja pegawai KP3.4.3" [ref=e385]:
+                - generic [ref=e386]: Evaluasi kinerja pegawai
+                - generic [ref=e387]: KP3.4.3
+              - cell "03 Apr 2026 09:00 WIT" [ref=e388]:
+                - generic [ref=e389]: 03 Apr 2026
+                - generic [ref=e390]: 09:00 WIT
+              - cell "PTA Papua Barat" [ref=e391]
+              - cell "2 peserta Kabag Kepegawaian, Kabag Umum" [ref=e392]:
+                - generic [ref=e393]: 2 peserta
+                - generic [ref=e394]: Kabag Kepegawaian, Kabag Umum
+              - cell "Sekretaris Panitera" [ref=e395]:
+                - generic [ref=e396]: Sekretaris
+                - generic [ref=e397]: Panitera
+              - cell "Disetujui Lihat riwayat approval" [ref=e398]:
+                - button "Disetujui Lihat riwayat approval" [ref=e399] [cursor=pointer]:
+                  - generic [ref=e400]: Disetujui
+                  - generic [ref=e401]: Lihat riwayat approval
+        - generic [ref=e402]:
+          - status [ref=e404]: Showing 1 to 3 of 3 entries
+          - list [ref=e407]:
+            - listitem [ref=e408]:
+              - link "Previous" [disabled]
+            - listitem [ref=e409]:
+              - link "1" [ref=e410] [cursor=pointer]:
+                - /url: "#"
+            - listitem [ref=e411]:
+              - link "Next" [disabled]
+      - text:            + -
+  - contentinfo [ref=e412]:
+    - generic [ref=e413]:
+      - text: © 2026
+      - strong [ref=e414]: Pengadilan Tinggi Agama Papua Barat
+      - text: . Sistem Informasi Persuratan.
+  - text:     

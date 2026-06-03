@@ -72,6 +72,312 @@
             color: #64748b;
         }
 
+        .rapat-form-modal .rapat-modal-dialog {
+            margin-top: 1.25rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .rapat-form-modal .modal-content {
+            display: flex;
+            flex-direction: column;
+            max-height: calc(100vh - 2.5rem);
+            border: 0;
+            border-radius: 22px;
+            overflow: hidden;
+            box-shadow: 0 28px 80px rgba(15, 23, 42, 0.22);
+        }
+
+        .rapat-form-modal .modal-header,
+        .rapat-form-modal .modal-footer {
+            flex: 0 0 auto;
+        }
+
+        .rapat-form-modal .modal-header,
+        .rapat-form-modal .modal-footer {
+            border-color: #e5eaf3;
+            background: #fff;
+            padding: 16px 20px;
+        }
+
+        .rapat-form-modal .modal-body {
+            flex: 1 1 auto;
+            min-height: 0;
+            max-height: calc(100vh - 12rem);
+            padding: 18px 20px;
+            background: #fbfcff;
+            overflow-y: auto !important;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .rapat-form-modal .modal-body::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .rapat-form-modal .modal-body::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 999px;
+        }
+
+        .rapat-form-modal .modal-body::-webkit-scrollbar-thumb {
+            background: #c4b5fd;
+            border-radius: 999px;
+        }
+
+        .rapat-form-modal .modal-body::-webkit-scrollbar-thumb:hover {
+            background: #a78bfa;
+        }
+
+        .rapat-form-modal .modal-title {
+            font-size: 1.05rem;
+            font-weight: 800;
+            color: #0f172a;
+            letter-spacing: -0.01em;
+        }
+
+        .rapat-modal-subtitle {
+            margin-top: 3px;
+            color: #64748b;
+            font-size: 0.82rem;
+            line-height: 1.35;
+        }
+
+        .rapat-form-section {
+            padding: 16px;
+            border: 1px solid #e5eaf3;
+            border-radius: 18px;
+            background: #fff;
+            margin-bottom: 14px;
+        }
+
+        .rapat-form-section-title {
+            margin-bottom: 12px;
+            color: #111827;
+            font-size: 0.86rem;
+            font-weight: 800;
+        }
+
+        .rapat-form-modal label {
+            color: #1f2937;
+            font-size: 0.78rem;
+            font-weight: 800;
+            margin-bottom: 6px;
+        }
+
+        .rapat-form-modal .form-control {
+            min-height: 42px;
+            border-color: #dbe4f0;
+            border-radius: 13px;
+            color: #111827;
+            font-size: 0.88rem;
+            font-weight: 600;
+            box-shadow: none;
+        }
+
+        .rapat-form-modal textarea.form-control {
+            min-height: auto;
+            line-height: 1.45;
+            font-weight: 500;
+        }
+
+        .rapat-form-modal .form-control:focus {
+            border-color: #8b5cf6;
+            box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.13);
+        }
+
+        .rapat-form-modal .select2-container {
+            width: 100% !important;
+        }
+
+        .rapat-form-modal .select2-container--bootstrap4 .select2-selection {
+            min-height: 42px;
+            border-color: #dbe4f0;
+            border-radius: 13px;
+            box-shadow: none;
+        }
+
+        .rapat-form-modal .select2-container--bootstrap4 .select2-selection--multiple .select2-selection__choice {
+            border: 0;
+            border-radius: 999px;
+            background: #ede9fe;
+            color: #5b21b6;
+            font-size: 0.76rem;
+            font-weight: 800;
+            padding: 3px 8px;
+        }
+
+        .rapat-advanced {
+            border: 1px solid #e5eaf3;
+            border-radius: 18px;
+            background: #fff;
+        }
+
+        .rapat-advanced summary {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 14px 16px;
+            cursor: pointer;
+            list-style: none;
+            color: #111827;
+            font-size: 0.86rem;
+            font-weight: 800;
+        }
+
+        .rapat-advanced summary::-webkit-details-marker {
+            display: none;
+        }
+
+        .rapat-advanced summary::after {
+            content: '+';
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 28px;
+            height: 28px;
+            border-radius: 999px;
+            background: #ede9fe;
+            color: #5b21b6;
+            font-weight: 900;
+            flex: 0 0 auto;
+        }
+
+        .rapat-advanced[open] summary::after {
+            content: '-';
+            background: #f1f5f9;
+            color: #475569;
+        }
+
+        .rapat-advanced summary small {
+            display: block;
+            margin-top: 2px;
+            color: #64748b;
+            font-size: 0.74rem;
+            font-weight: 600;
+        }
+
+        .rapat-advanced-body {
+            padding: 0 16px 16px;
+        }
+
+        .rapat-option-grid {
+            display: grid;
+            grid-template-columns: repeat(5, minmax(0, 1fr));
+            gap: 10px;
+            margin: 2px 0 14px;
+        }
+
+        .rapat-option-card {
+            display: flex;
+            gap: 9px;
+            align-items: flex-start;
+            min-height: 82px;
+            padding: 11px;
+            border: 1px solid #e5eaf3;
+            border-radius: 16px;
+            background: #fff;
+            cursor: pointer;
+            margin: 0;
+            transition: border-color 0.15s ease, background 0.15s ease, transform 0.15s ease;
+        }
+
+        .rapat-option-card:hover {
+            border-color: #c4b5fd;
+            background: #fbfaff;
+            transform: translateY(-1px);
+        }
+
+        .rapat-option-card input {
+            width: 16px;
+            height: 16px;
+            margin-top: 2px;
+            accent-color: #6d4aff;
+            flex: 0 0 auto;
+        }
+
+        .rapat-option-card strong {
+            display: block;
+            color: #111827;
+            font-size: 0.8rem;
+            font-weight: 900;
+            line-height: 1.2;
+        }
+
+        .rapat-option-card small {
+            display: block;
+            margin-top: 4px;
+            color: #64748b;
+            font-size: 0.7rem;
+            line-height: 1.25;
+            font-weight: 600;
+        }
+
+        .rapat-option-card:has(input:checked) {
+            border-color: #a78bfa;
+            background: #f5f3ff;
+        }
+
+        .rapat-conditional-field {
+            padding: 14px;
+            border: 1px solid #e5eaf3;
+            border-radius: 16px;
+            background: #f8fafc;
+            margin-top: 10px;
+        }
+
+        .rapat-form-modal .modal-footer .btn {
+            min-height: 38px;
+            border-radius: 999px;
+            font-size: 0.84rem;
+            font-weight: 800;
+            padding: 8px 16px;
+        }
+
+        .rapat-form-modal .modal-footer .app-create-btn {
+            border-color: #6d4aff;
+            background: linear-gradient(135deg, #6d4aff, #8b5cf6);
+            color: #fff;
+        }
+
+        @media (max-width: 991.98px) {
+            .rapat-option-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+
+        @media (max-width: 575.98px) {
+            .rapat-form-modal .modal-dialog {
+                margin: 10px;
+            }
+
+            .rapat-form-modal .modal-content {
+                max-height: calc(100dvh - 20px);
+            }
+
+            .rapat-form-modal .modal-body {
+                max-height: calc(100dvh - 150px);
+            }
+
+            .rapat-form-modal .modal-header,
+            .rapat-form-modal .modal-footer,
+            .rapat-form-modal .modal-body {
+                padding: 14px;
+            }
+
+            .rapat-form-section {
+                padding: 14px;
+                border-radius: 16px;
+            }
+
+            .rapat-advanced summary {
+                align-items: flex-start;
+            }
+
+            .rapat-option-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
         .row-toggle-col {
             width: 46px;
         }
@@ -686,7 +992,6 @@
                     $('#editIsVirtual').prop('checked', Number(row.data('isVirtual')) === 1).trigger('change');
                     $('#editMeetingId').val(row.data('meetingId'));
                     $('#editMeetingPasscode').val(row.data('meetingPasscode'));
-                    $('#editStatus').val(row.data('status'));
                     $('#editIsRecurring').prop('checked', Number(row.data('isRecurring')) === 1).trigger('change');
                     $('#editRecurringPattern').val(row.data('recurringPattern'));
                     $('#editRecurringUntil').val(row.data('recurringUntil'));

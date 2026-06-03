@@ -1,0 +1,942 @@
+- generic [ref=e2]:
+  - navigation [ref=e3]:
+    - list [ref=e4]:
+      - listitem [ref=e5]:
+        - link "" [ref=e6] [cursor=pointer]:
+          - /url: "#"
+          - generic [ref=e7]: 
+    - list [ref=e8]:
+      - listitem [ref=e9]:
+        - link " 28" [ref=e10] [cursor=pointer]:
+          - /url: "#"
+          - generic [ref=e11]: 
+          - generic [ref=e12]: "28"
+        - text:        
+      - listitem [ref=e13]:
+        - link "" [ref=e14] [cursor=pointer]:
+          - /url: http://localhost:8000/profil/2fa
+          - generic [ref=e15]: 
+      - listitem [ref=e16]:
+        - link "Super Admin 2 Super Admin 2" [ref=e17] [cursor=pointer]:
+          - /url: "#"
+          - img "Super Admin 2" [ref=e19]
+          - generic [ref=e20]: Super Admin 2
+        - text:  
+  - complementary [ref=e21]:
+    - link "P PTA Papua Barat" [ref=e22] [cursor=pointer]:
+      - /url: http://localhost:8000/dashboard
+      - generic [ref=e23]: P
+      - generic [ref=e24]: PTA Papua Barat
+    - generic [ref=e25]:
+      - generic [ref=e27]:
+        - img "Super Admin 2" [ref=e29]
+        - generic [ref=e30]:
+          - generic [ref=e31]: Super Admin 2
+          - generic [ref=e32]: Super Admin
+      - navigation [ref=e33]:
+        - menu [ref=e34]:
+          - listitem [ref=e35]:
+            - link " Dashboard" [ref=e36] [cursor=pointer]:
+              - /url: http://localhost:8000/dashboard
+              - generic [ref=e37]: 
+              - paragraph [ref=e38]: Dashboard
+          - listitem [ref=e39]:
+            - link " Dashboard Pimpinan" [ref=e40] [cursor=pointer]:
+              - /url: http://localhost:8000/dashboard/pimpinan
+              - generic [ref=e41]: 
+              - paragraph [ref=e42]: Dashboard Pimpinan
+          - listitem [ref=e43]:
+            - link " Audit Trail" [ref=e44] [cursor=pointer]:
+              - /url: http://localhost:8000/audit-trail
+              - generic [ref=e45]: 
+              - paragraph [ref=e46]: Audit Trail
+          - listitem [ref=e47]:
+            - link " Kalender Terpadu" [ref=e48] [cursor=pointer]:
+              - /url: http://localhost:8000/kalender-terpadu
+              - generic [ref=e49]: 
+              - paragraph [ref=e50]: Kalender Terpadu
+          - listitem [ref=e51]:
+            - link " Tindak Lanjut Terpadu 28" [ref=e52] [cursor=pointer]:
+              - /url: http://localhost:8000/tindak-lanjut-terpadu
+              - generic [ref=e53]: 
+              - paragraph [ref=e54]:
+                - text: Tindak Lanjut Terpadu
+                - generic [ref=e55]: "28"
+          - listitem [ref=e56]:
+            - button "Approval " [ref=e57] [cursor=pointer]:
+              - generic [ref=e58]: Approval
+              - generic [ref=e59]: 
+            - list [ref=e60]:
+              - listitem [ref=e61]:
+                - link " Tindaklanjuti" [ref=e62] [cursor=pointer]:
+                  - /url: http://localhost:8000/approval
+                  - generic [ref=e63]: 
+                  - paragraph [ref=e64]: Tindaklanjuti
+              - listitem [ref=e65]:
+                - link " Riwayat Approval" [ref=e66] [cursor=pointer]:
+                  - /url: http://localhost:8000/approval/history
+                  - generic [ref=e67]: 
+                  - paragraph [ref=e68]: Riwayat Approval
+          - listitem [ref=e69]:
+            - button "Persuratan " [ref=e70] [cursor=pointer]:
+              - generic [ref=e71]: Persuratan
+              - generic [ref=e72]: 
+            - list [ref=e73]:
+              - listitem [ref=e74]:
+                - link " Surat Masuk 802" [ref=e75] [cursor=pointer]:
+                  - /url: http://localhost:8000/surat-masuk
+                  - generic [ref=e76]: 
+                  - paragraph [ref=e77]:
+                    - text: Surat Masuk
+                    - generic [ref=e78]: "802"
+              - listitem [ref=e79]:
+                - link " Surat Keluar 1058" [ref=e80] [cursor=pointer]:
+                  - /url: http://localhost:8000/surat-keluar
+                  - generic [ref=e81]: 
+                  - paragraph [ref=e82]:
+                    - text: Surat Keluar
+                    - generic [ref=e83]: "1058"
+              - listitem [ref=e84]:
+                - link " Template Surat" [ref=e85] [cursor=pointer]:
+                  - /url: http://localhost:8000/template-surat
+                  - generic [ref=e86]: 
+                  - paragraph [ref=e87]: Template Surat
+          - listitem [ref=e88]:
+            - button "Rapat / Agenda " [ref=e89] [cursor=pointer]:
+              - generic [ref=e90]: Rapat / Agenda
+              - generic [ref=e91]: 
+            - list [ref=e92]:
+              - listitem [ref=e93]:
+                - link " Rapat/Agenda" [ref=e94] [cursor=pointer]:
+                  - /url: http://localhost:8000/rapat
+                  - generic [ref=e95]: 
+                  - paragraph [ref=e96]: Rapat/Agenda
+              - listitem [ref=e97]:
+                - link " Notulensi" [ref=e98] [cursor=pointer]:
+                  - /url: http://localhost:8000/rapat/notulensi
+                  - generic [ref=e99]: 
+                  - paragraph [ref=e100]: Notulensi
+              - listitem [ref=e101]:
+                - link " Tindak Lanjut" [ref=e102] [cursor=pointer]:
+                  - /url: http://localhost:8000/rapat/notulensi/tindak-lanjut
+                  - generic [ref=e103]: 
+                  - paragraph [ref=e104]: Tindak Lanjut
+              - listitem [ref=e105]:
+                - link " Absensi" [ref=e106] [cursor=pointer]:
+                  - /url: http://localhost:8000/rapat/absensi
+                  - generic [ref=e107]: 
+                  - paragraph [ref=e108]: Absensi
+              - listitem [ref=e109]:
+                - link " Laporan" [ref=e110] [cursor=pointer]:
+                  - /url: http://localhost:8000/rapat/laporan
+                  - generic [ref=e111]: 
+                  - paragraph [ref=e112]: Laporan
+              - listitem [ref=e113]:
+                - link " Agenda Pimpinan" [ref=e114] [cursor=pointer]:
+                  - /url: http://localhost:8000/rapat/agenda-pimpinan
+                  - generic [ref=e115]: 
+                  - paragraph [ref=e116]: Agenda Pimpinan
+              - listitem [ref=e117]:
+                - link " E-Voting" [ref=e118] [cursor=pointer]:
+                  - /url: http://localhost:8000/rapat/voting
+                  - generic [ref=e119]: 
+                  - paragraph [ref=e120]: E-Voting
+          - listitem [ref=e121]:
+            - button "Cuti " [ref=e122] [cursor=pointer]:
+              - generic [ref=e123]: Cuti
+              - generic [ref=e124]: 
+            - list [ref=e125]:
+              - listitem [ref=e126]:
+                - link " Pengajuan Cuti" [ref=e127] [cursor=pointer]:
+                  - /url: http://localhost:8000/cuti
+                  - generic [ref=e128]: 
+                  - paragraph [ref=e129]: Pengajuan Cuti
+              - listitem [ref=e130]:
+                - link " Approval Cuti" [ref=e131] [cursor=pointer]:
+                  - /url: http://localhost:8000/cuti/approval/list
+                  - generic [ref=e132]: 
+                  - paragraph [ref=e133]: Approval Cuti
+              - listitem [ref=e134]:
+                - link " Rekap Saldo" [ref=e135] [cursor=pointer]:
+                  - /url: http://localhost:8000/cuti/saldo
+                  - generic [ref=e136]: 
+                  - paragraph [ref=e137]: Rekap Saldo
+              - listitem [ref=e138]:
+                - link " Laporan Cuti" [ref=e139] [cursor=pointer]:
+                  - /url: http://localhost:8000/cuti/laporan
+                  - generic [ref=e140]: 
+                  - paragraph [ref=e141]: Laporan Cuti
+              - listitem [ref=e142]:
+                - link " Jenis Cuti" [ref=e143] [cursor=pointer]:
+                  - /url: http://localhost:8000/cuti/master/jenis-cuti
+                  - generic [ref=e144]: 
+                  - paragraph [ref=e145]: Jenis Cuti
+              - listitem [ref=e146]:
+                - link " Kebijakan Cuti" [ref=e147] [cursor=pointer]:
+                  - /url: http://localhost:8000/cuti/master/kebijakan
+                  - generic [ref=e148]: 
+                  - paragraph [ref=e149]: Kebijakan Cuti
+              - listitem [ref=e150]:
+                - link " Cuti Bersama" [ref=e151] [cursor=pointer]:
+                  - /url: http://localhost:8000/cuti/master/cuti-bersama
+                  - generic [ref=e152]: 
+                  - paragraph [ref=e153]: Cuti Bersama
+              - listitem [ref=e154]:
+                - link " Delegasi Approval" [ref=e155] [cursor=pointer]:
+                  - /url: http://localhost:8000/cuti/master/delegasi
+                  - generic [ref=e156]: 
+                  - paragraph [ref=e157]: Delegasi Approval
+          - listitem [ref=e158]:
+            - button "Perawatan Alat dan Mesin " [ref=e159] [cursor=pointer]:
+              - generic [ref=e160]: Perawatan Alat dan Mesin
+              - generic [ref=e161]: 
+            - list [ref=e162]:
+              - listitem [ref=e163]:
+                - link " Dashboard" [ref=e164] [cursor=pointer]:
+                  - /url: http://localhost:8000/perawatan-alat-dan-mesin
+                  - generic [ref=e165]: 
+                  - paragraph [ref=e166]: Dashboard
+              - listitem [ref=e167]:
+                - link " Master Barang" [ref=e168] [cursor=pointer]:
+                  - /url: http://localhost:8000/perawatan-alat-dan-mesin/barang
+                  - generic [ref=e169]: 
+                  - paragraph [ref=e170]: Master Barang
+              - listitem [ref=e171]:
+                - link " Transaksi Perawatan" [ref=e172] [cursor=pointer]:
+                  - /url: http://localhost:8000/perawatan-alat-dan-mesin/transaksi-perawatan
+                  - generic [ref=e173]: 
+                  - paragraph [ref=e174]: Transaksi Perawatan
+              - listitem [ref=e175]:
+                - link " Laporan" [ref=e176] [cursor=pointer]:
+                  - /url: http://localhost:8000/perawatan-alat-dan-mesin/laporan
+                  - generic [ref=e177]: 
+                  - paragraph [ref=e178]: Laporan
+              - listitem [ref=e179]:
+                - link " Cetak QR Code" [ref=e180] [cursor=pointer]:
+                  - /url: http://localhost:8000/perawatan-alat-dan-mesin/qrcode
+                  - generic [ref=e181]: 
+                  - paragraph [ref=e182]: Cetak QR Code
+              - listitem [ref=e183]:
+                - link " Satuan Barang" [ref=e184] [cursor=pointer]:
+                  - /url: http://localhost:8000/perawatan-alat-dan-mesin/master/units
+                  - generic [ref=e185]: 
+                  - paragraph [ref=e186]: Satuan Barang
+              - listitem [ref=e187]:
+                - link " Kondisi Barang" [ref=e188] [cursor=pointer]:
+                  - /url: http://localhost:8000/perawatan-alat-dan-mesin/master/conditions
+                  - generic [ref=e189]: 
+                  - paragraph [ref=e190]: Kondisi Barang
+              - listitem [ref=e191]:
+                - link " Ruang" [ref=e192] [cursor=pointer]:
+                  - /url: http://localhost:8000/perawatan-alat-dan-mesin/master/rooms
+                  - generic [ref=e193]: 
+                  - paragraph [ref=e194]: Ruang
+              - listitem [ref=e195]:
+                - link " Brand / Merk" [ref=e196] [cursor=pointer]:
+                  - /url: http://localhost:8000/perawatan-alat-dan-mesin/master/brands
+                  - generic [ref=e197]: 
+                  - paragraph [ref=e198]: Brand / Merk
+              - listitem [ref=e199]:
+                - link " Kuasa Pengguna" [ref=e200] [cursor=pointer]:
+                  - /url: http://localhost:8000/perawatan-alat-dan-mesin/kuasa-pengguna-barang
+                  - generic [ref=e201]: 
+                  - paragraph [ref=e202]: Kuasa Pengguna
+          - listitem [ref=e203]:
+            - button "Persediaan " [ref=e204] [cursor=pointer]:
+              - generic [ref=e205]: Persediaan
+              - generic [ref=e206]: 
+            - list [ref=e207]:
+              - listitem [ref=e208]:
+                - link " Ajukan Barang" [ref=e209] [cursor=pointer]:
+                  - /url: http://localhost:8000/persediaan/pengajuan/create
+                  - generic [ref=e210]: 
+                  - paragraph [ref=e211]: Ajukan Barang
+              - listitem [ref=e212]:
+                - link " Daftar Pengajuan" [ref=e213] [cursor=pointer]:
+                  - /url: http://localhost:8000/persediaan/pengajuan
+                  - generic [ref=e214]: 
+                  - paragraph [ref=e215]: Daftar Pengajuan
+              - listitem [ref=e216]:
+                - link " Barang Diambil" [ref=e217] [cursor=pointer]:
+                  - /url: http://localhost:8000/persediaan/barang-diambil
+                  - generic [ref=e218]: 
+                  - paragraph [ref=e219]: Barang Diambil
+              - listitem [ref=e220]:
+                - link " Master Barang" [ref=e221] [cursor=pointer]:
+                  - /url: http://localhost:8000/persediaan/barang
+                  - generic [ref=e222]: 
+                  - paragraph [ref=e223]: Master Barang
+          - listitem [ref=e224]:
+            - button "Progress ZI " [ref=e225] [cursor=pointer]:
+              - generic [ref=e226]: Progress ZI
+              - generic [ref=e227]: 
+            - list [ref=e228]:
+              - listitem [ref=e229]:
+                - link " Rekapan ZI" [ref=e230] [cursor=pointer]:
+                  - /url: http://localhost:8000/progress-zi
+                  - generic [ref=e231]: 
+                  - paragraph [ref=e232]: Rekapan ZI
+              - listitem [ref=e233]:
+                - link " Monitoring Kegiatan 37" [ref=e234] [cursor=pointer]:
+                  - /url: http://localhost:8000/progress-zi/activities
+                  - generic [ref=e235]: 
+                  - paragraph [ref=e236]:
+                    - text: Monitoring Kegiatan
+                    - generic [ref=e237]: "37"
+              - listitem [ref=e238]:
+                - link " Pedoman ZI" [ref=e239] [cursor=pointer]:
+                  - /url: http://localhost:8000/progress-zi/guidelines
+                  - generic [ref=e240]: 
+                  - paragraph [ref=e241]: Pedoman ZI
+          - listitem [ref=e242]:
+            - button "Master Data " [ref=e243] [cursor=pointer]:
+              - generic [ref=e244]: Master Data
+              - generic [ref=e245]: 
+            - list [ref=e246]:
+              - listitem [ref=e247]:
+                - link " User" [ref=e248] [cursor=pointer]:
+                  - /url: http://localhost:8000/admin/users
+                  - generic [ref=e249]: 
+                  - paragraph [ref=e250]: User
+              - listitem [ref=e251]:
+                - link " Jabatan" [ref=e252] [cursor=pointer]:
+                  - /url: http://localhost:8000/admin/jabatans
+                  - generic [ref=e253]: 
+                  - paragraph [ref=e254]: Jabatan
+              - listitem [ref=e255]:
+                - link " Unit Kerja" [ref=e256] [cursor=pointer]:
+                  - /url: http://localhost:8000/admin/units
+                  - generic [ref=e257]: 
+                  - paragraph [ref=e258]: Unit Kerja
+              - listitem [ref=e259]:
+                - link " Bidang" [ref=e260] [cursor=pointer]:
+                  - /url: http://localhost:8000/admin/bidangs
+                  - generic [ref=e261]: 
+                  - paragraph [ref=e262]: Bidang
+              - listitem [ref=e263]:
+                - link " Kategori Surat" [ref=e264] [cursor=pointer]:
+                  - /url: http://localhost:8000/admin/kategori-surats
+                  - generic [ref=e265]: 
+                  - paragraph [ref=e266]: Kategori Surat
+              - listitem [ref=e267]:
+                - link " Kategori Rapat" [ref=e268] [cursor=pointer]:
+                  - /url: http://localhost:8000/admin/kategori-rapats
+                  - generic [ref=e269]: 
+                  - paragraph [ref=e270]: Kategori Rapat
+              - listitem [ref=e271]:
+                - link " Dasar Hukum" [ref=e272] [cursor=pointer]:
+                  - /url: http://localhost:8000/admin/dasar-hukums
+                  - generic [ref=e273]: 
+                  - paragraph [ref=e274]: Dasar Hukum
+              - listitem [ref=e275]:
+                - link " Periode ZI" [ref=e276] [cursor=pointer]:
+                  - /url: http://localhost:8000/progress-zi/periods
+                  - generic [ref=e277]: 
+                  - paragraph [ref=e278]: Periode ZI
+              - listitem [ref=e279]:
+                - link " Area ZI" [ref=e280] [cursor=pointer]:
+                  - /url: http://localhost:8000/progress-zi/areas
+                  - generic [ref=e281]: 
+                  - paragraph [ref=e282]: Area ZI
+          - listitem [ref=e283]:
+            - button "Arsip " [ref=e284] [cursor=pointer]:
+              - generic [ref=e285]: Arsip
+              - generic [ref=e286]: 
+            - list [ref=e287]:
+              - listitem [ref=e288]:
+                - link " Arsip" [ref=e289] [cursor=pointer]:
+                  - /url: http://localhost:8000/arsip
+                  - generic [ref=e290]: 
+                  - paragraph [ref=e291]: Arsip
+  - generic [ref=e296]:
+    - text:           
+    - generic [ref=e297]:
+      - generic [ref=e298]: Super Admin 2
+      - generic [ref=e299]: Jumat, 22 Mei 2026
+      - generic [ref=e300]:
+        - generic [ref=e301]:
+          - generic [ref=e302]: 
+          - generic [ref=e303]:
+            - strong [ref=e304]: "28"
+            - generic [ref=e305]: Tindak lanjut
+        - generic [ref=e306]:
+          - generic [ref=e307]: 
+          - generic [ref=e308]:
+            - strong [ref=e309]: "8"
+            - generic [ref=e310]: Prioritas tinggi
+        - generic [ref=e311]:
+          - generic [ref=e312]: 
+          - generic [ref=e313]:
+            - strong [ref=e314]: "18"
+            - generic [ref=e315]: Item overdue
+        - generic [ref=e316]:
+          - generic [ref=e317]: 
+          - generic [ref=e318]:
+            - strong [ref=e319]: "0"
+            - generic [ref=e320]: Surat masuk
+        - generic [ref=e321]:
+          - generic [ref=e322]: 
+          - generic [ref=e323]:
+            - strong [ref=e324]: "3"
+            - generic [ref=e325]: Agenda mendatang
+        - generic [ref=e326]:
+          - generic [ref=e327]: 
+          - generic [ref=e328]:
+            - strong [ref=e329]: "0"
+            - generic [ref=e330]: Cuti pending
+    - generic [ref=e331]:
+      - generic [ref=e332]:
+        - generic [ref=e333]:
+          - heading "Kalender Bulan Ini" [level=5] [ref=e334]
+          - paragraph [ref=e335]: Mei 2026
+        - link " Buka Kalender" [ref=e337] [cursor=pointer]:
+          - /url: http://localhost:8000/kalender-terpadu
+          - generic [ref=e338]: 
+          - text: Buka Kalender
+      - generic [ref=e339]:
+        - generic [ref=e340]:
+          - generic [ref=e341]:
+            - generic [ref=e342]: "6"
+            - generic [ref=e343]: Event bulan ini
+          - generic [ref=e344]:
+            - generic [ref=e345]: "4"
+            - generic [ref=e346]: Hari dengan agenda
+          - generic [ref=e347]:
+            - generic [ref=e348]: "3"
+            - generic [ref=e349]: Rapat & agenda
+          - generic [ref=e350]:
+            - generic [ref=e351]: "3"
+            - generic [ref=e352]: Agenda pimpinan
+          - generic [ref=e353]:
+            - generic [ref=e354]: "3"
+            - generic [ref=e355]: Cuti pegawai
+          - generic [ref=e356]:
+            - generic [ref=e357]: "0"
+            - generic [ref=e358]: Progress ZI
+          - generic [ref=e359]:
+            - generic [ref=e360]: "0"
+            - generic [ref=e361]: Surat tugas
+          - generic [ref=e362]:
+            - generic [ref=e363]: "1"
+            - generic [ref=e364]: Benturan jadwal
+        - generic [ref=e365]:
+          - generic [ref=e366]:
+            - generic [ref=e367]: Kalender Mini
+            - generic [ref=e368]:
+              - generic [ref=e369]:
+                - generic [ref=e370]: Sen
+                - generic [ref=e371]: Sel
+                - generic [ref=e372]: Rab
+                - generic [ref=e373]: Kam
+                - generic [ref=e374]: Jum
+                - generic [ref=e375]: Sab
+                - generic [ref=e376]: Min
+              - generic [ref=e378]:
+                - generic [ref=e381]: "27"
+                - generic [ref=e384]: "28"
+                - generic [ref=e387]: "29"
+                - generic [ref=e390]: "30"
+                - generic [ref=e393]: "1"
+                - generic [ref=e396]: "2"
+                - generic [ref=e399]: "3"
+              - generic [ref=e401]:
+                - generic [ref=e404]: "4"
+                - generic [ref=e406]:
+                  - generic [ref=e407]: "5"
+                  - generic [ref=e408]: "1"
+                - generic [ref=e412]:
+                  - generic [ref=e413]: "6"
+                  - generic [ref=e414]: "1"
+                - generic [ref=e419]: "7"
+                - generic [ref=e422]: "8"
+                - generic [ref=e425]: "9"
+                - generic [ref=e428]: "10"
+              - generic [ref=e430]:
+                - generic [ref=e433]: "11"
+                - generic [ref=e436]: "12"
+                - generic [ref=e439]: "13"
+                - generic [ref=e442]: "14"
+                - generic [ref=e445]: "15"
+                - generic [ref=e448]: "16"
+                - generic [ref=e451]: "17"
+              - generic [ref=e453]:
+                - generic [ref=e456]: "18"
+                - generic [ref=e459]: "19"
+                - generic [ref=e462]: "20"
+                - generic [ref=e464]:
+                  - generic [ref=e465]: "21"
+                  - generic [ref=e466]: "1"
+                - generic [ref=e470]:
+                  - generic [ref=e471]: "22"
+                  - generic [ref=e472]: "1"
+                - generic [ref=e477]: "23"
+                - generic [ref=e480]: "24"
+              - generic [ref=e482]:
+                - generic [ref=e484]:
+                  - generic [ref=e485]: "25"
+                  - generic [ref=e486]: "3"
+                - generic [ref=e491]: "26"
+                - generic [ref=e493]:
+                  - generic [ref=e494]: "27"
+                  - generic [ref=e495]: "1"
+                - generic [ref=e499]:
+                  - generic [ref=e500]: "28"
+                  - generic [ref=e501]: "1"
+                - generic [ref=e505]:
+                  - generic [ref=e506]: "29"
+                  - generic [ref=e507]: "1"
+                - generic [ref=e511]:
+                  - generic [ref=e512]: "30"
+                  - generic [ref=e513]: "1"
+                - generic [ref=e517]:
+                  - generic [ref=e518]: "31"
+                  - generic [ref=e519]: "1"
+          - generic [ref=e523]:
+            - generic [ref=e524]:
+              - generic [ref=e525]: Event Saya Hari Ini
+              - generic [ref=e526]: Tidak ada event hari ini.
+            - generic [ref=e527]:
+              - generic [ref=e528]: Benturan Jadwal
+              - generic [ref=e530]:
+                - generic [ref=e531]:
+                  - generic [ref=e532]: 
+                  - text: 3 agenda di 25 Mei 2026
+                - generic [ref=e533]: testsfaafasdfasdf &bull; testsfaafasdfasdf &bull; testsfaafasdfasdf
+        - generic [ref=e534]:
+          - generic [ref=e535]: Agenda Mendatang
+          - generic [ref=e536]:
+            - generic [ref=e537]:
+              - generic [ref=e538]: testsfaafasdfasdf
+              - generic [ref=e539]: 25 Mei 2026 • Agenda Pimpinan • Dijadwalkan
+            - generic [ref=e540]:
+              - generic [ref=e541]: testsfaafasdfasdf
+              - generic [ref=e542]: 25 Mei 2026 • Agenda Pimpinan • Dijadwalkan
+            - generic [ref=e543]:
+              - generic [ref=e544]: testsfaafasdfasdf
+              - generic [ref=e545]: 25 Mei 2026 • Agenda Pimpinan • Dijadwalkan
+            - generic [ref=e546]:
+              - generic [ref=e547]: Cuti Tahunan - MUHJAR NIAS DANI, S.Kom.
+              - generic [ref=e548]: 27 Mei 2026 • Cuti • Dijadwalkan
+    - generic [ref=e549]:
+      - article [ref=e550]:
+        - generic [ref=e551]:
+          - generic [ref=e553]: Persuratan
+          - generic [ref=e555]: 
+        - generic [ref=e556]:
+          - generic [ref=e557]:
+            - generic [ref=e558]: "894"
+            - generic [ref=e559]: Surat masuk
+          - generic [ref=e560]:
+            - generic [ref=e561]: "328"
+            - generic [ref=e562]: Surat masuk baru
+          - generic [ref=e563]:
+            - generic [ref=e564]: "0"
+            - generic [ref=e565]: Disposisi pending
+          - generic [ref=e566]:
+            - generic [ref=e567]: "1058"
+            - generic [ref=e568]: Surat keluar draft
+        - generic [ref=e569]:
+          - link " Surat Masuk" [ref=e570] [cursor=pointer]:
+            - /url: http://localhost:8000/surat-masuk
+            - generic [ref=e571]: 
+            - text: Surat Masuk
+          - link " Surat Keluar" [ref=e572] [cursor=pointer]:
+            - /url: http://localhost:8000/surat-keluar
+            - generic [ref=e573]: 
+            - text: Surat Keluar
+      - article [ref=e574]:
+        - generic [ref=e575]:
+          - generic [ref=e577]: Rapat / Agenda
+          - generic [ref=e579]: 
+        - generic [ref=e580]:
+          - generic [ref=e581]:
+            - generic [ref=e582]: "3"
+            - generic [ref=e583]: Total rapat
+          - generic [ref=e584]:
+            - generic [ref=e585]: "4"
+            - generic [ref=e586]: Agenda pimpinan
+          - generic [ref=e587]:
+            - generic [ref=e588]: "0"
+            - generic [ref=e589]: Approval pending
+          - generic [ref=e590]:
+            - generic [ref=e591]: "0"
+            - generic [ref=e592]: Tindak lanjut
+        - generic [ref=e593]:
+          - link " Rapat" [ref=e594] [cursor=pointer]:
+            - /url: http://localhost:8000/rapat
+            - generic [ref=e595]: 
+            - text: Rapat
+          - link " Absensi" [ref=e596] [cursor=pointer]:
+            - /url: http://localhost:8000/rapat/absensi
+            - generic [ref=e597]: 
+            - text: Absensi
+          - link " Laporan" [ref=e598] [cursor=pointer]:
+            - /url: http://localhost:8000/rapat/laporan
+            - generic [ref=e599]: 
+            - text: Laporan
+      - article [ref=e600]:
+        - generic [ref=e601]:
+          - generic [ref=e603]: Cuti
+          - generic [ref=e605]: 
+        - generic [ref=e606]:
+          - generic [ref=e607]:
+            - generic [ref=e608]: "0"
+            - generic [ref=e609]: Pengajuan saya
+          - generic [ref=e610]:
+            - generic [ref=e611]: "0"
+            - generic [ref=e612]: Sedang diproses
+          - generic [ref=e613]:
+            - generic [ref=e614]: "0"
+            - generic [ref=e615]: Disetujui
+          - generic [ref=e616]:
+            - generic [ref=e617]: "0"
+            - generic [ref=e618]: Cuti pending
+        - generic [ref=e619]:
+          - link " Pengajuan Cuti" [ref=e620] [cursor=pointer]:
+            - /url: http://localhost:8000/cuti
+            - generic [ref=e621]: 
+            - text: Pengajuan Cuti
+          - link " Laporan Cuti" [ref=e622] [cursor=pointer]:
+            - /url: http://localhost:8000/cuti/laporan
+            - generic [ref=e623]: 
+            - text: Laporan Cuti
+      - article [ref=e624]:
+        - generic [ref=e625]:
+          - generic [ref=e627]: Perawatan Alat dan Mesin
+          - generic [ref=e629]: 
+        - generic [ref=e630]:
+          - generic [ref=e631]:
+            - generic [ref=e632]: "41"
+            - generic [ref=e633]: Barang induk
+          - generic [ref=e634]:
+            - generic [ref=e635]: "234"
+            - generic [ref=e636]: Sub barang
+          - generic [ref=e637]:
+            - generic [ref=e638]: "19"
+            - generic [ref=e639]: Ruang
+          - generic [ref=e640]:
+            - generic [ref=e641]: "158"
+            - generic [ref=e642]: Transaksi perawatan
+        - generic [ref=e643]:
+          - link " Modul" [ref=e644] [cursor=pointer]:
+            - /url: http://localhost:8000/perawatan-alat-dan-mesin
+            - generic [ref=e645]: 
+            - text: Modul
+          - link " Transaksi" [ref=e646] [cursor=pointer]:
+            - /url: http://localhost:8000/perawatan-alat-dan-mesin/transaksi-perawatan
+            - generic [ref=e647]: 
+            - text: Transaksi
+      - article [ref=e648]:
+        - generic [ref=e649]:
+          - generic [ref=e651]: Progress ZI
+          - generic [ref=e653]: 
+        - generic [ref=e654]:
+          - generic [ref=e655]:
+            - generic [ref=e656]: "12"
+            - generic [ref=e657]: Area aktif
+          - generic [ref=e658]:
+            - generic [ref=e659]: "23"
+            - generic [ref=e660]: Kegiatan
+          - generic [ref=e661]:
+            - generic [ref=e662]: "17"
+            - generic [ref=e663]: Indikator
+          - generic [ref=e664]:
+            - generic [ref=e665]: 41.3%
+            - generic [ref=e666]: Periode Evaluasi ZI 2026
+        - generic [ref=e667]:
+          - link " Dashboard ZI" [ref=e668] [cursor=pointer]:
+            - /url: http://localhost:8000/progress-zi
+            - generic [ref=e669]: 
+            - text: Dashboard ZI
+          - link " Monitoring" [ref=e670] [cursor=pointer]:
+            - /url: http://localhost:8000/progress-zi/activities
+            - generic [ref=e671]: 
+            - text: Monitoring
+    - generic [ref=e672]:
+      - generic [ref=e673]:
+        - heading "Yang Perlu Ditindaklanjuti" [level=5] [ref=e676]
+        - generic [ref=e678]:
+          - generic [ref=e679]:
+            - generic [ref=e681]: 
+            - generic [ref=e682]:
+              - generic [ref=e683]: Kegiatan Overdue
+              - generic [ref=e684]: Evaluasi berkala Penguatan tata kelola internal
+              - generic [ref=e685]: Target berakhir 06 Februari 2026
+              - generic [ref=e686]: Progress ZI • 3 bulan yang lalu
+            - link "" [ref=e687] [cursor=pointer]:
+              - /url: http://localhost:8000/progress-zi/activities
+              - generic [ref=e688]: 
+          - generic [ref=e689]:
+            - generic [ref=e691]: 
+            - generic [ref=e692]:
+              - generic [ref=e693]: Kegiatan Overdue
+              - generic [ref=e694]: Pelaksanaan Penguatan disiplin kinerja
+              - generic [ref=e695]: Target berakhir 11 Februari 2026
+              - generic [ref=e696]: Progress ZI • 3 bulan yang lalu
+            - link "" [ref=e697] [cursor=pointer]:
+              - /url: http://localhost:8000/progress-zi/activities
+              - generic [ref=e698]: 
+          - generic [ref=e699]:
+            - generic [ref=e701]: 
+            - generic [ref=e702]:
+              - generic [ref=e703]: Kegiatan Overdue
+              - generic [ref=e704]: Pelaksanaan Digitalisasi administrasi
+              - generic [ref=e705]: Target berakhir 21 Februari 2026
+              - generic [ref=e706]: Progress ZI • 3 bulan yang lalu
+            - link "" [ref=e707] [cursor=pointer]:
+              - /url: http://localhost:8000/progress-zi/activities
+              - generic [ref=e708]: 
+          - generic [ref=e709]:
+            - generic [ref=e711]: 
+            - generic [ref=e712]:
+              - generic [ref=e713]: Kegiatan Overdue
+              - generic [ref=e714]: Evaluasi berkala Digitalisasi administrasi
+              - generic [ref=e715]: Target berakhir 26 Februari 2026
+              - generic [ref=e716]: Progress ZI • 2 bulan yang lalu
+            - link "" [ref=e717] [cursor=pointer]:
+              - /url: http://localhost:8000/progress-zi/activities
+              - generic [ref=e718]: 
+          - generic [ref=e719]:
+            - generic [ref=e721]: 
+            - generic [ref=e722]:
+              - generic [ref=e723]: Kegiatan Overdue
+              - generic [ref=e724]: Pelaksanaan Sinergi tim lintas fungsi
+              - generic [ref=e725]: Target berakhir 13 Maret 2026
+              - generic [ref=e726]: Progress ZI • 2 bulan yang lalu
+            - link "" [ref=e727] [cursor=pointer]:
+              - /url: http://localhost:8000/progress-zi/activities
+              - generic [ref=e728]: 
+          - generic [ref=e729]:
+            - generic [ref=e731]: 
+            - generic [ref=e732]:
+              - generic [ref=e733]: Kegiatan Overdue
+              - generic [ref=e734]: Evaluasi berkala Sinergi tim lintas fungsi
+              - generic [ref=e735]: Target berakhir 18 Maret 2026
+              - generic [ref=e736]: Progress ZI • 2 bulan yang lalu
+            - link "" [ref=e737] [cursor=pointer]:
+              - /url: http://localhost:8000/progress-zi/activities
+              - generic [ref=e738]: 
+          - generic [ref=e739]:
+            - generic [ref=e741]: 
+            - generic [ref=e742]:
+              - generic [ref=e743]: Kegiatan Overdue
+              - generic [ref=e744]: Pelaksanaan Inovasi proses kerja
+              - generic [ref=e745]: Target berakhir 23 Maret 2026
+              - generic [ref=e746]: Progress ZI • 1 bulan yang lalu
+            - link "" [ref=e747] [cursor=pointer]:
+              - /url: http://localhost:8000/progress-zi/activities
+              - generic [ref=e748]: 
+          - generic [ref=e749]:
+            - generic [ref=e751]: 
+            - generic [ref=e752]:
+              - generic [ref=e753]: Kegiatan Overdue
+              - generic [ref=e754]: Pemenuhan Eviden - Kebijakan pengendalian internal, gratifikasi, atau benturan kepentingan tersedia.
+              - generic [ref=e755]: Target berakhir 25 Maret 2026
+              - generic [ref=e756]: Progress ZI • 1 bulan yang lalu
+            - link "" [ref=e757] [cursor=pointer]:
+              - /url: http://localhost:8000/progress-zi/activities
+              - generic [ref=e758]: 
+          - generic [ref=e759]:
+            - generic [ref=e761]: 
+            - generic [ref=e762]:
+              - generic [ref=e763]: Draft Surat Keluar
+              - generic [ref=e764]: Laporan Pengembalian Tukin bulan Oktober 2025
+              - generic [ref=e765]: Draft surat keluar belum diselesaikan.
+              - generic [ref=e766]: Persuratan • 7 bulan yang lalu
+            - link "" [ref=e767] [cursor=pointer]:
+              - /url: http://localhost:8000/surat-keluar
+              - generic [ref=e768]: 
+          - generic [ref=e769]:
+            - generic [ref=e771]: 
+            - generic [ref=e772]:
+              - generic [ref=e773]: Draft Surat Keluar
+              - generic [ref=e774]: BA Verifikasi Tukin Bulan November 2025
+              - generic [ref=e775]: Draft surat keluar belum diselesaikan.
+              - generic [ref=e776]: Persuratan • 7 bulan yang lalu
+            - link "" [ref=e777] [cursor=pointer]:
+              - /url: http://localhost:8000/surat-keluar
+              - generic [ref=e778]: 
+      - generic [ref=e779]:
+        - heading "Agenda Terdekat" [level=5] [ref=e782]
+        - generic [ref=e784]:
+          - generic [ref=e785]:
+            - generic [ref=e786]:
+              - generic [ref=e787]: testsfaafasdfasdf
+              - generic [ref=e788]: 25 Mei 2026 • 09:00 WIT
+              - generic [ref=e789]: Kantor Gurbernur
+            - generic [ref=e791]: Agenda
+          - generic [ref=e792]:
+            - generic [ref=e793]:
+              - generic [ref=e794]: testsfaafasdfasdf
+              - generic [ref=e795]: 25 Mei 2026 • 09:00 WIT
+              - generic [ref=e796]: Kantor Gurbernur
+            - generic [ref=e798]: Agenda
+          - generic [ref=e799]:
+            - generic [ref=e800]:
+              - generic [ref=e801]: testsfaafasdfasdf
+              - generic [ref=e802]: 25 Mei 2026 • 09:00 WIT
+              - generic [ref=e803]: Kantor Gurbernur
+            - generic [ref=e805]: Agenda
+    - generic [ref=e806]:
+      - generic [ref=e807]:
+        - heading "Persuratan Terbaru" [level=5] [ref=e810]
+        - generic [ref=e812]:
+          - generic [ref=e813]:
+            - generic [ref=e814]:
+              - generic [ref=e815]: 1095/KPTA.W31-A/KP5.3/V/2026
+              - generic [ref=e816]: Surat Keluar • Permintaan dan Pemberian Cuti Tahunan - MUHJAR NIAS DANI, S.Kom.
+              - generic [ref=e817]: MUHJAR NIAS DANI, S.Kom. • 1 hari yang lalu
+            - generic [ref=e819]: Lengkap
+          - generic [ref=e820]:
+            - generic [ref=e821]:
+              - generic [ref=e822]: 1094/KPTA.W31-A/KP5.3/V/2026
+              - generic [ref=e823]: Surat Keluar • Permintaan dan Pemberian Cuti Tahunan - Super Admin 3
+              - generic [ref=e824]: Super Admin 3 • 2 hari yang lalu
+            - generic [ref=e826]: Lengkap
+          - generic [ref=e827]:
+            - generic [ref=e828]:
+              - generic [ref=e829]: 1093/KPTA.W31-A/KP5.3/V/2026
+              - generic [ref=e830]: Surat Keluar • Permintaan dan Pemberian Cuti Karena Alasan Penting - Super Admin 3
+              - generic [ref=e831]: Super Admin 3 • 2 hari yang lalu
+            - generic [ref=e833]: Lengkap
+          - generic [ref=e834]:
+            - generic [ref=e835]:
+              - generic [ref=e836]: 1092/KPTA.W31-A/KP5.3/V/2026
+              - generic [ref=e837]: Surat Keluar • Permintaan dan Pemberian Cuti Tahunan - MUHJAR NIAS DANI, S.Kom.
+              - generic [ref=e838]: MUHJAR NIAS DANI, S.Kom. • 2 hari yang lalu
+            - generic [ref=e840]: Lengkap
+          - generic [ref=e841]:
+            - generic [ref=e842]:
+              - generic [ref=e843]: "35436456457"
+              - generic [ref=e844]: Surat Masuk • testsfaafasdfasdf
+              - generic [ref=e845]: Mahkamah Agung • 3 hari yang lalu
+            - generic [ref=e847]: Baru
+          - generic [ref=e848]:
+            - generic [ref=e849]:
+              - generic [ref=e850]: "35436456457"
+              - generic [ref=e851]: Surat Masuk • testsfaafasdfasdf
+              - generic [ref=e852]: Mahkamah Agung • 3 hari yang lalu
+            - generic [ref=e854]: Baru
+      - generic [ref=e855]:
+        - heading "Rapat / Agenda Terbaru" [level=5] [ref=e858]
+        - generic [ref=e860]:
+          - generic [ref=e861]:
+            - generic [ref=e862]:
+              - generic [ref=e863]: testsfaafasdfasdf
+              - generic [ref=e864]: Agenda • 35436456457
+              - generic [ref=e865]: 25 Mei 2026 • 0 penerima
+            - generic [ref=e867]: Agenda
+          - generic [ref=e868]:
+            - generic [ref=e869]:
+              - generic [ref=e870]: testsfaafasdfasdf
+              - generic [ref=e871]: Agenda • 35436456457
+              - generic [ref=e872]: 25 Mei 2026 • 0 penerima
+            - generic [ref=e874]: Agenda
+          - generic [ref=e875]:
+            - generic [ref=e876]:
+              - generic [ref=e877]: testsfaafasdfasdf
+              - generic [ref=e878]: Agenda • 35436456457
+              - generic [ref=e879]: 25 Mei 2026 • 1 penerima
+            - generic [ref=e881]: Agenda
+          - generic [ref=e882]:
+            - generic [ref=e883]:
+              - generic [ref=e884]: upacara bendera hari kemerdekaan
+              - generic [ref=e885]: Agenda • Agenda pimpinan
+              - generic [ref=e886]: 03 April 2026 • 1 penerima
+            - generic [ref=e888]: Agenda
+          - generic [ref=e889]:
+            - generic [ref=e890]:
+              - generic [ref=e891]: Monitoring dan Evaluasi Bidang Kepaniteraaan
+              - generic [ref=e892]: Rapat • 12/PAN.W31-A/KP3.4.3/IV/2026
+              - generic [ref=e893]: 03 April 2026 • 2 peserta
+            - generic [ref=e895]: Disetujui
+          - generic [ref=e896]:
+            - generic [ref=e897]:
+              - generic [ref=e898]: Rapat Monitoring dan Evaluasi - Unit kerja memiliki rencana kerja pembangunan Zona Integritas.
+              - generic [ref=e899]: Rapat • 11/SEK.W31-A/KP3.4.3/III/2026
+              - generic [ref=e900]: 26 Maret 2026 • 3 peserta
+            - generic [ref=e902]: Disetujui
+      - generic [ref=e903]:
+        - heading "Cuti Terbaru" [level=5] [ref=e906]
+        - generic [ref=e908]:
+          - generic [ref=e909]:
+            - generic [ref=e910]:
+              - generic [ref=e911]: 1095/KPTA.W31-A/KP5.3/V/2026
+              - generic [ref=e912]: Cuti Tahunan
+              - generic [ref=e913]: 04 Juni 2026 s.d. 05 Juni 2026 • MUHJAR NIAS DANI, S.Kom.
+            - generic [ref=e915]: Disetujui
+          - generic [ref=e916]:
+            - generic [ref=e917]:
+              - generic [ref=e918]: 1094/KPTA.W31-A/KP5.3/V/2026
+              - generic [ref=e919]: Cuti Tahunan
+              - generic [ref=e920]: 21 Mei 2026 s.d. 22 Mei 2026 • Super Admin 3
+            - generic [ref=e922]: Disetujui
+          - generic [ref=e923]:
+            - generic [ref=e924]:
+              - generic [ref=e925]: 1093/KPTA.W31-A/KP5.3/V/2026
+              - generic [ref=e926]: Cuti Karena Alasan Penting
+              - generic [ref=e927]: 04 Juni 2026 s.d. 12 Juni 2026 • Super Admin 3
+            - generic [ref=e929]: Disetujui
+          - generic [ref=e930]:
+            - generic [ref=e931]:
+              - generic [ref=e932]: 1092/KPTA.W31-A/KP5.3/V/2026
+              - generic [ref=e933]: Cuti Tahunan
+              - generic [ref=e934]: 27 Mei 2026 s.d. 02 Juni 2026 • MUHJAR NIAS DANI, S.Kom.
+            - generic [ref=e936]: Disetujui
+          - generic [ref=e937]:
+            - generic [ref=e938]:
+              - generic [ref=e939]: 1091/KPTA.W31-A/KP5.3/V/2026
+              - generic [ref=e940]: Cuti Tahunan
+              - generic [ref=e941]: 05 Mei 2026 s.d. 06 Mei 2026 • Super Admin 3
+            - generic [ref=e943]: Disetujui
+          - generic [ref=e944]:
+            - generic [ref=e945]:
+              - generic [ref=e946]: 6/KPTA.W31-A/KP5.3/III/2026
+              - generic [ref=e947]: Cuti Sakit
+              - generic [ref=e948]: 24 Maret 2026 s.d. 24 Maret 2026 • Staf Kepegawaian 1
+            - generic [ref=e950]: Disetujui
+      - generic [ref=e951]:
+        - heading "Perawatan Terbaru" [level=5] [ref=e954]
+        - generic [ref=e956]:
+          - generic [ref=e957]:
+            - generic [ref=e958]:
+              - generic [ref=e959]: Mini Bus
+              - generic [ref=e960]: Perawatan Alat/Mesin • 3.02.01.02.003.2
+              - generic [ref=e961]: 12 Maret 2026 • Rp 300.000
+            - generic [ref=e963]: Import
+          - generic [ref=e964]:
+            - generic [ref=e965]:
+              - generic [ref=e966]: Mini Bus
+              - generic [ref=e967]: Perawatan Alat/Mesin • 3.02.01.02.003.3
+              - generic [ref=e968]: 12 Maret 2026 • Rp 300.000
+            - generic [ref=e970]: Import
+          - generic [ref=e971]:
+            - generic [ref=e972]:
+              - generic [ref=e973]: Mini Bus
+              - generic [ref=e974]: Perawatan Alat/Mesin • 3.02.01.02.003.4
+              - generic [ref=e975]: 10 Maret 2026 • Rp 500.000
+            - generic [ref=e977]: Import
+          - generic [ref=e978]:
+            - generic [ref=e979]:
+              - generic [ref=e980]: Mini Bus
+              - generic [ref=e981]: Perawatan Alat/Mesin • 3.02.01.02.003.2
+              - generic [ref=e982]: 06 Maret 2026 • Rp 300.000
+            - generic [ref=e984]: Import
+          - generic [ref=e985]:
+            - generic [ref=e986]:
+              - generic [ref=e987]: Alat Angkutan Bermotor
+              - generic [ref=e988]: Perawatan Alat/Mesin • 3020104001.1.1
+              - generic [ref=e989]: 05 Maret 2026 • Rp 90.000
+            - generic [ref=e991]: Import
+          - generic [ref=e992]:
+            - generic [ref=e993]:
+              - generic [ref=e994]: Alat Angkutan Bermotor
+              - generic [ref=e995]: Perawatan Alat/Mesin • 3020104001.1.3
+              - generic [ref=e996]: 05 Maret 2026 • Rp 85.000
+            - generic [ref=e998]: Import
+  - contentinfo [ref=e999]:
+    - generic [ref=e1000]:
+      - text: © 2026
+      - strong [ref=e1001]: Pengadilan Tinggi Agama Papua Barat
+      - text: . Sistem Informasi Persuratan.
+  - text:     
