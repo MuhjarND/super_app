@@ -57,6 +57,40 @@ class LeaveApprovalController extends Controller
         return back()->with('success', 'Pengajuan cuti ditolak.');
     }
 
+    public function change(ApprovalActionRequest $request, LeaveApproval $leaveApproval)
+    {
+        abort_unless(auth()->user()->canAccessLeaveApproval(), 403);
+        abort_unless((int) $leaveApproval->approver_id === (int) auth()->id() || auth()->user()->isSuperAdmin(), 403);
+        $request->validate([
+            'note' => ['required', 'string', 'max:2000'],
+            'signature_data' => ['required', 'string'],
+        ], [
+            'note.required' => 'Catatan perubahan wajib diisi.',
+            'signature_data.required' => 'Tanda tangan wajib diisi.',
+        ]);
+        $oldStatus = $leaveApproval->leaveRequest->status;
+        $this->approvalService->requestChange($leaveApproval, auth()->user(), $request->note, $request->signature_data);
+        event(new LeaveRequestStatusChanged($leaveApproval->leaveRequest->fresh(), auth()->user(), $oldStatus, $leaveApproval->leaveRequest->fresh()->status, 'changed'));
+        return back()->with('success', 'Pengajuan cuti dikembalikan untuk perubahan.');
+    }
+
+    public function defer(ApprovalActionRequest $request, LeaveApproval $leaveApproval)
+    {
+        abort_unless(auth()->user()->canAccessLeaveApproval(), 403);
+        abort_unless((int) $leaveApproval->approver_id === (int) auth()->id() || auth()->user()->isSuperAdmin(), 403);
+        $request->validate([
+            'note' => ['required', 'string', 'max:2000'],
+            'signature_data' => ['required', 'string'],
+        ], [
+            'note.required' => 'Alasan penangguhan wajib diisi.',
+            'signature_data.required' => 'Tanda tangan wajib diisi.',
+        ]);
+        $oldStatus = $leaveApproval->leaveRequest->status;
+        $this->approvalService->defer($leaveApproval, auth()->user(), $request->note, $request->signature_data);
+        event(new LeaveRequestStatusChanged($leaveApproval->leaveRequest->fresh(), auth()->user(), $oldStatus, $leaveApproval->leaveRequest->fresh()->status, 'deferred'));
+        return back()->with('success', 'Pengajuan cuti ditangguhkan.');
+    }
+
     public function verifyDocument(VerifyLeaveDocumentRequest $request, LeaveApproval $leaveApproval)
     {
         abort_unless(auth()->user()->canAccessLeaveApproval(), 403);

@@ -8,26 +8,31 @@
     $tanggalMulai = !empty($fieldValues['tanggal_mulai']) ? Carbon::parse($fieldValues['tanggal_mulai'])->translatedFormat('d F Y') : '-';
     $tanggalSelesai = !empty($fieldValues['tanggal_selesai']) ? Carbon::parse($fieldValues['tanggal_selesai'])->translatedFormat('d F Y') : '-';
     $kotaTtd = trim((string) ($fieldValues['kota_tanda_tangan'] ?? '')) ?: 'Manokwari';
+    $lokasi = trim((string) ($fieldValues['lokasi'] ?? '')) ?: '-';
+    $tanggalTugas = $tanggalMulai === $tanggalSelesai ? $tanggalMulai : $tanggalMulai . ' s/d ' . $tanggalSelesai;
 @endphp
 
 <style>
-    .st-doc { font-family: "Times New Roman", DejaVu Serif, serif; color:#111; font-size:12px; line-height:1.35; }
-    .st-kop { margin-bottom:8px; }
-    .st-kop img { width:100%; height:auto; display:block; }
-    .st-title { text-align:center; font-weight:700; font-size:18px; text-transform:uppercase; text-decoration:underline; margin:4px 0 2px; }
-    .st-number { text-align:center; margin-bottom:10px; }
-    .st-grid { width:100%; border-collapse:collapse; margin-bottom:8px; }
-    .st-grid td, .st-grid th { border:1px solid #111; padding:5px 6px; vertical-align:top; }
-    .st-grid th { text-align:center; font-weight:700; }
+    @page { margin: 3.75cm 1.85cm 2.85cm 2cm; }
+    .st-page-header { position: fixed; top: -3.3cm; left: 0; right: 0; height: 2.75cm; }
+    .st-page-header img { width: 100%; height: auto; display: block; }
+    .st-doc { font-family: "Times New Roman", DejaVu Serif, serif; color:#111; font-size:11.2px; line-height:1.28; }
+    .st-title { text-align:center; font-weight:700; font-size:17px; text-transform:uppercase; text-decoration:underline; margin:0 0 1px; }
+    .st-number { text-align:center; margin-bottom:9px; }
+    .st-grid { width:100%; border-collapse:collapse; table-layout:fixed; margin-bottom:8px; page-break-inside:auto; }
+    .st-grid td, .st-grid th { border:0.85px solid #111; padding:3px 5px; vertical-align:top; line-height:1.22; }
+    .st-grid th { text-align:center; font-weight:700; padding-top:4px; padding-bottom:4px; }
+    .st-grid tr { page-break-inside:avoid; page-break-after:auto; }
+    .st-grid td { overflow-wrap:break-word; word-wrap:break-word; }
     .st-row { width:100%; margin-bottom:8px; }
     .st-row table { width:100%; border-collapse:collapse; }
     .st-row td { padding:0; vertical-align:top; }
-    .st-label { width:88px; white-space:nowrap; }
-    .st-sep { width:14px; text-align:center; }
+    .st-label { width:104px; white-space:nowrap; padding-right:18px !important; }
+    .st-sep { width:20px; text-align:center; padding:0 8px !important; }
     .st-content { text-align:justify; }
-    .st-indent { display:block; padding-left:20px; text-indent:-20px; }
-    .st-section { text-align:center; font-weight:700; margin:10px 0 6px; }
-    .st-sign { width:245px; margin-left:auto; text-align:center; margin-top:16px; }
+    .st-indent { display:block; padding-left:18px; text-indent:-18px; }
+    .st-section { text-align:center; font-weight:700; margin:8px 0 5px; }
+    .st-sign { width:245px; margin-left:auto; text-align:center; margin-top:14px; page-break-inside:avoid; }
     .st-sign-city { margin-bottom:2px; }
     .st-sign-role { display:block; margin-bottom:8px; }
     .st-sign-image-wrap { width:100%; text-align:center; margin:0 auto 6px; }
@@ -37,13 +42,13 @@
     .st-sign-nip { display:block; margin-top:4px; }
 </style>
 
-<div class="st-doc">
-    @if($kopImage)
-        <div class="st-kop">
-            <img src="{{ $kopImage }}" alt="Kop Surat">
-        </div>
-    @endif
+@if($kopImage)
+    <div class="st-page-header">
+        <img src="{{ $kopImage }}" alt="Kop Surat">
+    </div>
+@endif
 
+<div class="st-doc">
     <div class="st-title">Surat Tugas</div>
     <div class="st-number">Nomor : {{ $suratKeluar->nomor_surat_formatted }}</div>
 
@@ -82,18 +87,18 @@
     <table class="st-grid">
         <thead>
             <tr>
-                <th style="width:40px;">No</th>
-                <th>Nama</th>
-                <th style="width:150px;">NIP</th>
-                <th style="width:150px;">Pangkat</th>
-                <th style="width:150px;">Jabatan</th>
+                <th style="width:7%;">No</th>
+                <th style="width:28%;">Nama</th>
+                <th style="width:21%;">NIP</th>
+                <th style="width:22%;">Pangkat</th>
+                <th style="width:22%;">Jabatan</th>
             </tr>
         </thead>
         <tbody>
             @forelse($petugasRows as $index => $row)
                 <tr>
                     <td style="text-align:center;">{{ $index + 1 }}</td>
-                    <td>{{ $row['nama'] }}</td>
+                    <td><strong>{{ $row['nama'] }}</strong></td>
                     <td>{{ $row['nip'] }}</td>
                     <td>{{ $row['pangkat'] }}</td>
                     <td>{{ $row['jabatan'] }}</td>
@@ -112,7 +117,7 @@
                 <td class="st-label">Untuk</td>
                 <td class="st-sep">:</td>
                 <td class="st-content">
-                    {{ $fieldValues['untuk_tugas'] ?? '-' }}, pada tanggal {{ $tanggalMulai }} s/d {{ $tanggalSelesai }}.
+                    Melaksanakan {{ $fieldValues['dalam_rangka'] ?? '-' }}, pada tanggal {{ $tanggalTugas }}, di {{ $lokasi }}.
                 </td>
             </tr>
         </table>

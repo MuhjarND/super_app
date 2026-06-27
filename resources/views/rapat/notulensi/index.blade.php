@@ -15,68 +15,30 @@
             color: #0f172a;
         }
 
-        .meeting-action-toggle-col {
-            width: 46px;
+        .notulensi-action-cell {
+            width: 132px;
+            vertical-align: middle !important;
         }
 
-        .meeting-action-toggle {
-            width: 28px;
-            height: 28px;
-            border: none;
-            border-radius: 8px;
-            background: linear-gradient(135deg, #4f46e5, #6366f1);
-            color: #fff;
-            font-size: 1rem;
-            font-weight: 700;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
+        .notulensi-action-cell .app-action-group {
+            flex-wrap: nowrap;
+            justify-content: flex-end;
         }
 
-        .meeting-action-toggle.is-open {
-            background: linear-gradient(135deg, #475569, #64748b);
+        .notulensi-action-cell form {
+            margin: 0;
         }
 
-        .meeting-action-row {
-            display: none;
-        }
+        @media (max-width: 767.98px) {
+            .notulensi-action-cell {
+                width: auto;
+            }
 
-        .meeting-action-row td {
-            background: #f8fafc;
-            border-top: 1px solid #e2e8f0;
-            padding: 12px 16px;
+            .notulensi-action-cell .app-action-group {
+                flex-wrap: wrap;
+                justify-content: flex-start;
+            }
         }
-
-        .meeting-action-panel {
-            display: flex;
-            flex-wrap: wrap;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .meeting-action-meta {
-            color: #64748b;
-            font-size: 0.82rem;
-            margin-right: 10px;
-        }
-
-        .meeting-action-btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            border-radius: 10px;
-            padding: 7px 12px;
-            font-size: 0.82rem;
-            font-weight: 700;
-            border: 1px solid transparent;
-            background: #fff;
-            color: #1f2937;
-        }
-
-        .meeting-action-btn.primary { background: #eef2ff; color: #4338ca; border-color: #c7d2fe; }
-        .meeting-action-btn.success { background: #ecfdf5; color: #047857; border-color: #a7f3d0; }
-        .meeting-action-btn.dark { background: #f1f5f9; color: #334155; border-color: #cbd5e1; }
-        .meeting-action-btn.secondary { background: #f8fafc; color: #475569; border-color: #cbd5e1; }
     </style>
 @endpush
 
@@ -109,19 +71,16 @@
             <table class="table table-hover mb-0">
                 <thead>
                     <tr>
-                        <th class="meeting-action-toggle-col"></th>
                         <th>Rapat</th>
                         <th>Waktu WIT</th>
                         <th>Kategori</th>
                         <th>Pembuat</th>
+                        <th class="text-right">Aksi</th>
                     </tr>
                 </thead>
                 <tbody>
                     @forelse($belumAda as $rapat)
                         <tr>
-                            <td class="meeting-action-toggle-col">
-                                <button type="button" class="meeting-action-toggle" aria-label="Toggle aksi">+</button>
-                            </td>
                             <td>
                                 <div class="font-weight-bold">{{ $rapat->judul }}</div>
                                 <div class="text-muted" style="font-size: 0.78rem;">{{ $rapat->nomor_undangan }}</div>
@@ -132,21 +91,18 @@
                             </td>
                             <td>{{ $rapat->kategori_surat_label }}</td>
                             <td>{{ optional($rapat->creator)->name ?: '-' }}</td>
-                        </tr>
-                        <tr class="meeting-action-row">
-                            <td colspan="5">
-                                <div class="meeting-action-panel">
-                                    <span class="meeting-action-meta">Tindakan notulensi</span>
-                                    <a href="{{ route('rapat.notulensi.create', $rapat) }}" class="meeting-action-btn primary">
-                                        <i class="fas fa-file-signature"></i> Buat
+                            <td class="app-action-cell notulensi-action-cell" data-label="Aksi">
+                                <div class="app-action-group">
+                                    <a href="{{ route('rapat.notulensi.create', $rapat) }}" class="app-icon-btn process" data-mobile-label="Buat" title="Buat notulensi">
+                                        <i class="fas fa-file-signature"></i>
                                     </a>
-                                    <button type="button" class="meeting-action-btn success" onclick="openUploadModal('{{ route('rapat.notulensi.upload-from-rapat', $rapat) }}', '{{ $rapat->judul }}')">
-                                        <i class="fas fa-upload"></i> Upload File
+                                    <button type="button" class="app-icon-btn upload" data-mobile-label="Upload" title="Upload file" onclick='openUploadModal("{{ route('rapat.notulensi.upload-from-rapat', $rapat) }}", @json($rapat->judul))'>
+                                        <i class="fas fa-upload"></i>
                                     </button>
                                     <form action="{{ route('rapat.notulensi.skip', $rapat) }}" method="POST" class="d-inline">
                                         @csrf
-                                        <button type="submit" class="meeting-action-btn dark" onclick="return confirm('Tandai rapat ini tanpa notulen?')">
-                                            <i class="fas fa-ban"></i> Tanpa Notulen
+                                        <button type="submit" class="app-icon-btn cancel" data-mobile-label="Tanpa Notulen" title="Tandai tanpa notulen" onclick="return confirm('Tandai rapat ini tanpa notulen?')">
+                                            <i class="fas fa-ban"></i>
                                         </button>
                                     </form>
                                 </div>
@@ -170,21 +126,18 @@
             <table class="table table-hover mb-0">
                 <thead>
                     <tr>
-                        <th class="meeting-action-toggle-col"></th>
                         <th>Rapat</th>
                         <th>Mode</th>
                         <th>Status</th>
                         <th>Notulis</th>
                         <th>Tindak Lanjut</th>
                         <th>Diperbarui</th>
+                        <th class="text-right">Aksi</th>
                     </tr>
                 </thead>
                 <tbody>
                     @forelse($sudahAda as $rapat)
                         <tr>
-                            <td class="meeting-action-toggle-col">
-                                <button type="button" class="meeting-action-toggle" aria-label="Toggle aksi">+</button>
-                            </td>
                             <td>
                                 <div class="font-weight-bold">{{ $rapat->judul }}</div>
                                 <div class="text-muted" style="font-size: 0.78rem;">{{ $rapat->nomor_undangan }}</div>
@@ -194,20 +147,17 @@
                             <td>{{ optional($rapat->notulensi->notulis)->name ?: '-' }}</td>
                             <td>{{ $rapat->notulensi->tindakLanjuts->where('status', 'pending')->count() }} pending</td>
                             <td>{{ optional($rapat->notulensi->updated_at)->timezone('Asia/Jayapura')->format('d/m/Y H:i') ?: '-' }}</td>
-                        </tr>
-                        <tr class="meeting-action-row">
-                            <td colspan="7">
-                                <div class="meeting-action-panel">
-                                    <span class="meeting-action-meta">Tindakan notulensi</span>
-                                    <a href="{{ route('rapat.notulensi.edit', $rapat->notulensi) }}" class="meeting-action-btn primary">
-                                        <i class="fas fa-pen"></i> Edit
+                            <td class="app-action-cell notulensi-action-cell" data-label="Aksi">
+                                <div class="app-action-group">
+                                    <a href="{{ route('rapat.notulensi.edit', $rapat->notulensi) }}" class="app-icon-btn edit" data-mobile-label="Edit" title="Edit notulensi">
+                                        <i class="fas fa-pen"></i>
                                     </a>
-                                    <a href="{{ route('rapat.notulensi.pdf', $rapat->notulensi) }}" target="_blank" class="meeting-action-btn success">
-                                        <i class="fas fa-file-pdf"></i> PDF
+                                    <a href="{{ route('rapat.notulensi.pdf', $rapat->notulensi) }}" target="_blank" class="app-icon-btn pdf" data-mobile-label="PDF" title="Buka PDF">
+                                        <i class="fas fa-file-pdf"></i>
                                     </a>
                                     @if($rapat->notulensi->file_path)
-                                        <a href="{{ route('rapat.notulensi.file', $rapat->notulensi) }}" target="_blank" class="meeting-action-btn secondary">
-                                            <i class="fas fa-paperclip"></i> File
+                                        <a href="{{ route('rapat.notulensi.file', $rapat->notulensi) }}" target="_blank" class="app-icon-btn file" data-mobile-label="File" title="Buka file">
+                                            <i class="fas fa-paperclip"></i>
                                         </a>
                                     @endif
                                 </div>
@@ -257,20 +207,5 @@
             $('#uploadNotulensiModal').modal('show');
         }
 
-        $(function () {
-            $(document).on('click', '.meeting-action-toggle', function () {
-                const $button = $(this);
-                const $actionRow = $button.closest('tr').next('.meeting-action-row');
-                const isOpen = $actionRow.is(':visible');
-
-                $('.meeting-action-row').hide();
-                $('.meeting-action-toggle').removeClass('is-open').text('+');
-
-                if (!isOpen) {
-                    $actionRow.show();
-                    $button.addClass('is-open').text('-');
-                }
-            });
-        });
     </script>
 @endpush

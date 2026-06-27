@@ -104,6 +104,20 @@ class SendLeaveStatusNotification
             ];
         }
 
+        if ($eventName === 'changed' || $leaveRequest->status === 'changed') {
+            return [
+                'title' => 'Pengajuan cuti perlu perubahan',
+                'message' => 'Pengajuan cuti Bapak/Ibu perlu disesuaikan. Mohon meninjau catatan perubahan pada aplikasi.',
+            ];
+        }
+
+        if ($eventName === 'deferred' || $leaveRequest->status === 'deferred') {
+            return [
+                'title' => 'Pengajuan cuti ditangguhkan',
+                'message' => 'Pengajuan cuti Bapak/Ibu ditangguhkan. Mohon meninjau alasan penangguhan pada aplikasi.',
+            ];
+        }
+
         if ($eventName === 'cancelled' || $leaveRequest->status === 'cancelled') {
             return [
                 'title' => 'Pengajuan cuti dibatalkan',

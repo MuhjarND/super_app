@@ -33,7 +33,7 @@ class LeaveValidationService
         $leaveRequest->workday_count = $workdayCount;
         $leaveRequest->requested_days = $workdayCount;
 
-        $this->validateServiceYears($user, $leaveType, $leaveRequest->start_date);
+        $this->validateServiceYears($leaveRequest, $user, $leaveType, $leaveRequest->start_date);
         $this->validateBalance($user, $leaveType, $workdayCount, $leaveRequest->start_date);
         $childNumberContext = !is_null(optional($user)->jumlah_anak)
             ? ((int) $user->jumlah_anak + 1)
@@ -43,7 +43,9 @@ class LeaveValidationService
         $this->validateRequiredDocuments($leaveRequest, $leaveType);
         $this->validateDoctorLetter($leaveRequest, $leaveType, $workdayCount);
         $this->validateDateOverlap($leaveRequest);
-        $this->validateSpecialLimits($leaveType, $workdayCount);
+        $this->validateSpecialLimits($leaveRequest, $leaveType, $workdayCount);
+        $this->validateAbroadRequest($leaveRequest, $leaveType);
+        $this->validateAnnualAndLargeLeaveInteraction($leaveRequest, $leaveType, $workdayCount);
     }
 
     public function countWorkingDays($startDate, $endDate)
@@ -67,10 +69,14 @@ class LeaveValidationService
         return $days;
     }
 
-    protected function validateServiceYears(User $user, LeaveType $leaveType, $startDate)
+    protected function validateServiceYears(LeaveRequest $leaveRequest, User $user, LeaveType $leaveType, $startDate)
     {
         $yearsRequired = (int) ($leaveType->service_years_required ?: 0);
         if ($yearsRequired < 1 || empty($user->tmt_pns)) {
+            return;
+        }
+
+        if ($leaveType->code === LeaveType::CODE_BESAR && $this->isLargeLeaveServiceException($leaveRequest)) {
             return;
         }
 
@@ -83,6 +89,17 @@ class LeaveValidationService
         if ($tmtPns->diffInYears($start) < $yearsRequired) {
             throw ValidationException::withMessages(['start_date' => 'Masa kerja belum memenuhi syarat untuk jenis cuti ini.']);
         }
+    }
+
+    protected function isLargeLeaveServiceException(LeaveRequest $leaveRequest)
+    {
+        $purpose = mb_strtolower((string) $leaveRequest->purpose);
+
+        return str_contains($purpose, 'haji pertama')
+            || str_contains($purpose, 'anak keempat')
+            || str_contains($purpose, 'anak ke-4')
+            || str_contains($purpose, 'kelahiran anak keempat')
+            || str_contains($purpose, 'kelahiran anak ke-4');
     }
 
     protected function validateBalance(User $user, LeaveType $leaveType, $requestedDays, $startDate)
@@ -151,14 +168,129 @@ class LeaveValidationService
         }
     }
 
-    protected function validateSpecialLimits(LeaveType $leaveType, $requestedDays)
+    protected function validateSpecialLimits(LeaveRequest $leaveRequest, LeaveType $leaveType, $requestedDays)
     {
+        if ($leaveType->code === LeaveType::CODE_TAHUNAN) {
+            return;
+        }
+
+        $this->validateMaxMonths($leaveRequest, $leaveType);
+
         if (!empty($leaveType->max_days) && $requestedDays > (int) $leaveType->max_days) {
             throw ValidationException::withMessages(['end_date' => 'Jumlah hari melebihi batas maksimum jenis cuti.']);
         }
-        if ($leaveType->code === LeaveType::CODE_BESAR && $requestedDays > 90) {
-            throw ValidationException::withMessages(['end_date' => 'Cuti besar maksimal tiga bulan.']);
+    }
+
+    protected function validateMaxMonths(LeaveRequest $leaveRequest, LeaveType $leaveType)
+    {
+        if (empty($leaveType->max_months)) {
+            return;
         }
+
+        $start = $this->normalizeDate($leaveRequest->start_date);
+        $end = $this->normalizeDate($leaveRequest->end_date);
+        if (!$start || !$end) {
+            return;
+        }
+
+        $latestEnd = $start->copy()->startOfDay()->addMonthsNoOverflow((int) $leaveType->max_months)->subDay();
+        if ($end->startOfDay()->gt($latestEnd)) {
+            throw ValidationException::withMessages(['end_date' => 'Lama cuti melebihi batas ' . (int) $leaveType->max_months . ' bulan kalender.']);
+        }
+    }
+
+    protected function validateAbroadRequest(LeaveRequest $leaveRequest, LeaveType $leaveType)
+    {
+        if (!$leaveRequest->is_abroad) {
+            return;
+        }
+
+        if (!in_array($leaveType->code, [
+            LeaveType::CODE_TAHUNAN,
+            LeaveType::CODE_BESAR,
+            LeaveType::CODE_SAKIT,
+            LeaveType::CODE_MELAHIRKAN,
+            LeaveType::CODE_ALASAN_PENTING,
+        ], true)) {
+            return;
+        }
+
+        $start = $this->normalizeDate($leaveRequest->start_date);
+        if (!$start) {
+            return;
+        }
+
+        $minimumStart = Carbon::now('Asia/Jayapura')->startOfDay()->addMonthNoOverflow();
+        if ($start->startOfDay()->lt($minimumStart)) {
+            throw ValidationException::withMessages(['start_date' => 'Cuti yang dijalankan di luar negeri wajib diajukan paling lambat 1 bulan sebelum pelaksanaan.']);
+        }
+    }
+
+    protected function validateAnnualAndLargeLeaveInteraction(LeaveRequest $leaveRequest, LeaveType $leaveType, $requestedDays)
+    {
+        if (!in_array($leaveType->code, [LeaveType::CODE_TAHUNAN, LeaveType::CODE_BESAR], true)) {
+            return;
+        }
+
+        $start = $this->normalizeDate($leaveRequest->start_date);
+        if (!$start) {
+            return;
+        }
+
+        $year = $start->year;
+        $annualType = LeaveType::where('code', LeaveType::CODE_TAHUNAN)->first();
+        $largeType = LeaveType::where('code', LeaveType::CODE_BESAR)->first();
+        if (!$annualType || !$largeType) {
+            return;
+        }
+
+        if ($leaveType->code === LeaveType::CODE_TAHUNAN && $this->hasActiveLeaveOfType($leaveRequest, $largeType->id, $year)) {
+            throw ValidationException::withMessages(['leave_type_id' => 'Cuti tahunan tidak dapat digunakan pada tahun yang sama ketika cuti besar sedang/akan digunakan.']);
+        }
+
+        if ($leaveType->code === LeaveType::CODE_BESAR) {
+            $annualUsedDays = $this->usedDaysForLeaveType($leaveRequest, $annualType->id, $year);
+            $latestEnd = $start->copy()->startOfDay()->addMonthsNoOverflow((int) ($leaveType->max_months ?: 3))->subDay();
+            $largeLeaveWorkdayLimit = $this->countWorkingDays($leaveRequest->start_date, $latestEnd);
+            if ($annualUsedDays > 0 && ($requestedDays + $annualUsedDays) > $largeLeaveWorkdayLimit) {
+                throw ValidationException::withMessages(['end_date' => 'Cuti besar wajib mempertimbangkan cuti tahunan yang sudah digunakan pada tahun berjalan.']);
+            }
+        }
+    }
+
+    protected function hasActiveLeaveOfType(LeaveRequest $leaveRequest, $leaveTypeId, $year)
+    {
+        return LeaveRequest::where('user_id', $leaveRequest->user_id)
+            ->where('id', '!=', $leaveRequest->id)
+            ->where('leave_type_id', $leaveTypeId)
+            ->whereYear('start_date', $year)
+            ->whereNotIn('status', [
+                LeaveRequest::STATUS_DRAFT,
+                LeaveRequest::STATUS_REJECTED,
+                LeaveRequest::STATUS_CHANGED,
+                LeaveRequest::STATUS_DEFERRED,
+                LeaveRequest::STATUS_CANCELLED,
+            ])
+            ->exists();
+    }
+
+    protected function usedDaysForLeaveType(LeaveRequest $leaveRequest, $leaveTypeId, $year)
+    {
+        return (int) LeaveRequest::where('user_id', $leaveRequest->user_id)
+            ->where('id', '!=', $leaveRequest->id)
+            ->where('leave_type_id', $leaveTypeId)
+            ->whereYear('start_date', $year)
+            ->whereNotIn('status', [
+                LeaveRequest::STATUS_DRAFT,
+                LeaveRequest::STATUS_REJECTED,
+                LeaveRequest::STATUS_CHANGED,
+                LeaveRequest::STATUS_DEFERRED,
+                LeaveRequest::STATUS_CANCELLED,
+            ])
+            ->get()
+            ->sum(function (LeaveRequest $request) {
+                return (int) ($request->approved_days ?: $request->requested_days ?: $request->workday_count);
+            });
     }
 
     protected function isHoliday(Carbon $date)

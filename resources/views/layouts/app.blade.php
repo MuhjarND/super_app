@@ -221,6 +221,8 @@
         .sidebar {
             padding: 0 !important;
             overflow-y: auto;
+            scrollbar-color: var(--primary-light) var(--primary-50);
+            scrollbar-width: thin;
         }
 
         .sidebar .nav-header {
@@ -1273,16 +1275,21 @@
 
         /* ======================== SCROLLBAR ======================== */
         .sidebar::-webkit-scrollbar {
-            width: 4px;
+            width: 6px;
         }
 
         .sidebar::-webkit-scrollbar-track {
-            background: transparent;
+            background: var(--primary-50);
+            border-radius: 999px;
         }
 
         .sidebar::-webkit-scrollbar-thumb {
-            background: #d1d5db;
-            border-radius: 10px;
+            background: linear-gradient(180deg, var(--primary-light), var(--accent));
+            border-radius: 999px;
+        }
+
+        .sidebar::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(180deg, var(--primary), var(--accent));
         }
 
         /* ======================== TOAST ======================== */
@@ -1672,6 +1679,10 @@
             .select2-container {
                 width: 100% !important;
             }
+        }
+
+        .mobile-preview-direct-link {
+            display: none;
         }
 
         @media (max-width: 767.98px) {
@@ -2570,6 +2581,27 @@
                 background: #ffffff;
             }
 
+            .mobile-preview-direct-link {
+                display: inline-flex !important;
+                align-items: center;
+                justify-content: center;
+                gap: 7px;
+                width: 100%;
+                min-height: 42px;
+                margin-bottom: 10px;
+                border: 1px solid #c7d2fe;
+                border-radius: 12px;
+                background: #eef2ff;
+                color: #4338ca !important;
+                font-size: 0.84rem;
+                font-weight: 800;
+                text-decoration: none !important;
+            }
+
+            .mobile-preview-direct-link.is-disabled {
+                display: none !important;
+            }
+
             .modal-footer {
                 padding: 12px 16px !important;
                 gap: 8px;
@@ -2691,6 +2723,312 @@
                 border: 2px solid #ffffff;
             }
 
+        }
+
+        /* ======================== MOBILE POLISH OVERRIDES ======================== */
+        @media (max-width: 991.98px) {
+            body {
+                min-width: 0;
+            }
+
+            .main-header {
+                display: flex !important;
+                align-items: center;
+                min-height: 58px !important;
+            }
+
+            .main-header .navbar {
+                display: flex !important;
+                align-items: center;
+                width: 100%;
+                min-width: 0;
+                gap: 6px;
+            }
+
+            .main-header > .navbar-nav,
+            .main-header .navbar-nav {
+                display: flex !important;
+                flex-direction: row !important;
+                align-items: center !important;
+                flex-wrap: nowrap !important;
+                list-style: none !important;
+                margin-bottom: 0 !important;
+                padding-left: 0 !important;
+            }
+
+            .main-header > .navbar-nav > .nav-item,
+            .main-header .navbar-nav > .nav-item {
+                display: flex !important;
+                align-items: center !important;
+                list-style: none !important;
+                margin-bottom: 0 !important;
+            }
+
+            .main-header > .navbar-nav > .nav-item::marker,
+            .main-header .navbar-nav > .nav-item::marker {
+                content: '' !important;
+                font-size: 0 !important;
+            }
+
+            .main-header .navbar-nav.ml-auto {
+                min-width: 0;
+                flex: 0 1 auto;
+                margin-left: auto !important;
+                justify-content: flex-end !important;
+                max-width: calc(100vw - 66px);
+            }
+
+            .main-header .nav-link {
+                display: inline-flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+                margin: 0 !important;
+                flex-shrink: 0;
+            }
+
+            .main-header .navbar-nav .nav-item .dropdown-toggle > span {
+                display: none !important;
+            }
+
+            .main-header .dropdown,
+            .main-header .nav-item {
+                position: relative;
+            }
+
+            .main-header .dropdown-menu {
+                position: absolute !important;
+                float: none !important;
+                top: calc(100% + 8px) !important;
+                z-index: 2050 !important;
+            }
+
+            .main-header .dropdown-menu-right {
+                right: 0 !important;
+                left: auto !important;
+            }
+
+            .main-header .notification-menu {
+                position: fixed !important;
+                top: 66px !important;
+                right: 10px !important;
+                left: 10px !important;
+                width: auto !important;
+                max-width: none !important;
+                max-height: min(72vh, 520px);
+                overflow: hidden;
+            }
+
+            .main-header .notification-list {
+                max-height: min(54vh, 390px);
+                overflow-y: auto;
+            }
+
+            .content-wrapper {
+                padding-bottom: calc(108px + env(safe-area-inset-bottom)) !important;
+            }
+
+            .content > .container-fluid > .d-flex.justify-content-between.align-items-center.mb-3,
+            .content > .container-fluid > .d-flex.justify-content-between.align-items-start.mb-3,
+            .content > .container-fluid > .d-flex.justify-content-between.mb-3 {
+                margin-bottom: 12px !important;
+            }
+
+            .app-action-group {
+                width: 100%;
+                display: flex;
+                justify-content: flex-start;
+                gap: 8px;
+            }
+
+            .content > .container-fluid > .d-flex.justify-content-between.align-items-center.mb-3 .app-action-group,
+            .content > .container-fluid > .d-flex.justify-content-between.align-items-start.mb-3 .app-action-group,
+            .content > .container-fluid > .d-flex.justify-content-between.mb-3 .app-action-group,
+            .page-header-card .app-action-group {
+                align-items: stretch;
+            }
+
+            .content > .container-fluid > .d-flex.justify-content-between.align-items-center.mb-3 .app-action-group > .btn,
+            .content > .container-fluid > .d-flex.justify-content-between.align-items-start.mb-3 .app-action-group > .btn,
+            .content > .container-fluid > .d-flex.justify-content-between.mb-3 .app-action-group > .btn,
+            .page-header-card .app-action-group > .btn {
+                flex: 1 1 100%;
+            }
+
+            .app-icon-btn[data-mobile-label],
+            .approval-list-item .btn.btn-sm[data-mobile-label],
+            .app-iconify[data-mobile-label] {
+                max-width: 100%;
+                overflow: hidden;
+                white-space: nowrap;
+            }
+
+            .app-icon-btn[data-mobile-label]::after,
+            .approval-list-item .btn.btn-sm[data-mobile-label]::after,
+            .app-iconify[data-mobile-label]::after {
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+            }
+
+            .table.table-mobile-stack tbody tr {
+                transform: translateZ(0);
+            }
+
+            .table.table-mobile-stack tbody td > * {
+                max-width: 100%;
+            }
+
+            .table.table-mobile-stack td[data-label="Aksi"] .app-action-group,
+            .table.table-mobile-stack td[data-label="AKSI"] .app-action-group {
+                display: grid;
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 8px;
+                width: 100%;
+            }
+
+            .table.table-mobile-stack td[data-label="Aksi"] .app-icon-btn[data-mobile-label],
+            .table.table-mobile-stack td[data-label="AKSI"] .app-icon-btn[data-mobile-label],
+            .table.table-mobile-stack td[data-label="Aksi"] .btn[data-mobile-label],
+            .table.table-mobile-stack td[data-label="AKSI"] .btn[data-mobile-label] {
+                width: 100%;
+                min-width: 0;
+                justify-content: center;
+            }
+
+            .modal-dialog {
+                display: flex;
+                align-items: flex-start;
+                min-height: calc(100vh - 20px);
+            }
+
+            .modal-content {
+                width: 100%;
+            }
+
+            .select2-container--bootstrap4 .select2-selection--single {
+                display: flex;
+                align-items: center;
+            }
+
+            .mobile-bottom-nav {
+                left: 8px;
+                right: 8px;
+                min-height: 62px;
+                padding: 7px;
+                border-radius: 20px;
+            }
+
+            .mobile-bottom-nav-item {
+                min-height: 48px;
+                border-radius: 15px;
+            }
+        }
+
+        @media (max-width: 575.98px) {
+            body {
+                font-size: 12.8px;
+            }
+
+            .content-header .container-fluid,
+            .content > .container-fluid {
+                padding-left: 10px !important;
+                padding-right: 10px !important;
+            }
+
+            .card,
+            .info-box,
+            .small-box,
+            .page-header-card {
+                border-radius: 14px !important;
+            }
+
+            .card-header,
+            .card-body,
+            .card-footer,
+            .page-header-card {
+                padding: 12px !important;
+            }
+
+            .table.table-mobile-stack tbody tr {
+                margin-bottom: 10px;
+                border-radius: 13px;
+            }
+
+            .table.table-mobile-stack tbody td {
+                padding: 10px 12px !important;
+                min-height: 0;
+            }
+
+            .table.table-mobile-stack tbody td::before {
+                position: static;
+                display: block;
+                width: auto;
+                margin-bottom: 4px;
+                font-size: 0.62rem;
+                line-height: 1.2;
+            }
+
+            .table.table-mobile-stack tbody td.table-mobile-no-label,
+            .table.table-mobile-stack tbody tr.table-mobile-fullrow-auto td {
+                padding-left: 12px !important;
+            }
+
+            .table.table-mobile-stack .badge {
+                display: inline-flex;
+                width: auto;
+                max-width: 100%;
+            }
+
+            .app-icon-btn[data-mobile-label],
+            .approval-list-item .btn.btn-sm[data-mobile-label],
+            .app-iconify[data-mobile-label] {
+                min-height: 38px;
+                padding-left: 10px;
+                padding-right: 10px;
+                font-size: 0.74rem !important;
+            }
+
+            .table.table-mobile-stack td[data-label="Aksi"] .app-action-group,
+            .table.table-mobile-stack td[data-label="AKSI"] .app-action-group {
+                grid-template-columns: 1fr;
+            }
+
+            .modal-dialog {
+                margin: 8px !important;
+                max-width: calc(100vw - 16px) !important;
+                min-height: calc(100vh - 16px);
+            }
+
+            .modal-content {
+                max-height: calc(100vh - 16px);
+                border-radius: 18px !important;
+            }
+
+            .mobile-bottom-nav {
+                left: 6px;
+                right: 6px;
+                bottom: max(6px, env(safe-area-inset-bottom));
+                min-height: 58px;
+                padding: 6px;
+                border-radius: 18px;
+                gap: 4px;
+            }
+
+            .mobile-bottom-nav-item {
+                min-height: 46px;
+                gap: 3px;
+                font-size: 0.58rem;
+                border-radius: 13px;
+            }
+
+            .mobile-bottom-nav-item i {
+                font-size: 0.9rem;
+            }
+
+            .mobile-bottom-nav-badge {
+                top: 3px;
+                right: 8px;
+            }
         }
     </style>
 
@@ -3038,13 +3376,15 @@
                                             </a>
                                         </li>
                                     @endif
-                                    <li class="nav-item nav-item-sub">
-                                        <a href="{{ route('cuti.balances.index') }}"
-                                            class="nav-link {{ request()->routeIs('cuti.balances.*') ? 'active' : '' }}">
-                                            <i class="nav-icon fas fa-wallet"></i>
-                                            <p>Rekap Saldo</p>
-                                        </a>
-                                    </li>
+                                    @if($isSidebarSuperAdmin || $sidebarUser->canAccessLeaveBalanceReport())
+                                        <li class="nav-item nav-item-sub">
+                                            <a href="{{ route('cuti.balances.index') }}"
+                                                class="nav-link {{ request()->routeIs('cuti.balances.*') ? 'active' : '' }}">
+                                                <i class="nav-icon fas fa-wallet"></i>
+                                                <p>Rekap Saldo</p>
+                                            </a>
+                                        </li>
+                                    @endif
                                     <li class="nav-item nav-item-sub">
                                         <a href="{{ route('cuti.reports.index') }}"
                                             class="nav-link {{ request()->routeIs('cuti.reports.*') ? 'active' : '' }}">
@@ -3368,6 +3708,7 @@
         @if(Auth::check())
             @php($mobileUser = Auth::user())
             @php($mobileIsSuperAdmin = $mobileUser && $mobileUser->isSuperAdmin())
+            @php($mobileMenuModule = optional(request()->route())->parameter('module'))
             <nav class="mobile-bottom-nav" aria-label="Navigasi utama mobile">
                 <a href="{{ route('dashboard') }}" class="mobile-bottom-nav-item {{ request()->routeIs('dashboard') || request()->routeIs('home') ? 'active' : '' }}">
                     <i class="fas fa-home"></i>
@@ -3375,7 +3716,7 @@
                 </a>
 
                 @if($mobileUser && $mobileUser->canAccessUnifiedActionCenter())
-                    <a href="{{ route('action-center.index') }}" class="mobile-bottom-nav-item {{ request()->routeIs('action-center.*') ? 'active' : '' }}">
+                    <a href="{{ route('mobile.menu.show', 'action') }}" class="mobile-bottom-nav-item {{ (request()->routeIs('mobile.menu.show') && $mobileMenuModule === 'action') || request()->routeIs('action-center.*') ? 'active' : '' }}">
                         <i class="fas fa-bell"></i>
                         <span>Tindak</span>
                         @if(($topbarActionCount ?? 0) > 0)
@@ -3385,23 +3726,23 @@
                 @endif
 
                 @if($mobileUser && $mobileUser->canAccessIntegratedCalendar())
-                    <a href="{{ route('calendar.integrated.index') }}" class="mobile-bottom-nav-item {{ request()->routeIs('calendar.integrated.*') ? 'active' : '' }}">
+                    <a href="{{ route('mobile.menu.show', 'calendar') }}" class="mobile-bottom-nav-item {{ (request()->routeIs('mobile.menu.show') && $mobileMenuModule === 'calendar') || request()->routeIs('calendar.integrated.*') ? 'active' : '' }}">
                         <i class="far fa-calendar-alt"></i>
                         <span>Kalender</span>
                     </a>
                 @endif
 
                 @if($mobileIsSuperAdmin || ($mobileUser && $mobileUser->canAccessLeaveModule()))
-                    <a href="{{ route('cuti.index') }}" class="mobile-bottom-nav-item {{ request()->routeIs('cuti.*') ? 'active' : '' }}">
+                    <a href="{{ route('mobile.menu.show', 'cuti') }}" class="mobile-bottom-nav-item {{ (request()->routeIs('mobile.menu.show') && $mobileMenuModule === 'cuti') || request()->routeIs('cuti.*') ? 'active' : '' }}">
                         <i class="fas fa-calendar-check"></i>
                         <span>Cuti</span>
                     </a>
                 @endif
 
-                <button type="button" class="mobile-bottom-nav-item mobile-menu-toggle" aria-label="Buka semua menu">
+                <a href="{{ route('dashboard') }}" class="mobile-bottom-nav-item" aria-label="Buka semua menu">
                     <i class="fas fa-th-large"></i>
                     <span>Menu</span>
-                </button>
+                </a>
             </nav>
         @endif
     </div>
@@ -3839,7 +4180,7 @@
                     canvas.width = Math.max(1, Math.floor(rect.width * ratio));
                     canvas.height = Math.max(1, Math.floor(rect.height * ratio));
                     ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
-                    ctx.lineWidth = 2.2;
+                    ctx.lineWidth = 3;
                     ctx.lineCap = 'round';
                     ctx.lineJoin = 'round';
                     ctx.strokeStyle = '#0f172a';
@@ -3957,15 +4298,64 @@
             }
         };
 
+        function normalizePreviewUrl(src) {
+            const value = (src || '').trim();
+            if (!value || value === 'about:blank' || value === 'about:srcdoc' || value.indexOf('javascript:') === 0) {
+                return '';
+            }
+
+            return value;
+        }
+
+        function ensureMobilePreviewDirectLink(frame) {
+            if (!frame || frame.dataset.mobilePreviewBound === '1') {
+                return;
+            }
+
+            if (frame.previousElementSibling && frame.previousElementSibling.classList.contains('surat-preview-toolbar')) {
+                frame.dataset.mobilePreviewBound = '1';
+                return;
+            }
+
+            const link = document.createElement('a');
+            link.className = 'mobile-preview-direct-link is-disabled';
+            link.target = '_blank';
+            link.rel = 'noopener';
+            link.innerHTML = '<i class="fas fa-external-link-alt"></i><span>Buka Dokumen</span>';
+            frame.parentNode.insertBefore(link, frame);
+
+            const syncLink = function () {
+                const url = normalizePreviewUrl(frame.getAttribute('src'));
+                if (url) {
+                    link.href = url;
+                    link.classList.remove('is-disabled');
+                } else {
+                    link.href = '#';
+                    link.classList.add('is-disabled');
+                }
+            };
+
+            syncLink();
+            new MutationObserver(syncLink).observe(frame, { attributes: true, attributeFilter: ['src'] });
+            frame.dataset.mobilePreviewBound = '1';
+        }
+
+        function syncMobilePreviewDirectLinks(scope) {
+            const root = scope || document;
+            root.querySelectorAll('iframe').forEach(ensureMobilePreviewDirectLink);
+        }
+
         $(document).ready(function () {
             $('.select2').select2({ theme: 'bootstrap4', width: '100%' });
             registerActionTooltips('.app-icon-btn, .approval-list-item .btn.btn-sm');
             syncMobileActionLabels();
             syncMobileFilters();
+            syncMobilePreviewDirectLinks(document);
             initSignaturePads(document);
 
             $(document).on('shown.bs.modal', function (event) {
                 initSignaturePads(event.target);
+                syncMobilePreviewDirectLinks(event.target);
                 event.target.querySelectorAll('.js-signature-pad').forEach(function (field) {
                     if (field.signaturePadApi) {
                         field.signaturePadApi.resize();
@@ -4104,6 +4494,7 @@
             syncMobileTableStacks();
             syncMobileActionLabels();
             syncMobileFilters();
+            syncMobilePreviewDirectLinks(document);
 
             if (typeof window.fetch === 'function') {
                 const nativeFetch = window.fetch.bind(window);
@@ -4125,6 +4516,7 @@
                 syncMobileTableStacks();
                 syncMobileActionLabels();
                 syncMobileFilters();
+                syncMobilePreviewDirectLinks(document);
             });
 
             let mobileTableSyncTimer = null;
@@ -4134,6 +4526,7 @@
                     syncMobileTableStacks();
                     syncMobileActionLabels();
                     syncMobileFilters();
+                    syncMobilePreviewDirectLinks(document);
                 }, 120);
             });
         });

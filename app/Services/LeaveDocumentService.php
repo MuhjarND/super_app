@@ -255,7 +255,7 @@ class LeaveDocumentService
     {
         return $leaveRequest->approvals
             ->filter(function ($approval) {
-                return $approval->status === 'approved'
+                return in_array($approval->status, ['approved', 'changed', 'deferred'], true)
                     && $approval->role_name !== 'verifikator_dokumen'
                     && !empty($approval->signature_path);
             })
@@ -311,7 +311,7 @@ class LeaveDocumentService
 
     protected function makeApprovalSignatureImage($approval = null)
     {
-        if (!$approval || $approval->status !== 'approved') {
+        if (!$approval || !in_array($approval->status, ['approved', 'changed', 'deferred'], true)) {
             return null;
         }
 
@@ -465,7 +465,9 @@ class LeaveDocumentService
         }
 
         return $signers->merge($leaveRequest->approvals
-            ->where('status', 'approved')
+            ->filter(function ($approval) {
+                return in_array($approval->status, ['approved', 'changed', 'deferred'], true);
+            })
             ->map(function ($approval) {
                 return [
                     'name' => optional($approval->approver)->name ?: '-',
@@ -547,6 +549,16 @@ class LeaveDocumentService
         $extension = strtolower((string) pathinfo($absolutePath, PATHINFO_EXTENSION));
 
         if ($mime === 'application/pdf' || $extension === 'pdf') {
+            if (!$this->canMergePdf($absolutePath)) {
+                return [
+                    'path' => $this->renderUnsupportedAttachmentNoticePdf(
+                        $document->original_name,
+                        'Lampiran PDF ini tersimpan di sistem, tetapi memakai teknik kompresi PDF yang tidak didukung oleh parser PDF gratis pada server. Silakan buka lampiran asli dari daftar dokumen pendukung.'
+                    ),
+                    'temporary' => true,
+                ];
+            }
+
             return ['path' => $absolutePath, 'temporary' => false];
         }
 
@@ -561,6 +573,17 @@ class LeaveDocumentService
             ),
             'temporary' => true,
         ];
+    }
+
+    protected function canMergePdf($path)
+    {
+        try {
+            $pdf = new Fpdi();
+            $pdf->setSourceFile($path);
+            return true;
+        } catch (\Throwable $exception) {
+            return false;
+        }
     }
 
     protected function renderImageAttachmentAsPdf($imagePath, $documentName)
@@ -640,15 +663,38 @@ class LeaveDocumentService
         $pdf = new Fpdi();
 
         foreach ($sourceFiles as $sourceFile) {
-            $pageCount = $pdf->setSourceFile($sourceFile);
+            try {
+                $pageCount = $pdf->setSourceFile($sourceFile);
 
-            for ($pageNumber = 1; $pageNumber <= $pageCount; $pageNumber++) {
-                $templateId = $pdf->importPage($pageNumber);
-                $size = $pdf->getTemplateSize($templateId);
-                $orientation = $size['width'] > $size['height'] ? 'L' : 'P';
+                for ($pageNumber = 1; $pageNumber <= $pageCount; $pageNumber++) {
+                    $templateId = $pdf->importPage($pageNumber);
+                    $size = $pdf->getTemplateSize($templateId);
+                    $orientation = $size['width'] > $size['height'] ? 'L' : 'P';
 
-                $pdf->AddPage($orientation, [$size['width'], $size['height']]);
-                $pdf->useTemplate($templateId);
+                    $pdf->AddPage($orientation, [$size['width'], $size['height']]);
+                    $pdf->useTemplate($templateId);
+                }
+            } catch (\Throwable $exception) {
+                $fallbackPath = $this->renderUnsupportedAttachmentNoticePdf(
+                    basename((string) $sourceFile),
+                    'Bagian PDF ini tidak dapat digabung otomatis karena format kompresi PDF tidak didukung oleh parser server.'
+                );
+
+                try {
+                    $pageCount = $pdf->setSourceFile($fallbackPath);
+                    for ($pageNumber = 1; $pageNumber <= $pageCount; $pageNumber++) {
+                        $templateId = $pdf->importPage($pageNumber);
+                        $size = $pdf->getTemplateSize($templateId);
+                        $orientation = $size['width'] > $size['height'] ? 'L' : 'P';
+
+                        $pdf->AddPage($orientation, [$size['width'], $size['height']]);
+                        $pdf->useTemplate($templateId);
+                    }
+                } finally {
+                    if (file_exists($fallbackPath)) {
+                        @unlink($fallbackPath);
+                    }
+                }
             }
         }
 

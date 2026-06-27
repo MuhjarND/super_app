@@ -24,11 +24,13 @@ class WhatsAppNotificationService
 {
     protected $apiUrl;
     protected $apiKey;
+    protected $magicLinkService;
 
-    public function __construct()
+    public function __construct(WhatsAppMagicLinkService $magicLinkService)
     {
         $this->apiUrl = config('services.whatsapp.api_url');
         $this->apiKey = config('services.whatsapp.api_key');
+        $this->magicLinkService = $magicLinkService;
     }
 
     public function send($phoneNumber, $message, array $context = [])
@@ -89,6 +91,8 @@ class WhatsAppNotificationService
         if (!$targetUser instanceof User) {
             return false;
         }
+
+        $message = $this->magicLinkService->replaceApplicationUrls($targetUser, $message);
 
         $context = array_merge($context, [
             'target_user_id' => $targetUser->id,
@@ -457,7 +461,7 @@ class WhatsAppNotificationService
             'Pengusul: ' . optional($rapat->creator)->name,
             '',
             'Silakan meninjau dokumen melalui tautan berikut:',
-            route('approval.index', ['category' => 'undangan']),
+            route('rapat.approval.show', $approval),
         ]);
 
         $sent = $this->sendToUser($approval->approver, $message, [
@@ -496,7 +500,8 @@ class WhatsAppNotificationService
         }
 
         $lines[] = '';
-        $lines[] = 'Mohon melakukan perbaikan dokumen pada aplikasi.';
+        $lines[] = 'Mohon melakukan perbaikan dokumen melalui tautan berikut:';
+        $lines[] = route('rapat.index');
 
         return $this->sendToUser($rapat->creator, $this->wrap($lines), [
             'module' => 'rapat',
@@ -541,6 +546,8 @@ class WhatsAppNotificationService
 
         $lines[] = '';
         $lines[] = 'Mohon kehadiran tepat waktu sesuai jadwal yang telah ditetapkan.';
+        $lines[] = 'Tinjau undangan melalui tautan berikut:';
+        $lines[] = route('rapat.undangan.preview', $rapat);
 
         $message = $this->wrap($lines);
         $users = $rapat->pesertas->filter(function ($user) {
@@ -608,7 +615,9 @@ class WhatsAppNotificationService
     {
         $agenda->loadMissing(['recipients.jabatan']);
 
-        $message = $agenda->whatsapp_preview;
+        $message = $agenda->whatsapp_preview
+            . "\n\nTinjau agenda melalui tautan berikut:\n"
+            . route('rapat.agenda.index');
         $result = $this->sendBulk($agenda->recipients->filter(function ($user) {
             return !empty($user->no_hp);
         }), $message, [

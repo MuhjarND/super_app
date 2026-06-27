@@ -59,7 +59,7 @@
         .attendance-table th,
         .attendance-table td {
             border: 1px solid #64748b;
-            padding: 5pt 6pt;
+            padding: 4.5pt 5pt;
             vertical-align: middle;
         }
 
@@ -71,7 +71,7 @@
         }
 
         .attendance-table td {
-            font-size: 9.5pt;
+            font-size: 9pt;
         }
 
         .text-center {
@@ -90,6 +90,37 @@
             text-align: center;
             color: #64748b;
             font-style: italic;
+        }
+
+        .ttd-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 16pt;
+        }
+
+        .ttd-table td {
+            vertical-align: top;
+        }
+
+        .ttd-box {
+            width: 240pt;
+            margin-left: auto;
+        }
+
+        .signature-pad-image {
+            margin: 8pt 0 4pt 0;
+        }
+
+        .signature-pad-image img {
+            width: 118pt;
+            height: 58pt;
+            display: block;
+            object-fit: contain;
+        }
+
+        .nama-ttd {
+            font-weight: bold;
+            font-size: 10.5pt;
         }
     </style>
 </head>
@@ -124,7 +155,7 @@
         </tr>
     </table>
 
-    <div class="section-title">Absensi Peserta Internal</div>
+    <div class="section-title">Daftar Hadir Peserta</div>
     <table class="attendance-table">
         <thead>
             <tr>
@@ -132,19 +163,19 @@
                 <th>Nama</th>
                 <th>Jabatan / Keterangan</th>
                 <th style="width: 74pt;">Status</th>
-                <th style="width: 92pt;">Tanda Tangan</th>
+                <th style="width: 108pt;">Tanda Tangan</th>
             </tr>
         </thead>
         <tbody>
-            @forelse($internalParticipants as $index => $item)
+            @forelse($attendanceRows as $index => $row)
                 <tr>
                     <td class="text-center">{{ $index + 1 }}</td>
-                    <td>{{ $item['user']->name }}</td>
-                    <td>{{ $item['user']->jabatan_keterangan ?: optional($item['user']->jabatan)->nama ?: '-' }}</td>
-                    <td class="text-center">{{ $item['attendance'] ? 'Hadir' : 'Belum Hadir' }}</td>
+                    <td>{{ $row['name'] }}</td>
+                    <td>{{ $row['description'] }}</td>
+                    <td class="text-center">{{ $row['status'] }}</td>
                     <td class="text-center">
-                        @if($item['signature_data_uri'])
-                            <img src="{{ $item['signature_data_uri'] }}" alt="Tanda Tangan" class="signature-image">
+                        @if($row['signature_data_uri'])
+                            <img src="{{ $row['signature_data_uri'] }}" alt="Tanda Tangan" class="signature-image">
                         @else
                             -
                         @endif
@@ -152,39 +183,31 @@
                 </tr>
             @empty
                 <tr>
-                    <td colspan="5" class="empty">Belum ada peserta internal yang terdaftar.</td>
+                    <td colspan="5" class="empty">Belum ada data peserta absensi.</td>
                 </tr>
             @endforelse
         </tbody>
     </table>
 
-    @if($guestAttendances->count() > 0)
-        <div class="section-title">Absensi Peserta External</div>
-        <table class="attendance-table">
-            <thead>
-                <tr>
-                    <th style="width: 28pt;">No</th>
-                    <th>Nama</th>
-                    <th>Instansi / Keterangan</th>
-                    <th style="width: 92pt;">Tanda Tangan</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach($guestAttendances as $index => $attendance)
-                    <tr>
-                        <td class="text-center">{{ $index + 1 }}</td>
-                        <td>{{ $attendance->participant_name_snapshot }}</td>
-                        <td>{{ $attendance->guest_instansi ?: ($attendance->participant_jabatan_snapshot ?: '-') }}</td>
-                        <td class="text-center">
-                            @if($attendance->signature_data_uri)
-                                <img src="{{ $attendance->signature_data_uri }}" alt="Tanda Tangan" class="signature-image">
-                            @else
-                                -
-                            @endif
-                        </td>
-                    </tr>
-                @endforeach
-            </tbody>
+    @if($attendanceCompleted)
+        <table class="ttd-table">
+            <tr>
+                <td style="width: 52%;"></td>
+                <td>
+                    <div class="ttd-box">
+                        <div>{{ $pimpinanSignature['line1'] ?? 'Pejabat Penanda Tangan,' }}</div>
+                        <div><strong>{{ $pimpinanSignature['line2'] ?? 'Pengadilan Tinggi Agama Papua Barat' }}</strong></div>
+                        @if(!empty($pimpinanSignature['image']))
+                            <div class="signature-pad-image">
+                                <img src="{{ $pimpinanSignature['image'] }}" alt="Tanda Tangan Pimpinan">
+                            </div>
+                        @else
+                            <div style="height: 68pt;"></div>
+                        @endif
+                        <div class="nama-ttd">{{ $pimpinanSignature['name'] ?? '-' }}</div>
+                    </div>
+                </td>
+            </tr>
         </table>
     @endif
 </body>

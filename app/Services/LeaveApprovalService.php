@@ -58,7 +58,8 @@ class LeaveApprovalService
         $chairman = User::whereHas('roles', function ($q) {
             $q->where('name', 'ketua');
         })->orderBy('id')->first();
-        $finalApproverId = optional($leaveRequest->user)->pejabat_berwenang_id ?: optional($chairman)->id;
+        $sekma = $leaveRequest->is_abroad ? $this->firstRoleUser(['sekretaris_ma', 'sekretaris_mahkamah_agung']) : null;
+        $finalApproverId = optional($sekma)->id ?: (optional($leaveRequest->user)->pejabat_berwenang_id ?: optional($chairman)->id);
         $existingApproverIds = collect($steps)->pluck('approver_id')->filter()->map(function ($value) {
             return (int) $value;
         })->all();
@@ -66,7 +67,7 @@ class LeaveApprovalService
         if ($finalApproverId && !in_array((int) $finalApproverId, $existingApproverIds, true)) {
             $steps[] = [
                 'step_no' => count($steps) + 1,
-                'role_name' => 'ppk',
+                'role_name' => $sekma ? 'sekretaris_ma' : 'ppk',
                 'approver_id' => $this->resolveApproverId($finalApproverId, 'ppk_approval', $leaveRequest->start_date),
             ];
         }
@@ -224,6 +225,59 @@ class LeaveApprovalService
             'target_name' => optional(optional($approval->leaveRequest)->user)->name,
             'old_values_json' => ['status' => $previousStatus],
             'new_values_json' => ['status' => 'rejected'],
+            'note' => $note,
+        ], $actor);
+    }
+
+    public function requestChange(LeaveApproval $approval, User $actor, $note, $signatureData = null)
+    {
+        $this->finishWithNonApprovalDecision($approval, $actor, $note, $signatureData, 'changed', LeaveRequest::STATUS_CHANGED, 'leave_approval_changed');
+    }
+
+    public function defer(LeaveApproval $approval, User $actor, $note, $signatureData = null)
+    {
+        $this->finishWithNonApprovalDecision($approval, $actor, $note, $signatureData, 'deferred', LeaveRequest::STATUS_DEFERRED, 'leave_approval_deferred');
+    }
+
+    protected function finishWithNonApprovalDecision(LeaveApproval $approval, User $actor, $note, $signatureData, $approvalStatus, $requestStatus, $auditEvent)
+    {
+        if ($approval->status !== 'pending') {
+            throw ValidationException::withMessages(['status' => 'Approval cuti ini tidak berada pada status pending.']);
+        }
+
+        $previousStatus = $approval->status;
+        DB::transaction(function () use ($approval, $actor, $note, $signatureData, $approvalStatus, $requestStatus) {
+            $signature = $this->signaturePadService->storeDataUri($signatureData, 'cuti/approval-signatures');
+            $approval->status = $approvalStatus;
+            $approval->action = $approvalStatus;
+            $approval->acted_at = Carbon::now();
+            $approval->signature_path = $signature['path'];
+            $approval->signature_mime = $signature['mime'];
+            $approval->signature_size = $signature['size'];
+            $approval->note = $note;
+            $approval->save();
+
+            $leaveRequest = $approval->leaveRequest;
+            $this->documentService->ensureLetterNumber($leaveRequest);
+            $leaveRequest->status = $requestStatus;
+            $leaveRequest->is_deferred = $requestStatus === LeaveRequest::STATUS_DEFERRED;
+            $leaveRequest->deferred_reason = $requestStatus === LeaveRequest::STATUS_DEFERRED ? $note : null;
+            $leaveRequest->revision_note = $note;
+            $leaveRequest->updated_by = $actor->id;
+            $leaveRequest->save();
+            $this->balanceService->restore($leaveRequest);
+            $this->documentService->syncSuratKeluar($leaveRequest->fresh(['leaveType', 'approvals', 'documents', 'user']), true);
+        });
+
+        $approval->loadMissing('leaveRequest.user', 'leaveRequest.leaveType', 'approver');
+        $this->auditService->log('cuti', $auditEvent, $approval, [
+            'subject_type' => 'leave_request',
+            'subject_id' => optional($approval->leaveRequest)->id,
+            'subject_title' => optional(optional($approval->leaveRequest)->user)->name . ' - ' . optional(optional($approval->leaveRequest)->leaveType)->name,
+            'target_user_id' => optional($approval->leaveRequest)->user_id,
+            'target_name' => optional(optional($approval->leaveRequest)->user)->name,
+            'old_values_json' => ['status' => $previousStatus],
+            'new_values_json' => ['status' => $approvalStatus],
             'note' => $note,
         ], $actor);
     }

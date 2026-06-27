@@ -8,6 +8,10 @@ Route::get('/', function () {
 });
 
 Auth::routes(['register' => false]); // Disable registration - admin adds users
+Route::get('/masuk/whatsapp/{token}', 'Auth\WhatsAppMagicLoginController@consume')
+    ->where('token', '[A-Za-z0-9]{64}')
+    ->middleware('throttle:10,1')
+    ->name('whatsapp.magic-login.consume');
 Route::get('/login/2fa', 'Auth\TwoFactorChallengeController@show')->name('two-factor.challenge.show');
 Route::post('/login/2fa', 'Auth\TwoFactorChallengeController@store')->name('two-factor.challenge.store');
 
@@ -154,6 +158,7 @@ Route::middleware(['auth'])->group(function () {
         });
 
         Route::get('/saldo', 'LeaveReportController@balances')->name('balances.index');
+        Route::post('/saldo', 'LeaveReportController@storeAnnualBalance')->name('balances.store');
         Route::get('/saldo/pdf', 'LeaveReportController@balancesPdf')->name('balances.pdf');
         Route::get('/saldo/excel', 'LeaveReportController@balancesExcel')->name('balances.excel');
         Route::get('/laporan', 'LeaveReportController@index')->name('reports.index');
@@ -164,6 +169,8 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/approval/{leaveApproval}', 'LeaveApprovalController@show')->name('approval.show');
         Route::post('/approval/{leaveApproval}/approve', 'LeaveApprovalController@approve')->name('approval.approve');
         Route::post('/approval/{leaveApproval}/reject', 'LeaveApprovalController@reject')->name('approval.reject');
+        Route::post('/approval/{leaveApproval}/change', 'LeaveApprovalController@change')->name('approval.change');
+        Route::post('/approval/{leaveApproval}/defer', 'LeaveApprovalController@defer')->name('approval.defer');
         Route::post('/approval/{leaveApproval}/verify-document', 'LeaveApprovalController@verifyDocument')->name('approval.verify-document');
 
         Route::get('/{leaveRequest}', 'LeaveRequestController@show')->name('show');

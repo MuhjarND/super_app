@@ -619,6 +619,13 @@ class User extends Authenticatable
         return $this->canApproveLeave() || $this->hasLeaveApprovalAssignment();
     }
 
+    public function canAccessLeaveBalanceReport()
+    {
+        return $this->isSuperAdmin()
+            || $this->canManageLeaveMasterData()
+            || $this->canApproveLeave();
+    }
+
     public function canApproveSuratKeluarTemplate()
     {
         if ($this->isSuperAdmin()) {

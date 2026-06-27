@@ -99,7 +99,7 @@
 
     .leave-approval-actions {
         display: grid;
-        grid-template-columns: 1fr 1fr;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
         gap: 12px;
     }
 
@@ -167,8 +167,8 @@
 
 @php
     $isApprovalMode = isset($leaveApproval);
-    $canOpenPdf = in_array($leaveRequest->status, [\App\LeaveRequest::STATUS_APPROVED, \App\LeaveRequest::STATUS_REJECTED, \App\LeaveRequest::STATUS_COMPLETED], true) || $isApprovalMode;
-    $canEditSubmit = in_array($leaveRequest->status, [\App\LeaveRequest::STATUS_DRAFT, \App\LeaveRequest::STATUS_REJECTED], true);
+    $canOpenPdf = in_array($leaveRequest->status, [\App\LeaveRequest::STATUS_APPROVED, \App\LeaveRequest::STATUS_REJECTED, \App\LeaveRequest::STATUS_CHANGED, \App\LeaveRequest::STATUS_DEFERRED, \App\LeaveRequest::STATUS_COMPLETED], true) || $isApprovalMode;
+    $canEditSubmit = in_array($leaveRequest->status, [\App\LeaveRequest::STATUS_DRAFT, \App\LeaveRequest::STATUS_REJECTED, \App\LeaveRequest::STATUS_CHANGED, \App\LeaveRequest::STATUS_DEFERRED], true);
     $canCancelRequest = in_array($leaveRequest->status, [\App\LeaveRequest::STATUS_DRAFT, \App\LeaveRequest::STATUS_SUBMITTED, \App\LeaveRequest::STATUS_UNDER_REVIEW, \App\LeaveRequest::STATUS_VERIFIED], true);
 @endphp
 
@@ -211,6 +211,12 @@
                 <button type="button" class="btn btn-success" data-toggle="modal" data-target="#leaveApprovalSignatureModal">
                     <i class="fas fa-check mr-1"></i> Setujui
                 </button>
+                <button type="button" class="btn btn-info" data-toggle="modal" data-target="#leaveApprovalChangeModal">
+                    <i class="fas fa-edit mr-1"></i> Perubahan
+                </button>
+                <button type="button" class="btn btn-warning" data-toggle="modal" data-target="#leaveApprovalDeferModal">
+                    <i class="fas fa-clock mr-1"></i> Ditangguhkan
+                </button>
                 <form action="{{ route('cuti.approval.reject', $leaveApproval) }}" method="POST">
                     @csrf
                     <textarea name="note" class="form-control mb-2" rows="2" placeholder="Catatan penolakan" required></textarea>
@@ -248,9 +254,25 @@
                 <div class="leave-summary-value">{{ $leaveRequest->contact_phone ?: optional($leaveRequest->user)->no_hp ?: '-' }}</div>
             </div>
             <div class="leave-summary-item">
+                <span class="leave-summary-label">Cuti Luar Negeri</span>
+                <div class="leave-summary-value">{{ $leaveRequest->is_abroad ? ($leaveRequest->abroad_country ?: 'Ya') : 'Tidak' }}</div>
+            </div>
+            <div class="leave-summary-item">
                 <span class="leave-summary-label">Nomor</span>
                 <div class="leave-summary-value">{{ $leaveRequest->display_number }}</div>
             </div>
+            @if($leaveRequest->revision_note)
+                <div class="leave-summary-item" style="grid-column: 1 / -1;">
+                    <span class="leave-summary-label">Catatan Keputusan</span>
+                    <div class="leave-summary-value">{{ $leaveRequest->revision_note }}</div>
+                </div>
+            @endif
+            @if($leaveRequest->deferred_reason)
+                <div class="leave-summary-item" style="grid-column: 1 / -1;">
+                    <span class="leave-summary-label">Alasan Penangguhan</span>
+                    <div class="leave-summary-value">{{ $leaveRequest->deferred_reason }}</div>
+                </div>
+            @endif
             <div class="leave-summary-item" style="grid-column: 1 / -1;">
                 <span class="leave-summary-label">Alasan</span>
                 <div class="leave-summary-value">{{ $leaveRequest->purpose ?: '-' }}</div>
@@ -322,6 +344,58 @@
                     Submit pengajuan akan membuka modal tanda tangan pemohon sebelum pengajuan masuk ke alur approval.
                 </div>
             @endif
+        </div>
+    </div>
+@endif
+
+@if($isApprovalMode)
+    <div class="modal fade" id="leaveApprovalChangeModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Keputusan Perubahan</h5>
+                    <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+                </div>
+                <form action="{{ route('cuti.approval.change', $leaveApproval) }}" method="POST" class="requires-signature-pad">
+                    @csrf
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label>Catatan Perubahan</label>
+                            <textarea name="note" class="form-control" rows="3" placeholder="Tuliskan perubahan yang harus dilakukan" required></textarea>
+                        </div>
+                        @include('partials.signature-pad', ['id' => 'leaveApprovalChangeSignaturePad', 'name' => 'signature_data', 'label' => 'Bubuhkan Tanda Tangan', 'required' => true])
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-info">Simpan Perubahan</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="leaveApprovalDeferModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Keputusan Ditangguhkan</h5>
+                    <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+                </div>
+                <form action="{{ route('cuti.approval.defer', $leaveApproval) }}" method="POST" class="requires-signature-pad">
+                    @csrf
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label>Alasan Penangguhan</label>
+                            <textarea name="note" class="form-control" rows="3" placeholder="Tuliskan alasan penangguhan" required></textarea>
+                        </div>
+                        @include('partials.signature-pad', ['id' => 'leaveApprovalDeferSignaturePad', 'name' => 'signature_data', 'label' => 'Bubuhkan Tanda Tangan', 'required' => true])
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-warning">Simpan Penangguhan</button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 @endif

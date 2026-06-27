@@ -454,6 +454,8 @@ class SuratTemplateController extends Controller
         $fields['tanggal_surat'] = $tanggal->format('Y-m-d');
         $fields['nomor_surat'] = $generated['nomor'];
         $fields['kota_tanda_tangan'] = 'Manokwari';
+        $fields['lokasi'] = trim((string) ($fields['lokasi'] ?? '')) ?: '-';
+        unset($fields['untuk_tugas']);
         $fields['dasar_hukum_default'] = $this->defaultSuratTugasDasarHukum();
         $fields['dasar_hukum_rows'] = array_merge(
             $fields['dasar_hukum_default'],
@@ -592,8 +594,8 @@ class SuratTemplateController extends Controller
 
     protected function buildPrefillPerihal($templateName, array $fields)
     {
-        if (!empty($fields['untuk_tugas'])) {
-            $summary = trim(preg_replace('/\s+/u', ' ', strip_tags((string) $fields['untuk_tugas'])));
+        if (!empty($fields['dalam_rangka'])) {
+            $summary = trim(preg_replace('/\s+/u', ' ', strip_tags((string) $fields['dalam_rangka'])));
             return $templateName . ' - ' . mb_substr($summary, 0, 120);
         }
 

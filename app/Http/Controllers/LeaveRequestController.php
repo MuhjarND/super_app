@@ -39,7 +39,40 @@ class LeaveRequestController extends Controller
         if (!$this->moduleReady()) { return $this->setupResponse('Modul Cuti Belum Diaktifkan'); }
         $leaveRequests = LeaveRequest::with(['leaveType', 'approvals.approver', 'audits.actor', 'documents'])->where('user_id', auth()->id())->latest('id')->paginate(15);
         $leaveTypes = LeaveType::where('status', 'active')->orderBy('name')->get();
-        return view('cuti.index', compact('leaveRequests', 'leaveTypes'));
+        $balanceYear = (int) request('balance_year', now()->year);
+        $leaveBalanceSummaries = $leaveTypes
+            ->where('requires_balance', true)
+            ->map(function ($leaveType) use ($balanceYear) {
+                $balance = $this->balanceService->getBalanceSnapshot(auth()->user(), $leaveType, $balanceYear);
+                $carryForwardByYear = (array) ($balance['carry_forward_by_year'] ?? []);
+                $previousYear = $balanceYear - 1;
+                $twoYearsAgo = $balanceYear - 2;
+                $totalBalance = (int) ($balance['opening_balance'] ?? 0)
+                    + (int) ($balance['entitlement'] ?? 0)
+                    + (int) ($balance['carry_forward'] ?? 0)
+                    + (int) ($balance['adjustment_plus'] ?? 0)
+                    - (int) ($balance['adjustment_minus'] ?? 0);
+
+                return [
+                    'leave_type' => $leaveType,
+                    'year' => $balanceYear,
+                    'opening_balance' => (int) ($balance['opening_balance'] ?? 0),
+                    'entitlement' => (int) ($balance['entitlement'] ?? 0),
+                    'carry_forward' => (int) ($balance['carry_forward'] ?? 0),
+                    'carry_forward_by_year' => $carryForwardByYear,
+                    'carry_forward_previous_year' => (int) ($carryForwardByYear[$previousYear] ?? $carryForwardByYear[(string) $previousYear] ?? 0),
+                    'carry_forward_two_years_ago' => (int) ($carryForwardByYear[$twoYearsAgo] ?? $carryForwardByYear[(string) $twoYearsAgo] ?? 0),
+                    'adjustment_plus' => (int) ($balance['adjustment_plus'] ?? 0),
+                    'adjustment_minus' => (int) ($balance['adjustment_minus'] ?? 0),
+                    'used_days' => (int) ($balance['used_days'] ?? 0),
+                    'reserved_days' => (int) ($balance['reserved_days'] ?? 0),
+                    'remaining_balance' => (int) ($balance['remaining_balance'] ?? 0),
+                    'total_balance' => $totalBalance,
+                ];
+            })
+            ->values();
+
+        return view('cuti.index', compact('leaveRequests', 'leaveTypes', 'leaveBalanceSummaries', 'balanceYear'));
     }
 
     public function create()
@@ -61,6 +94,8 @@ class LeaveRequestController extends Controller
             'end_date' => $request->end_date,
             'purpose' => $request->purpose,
             'leave_address' => $request->leave_address,
+            'is_abroad' => $request->boolean('is_abroad'),
+            'abroad_country' => $request->boolean('is_abroad') ? $request->abroad_country : null,
             'contact_phone' => auth()->user()->no_hp,
             'status_asn_snapshot' => auth()->user()->status_asn ?? 'PNS',
             'unit_snapshot' => optional(auth()->user()->unit)->nama,
@@ -99,6 +134,8 @@ class LeaveRequestController extends Controller
         if (!$this->moduleReady()) { return $this->setupResponse('Modul Cuti Belum Diaktifkan'); }
         $this->authorize('update', $leaveRequest);
         $leaveRequest->fill($request->only(['leave_type_id', 'start_date', 'end_date', 'purpose', 'leave_address', 'revision_note']));
+        $leaveRequest->is_abroad = $request->boolean('is_abroad');
+        $leaveRequest->abroad_country = $leaveRequest->is_abroad ? $request->abroad_country : null;
         $leaveRequest->contact_phone = auth()->user()->no_hp;
         $leaveRequest->updated_by = auth()->id();
         $leaveRequest->save();

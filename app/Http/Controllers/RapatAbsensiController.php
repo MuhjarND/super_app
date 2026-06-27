@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Rapat;
 use App\RapatAttendance;
+use App\Services\RapatDocumentService;
 use App\Services\WhatsAppNotificationService;
 use Barryvdh\DomPDF\Facade as PDF;
 use Carbon\Carbon;
@@ -14,11 +15,13 @@ use Illuminate\Support\Str;
 class RapatAbsensiController extends Controller
 {
     protected $whatsAppService;
+    protected $documentService;
 
-    public function __construct(WhatsAppNotificationService $whatsAppService)
+    public function __construct(WhatsAppNotificationService $whatsAppService, RapatDocumentService $documentService)
     {
         $this->middleware('auth')->except(['publicShow', 'publicStore', 'publicStoreGuest']);
         $this->whatsAppService = $whatsAppService;
+        $this->documentService = $documentService;
     }
 
     public function index()
@@ -77,9 +80,13 @@ class RapatAbsensiController extends Controller
         $rapat->load([
             'creator',
             'kategoriSuratKode',
+            'approvals.approver.jabatan',
+            'approver1.jabatan',
+            'approver2.jabatan',
             'pesertas' => function ($query) {
                 $query->orderBy('rapat_peserta.urutan');
             },
+            'pesertas.jabatan',
             'internalAttendances',
             'guestAttendances',
         ]);
@@ -99,17 +106,52 @@ class RapatAbsensiController extends Controller
             $attendance->signature_data_uri = $this->resolveStorageFileDataUri($attendance->signature_path);
             return $attendance;
         });
+
+        $attendanceRows = $internalParticipants->map(function ($item) {
+            $attendance = $item['attendance'];
+            $user = $item['user'];
+
+            return [
+                'name' => $user->name,
+                'description' => $user->jabatan_keterangan ?: optional($user->jabatan)->nama ?: '-',
+                'status' => $attendance ? 'Hadir' : 'Belum Hadir',
+                'signature_data_uri' => $item['signature_data_uri'],
+            ];
+        })->concat($guestAttendances->map(function ($attendance) {
+            return [
+                'name' => $attendance->participant_name_snapshot,
+                'description' => $attendance->guest_instansi ?: ($attendance->participant_jabatan_snapshot ?: '-'),
+                'status' => 'Hadir',
+                'signature_data_uri' => $attendance->signature_data_uri,
+            ];
+        }))->values();
+
+        $attendanceCompleted = $rapat->status === 'selesai';
+        $pimpinanSignature = $this->documentService->buildApprovalSignatureData($rapat, $attendanceCompleted);
+        $signers = $attendanceCompleted && !empty($pimpinanSignature['name'])
+            ? [[
+                'name' => $pimpinanSignature['name'],
+                'role' => 'Penanda Tangan Absensi',
+                'title' => trim(($pimpinanSignature['line1'] ?? '') . ' ' . ($pimpinanSignature['line2'] ?? '')),
+                'signed_at' => !empty($pimpinanSignature['signed_at'])
+                    ? $pimpinanSignature['signed_at']->translatedFormat('d F Y H:i') . ' WIT'
+                    : '-',
+            ]]
+            : [];
+
         $kopImage = $this->resolveKopAbsenImage();
         $verifier = app(\App\Services\PdfVerificationService::class);
-        $verification = $verifier->begin('rapat', 'laporan_absensi', $rapat->id, 'Laporan Absensi Rapat - ' . ($rapat->judul ?: $rapat->id), [], [
+        $verification = $verifier->begin('rapat', 'laporan_absensi', $rapat->id, 'Laporan Absensi Rapat - ' . ($rapat->judul ?: $rapat->id), $signers, [
             'tanggal' => optional($rapat->tanggal)->toDateString(),
+            'status_rapat' => $rapat->status,
         ]);
         $pdfVerification = $verifier->viewData($verification);
 
         $pdf = PDF::loadView('rapat.absensi.pdf', compact(
             'rapat',
-            'internalParticipants',
-            'guestAttendances',
+            'attendanceRows',
+            'attendanceCompleted',
+            'pimpinanSignature',
             'kopImage',
             'pdfVerification'
         ))->setPaper('a4', 'portrait');

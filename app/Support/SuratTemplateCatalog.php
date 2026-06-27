@@ -24,11 +24,11 @@ class SuratTemplateCatalog
                     ['name' => 'dalam_rangka', 'label' => 'Dalam Rangka', 'type' => 'textarea', 'required' => true],
                     ['name' => 'tambahan_dasar_hukum', 'label' => 'Tambahan Dasar Hukum (Opsional, 1 baris = 1 poin)', 'type' => 'textarea', 'required' => false],
                     ['name' => 'petugas_ids', 'label' => 'Daftar Petugas', 'type' => 'user_multi', 'required' => true],
-                    ['name' => 'untuk_tugas', 'label' => 'Untuk / Uraian Tugas', 'type' => 'textarea', 'required' => true],
                     ['name' => 'tanggal_mulai', 'label' => 'Tanggal Mulai', 'type' => 'date', 'required' => true],
                     ['name' => 'tanggal_selesai', 'label' => 'Tanggal Selesai', 'type' => 'date', 'required' => true],
                     ['name' => 'penanda_tangan_id', 'label' => 'Penanda Tangan', 'type' => 'user_select', 'required' => true],
                     ['name' => 'jabatan_plh', 'label' => 'Jabatan Plh/Plt (Opsional)', 'type' => 'text', 'required' => false],
+                    ['name' => 'lokasi', 'label' => 'Lokasi', 'type' => 'text', 'required' => true],
                 ],
                 'template_body' => '<p><strong>SURAT TUGAS</strong></p><p>Nomor: {{nomor_surat}}</p><p>Template surat tugas resmi Pengadilan Tinggi Agama Papua Barat.</p>',
             ],
@@ -134,4 +134,3 @@ class SuratTemplateCatalog
         ];
     }
 }
-

@@ -310,6 +310,9 @@
         $attendedUserIds = $rapat->internalAttendances->pluck('user_id')->filter()->map(function ($id) {
             return (int) $id;
         })->all();
+        $availableParticipants = $rapat->pesertas->reject(function ($peserta) use ($attendedUserIds) {
+            return in_array((int) $peserta->id, $attendedUserIds, true);
+        })->values();
     @endphp
 
     <div class="container">
@@ -365,15 +368,17 @@
                 <form id="internalAttendanceForm">
                     <div class="field">
                         <label for="user_id">Nama Peserta</label>
-                        <select name="user_id" id="user_id" class="select" required>
+                        <select name="user_id" id="user_id" class="select" required {{ $availableParticipants->isEmpty() ? 'disabled' : '' }}>
                             <option value="">-- Pilih Nama Peserta --</option>
-                            @foreach($rapat->pesertas as $peserta)
-                                <option value="{{ $peserta->id }}" {{ in_array((int) $peserta->id, $attendedUserIds, true) ? 'disabled' : '' }}>
-                                    {{ $peserta->name }}{{ in_array((int) $peserta->id, $attendedUserIds, true) ? ' (sudah hadir)' : '' }}
+                            @foreach($availableParticipants as $peserta)
+                                <option value="{{ $peserta->id }}">
+                                    {{ $peserta->name }}
                                 </option>
                             @endforeach
                         </select>
-                        <div class="hint">Cukup pilih nama. Nomor HP tidak diperlukan pada absensi publik.</div>
+                        <div class="hint">
+                            {{ $availableParticipants->isEmpty() ? 'Semua peserta undangan sudah melakukan absensi.' : 'Cukup pilih nama. Nomor HP tidak diperlukan pada absensi publik.' }}
+                        </div>
                     </div>
 
                     <div class="field">
@@ -387,7 +392,7 @@
                         </div>
                     </div>
 
-                    <button type="submit" class="btn btn-primary">Kirim Absensi Peserta</button>
+                    <button type="submit" class="btn btn-primary" {{ $availableParticipants->isEmpty() ? 'disabled' : '' }}>Kirim Absensi Peserta</button>
                 </form>
             </div>
 
@@ -459,7 +464,7 @@
                 ctx.scale(ratio, ratio);
                 ctx.fillStyle = '#ffffff';
                 ctx.fillRect(0, 0, rect.width, rect.height);
-                ctx.lineWidth = 2.2;
+                ctx.lineWidth = 3;
                 ctx.lineCap = 'round';
                 ctx.lineJoin = 'round';
                 ctx.strokeStyle = '#000000';

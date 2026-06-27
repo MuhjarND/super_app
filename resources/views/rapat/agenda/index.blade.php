@@ -8,18 +8,16 @@
         .agenda-table thead th { font-size: 0.72rem; text-transform: uppercase; color: #64748b; border-top: none; }
         .agenda-table tbody td { vertical-align: top; font-size: 0.85rem; }
         .agenda-preview { white-space: pre-line; font-size: 0.8rem; color: #334155; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 12px; }
-        .agenda-action-cell { min-width: 260px; }
-        .meeting-action-panel { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
-        .agenda-action-cell .meeting-action-panel { gap: 8px; }
+        .agenda-action-cell { width: 196px; vertical-align: middle !important; }
+        .agenda-action-cell .app-action-group { flex-wrap: nowrap; justify-content: flex-end; }
         .agenda-action-cell form { margin: 0; }
-        .meeting-action-btn { display: inline-flex; align-items: center; gap: 8px; border-radius: 10px; padding: 7px 12px; font-size: 0.82rem; font-weight: 700; border: 1px solid transparent; background: #fff; color: #1f2937; }
-        .agenda-action-cell .meeting-action-btn { padding: 6px 10px; white-space: nowrap; }
-        .meeting-action-btn.secondary { background: #f8fafc; color: #475569; border-color: #cbd5e1; }
-        .meeting-action-btn.success { background: #ecfdf5; color: #047857; border-color: #a7f3d0; }
-        .meeting-action-btn.primary { background: #eef2ff; color: #4338ca; border-color: #c7d2fe; }
-        .meeting-action-btn.danger { background: #fef2f2; color: #dc2626; border-color: #fecaca; }
         .agenda-source-badge { display: inline-flex; align-items: center; gap: 5px; border-radius: 999px; padding: 3px 8px; background: #ecfdf5; color: #047857; font-size: 0.68rem; font-weight: 800; margin-top: 6px; }
         .agenda-source-link { color: #2563eb; font-size: 0.76rem; font-weight: 700; }
+
+        @media (max-width: 767.98px) {
+            .agenda-action-cell { width: auto; }
+            .agenda-action-cell .app-action-group { flex-wrap: wrap; justify-content: flex-start; }
+        }
     </style>
 @endpush
 
@@ -57,7 +55,7 @@
                         <th>Peserta Kegiatan</th>
                         <th>Penerima</th>
                         <th>Lampiran</th>
-                        <th>Aksi</th>
+                        <th class="text-right">Aksi</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -111,29 +109,29 @@
                                     <span class="text-muted">-</span>
                                 @endif
                             </td>
-                            <td class="agenda-action-cell">
-                                <div class="meeting-action-panel">
-                                    <button type="button" class="meeting-action-btn secondary" onclick="previewWhatsapp({{ $agenda->id }})">
-                                        <i class="fas fa-comment-dots"></i> Preview WA
+                            <td class="app-action-cell agenda-action-cell" data-label="Aksi">
+                                <div class="app-action-group">
+                                    <button type="button" class="app-icon-btn preview" data-mobile-label="Preview WA" title="Preview WhatsApp" onclick="previewWhatsapp({{ $agenda->id }})">
+                                        <i class="fas fa-comment-dots"></i>
                                     </button>
                                     <form action="{{ route('rapat.agenda.send-whatsapp', $agenda) }}" method="POST" class="d-inline">
                                         @csrf
-                                        <button type="submit" class="meeting-action-btn success" onclick="return confirm('Kirim notifikasi WhatsApp agenda ini sekarang?')">
-                                            <i class="fas fa-paper-plane"></i> Kirim WA
+                                        <button type="submit" class="app-icon-btn send" data-mobile-label="Kirim WA" title="Kirim WhatsApp" onclick="return confirm('Kirim notifikasi WhatsApp agenda ini sekarang?')">
+                                            <i class="fas fa-paper-plane"></i>
                                         </button>
                                     </form>
-                                    <button type="button" class="meeting-action-btn primary" onclick="openParticipantsAgenda({{ $agenda->id }})">
-                                        <i class="fas fa-user-plus"></i> Atur Peserta
+                                    <button type="button" class="app-icon-btn process" data-mobile-label="Peserta" title="Atur peserta" onclick="openParticipantsAgenda({{ $agenda->id }})">
+                                        <i class="fas fa-user-plus"></i>
                                     </button>
                                     @if($canManageAgendaDetails)
-                                        <button type="button" class="meeting-action-btn secondary" onclick="openEditAgenda({{ $agenda->id }})">
-                                            <i class="fas fa-pen"></i> Edit Detail
+                                        <button type="button" class="app-icon-btn edit" data-mobile-label="Edit" title="Edit detail" onclick="openEditAgenda({{ $agenda->id }})">
+                                            <i class="fas fa-pen"></i>
                                         </button>
                                         <form action="{{ route('rapat.agenda.destroy', $agenda) }}" method="POST" class="d-inline">
                                             @csrf
                                             @method('DELETE')
-                                            <button type="submit" class="meeting-action-btn danger" onclick="return confirm('Hapus agenda pimpinan ini?')">
-                                                <i class="fas fa-trash"></i> Hapus
+                                            <button type="submit" class="app-icon-btn delete" data-mobile-label="Hapus" title="Hapus agenda" onclick="return confirm('Hapus agenda pimpinan ini?')">
+                                                <i class="fas fa-trash"></i>
                                             </button>
                                         </form>
                                     @endif

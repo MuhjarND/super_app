@@ -8,6 +8,8 @@
     $tanggalSurat = !empty($fieldValues['tanggal_surat']) ? Carbon::parse($fieldValues['tanggal_surat'])->translatedFormat('d F Y') : Carbon::now()->translatedFormat('d F Y');
     $tanggalMulai = !empty($fieldValues['tanggal_mulai']) ? Carbon::parse($fieldValues['tanggal_mulai'])->translatedFormat('d F Y') : '-';
     $tanggalSelesai = !empty($fieldValues['tanggal_selesai']) ? Carbon::parse($fieldValues['tanggal_selesai'])->translatedFormat('d F Y') : '-';
+    $lokasi = trim((string) ($fieldValues['lokasi'] ?? '')) ?: '-';
+    $tanggalTugas = $tanggalMulai === $tanggalSelesai ? $tanggalMulai : $tanggalMulai . ' s/d ' . $tanggalSelesai;
 @endphp
 
 <style>
@@ -19,8 +21,8 @@
     .st-row { width:100%; margin-bottom:12px; }
     .st-row table { width:100%; border-collapse:collapse; }
     .st-row td { padding:0; vertical-align:top; }
-    .st-label { width:120px; font-weight:700; white-space:nowrap; }
-    .st-sep { width:14px; text-align:center; }
+    .st-label { width:138px; font-weight:700; white-space:nowrap; padding-right:22px !important; }
+    .st-sep { width:24px; text-align:center; padding:0 10px !important; }
     .st-content { text-align:justify; }
     .st-indent { display:block; padding-left:20px; text-indent:-20px; }
     .st-section-head { text-align:center; font-weight:700; margin:18px 0 8px; }
@@ -77,7 +79,7 @@
             @forelse($petugasRows as $index => $row)
                 <tr>
                     <td>{{ $index + 1 }}.</td>
-                    <td>{{ $row['nama'] }}</td>
+                    <td><strong>{{ $row['nama'] }}</strong></td>
                     <td>{{ $row['nip'] }}</td>
                     <td>{{ $row['pangkat'] }}</td>
                     <td>{{ $row['jabatan'] }}</td>
@@ -94,7 +96,7 @@
                 <td class="st-label">Untuk</td>
                 <td class="st-sep">:</td>
                 <td class="st-content">
-                    {{ $fieldValues['untuk_tugas'] ?? '-' }}, pada tanggal {{ $tanggalMulai }} s/d {{ $tanggalSelesai }}.
+                    Melaksanakan {{ $fieldValues['dalam_rangka'] ?? '-' }}, pada tanggal {{ $tanggalTugas }}, di {{ $lokasi }}.
                 </td>
             </tr>
         </table>

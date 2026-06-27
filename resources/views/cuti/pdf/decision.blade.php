@@ -175,7 +175,12 @@ body { margin: 0; }
     <table class="section-table">
         <tr class="section-head"><td colspan="3">VI. &nbsp; ALAMAT SELAMA MENJALANKAN CUTI</td></tr>
         <tr>
-            <td width="59%" rowspan="2" class="address-cell">{{ $leaveRequest->leave_address ?: '-' }}</td>
+            <td width="59%" rowspan="2" class="address-cell">
+                {{ $leaveRequest->leave_address ?: '-' }}
+                @if($leaveRequest->is_abroad)
+                    <br>Negara tujuan: {{ $leaveRequest->abroad_country ?: '-' }}
+                @endif
+            </td>
             <td width="7%">Telp.</td>
             <td width="34%">{{ $contactPhone ?: '-' }}</td>
         </tr>
@@ -201,8 +206,8 @@ body { margin: 0; }
         </tr>
         <tr>
             <td class="decision-mark">{!! $statusAtasan === 'approved' ? $checkMark : '' !!}</td>
-            <td class="decision-mark"></td>
-            <td class="decision-mark"></td>
+            <td class="decision-mark">{!! $statusAtasan === 'changed' ? $checkMark : '' !!}</td>
+            <td class="decision-mark">{!! $statusAtasan === 'deferred' ? $checkMark : '' !!}</td>
             <td class="decision-mark">{!! $statusAtasan === 'rejected' ? $checkMark : '' !!}</td>
         </tr>
         <tr>
@@ -228,8 +233,8 @@ body { margin: 0; }
         </tr>
         <tr>
             <td class="decision-mark">{!! $statusPpk === 'approved' ? $checkMark : '' !!}</td>
-            <td class="decision-mark"></td>
-            <td class="decision-mark"></td>
+            <td class="decision-mark">{!! $statusPpk === 'changed' ? $checkMark : '' !!}</td>
+            <td class="decision-mark">{!! $statusPpk === 'deferred' ? $checkMark : '' !!}</td>
             <td class="decision-mark">{!! $statusPpk === 'rejected' ? $checkMark : '' !!}</td>
         </tr>
         <tr>

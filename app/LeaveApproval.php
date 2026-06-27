@@ -19,6 +19,7 @@ class LeaveApproval extends Model
             'atasan_lanjutan' => 'Atasan dari Atasan Langsung',
             'verifikator_dokumen' => 'Verifikator Dokumen',
             'ppk' => 'PPK / Pejabat Berwenang',
+            'sekretaris_ma' => 'Sekretaris Mahkamah Agung RI',
         ];
 
         return $map[$this->role_name] ?? ucfirst(str_replace('_', ' ', (string) $this->role_name));
@@ -31,6 +32,8 @@ class LeaveApproval extends Model
             'pending' => 'Pending',
             'approved' => 'Disetujui',
             'rejected' => 'Ditolak',
+            'changed' => 'Perubahan',
+            'deferred' => 'Ditangguhkan',
         ];
 
         return $map[$this->status] ?? ucfirst((string) $this->status);
@@ -43,6 +46,8 @@ class LeaveApproval extends Model
             'pending' => ['warning', 'Pending'],
             'approved' => ['success', 'Disetujui'],
             'rejected' => ['danger', 'Ditolak'],
+            'changed' => ['info', 'Perubahan'],
+            'deferred' => ['warning', 'Ditangguhkan'],
         ];
 
         $status = $map[$this->status] ?? ['secondary', ucfirst((string) $this->status)];

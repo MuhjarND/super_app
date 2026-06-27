@@ -103,7 +103,7 @@ class MobileModuleMenuController extends Controller
                 'items' => ($isSuperAdmin || $user->canAccessLeaveModule()) ? array_values(array_filter([
                     $this->item('Pengajuan', route('cuti.index'), 'fas fa-calendar-alt', 'red'),
                     ($isSuperAdmin || $user->canAccessLeaveApproval()) ? $this->item('Approval', route('cuti.approval.index'), 'fas fa-user-check', 'teal') : null,
-                    $this->item('Rekap Saldo', route('cuti.balances.index'), 'fas fa-wallet', 'blue'),
+                    ($isSuperAdmin || $user->canAccessLeaveBalanceReport()) ? $this->item('Rekap Saldo', route('cuti.balances.index'), 'fas fa-wallet', 'blue') : null,
                     $this->item('Laporan', route('cuti.reports.index'), 'far fa-chart-bar', 'orange'),
                     ($isSuperAdmin || $user->canManageLeaveMasterData()) ? $this->item('Jenis Cuti', route('cuti.master.types.index'), 'far fa-list-alt', 'indigo') : null,
                     ($isSuperAdmin || $user->canManageLeaveMasterData()) ? $this->item('Kebijakan', route('cuti.master.policies.index'), 'fas fa-sliders-h', 'slate') : null,

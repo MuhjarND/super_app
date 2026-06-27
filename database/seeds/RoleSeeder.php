@@ -29,6 +29,7 @@ class RoleSeeder extends Seeder
             ['name' => 'admin_kepegawaian', 'display_name' => 'Admin Kepegawaian'],
             ['name' => 'verifikator_dokumen', 'display_name' => 'Verifikator Dokumen'],
             ['name' => 'ppk', 'display_name' => 'PPK'],
+            ['name' => 'sekretaris_ma', 'display_name' => 'Sekretaris Mahkamah Agung RI'],
             ['name' => 'operator_persediaan', 'display_name' => 'Operator Persediaan'],
         ];
 

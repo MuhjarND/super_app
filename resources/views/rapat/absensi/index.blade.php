@@ -48,39 +48,15 @@
             font-size: 0.85rem;
         }
 
-        .meeting-action-toggle-col { width: 46px; }
-        .meeting-action-toggle {
-            width: 28px;
-            height: 28px;
-            border: none;
-            border-radius: 8px;
-            background: linear-gradient(135deg, #4f46e5, #6366f1);
-            color: #fff;
-            font-size: 1rem;
-            font-weight: 700;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
+        .attendance-action-cell {
+            width: 132px;
+            vertical-align: middle !important;
         }
-        .meeting-action-toggle.is-open { background: linear-gradient(135deg, #475569, #64748b); }
-        .meeting-action-row { display: none; }
-        .meeting-action-row td { background: #f8fafc; border-top: 1px solid #e2e8f0; padding: 12px 16px; }
-        .meeting-action-panel { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
-        .meeting-action-meta { color: #64748b; font-size: 0.82rem; margin-right: 10px; }
-        .meeting-action-btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            border-radius: 10px;
-            padding: 7px 12px;
-            font-size: 0.82rem;
-            font-weight: 700;
-            border: 1px solid transparent;
-            background: #fff;
-            color: #1f2937;
+
+        .attendance-action-cell .app-action-group {
+            flex-wrap: nowrap;
+            justify-content: flex-end;
         }
-        .meeting-action-btn.primary { background: #eef2ff; color: #4338ca; border-color: #c7d2fe; }
-        .meeting-action-btn.secondary { background: #f8fafc; color: #475569; border-color: #cbd5e1; }
 
         .attendance-progress {
             margin-top: 6px;
@@ -152,13 +128,13 @@
                 <table class="table table-hover mb-0 attendance-table">
                     <thead>
                         <tr>
-                            <th class="meeting-action-toggle-col"></th>
                             <th>Rapat</th>
                             <th>Waktu WIT</th>
                             <th>Peserta</th>
                             <th>Hadir</th>
                             <th>External</th>
                             <th>Status</th>
+                            <th class="text-right">Aksi</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -171,9 +147,6 @@
                                 $attendancePercent = $participantCount > 0 ? round(($attendedCount / $participantCount) * 100) : 0;
                             @endphp
                             <tr>
-                                <td class="meeting-action-toggle-col">
-                                    <button type="button" class="meeting-action-toggle" aria-label="Toggle aksi">+</button>
-                                </td>
                                 <td>
                                     <div style="font-weight: 700; color: #0f172a;">{{ $rapat->judul }}</div>
                                     <div style="font-size: 0.78rem; color: #64748b;">{{ $rapat->nomor_undangan }}</div>
@@ -197,19 +170,16 @@
                                 </td>
                                 <td>{{ $guestCount }}</td>
                                 <td>{!! $rapat->status_badge !!}</td>
-                            </tr>
-                            <tr class="meeting-action-row">
-                                <td colspan="7">
-                                    <div class="meeting-action-panel">
-                                        <span class="meeting-action-meta">Tindakan absensi</span>
-                                        <a href="{{ route('rapat.absensi.show', $rapat) }}" class="meeting-action-btn primary">
-                                            <i class="fas fa-clipboard-list"></i> Rekap
+                                <td class="app-action-cell attendance-action-cell" data-label="Aksi">
+                                    <div class="app-action-group">
+                                        <a href="{{ route('rapat.absensi.show', $rapat) }}" class="app-icon-btn detail" data-mobile-label="Rekap" title="Rekap absensi">
+                                            <i class="fas fa-clipboard-list"></i>
                                         </a>
-                                        <a href="{{ route('rapat.absensi.pdf', $rapat) }}" target="_blank" class="meeting-action-btn secondary">
-                                            <i class="fas fa-file-pdf"></i> PDF
+                                        <a href="{{ route('rapat.absensi.pdf', $rapat) }}" target="_blank" class="app-icon-btn pdf" data-mobile-label="PDF" title="Unduh PDF">
+                                            <i class="fas fa-file-pdf"></i>
                                         </a>
-                                        <button type="button" class="meeting-action-btn secondary" onclick="copyPublicLink('{{ route('rapat.absensi.public.show', $rapat->public_code) }}')">
-                                            <i class="fas fa-link"></i> Link Publik
+                                        <button type="button" class="app-icon-btn link" data-mobile-label="Link" title="Salin link publik" onclick="copyPublicLink('{{ route('rapat.absensi.public.show', $rapat->public_code) }}')">
+                                            <i class="fas fa-link"></i>
                                         </button>
                                     </div>
                                 </td>
@@ -236,20 +206,5 @@
             });
         }
 
-        $(function () {
-            $(document).on('click', '.meeting-action-toggle', function () {
-                const $button = $(this);
-                const $actionRow = $button.closest('tr').next('.meeting-action-row');
-                const isOpen = $actionRow.is(':visible');
-
-                $('.meeting-action-row').hide();
-                $('.meeting-action-toggle').removeClass('is-open').text('+');
-
-                if (!isOpen) {
-                    $actionRow.show();
-                    $button.addClass('is-open').text('-');
-                }
-            });
-        });
     </script>
 @endpush

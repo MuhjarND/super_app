@@ -74,7 +74,7 @@ class SuratMasukController extends Controller
         $request->validate([
             'nomor_surat' => 'required|string|max:255',
             'opsi_pengirim' => 'required|in:mahkamah_agung,non_mahkamah_agung',
-            'klasifikasi_kode_id' => 'nullable|exists:klasifikasi_kodes,id',
+            'klasifikasi_kode_id' => 'required_if:opsi_pengirim,mahkamah_agung|nullable|exists:klasifikasi_kodes,id',
             'kategori_surat_id' => 'nullable|exists:kategori_surats,id',
             'pengirim' => 'required|string|max:255',
             'perihal' => 'required|string',
@@ -249,7 +249,7 @@ class SuratMasukController extends Controller
         $request->validate([
             'nomor_surat' => 'required|string|max:255',
             'opsi_pengirim' => 'required|in:mahkamah_agung,non_mahkamah_agung',
-            'klasifikasi_kode_id' => 'nullable|exists:klasifikasi_kodes,id',
+            'klasifikasi_kode_id' => 'required_if:opsi_pengirim,mahkamah_agung|nullable|exists:klasifikasi_kodes,id',
             'kategori_surat_id' => 'nullable|exists:kategori_surats,id',
             'pengirim' => 'required|string|max:255',
             'perihal' => 'required|string',
@@ -335,13 +335,9 @@ class SuratMasukController extends Controller
         $kategori = $kategoriId ? KategoriSurat::find($kategoriId) : null;
 
         if ($opsiPengirim !== 'mahkamah_agung') {
-            if (!$kategori && $klasifikasi) {
-                $kategori = $this->findKategoriByKode($klasifikasi->kode);
-            }
-
             return [
                 'klasifikasi_kode_id' => null,
-                'kategori_surat_id' => optional($kategori)->id,
+                'kategori_surat_id' => null,
             ];
         }
 

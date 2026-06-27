@@ -57,6 +57,20 @@
                         <input type="text" name="leave_address" class="form-control" value="{{ !$isEdit ? old('leave_address') : '' }}" required>
                     </div>
 
+                    <div class="form-row">
+                        <div class="form-group col-md-4">
+                            <div class="form-check mt-md-4 pt-md-2">
+                                <input type="checkbox" name="is_abroad" value="1" class="form-check-input" id="{{ $modalId }}IsAbroad" {{ !$isEdit && old('is_abroad') ? 'checked' : '' }} data-leave-abroad-toggle>
+                                <label class="form-check-label" for="{{ $modalId }}IsAbroad">Cuti dijalankan di luar negeri</label>
+                            </div>
+                        </div>
+                        <div class="form-group col-md-8" data-leave-abroad-country>
+                            <label>Negara Tujuan</label>
+                            <input type="text" name="abroad_country" class="form-control" value="{{ !$isEdit ? old('abroad_country') : '' }}" placeholder="Contoh: Malaysia">
+                            <small class="text-muted">Sesuai SE Sekma, cuti luar negeri diajukan paling lambat 1 bulan sebelum pelaksanaan.</small>
+                        </div>
+                    </div>
+
                     <div class="form-group mb-0">
                         <label>Dokumen Pendukung</label>
                         <input type="file" name="documents[]" class="form-control-file" multiple>

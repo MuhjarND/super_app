@@ -256,6 +256,59 @@
             color: #dc2626;
         }
 
+        #suratMasukTable tbody tr.surat-needs-disposition {
+            background: #fff7f7;
+        }
+
+        #suratMasukTable tbody tr.surat-needs-disposition td:first-child {
+            border-left: 4px solid #ef4444;
+        }
+
+        #suratMasukTable tbody tr.surat-needs-disposition:hover {
+            background: #fff1f2;
+        }
+
+        .badge-needs-disposition {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            background: #fee2e2;
+            color: #b91c1c;
+            font-size: 0.65rem;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-weight: 800;
+        }
+
+        .surat-preview-toolbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+
+        .surat-preview-toolbar h6 {
+            margin-bottom: 0 !important;
+        }
+
+        .surat-preview-open-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            white-space: nowrap;
+            font-size: 0.76rem;
+            font-weight: 700;
+        }
+
+        .surat-mobile-action-bar {
+            display: none;
+        }
+
+        .surat-mobile-row-toggle {
+            display: none;
+        }
+
         .detail-label {
             color: #9ca3af;
             font-size: 0.8rem;
@@ -468,8 +521,225 @@
             }
 
             .surat-masuk-card .card-body {
-                padding-left: 14px !important;
-                padding-right: 14px !important;
+                padding: 12px !important;
+            }
+
+            .surat-masuk-table-wrap {
+                overflow: visible;
+            }
+
+            #suratMasukTable {
+                min-width: 0 !important;
+                border-spacing: 0 10px !important;
+            }
+
+            #suratMasukTable.table-mobile-stack tbody tr {
+                position: relative;
+                z-index: 1;
+                border: 1px solid #dbe5f3;
+                border-radius: 16px;
+                box-shadow: 0 12px 28px rgba(15, 23, 42, 0.07);
+                overflow: visible;
+                background: #ffffff;
+            }
+
+            #suratMasukTable.table-mobile-stack tbody tr.surat-action-open {
+                z-index: 3000;
+            }
+
+            #suratMasukTable.table-mobile-stack tbody tr.mobile-detail-open {
+                border-color: #c7d2fe;
+                box-shadow: 0 14px 34px rgba(79, 70, 229, 0.12);
+            }
+
+            #suratMasukTable.table-mobile-stack tbody tr.surat-needs-disposition {
+                border-color: #fecaca;
+                background: #fff7f7;
+                box-shadow: 0 12px 28px rgba(220, 38, 38, 0.1);
+            }
+
+            #suratMasukTable.table-mobile-stack tbody tr.surat-needs-disposition td:first-child {
+                border-left: 0;
+            }
+
+            #suratMasukTable.table-mobile-stack tbody tr.surat-needs-disposition td[data-label="No. Surat"] {
+                background: linear-gradient(180deg, #fff7f7, #ffffff);
+            }
+
+            #suratMasukTable.table-mobile-stack tbody td {
+                padding: 10px 12px !important;
+                border-bottom: 1px solid #eef2f7 !important;
+                min-height: 0;
+                overflow: visible;
+            }
+
+            #suratMasukTable.table-mobile-stack tbody td::before {
+                display: none !important;
+            }
+
+            #suratMasukTable.table-mobile-stack tbody td[data-label="Diinput Pada"],
+            #suratMasukTable.table-mobile-stack tbody td[data-label="Dibuat Oleh"] {
+                display: none !important;
+            }
+
+            #suratMasukTable.table-mobile-stack tbody tr:not(.mobile-detail-open) td.surat-mobile-extra {
+                display: none !important;
+            }
+
+            #suratMasukTable.table-mobile-stack tbody tr.mobile-detail-open td.surat-mobile-extra {
+                display: block !important;
+            }
+
+            #suratMasukTable.table-mobile-stack tbody tr.mobile-detail-open td.surat-mobile-extra::before {
+                content: attr(data-label);
+                display: block !important;
+                margin-bottom: 4px;
+                color: #64748b;
+                font-size: 0.62rem;
+                font-weight: 900;
+                letter-spacing: 0.04em;
+                line-height: 1.2;
+                text-transform: uppercase;
+            }
+
+            #suratMasukTable.table-mobile-stack tbody td[data-label="No. Surat"] {
+                position: relative;
+                padding-top: 13px !important;
+                padding-right: 58px !important;
+                background: linear-gradient(180deg, #ffffff, #fbfdff);
+            }
+
+            #suratMasukTable.table-mobile-stack tbody td[data-label="No. Surat"] .klasifikasi-prefix {
+                display: block;
+                max-width: 100%;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+                font-size: 0.7rem;
+            }
+
+            #suratMasukTable.table-mobile-stack tbody td[data-label="No. Surat"] .nomor-surat-text {
+                display: block;
+                margin: 2px 0 7px;
+                font-size: 0.95rem;
+                line-height: 1.25;
+            }
+
+            #suratMasukTable.table-mobile-stack tbody td[data-label="Pengirim"] .pengirim-nama {
+                font-size: 0.82rem;
+                line-height: 1.35;
+            }
+
+            #suratMasukTable.table-mobile-stack tbody td[data-label="Perihal / Isi Ringkas"] {
+                font-size: 0.88rem !important;
+                line-height: 1.45;
+                color: #0f172a;
+                font-weight: 650;
+            }
+
+            #suratMasukTable.table-mobile-stack tbody td[data-label="Tanggal Surat"] {
+                display: inline-flex;
+                align-items: center;
+                gap: 7px;
+                width: auto;
+                margin: 10px 0 0 12px;
+                padding: 5px 9px !important;
+                border: 1px solid #e0e7ff !important;
+                border-radius: 999px;
+                background: #eef2ff;
+                color: #4338ca;
+                font-size: 0.72rem !important;
+                font-weight: 800;
+            }
+
+            #suratMasukTable.table-mobile-stack tbody td[data-label="Tanggal Surat"]::after {
+                content: 'Tanggal surat';
+                order: -1;
+                color: #64748b;
+                font-weight: 700;
+            }
+
+            #suratMasukTable.table-mobile-stack tbody td[data-label="Status"] {
+                padding-top: 8px !important;
+            }
+
+            #suratMasukTable.table-mobile-stack tbody td[data-label="Status"] .status-text {
+                font-size: 0.82rem;
+                font-weight: 800;
+                margin-right: 6px;
+            }
+
+            #suratMasukTable.table-mobile-stack tbody td[data-label="Aksi"] {
+                padding: 10px 12px 12px !important;
+                border-bottom: none !important;
+                background: #f8fafc;
+                position: relative;
+                z-index: 30;
+            }
+
+            #suratMasukTable.table-mobile-stack tbody tr.surat-action-open td[data-label="Aksi"] {
+                z-index: 3001;
+            }
+
+            #suratMasukTable.table-mobile-stack .surat-action-dropdown {
+                display: block !important;
+                position: static;
+            }
+
+            #suratMasukTable.table-mobile-stack .surat-action-dropdown.show {
+                z-index: 3002;
+            }
+
+            .surat-mobile-action-bar {
+                display: none !important;
+            }
+
+            .surat-mobile-row-toggle {
+                position: absolute;
+                top: 12px;
+                right: 12px;
+                width: 36px;
+                height: 36px;
+                border: 0;
+                border-radius: 12px;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                background: linear-gradient(135deg, #4f46e5, #7c3aed);
+                color: #ffffff;
+                font-size: 0.86rem;
+                box-shadow: 0 10px 20px rgba(79, 70, 229, 0.22);
+            }
+
+            #suratMasukTable.table-mobile-stack tbody tr.mobile-detail-open .surat-mobile-row-toggle {
+                background: linear-gradient(135deg, #64748b, #475569);
+            }
+
+            #suratMasukTable.table-mobile-stack tbody tr.mobile-detail-open .surat-mobile-row-toggle i {
+                transform: rotate(45deg);
+            }
+
+            #suratMasukTable.table-mobile-stack .surat-action-dropdown .dropdown-toggle {
+                min-width: 96px;
+                min-height: 38px;
+                justify-content: center;
+            }
+
+            #suratMasukTable.table-mobile-stack .surat-action-menu {
+                width: min(250px, calc(100vw - 40px));
+                max-height: min(70vh, 420px);
+                overflow-y: auto;
+                z-index: 3003;
+            }
+
+            .surat-preview-toolbar {
+                align-items: stretch;
+                flex-direction: column;
+            }
+
+            .surat-preview-open-btn {
+                justify-content: center;
+                width: 100%;
             }
 
             .content-header .row.mb-2 {
@@ -570,8 +840,10 @@
                                 ->where('status', 'pending')
                                 ->sortByDesc('created_at')
                                 ->first();
+                            $needsDisposition = ($surat->status === 'baru' && auth()->user()->canForwardSuratMasuk($surat))
+                                || (bool) $pendingForMe;
                         @endphp
-                        <tr class="main-row" data-surat-id="{{ $surat->id }}" data-creator="{{ optional($surat->creator)->name ?: '-' }}"
+                        <tr class="main-row {{ $needsDisposition ? 'surat-needs-disposition' : '' }}" data-surat-id="{{ $surat->id }}" data-creator="{{ optional($surat->creator)->name ?: '-' }}"
                             data-show-url="{{ route('surat-masuk.show', $surat) }}"
                             data-download-url="{{ route('surat-masuk.download', $surat) }}"
                             data-preview-url="{{ route('surat-masuk.preview', $surat) }}"
@@ -595,6 +867,9 @@
                             data-can-follow-up="{{ auth()->user()->canOpenTindakLanjutSuratMasuk($surat) ? 1 : 0 }}"
                             data-pending-disposisi-id="{{ $pendingForMe ? $pendingForMe->id : '' }}">
                             <td>
+                                <button type="button" class="surat-mobile-row-toggle" aria-label="Lihat detail surat" aria-expanded="false">
+                                    <i class="fas fa-plus"></i>
+                                </button>
                                 @if($surat->klasifikasiKode)
                                     <span class="klasifikasi-prefix">{{ $surat->klasifikasiKode->kode }} -
                                         {{ $surat->klasifikasiKode->nama }}</span><br>
@@ -607,7 +882,7 @@
                                 <span
                                     class="{{ $sifatClass[$surat->sifat] ?? 'badge-sifat-biasa' }}">{{ $sifatLabel[$surat->sifat] ?? $surat->sifat }}</span>
                             </td>
-                            <td>
+                            <td class="surat-mobile-extra">
                                 <span class="{{ $surat->opsi_pengirim == 'mahkamah_agung' ? 'badge-ma' : 'badge-non-ma' }}">
                                     {{ $surat->opsi_pengirim == 'mahkamah_agung' ? 'Mahkamah Agung' : 'Non Mahkamah Agung' }}
                                 </span>
@@ -616,10 +891,15 @@
                             <td style="max-width: 220px;">
                                 {{ Str::limit($surat->perihal, 80) }}
                             </td>
-                            <td>{{ $surat->tanggal_surat->format('Y-m-d') }}</td>
-                            <td>{{ $surat->created_at->format('Y-m-d') }}</td>
-                            <td>{{ optional($surat->creator)->name ?: '-' }}</td>
+                            <td class="surat-mobile-extra">{{ $surat->tanggal_surat->format('Y-m-d') }}</td>
+                            <td class="surat-mobile-extra">{{ $surat->created_at->format('Y-m-d') }}</td>
+                            <td class="surat-mobile-extra">{{ optional($surat->creator)->name ?: '-' }}</td>
                             <td>
+                                @if($needsDisposition)
+                                    <span class="badge-needs-disposition mb-1">
+                                        <i class="fas fa-exclamation-circle"></i> Perlu Disposisi
+                                    </span><br>
+                                @endif
                                 @if($surat->status == 'baru')
                                     <span class="status-text">Baru</span><br>
                                     <span class="badge-new-status">New</span>
@@ -732,7 +1012,7 @@
                             </select>
                         </div>
 
-                        <div class="form-group">
+                        <div class="form-group" id="createKategoriSuratGroup" style="display: none;">
                             <label>Kategori Surat</label>
                             <select class="form-control" name="kategori_surat_id" id="createKategoriSurat">
                                 <option value="">-- Pilih Kategori Surat --</option>
@@ -834,9 +1114,14 @@
                         <!-- File Preview -->
                         <div class="col-lg-7" style="border-right: 1px solid #f3f4f6;">
                             <div style="padding: 16px;">
-                                <h6 style="font-weight: 700; color: #374151; margin-bottom: 12px;">
-                                    <i class="fas fa-file-pdf mr-1 text-danger"></i> Preview Lampiran
-                                </h6>
+                                <div class="surat-preview-toolbar">
+                                    <h6 style="font-weight: 700; color: #374151; margin-bottom: 12px;">
+                                        <i class="fas fa-file-pdf mr-1 text-danger"></i> Preview Lampiran
+                                    </h6>
+                                    <a href="#" id="detailPreviewOpenBtn" target="_blank" rel="noopener" class="btn btn-sm btn-outline-primary surat-preview-open-btn">
+                                        <i class="fas fa-external-link-alt"></i> Buka Surat
+                                    </a>
+                                </div>
                                 <iframe id="detailFileViewer"
                                     style="width: 100%; height: 500px; border: 1px solid #e8eaed; border-radius: 10px; background: #f9fafb;"></iframe>
                             </div>
@@ -951,7 +1236,7 @@
                                 @endforeach
                             </select>
                         </div>
-                        <div class="form-group">
+                        <div class="form-group" id="editKategoriSuratGroup" style="display: none;">
                             <label>Kategori Surat</label>
                             <select class="form-control" name="kategori_surat_id" id="editKategoriSurat">
                                 <option value="">-- Pilih Kategori Surat --</option>
@@ -1023,9 +1308,14 @@
                             <!-- Preview Surat -->
                             <div class="col-lg-6" style="border-right: 1px solid #f3f4f6;">
                                 <div style="padding: 16px;">
-                                    <h6 style="font-weight: 700; color: #374151; margin-bottom: 12px;">
-                                        <i class="fas fa-file-pdf mr-1 text-danger"></i> Preview Surat
-                                    </h6>
+                                    <div class="surat-preview-toolbar">
+                                        <h6 style="font-weight: 700; color: #374151; margin-bottom: 12px;">
+                                            <i class="fas fa-file-pdf mr-1 text-danger"></i> Preview Surat
+                                        </h6>
+                                        <a href="#" id="disposisiPreviewOpenBtn" target="_blank" rel="noopener" class="btn btn-sm btn-outline-primary surat-preview-open-btn">
+                                            <i class="fas fa-external-link-alt"></i> Buka Surat
+                                        </a>
+                                    </div>
                                     <iframe id="disposisiFileViewer"
                                         style="width: 100%; height: 400px; border: 1px solid #e8eaed; border-radius: 10px; background: #f9fafb;"></iframe>
                                 </div>
@@ -1107,9 +1397,14 @@
                         <div class="row no-gutters">
                             <div class="col-lg-6" style="border-right: 1px solid #f3f4f6;">
                                 <div style="padding: 16px;">
-                                    <h6 style="font-weight: 700; color: #374151; margin-bottom: 12px;">
-                                        <i class="fas fa-file-pdf mr-1 text-danger"></i> Preview Surat
-                                    </h6>
+                                    <div class="surat-preview-toolbar">
+                                        <h6 style="font-weight: 700; color: #374151; margin-bottom: 12px;">
+                                            <i class="fas fa-file-pdf mr-1 text-danger"></i> Preview Surat
+                                        </h6>
+                                        <a href="#" id="tindakLanjutPreviewOpenBtn" target="_blank" rel="noopener" class="btn btn-sm btn-outline-primary surat-preview-open-btn">
+                                            <i class="fas fa-external-link-alt"></i> Buka Surat
+                                        </a>
+                                    </div>
                                     <iframe id="tindakLanjutFileViewer"
                                         style="width: 100%; height: 400px; border: 1px solid #e8eaed; border-radius: 10px; background: #f9fafb;"></iframe>
                                 </div>
@@ -1196,6 +1491,27 @@
                 $klasifikasiSelect.val(selected ? (klasifikasiByKode[selected.kode] || '') : '').trigger('change.select2');
             }
 
+            function toggleCreateSuratCategory() {
+                const isMahkamahAgung = $('#opsiPengirim').val() === 'mahkamah_agung';
+                $('#createKategoriSuratGroup').hide();
+                $('#createKategoriSurat').prop('disabled', false);
+
+                if (!isMahkamahAgung) {
+                    $('#createKategoriSurat').val('');
+                }
+            }
+
+            function toggleEditSuratCategory() {
+                const isMahkamahAgung = $('#editOpsiPengirim').val() === 'mahkamah_agung';
+                $('#editKategoriSuratGroup').hide();
+                $('#editKategoriSurat').prop('disabled', false);
+
+                if (!isMahkamahAgung) {
+                    $('#editKategoriSurat').val('');
+                }
+            }
+            window.toggleEditSuratCategory = toggleEditSuratCategory;
+
             $('#disposisiPetunjukGroup').toggle(requiresPetunjuk);
             $('#disposisiPetunjuk').prop('required', requiresPetunjuk);
 
@@ -1251,6 +1567,26 @@
                 ]
             });
 
+            $('#suratMasukTable').on('click', '.surat-mobile-row-toggle', function (event) {
+                event.preventDefault();
+                event.stopPropagation();
+
+                var $button = $(this);
+                var $row = $button.closest('tr');
+                var isOpen = $row.toggleClass('mobile-detail-open').hasClass('mobile-detail-open');
+
+                $button.attr('aria-expanded', isOpen ? 'true' : 'false');
+            });
+
+            $('#suratMasukTable')
+                .on('show.bs.dropdown', '.surat-action-dropdown', function () {
+                    $('#suratMasukTable tbody tr.surat-action-open').removeClass('surat-action-open');
+                    $(this).closest('tr').addClass('surat-action-open');
+                })
+                .on('hidden.bs.dropdown', '.surat-action-dropdown', function () {
+                    $(this).closest('tr').removeClass('surat-action-open');
+                });
+
             // Toggle klasifikasi
             $('#opsiPengirim').on('change', function () {
                 if ($(this).val() === 'mahkamah_agung') {
@@ -1262,7 +1598,9 @@
                     $('#klasifikasiGroup').slideUp();
                     $('#klasifikasiKode').val('').trigger('change');
                 }
+                toggleCreateSuratCategory();
             });
+            toggleCreateSuratCategory();
 
             $('#klasifikasiKode').on('change', function () {
                 syncKategoriFromKlasifikasi($('#klasifikasiKode'), $('#createKategoriSurat'));
@@ -1314,6 +1652,7 @@
                         $('#klasifikasiGroup').hide();
                         $('#createKategoriSurat').val('');
                         $('#klasifikasiKode').val('').trigger('change');
+                        toggleCreateSuratCategory();
                         $('#createAgendaPimpinan').prop('checked', false);
                         toggleCreateAgendaFields();
                         location.reload();
@@ -1374,6 +1713,7 @@
                     $('#editKlasifikasiGroup').slideUp();
                     $('#editKlasifikasi').val('');
                 }
+                toggleEditSuratCategory();
             });
 
             $('#editKlasifikasi').on('change', function () {
@@ -1490,8 +1830,10 @@
 
             if (d.filePath) {
                 $('#detailFileViewer').attr('src', d.previewUrl);
+                $('#detailPreviewOpenBtn').attr('href', d.previewUrl).removeClass('disabled');
             } else {
                 $('#detailFileViewer').attr('src', '');
+                $('#detailPreviewOpenBtn').attr('href', '#').addClass('disabled');
             }
 
             $('#detailModal').modal('show');
@@ -1524,6 +1866,9 @@
                 }
             } else {
                 $('#editKlasifikasiGroup').hide();
+            }
+            if (window.toggleEditSuratCategory) {
+                window.toggleEditSuratCategory();
             }
 
             $('#editModal').modal('show');
@@ -1563,18 +1908,25 @@
             // Load file preview
             if (d.filePath && d.previewUrl) {
                 $('#disposisiFileViewer').attr('src', d.previewUrl);
+                $('#disposisiPreviewOpenBtn').attr('href', d.previewUrl).removeClass('disabled');
             } else {
                 $('#disposisiFileViewer').attr('src', '');
+                $('#disposisiPreviewOpenBtn').attr('href', '#').addClass('disabled');
             }
             window.renderSuratHistory(String(suratId), '#disposisiHistory');
 
             // Load targets via API
-            $.get('{{ route("api.disposisi.targets") }}', function (res) {
+            $.get('{{ route("api.disposisi.targets") }}', {
+                surat_masuk_id: suratId,
+                tipe: $('#disposisiTipe').val()
+            }, function (res) {
                 var options = '<option value="">-- Pilih Tujuan --</option>';
                 if (res && res.length) {
                     res.forEach(function (item) {
                         options += '<option value="' + item.id + '">' + item.name + ' (' + (item.jabatan || '-') + ')</option>';
                     });
+                } else {
+                    options = '<option value="">Tidak ada pegawai tujuan untuk akun ini</option>';
                 }
                 $('#disposisiTarget').html(options);
             }).fail(function () {
@@ -1599,8 +1951,10 @@
 
             if (d.filePath && d.previewUrl) {
                 $('#tindakLanjutFileViewer').attr('src', d.previewUrl);
+                $('#tindakLanjutPreviewOpenBtn').attr('href', d.previewUrl).removeClass('disabled');
             } else {
                 $('#tindakLanjutFileViewer').attr('src', '');
+                $('#tindakLanjutPreviewOpenBtn').attr('href', '#').addClass('disabled');
             }
 
             $('#tindakLanjutModal').modal('show');

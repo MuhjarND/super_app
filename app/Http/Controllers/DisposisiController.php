@@ -48,10 +48,10 @@ class DisposisiController extends Controller
             ], 403);
         }
 
-        $kepadaUser = User::find($request->kepada_user_id);
-        $targetIds = $user->jabatan ? $user->jabatan->getTargetDisposisi() : [];
+        $kepadaUser = User::with('jabatan')->find($request->kepada_user_id);
+        $targetIds = $this->targetJabatanIdsFor($user);
 
-        if (!$kepadaUser || !$kepadaUser->jabatan_id || !in_array($kepadaUser->jabatan_id, $targetIds)) {
+        if (!$kepadaUser || !$kepadaUser->jabatan_id || (!$user->isSuperAdmin() && !in_array($kepadaUser->jabatan_id, $targetIds))) {
             return response()->json([
                 'success' => false,
                 'message' => 'Tujuan disposisi tidak valid untuk jabatan Anda.',
@@ -220,33 +220,60 @@ class DisposisiController extends Controller
         ]);
     }
 
-    public function getTargets()
+    public function getTargets(Request $request)
     {
         $user = auth()->user();
         $targets = [];
 
-        if ($user->jabatan) {
-            $targetIds = $user->jabatan->getTargetDisposisi();
-            if (empty($targetIds)) {
-                return response()->json([]);
-            }
-            $targetJabatans = Jabatan::whereIn('id', $targetIds)->with('users')->get();
+        $targetIds = $this->targetJabatanIdsFor($user);
+        if (empty($targetIds)) {
+            return response()->json([]);
+        }
 
-            foreach ($targetJabatans as $jabatan) {
-                foreach ($jabatan->users as $u) {
-                    $targets[] = [
-                        'id' => $u->id,
-                        'name' => $u->name,
-                        'user_id' => $u->id,
-                        'user_name' => $u->name,
-                        'jabatan' => $jabatan->nama,
-                        'jabatan_kode' => $jabatan->kode,
-                        'is_naikan' => in_array($jabatan->kode, ['KPTA', 'WKPTA']),
-                    ];
-                }
+        $targetJabatans = Jabatan::whereIn('id', $targetIds)
+            ->with(['users' => function ($query) use ($user) {
+                $query->where('id', '!=', $user->id)->orderBy('name');
+            }])
+            ->orderBy('level')
+            ->orderBy('nama')
+            ->get();
+
+        foreach ($targetJabatans as $jabatan) {
+            foreach ($jabatan->users as $u) {
+                $targets[] = [
+                    'id' => $u->id,
+                    'name' => $u->name,
+                    'user_id' => $u->id,
+                    'user_name' => $u->name,
+                    'jabatan' => $jabatan->nama,
+                    'jabatan_kode' => $jabatan->kode,
+                    'is_naikan' => in_array($jabatan->kode, ['KPTA', 'WKPTA']),
+                ];
             }
         }
 
         return response()->json($targets);
+    }
+
+    protected function targetJabatanIdsFor(User $user)
+    {
+        if ($user->isSuperAdmin()) {
+            return Jabatan::whereIn('kode', [
+                'KPTA',
+                'WKPTA',
+                'SEK',
+                'PAN',
+                'KABAG_KEPEG',
+                'KABAG_UMUM',
+                'KASUBAG_KEPEG',
+                'KASUBAG_RENPRO',
+                'KASUBAG_LAPKEU',
+                'KASUBAG_TURT',
+                'PANMUD_BANDING',
+                'PANMUD_HUKUM',
+            ])->pluck('id')->toArray();
+        }
+
+        return $user->jabatan ? $user->jabatan->getTargetDisposisi() : [];
     }
 }
