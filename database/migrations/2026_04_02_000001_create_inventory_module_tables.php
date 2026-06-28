@@ -113,10 +113,11 @@ class CreateInventoryModuleTables extends Migration
                 $table->timestamps();
 
                 $table->foreign('inventory_item_id')->references('id')->on('inventory_items')->onDelete('cascade');
-                $table->foreign('inventory_item_detail_id')->references('id')->on('inventory_item_details')->onDelete('set null');
+                $table->foreign('inventory_item_detail_id', 'inventory_maintenance_item_detail_fk')
+                    ->references('id')->on('inventory_item_details')->onDelete('set null');
                 $table->foreign('created_by')->references('id')->on('users')->onDelete('set null');
                 $table->foreign('updated_by')->references('id')->on('users')->onDelete('set null');
-                $table->index(['transaction_date', 'inventory_item_id']);
+                $table->index(['transaction_date', 'inventory_item_id'], 'inventory_maintenance_date_item_idx');
             });
         }
 
