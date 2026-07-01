@@ -34,7 +34,7 @@ class LeaveApprovalService
         $steps = [];
         $leaveRequest->loadMissing(['user.atasanLangsung.atasanLangsung', 'user.unit', 'user.roles']);
 
-        $verifikator = User::whereHas('roles', function ($q) {
+        $verifikator = User::active()->whereHas('roles', function ($q) {
             $q->where('name', 'verifikator_dokumen');
         })->orderBy('id')->first();
 
@@ -55,7 +55,7 @@ class LeaveApprovalService
             ];
         }
 
-        $chairman = User::whereHas('roles', function ($q) {
+        $chairman = User::active()->whereHas('roles', function ($q) {
             $q->where('name', 'ketua');
         })->orderBy('id')->first();
         $sekma = $leaveRequest->is_abroad ? $this->firstRoleUser(['sekretaris_ma', 'sekretaris_mahkamah_agung']) : null;
@@ -328,7 +328,8 @@ class LeaveApprovalService
             }
         }
 
-        $supervisor = User::where('id', '<>', $user->id)
+        $supervisor = User::active()
+            ->where('id', '<>', $user->id)
             ->whereHas('roles', function ($query) {
                 $query->whereIn('name', ['atasan_langsung', 'sekretaris', 'panitera', 'wakil_ketua', 'ketua']);
             })
@@ -345,7 +346,8 @@ class LeaveApprovalService
 
     protected function firstRoleUser(array $roles, $excludeUserId = null)
     {
-        return User::whereHas('roles', function ($query) use ($roles) {
+        return User::active()
+            ->whereHas('roles', function ($query) use ($roles) {
                 $query->whereIn('name', $roles);
             })
             ->when($excludeUserId, function ($query) use ($excludeUserId) {

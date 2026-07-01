@@ -406,12 +406,12 @@
                 <form method="POST" action="{{ route('login') }}">
                     @csrf
                     <div class="form-group">
-                        <label for="login">NIP</label>
+                        <label for="login">Email atau NIP</label>
                         <div class="input-group">
                             <div class="input-icon">
-                                <i class="fas fa-id-card"></i>
+                                <i class="fas fa-user"></i>
                             </div>
-                            <input id="login" type="text" inputmode="numeric" autocomplete="username" class="form-control" name="login" value="{{ old('login') }}" placeholder="Masukkan NIP Anda" required autofocus>
+                            <input id="login" type="text" inputmode="email" autocomplete="username" class="form-control" name="login" value="{{ old('login') }}" placeholder="Masukkan email atau NIP Anda" required autofocus>
                         </div>
                         @error('login')
                             <div class="error-msg">{{ $message }}</div>

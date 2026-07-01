@@ -12,6 +12,7 @@ use Barryvdh\DomPDF\Facade as PDF;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Validation\Rule;
 
 class LeaveReportController extends Controller
 {
@@ -40,7 +41,7 @@ class LeaveReportController extends Controller
 
         $currentYear = (int) now()->year;
         $validated = $request->validate([
-            'user_id' => 'required|integer|exists:users,id',
+            'user_id' => ['required', 'integer', Rule::exists('users', 'id')->where('status_aktif_pegawai', true)],
             'year' => 'required|integer|min:2000|max:' . $currentYear,
             'carry_forward_previous_year' => 'required|integer|min:0|max:6',
             'carry_forward_two_years_ago' => 'required|integer|min:0|max:6',
@@ -282,6 +283,7 @@ class LeaveReportController extends Controller
     protected function balanceUsersQuery()
     {
         return User::with(['unit', 'roles'])
+            ->active()
             ->whereHas('roles', function ($builder) {
                 $builder->whereIn('name', [
                     'pegawai',

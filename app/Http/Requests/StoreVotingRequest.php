@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class StoreVotingRequest extends FormRequest
 {
@@ -19,12 +20,12 @@ class StoreVotingRequest extends FormRequest
             'status' => ['required', 'in:draft,aktif,selesai'],
             'select_all_participants' => ['nullable', 'boolean'],
             'participant_ids' => ['nullable', 'array'],
-            'participant_ids.*' => ['exists:users,id'],
+            'participant_ids.*' => [Rule::exists('users', 'id')->where('status_aktif_pegawai', true)],
             'items' => ['required', 'array', 'min:1'],
             'items.*.judul' => ['required', 'string', 'max:255'],
             'items.*.deskripsi' => ['nullable', 'string'],
             'items.*.candidate_ids' => ['required', 'array', 'min:2'],
-            'items.*.candidate_ids.*' => ['distinct', 'exists:users,id'],
+            'items.*.candidate_ids.*' => ['distinct', Rule::exists('users', 'id')->where('status_aktif_pegawai', true)],
         ];
     }
 

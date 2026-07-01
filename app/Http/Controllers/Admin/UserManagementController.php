@@ -61,7 +61,7 @@ class UserManagementController extends Controller
         $jabatans = Jabatan::with('unit')->orderBy('nama')->get();
         $units = Unit::orderBy('nama')->get();
         $bidangs = Bidang::orderBy('nama')->get();
-        $supervisorOptions = User::with('jabatan')->ordered()->get(['id', 'name', 'nip', 'jabatan_id', 'hirarki']);
+        $supervisorOptions = User::with('jabatan')->active()->ordered()->get(['id', 'name', 'nip', 'jabatan_id', 'hirarki']);
         $filters = $request->only(['search', 'role_id', 'jabatan_id', 'unit_id', 'bidang_id']);
 
         return view('admin.users.index', compact('users', 'roles', 'jabatans', 'units', 'bidangs', 'supervisorOptions', 'filters'));
@@ -167,6 +167,22 @@ class UserManagementController extends Controller
         );
     }
 
+    public function toggleStatus(User $user)
+    {
+        if ((int) auth()->id() === (int) $user->id) {
+            return redirect()->route('admin.users.index')->with('error', 'Akun yang sedang dipakai tidak bisa dinonaktifkan.');
+        }
+
+        $user->update([
+            'status_aktif_pegawai' => ! $user->status_aktif_pegawai,
+        ]);
+
+        return redirect()->route('admin.users.index')->with(
+            'success',
+            $user->status_aktif_pegawai ? 'User berhasil diaktifkan.' : 'User berhasil dinonaktifkan.'
+        );
+    }
+
     protected function validateRequest(Request $request, $userId = null)
     {
         $passwordRules = $userId
@@ -186,8 +202,8 @@ class UserManagementController extends Controller
             'hirarki' => ['nullable', 'integer', 'min:1'],
             'nip' => ['nullable', 'string', 'max:50'],
             'no_hp' => ['nullable', 'string', 'max:50'],
-            'atasan_langsung_id' => array_filter(['nullable', 'exists:users,id', $userId ? Rule::notIn([$userId]) : null]),
-            'pejabat_berwenang_id' => array_filter(['nullable', 'exists:users,id', $userId ? Rule::notIn([$userId]) : null]),
+            'atasan_langsung_id' => array_filter(['nullable', Rule::exists('users', 'id')->where('status_aktif_pegawai', true), $userId ? Rule::notIn([$userId]) : null]),
+            'pejabat_berwenang_id' => array_filter(['nullable', Rule::exists('users', 'id')->where('status_aktif_pegawai', true), $userId ? Rule::notIn([$userId]) : null]),
         ]);
     }
 
@@ -197,7 +213,7 @@ class UserManagementController extends Controller
         $data['jabatans'] = Jabatan::with('unit')->orderBy('nama')->get();
         $data['units'] = Unit::orderBy('nama')->get();
         $data['bidangs'] = Bidang::orderBy('nama')->get();
-        $data['supervisorOptions'] = User::with('jabatan')->ordered()->get(['id', 'name', 'nip', 'jabatan_id', 'hirarki']);
+        $data['supervisorOptions'] = User::with('jabatan')->active()->ordered()->get(['id', 'name', 'nip', 'jabatan_id', 'hirarki']);
 
         return $data;
     }

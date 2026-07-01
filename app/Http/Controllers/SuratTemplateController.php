@@ -20,6 +20,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 
 class SuratTemplateController extends Controller
@@ -97,8 +98,8 @@ class SuratTemplateController extends Controller
             'proposalModuleReady' => $proposalModuleReady,
             'canManageTemplates' => $this->canManage(),
             'canSubmitProposal' => auth()->user()->canSubmitSuratTemplateProposal(),
-            'templateUsers' => User::with('jabatan')->ordered()->get(),
-            'templateSignerUsers' => User::with('jabatan')->whereHas('roles', function ($query) {
+            'templateUsers' => User::with('jabatan')->active()->ordered()->get(),
+            'templateSignerUsers' => User::with('jabatan')->active()->whereHas('roles', function ($query) {
                 $query->where('name', 'approval');
             })->ordered()->get(),
         ]);
@@ -379,9 +380,9 @@ class SuratTemplateController extends Controller
                 $rules['fields.' . $name] = $baseRule . '|date';
             } elseif ($type === 'user_multi') {
                 $rules['fields.' . $name] = $baseRule . '|array|min:1';
-                $rules['fields.' . $name . '.*'] = 'exists:users,id';
+                $rules['fields.' . $name . '.*'] = Rule::exists('users', 'id')->where('status_aktif_pegawai', true);
             } elseif ($type === 'user_select') {
-                $rules['fields.' . $name] = $baseRule . '|exists:users,id';
+                $rules['fields.' . $name] = [$baseRule, Rule::exists('users', 'id')->where('status_aktif_pegawai', true)];
             } else {
                 $rules['fields.' . $name] = $baseRule . '|string|max:5000';
             }
@@ -393,7 +394,7 @@ class SuratTemplateController extends Controller
         if (!empty($fields['penanda_tangan_id'])) {
             $validSigner = User::whereHas('roles', function ($query) {
                 $query->where('name', 'approval');
-            })->where('id', $fields['penanda_tangan_id'])->exists();
+            })->active()->where('id', $fields['penanda_tangan_id'])->exists();
 
             if (!$validSigner) {
                 throw ValidationException::withMessages([
@@ -463,6 +464,7 @@ class SuratTemplateController extends Controller
         );
 
         $selectedPetugas = User::with('jabatan')
+            ->active()
             ->whereIn('id', $fields['petugas_ids'] ?? [])
             ->get()
             ->sortBy(function ($user) use ($fields) {
@@ -481,7 +483,7 @@ class SuratTemplateController extends Controller
         })->all();
 
         $penandaTangan = !empty($fields['penanda_tangan_id'])
-            ? User::with('jabatan')->find($fields['penanda_tangan_id'])
+            ? User::with('jabatan')->active()->find($fields['penanda_tangan_id'])
             : null;
 
         $fields['penanda_tangan'] = [

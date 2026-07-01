@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class StoreRapatNotulensiRequest extends FormRequest
 {
@@ -24,7 +25,7 @@ class StoreRapatNotulensiRequest extends FormRequest
             'rekomendasi_items' => ['nullable', 'array'],
             'rekomendasi_items.*.aksi' => ['nullable', 'string'],
             'rekomendasi_items.*.user_ids' => ['nullable', 'array'],
-            'rekomendasi_items.*.user_ids.*' => ['integer', 'exists:users,id'],
+            'rekomendasi_items.*.user_ids.*' => ['integer', Rule::exists('users', 'id')->where('status_aktif_pegawai', true)],
             'dokumentasi_files' => $isCreate ? ['required', 'array', 'min:1'] : ['nullable', 'array'],
             'dokumentasi_files.*' => ['file', 'image', 'max:5120'],
             'remove_dokumentasi_files' => ['nullable', 'array'],

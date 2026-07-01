@@ -6,6 +6,7 @@ use App\LeaveDelegation;
 use App\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Validation\Rule;
 
 class LeaveDelegationManagementController extends Controller
 {
@@ -37,7 +38,7 @@ class LeaveDelegationManagementController extends Controller
         }
 
         $delegations = $query->orderByDesc('id')->paginate(15)->appends($request->query());
-        $users = User::ordered()->get();
+        $users = User::active()->ordered()->get();
         $filters = $request->only(['scope', 'search']);
 
         return view('cuti.master.delegations.index', compact('delegations', 'users', 'filters'));
@@ -76,8 +77,8 @@ class LeaveDelegationManagementController extends Controller
     protected function validatedData(Request $request)
     {
         $data = $request->validate([
-            'delegator_id' => 'required|exists:users,id|different:delegate_id',
-            'delegate_id' => 'required|exists:users,id|different:delegator_id',
+            'delegator_id' => ['required', Rule::exists('users', 'id')->where('status_aktif_pegawai', true), 'different:delegate_id'],
+            'delegate_id' => ['required', Rule::exists('users', 'id')->where('status_aktif_pegawai', true), 'different:delegator_id'],
             'scope' => 'required|in:leave_approval,document_verification,ppk_approval',
             'start_date' => 'required|date',
             'end_date' => 'required|date|after_or_equal:start_date',

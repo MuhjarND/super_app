@@ -6,6 +6,7 @@ use App\AgendaPimpinan;
 use App\Services\WhatsAppNotificationService;
 use App\User;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class AgendaPimpinanController extends Controller
 {
@@ -27,6 +28,7 @@ class AgendaPimpinanController extends Controller
             ->get();
 
         $users = User::with(['jabatan', 'unit', 'bidang'])
+            ->active()
             ->ordered()
             ->get();
 
@@ -101,7 +103,7 @@ class AgendaPimpinanController extends Controller
         $data = $request->validate([
             'seragam_pakaian' => ['nullable', 'string', 'max:255'],
             'recipient_ids' => ['nullable', 'array'],
-            'recipient_ids.*' => ['exists:users,id'],
+            'recipient_ids.*' => [Rule::exists('users', 'id')->where('status_aktif_pegawai', true)],
         ]);
 
         $orderedRecipients = $this->syncRecipients($agenda, $data['recipient_ids'] ?? []);
@@ -141,13 +143,14 @@ class AgendaPimpinanController extends Controller
             'lampiran_link' => ['nullable', 'url', 'max:1000'],
             'catatan' => ['nullable', 'string'],
             'recipient_ids' => ['nullable', 'array'],
-            'recipient_ids.*' => ['exists:users,id'],
+            'recipient_ids.*' => [Rule::exists('users', 'id')->where('status_aktif_pegawai', true)],
         ]);
     }
 
     protected function syncRecipients(AgendaPimpinan $agenda, array $recipientIds)
     {
         $orderedUsers = User::whereIn('id', $recipientIds)
+            ->active()
             ->ordered()
             ->get();
 

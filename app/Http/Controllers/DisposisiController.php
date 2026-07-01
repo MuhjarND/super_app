@@ -32,7 +32,7 @@ class DisposisiController extends Controller
 
         $request->validate([
             'surat_masuk_id' => 'required|exists:surat_masuks,id',
-            'kepada_user_id' => 'required|exists:users,id',
+            'kepada_user_id' => ['required', Rule::exists('users', 'id')->where('status_aktif_pegawai', true)],
             'tipe' => 'required|in:disposisi,naikan',
             'petunjuk' => $petunjukRules,
             'catatan' => 'nullable|string',
@@ -232,7 +232,7 @@ class DisposisiController extends Controller
 
         $targetJabatans = Jabatan::whereIn('id', $targetIds)
             ->with(['users' => function ($query) use ($user) {
-                $query->where('id', '!=', $user->id)->orderBy('name');
+                $query->active()->where('id', '!=', $user->id)->orderBy('name');
             }])
             ->orderBy('level')
             ->orderBy('nama')

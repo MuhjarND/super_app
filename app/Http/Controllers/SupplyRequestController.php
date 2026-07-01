@@ -319,12 +319,12 @@ class SupplyRequestController extends Controller
     {
         $operators = User::whereHas('roles', function ($query) {
             $query->where('name', 'operator_persediaan');
-        })->get()->unique('id')->values();
+        })->active()->get()->unique('id')->values();
 
         if ($operators->isEmpty()) {
             $operators = User::whereHas('roles', function ($query) {
                 $query->where('name', 'super_admin');
-            })->get()->unique('id')->values();
+            })->active()->get()->unique('id')->values();
         }
 
         foreach ($operators as $operator) {

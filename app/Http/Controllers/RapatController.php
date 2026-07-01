@@ -14,6 +14,7 @@ use App\ZiGuidelineSubPoint;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 
 class RapatController extends Controller
 {
@@ -56,11 +57,12 @@ class RapatController extends Controller
 
         $kategoriSuratOptions = $this->documentService->getKategoriSuratLeafOptions();
         $participants = User::with(['unit', 'bidang', 'jabatan', 'roles'])
+            ->active()
             ->ordered()
             ->get();
         $approvers = User::whereHas('roles', function ($query) {
             $query->whereIn('name', ['admin', 'approval', 'super_admin']);
-        })->with('jabatan')->ordered()->get();
+        })->active()->with('jabatan')->ordered()->get();
 
         return view('rapat.index', compact('rapats', 'kategoriSuratOptions', 'participants', 'approvers'));
     }
@@ -164,8 +166,8 @@ class RapatController extends Controller
             'kategori_surat_kode_id' => 'nullable|exists:klasifikasi_kodes,id',
             'nomenklatur_jabatan' => 'nullable|in:ketua,wakil_ketua,sekretaris,panitera',
             'tanggal' => 'nullable|date',
-            'approver_1_id' => 'nullable|exists:users,id',
-            'approver_2_id' => 'nullable|exists:users,id',
+            'approver_1_id' => ['nullable', Rule::exists('users', 'id')->where('status_aktif_pegawai', true)],
+            'approver_2_id' => ['nullable', Rule::exists('users', 'id')->where('status_aktif_pegawai', true)],
         ]);
 
         return response()->json([
@@ -273,6 +275,7 @@ class RapatController extends Controller
     protected function syncPeserta(Rapat $rapat, array $participantIds)
     {
         $orderedUsers = User::whereIn('id', $participantIds)
+            ->active()
             ->ordered()
             ->get();
 

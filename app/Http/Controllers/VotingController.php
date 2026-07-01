@@ -39,7 +39,7 @@ class VotingController extends Controller
     {
         abort_unless(auth()->user()->canManageVoting(), 403);
 
-        $users = User::with('jabatan')->ordered()->get();
+        $users = User::with('jabatan')->active()->ordered()->get();
 
         return view('rapat.voting.form', [
             'voting' => new Voting(['status' => 'draft']),
@@ -100,7 +100,7 @@ class VotingController extends Controller
         abort_unless(auth()->user()->canManageVoting(), 403);
 
         $voting->load(['items.candidates', 'participants']);
-        $users = User::with('jabatan')->ordered()->get();
+        $users = User::with('jabatan')->active()->ordered()->get();
 
         return view('rapat.voting.form', [
             'voting' => $voting,
@@ -253,6 +253,7 @@ class VotingController extends Controller
     {
         $users = User::with('jabatan')
             ->whereIn('id', array_values($candidateIds))
+            ->active()
             ->ordered()
             ->get();
 
@@ -270,10 +271,11 @@ class VotingController extends Controller
     protected function syncParticipants(Voting $voting, array $data)
     {
         $participantIds = (bool) ($data['select_all_participants'] ?? false)
-            ? User::ordered()->pluck('id')->all()
+            ? User::active()->ordered()->pluck('id')->all()
             : (array) ($data['participant_ids'] ?? []);
 
         $orderedUsers = User::whereIn('id', $participantIds)
+            ->active()
             ->ordered()
             ->get();
 

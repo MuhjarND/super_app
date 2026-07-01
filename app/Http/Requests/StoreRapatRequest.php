@@ -4,6 +4,7 @@ namespace App\Http\Requests;
 
 use App\KlasifikasiKode;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class StoreRapatRequest extends FormRequest
 {
@@ -23,9 +24,9 @@ class StoreRapatRequest extends FormRequest
             'waktu_mulai' => ['required', 'date_format:H:i'],
             'tempat' => ['required', 'string', 'max:255'],
             'peserta_ids' => ['required', 'array', 'min:1'],
-            'peserta_ids.*' => ['exists:users,id'],
-            'approver_1_id' => ['nullable', 'exists:users,id'],
-            'approver_2_id' => ['nullable', 'different:approver_1_id', 'exists:users,id'],
+            'peserta_ids.*' => [Rule::exists('users', 'id')->where('status_aktif_pegawai', true)],
+            'approver_1_id' => ['nullable', Rule::exists('users', 'id')->where('status_aktif_pegawai', true)],
+            'approver_2_id' => ['nullable', 'different:approver_1_id', Rule::exists('users', 'id')->where('status_aktif_pegawai', true)],
             'approval1_jabatan_manual' => ['nullable', 'string', 'max:255'],
             'include_detail_tambahan' => ['nullable', 'boolean'],
             'detail_tambahan' => ['nullable', 'required_if:include_detail_tambahan,1', 'string'],

@@ -34,7 +34,7 @@ return [
         'provider' => env('WHATSAPP_PROVIDER', 'fonnte'),
         'api_url' => env('WHATSAPP_API_URL', env('FONNTE_API_URL', 'https://api.fonnte.com/send')),
         'api_key' => env('WHATSAPP_API_KEY', env('FONNTE_TOKEN')),
-        'magic_link_ttl' => env('WHATSAPP_MAGIC_LINK_TTL', 30),
+        'magic_link_ttl' => env('WHATSAPP_MAGIC_LINK_TTL', 10080),
     ],
 
 ];

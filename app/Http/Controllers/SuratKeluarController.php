@@ -11,6 +11,7 @@ use App\Services\RapatDocumentService;
 use App\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\Rule;
 
 class SuratKeluarController extends Controller
 {
@@ -27,7 +28,7 @@ class SuratKeluarController extends Controller
         $user = auth()->user();
 
         $suratKeluar = SuratKeluar::visibleTo($user)
-            ->with('klasifikasiKode', 'kategoriSurat', 'kodeFungsi', 'kodeKegiatan', 'kodeTransaksi', 'creator', 'penerimaInternal', 'templateApproval', 'pdfVerifications', 'rapat', 'leaveRequest')
+            ->with('klasifikasiKode', 'kategoriSurat', 'kodeFungsi', 'kodeKegiatan', 'kodeTransaksi', 'creator', 'penerimaInternal.jabatan', 'templateApproval', 'pdfVerifications', 'rapat', 'leaveRequest')
             ->orderBy('created_at', 'desc')
             ->get();
         $kategoriSurats = KategoriSurat::where('aktif', true)->orderBy('kode')->get();
@@ -44,7 +45,7 @@ class SuratKeluarController extends Controller
         $kodeKegiatan = KlasifikasiKode::where('tipe', 'kegiatan')->get();
         $kodeTransaksi = KlasifikasiKode::where('tipe', 'transaksi')->get();
         $canManageSuratKeluar = $user->canManageSuratKeluar();
-        $users = $canManageSuratKeluar ? User::ordered()->get() : collect();
+        $users = $canManageSuratKeluar ? User::active()->ordered()->get() : collect();
         $kodeFungsiOptions = $kodeFungsi->map(function ($k) {
             return [
                 'id' => $k->id,
@@ -100,11 +101,11 @@ class SuratKeluarController extends Controller
             'nomenklatur_jabatan' => 'required|in:ketua,wakil_ketua,sekretaris,panitera',
             'opsi_penerima' => 'required|in:internal,external',
             'penerima_internal' => 'nullable|array',
-            'penerima_internal.*' => 'exists:users,id',
+            'penerima_internal.*' => Rule::exists('users', 'id')->where('status_aktif_pegawai', true),
             'penerima_external' => 'nullable|string|max:255',
             'perihal' => 'required|string',
             'tanggal_surat' => 'required|date',
-            'has_lampiran' => 'required|in:ya,tidak',
+            'has_lampiran' => 'nullable|in:ya,tidak',
             'template_source' => 'nullable|in:template_surat',
             'template_name' => 'nullable|string|max:255',
             'template_slug' => 'nullable|string|max:255',
@@ -157,7 +158,7 @@ class SuratKeluarController extends Controller
             'penerima_external' => $request->opsi_penerima == 'external' ? $request->penerima_external : null,
             'perihal' => $request->perihal,
             'tanggal_surat' => $request->tanggal_surat,
-            'has_lampiran' => $request->has_lampiran == 'ya',
+            'has_lampiran' => $request->input('has_lampiran', 'tidak') == 'ya',
             'status' => 'draft',
             'created_by' => auth()->id(),
         ]);
@@ -195,11 +196,11 @@ class SuratKeluarController extends Controller
             'kode_transaksi_id' => 'nullable|exists:klasifikasi_kodes,id',
             'nomenklatur_jabatan' => 'required|in:ketua,wakil_ketua,sekretaris,panitera',
             'penerima_internal' => 'nullable|array',
-            'penerima_internal.*' => 'exists:users,id',
+            'penerima_internal.*' => Rule::exists('users', 'id')->where('status_aktif_pegawai', true),
             'penerima_external' => 'nullable|string|max:255',
             'perihal' => 'required|string',
             'tanggal_surat' => 'required|date',
-            'has_lampiran' => 'required|in:ya,tidak',
+            'has_lampiran' => 'nullable|in:ya,tidak',
         ]);
 
         $sync = $this->syncKategoriDanKlasifikasi($request->klasifikasi_kode_id, $request->kategori_surat_id);
@@ -239,7 +240,7 @@ class SuratKeluarController extends Controller
             'penerima_external' => $request->opsi_penerima == 'external' ? $request->penerima_external : null,
             'perihal' => $request->perihal,
             'tanggal_surat' => $request->tanggal_surat,
-            'has_lampiran' => $request->has_lampiran == 'ya',
+            'has_lampiran' => $request->input('has_lampiran', 'tidak') == 'ya',
         ];
 
         if ($shouldRegenerateNomor) {

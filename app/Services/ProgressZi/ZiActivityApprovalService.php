@@ -146,7 +146,7 @@ class ZiActivityApprovalService
 
     protected function resolveApprover()
     {
-        return User::whereHas('roles', function ($query) {
+        return User::active()->whereHas('roles', function ($query) {
             $query->whereIn('name', ['approval', 'super_admin']);
         })
             ->ordered()

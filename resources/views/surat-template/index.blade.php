@@ -6,20 +6,208 @@
     use Illuminate\Support\Str;
 @endphp
 
+@push('styles')
+<style>
+    .template-page-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        margin-bottom: 16px;
+    }
+
+    .template-page-title h3 {
+        margin: 0;
+        color: #0f172a;
+        font-size: 1.25rem;
+        font-weight: 800;
+    }
+
+    .template-page-title p {
+        margin: 4px 0 0;
+        color: #64748b;
+        font-size: 0.86rem;
+    }
+
+    .template-toolbar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .template-panel {
+        border: 1px solid #e5e7eb;
+        border-radius: 12px;
+        background: #ffffff;
+        box-shadow: 0 10px 26px rgba(15, 23, 42, 0.05);
+        overflow: hidden;
+    }
+
+    .template-filter {
+        padding: 14px;
+        border-bottom: 1px solid #eef2f7;
+        background: #fbfcff;
+    }
+
+    .template-list {
+        display: grid;
+    }
+
+    .template-list-row {
+        display: grid;
+        grid-template-columns: minmax(260px, 1.5fr) minmax(220px, 1fr) 120px 180px;
+        gap: 16px;
+        align-items: center;
+        padding: 15px 16px;
+        border-bottom: 1px solid #eef2f7;
+    }
+
+    .template-list-row:last-child {
+        border-bottom: 0;
+    }
+
+    .template-name {
+        color: #0f172a;
+        font-size: 0.94rem;
+        font-weight: 800;
+        line-height: 1.25;
+    }
+
+    .template-category {
+        margin-top: 4px;
+        color: #64748b;
+        font-size: 0.78rem;
+        line-height: 1.35;
+    }
+
+    .template-description {
+        margin-top: 5px;
+        color: #94a3b8;
+        font-size: 0.76rem;
+        line-height: 1.35;
+    }
+
+    .template-field-pills {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+    }
+
+    .template-field-pill {
+        display: inline-flex;
+        max-width: 100%;
+        border-radius: 999px;
+        padding: 4px 9px;
+        background: #eef2ff;
+        color: #4f46e5;
+        font-size: 0.72rem;
+        font-weight: 700;
+        line-height: 1.15;
+    }
+
+    .template-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 7px;
+    }
+
+    .template-action-btn {
+        width: 34px;
+        height: 34px;
+        border-radius: 9px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border: 0;
+        color: #ffffff;
+        background: #6957f5;
+        transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .template-action-btn:hover {
+        color: #ffffff;
+        transform: translateY(-1px);
+        box-shadow: 0 9px 18px rgba(79, 70, 229, 0.22);
+    }
+
+    .template-action-btn.secondary {
+        background: #64748b;
+    }
+
+    .template-action-btn.warning {
+        background: #f59e0b;
+    }
+
+    .template-empty {
+        padding: 28px;
+        text-align: center;
+        color: #94a3b8;
+    }
+
+    .template-proposal-panel .card-header {
+        padding: 14px 16px;
+    }
+
+    .template-proposal-panel h5 {
+        font-size: 0.98rem;
+        font-weight: 800;
+    }
+
+    .template-proposal-panel .table th {
+        border-top: 0;
+        background: #f8fafc;
+        color: #64748b;
+        font-size: 0.72rem;
+        font-weight: 800;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+    }
+
+    .template-proposal-panel .table td {
+        vertical-align: middle;
+        font-size: 0.84rem;
+    }
+
+    @media (max-width: 991.98px) {
+        .template-page-header {
+            align-items: flex-start;
+            flex-direction: column;
+        }
+
+        .template-toolbar {
+            width: 100%;
+        }
+
+        .template-toolbar .btn {
+            flex: 1 1 auto;
+        }
+
+        .template-list-row {
+            grid-template-columns: 1fr;
+            gap: 10px;
+        }
+
+        .template-actions {
+            justify-content: flex-start;
+        }
+    }
+</style>
+@endpush
+
 @section('content')
 @include('admin._alerts')
 
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <div>
-        <h3 class="mb-1">Template Surat</h3>
-        <p class="text-muted mb-0">Gunakan template surat resmi dan kelola pengajuan template baru dari kabag atau kasubag.</p>
+<div class="template-page-header">
+    <div class="template-page-title">
+        <h3>Template Surat</h3>
+        <p>Gunakan template resmi, buat preview, atau teruskan ke Surat Keluar.</p>
     </div>
-    <div class="d-flex" style="gap:8px;">
+    <div class="template-toolbar">
         @if($canManageTemplates && $moduleReady)
-            <button class="btn app-create-btn" data-toggle="modal" data-target="#createTemplateModal"><i class="fas fa-plus"></i> Tambah Template</button>
+            <button class="btn app-create-btn" data-toggle="modal" data-target="#createTemplateModal"><i class="fas fa-plus mr-1"></i> Tambah</button>
         @endif
         @if($canSubmitProposal && $proposalModuleReady)
-            <button class="btn btn-primary" data-toggle="modal" data-target="#createProposalModal"><i class="fas fa-file-upload"></i> Ajukan Template</button>
+            <button class="btn btn-primary" data-toggle="modal" data-target="#createProposalModal"><i class="fas fa-file-upload mr-1"></i> Ajukan</button>
         @endif
     </div>
 </div>
@@ -30,15 +218,15 @@
     </div>
 @endif
 
-<div class="card border-0 shadow-sm mb-4">
-    <div class="card-header bg-white border-0 pb-0">
+<div class="template-panel mb-4">
+    <div class="template-filter">
         <form method="GET" action="{{ route('surat-template.index') }}">
-            <div class="row">
-                <div class="col-md-8 form-group mb-md-0">
+            <div class="row align-items-center">
+                <div class="col-md-8 form-group mb-md-0 mb-2">
                     <input type="text" name="search" class="form-control" value="{{ $filters['search'] ?? '' }}" placeholder="Cari nama template, kategori, atau deskripsi">
                 </div>
                 @if($moduleReady && $canManageTemplates)
-                    <div class="col-md-2 form-group mb-md-0">
+                    <div class="col-md-2 form-group mb-md-0 mb-2">
                         <select name="status" class="form-control">
                             <option value="">Semua Status</option>
                             <option value="active" {{ ($filters['status'] ?? '') === 'active' ? 'selected' : '' }}>Aktif</option>
@@ -48,67 +236,65 @@
                     </div>
                 @endif
                 <div class="{{ $moduleReady && $canManageTemplates ? 'col-md-2' : 'col-md-4' }} d-flex" style="gap:6px;">
-                    <button type="submit" class="btn btn-primary btn-block">Filter</button>
-                    <a href="{{ route('surat-template.index') }}" class="btn btn-outline-secondary">Reset</a>
+                    <button type="submit" class="btn btn-primary btn-block"><i class="fas fa-search"></i></button>
+                    <a href="{{ route('surat-template.index') }}" class="btn btn-outline-secondary"><i class="fas fa-sync-alt"></i></a>
                 </div>
             </div>
         </form>
     </div>
-    <div class="card-body pt-3">
-        <div class="row">
-            @forelse($templates as $template)
-                @php
-                    $templateId = data_get($template, 'id');
-                    $templateName = data_get($template, 'name');
-                    $templateSlug = data_get($template, 'slug');
-                    $templateCategory = data_get($template, 'category');
-                    $templateDescription = data_get($template, 'description');
-                    $templateStatus = data_get($template, 'status', 'active');
-                    $templateStatusLabel = data_get($template, 'status_label', ucfirst($templateStatus));
-                    $templateStatusClass = data_get($template, 'status_badge_class', $templateStatus === 'active' ? 'success' : 'secondary');
-                    $fieldSchema = data_get($template, 'field_schema', []);
-                    $templateBody = data_get($template, 'template_body', '');
-                    $samplePath = data_get($template, 'sample_file_path');
-                    $isStoredTemplate = $template instanceof \App\SuratTemplate;
-                    $fieldSchemaJson = json_encode($fieldSchema, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
-                @endphp
-                <div class="col-lg-4 mb-3">
-                    <div class="card h-100 border-0 shadow-sm template-card">
-                        <div class="card-body d-flex flex-column">
-                            <div class="d-flex justify-content-between align-items-start mb-2">
-                                <div>
-                                    <div class="font-weight-700">{{ $templateName }}</div>
-                                    <div class="text-muted small">{{ $templateCategory }}</div>
-                                </div>
-                                <span class="badge badge-{{ $templateStatusClass }}">{{ $templateStatusLabel }}</span>
-                            </div>
-                            <p class="text-muted small flex-grow-1 mb-3">{{ $templateDescription ?: 'Template surat siap pakai dengan field dinamis sesuai kebutuhan dokumen.' }}</p>
-                            <div class="small text-muted mb-3">
-                                <strong>Field:</strong>
-                                @if(!empty($fieldSchema))
-                                    {{ collect($fieldSchema)->pluck('label')->implode(', ') }}
-                                @else
-                                    -
-                                @endif
-                            </div>
-                            <div class="d-flex flex-wrap" style="gap:8px;">
-                                <button type="button" class="btn btn-primary btn-sm" data-toggle="modal" data-target="#useTemplateModal{{ $templateId }}">
-                                    <i class="fas fa-pen-alt"></i> {{ $templateSlug === 'surat-tugas' ? 'Buat Surat Tugas' : 'Gunakan Template' }}
-                                </button>
-                                @if($isStoredTemplate && $samplePath)
-                                    <a href="{{ route('surat-template.sample', ['type' => 'template', 'id' => $templateId]) }}" target="_blank" class="btn btn-outline-secondary btn-sm">
-                                        <i class="fas fa-file-alt"></i> Contoh
-                                    </a>
-                                @endif
-                                @if($canManageTemplates && $isStoredTemplate && $moduleReady)
-                                    <button type="button" class="btn btn-outline-primary btn-sm" data-toggle="modal" data-target="#editTemplateModal{{ $templateId }}">
-                                        <i class="fas fa-cog"></i> Kelola
-                                    </button>
-                                @endif
-                            </div>
-                        </div>
-                    </div>
+    <div class="template-list">
+        @forelse($templates as $template)
+            @php
+                $templateId = data_get($template, 'id');
+                $templateName = data_get($template, 'name');
+                $templateSlug = data_get($template, 'slug');
+                $templateCategory = data_get($template, 'category');
+                $templateDescription = data_get($template, 'description');
+                $templateStatus = data_get($template, 'status', 'active');
+                $templateStatusLabel = data_get($template, 'status_label', ucfirst($templateStatus));
+                $templateStatusClass = data_get($template, 'status_badge_class', $templateStatus === 'active' ? 'success' : 'secondary');
+                $fieldSchema = data_get($template, 'field_schema', []);
+                $templateBody = data_get($template, 'template_body', '');
+                $samplePath = data_get($template, 'sample_file_path');
+                $isStoredTemplate = $template instanceof \App\SuratTemplate;
+                $fieldSchemaJson = json_encode($fieldSchema, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+                $fieldLabels = collect($fieldSchema)->pluck('label')->filter()->values();
+            @endphp
+            <div class="template-list-row">
+                <div>
+                    <div class="template-name">{{ $templateName }}</div>
+                    <div class="template-category">{{ $templateCategory ?: 'Tanpa kategori' }}</div>
+                    <div class="template-description">{{ Str::limit($templateDescription ?: 'Template surat siap pakai dengan field dinamis.', 90) }}</div>
                 </div>
+                <div class="template-field-pills">
+                    @forelse($fieldLabels->take(4) as $label)
+                        <span class="template-field-pill">{{ $label }}</span>
+                    @empty
+                        <span class="text-muted small">Belum ada field</span>
+                    @endforelse
+                    @if($fieldLabels->count() > 4)
+                        <span class="template-field-pill">+{{ $fieldLabels->count() - 4 }}</span>
+                    @endif
+                </div>
+                <div>
+                    <span class="badge badge-{{ $templateStatusClass }}">{{ $templateStatusLabel }}</span>
+                </div>
+                <div class="template-actions">
+                    <button type="button" class="template-action-btn" data-toggle="modal" data-target="#useTemplateModal{{ $templateId }}" title="{{ $templateSlug === 'surat-tugas' ? 'Buat Surat Tugas' : 'Gunakan Template' }}">
+                        <i class="fas fa-pen-alt"></i>
+                    </button>
+                    @if($isStoredTemplate && $samplePath)
+                        <a href="{{ route('surat-template.sample', ['type' => 'template', 'id' => $templateId]) }}" target="_blank" class="template-action-btn secondary" title="Buka contoh">
+                            <i class="fas fa-file-alt"></i>
+                        </a>
+                    @endif
+                    @if($canManageTemplates && $isStoredTemplate && $moduleReady)
+                        <button type="button" class="template-action-btn warning" data-toggle="modal" data-target="#editTemplateModal{{ $templateId }}" title="Kelola template">
+                            <i class="fas fa-cog"></i>
+                        </button>
+                    @endif
+                </div>
+            </div>
 
                 <div class="modal fade" id="useTemplateModal{{ $templateId }}" tabindex="-1">
                     <div class="modal-dialog modal-lg"><div class="modal-content">
@@ -180,16 +366,13 @@
                         </div></div>
                     </div>
                 @endif
-            @empty
-                <div class="col-12">
-                    <div class="alert alert-light border text-muted mb-0">Belum ada template surat yang tersedia.</div>
-                </div>
-            @endforelse
-        </div>
+        @empty
+            <div class="template-empty">Belum ada template surat yang tersedia.</div>
+        @endforelse
     </div>
 </div>
 
-<div class="card border-0 shadow-sm">
+<div class="card border-0 shadow-sm template-proposal-panel">
     <div class="card-header bg-white d-flex justify-content-between align-items-center">
         <div>
             <h5 class="mb-1">Pengajuan Template Baru</h5>

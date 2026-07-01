@@ -43,6 +43,165 @@
             box-shadow: 0 4px 14px rgba(79, 70, 229, 0.25);
         }
 
+        .recipient-type-group {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 10px;
+        }
+
+        .recipient-type-option {
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            min-height: 48px;
+            padding: 11px 14px;
+            border: 1px solid #dbe3ef;
+            border-radius: 10px;
+            background: #ffffff;
+            color: #334155;
+            font-weight: 700;
+            cursor: pointer;
+            transition: border-color 0.15s ease, background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
+        }
+
+        .recipient-type-option input {
+            width: 16px;
+            height: 16px;
+            accent-color: #5b4df5;
+        }
+
+        .recipient-type-option:has(input:checked) {
+            border-color: #6957f5;
+            background: #f1efff;
+            color: #4f46e5;
+            box-shadow: 0 8px 18px rgba(99, 102, 241, 0.12);
+        }
+
+        .recipient-select-all {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            width: max-content;
+            border: 1px solid #dbe3ef;
+            border-radius: 999px;
+            padding: 7px 12px;
+            margin: 0 0 10px;
+            background: #ffffff;
+            color: #475569;
+            font-size: 0.82rem;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .recipient-select-all input {
+            accent-color: #5b4df5;
+        }
+
+        #createInternalGroup > label:first-child,
+        #editInternalGroup > label:first-child {
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        .surat-recipient-select + .select2-container--bootstrap4 .select2-selection--multiple {
+            min-height: 46px;
+            height: auto !important;
+            border-color: #dbe3ef;
+            border-radius: 10px;
+            padding: 7px 8px;
+            background: #fbfcff;
+            overflow: visible;
+        }
+
+        .surat-recipient-select + .select2-container--bootstrap4.select2-container--focus .select2-selection--multiple {
+            border-color: #6957f5;
+            box-shadow: 0 0 0 0.2rem rgba(99, 102, 241, 0.12);
+        }
+
+        .surat-recipient-select + .select2-container--bootstrap4 .select2-selection--multiple .select2-selection__rendered {
+            display: flex !important;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 7px;
+            width: 100%;
+            padding: 0;
+            margin: 0;
+        }
+
+        .surat-recipient-select + .select2-container--bootstrap4 .select2-selection__choice {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            float: none;
+            max-width: 100%;
+            border: 1px solid #c7d2fe;
+            border-radius: 999px;
+            padding: 4px 10px 4px 7px;
+            margin: 0;
+            background: #eef2ff;
+            color: #4338ca;
+            font-size: 0.8rem;
+            font-weight: 700;
+            line-height: 1.25;
+            white-space: normal;
+            word-break: break-word;
+        }
+
+        .surat-recipient-select + .select2-container--bootstrap4 .select2-selection__choice__remove {
+            flex: 0 0 auto;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            margin: 0;
+            background: #ffffff;
+            color: #4f46e5;
+            line-height: 17px;
+            text-align: center;
+            opacity: 1;
+        }
+
+        .surat-recipient-select + .select2-container--bootstrap4 .select2-search--inline {
+            flex: 1 0 160px;
+            min-width: 160px;
+        }
+
+        .surat-recipient-select + .select2-container--bootstrap4 .select2-search__field {
+            width: 100% !important;
+            margin: 0;
+            line-height: 28px;
+        }
+
+        #createModal .form-control:focus,
+        #editModal .form-control:focus {
+            border-color: #6957f5;
+            box-shadow: 0 0 0 0.2rem rgba(99, 102, 241, 0.12);
+        }
+
+        #createModal select.form-control option:checked,
+        #editModal select.form-control option:checked {
+            background: #6957f5;
+            color: #ffffff;
+        }
+
+        #createModal select.form-control option:hover,
+        #editModal select.form-control option:hover {
+            background: #eef2ff;
+            color: #4338ca;
+        }
+
+        .select2-container--bootstrap4 .select2-results__option--highlighted[aria-selected],
+        .select2-container--bootstrap4 .select2-results__option--highlighted[aria-selected="true"] {
+            background-color: #6957f5;
+            color: #ffffff;
+        }
+
+        .select2-container--bootstrap4 .select2-results__option[aria-selected="true"] {
+            background-color: #eef2ff;
+            color: #4338ca;
+            font-weight: 700;
+        }
+
         /* Warning banner */
         .notice-banner {
             background: linear-gradient(135deg, #f0fdf4, #dcfce7);
@@ -199,6 +358,73 @@
             white-space: normal;
             word-break: break-word;
             overflow-wrap: anywhere;
+        }
+
+        .recipient-count-btn {
+            border: 0;
+            cursor: pointer;
+            text-align: left;
+        }
+
+        .recipient-count-btn:hover,
+        .recipient-count-btn:focus {
+            color: #ffffff;
+            background: linear-gradient(135deg, #4f46e5, #4338ca);
+            box-shadow: 0 8px 18px rgba(79, 70, 229, 0.22);
+            outline: none;
+        }
+
+        .recipient-modal-summary {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 14px;
+            color: #64748b;
+            font-size: 0.86rem;
+        }
+
+        .recipient-modal-list {
+            display: grid;
+            gap: 10px;
+            max-height: 420px;
+            overflow-y: auto;
+            padding-right: 4px;
+        }
+
+        .recipient-modal-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 14px;
+            border: 1px solid #e5e7eb;
+            border-radius: 10px;
+            background: #fbfcff;
+        }
+
+        .recipient-modal-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            flex: 0 0 auto;
+            background: #eef2ff;
+            color: #4f46e5;
+            font-weight: 800;
+        }
+
+        .recipient-modal-name {
+            color: #0f172a;
+            font-weight: 800;
+            line-height: 1.25;
+        }
+
+        .recipient-modal-position {
+            color: #64748b;
+            font-size: 0.8rem;
+            line-height: 1.3;
+            margin-top: 2px;
         }
 
         .lampiran-badge {
@@ -497,13 +723,17 @@
                                 <span class="recipient-pill <?php echo e($surat->opsi_penerima == 'internal' ? 'internal' : 'external'); ?>">
                                     <?php echo e($surat->opsi_penerima == 'internal' ? 'Internal' : 'External'); ?>
                                 </span>
-                                <div class="recipient-name">
-                                    <?php if($surat->opsi_penerima == 'internal'): ?>
+                                <?php if($surat->opsi_penerima == 'internal'): ?>
+                                    <button type="button" class="recipient-name recipient-count-btn js-recipient-modal"
+                                        data-surat-id="<?php echo e($surat->id); ?>"
+                                        data-nomor-surat="<?php echo e($surat->nomor_surat_formatted); ?>">
                                         <?php echo e($surat->penerimaInternal->count()); ?> orang
-                                    <?php else: ?>
+                                    </button>
+                                <?php else: ?>
+                                    <div class="recipient-name">
                                         <?php echo e(Str::limit($surat->penerima_external ?: '-', 36)); ?>
-                                    <?php endif; ?>
-                                </div>
+                                    </div>
+                                <?php endif; ?>
                             </td>
                             <td>
                                 <?php echo e($surat->tanggal_surat->format('Y-m-d')); ?>
@@ -586,20 +816,12 @@
                             </select>
                         </div>
 
-                        <div class="form-group">
-                            <label>Kategori Surat</label>
-                            <select class="form-control" name="kategori_surat_id" id="createKategoriSurat">
-                                <option value="">-- Pilih Kategori Surat --</option>
-                                <?php $__currentLoopData = $kategoriSurats; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $kategori): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                                    <option value="<?php echo e($kategori->id); ?>"><?php echo e($kategori->kode); ?> - <?php echo e($kategori->nama); ?></option>
-                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
-                            </select>
-                        </div>
+                        <input type="hidden" name="kategori_surat_id" id="createKategoriSurat">
 
                         <div class="form-group">
                             <label>Kode Fungsi</label>
                             <select class="form-control nomor-input" name="kode_fungsi_id" id="createKodeFungsi">
-                                <option value="">-- Pilih (Opsional) --</option>
+                                <option value="">-- Pilih --</option>
                                 <?php $__currentLoopData = $kodeFungsi; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $k): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                     <option value="<?php echo e($k->id); ?>" data-kode="<?php echo e($k->kode); ?>" data-parent="<?php echo e($k->parent_id); ?>">
                                         <?php echo e($k->kode); ?> - <?php echo e($k->nama); ?>
@@ -612,7 +834,7 @@
                         <div class="form-group">
                             <label>Kode Kegiatan</label>
                             <select class="form-control nomor-input" name="kode_kegiatan_id" id="createKodeKegiatan">
-                                <option value="">-- Pilih (Opsional) --</option>
+                                <option value="">-- Pilih --</option>
                                 <?php $__currentLoopData = $kodeKegiatan; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $k): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                     <option value="<?php echo e($k->id); ?>" data-kode="<?php echo e($k->kode); ?>" data-parent="<?php echo e($k->parent_id); ?>">
                                         <?php echo e($k->kode); ?> - <?php echo e($k->nama); ?>
@@ -625,7 +847,7 @@
                         <div class="form-group">
                             <label>Kode Transaksi</label>
                             <select class="form-control nomor-input" name="kode_transaksi_id" id="createKodeTransaksi">
-                                <option value="">-- Pilih (Opsional) --</option>
+                                <option value="">-- Pilih --</option>
                                 <?php $__currentLoopData = $kodeTransaksi; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $k): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                     <option value="<?php echo e($k->id); ?>" data-kode="<?php echo e($k->kode); ?>" data-parent="<?php echo e($k->parent_id); ?>">
                                         <?php echo e($k->kode); ?> - <?php echo e($k->nama); ?>
@@ -639,21 +861,24 @@
 
                         <div class="form-group">
                             <label>Opsi Penerima <span class="text-danger">*</span></label>
-                            <select class="form-control" name="opsi_penerima" id="createOpsiPenerima" required>
-                                <option value="">-- Pilih --</option>
-                                <option value="internal">Internal</option>
-                                <option value="external">External</option>
-                            </select>
+                            <div class="recipient-type-group" id="createOpsiPenerima">
+                                <label class="recipient-type-option">
+                                    <input type="radio" name="opsi_penerima" value="internal" required>
+                                    <span>Internal</span>
+                                </label>
+                                <label class="recipient-type-option">
+                                    <input type="radio" name="opsi_penerima" value="external" required>
+                                    <span>External</span>
+                                </label>
+                            </div>
                         </div>
 
                         <div class="form-group" id="createInternalGroup" style="display: none;">
                             <label>Penerima Internal <span class="text-danger">*</span></label>
-                            <div class="mb-2">
-                                <label style="cursor: pointer; font-weight: 400; font-size: 0.85rem;">
-                                    <input type="checkbox" id="selectAll" class="mr-2"> Pilih Semua
-                                </label>
-                            </div>
-                            <select class="form-control select2" name="penerima_internal[]" id="penerimaInternal" multiple>
+                            <label class="recipient-select-all">
+                                <input type="checkbox" id="selectAll"> <span>Pilih Semua</span>
+                            </label>
+                            <select class="form-control select2 surat-recipient-select" name="penerima_internal[]" id="penerimaInternal" multiple>
                                 <?php $__currentLoopData = $users; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $u): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                     <option value="<?php echo e($u->id); ?>"><?php echo e($u->name); ?>
 
@@ -682,13 +907,7 @@
                                 value="<?php echo e(date('Y-m-d')); ?>">
                         </div>
 
-                        <div class="form-group">
-                            <label>Lampiran</label>
-                            <select class="form-control" name="has_lampiran">
-                                <option value="tidak">Tidak</option>
-                                <option value="ya">Ya</option>
-                            </select>
-                        </div>
+                        <input type="hidden" name="has_lampiran" value="tidak">
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Batal</button>
@@ -743,34 +962,26 @@
                             </select>
                         </div>
 
-                        <div class="form-group">
-                            <label>Kategori Surat</label>
-                            <select class="form-control" name="kategori_surat_id" id="editKategoriSurat">
-                                <option value="">-- Pilih Kategori Surat --</option>
-                                <?php $__currentLoopData = $kategoriSurats; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $kategori): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                                    <option value="<?php echo e($kategori->id); ?>"><?php echo e($kategori->kode); ?> - <?php echo e($kategori->nama); ?></option>
-                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
-                            </select>
-                        </div>
+                        <input type="hidden" name="kategori_surat_id" id="editKategoriSurat">
 
                         <div class="form-group">
                             <label>Kode Fungsi</label>
                             <select class="form-control" name="kode_fungsi_id" id="editKodeFungsi">
-                                <option value="">-- Pilih (Opsional) --</option>
+                                <option value="">-- Pilih --</option>
                             </select>
                         </div>
 
                         <div class="form-group">
                             <label>Kode Kegiatan</label>
                             <select class="form-control" name="kode_kegiatan_id" id="editKodeKegiatan">
-                                <option value="">-- Pilih (Opsional) --</option>
+                                <option value="">-- Pilih --</option>
                             </select>
                         </div>
 
                         <div class="form-group">
                             <label>Kode Transaksi</label>
                             <select class="form-control" name="kode_transaksi_id" id="editKodeTransaksi">
-                                <option value="">-- Pilih (Opsional) --</option>
+                                <option value="">-- Pilih --</option>
                             </select>
                         </div>
 
@@ -778,21 +989,24 @@
 
                         <div class="form-group">
                             <label>Opsi Penerima <span class="text-danger">*</span></label>
-                            <select class="form-control" name="opsi_penerima" id="editOpsiPenerima" required>
-                                <option value="">-- Pilih --</option>
-                                <option value="internal">Internal</option>
-                                <option value="external">External</option>
-                            </select>
+                            <div class="recipient-type-group" id="editOpsiPenerima">
+                                <label class="recipient-type-option">
+                                    <input type="radio" name="opsi_penerima" value="internal" required>
+                                    <span>Internal</span>
+                                </label>
+                                <label class="recipient-type-option">
+                                    <input type="radio" name="opsi_penerima" value="external" required>
+                                    <span>External</span>
+                                </label>
+                            </div>
                         </div>
 
                         <div class="form-group" id="editInternalGroup" style="display: none;">
                             <label>Penerima Internal <span class="text-danger">*</span></label>
-                            <div class="mb-2">
-                                <label style="cursor: pointer; font-weight: 400; font-size: 0.85rem;">
-                                    <input type="checkbox" id="selectAllEdit" class="mr-2"> Pilih Semua
-                                </label>
-                            </div>
-                            <select class="form-control select2" name="penerima_internal[]" id="editPenerimaInternal" multiple>
+                            <label class="recipient-select-all">
+                                <input type="checkbox" id="selectAllEdit"> <span>Pilih Semua</span>
+                            </label>
+                            <select class="form-control select2 surat-recipient-select" name="penerima_internal[]" id="editPenerimaInternal" multiple>
                                 <?php $__currentLoopData = $users; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $u): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                     <option value="<?php echo e($u->id); ?>"><?php echo e($u->name); ?><?php echo e($u->jabatan ? ' (' . $u->jabatan->nama . ')' : ''); ?></option>
                                 <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
@@ -816,13 +1030,7 @@
                             <input type="date" class="form-control" name="tanggal_surat" id="editTanggalSurat" required>
                         </div>
 
-                        <div class="form-group">
-                            <label>Lampiran</label>
-                            <select class="form-control" name="has_lampiran" id="editHasLampiran">
-                                <option value="tidak">Tidak</option>
-                                <option value="ya">Ya</option>
-                            </select>
-                        </div>
+                        <input type="hidden" name="has_lampiran" id="editHasLampiran" value="tidak">
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Batal</button>
@@ -880,6 +1088,27 @@
             </div>
         </div>
     </div>
+
+    <div class="modal fade" id="recipientModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fas fa-users mr-2"></i>Penerima Internal</h5>
+                    <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+                </div>
+                <div class="modal-body">
+                    <div class="recipient-modal-summary">
+                        <span class="recipient-pill internal">Internal</span>
+                        <span id="recipientModalMeta">-</span>
+                    </div>
+                    <div class="recipient-modal-list" id="recipientModalList"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Tutup</button>
+                </div>
+            </div>
+        </div>
+    </div>
 <?php $__env->stopSection(); ?>
 
 <?php $__env->startPush('scripts'); ?>
@@ -890,6 +1119,40 @@
     <script>
         $(document).ready(function () {
             const canManageSuratKeluar = <?php echo json_encode($canManageSuratKeluar, 15, 512) ?>;
+            const recipientMap = <?php echo json_encode($suratKeluar->mapWithKeys(function ($surat) {
+                return [
+                    $surat->id => $surat->penerimaInternal->map(function ($user) {
+                        return [
+                            'name' => $user->name,
+                            'jabatan' => optional($user->jabatan)->nama ?: ($user->jabatan_keterangan ?: '-'),
+                        ];
+                    })->values(),
+                ];
+            })->all(), 15, 512) ?>;
+
+            function escapeHtml(value) {
+                return String(value ?? '').replace(/[&<>"']/g, function (char) {
+                    return {
+                        '&': '&amp;',
+                        '<': '&lt;',
+                        '>': '&gt;',
+                        '"': '&quot;',
+                        "'": '&#039;'
+                    }[char];
+                });
+            }
+
+            function initialsFromName(name) {
+                const words = String(name || '').trim().split(/\s+/).filter(Boolean);
+                if (!words.length) {
+                    return '-';
+                }
+
+                return words.slice(0, 2).map(function (word) {
+                    return word.charAt(0).toUpperCase();
+                }).join('');
+            }
+
             // Initialize DataTable
             const table = $('#suratKeluarTable').DataTable({
                 order: [],
@@ -943,6 +1206,27 @@
                     btn.addClass('expanded');
                     icon.removeClass('fa-plus').addClass('fa-minus');
                 }
+            });
+
+            $('#suratKeluarTable tbody').on('click', '.js-recipient-modal', function () {
+                const suratId = $(this).data('suratId');
+                const nomorSurat = $(this).data('nomorSurat') || '-';
+                const recipients = recipientMap[suratId] || [];
+                const listHtml = recipients.length
+                    ? recipients.map(function (recipient) {
+                        return '<div class="recipient-modal-item">' +
+                            '<div class="recipient-modal-avatar">' + escapeHtml(initialsFromName(recipient.name)) + '</div>' +
+                            '<div>' +
+                                '<div class="recipient-modal-name">' + escapeHtml(recipient.name || '-') + '</div>' +
+                                '<div class="recipient-modal-position">' + escapeHtml(recipient.jabatan || '-') + '</div>' +
+                            '</div>' +
+                        '</div>';
+                    }).join('')
+                    : '<div class="text-muted text-center py-3">Belum ada penerima internal.</div>';
+
+                $('#recipientModalMeta').text(recipients.length + ' orang ditag pada ' + nomorSurat);
+                $('#recipientModalList').html(listHtml);
+                $('#recipientModal').modal('show');
             });
 
             const fungsiOptions = <?php echo json_encode($kodeFungsiOptions, 15, 512) ?>;
@@ -1001,37 +1285,37 @@
                 const transaksiId = values.transaksi || '';
 
                 if (!klasifikasiId) {
-                    rebuildKodeOptions($fungsi, [], '-- Pilih (Opsional) --', '-- Pilih kode klasifikasi dulu --', '');
-                    rebuildKodeOptions($kegiatan, [], '-- Pilih (Opsional) --', '-- Pilih kode fungsi dulu --', '');
-                    rebuildKodeOptions($transaksi, [], '-- Pilih (Opsional) --', '-- Pilih kode kegiatan dulu --', '');
+                    rebuildKodeOptions($fungsi, [], '-- Pilih --', '-- Pilih kode klasifikasi dulu --', '');
+                    rebuildKodeOptions($kegiatan, [], '-- Pilih --', '-- Pilih kode fungsi dulu --', '');
+                    rebuildKodeOptions($transaksi, [], '-- Pilih --', '-- Pilih kode kegiatan dulu --', '');
                     return;
                 }
 
                 const filteredFungsi = fungsiOptions.filter(function (item) {
                     return String(item.parent_id) === String(klasifikasiId);
                 });
-                rebuildKodeOptions($fungsi, filteredFungsi, '-- Pilih (Opsional) --', '-- Tidak ada kode fungsi --', fungsiId);
+                rebuildKodeOptions($fungsi, filteredFungsi, '-- Pilih --', '-- Tidak ada kode fungsi --', fungsiId);
 
                 if (!fungsiId) {
-                    rebuildKodeOptions($kegiatan, [], '-- Pilih (Opsional) --', '-- Pilih kode fungsi dulu --', '');
-                    rebuildKodeOptions($transaksi, [], '-- Pilih (Opsional) --', '-- Pilih kode kegiatan dulu --', '');
+                    rebuildKodeOptions($kegiatan, [], '-- Pilih --', '-- Pilih kode fungsi dulu --', '');
+                    rebuildKodeOptions($transaksi, [], '-- Pilih --', '-- Pilih kode kegiatan dulu --', '');
                     return;
                 }
 
                 const filteredKegiatan = kegiatanOptions.filter(function (item) {
                     return String(item.parent_id) === String(fungsiId);
                 });
-                rebuildKodeOptions($kegiatan, filteredKegiatan, '-- Pilih (Opsional) --', '-- Tidak ada kode kegiatan --', kegiatanId);
+                rebuildKodeOptions($kegiatan, filteredKegiatan, '-- Pilih --', '-- Tidak ada kode kegiatan --', kegiatanId);
 
                 if (!kegiatanId) {
-                    rebuildKodeOptions($transaksi, [], '-- Pilih (Opsional) --', '-- Pilih kode kegiatan dulu --', '');
+                    rebuildKodeOptions($transaksi, [], '-- Pilih --', '-- Pilih kode kegiatan dulu --', '');
                     return;
                 }
 
                 const filteredTransaksi = transaksiOptions.filter(function (item) {
                     return String(item.parent_id) === String(kegiatanId);
                 });
-                rebuildKodeOptions($transaksi, filteredTransaksi, '-- Pilih (Opsional) --', '-- Tidak ada kode transaksi --', transaksiId);
+                rebuildKodeOptions($transaksi, filteredTransaksi, '-- Pilih --', '-- Tidak ada kode transaksi --', transaksiId);
             }
 
             function initInternalSelect(selectId, modalId) {
@@ -1047,8 +1331,8 @@
             }
 
             function togglePenerimaFields(prefix) {
-                const suffix = prefix === 'create' ? '' : 'Edit';
-                const opsi = $('#'+ prefix +'OpsiPenerima').val();
+                const formSelector = prefix === 'create' ? '#createForm' : '#editForm';
+                const opsi = $('input[name="opsi_penerima"]:checked', formSelector).val();
                 const $internalGroup = $('#' + prefix + 'InternalGroup');
                 const $externalGroup = $('#' + prefix + 'ExternalGroup');
 
@@ -1100,8 +1384,8 @@
             applyKodeHierarchy('create', {});
             applyKodeHierarchy('edit', {});
 
-            $('#createOpsiPenerima, #editOpsiPenerima').on('change', function () {
-                togglePenerimaFields(this.id === 'createOpsiPenerima' ? 'create' : 'edit');
+            $('input[name="opsi_penerima"]', '#createForm, #editForm').on('change', function () {
+                togglePenerimaFields($(this).closest('form').attr('id') === 'createForm' ? 'create' : 'edit');
             });
 
             $('#selectAll').on('change', function () {
@@ -1131,6 +1415,8 @@
                         showToast(res.message, 'success');
                         $('#createModal').modal('hide');
                         $('#createForm')[0].reset();
+                        $('input[name="opsi_penerima"]', '#createForm').prop('checked', false);
+                        $('#selectAll').prop('checked', false);
                         $('#createInternalGroup, #createExternalGroup').hide();
                         $('#penerimaInternal').val(null).trigger('change');
                         applyKodeHierarchy('create', {});
@@ -1207,8 +1493,9 @@
                 $('#editKategoriSurat').val(data.kategoriSurat);
                 $('#editPerihal').val(data.perihal);
                 $('#editTanggalSurat').val(data.tanggalSurat);
-                $('#editHasLampiran').val(data.hasLampiran);
-                $('#editOpsiPenerima').val(data.opsiPenerima);
+                $('#editHasLampiran').val('tidak');
+                $('input[name="opsi_penerima"]', '#editForm').prop('checked', false);
+                $('input[name="opsi_penerima"][value="' + data.opsiPenerima + '"]', '#editForm').prop('checked', true);
                 $('#editPenerimaExternal').val(data.penerimaExternal || '');
 
                 if (!data.klasifikasiKode && data.kategoriSurat) {
@@ -1266,9 +1553,9 @@
                 $('input[name="tahun_surat"]', '#createForm').val(suratTemplatePrefill.tahun_surat || new Date().getFullYear());
                 $('textarea[name="perihal"]', '#createForm').val(suratTemplatePrefill.perihal || suratTemplatePrefill.template_name || 'Template Surat');
                 $('input[name="tanggal_surat"]', '#createForm').val(suratTemplatePrefill.tanggal_surat || '');
-                $('select[name="has_lampiran"]', '#createForm').val('tidak');
+                $('input[name="has_lampiran"]', '#createForm').val('tidak');
                 $('select[name="nomenklatur_jabatan"]', '#createForm').val(suratTemplatePrefill.nomenklatur_jabatan || 'sekretaris');
-                $('select[name="opsi_penerima"]', '#createForm').val(suratTemplatePrefill.opsi_penerima || 'internal').trigger('change');
+                $('input[name="opsi_penerima"][value="' + (suratTemplatePrefill.opsi_penerima || 'internal') + '"]', '#createForm').prop('checked', true).trigger('change');
 
                 if (suratTemplatePrefill.klasifikasi_kode_id) {
                     $('#createKlasifikasiKode').val(String(suratTemplatePrefill.klasifikasi_kode_id));

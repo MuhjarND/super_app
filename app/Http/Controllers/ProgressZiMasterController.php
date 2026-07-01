@@ -15,6 +15,7 @@ use App\ZiIndicator;
 use App\ZiPeriod;
 use App\User;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class ProgressZiMasterController extends Controller
 {
@@ -81,7 +82,7 @@ class ProgressZiMasterController extends Controller
             'areas' => $areas,
             'groupedAreas' => ZiArea::grouped($areas),
             'groupOptions' => ZiArea::groupOptions(),
-            'users' => User::ordered()->get(),
+            'users' => User::active()->ordered()->get(),
             'canManage' => auth()->user()->canManageProgressZiMasterData(),
         ]);
     }
@@ -95,7 +96,7 @@ class ProgressZiMasterController extends Controller
             'description' => 'nullable|string',
             'group_type' => 'required|in:pengungkit,reform,hasil',
             'pic_user_ids' => 'nullable|array',
-            'pic_user_ids.*' => 'exists:users,id',
+            'pic_user_ids.*' => Rule::exists('users', 'id')->where('status_aktif_pegawai', true),
             'is_active' => 'nullable|boolean',
         ]);
         $picUserIds = collect($request->input('pic_user_ids', []))->filter()->unique()->values();
@@ -120,7 +121,7 @@ class ProgressZiMasterController extends Controller
             'description' => 'nullable|string',
             'group_type' => 'required|in:pengungkit,reform,hasil',
             'pic_user_ids' => 'nullable|array',
-            'pic_user_ids.*' => 'exists:users,id',
+            'pic_user_ids.*' => Rule::exists('users', 'id')->where('status_aktif_pegawai', true),
             'is_active' => 'nullable|boolean',
         ]);
         $picUserIds = collect($request->input('pic_user_ids', []))->filter()->unique()->values();
@@ -225,14 +226,14 @@ class ProgressZiMasterController extends Controller
             'groupOptions' => $groupOptions,
             'periods' => $periods,
             'selectedPeriod' => $selectedPeriod,
-            'users' => User::ordered()->get(),
+            'users' => User::active()->ordered()->get(),
             'guidelineSubPoints' => $this->guidelineSubPointOptions(),
             'evidenceSourceOptions' => $evidenceSourceOptions,
             'kategoriSuratOptions' => $this->rapatDocumentService->getKategoriSuratLeafOptions(),
-            'meetingParticipants' => User::with(['unit', 'bidang', 'jabatan', 'roles'])->ordered()->get(),
+            'meetingParticipants' => User::with(['unit', 'bidang', 'jabatan', 'roles'])->active()->ordered()->get(),
             'meetingApprovers' => User::whereHas('roles', function ($query) {
                 $query->whereIn('name', ['admin', 'approval', 'super_admin']);
-            })->with('jabatan')->ordered()->get(),
+            })->active()->with('jabatan')->ordered()->get(),
             'subPointRecommendations' => $subPointRecommendations,
             'filters' => $request->only(['period_id', 'area_id', 'status', 'pic_user_id', 'group_type']),
             'canManage' => auth()->user()->canManageProgressZiMasterData(),
@@ -241,7 +242,7 @@ class ProgressZiMasterController extends Controller
 
     public function storeActivity(Request $request)
     {
-        $request->validate(['zi_period_id' => 'required|exists:zi_periods,id', 'zi_area_id' => 'required|exists:zi_areas,id', 'zi_guideline_sub_point_id' => 'nullable|exists:zi_guideline_sub_points,id', 'name' => 'required|string|max:255', 'description' => 'nullable|string', 'target_start_date' => 'nullable|date', 'target_end_date' => 'nullable|date', 'pic_user_id' => 'nullable|exists:users,id', 'status' => 'required|in:belum_mulai,dijadwalkan,sedang_berjalan,sudah_terlaksana,selesai,perlu_perbaikan', 'source_type' => 'nullable|in:manual,persuratan,rapat,cuti']);
+        $request->validate(['zi_period_id' => 'required|exists:zi_periods,id', 'zi_area_id' => 'required|exists:zi_areas,id', 'zi_guideline_sub_point_id' => 'nullable|exists:zi_guideline_sub_points,id', 'name' => 'required|string|max:255', 'description' => 'nullable|string', 'target_start_date' => 'nullable|date', 'target_end_date' => 'nullable|date', 'pic_user_id' => ['nullable', Rule::exists('users', 'id')->where('status_aktif_pegawai', true)], 'status' => 'required|in:belum_mulai,dijadwalkan,sedang_berjalan,sudah_terlaksana,selesai,perlu_perbaikan', 'source_type' => 'nullable|in:manual,persuratan,rapat,cuti']);
         $area = ZiArea::findOrFail($request->zi_area_id);
         abort_unless(auth()->user()->canManageProgressZiArea($area), 403);
         $guidelineSubPointId = $this->validatedGuidelineSubPointId($request->zi_area_id, $request->zi_guideline_sub_point_id);
@@ -252,7 +253,7 @@ class ProgressZiMasterController extends Controller
     public function updateActivity(Request $request, ZiActivity $ziActivity)
     {
         $this->abortUnlessCanManageProgressZiMaster();
-        $request->validate(['zi_period_id' => 'required|exists:zi_periods,id', 'zi_area_id' => 'required|exists:zi_areas,id', 'zi_guideline_sub_point_id' => 'nullable|exists:zi_guideline_sub_points,id', 'name' => 'required|string|max:255', 'description' => 'nullable|string', 'target_start_date' => 'nullable|date', 'target_end_date' => 'nullable|date', 'pic_user_id' => 'nullable|exists:users,id', 'status' => 'required|in:belum_mulai,dijadwalkan,sedang_berjalan,sudah_terlaksana,selesai,perlu_perbaikan']);
+        $request->validate(['zi_period_id' => 'required|exists:zi_periods,id', 'zi_area_id' => 'required|exists:zi_areas,id', 'zi_guideline_sub_point_id' => 'nullable|exists:zi_guideline_sub_points,id', 'name' => 'required|string|max:255', 'description' => 'nullable|string', 'target_start_date' => 'nullable|date', 'target_end_date' => 'nullable|date', 'pic_user_id' => ['nullable', Rule::exists('users', 'id')->where('status_aktif_pegawai', true)], 'status' => 'required|in:belum_mulai,dijadwalkan,sedang_berjalan,sudah_terlaksana,selesai,perlu_perbaikan']);
         $guidelineSubPointId = $this->validatedGuidelineSubPointId($request->zi_area_id, $request->zi_guideline_sub_point_id);
         $ziActivity->update($request->only(['zi_period_id', 'zi_area_id', 'name', 'description', 'target_start_date', 'target_end_date', 'pic_user_id', 'status']) + ['zi_guideline_sub_point_id' => $guidelineSubPointId, 'updated_by' => auth()->id()]);
         return redirect()->route('progress-zi.activities.index')->with('success', 'Kegiatan ZI berhasil diperbarui.');

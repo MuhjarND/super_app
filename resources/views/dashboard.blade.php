@@ -808,6 +808,285 @@
             }
 
         }
+
+        .dashboard-compact {
+            gap: 14px;
+        }
+
+        .dashboard-compact .dashboard-hero {
+            display: grid;
+            grid-template-columns: minmax(220px, 280px) minmax(0, 1fr);
+            grid-template-rows: auto auto;
+            align-items: center;
+            gap: 18px;
+            padding: 16px;
+            border-radius: 14px;
+            border: 1px solid #e5e7eb;
+            background: #ffffff;
+            color: #0f172a;
+            box-shadow: 0 8px 22px rgba(15, 23, 42, 0.04);
+        }
+
+        .dashboard-compact .dashboard-hero::before,
+        .dashboard-compact .dashboard-hero::after {
+            content: none;
+        }
+
+        .dashboard-compact .dashboard-hero-title {
+            grid-column: 1;
+            grid-row: 1;
+            margin: 0;
+            color: #0f172a;
+            font-size: 1.05rem;
+            line-height: 1.25;
+            align-self: end;
+        }
+
+        .dashboard-compact .dashboard-hero-meta {
+            grid-column: 1;
+            grid-row: 2;
+            margin-top: 4px;
+            color: #64748b;
+            font-size: 0.78rem;
+            align-self: start;
+        }
+
+        .dashboard-compact .hero-chip-wrap {
+            grid-column: 2;
+            grid-row: 1 / span 2;
+            display: grid;
+            grid-template-columns: repeat(6, minmax(112px, 1fr));
+            gap: 8px;
+            margin: 0;
+            min-width: 0;
+        }
+
+        .dashboard-compact .hero-chip {
+            min-height: 66px;
+            padding: 10px;
+            border-radius: 12px;
+            border: 1px solid #e5e7eb;
+            background: #fbfcff;
+            color: #0f172a;
+            box-shadow: none;
+            backdrop-filter: none;
+            min-width: 0;
+        }
+
+        .dashboard-compact .hero-chip:hover {
+            transform: none;
+            background: #eef2ff;
+            border-color: #c7d2fe;
+        }
+
+        .dashboard-compact .hero-chip i {
+            color: #6957f5;
+            font-size: 0.85rem;
+        }
+
+        .dashboard-compact .hero-chip strong {
+            color: #111827;
+            font-size: 1.08rem;
+        }
+
+        .dashboard-compact .hero-chip span {
+            color: #64748b;
+            font-size: 0.68rem;
+            line-height: 1.2;
+        }
+
+        .dashboard-compact .module-grid {
+            grid-template-columns: repeat(5, minmax(0, 1fr));
+            gap: 10px;
+        }
+
+        .dashboard-compact .module-card {
+            gap: 10px;
+            padding: 12px;
+            border-radius: 12px;
+            border-color: #edf2f7;
+            background: #ffffff;
+            box-shadow: none;
+        }
+
+        .dashboard-compact .module-card:hover {
+            transform: none;
+            box-shadow: 0 8px 20px rgba(99, 102, 241, 0.07);
+        }
+
+        .dashboard-compact .module-card-head {
+            align-items: center;
+        }
+
+        .dashboard-compact .module-card-title {
+            margin: 0;
+            font-size: 0.82rem;
+            line-height: 1.25;
+        }
+
+        .dashboard-compact .module-pill {
+            width: 30px;
+            height: 30px;
+            border-radius: 9px;
+            font-size: 0.74rem;
+            box-shadow: none;
+        }
+
+        .dashboard-compact .metric-grid {
+            grid-template-columns: 1fr;
+            gap: 0;
+            border-top: 1px solid #f1f5f9;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .dashboard-compact .metric-box {
+            min-height: 0;
+            display: grid;
+            grid-template-columns: 44px 1fr;
+            align-items: center;
+            gap: 8px;
+            padding: 7px 0;
+            border: 0;
+            border-radius: 0;
+            background: transparent;
+        }
+
+        .dashboard-compact .metric-box + .metric-box {
+            border-top: 1px solid #f1f5f9;
+        }
+
+        .dashboard-compact .metric-box:hover {
+            background: transparent;
+            border-color: #f1f5f9;
+        }
+
+        .dashboard-compact .metric-box .value {
+            margin: 0;
+            color: #0f172a;
+            font-size: 0.98rem;
+            text-align: right;
+        }
+
+        .dashboard-compact .metric-box .label {
+            color: #64748b;
+            font-size: 0.68rem;
+            line-height: 1.15;
+        }
+
+        .dashboard-compact .module-link-row {
+            gap: 6px;
+        }
+
+        .dashboard-compact .module-link-row a {
+            width: 30px;
+            height: 30px;
+            justify-content: center;
+            padding: 0;
+            border-radius: 8px;
+            font-size: 0;
+        }
+
+        .dashboard-compact .module-link-row a i {
+            margin: 0;
+            font-size: 0.74rem;
+        }
+
+        .dashboard-compact .dash-panel {
+            border-radius: 14px;
+            box-shadow: none;
+        }
+
+        .dashboard-compact .dash-panel:hover {
+            box-shadow: none;
+        }
+
+        .dashboard-compact .dash-panel-head {
+            padding: 13px 15px 11px;
+        }
+
+        .dashboard-compact .dash-panel-head h5 {
+            font-size: 0.88rem;
+        }
+
+        .dashboard-compact .dash-panel-body {
+            padding: 4px 15px 12px;
+        }
+
+        .dashboard-compact .action-list,
+        .dashboard-compact .upcoming-list {
+            gap: 0;
+        }
+
+        .dashboard-compact .action-item,
+        .dashboard-compact .upcoming-item {
+            padding: 10px 0;
+        }
+
+        .dashboard-compact .action-icon {
+            width: 34px;
+            height: 34px;
+            border-radius: 10px;
+            font-size: 0.78rem;
+        }
+
+        .dashboard-compact .item-title {
+            margin-bottom: 2px;
+            font-size: 0.8rem;
+        }
+
+        .dashboard-compact .item-subtitle,
+        .dashboard-compact .item-description,
+        .dashboard-compact .item-meta {
+            font-size: 0.7rem;
+            line-height: 1.28;
+        }
+
+        .dashboard-compact .item-description {
+            display: none;
+        }
+
+        .dashboard-compact .item-link {
+            width: 32px;
+            height: 32px;
+            border-radius: 9px;
+        }
+
+        .dashboard-calendar-panel,
+        .dashboard-compact .recent-columns {
+            display: none;
+        }
+
+        @media (max-width: 1199.98px) {
+            .dashboard-compact .dashboard-hero {
+                grid-template-columns: 1fr;
+                grid-template-rows: auto;
+            }
+
+            .dashboard-compact .dashboard-hero-title,
+            .dashboard-compact .dashboard-hero-meta,
+            .dashboard-compact .hero-chip-wrap {
+                grid-column: 1;
+                grid-row: auto;
+            }
+
+            .dashboard-compact .hero-chip-wrap {
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+            }
+
+            .dashboard-compact .module-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+
+        @media (max-width: 767.98px) {
+            .dashboard-compact .dashboard-hero,
+            .dashboard-compact .dash-panel,
+            .dashboard-compact .module-grid,
+            .dashboard-compact .dashboard-row,
+            .dashboard-compact .recent-columns {
+                display: none;
+            }
+        }
     </style>
 @endpush
 
@@ -819,7 +1098,7 @@
 
 
 @section('content')
-    <div class="dashboard-shell">
+    <div class="dashboard-shell dashboard-compact">
         @php($dashboardUser = auth()->user())
         @php($dashboardIsSuperAdmin = $dashboardUser && $dashboardUser->isSuperAdmin())
         <section class="mobile-app-launcher">
@@ -958,7 +1237,7 @@
             </div>
         </section>
 
-        <section class="dash-panel">
+        <section class="dash-panel dashboard-calendar-panel">
             <div class="dash-panel-head">
                 <div>
                     <h5>Kalender Bulan Ini</h5>

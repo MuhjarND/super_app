@@ -128,7 +128,7 @@ class SuratMasukController extends Controller
         // Send WA notification to admin surat
         $adminSurat = User::whereHas('roles', function ($q) {
             $q->where('name', 'admin_surat');
-        })->get();
+        })->active()->get();
 
         foreach ($adminSurat as $admin) {
             $this->waService->notifySuratMasuk($suratMasuk, $admin);
@@ -228,7 +228,7 @@ class SuratMasukController extends Controller
     {
         $protokolerUsers = User::whereHas('roles', function ($query) {
             $query->where('name', 'protokoler');
-        })->get();
+        })->active()->get();
 
         $agenda->loadMissing('suratMasuk');
 

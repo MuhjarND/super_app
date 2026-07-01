@@ -98,6 +98,11 @@ class User extends Authenticatable
             ->orderBy('name');
     }
 
+    public function scopeActive($query)
+    {
+        return $query->where('status_aktif_pegawai', true);
+    }
+
     public function hasRole($role)
     {
         if (is_string($role)) {

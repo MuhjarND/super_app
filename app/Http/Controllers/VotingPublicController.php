@@ -7,6 +7,7 @@ use App\VotingVote;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 
 class VotingPublicController extends Controller
 {
@@ -15,7 +16,15 @@ class VotingPublicController extends Controller
         $voting = $this->findVoting($publicCode);
         abort_unless($voting->status === 'aktif', 404);
 
-        $voting->load(['items.candidates', 'participantPivots.user']);
+        $voting->load([
+            'items.candidates',
+            'participantPivots.user' => function ($query) {
+                $query->active();
+            },
+        ]);
+        $voting->setRelation('participantPivots', $voting->participantPivots->filter(function ($participant) {
+            return $participant->user;
+        })->values());
 
         return view('rapat.voting.public', compact('voting'));
     }
@@ -26,7 +35,7 @@ class VotingPublicController extends Controller
         abort_unless($voting->status === 'aktif', 422, 'Voting belum aktif atau sudah selesai.');
 
         $rules = [
-            'participant_id' => ['required', 'exists:users,id'],
+            'participant_id' => ['required', Rule::exists('users', 'id')->where('status_aktif_pegawai', true)],
             'choices' => ['required', 'array'],
         ];
 

@@ -36,6 +36,7 @@ class WhatsAppNotificationService
     public function send($phoneNumber, $message, array $context = [])
     {
         $normalizedPhone = $this->normalizePhoneNumber($phoneNumber);
+        $message = $this->withNotificationHeader($message, $context);
         $log = $this->createLog($normalizedPhone, $message, $context);
 
         if (!$normalizedPhone) {
@@ -843,6 +844,44 @@ class WhatsAppNotificationService
     protected function wrap(array $lines)
     {
         return implode("\n", $lines) . "\n\nHormat kami,\nSistem Informasi PTA Papua Barat";
+    }
+
+    protected function withNotificationHeader($message, array $context = [])
+    {
+        $message = trim((string) $message);
+
+        if (preg_match('/^\*\[[^\]]+ NOTIF\]\*/i', $message)) {
+            return $message;
+        }
+
+        return '*[' . $this->notificationModuleTitle($context['module'] ?? null) . ' NOTIF]*'
+            . "\n\n"
+            . $message;
+    }
+
+    protected function notificationModuleTitle($module)
+    {
+        $map = [
+            'security' => 'KEAMANAN',
+            'persuratan' => 'PERSURATAN',
+            'surat_tugas' => 'SURAT TUGAS',
+            'cuti' => 'CUTI',
+            'progress_zi' => 'PROGRESS ZI',
+            'rapat' => 'RAPAT',
+            'agenda_pimpinan' => 'AGENDA PIMPINAN',
+            'voting' => 'E-VOTING',
+            'persediaan' => 'PERSEDIAAN',
+            'master_data' => 'MASTER DATA',
+            'general' => 'UMUM',
+        ];
+
+        $module = trim((string) $module);
+
+        if ($module === '') {
+            return $map['general'];
+        }
+
+        return $map[$module] ?? strtoupper(str_replace('_', ' ', $module));
     }
 
     protected function normalizePhoneNumber($phoneNumber)

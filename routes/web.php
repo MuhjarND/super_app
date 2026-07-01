@@ -117,6 +117,7 @@ Route::middleware(['auth'])->group(function () {
     Route::prefix('admin')->name('admin.')->middleware('role:super_admin')->group(function () {
         Route::resource('users', 'Admin\UserManagementController')->except(['show']);
         Route::post('users/{user}/send-login-info', 'Admin\UserManagementController@sendLoginInfo')->name('users.send-login-info');
+        Route::patch('users/{user}/toggle-status', 'Admin\UserManagementController@toggleStatus')->name('users.toggle-status');
         Route::resource('jabatans', 'Admin\JabatanManagementController')->except(['show']);
         Route::resource('units', 'Admin\UnitManagementController')->except(['show']);
         Route::resource('bidangs', 'Admin\BidangManagementController')->except(['show']);

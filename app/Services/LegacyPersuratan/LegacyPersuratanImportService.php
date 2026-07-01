@@ -3,13 +3,16 @@
 namespace App\Services\LegacyPersuratan;
 
 use App\Disposisi;
+use App\Jabatan;
 use App\KategoriSurat;
 use App\KlasifikasiKode;
+use App\Role;
 use App\SuratKeluar;
 use App\SuratMasuk;
 use App\User;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
@@ -51,6 +54,9 @@ class LegacyPersuratanImportService
             'surat_keluar_updated' => 0,
             'disposisi_imported' => 0,
             'disposisi_updated' => 0,
+            'legacy_users_created' => 0,
+            'profile_photos_copied' => 0,
+            'tindak_lanjut_legacy_synced' => 0,
             'file_copied' => 0,
             'file_missing' => 0,
             'recipients_unmatched' => 0,
@@ -68,6 +74,7 @@ class LegacyPersuratanImportService
             $this->syncPetunjukMap($legacyDb);
             $this->importSuratMasuk($legacyDb);
             $this->importDisposisi($legacyDb);
+            $this->syncLegacyTindakLanjut($legacyDb);
             $this->importSuratKeluar($legacyDb);
             $this->refreshSuratMasukStatus();
         });
@@ -103,7 +110,10 @@ class LegacyPersuratanImportService
                 'users.name',
                 'users.email',
                 'daftar_pegawai.nip',
-                'daftar_pegawai.no_wa'
+                'daftar_pegawai.no_wa',
+                'daftar_pegawai.id_jabatan',
+                'daftar_pegawai.photo_user',
+                'users.id_bidang'
             )
             ->get();
 
@@ -141,6 +151,28 @@ class LegacyPersuratanImportService
                 $currentUser = $byNip[$nipKey];
             } elseif ($nameKey !== '' && isset($byName[$nameKey]) && count($byName[$nameKey]) === 1) {
                 $currentUser = $byName[$nameKey][0];
+            }
+
+            if (!$currentUser) {
+                $currentUser = $this->createLegacyUser($legacyUser);
+
+                if ($currentUser->email) {
+                    $byEmail[Str::lower(trim($currentUser->email))] = $currentUser;
+                }
+                if ($currentUser->nip) {
+                    $byNip[$this->digitsOnly($currentUser->nip)] = $currentUser;
+                }
+                if ($nameKey !== '') {
+                    $byName[$nameKey][] = $currentUser;
+                }
+
+                $this->summary['legacy_users_created']++;
+            } else {
+                $photoPath = $this->copyLegacyProfilePhoto($legacyUser->photo_user ?? null, $legacyUser->id);
+                if ($photoPath && !$currentUser->profile_photo_path) {
+                    $currentUser->profile_photo_path = $photoPath;
+                    $currentUser->save();
+                }
             }
 
             $this->legacyUserRows[$legacyUser->id] = $legacyUser;
@@ -342,6 +374,80 @@ class LegacyPersuratanImportService
             $disposisi->save();
 
             $this->summary[$isNew ? 'disposisi_imported' : 'disposisi_updated']++;
+        }
+    }
+
+    protected function syncLegacyTindakLanjut($legacyDb)
+    {
+        $rows = $legacyDb->table('transaksi_surat_masuk')
+            ->where(function ($query) {
+                $query->whereNotNull('file_tindak_lanjut')
+                    ->orWhereNotNull('catatan_tindaklanjut')
+                    ->orWhereNotNull('id_user_tindak_lanjut')
+                    ->orWhereNotNull('tgl_tindak_lanjut')
+                    ->orWhere('id_status', 3);
+            })
+            ->orderBy('id')
+            ->get();
+
+        foreach ($rows as $row) {
+            $suratMasukId = $this->suratMasukMap[$row->id] ?? null;
+            if (!$suratMasukId) {
+                continue;
+            }
+
+            $targetUserId = $this->resolveUserId($row->id_user_tindak_lanjut, false);
+            $completedAt = $this->normalizeTimestamp($row->tgl_tindak_lanjut ?: $row->updated_at ?: $row->created_at);
+            $legacyFilePath = $this->copyLegacyFile(
+                'tindak_lanjut',
+                $row->file_tindak_lanjut,
+                'surat-masuk/tindak-lanjut/legacy',
+                $row->id
+            );
+
+            $query = Disposisi::where('surat_masuk_id', $suratMasukId);
+            if ($targetUserId) {
+                $query->where('kepada_user_id', $targetUserId);
+            }
+
+            $disposisi = $query->latest('created_at')->first()
+                ?: Disposisi::where('surat_masuk_id', $suratMasukId)->latest('created_at')->first();
+
+            if (!$disposisi) {
+                $creatorId = $this->resolveUserId($row->created_by, true);
+                $kepadaUserId = $targetUserId ?: $creatorId;
+                $dariUser = User::find($creatorId);
+                $kepadaUser = User::find($kepadaUserId);
+
+                $disposisi = new Disposisi([
+                    'legacy_source_id' => $this->buildSyntheticTindakLanjutLegacySourceId($row->id),
+                    'surat_masuk_id' => $suratMasukId,
+                    'dari_user_id' => $creatorId,
+                    'kepada_user_id' => $kepadaUserId,
+                    'dari_jabatan_id' => optional($dariUser)->jabatan_id,
+                    'kepada_jabatan_id' => optional($kepadaUser)->jabatan_id,
+                    'tipe' => 'disposisi',
+                    'priority_level' => 'normal',
+                    'created_at' => $this->normalizeTimestamp($row->created_at),
+                ]);
+            }
+
+            $noteParts = [];
+            if ($row->catatan_tindaklanjut) {
+                $noteParts[] = trim((string) $row->catatan_tindaklanjut);
+            }
+            if ($legacyFilePath) {
+                $noteParts[] = 'Berkas tindak lanjut legacy: /storage/' . $legacyFilePath;
+            }
+
+            $disposisi->status = 'ditindaklanjuti';
+            $disposisi->completed_at = $completedAt;
+            $disposisi->read_at = $disposisi->read_at ?: $completedAt;
+            $disposisi->catatan_tindak_lanjut = trim(implode(PHP_EOL, array_filter($noteParts))) ?: $disposisi->catatan_tindak_lanjut;
+            $disposisi->updated_at = $completedAt;
+            $disposisi->save();
+
+            $this->summary['tindak_lanjut_legacy_synced']++;
         }
     }
 
@@ -561,7 +667,7 @@ class LegacyPersuratanImportService
             return $required ? $this->ensureMissingFilePlaceholder($targetDir, $legacyId, $legacyFolder, $filename) : null;
         }
 
-        $source = $this->legacyPublicPath . DIRECTORY_SEPARATOR . 'uploads' . DIRECTORY_SEPARATOR . $legacyFolder . DIRECTORY_SEPARATOR . basename($filename);
+        $source = $this->resolveLegacySourceFile($legacyFolder, $filename);
 
         if (!is_file($source)) {
             $this->summary['file_missing']++;
@@ -577,6 +683,22 @@ class LegacyPersuratanImportService
         }
 
         return $targetPath;
+    }
+
+    protected function resolveLegacySourceFile($legacyFolder, $filename)
+    {
+        $basename = basename((string) $filename);
+
+        foreach ([
+            $this->legacyPublicPath . DIRECTORY_SEPARATOR . 'uploads' . DIRECTORY_SEPARATOR . $legacyFolder . DIRECTORY_SEPARATOR . $basename,
+            $this->legacyPublicPath . DIRECTORY_SEPARATOR . $legacyFolder . DIRECTORY_SEPARATOR . $basename,
+        ] as $candidate) {
+            if (is_file($candidate)) {
+                return $candidate;
+            }
+        }
+
+        return $this->legacyPublicPath . DIRECTORY_SEPARATOR . 'uploads' . DIRECTORY_SEPARATOR . $legacyFolder . DIRECTORY_SEPARATOR . $basename;
     }
 
     protected function ensureMissingFilePlaceholder($targetDir, $legacyId, $legacyFolder, $filename)
@@ -609,6 +731,143 @@ class LegacyPersuratanImportService
         $sequenceBySurat[$detail->id_surat]++;
 
         return $base + $sequenceBySurat[$detail->id_surat];
+    }
+
+    protected function buildSyntheticTindakLanjutLegacySourceId($legacySuratMasukId)
+    {
+        return 900000000000 + (int) $legacySuratMasukId;
+    }
+
+    protected function createLegacyUser($legacyUser)
+    {
+        $jabatan = $this->resolveLegacyJabatan($legacyUser->id_jabatan ?? null);
+        $unitId = $this->resolveLegacyUnitId($legacyUser->id_bidang ?? null);
+        $photoPath = $this->copyLegacyProfilePhoto($legacyUser->photo_user ?? null, $legacyUser->id);
+
+        $user = User::create([
+            'name' => $this->normalizeLegacyText($legacyUser->name, 'User Legacy ' . $legacyUser->id),
+            'username' => $this->uniqueUsername($legacyUser),
+            'email' => $this->uniqueEmail($legacyUser),
+            'password' => Hash::make(Str::random(40)),
+            'profile_photo_path' => $photoPath,
+            'jabatan_id' => optional($jabatan)->id,
+            'jabatan_keterangan' => $this->legacyJabatanName($legacyUser->id_jabatan ?? null),
+            'unit_id' => $unitId,
+            'bidang_id' => null,
+            'hirarki' => 999,
+            'nip' => $this->normalizeLegacyNip($legacyUser->nip ?? null),
+            'no_hp' => $legacyUser->no_wa ?? null,
+            'status_asn' => 'PNS',
+            'status_aktif_pegawai' => true,
+        ]);
+
+        $pegawaiRole = Role::where('name', 'pegawai')->first();
+        if ($pegawaiRole) {
+            $user->roles()->syncWithoutDetaching([$pegawaiRole->id]);
+        }
+
+        return $user;
+    }
+
+    protected function copyLegacyProfilePhoto($filename, $legacyUserId)
+    {
+        if ($this->skipFiles || !$filename) {
+            return null;
+        }
+
+        $source = $this->resolveLegacySourceFile('photo_user', $filename);
+        if (!is_file($source)) {
+            return null;
+        }
+
+        $targetPath = 'profile-photos/legacy/legacy-' . $legacyUserId . '-' . basename($filename);
+        if (!Storage::disk('public')->exists($targetPath)) {
+            Storage::disk('public')->makeDirectory(dirname($targetPath));
+            copy($source, Storage::disk('public')->path($targetPath));
+            $this->summary['profile_photos_copied']++;
+        }
+
+        return $targetPath;
+    }
+
+    protected function resolveLegacyJabatan($legacyJabatanId)
+    {
+        $map = [
+            1 => 'KPTA',
+            2 => 'WKPTA',
+            3 => 'SEK',
+            4 => 'PAN',
+            6 => 'PANMUD_HUKUM',
+            7 => 'PANMUD_BANDING',
+            8 => 'KABAG_KEPEG',
+            9 => 'KABAG_UMUM',
+            11 => 'KASUBAG_RENPRO',
+            12 => 'KASUBAG_TURT',
+            13 => 'KASUBAG_LAPKEU',
+            14 => 'KASUBAG_KEPEG',
+            23 => 'IT',
+        ];
+
+        $kode = $map[(int) $legacyJabatanId] ?? null;
+        return $kode ? Jabatan::where('kode', $kode)->first() : null;
+    }
+
+    protected function legacyJabatanName($legacyJabatanId)
+    {
+        if (!$legacyJabatanId) {
+            return null;
+        }
+
+        return trim((string) optional(DB::connection($this->legacyConnection)
+            ->table('ref_jabatan')
+            ->where('id', $legacyJabatanId)
+            ->first())->nama) ?: null;
+    }
+
+    protected function resolveLegacyUnitId($legacyBidangId)
+    {
+        $map = [
+            1 => 'PIMPINAN',
+            2 => 'KESEKRETARIATAN',
+            3 => 'KEPANITERAAN',
+        ];
+
+        $kode = $map[(int) $legacyBidangId] ?? null;
+        return $kode ? optional(DB::table('units')->where('kode', $kode)->first())->id : null;
+    }
+
+    protected function uniqueUsername($legacyUser)
+    {
+        $base = Str::slug(Str::before((string) $legacyUser->email, '@'), '');
+        if ($base === '') {
+            $base = 'legacy' . $legacyUser->id;
+        }
+
+        $username = Str::limit($base, 50, '');
+        $suffix = 1;
+        while (User::where('username', $username)->exists()) {
+            $username = Str::limit($base, 45, '') . $suffix;
+            $suffix++;
+        }
+
+        return $username;
+    }
+
+    protected function uniqueEmail($legacyUser)
+    {
+        $email = trim((string) $legacyUser->email);
+        if ($email === '' || User::whereRaw('LOWER(email) = ?', [Str::lower($email)])->exists()) {
+            $local = 'legacy-user-' . $legacyUser->id;
+            $email = $local . '@legacy.local';
+        }
+
+        return $email;
+    }
+
+    protected function normalizeLegacyNip($nip)
+    {
+        $value = trim((string) $nip);
+        return $value !== '' ? $value : null;
     }
 
     protected function normalizeTimestamp($value)
