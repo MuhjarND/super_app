@@ -48,7 +48,7 @@
                     <div class="pdf-verification-label">Validasi PDF</div>
                 </td>
                 <td class="pdf-verification-note">
-                    Dokumen ini telah ditandatangani secara elektronik melalui aplikasi SIMANTAP.
+                    Dokumen ini telah ditandatangani secara elektronik melalui aplikasi PAPEDA.
                     Pindai QR untuk verifikasi keaslian dokumen.
                 </td>
             </tr>

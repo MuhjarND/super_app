@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\AppSetting;
 use App\AgendaPimpinan;
 use App\LeaveApproval;
 use App\LeaveRequest;
@@ -38,6 +39,15 @@ class WhatsAppNotificationService
         $normalizedPhone = $this->normalizePhoneNumber($phoneNumber);
         $message = $this->withNotificationHeader($message, $context);
         $log = $this->createLog($normalizedPhone, $message, $context);
+
+        if (!$this->isEnabled()) {
+            $log->update([
+                'status' => 'skipped',
+                'response_body' => 'Notifikasi WhatsApp sedang dinonaktifkan dari pengaturan aplikasi.',
+            ]);
+
+            return false;
+        }
 
         if (!$normalizedPhone) {
             $log->update([
@@ -340,6 +350,31 @@ class WhatsAppNotificationService
         return $this->sendToUser($targetUser, $message, [
             'module' => 'surat_tugas',
             'event' => 'surat_tugas_recipient',
+            'notifiable_type' => get_class($suratKeluar),
+            'notifiable_id' => $suratKeluar->id,
+        ]);
+    }
+
+    public function notifySuratKeluarRecipient(SuratKeluar $suratKeluar, User $targetUser)
+    {
+        $suratKeluar->loadMissing('creator');
+
+        $message = $this->wrap([
+            'Yth. Bapak/Ibu,',
+            'Dengan hormat, terdapat surat keluar yang menandai Bapak/Ibu sebagai penerima internal.',
+            '',
+            'Nomor Surat: ' . $suratKeluar->nomor_surat_formatted,
+            'Perihal: ' . ($suratKeluar->perihal ?: '-'),
+            'Tanggal Surat: ' . $this->formatDateValue($suratKeluar->tanggal_surat),
+            'Dibuat Oleh: ' . (optional($suratKeluar->creator)->name ?: '-'),
+            '',
+            'Silakan meninjau dokumen melalui tautan berikut:',
+            route('surat-keluar.file', $suratKeluar),
+        ]);
+
+        return $this->sendToUser($targetUser, $message, [
+            'module' => 'persuratan',
+            'event' => 'surat_keluar_recipient',
             'notifiable_type' => get_class($suratKeluar),
             'notifiable_id' => $suratKeluar->id,
         ]);
@@ -802,6 +837,11 @@ class WhatsAppNotificationService
         return !empty($this->apiUrl) && !empty($this->apiKey);
     }
 
+    public function isEnabled()
+    {
+        return AppSetting::boolean('whatsapp_notifications_enabled', true);
+    }
+
     protected function sendBulk($users, $message, array $context = [])
     {
         $users = $users instanceof Collection ? $users : collect($users);
@@ -810,6 +850,16 @@ class WhatsAppNotificationService
             'attempted' => 0,
             'success' => 0,
         ];
+
+        if (!$this->isEnabled()) {
+            $users->each(function ($user) use ($message, $context) {
+                if ($user instanceof User && !empty($user->no_hp)) {
+                    $this->sendToUser($user, $message, $context);
+                }
+            });
+
+            return $result;
+        }
 
         foreach ($users as $user) {
             if (!$user instanceof User || empty($user->no_hp)) {
@@ -843,7 +893,7 @@ class WhatsAppNotificationService
 
     protected function wrap(array $lines)
     {
-        return implode("\n", $lines) . "\n\nHormat kami,\nSistem Informasi PTA Papua Barat";
+        return implode("\n", $lines) . "\n\nHormat kami,\nPAPEDA";
     }
 
     protected function withNotificationHeader($message, array $context = [])

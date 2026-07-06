@@ -84,7 +84,7 @@ class RapatNotulensiApprovalService
         DB::transaction(function () use ($approval, $actor, $catatan, $signatureData) {
             $approval->refresh();
             $this->guardDecision($approval, $actor);
-            $signature = $this->signaturePadService->storeDataUri($signatureData, 'rapat/notulensi-approval-signatures');
+            $signature = $this->signaturePadService->resolveForUser($actor, 'rapat/notulensi-approval-signatures', $signatureData);
 
             $approval->update([
                 'status' => 'approved',
@@ -183,7 +183,7 @@ class RapatNotulensiApprovalService
 
     protected function guardDecision(RapatNotulensiApproval $approval, User $actor)
     {
-        if ((int) $approval->approver_id !== (int) $actor->id && !$actor->isMeetingAdmin()) {
+        if (!$actor->canActAsAssignedUser($approval->approver_id) && !$actor->isMeetingAdmin()) {
             abort(403, 'Anda tidak berhak memproses approval notulen ini.');
         }
 

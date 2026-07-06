@@ -142,9 +142,9 @@
         }
 
         .signature-pad-image {
-            margin: 8px auto 6px;
-            width: 145px;
-            height: 72px;
+            margin: 0 auto -16px;
+            width: 170px;
+            height: 88px;
         }
 
         .signature-pad-image img {
@@ -162,7 +162,9 @@
         .signature-name {
             font-weight: bold;
             font-size: 11pt;
-            margin-top: 2px;
+            margin-top: 0;
+            position: relative;
+            z-index: 1;
         }
     </style>
 </head>

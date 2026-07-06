@@ -5,7 +5,12 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', 'Persuratan') | PTA Papua Barat</title>
+    <title>@yield('title', 'Dashboard') | PAPEDA</title>
+    <link rel="icon" type="image/png" href="{{ asset('logo_app_new.png') }}">
+    <link rel="shortcut icon" href="{{ asset('logo_app_new.png') }}">
+    <link rel="apple-touch-icon" href="{{ asset('icons/logo-app-192.png') }}">
+    <link rel="manifest" href="{{ asset('site.webmanifest') }}">
+    <meta name="theme-color" content="#5b21b6">
 
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
@@ -142,32 +147,57 @@
         .main-sidebar .brand-link {
             background: transparent;
             border-bottom: 1px solid var(--sidebar-border);
-            padding: 16px 20px;
+            padding: 14px 20px;
             display: flex;
             align-items: center;
+            justify-content: flex-start;
             gap: 12px;
         }
 
         .main-sidebar .brand-link .brand-text {
             color: var(--text-primary) !important;
             font-weight: 800;
-            font-size: 0.85rem;
             letter-spacing: -0.01em;
+            line-height: 1.15;
+            white-space: normal;
+        }
+
+        .main-sidebar .brand-link .brand-text strong {
+            display: block;
+            font-size: 0.88rem;
+            font-weight: 800;
+        }
+
+        .main-sidebar .brand-link .brand-text small {
+            display: block;
+            max-width: 150px;
+            margin-top: 2px;
+            color: var(--text-secondary);
+            font-size: 0.58rem;
+            font-weight: 600;
+            line-height: 1.25;
         }
 
         .logo-mark {
-            width: 38px;
-            height: 38px;
-            background: linear-gradient(135deg, #4f46e5, #7c3aed);
-            border-radius: 12px;
-            box-shadow: 0 4px 14px rgba(79, 70, 229, 0.3);
+            width: 54px;
+            height: 54px;
+            background: #ffffff;
+            border: 1px solid rgba(79, 70, 229, 0.15);
+            border-radius: 14px;
+            box-shadow: 0 4px 14px rgba(79, 70, 229, 0.18);
             display: flex;
             align-items: center;
             justify-content: center;
-            color: white;
-            font-weight: 800;
-            font-size: 1.05rem;
             flex-shrink: 0;
+            overflow: hidden;
+            padding: 3px;
+        }
+
+        .logo-mark img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            display: block;
         }
 
         /* User panel in sidebar */
@@ -186,7 +216,7 @@
             width: 42px;
             height: 42px;
             border-radius: 12px;
-            background: linear-gradient(135deg, #4f46e5, #7c3aed);
+            background: linear-gradient(135deg, #4f46e5, #8b5cf6);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -409,6 +439,20 @@
             border-bottom: 1px solid #e5e7eb;
             box-shadow: none;
             min-height: 56px;
+        }
+
+        @media (min-width: 992px) {
+            .main-header {
+                position: fixed;
+                top: 0;
+                right: 0;
+                left: 0;
+                z-index: 1035;
+            }
+
+            .content-wrapper {
+                padding-top: 56px;
+            }
         }
 
         .main-header .nav-link {
@@ -1355,7 +1399,7 @@
             height: 52px;
             margin: 0 auto 14px;
             border-radius: 50%;
-            border: 4px solid rgba(99, 102, 241, 0.18);
+            border: 4px solid rgba(79, 70, 229, 0.2);
             border-top-color: #4f46e5;
             animation: globalLoaderSpin 0.8s linear infinite;
         }
@@ -1562,6 +1606,8 @@
             }
 
             .main-header {
+                position: static !important;
+                top: auto !important;
                 min-height: auto;
                 padding: 6px 8px;
             }
@@ -2089,8 +2135,8 @@
             }
 
             .main-header {
-                position: sticky;
-                top: 0;
+                position: static !important;
+                top: auto !important;
                 z-index: 1030;
                 min-height: 58px;
                 padding: 7px 12px;
@@ -2389,7 +2435,7 @@
                 border-color: transparent !important;
                 color: #ffffff !important;
                 background: linear-gradient(135deg, var(--primary), var(--accent)) !important;
-                box-shadow: 0 10px 22px rgba(79, 70, 229, 0.24);
+                box-shadow: 0 10px 22px rgba(79, 70, 229, 0.25);
             }
 
             .alert {
@@ -3087,23 +3133,42 @@
                     </a>
                 </li>
                 
+                @php
+                    $topbarUser = Auth::user();
+                    $topbarDelegationLabels = $topbarUser ? $topbarUser->activeDelegationLabels() : collect();
+                @endphp
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#">
                         <div class="topbar-avatar">
-                            @if(Auth::user()->profile_photo_path)
-                                <img src="{{ asset('storage/' . Auth::user()->profile_photo_path) }}" alt="{{ Auth::user()->name }}">
+                            @if($topbarUser && $topbarUser->profile_photo_path)
+                                <img src="{{ asset('storage/' . $topbarUser->profile_photo_path) }}" alt="{{ $topbarUser->name }}">
                             @else
-                                {{ strtoupper(substr(Auth::user()->name ?? 'U', 0, 1)) }}
+                                {{ strtoupper(substr($topbarUser->name ?? 'U', 0, 1)) }}
                             @endif
                         </div>
-                        <span style="font-weight: 600; color: #374151;">{{ Auth::user()->name ?? 'User' }}</span>
+                        <span style="font-weight: 600; color: #374151;">{{ $topbarUser->name ?? 'User' }}</span>
+                        @if($topbarDelegationLabels->isNotEmpty())
+                            <span class="ml-2 d-none d-md-inline-flex align-items-center"
+                                style="font-size: 0.66rem; font-weight: 800; letter-spacing: .04em; color: #4f46e5; background: #eef2ff; border: 1px solid #c7d2fe; border-radius: 999px; padding: 0.16rem 0.46rem;">
+                                {{ \Illuminate\Support\Str::limit($topbarDelegationLabels->first(), 22) }}
+                            </span>
+                        @endif
                     </a>
                     <div class="dropdown-menu dropdown-menu-right">
                         <div class="px-3 py-2">
                             <div style="font-weight: 600; font-size: 0.85rem; color: #111827;">
-                                {{ Auth::user()->name ?? '-' }}</div>
-                            <div style="font-size: 0.75rem; color: #9ca3af;">{{ Auth::user()->display_jabatan }}
+                                {{ $topbarUser->name ?? '-' }}</div>
+                            <div style="font-size: 0.75rem; color: #9ca3af;">{{ $topbarUser->display_jabatan }}
                             </div>
+                            @if($topbarDelegationLabels->isNotEmpty())
+                                <div class="mt-2 d-flex flex-wrap" style="gap: .35rem;">
+                                    @foreach($topbarDelegationLabels as $delegationLabel)
+                                        <span style="font-size: 0.68rem; font-weight: 800; color: #4f46e5; background: #eef2ff; border: 1px solid #c7d2fe; border-radius: 999px; padding: 0.18rem 0.48rem;">
+                                            {{ $delegationLabel }}
+                                        </span>
+                                    @endforeach
+                                </div>
+                            @endif
                         </div>
                         <div class="dropdown-divider"></div>
                         <a class="dropdown-item" href="{{ route('profile.edit') }}">
@@ -3124,28 +3189,16 @@
         <!-- Sidebar -->
         <aside class="main-sidebar">
             <a href="{{ route('dashboard') }}" class="brand-link" style="text-decoration: none;">
-                <div class="logo-mark">P</div>
-                <span class="brand-text">PTA Papua Barat</span>
+                <div class="logo-mark">
+                    <img src="{{ asset('logo_app_new.png') }}" alt="Logo PAPEDA">
+                </div>
+                <span class="brand-text">
+                    <strong>PAPEDA</strong>
+                    <small>Pusat Aplikasi Pengelolaan Dokumen dan Administrasi</small>
+                </span>
             </a>
 
             <div class="sidebar">
-                <!-- User Panel -->
-                <div class="sidebar-user">
-                    <div class="sidebar-user-inner">
-                        <div class="sidebar-user-avatar">
-                            @if(Auth::user()->profile_photo_path)
-                                <img src="{{ asset('storage/' . Auth::user()->profile_photo_path) }}" alt="{{ Auth::user()->name }}">
-                            @else
-                                {{ strtoupper(substr(Auth::user()->name ?? 'U', 0, 2)) }}
-                            @endif
-                        </div>
-                        <div>
-                            <div class="sidebar-user-name">{{ Auth::user()->name ?? 'User' }}</div>
-                            <div class="sidebar-user-role">{{ Auth::user()->roles->first()->display_name ?? '-' }}</div>
-                        </div>
-                    </div>
-                </div>
-
                 <!-- Menu -->
                 <nav class="mt-1">
                     @php($sidebarUser = Auth::user())
@@ -3588,7 +3641,7 @@
                             </li>
                         @endif
 
-                        @if($isSidebarSuperAdmin || $sidebarUser->canAccessMeetingMasterData() || $sidebarUser->canManageProgressZiMasterData())
+                        @if($isSidebarSuperAdmin)
                             <li class="nav-section " data-section="master-data">
                                 <button type="button" class="nav-section-toggle">
                                     <span>Master Data</span>
@@ -3664,7 +3717,7 @@
                             </li>
                         @endif
 
-                        @if($isSidebarSuperAdmin || $sidebarUser->canAccessArchiveMenu())
+                        @if($isSidebarSuperAdmin)
                             <li class="nav-section " data-section="arsip">
                                 <button type="button" class="nav-section-toggle">
                                     <span>Arsip</span>

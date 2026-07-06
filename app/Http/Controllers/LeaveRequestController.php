@@ -151,9 +151,7 @@ class LeaveRequestController extends Controller
         if (!$this->moduleReady()) { return $this->setupResponse('Modul Cuti Belum Diaktifkan'); }
         $this->authorize('submit', $leaveRequest);
         $request->validate([
-            'signature_data' => ['required', 'string'],
-        ], [
-            'signature_data.required' => 'Tanda tangan pemohon wajib diisi sebelum pengajuan cuti disubmit.',
+            'signature_data' => ['nullable', 'string'],
         ]);
         $leaveRequest->load(['user', 'leaveType', 'documents']);
         $this->validator->validateForSubmit($leaveRequest);

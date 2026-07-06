@@ -116,16 +116,14 @@ class SupplyRequestController extends Controller
         abort_unless($supplyRequest->status === SupplyRequest::STATUS_PENDING, 422, 'Pengajuan ini sudah tidak dapat diproses.');
 
         $request->validate([
-            'signature_data' => ['required', 'string'],
+            'signature_data' => ['nullable', 'string'],
             'operator_note' => ['nullable', 'string', 'max:1000'],
-        ], [
-            'signature_data.required' => 'Paraf penerima wajib diisi sebelum barang diserahkan.',
         ]);
 
         $supplyRequest->load(['requester', 'items.item']);
         $this->ensureStockAvailable($supplyRequest);
 
-        $signature = $this->signaturePadService->storeDataUri($request->input('signature_data'), 'persediaan/paraf-penerima');
+        $signature = $this->signaturePadService->resolveForUser(auth()->user(), 'persediaan/paraf-penerima', $request->input('signature_data'));
 
         DB::transaction(function () use ($supplyRequest, $request, $signature) {
             $freshRequest = SupplyRequest::whereKey($supplyRequest->id)->lockForUpdate()->firstOrFail();

@@ -93,7 +93,7 @@ class RapatNotulensiController extends Controller
         $recommendationItems = $this->normalizeRecommendationItems($rapat, $data['rekomendasi_items'] ?? []);
 
         $notulensi = DB::transaction(function () use ($rapat, $data, $request, $recommendationItems) {
-            $signature = $this->signaturePadService->storeDataUri($data['signature_data'], 'rapat/notulis-signatures');
+            $signature = $this->signaturePadService->resolveForUser(auth()->user(), 'rapat/notulis-signatures', $data['signature_data'] ?? null);
             $notulensi = RapatNotulensi::create([
                 'rapat_id' => $rapat->id,
                 'notulis_id' => auth()->id(),
@@ -172,7 +172,7 @@ class RapatNotulensiController extends Controller
 
         DB::transaction(function () use ($notulensi, $data, $request, $recommendationItems) {
             $rapat = $notulensi->rapat;
-            $signature = $this->signaturePadService->storeDataUri($data['signature_data'], 'rapat/notulis-signatures');
+            $signature = $this->signaturePadService->resolveForUser(auth()->user(), 'rapat/notulis-signatures', $data['signature_data'] ?? null);
 
             $notulensi->update([
                 'notulis_id' => auth()->id(),

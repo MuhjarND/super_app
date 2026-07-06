@@ -338,7 +338,7 @@ class DashboardController extends Controller
         $suratKeluarVisible = SuratKeluar::visibleTo($user);
 
         $pendingDisposisiQuery = Disposisi::with(['suratMasuk', 'dariUser'])
-            ->where('kepada_user_id', $user->id)
+            ->addressedToUser($user)
             ->where('status', 'pending');
 
         $recent = collect()
@@ -433,13 +433,13 @@ class DashboardController extends Controller
         $pendingRapatApprovalQuery = RapatApproval::with(['rapat'])
             ->where('status', 'pending');
         if (!$user->isMeetingAdmin() && !$user->isSuperAdmin()) {
-            $pendingRapatApprovalQuery->where('approver_id', $user->id);
+            $pendingRapatApprovalQuery->whereIn('approver_id', $user->effectiveAssignmentUserIds());
         }
 
         $pendingNotulensiApprovalQuery = RapatNotulensiApproval::with(['notulensi.rapat'])
             ->where('status', 'pending');
         if (!$user->isMeetingAdmin() && !$user->isSuperAdmin()) {
-            $pendingNotulensiApprovalQuery->where('approver_id', $user->id);
+            $pendingNotulensiApprovalQuery->whereIn('approver_id', $user->effectiveAssignmentUserIds());
         }
 
         $pendingFollowUpQuery = $this->pendingMeetingFollowUpQuery($user);
@@ -605,7 +605,7 @@ class DashboardController extends Controller
             $relevantLeaveQuery->where(function ($query) use ($user) {
                 $query->where('user_id', $user->id)
                     ->orWhereHas('approvals', function ($approvalQuery) use ($user) {
-                        $approvalQuery->where('approver_id', $user->id);
+                        $approvalQuery->whereIn('approver_id', $user->effectiveAssignmentUserIds());
                     });
             });
         }
@@ -613,7 +613,7 @@ class DashboardController extends Controller
         $pendingLeaveApprovalQuery = LeaveApproval::with(['leaveRequest.user', 'leaveRequest.leaveType'])
             ->where('status', 'pending');
         if (!$user->isSuperAdmin()) {
-            $pendingLeaveApprovalQuery->where('approver_id', $user->id);
+            $pendingLeaveApprovalQuery->whereIn('approver_id', $user->effectiveAssignmentUserIds());
         }
 
         $recent = (clone $relevantLeaveQuery)

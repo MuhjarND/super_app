@@ -9,6 +9,7 @@ use App\KategoriSurat;
 use App\User;
 use App\Disposisi;
 use App\Services\WhatsAppNotificationService;
+use App\Services\DocumentPreviewService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -16,11 +17,13 @@ use Illuminate\Support\Facades\Storage;
 class SuratMasukController extends Controller
 {
     protected $waService;
+    protected $documentPreviewService;
 
-    public function __construct(WhatsAppNotificationService $waService)
+    public function __construct(WhatsAppNotificationService $waService, DocumentPreviewService $documentPreviewService)
     {
         $this->middleware('auth');
         $this->waService = $waService;
+        $this->documentPreviewService = $documentPreviewService;
     }
 
     public function index(Request $request)
@@ -30,11 +33,12 @@ class SuratMasukController extends Controller
         $suratMasuk = SuratMasuk::visibleTo($user)
             ->with('klasifikasiKode', 'kategoriSurat', 'creator', 'agendaPimpinan', 'disposisis.dariUser', 'disposisis.kepadaUser', 'disposisis.kepadaJabatan')
             ->orderBy('created_at', 'desc')
-            ->get();
+            ->paginate(25)
+            ->withQueryString();
         $klasifikasiKodes = $this->getKlasifikasiHuruf();
         $kategoriSurats = KategoriSurat::where('aktif', true)->orderBy('kode')->get();
         $petunjukOptions = $this->getPetunjukOptions();
-        $suratHistories = $suratMasuk->mapWithKeys(function ($surat) {
+        $suratHistories = $suratMasuk->getCollection()->mapWithKeys(function ($surat) {
             $items = $surat->disposisis
                 ->sortByDesc('created_at')
                 ->values()
@@ -153,14 +157,20 @@ class SuratMasukController extends Controller
         $user = auth()->user();
         abort_unless($user->canViewSuratMasuk($suratMasuk), 403);
 
+        $suratMasuk->disposisis()
+            ->addressedToUser($user)
+            ->whereNull('read_at')
+            ->update(['read_at' => now('Asia/Jayapura')]);
+
         $canDisposisi = $user->canForwardSuratMasuk($suratMasuk);
         $targetDisposisi = [];
         $showPetunjuk = $user->requiresPetunjukDisposisi();
+        $canNaikanSurat = $user->canNaikanSuratMasuk();
         $canEdit = $user->canEditSuratMasuk($suratMasuk);
         $canDelete = $user->canDeleteSuratMasuk($suratMasuk);
 
-        if ($canDisposisi && $user->jabatan) {
-            $targetIds = $user->jabatan->getTargetDisposisi();
+        if ($canDisposisi) {
+            $targetIds = $user->targetDisposisiJabatanIds();
             if (!empty($targetIds)) {
                 $targetDisposisi = \App\Jabatan::whereIn('id', $targetIds)->with('users')->get();
             }
@@ -174,6 +184,7 @@ class SuratMasukController extends Controller
             'targetDisposisi',
             'petunjukOptions',
             'showPetunjuk',
+            'canNaikanSurat',
             'canEdit',
             'canDelete'
         ));
@@ -319,7 +330,11 @@ class SuratMasukController extends Controller
         if (!$suratMasuk->file_path) {
             abort(404, 'File tidak ditemukan.');
         }
-        return response()->file(storage_path('app/public/' . $suratMasuk->file_path));
+        return $this->documentPreviewService->streamPublicFile(
+            $suratMasuk->file_path,
+            $suratMasuk->nomor_surat . ' - ' . $suratMasuk->perihal,
+            route('surat-masuk.download', $suratMasuk)
+        );
     }
 
     public function downloadFile(SuratMasuk $suratMasuk)

@@ -41,6 +41,13 @@ class DisposisiController extends Controller
         ]);
 
         $suratMasuk = SuratMasuk::findOrFail($request->surat_masuk_id);
+        if ($suratMasuk->status === 'selesai') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Surat ini sudah selesai ditindaklanjuti dan tidak perlu didisposisi lagi.',
+            ], 422);
+        }
+
         if (!$user->canViewSuratMasuk($suratMasuk) || !$user->canForwardSuratMasuk($suratMasuk)) {
             return response()->json([
                 'success' => false,
@@ -48,19 +55,37 @@ class DisposisiController extends Controller
             ], 403);
         }
 
-        $kepadaUser = User::with('jabatan')->find($request->kepada_user_id);
-        $targetIds = $this->targetJabatanIdsFor($user);
+        $kepadaUser = User::with('jabatan', 'activeJabatanDelegations.jabatan')->find($request->kepada_user_id);
+        $targetIds = $this->targetJabatanIdsFor($user, $request->tipe);
+        $kepadaJabatanId = $this->resolveTargetJabatanId($kepadaUser, $targetIds);
+        $kepadaJabatan = $kepadaJabatanId ? Jabatan::find($kepadaJabatanId) : null;
 
-        if (!$kepadaUser || !$kepadaUser->jabatan_id || (!$user->isSuperAdmin() && !in_array($kepadaUser->jabatan_id, $targetIds))) {
+        if (!$kepadaUser || !$kepadaJabatanId || (!$user->isSuperAdmin() && !in_array($kepadaJabatanId, $targetIds))) {
             return response()->json([
                 'success' => false,
                 'message' => 'Tujuan disposisi tidak valid untuk jabatan Anda.',
             ], 422);
         }
 
+        if ($request->tipe === 'naikan') {
+            if (!$user->canNaikanSuratMasuk()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Opsi naikkan hanya tersedia untuk Panitera, Sekretaris, dan Kasubag TURT.',
+                ], 403);
+            }
+
+            if (!$kepadaJabatan || !in_array($kepadaJabatan->kode, ['KPTA', 'WKPTA'], true)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Tujuan naikkan surat harus Ketua atau Wakil Ketua.',
+                ], 422);
+            }
+        }
+
         if ($suratMasuk->status === 'didisposisi') {
             $suratMasuk->disposisis()
-                ->where('kepada_user_id', $user->id)
+                ->addressedToUser($user)
                 ->where('status', 'pending')
                 ->update(['status' => 'ditindaklanjuti']);
         }
@@ -74,8 +99,8 @@ class DisposisiController extends Controller
             'surat_masuk_id' => $request->surat_masuk_id,
             'dari_user_id' => $user->id,
             'kepada_user_id' => $request->kepada_user_id,
-            'dari_jabatan_id' => $user->jabatan_id,
-            'kepada_jabatan_id' => $kepadaUser->jabatan_id,
+            'dari_jabatan_id' => $user->sourceJabatanIdForTarget($kepadaJabatanId),
+            'kepada_jabatan_id' => $kepadaJabatanId,
             'petunjuk' => $user->requiresPetunjukDisposisi() ? $request->petunjuk : null,
             'catatan' => $request->catatan,
             'tipe' => $request->tipe,
@@ -187,7 +212,7 @@ class DisposisiController extends Controller
     {
         $user = auth()->user();
         abort_unless(
-            $user->isSuperAdmin() || (int) $disposisi->dari_user_id === (int) $user->id || (int) $disposisi->kepada_user_id === (int) $user->id,
+            $user->isSuperAdmin() || (int) $disposisi->dari_user_id === (int) $user->id || $user->canFollowUpDisposisi($disposisi),
             403
         );
         abort_if($disposisi->status === 'ditindaklanjuti', 422, 'Disposisi sudah selesai ditindaklanjuti.');
@@ -225,21 +250,31 @@ class DisposisiController extends Controller
         $user = auth()->user();
         $targets = [];
 
-        $targetIds = $this->targetJabatanIdsFor($user);
+        $tipe = $request->input('tipe') === 'naikan' ? 'naikan' : 'disposisi';
+        $targetIds = $this->targetJabatanIdsFor($user, $tipe);
         if (empty($targetIds)) {
             return response()->json([]);
         }
 
         $targetJabatans = Jabatan::whereIn('id', $targetIds)
-            ->with(['users' => function ($query) use ($user) {
-                $query->active()->where('id', '!=', $user->id)->orderBy('name');
-            }])
             ->orderBy('level')
             ->orderBy('nama')
             ->get();
 
         foreach ($targetJabatans as $jabatan) {
-            foreach ($jabatan->users as $u) {
+            $users = User::with('jabatan')
+                ->active()
+                ->where('id', '!=', $user->id)
+                ->where(function ($query) use ($jabatan) {
+                    $query->where('jabatan_id', $jabatan->id)
+                        ->orWhereHas('activeJabatanDelegations', function ($delegationQuery) use ($jabatan) {
+                            $delegationQuery->where('jabatan_id', $jabatan->id);
+                        });
+                })
+                ->orderBy('name')
+                ->get();
+
+            foreach ($users as $u) {
                 $targets[] = [
                     'id' => $u->id,
                     'name' => $u->name,
@@ -255,10 +290,18 @@ class DisposisiController extends Controller
         return response()->json($targets);
     }
 
-    protected function targetJabatanIdsFor(User $user)
+    protected function targetJabatanIdsFor(User $user, $tipe = null)
     {
+        if ($tipe === 'naikan') {
+            if (!$user->canNaikanSuratMasuk() && !$user->isSuperAdmin()) {
+                return [];
+            }
+
+            return Jabatan::whereIn('kode', ['KPTA', 'WKPTA'])->pluck('id')->toArray();
+        }
+
         if ($user->isSuperAdmin()) {
-            return Jabatan::whereIn('kode', [
+            $query = Jabatan::whereIn('kode', [
                 'KPTA',
                 'WKPTA',
                 'SEK',
@@ -271,9 +314,48 @@ class DisposisiController extends Controller
                 'KASUBAG_TURT',
                 'PANMUD_BANDING',
                 'PANMUD_HUKUM',
-            ])->pluck('id')->toArray();
+            ]);
+
+            if ($tipe === 'disposisi') {
+                $query->whereNotIn('kode', ['KPTA', 'WKPTA']);
+            }
+
+            return $query->pluck('id')->toArray();
         }
 
-        return $user->jabatan ? $user->jabatan->getTargetDisposisi() : [];
+        $targetIds = $user->targetDisposisiJabatanIds();
+
+        if ($tipe === 'disposisi' && !empty($targetIds)) {
+            $pimpinanIds = Jabatan::whereIn('kode', ['KPTA', 'WKPTA'])->pluck('id')->map(function ($id) {
+                return (int) $id;
+            })->all();
+
+            $targetIds = array_values(array_filter($targetIds, function ($id) use ($pimpinanIds) {
+                return !in_array((int) $id, $pimpinanIds, true);
+            }));
+        }
+
+        return $targetIds;
+    }
+
+    protected function resolveTargetJabatanId($targetUser, array $allowedTargetIds)
+    {
+        if (!$targetUser) {
+            return null;
+        }
+
+        $allowedTargetIds = array_map('intval', $allowedTargetIds);
+
+        if ($targetUser->jabatan_id && in_array((int) $targetUser->jabatan_id, $allowedTargetIds, true)) {
+            return (int) $targetUser->jabatan_id;
+        }
+
+        foreach ($targetUser->activeJabatanDelegations as $delegation) {
+            if ($delegation->jabatan_id && in_array((int) $delegation->jabatan_id, $allowedTargetIds, true)) {
+                return (int) $delegation->jabatan_id;
+            }
+        }
+
+        return null;
     }
 }

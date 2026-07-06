@@ -102,11 +102,11 @@ class ApprovalCenterController extends Controller
         if ($category === 'dokumen_rapat') {
             $query = RapatApproval::where('status', 'pending');
             if (!$user->isMeetingAdmin()) {
-                $query->where('approver_id', $user->id);
+                $query->whereIn('approver_id', $user->effectiveAssignmentUserIds());
             }
             $notulensiQuery = RapatNotulensiApproval::where('status', 'pending');
             if (!$user->isMeetingAdmin()) {
-                $notulensiQuery->where('approver_id', $user->id);
+                $notulensiQuery->whereIn('approver_id', $user->effectiveAssignmentUserIds());
             }
             return $query->count() + $notulensiQuery->count();
         }
@@ -114,7 +114,7 @@ class ApprovalCenterController extends Controller
         if ($category === 'surat_cuti' && Schema::hasTable('leave_approvals')) {
             $query = LeaveApproval::where('status', 'pending');
             if (!$user->isSuperAdmin()) {
-                $query->where('approver_id', $user->id);
+                $query->whereIn('approver_id', $user->effectiveAssignmentUserIds());
             }
             return $query->count();
         }
@@ -122,7 +122,7 @@ class ApprovalCenterController extends Controller
         if ($category === 'surat_keluar' && Schema::hasTable('surat_keluar_approvals')) {
             $query = SuratKeluarApproval::where('status', 'pending');
             if (!$user->isSuperAdmin()) {
-                $query->where('approver_id', $user->id);
+                $query->whereIn('approver_id', $user->effectiveAssignmentUserIds());
             }
             return $query->count();
         }
@@ -130,7 +130,7 @@ class ApprovalCenterController extends Controller
         if ($category === 'progress_zi' && Schema::hasTable('zi_activity_approvals')) {
             $query = ZiActivityApproval::where('status', 'pending');
             if (!$user->isSuperAdmin()) {
-                $query->where('approver_id', $user->id);
+                $query->whereIn('approver_id', $user->effectiveAssignmentUserIds());
             }
             return $query->count();
         }
@@ -145,11 +145,11 @@ class ApprovalCenterController extends Controller
         if ($category === 'dokumen_rapat') {
             $query = RapatApprovalHistory::query();
             if (!$user->isMeetingAdmin()) {
-                $query->where('approver_id', $user->id);
+                $query->whereIn('approver_id', $user->effectiveAssignmentUserIds());
             }
             $notulensiQuery = RapatNotulensiApprovalHistory::query();
             if (!$user->isMeetingAdmin()) {
-                $notulensiQuery->where('approver_id', $user->id);
+                $notulensiQuery->whereIn('approver_id', $user->effectiveAssignmentUserIds());
             }
             return $query->count() + $notulensiQuery->count();
         }
@@ -158,7 +158,7 @@ class ApprovalCenterController extends Controller
             $query = LeaveRequest::whereIn('status', [LeaveRequest::STATUS_APPROVED, LeaveRequest::STATUS_REJECTED, LeaveRequest::STATUS_CANCELLED, LeaveRequest::STATUS_COMPLETED]);
             if (!$user->isSuperAdmin()) {
                 $query->whereHas('approvals', function ($approvalQuery) use ($user) {
-                    $approvalQuery->where('approver_id', $user->id)->whereIn('status', ['approved', 'rejected']);
+                    $approvalQuery->whereIn('approver_id', $user->effectiveAssignmentUserIds())->whereIn('status', ['approved', 'rejected']);
                 });
             }
             return $query->count();
@@ -167,7 +167,7 @@ class ApprovalCenterController extends Controller
         if ($category === 'surat_keluar' && Schema::hasTable('surat_keluar_approvals')) {
             $query = SuratKeluarApprovalHistory::query();
             if (!$user->isSuperAdmin()) {
-                $query->where('approver_id', $user->id);
+                $query->whereIn('approver_id', $user->effectiveAssignmentUserIds());
             }
             return $query->count();
         }
@@ -175,7 +175,7 @@ class ApprovalCenterController extends Controller
         if ($category === 'progress_zi' && Schema::hasTable('zi_activity_approvals')) {
             $query = ZiActivityApproval::whereIn('status', ['approved', 'rejected']);
             if (!$user->isSuperAdmin()) {
-                $query->where('approver_id', $user->id);
+                $query->whereIn('approver_id', $user->effectiveAssignmentUserIds());
             }
             return $query->count();
         }
@@ -196,7 +196,7 @@ class ApprovalCenterController extends Controller
             ])->where('status', 'pending')->orderByDesc('updated_at');
 
             if (!$user->isMeetingAdmin()) {
-                $query->where('approver_id', $user->id);
+                $query->whereIn('approver_id', $user->effectiveAssignmentUserIds());
             }
 
             $undanganItems = $query->get()->map(function ($approval) {
@@ -220,7 +220,7 @@ class ApprovalCenterController extends Controller
             ])->where('status', 'pending')->orderByDesc('updated_at');
 
             if (!$user->isMeetingAdmin()) {
-                $query->where('approver_id', $user->id);
+                $query->whereIn('approver_id', $user->effectiveAssignmentUserIds());
             }
 
             $notulensiItems = $query->get()->map(function ($approval) {
@@ -246,7 +246,7 @@ class ApprovalCenterController extends Controller
                 ->orderByDesc('updated_at');
 
             if (!$user->isSuperAdmin()) {
-                $query->where('approver_id', $user->id);
+                $query->whereIn('approver_id', $user->effectiveAssignmentUserIds());
             }
 
             return $query->get()->map(function ($approval) {
@@ -270,7 +270,7 @@ class ApprovalCenterController extends Controller
                 ->orderByDesc('updated_at');
 
             if (!$user->isSuperAdmin()) {
-                $query->where('approver_id', $user->id);
+                $query->whereIn('approver_id', $user->effectiveAssignmentUserIds());
             }
 
             return $query->get()->map(function ($approval) {
@@ -295,7 +295,7 @@ class ApprovalCenterController extends Controller
                 ->orderByDesc('id');
 
             if (!$user->isSuperAdmin()) {
-                $query->where('approver_id', $user->id);
+                $query->whereIn('approver_id', $user->effectiveAssignmentUserIds());
             }
 
             return $query->get()->map(function ($approval) {
@@ -323,7 +323,7 @@ class ApprovalCenterController extends Controller
         if ($category === 'dokumen_rapat') {
             $query = RapatApprovalHistory::with(['rapat', 'approver', 'approval'])->orderByDesc('acted_at')->orderByDesc('id');
             if (!$user->isMeetingAdmin()) {
-                $query->where('approver_id', $user->id);
+                $query->whereIn('approver_id', $user->effectiveAssignmentUserIds());
             }
 
             $undanganItems = $query->limit(100)->get()->map(function ($entry) {
@@ -341,7 +341,7 @@ class ApprovalCenterController extends Controller
 
             $query = RapatNotulensiApprovalHistory::with(['notulensi.rapat', 'approver', 'approval'])->orderByDesc('acted_at')->orderByDesc('id');
             if (!$user->isMeetingAdmin()) {
-                $query->where('approver_id', $user->id);
+                $query->whereIn('approver_id', $user->effectiveAssignmentUserIds());
             }
 
             $notulensiItems = $query->limit(100)->get()->map(function ($entry) {
@@ -363,7 +363,7 @@ class ApprovalCenterController extends Controller
         if ($category === 'progress_zi' && Schema::hasTable('zi_activity_approvals')) {
             $query = ZiActivityApproval::with(['activity.area', 'approver'])->whereIn('status', ['approved', 'rejected'])->orderByDesc('acted_at')->orderByDesc('id');
             if (!$user->isSuperAdmin()) {
-                $query->where('approver_id', $user->id);
+                $query->whereIn('approver_id', $user->effectiveAssignmentUserIds());
             }
 
             return $query->limit(100)->get()->map(function ($entry) {
@@ -386,7 +386,7 @@ class ApprovalCenterController extends Controller
                 ->orderByDesc('id');
 
             if (!$user->isSuperAdmin()) {
-                $query->where('approver_id', $user->id);
+                $query->whereIn('approver_id', $user->effectiveAssignmentUserIds());
             }
 
             return $query->limit(100)->get()->map(function ($entry) {
@@ -408,7 +408,7 @@ class ApprovalCenterController extends Controller
                 ->orderByDesc('id');
 
             if (!$user->isSuperAdmin()) {
-                $query->where('approver_id', $user->id);
+                $query->whereIn('approver_id', $user->effectiveAssignmentUserIds());
             }
 
             return $query->limit(100)->get()->map(function ($entry) {

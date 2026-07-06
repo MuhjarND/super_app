@@ -25,9 +25,10 @@ class ProgressZiApprovalController extends Controller
     public function show(ZiActivityApproval $ziActivityApproval)
     {
         $this->abortUnlessCanVerifyProgressZi();
+        $user = auth()->user();
 
         abort_unless(
-            auth()->id() === (int) $ziActivityApproval->approver_id || auth()->user()->isSuperAdmin(),
+            $user->canActAsAssignedUser($ziActivityApproval->approver_id) || $user->isSuperAdmin(),
             403
         );
 
@@ -62,9 +63,10 @@ class ProgressZiApprovalController extends Controller
     public function bundle(ZiActivityApproval $ziActivityApproval)
     {
         $this->abortUnlessCanVerifyProgressZi();
+        $user = auth()->user();
 
         abort_unless(
-            auth()->id() === (int) $ziActivityApproval->approver_id || auth()->user()->isSuperAdmin(),
+            $user->canActAsAssignedUser($ziActivityApproval->approver_id) || $user->isSuperAdmin(),
             403
         );
 

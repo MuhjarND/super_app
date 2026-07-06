@@ -4,6 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{{ $voting->judul }} | Hasil Voting</title>
+    @include('partials.app-icons')
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         body{margin:0;font-family:'Inter',sans-serif;background:#f8fafc;color:#0f172a;}
@@ -19,6 +20,9 @@
         .bar{width:100%;background:#e2e8f0;height:16px;border-radius:999px;overflow:hidden;}
         .fill{height:100%;background:linear-gradient(90deg,#4f46e5,#38bdf8);transition:width .45s ease;}
         .fill.leading{background:linear-gradient(90deg,#f97316,#ef4444);}
+        .candidate-head{display:flex;justify-content:space-between;gap:12px;align-items:center;font-size:.88rem;font-weight:700;margin-bottom:6px;}
+        .candidate-name{display:flex;align-items:center;gap:10px;min-width:0;}
+        .candidate-img{width:44px;height:44px;border-radius:12px;object-fit:cover;background:#eef2ff;border:1px solid #dbe4ff;flex:0 0 auto;}
         .pending{margin-top:18px;}
     </style>
 </head>
@@ -57,8 +61,9 @@
                 const topCount = item.candidates.length ? item.candidates[0].count : 0;
                 const bars = item.candidates.map(function (candidate) {
                     const leading = candidate.count === topCount && candidate.count > 0 ? 'leading' : '';
+                    const image = candidate.image_url ? '<img src="' + candidate.image_url + '" class="candidate-img" alt="">' : '';
                     return '<div style="margin-bottom:12px;">'
-                        + '<div style="display:flex;justify-content:space-between;font-size:.88rem;font-weight:700;"><span>' + candidate.nama + '</span><span>' + candidate.count + ' (' + candidate.percentage + '%)</span></div>'
+                        + '<div class="candidate-head"><span class="candidate-name">' + image + '<span>' + candidate.nama + '</span></span><span>' + candidate.count + ' (' + candidate.percentage + '%)</span></div>'
                         + '<div class="bar"><div class="fill ' + leading + '" style="width:' + candidate.percentage + '%"></div></div>'
                         + '</div>';
                 }).join('');

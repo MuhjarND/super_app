@@ -108,12 +108,12 @@
         }
 
         .signature-pad-image {
-            margin: 8pt 0 4pt 0;
+            margin: 0 0 -12pt 0;
         }
 
         .signature-pad-image img {
-            width: 118pt;
-            height: 58pt;
+            width: 138pt;
+            height: 70pt;
             display: block;
             object-fit: contain;
         }
@@ -121,6 +121,8 @@
         .nama-ttd {
             font-weight: bold;
             font-size: 10.5pt;
+            position: relative;
+            z-index: 1;
         }
     </style>
 </head>

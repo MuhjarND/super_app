@@ -10,7 +10,7 @@
     .zi-kpi { background:#fff; border:1px solid #e5e7eb; border-radius:14px; padding:16px; box-shadow:0 4px 12px rgba(15, 23, 42, .04); }
     .zi-kpi .value { font-size:1.4rem; font-weight:800; color:#0f172a; line-height:1; margin-bottom:5px; }
     .zi-kpi .label { font-size:.76rem; color:#64748b; }
-    .zi-row { display:grid; grid-template-columns:1.1fr .9fr; gap:16px; }
+    .zi-row { display:grid; grid-template-columns:1.1fr .9fr; gap:16px; align-items:start; }
     .zi-wide-panel { width:100%; }
     .zi-trend-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(260px, 1fr)); gap:10px; width:100%; }
     .zi-panel { background:#fff; border:1px solid #e5e7eb; border-radius:16px; box-shadow:0 4px 12px rgba(15,23,42,.04); overflow:hidden; }
@@ -31,32 +31,72 @@
     .zi-chart-box span { font-size:.72rem; color:#64748b; }
     .zi-trend-top { display:flex; align-items:center; justify-content:space-between; gap:12px; }
     .zi-filter-bar { background:#fff; border:1px solid #e5e7eb; border-radius:16px; box-shadow:0 4px 12px rgba(15,23,42,.04); padding:14px 18px; display:flex; align-items:center; justify-content:space-between; gap:14px; flex-wrap:wrap; }
-    @media (max-width: 991.98px) { .zi-kpi-grid, .zi-group-grid, .zi-row, .zi-chart-grid, .zi-trend-grid { grid-template-columns:1fr; } .zi-filter-bar { flex-direction:column; align-items:stretch; } }
+    .zi-hero { position:relative; overflow:hidden; border:1px solid #e0e7ff; border-radius:18px; background:linear-gradient(135deg, #ffffff 0%, #f6f7ff 52%, #ecfeff 100%); box-shadow:0 10px 28px rgba(79,70,229,.08); padding:18px; display:grid; grid-template-columns:1fr auto; gap:18px; align-items:center; }
+    .zi-hero:after { content:""; position:absolute; right:-72px; top:-92px; width:190px; height:190px; border-radius:50%; background:rgba(79,70,229,.09); pointer-events:none; }
+    .zi-hero-title { margin:0; font-size:1.05rem !important; font-weight:850; color:#0f172a; letter-spacing:0; }
+    .zi-hero-subtitle { margin-top:5px; color:#64748b; font-size:.78rem; line-height:1.55; max-width:660px; }
+    .zi-hero-actions { position:relative; z-index:1; display:flex; align-items:center; gap:12px; flex-wrap:wrap; justify-content:flex-end; }
+    .zi-score-ring { width:92px; height:92px; border-radius:24px; background:#fff; border:1px solid #dbe4ff; box-shadow:0 14px 24px rgba(79,70,229,.12); display:flex; flex-direction:column; align-items:center; justify-content:center; }
+    .zi-score-ring strong { font-size:1.45rem; line-height:1; font-weight:850; color:#4f46e5; }
+    .zi-score-ring span { margin-top:5px; font-size:.66rem; font-weight:800; color:#64748b; text-transform:uppercase; letter-spacing:.06em; }
+    .zi-period-form { display:flex; align-items:center; gap:8px; background:#fff; border:1px solid #dbe4ff; border-radius:14px; padding:7px; box-shadow:0 8px 18px rgba(15,23,42,.05); }
+    .zi-period-form .form-control { min-width:220px; border:0; background:#f8fafc; border-radius:10px; }
+    .zi-kpi { display:flex; align-items:center; gap:12px; border-radius:16px; padding:15px; }
+    .zi-kpi-icon { width:38px; height:38px; display:flex; align-items:center; justify-content:center; border-radius:12px; background:#eef2ff; color:#4f46e5; flex-shrink:0; }
+    .zi-kpi .value { margin-bottom:3px; }
+    .zi-panel { border-radius:18px; }
+    .zi-panel-head { min-height:50px; }
+    .zi-chart-box { text-align:left; }
+    .zi-chart-box strong { font-size:1.16rem; }
+    .zi-progress-item { border:1px solid #edf2f7; border-radius:14px; padding:12px; background:#fff; }
+    .zi-progress-item + .zi-progress-item { margin-top:0; }
+    .zi-progress-list { gap:9px; }
+    .zi-attention-item, .zi-trend-item { border-color:#edf2f7; background:#fbfdff; }
+    @media (max-width: 991.98px) {
+        .zi-kpi-grid, .zi-group-grid, .zi-row, .zi-chart-grid, .zi-trend-grid, .zi-hero { grid-template-columns:1fr; }
+        .zi-filter-bar, .zi-hero-actions, .zi-period-form { flex-direction:column; align-items:stretch; }
+        .zi-score-ring { width:100%; height:auto; min-height:78px; border-radius:16px; }
+        .zi-period-form .form-control { min-width:0; width:100%; }
+    }
 </style>
 @endpush
 
 @section('content')
 <div class="zi-shell">
-    <div class="zi-filter-bar">
-        <h5 style="margin:0; font-size:.92rem; font-weight:800; color:#0f172a;">Rekapan Zona Integritas</h5>
-        <form method="GET" class="d-flex align-items-center" style="gap:8px;">
-            <select name="period_id" class="form-control">
-                <option value="">Semua Periode</option>
-                @foreach($periods as $period)
-                    <option value="{{ $period->id }}" {{ optional($selectedPeriod)->id === $period->id ? 'selected' : '' }}>{{ $period->name }} ({{ $period->year }})</option>
-                @endforeach
-            </select>
-            <button class="btn btn-primary btn-sm px-3" type="submit">Terapkan</button>
-        </form>
+    <div class="zi-hero">
+        <div>
+            <h1 class="zi-hero-title">Rekapan Zona Integritas</h1>
+            <div class="zi-hero-subtitle">
+                Pantau capaian area, eviden, kegiatan, dan item yang perlu ditindaklanjuti dalam satu tampilan ringkas.
+                @if($selectedPeriod)
+                    Periode aktif: <strong>{{ $selectedPeriod->name }} ({{ $selectedPeriod->year }})</strong>.
+                @endif
+            </div>
+        </div>
+        <div class="zi-hero-actions">
+            <div class="zi-score-ring">
+                <strong>{{ rtrim(rtrim(number_format($dashboard['summary']['period_score'], 1), '0'), '.') }}%</strong>
+                <span>Nilai</span>
+            </div>
+            <form method="GET" class="zi-period-form">
+                <select name="period_id" class="form-control">
+                    <option value="">Semua Periode</option>
+                    @foreach($periods as $period)
+                        <option value="{{ $period->id }}" {{ optional($selectedPeriod)->id === $period->id ? 'selected' : '' }}>{{ $period->name }} ({{ $period->year }})</option>
+                    @endforeach
+                </select>
+                <button class="btn btn-primary btn-sm px-3" type="submit"><i class="fas fa-filter mr-1"></i>Terapkan</button>
+            </form>
+        </div>
     </div>
 
     <div class="zi-kpi-grid">
-        <div class="zi-kpi"><div class="value">{{ $dashboard['summary']['group_count'] }}</div><div class="label">Kelompok</div></div>
-        <div class="zi-kpi"><div class="value">{{ $dashboard['summary']['area_count'] }}</div><div class="label">Area</div></div>
-        <div class="zi-kpi"><div class="value">{{ $dashboard['summary']['sub_point_covered_count'] }}/{{ $dashboard['summary']['sub_point_count'] }}</div><div class="label">Sub Poin</div></div>
-        <div class="zi-kpi"><div class="value">{{ $dashboard['summary']['periodic_sub_point_count'] }}</div><div class="label">Berkala</div></div>
-        <div class="zi-kpi"><div class="value">{{ $dashboard['summary']['activity_count'] }}</div><div class="label">Kegiatan</div></div>
-        <div class="zi-kpi"><div class="value">{{ rtrim(rtrim(number_format($dashboard['summary']['period_score'], 1), '0'), '.') }}%</div><div class="label">Nilai Periode</div></div>
+        <div class="zi-kpi"><div class="zi-kpi-icon"><i class="fas fa-layer-group"></i></div><div><div class="value">{{ $dashboard['summary']['group_count'] }}</div><div class="label">Kelompok</div></div></div>
+        <div class="zi-kpi"><div class="zi-kpi-icon"><i class="fas fa-map-marked-alt"></i></div><div><div class="value">{{ $dashboard['summary']['area_count'] }}</div><div class="label">Area</div></div></div>
+        <div class="zi-kpi"><div class="zi-kpi-icon"><i class="fas fa-check-double"></i></div><div><div class="value">{{ $dashboard['summary']['sub_point_covered_count'] }}/{{ $dashboard['summary']['sub_point_count'] }}</div><div class="label">Sub Poin</div></div></div>
+        <div class="zi-kpi"><div class="zi-kpi-icon"><i class="fas fa-sync-alt"></i></div><div><div class="value">{{ $dashboard['summary']['periodic_sub_point_count'] }}</div><div class="label">Berkala</div></div></div>
+        <div class="zi-kpi"><div class="zi-kpi-icon"><i class="fas fa-tasks"></i></div><div><div class="value">{{ $dashboard['summary']['activity_count'] }}</div><div class="label">Kegiatan</div></div></div>
+        <div class="zi-kpi"><div class="zi-kpi-icon"><i class="fas fa-chart-line"></i></div><div><div class="value">{{ rtrim(rtrim(number_format($dashboard['summary']['period_score'], 1), '0'), '.') }}%</div><div class="label">Nilai Periode</div></div></div>
     </div>
 
     <div class="zi-panel zi-wide-panel">

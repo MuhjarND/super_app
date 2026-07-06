@@ -3,9 +3,12 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Login | SIMANTAP</title>
-    <link rel="icon" type="image/png" href="{{ asset('logo_app.png') }}">
-    <link rel="shortcut icon" href="{{ asset('logo_app.png') }}">
+    <title>Login | PAPEDA</title>
+    <link rel="icon" type="image/png" href="{{ asset('logo_app_new.png') }}">
+    <link rel="shortcut icon" href="{{ asset('logo_app_new.png') }}">
+    <link rel="apple-touch-icon" href="{{ asset('icons/logo-app-192.png') }}">
+    <link rel="manifest" href="{{ asset('site.webmanifest') }}">
+    <meta name="theme-color" content="#5b21b6">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <style>
@@ -95,12 +98,12 @@
             align-items: center;
             justify-content: center;
             padding: 48px;
-            color: #ffffff;
+            color: var(--text);
             text-align: center;
             background:
-                radial-gradient(circle at 44% 48%, rgba(167, 139, 250, 0.34), transparent 0 170px),
-                radial-gradient(circle at 50% 60%, rgba(255, 255, 255, 0.08), transparent 0 360px),
-                linear-gradient(135deg, var(--brand-dark) 0%, var(--brand) 52%, var(--brand-mid) 100%);
+                radial-gradient(circle at 42% 28%, rgba(255, 255, 255, 0.95), transparent 0 180px),
+                radial-gradient(circle at 54% 58%, rgba(237, 233, 254, 0.72), transparent 0 360px),
+                linear-gradient(135deg, #ffffff 0%, #f8fafc 48%, #ede9fe 100%);
         }
 
         .brand-content {
@@ -111,9 +114,9 @@
         }
 
         .brand-logo {
-            width: 126px;
-            height: 126px;
-            margin-bottom: 28px;
+            width: 270px;
+            height: 270px;
+            margin-bottom: 26px;
         }
 
         .brand-logo img {
@@ -125,7 +128,7 @@
 
         .brand-title {
             margin: 0;
-            color: #ffffff;
+            color: var(--brand-dark);
             font-size: 2.3rem;
             line-height: 1.1;
             font-weight: 800;
@@ -134,7 +137,7 @@
 
         .brand-subtitle {
             margin: 14px 0 0;
-            color: rgba(255, 255, 255, 0.82);
+            color: #34445a;
             font-size: 1.05rem;
             line-height: 1.55;
             font-weight: 500;
@@ -145,14 +148,14 @@
             height: 4px;
             margin: 28px auto 24px;
             border-radius: 999px;
-            background: #ffffff;
-            opacity: .72;
+            background: linear-gradient(90deg, var(--brand), var(--brand-mid));
+            opacity: .7;
         }
 
         .brand-description {
             margin: 0;
             max-width: 430px;
-            color: rgba(255, 255, 255, 0.72);
+            color: #475569;
             font-size: .98rem;
             line-height: 1.65;
             font-weight: 500;
@@ -337,8 +340,8 @@
             }
 
             .brand-logo {
-                width: 92px;
-                height: 92px;
+                width: 190px;
+                height: 190px;
                 margin-bottom: 18px;
             }
 
@@ -380,12 +383,10 @@
         <section class="brand-side">
             <div class="brand-content">
                 <div class="brand-logo">
-                    <img src="{{ asset('logo_app.png') }}" alt="Logo SIMANTAP">
+                    <img src="{{ asset('logo_app_new.png') }}" alt="Logo PAPEDA">
                 </div>
-                <h1 class="brand-title">SIMANTAP</h1>
-                <p class="brand-subtitle">Sistem Manajemen Terpadu PTA Papua Barat</p>
                 <div class="brand-divider"></div>
-                <p class="brand-description">Portal kerja terpadu untuk persuratan, rapat, cuti, Zona Integritas, perawatan aset, dan tindak lanjut internal.</p>
+                <p class="brand-description">"Administrasi yang tertib adalah awal dari pelayanan yang cepat, akurat, dan terpercaya."</p>
             </div>
         </section>
 

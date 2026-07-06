@@ -36,12 +36,9 @@ class SuratMasuk extends Model
         return $query->where(function ($builder) use ($user) {
             $builder->where('created_by', $user->id);
 
-            if (!$user->isAdminSurat()) {
-                $builder->orWhereHas('disposisis', function ($disposisiQuery) use ($user) {
-                    $disposisiQuery->where('dari_user_id', $user->id)
-                        ->orWhere('kepada_user_id', $user->id);
-                });
-            }
+            $builder->orWhereHas('disposisis', function ($disposisiQuery) use ($user) {
+                $disposisiQuery->involvingUser($user);
+            });
         });
     }
 
@@ -63,6 +60,11 @@ class SuratMasuk extends Model
     public function disposisis()
     {
         return $this->hasMany(Disposisi::class, 'surat_masuk_id');
+    }
+
+    public function readReceipts()
+    {
+        return $this->hasMany(SuratMasukRead::class, 'surat_masuk_id');
     }
 
     public function latestDisposisi()

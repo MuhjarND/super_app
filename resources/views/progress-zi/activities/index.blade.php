@@ -72,18 +72,72 @@
     .zi-suggestion-title { font-size:.78rem; font-weight:700; color:#0f172a; line-height:1.4; }
     .zi-suggestion-meta { font-size:.7rem; color:#64748b; margin-top:3px; }
     .zi-section-label { font-size:.68rem; font-weight:800; letter-spacing:.06em; text-transform:uppercase; color:#64748b; margin-bottom:6px; }
+    .zi-monitor-hero { border:1px solid #e0e7ff; border-radius:18px; background:linear-gradient(135deg, #ffffff 0%, #f6f7ff 58%, #ecfeff 100%); box-shadow:0 10px 28px rgba(79,70,229,.08); padding:18px; display:flex; align-items:center; justify-content:space-between; gap:16px; overflow:hidden; position:relative; }
+    .zi-monitor-hero:after { content:""; position:absolute; width:190px; height:190px; border-radius:50%; background:rgba(79,70,229,.08); right:-78px; top:-98px; pointer-events:none; }
+    .zi-monitor-title { position:relative; z-index:1; }
+    .zi-monitor-title h1 { margin:0; font-size:1.05rem !important; line-height:1.25; font-weight:850; color:#0f172a; letter-spacing:0; }
+    .zi-monitor-title p { margin:5px 0 0; color:#64748b; font-size:.78rem; line-height:1.55; max-width:680px; }
+    .zi-monitor-tools { position:relative; z-index:1; display:flex; align-items:center; gap:8px; flex-wrap:wrap; justify-content:flex-end; }
+    .zi-monitor-pill { display:inline-flex; align-items:center; gap:7px; border:1px solid #dbe4ff; border-radius:999px; background:#fff; color:#3730a3; padding:8px 11px; font-size:.72rem; font-weight:800; box-shadow:0 8px 18px rgba(15,23,42,.05); }
+    .zi-group-grid { grid-template-columns:repeat(3, minmax(0,1fr)); }
+    .zi-group-card { border-radius:18px; border-color:#e0e7ff; background:#fff; box-shadow:0 8px 20px rgba(15,23,42,.04); }
+    .zi-group-card.active { border-color:#4f46e5; background:linear-gradient(135deg, #eef2ff 0%, #ffffff 100%); }
+    .zi-group-eyebrow { color:#64748b; }
+    .zi-group-stat { border-color:#e0e7ff; color:#4f46e5; }
+    .zi-monitor-filter { border-radius:18px; box-shadow:0 8px 20px rgba(15,23,42,.04); }
+    .zi-monitor-filter label { color:#475569; font-weight:800; margin-bottom:6px; }
+    .zi-monitor-filter .form-control { border-color:#dbe4ff; border-radius:12px; min-height:38px; }
+    .zi-monitor-filter .form-control:focus { border-color:#818cf8; box-shadow:0 0 0 .15rem rgba(79,70,229,.12); }
+    .zi-area-card { border-radius:18px; box-shadow:0 8px 22px rgba(15,23,42,.045); }
+    .zi-area-head { min-height:68px; }
+    .zi-area-title { font-size:.96rem; }
+    .zi-area-body { background:#f8fbff; }
+    .zi-point-card { border-radius:16px; box-shadow:0 2px 8px rgba(15,23,42,.025); }
+    .zi-subpoint-row { background:#fff; }
+    .zi-action-group .btn { border-radius:10px; font-weight:800; }
+    .zi-preview-link { padding:4px 8px; border-radius:999px; background:#eef2ff; color:#4338ca; }
+    .zi-detail-toggle { width:max-content; padding:4px 8px; border-radius:999px; background:#f8fafc; }
     @media (max-width: 991.98px) {
         .zi-group-grid { grid-template-columns:1fr; }
+        .zi-monitor-hero, .zi-monitor-tools { flex-direction:column; align-items:stretch; }
+        .zi-monitor-pill { justify-content:center; border-radius:14px; }
         .zi-subpoint-row { flex-direction:column; }
         .zi-subpoint-right { width:100%; }
+        .zi-action-group { width:100%; display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); }
+        .zi-action-group .btn, .zi-action-group form { width:100%; }
+        .zi-action-group form .btn { display:block; }
+        .zi-area-head { align-items:flex-start; flex-direction:column; }
+        .zi-area-meta { width:100%; justify-content:flex-start; }
         .zi-preview-layout { grid-template-columns:1fr; }
         .zi-preview-sidebar { border-right:none; border-bottom:1px solid #e2e8f0; max-height:200px; }
+    }
+    @media (max-width: 575.98px) {
+        .zi-action-group { grid-template-columns:1fr; }
+        .zi-monitor-filter form.row { display:block !important; margin-left:0; margin-right:0; }
+        .zi-monitor-filter .form-group { display:block !important; width:100% !important; max-width:100% !important; padding-left:0; padding-right:0; }
+        .zi-monitor-filter .row > [class*="col-"] { margin-bottom:10px; }
     }
 </style>
 @endpush
 
 @section('content')
 <div class="zi-monitor-shell">
+    <div class="zi-monitor-hero">
+        <div class="zi-monitor-title">
+            <h1>Monitoring Progress ZI</h1>
+            <p>
+                Kelola kegiatan, eviden, dan review setiap sub poin Zona Integritas dengan tampilan yang lebih mudah dipindai.
+                @if($selectedPeriod)
+                    Periode: <strong>{{ $selectedPeriod->name }}</strong>.
+                @endif
+            </p>
+        </div>
+        <div class="zi-monitor-tools">
+            <span class="zi-monitor-pill"><i class="fas fa-layer-group"></i>{{ count($groupOptions) }} kelompok</span>
+            <span class="zi-monitor-pill"><i class="fas fa-map-marked-alt"></i>{{ $visibleAreas->count() }} area tampil</span>
+        </div>
+    </div>
+
     <div class="zi-group-grid">
         @foreach($groupOptions as $groupType => $groupLabel)
             @php
@@ -140,8 +194,8 @@
                 </select>
             </div>
             <div class="col-md-2 form-group d-flex align-items-end mb-0" style="gap:10px;">
-                <button class="btn btn-primary">Filter</button>
-                <a href="{{ route('progress-zi.activities.index', ['group_type' => $selectedGroupType]) }}" class="btn btn-light">Reset</a>
+                <button class="btn btn-primary"><i class="fas fa-filter mr-1"></i>Filter</button>
+                <a href="{{ route('progress-zi.activities.index', ['group_type' => $selectedGroupType]) }}" class="btn btn-light"><i class="fas fa-undo mr-1"></i>Reset</a>
             </div>
         </form>
     </div>

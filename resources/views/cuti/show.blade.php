@@ -341,7 +341,7 @@
             </div>
             @if($canEditSubmit)
                 <div class="leave-action-note">
-                    Submit pengajuan akan membuka modal tanda tangan pemohon sebelum pengajuan masuk ke alur approval.
+                    Submit pengajuan akan memakai tanda tangan yang tersimpan pada Profil Saya sebelum pengajuan masuk ke alur approval.
                 </div>
             @endif
         </div>
@@ -356,14 +356,14 @@
                     <h5 class="modal-title">Keputusan Perubahan</h5>
                     <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
                 </div>
-                <form action="{{ route('cuti.approval.change', $leaveApproval) }}" method="POST" class="requires-signature-pad">
+                <form action="{{ route('cuti.approval.change', $leaveApproval) }}" method="POST">
                     @csrf
                     <div class="modal-body">
                         <div class="form-group">
                             <label>Catatan Perubahan</label>
                             <textarea name="note" class="form-control" rows="3" placeholder="Tuliskan perubahan yang harus dilakukan" required></textarea>
                         </div>
-                        @include('partials.signature-pad', ['id' => 'leaveApprovalChangeSignaturePad', 'name' => 'signature_data', 'label' => 'Bubuhkan Tanda Tangan', 'required' => true])
+                        @include('partials.profile-signature-notice')
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Batal</button>
@@ -381,14 +381,14 @@
                     <h5 class="modal-title">Keputusan Ditangguhkan</h5>
                     <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
                 </div>
-                <form action="{{ route('cuti.approval.defer', $leaveApproval) }}" method="POST" class="requires-signature-pad">
+                <form action="{{ route('cuti.approval.defer', $leaveApproval) }}" method="POST">
                     @csrf
                     <div class="modal-body">
                         <div class="form-group">
                             <label>Alasan Penangguhan</label>
                             <textarea name="note" class="form-control" rows="3" placeholder="Tuliskan alasan penangguhan" required></textarea>
                         </div>
-                        @include('partials.signature-pad', ['id' => 'leaveApprovalDeferSignaturePad', 'name' => 'signature_data', 'label' => 'Bubuhkan Tanda Tangan', 'required' => true])
+                        @include('partials.profile-signature-notice')
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Batal</button>
@@ -408,7 +408,7 @@
                     <h5 class="modal-title">Setujui Cuti</h5>
                     <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
                 </div>
-                <form action="{{ route('cuti.approval.approve', $leaveApproval) }}" method="POST" class="requires-signature-pad">
+                <form action="{{ route('cuti.approval.approve', $leaveApproval) }}" method="POST">
                     @csrf
                     <div class="modal-body">
                         <input type="hidden" name="action" value="approve">
@@ -416,7 +416,7 @@
                             <label>Catatan Approval</label>
                             <textarea name="note" class="form-control" rows="3" placeholder="Catatan approval"></textarea>
                         </div>
-                        @include('partials.signature-pad', ['id' => 'leaveApprovalSignaturePad', 'name' => 'signature_data', 'label' => 'Bubuhkan Tanda Tangan', 'required' => true])
+                        @include('partials.profile-signature-notice')
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Batal</button>
@@ -433,16 +433,13 @@
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">Tanda Tangan Pemohon</h5>
+                    <h5 class="modal-title">Submit Pengajuan Cuti</h5>
                     <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
                 </div>
-                <form action="{{ route('cuti.submit', $leaveRequest) }}" method="POST" class="requires-signature-pad">
+                <form action="{{ route('cuti.submit', $leaveRequest) }}" method="POST">
                     @csrf
                     <div class="modal-body">
-                        <p class="text-muted mb-3">
-                            Bubuhkan tanda tangan pemohon. Tanda tangan ini akan masuk ke PDF formulir cuti pada bagian Hormat Saya.
-                        </p>
-                        @include('partials.signature-pad', ['id' => 'leaveApplicantSignaturePad', 'name' => 'signature_data', 'label' => 'Tanda Tangan Pemohon', 'required' => true])
+                        @include('partials.profile-signature-notice')
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Batal</button>
@@ -454,13 +451,3 @@
     </div>
 @endif
 @endsection
-
-@push('scripts')
-<script>
-    (function () {
-        @if($errors->has('signature_data') && !$isApprovalMode)
-            $('#leaveApplicantSignatureModal').modal('show');
-        @endif
-    })();
-</script>
-@endpush

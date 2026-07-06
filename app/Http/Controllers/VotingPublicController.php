@@ -111,6 +111,7 @@ class VotingPublicController extends Controller
                     return [
                         'id' => $candidate->id,
                         'nama' => $candidate->nama_snapshot,
+                        'image_url' => $candidate->image_url,
                         'count' => $count,
                         'percentage' => $totalVotes > 0 ? round(($count / $totalVotes) * 100, 2) : 0,
                     ];

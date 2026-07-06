@@ -55,9 +55,10 @@ class LeaveApprovalService
             ];
         }
 
-        $chairman = User::active()->whereHas('roles', function ($q) {
-            $q->where('name', 'ketua');
-        })->orderBy('id')->first();
+        $chairman = User::active()
+            ->withRoleOrDelegatedJabatan(['ketua'])
+            ->orderBy('id')
+            ->first();
         $sekma = $leaveRequest->is_abroad ? $this->firstRoleUser(['sekretaris_ma', 'sekretaris_mahkamah_agung']) : null;
         $finalApproverId = optional($sekma)->id ?: (optional($leaveRequest->user)->pejabat_berwenang_id ?: optional($chairman)->id);
         $existingApproverIds = collect($steps)->pluck('approver_id')->filter()->map(function ($value) {
@@ -91,13 +92,11 @@ class LeaveApprovalService
                     $leaveRequest->request_number = $number['formatted'];
                 }
 
-                if ($applicantSignatureData) {
-                    $signature = $this->signaturePadService->storeDataUri($applicantSignatureData, 'cuti/applicant-signatures');
-                    $newSignaturePath = $signature['path'];
-                    $leaveRequest->applicant_signature_path = $signature['path'];
-                    $leaveRequest->applicant_signature_mime = $signature['mime'];
-                    $leaveRequest->applicant_signature_size = $signature['size'];
-                }
+                $signature = $this->signaturePadService->resolveForUser($leaveRequest->user, 'cuti/applicant-signatures', $applicantSignatureData);
+                $newSignaturePath = $signature['path'];
+                $leaveRequest->applicant_signature_path = $signature['path'];
+                $leaveRequest->applicant_signature_mime = $signature['mime'];
+                $leaveRequest->applicant_signature_size = $signature['size'];
 
                 $leaveRequest->status = LeaveRequest::STATUS_SUBMITTED;
                 $leaveRequest->submitted_at = Carbon::now();
@@ -142,7 +141,7 @@ class LeaveApprovalService
         }
 
         DB::transaction(function () use ($approval, $actor, $note, $signatureData) {
-            $signature = $this->signaturePadService->storeDataUri($signatureData, 'cuti/approval-signatures');
+            $signature = $this->signaturePadService->resolveForUser($actor, 'cuti/approval-signatures', $signatureData);
             $approval->status = 'approved';
             $approval->action = 'approved';
             $approval->acted_at = Carbon::now();
@@ -247,7 +246,7 @@ class LeaveApprovalService
 
         $previousStatus = $approval->status;
         DB::transaction(function () use ($approval, $actor, $note, $signatureData, $approvalStatus, $requestStatus) {
-            $signature = $this->signaturePadService->storeDataUri($signatureData, 'cuti/approval-signatures');
+            $signature = $this->signaturePadService->resolveForUser($actor, 'cuti/approval-signatures', $signatureData);
             $approval->status = $approvalStatus;
             $approval->action = $approvalStatus;
             $approval->acted_at = Carbon::now();
@@ -330,8 +329,12 @@ class LeaveApprovalService
 
         $supervisor = User::active()
             ->where('id', '<>', $user->id)
-            ->whereHas('roles', function ($query) {
-                $query->whereIn('name', ['atasan_langsung', 'sekretaris', 'panitera', 'wakil_ketua', 'ketua']);
+            ->where(function ($query) {
+                $query
+                    ->withRoleOrDelegatedJabatan(['sekretaris', 'panitera', 'wakil_ketua', 'ketua'])
+                    ->orWhereHas('roles', function ($roleQuery) {
+                        $roleQuery->where('name', 'atasan_langsung');
+                    });
             })
             ->when($user->hirarki, function ($query) use ($user) {
                 $query->whereNotNull('hirarki')->where('hirarki', '<', $user->hirarki);
@@ -347,9 +350,7 @@ class LeaveApprovalService
     protected function firstRoleUser(array $roles, $excludeUserId = null)
     {
         return User::active()
-            ->whereHas('roles', function ($query) use ($roles) {
-                $query->whereIn('name', $roles);
-            })
+            ->withRoleOrDelegatedJabatan($roles)
             ->when($excludeUserId, function ($query) use ($excludeUserId) {
                 $query->where('id', '<>', $excludeUserId);
             })

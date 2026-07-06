@@ -691,7 +691,7 @@
                         <tr class="main-row" data-surat-id="<?php echo e($surat->id); ?>"
                             data-update-url="<?php echo e(route('surat-keluar.update', $surat)); ?>"
                             data-delete-url="<?php echo e(route('surat-keluar.destroy', $surat)); ?>"
-                            data-file-url="<?php echo e(($surat->file_path || $surat->templateApproval || $surat->rapat || $surat->leaveRequest || ($surat->relationLoaded('pdfVerifications') && $surat->pdfVerifications->isNotEmpty())) ? route('surat-keluar.file', $surat) : ''); ?>"
+                            data-file-url="<?php echo e(($surat->file_path || $surat->templateApproval || $surat->rapat || $surat->leaveRequest || ($surat->pdf_verifications_count ?? 0) > 0) ? route('surat-keluar.file', $surat) : ''); ?>"
                             data-creator="<?php echo e($surat->creator->name); ?>"
                             data-tahun-surat="<?php echo e($surat->tahun_surat); ?>"
                             data-nomenklatur-jabatan="<?php echo e($surat->nomenklatur_jabatan); ?>"
@@ -727,7 +727,7 @@
                                     <button type="button" class="recipient-name recipient-count-btn js-recipient-modal"
                                         data-surat-id="<?php echo e($surat->id); ?>"
                                         data-nomor-surat="<?php echo e($surat->nomor_surat_formatted); ?>">
-                                        <?php echo e($surat->penerimaInternal->count()); ?> orang
+                                        <?php echo e($surat->penerima_internal_count ?? $surat->penerimaInternal->count()); ?> orang
                                     </button>
                                 <?php else: ?>
                                     <div class="recipient-name">
@@ -742,7 +742,7 @@
                                 <?php echo e($surat->created_at->format('y-m-d')); ?>
                             </td>
                             <td>
-                                <?php if($surat->file_path || $surat->templateApproval || $surat->rapat || $surat->leaveRequest || ($surat->relationLoaded('pdfVerifications') && $surat->pdfVerifications->isNotEmpty())): ?>
+                                <?php if($surat->file_path || $surat->templateApproval || $surat->rapat || $surat->leaveRequest || ($surat->pdf_verifications_count ?? 0) > 0): ?>
                                     <a href="javascript:void(0)" class="lampiran-badge exists"
                                         onclick="viewFile('<?php echo e(route('surat-keluar.file', $surat)); ?>')">Berkas</a>
                                 <?php else: ?>
@@ -758,6 +758,16 @@
                 </tbody>
             </table>
             </div>
+            <?php if(method_exists($suratKeluar, 'links')): ?>
+                <div class="d-flex justify-content-between align-items-center flex-wrap mt-3">
+                    <div class="text-muted small mb-2 mb-md-0">
+                        Menampilkan <?php echo e($suratKeluar->firstItem() ?: 0); ?> - <?php echo e($suratKeluar->lastItem() ?: 0); ?> dari <?php echo e($suratKeluar->total()); ?> surat
+                    </div>
+                    <div>
+                        <?php echo $suratKeluar->links(); ?>
+                    </div>
+                </div>
+            <?php endif; ?>
         </div>
     </div>
 
@@ -1119,7 +1129,7 @@
     <script>
         $(document).ready(function () {
             const canManageSuratKeluar = <?php echo json_encode($canManageSuratKeluar, 15, 512) ?>;
-            const recipientMap = <?php echo json_encode($suratKeluar->mapWithKeys(function ($surat) {
+            const recipientMap = <?php echo json_encode($suratKeluar->getCollection()->mapWithKeys(function ($surat) {
                 return [
                     $surat->id => $surat->penerimaInternal->map(function ($user) {
                         return [
@@ -1156,7 +1166,9 @@
             // Initialize DataTable
             const table = $('#suratKeluarTable').DataTable({
                 order: [],
-                pageLength: 10,
+                paging: false,
+                info: false,
+                lengthChange: false,
                 autoWidth: false,
                 language: {
                     search: "Search:",

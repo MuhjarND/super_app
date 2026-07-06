@@ -99,9 +99,11 @@ class SuratTemplateController extends Controller
             'canManageTemplates' => $this->canManage(),
             'canSubmitProposal' => auth()->user()->canSubmitSuratTemplateProposal(),
             'templateUsers' => User::with('jabatan')->active()->ordered()->get(),
-            'templateSignerUsers' => User::with('jabatan')->active()->whereHas('roles', function ($query) {
-                $query->where('name', 'approval');
-            })->ordered()->get(),
+            'templateSignerUsers' => User::with('jabatan')
+                ->active()
+                ->withRoleOrDelegatedJabatan(['approval'])
+                ->ordered()
+                ->get(),
         ]);
     }
 
@@ -392,9 +394,10 @@ class SuratTemplateController extends Controller
         $fields = $validated['fields'] ?? [];
 
         if (!empty($fields['penanda_tangan_id'])) {
-            $validSigner = User::whereHas('roles', function ($query) {
-                $query->where('name', 'approval');
-            })->active()->where('id', $fields['penanda_tangan_id'])->exists();
+            $validSigner = User::withRoleOrDelegatedJabatan(['approval'])
+                ->active()
+                ->where('id', $fields['penanda_tangan_id'])
+                ->exists();
 
             if (!$validSigner) {
                 throw ValidationException::withMessages([

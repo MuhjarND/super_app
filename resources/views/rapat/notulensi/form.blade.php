@@ -154,7 +154,7 @@
         <div class="card-header bg-white">
             <strong>Form Notulen Template A</strong>
         </div>
-        <form id="notulensiForm" action="{{ $formAction }}" method="POST" enctype="multipart/form-data" class="requires-signature-pad" novalidate>
+        <form id="notulensiForm" action="{{ $formAction }}" method="POST" enctype="multipart/form-data" novalidate>
             @csrf
             @if($formMethod === 'PUT')
                 @method('PUT')
@@ -289,20 +289,15 @@
                 <div class="modal-dialog modal-dialog-centered">
                     <div class="modal-content">
                         <div class="modal-header">
-                            <h5 class="modal-title">Tanda Tangan Notulis</h5>
+                            <h5 class="modal-title">Simpan Notulen</h5>
                             <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
                         </div>
                         <div class="modal-body">
-                            @include('partials.signature-pad', [
-                                'id' => 'notulisSignaturePad',
-                                'name' => 'signature_data',
-                                'label' => 'Bubuhkan Tanda Tangan Notulis',
-                                'required' => true,
-                            ])
+                            @include('partials.profile-signature-notice')
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Batal</button>
-                            <button type="submit" class="btn btn-primary">Simpan & Tanda Tangani</button>
+                            <button type="submit" class="btn btn-primary">Simpan Notulen</button>
                         </div>
                     </div>
                 </div>

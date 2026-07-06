@@ -27,8 +27,8 @@ body { margin: 0; }
 .address-cell { vertical-align: top; height: 88px; }
 .signature-cell { vertical-align: top; }
 .signature-inner { text-align: center; font-size: 8.05px; line-height: 1.055; }
-.signature-pad-img { height: 46px; max-width: 122px; margin: 1px auto 1px auto; display: block; object-fit: contain; }
-.signature-name { font-weight: bold; }
+.signature-pad-img { height: 54px; max-width: 142px; margin: -2px auto -9px auto; display: block; object-fit: contain; }
+.signature-name { font-weight: bold; position: relative; z-index: 1; }
 .blank-area { height: 88px; }
 .decision-label { text-align: center; font-size: 8px; text-transform: uppercase; }
 .decision-mark { height: 10px; text-align: center; vertical-align: middle; font-family: DejaVu Sans, sans-serif; font-size: 11px; font-weight: bold; }
@@ -40,8 +40,8 @@ body { margin: 0; }
 .extra-signature-table { margin-bottom: 3.2px; }
 .extra-signature-table td { text-align: center; vertical-align: top; }
 .extra-signature-role { font-weight: bold; font-size: 7px; text-transform: uppercase; }
-.extra-signature-img { height: 30px; max-width: 92px; display: block; margin: 0 auto; object-fit: contain; }
-.extra-signature-name { font-weight: bold; font-size: 7px; }
+.extra-signature-img { height: 36px; max-width: 108px; display: block; margin: -2px auto -7px; object-fit: contain; }
+.extra-signature-name { font-weight: bold; font-size: 7px; position: relative; z-index: 1; }
 .extra-signature-meta { font-size: 6.6px; line-height: 1.02; }
 </style>
 </head>

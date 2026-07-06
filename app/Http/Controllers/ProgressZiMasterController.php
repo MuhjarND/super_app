@@ -231,9 +231,11 @@ class ProgressZiMasterController extends Controller
             'evidenceSourceOptions' => $evidenceSourceOptions,
             'kategoriSuratOptions' => $this->rapatDocumentService->getKategoriSuratLeafOptions(),
             'meetingParticipants' => User::with(['unit', 'bidang', 'jabatan', 'roles'])->active()->ordered()->get(),
-            'meetingApprovers' => User::whereHas('roles', function ($query) {
-                $query->whereIn('name', ['admin', 'approval', 'super_admin']);
-            })->active()->with('jabatan')->ordered()->get(),
+            'meetingApprovers' => User::withRoleOrDelegatedJabatan(['admin', 'approval', 'super_admin'])
+                ->active()
+                ->with('jabatan')
+                ->ordered()
+                ->get(),
             'subPointRecommendations' => $subPointRecommendations,
             'filters' => $request->only(['period_id', 'area_id', 'status', 'pic_user_id', 'group_type']),
             'canManage' => auth()->user()->canManageProgressZiMasterData(),

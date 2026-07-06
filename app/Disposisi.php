@@ -53,6 +53,41 @@ class Disposisi extends Model
         'Harap dihadiri/diwakili',
     ];
 
+    public function scopeAddressedToUser($query, User $user)
+    {
+        $userIds = $user->effectiveAssignmentUserIds();
+        $jabatanIds = $user->effectiveJabatanIds();
+
+        return $query->where(function ($targetQuery) use ($userIds, $jabatanIds) {
+            if (!empty($userIds)) {
+                $targetQuery->whereIn('kepada_user_id', $userIds);
+            }
+
+            if (!empty($jabatanIds)) {
+                $method = !empty($userIds) ? 'orWhereIn' : 'whereIn';
+                $targetQuery->{$method}('kepada_jabatan_id', $jabatanIds);
+            }
+        });
+    }
+
+    public function scopeInvolvingUser($query, User $user)
+    {
+        $userIds = $user->effectiveAssignmentUserIds();
+        $jabatanIds = $user->effectiveJabatanIds();
+
+        return $query->where(function ($targetQuery) use ($user, $userIds, $jabatanIds) {
+            $targetQuery->where('dari_user_id', $user->id);
+
+            if (!empty($userIds)) {
+                $targetQuery->orWhereIn('kepada_user_id', $userIds);
+            }
+
+            if (!empty($jabatanIds)) {
+                $targetQuery->orWhereIn('kepada_jabatan_id', $jabatanIds);
+            }
+        });
+    }
+
     public function suratMasuk()
     {
         return $this->belongsTo(SuratMasuk::class, 'surat_masuk_id');

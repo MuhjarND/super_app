@@ -40,28 +40,28 @@ class RapatApprovalController extends Controller
         ]);
 
         abort_unless(
-            $user->isMeetingAdmin() || (int) $rapatApproval->approver_id === (int) $user->id,
+            $user->isMeetingAdmin() || $user->canActAsAssignedUser($rapatApproval->approver_id),
             403
         );
 
         $canAct = $rapatApproval->status === 'pending'
-            && ($user->isMeetingAdmin() || (int) $rapatApproval->approver_id === (int) $user->id);
+            && ($user->isMeetingAdmin() || $user->canActAsAssignedUser($rapatApproval->approver_id));
 
         return view('rapat.approval.show', compact('rapatApproval', 'canAct'));
     }
 
     public function approve(Request $request, RapatApproval $rapatApproval)
     {
-        abort_unless(auth()->user()->canAccessMeetingApproval(), 403);
+        $user = auth()->user();
+        abort_unless($user->canAccessMeetingApproval(), 403);
+        abort_unless($user->isMeetingAdmin() || $user->canActAsAssignedUser($rapatApproval->approver_id), 403);
         $request->validate([
-            'signature_data' => ['required', 'string'],
-        ], [
-            'signature_data.required' => 'Tanda tangan wajib diisi.',
+            'signature_data' => ['nullable', 'string'],
         ]);
 
         $this->approvalService->approve(
             $rapatApproval->load('rapat'),
-            auth()->user(),
+            $user,
             $request->input('catatan'),
             $request->input('signature_data')
         );
@@ -74,7 +74,9 @@ class RapatApprovalController extends Controller
 
     public function reject(Request $request, RapatApproval $rapatApproval)
     {
-        abort_unless(auth()->user()->canAccessMeetingApproval(), 403);
+        $user = auth()->user();
+        abort_unless($user->canAccessMeetingApproval(), 403);
+        abort_unless($user->isMeetingAdmin() || $user->canActAsAssignedUser($rapatApproval->approver_id), 403);
 
         $request->validate([
             'catatan' => ['required', 'string'],
@@ -84,7 +86,7 @@ class RapatApprovalController extends Controller
 
         $this->approvalService->reject(
             $rapatApproval->load('rapat'),
-            auth()->user(),
+            $user,
             $request->input('catatan')
         );
 

@@ -259,19 +259,14 @@
                             <h5 class="modal-title">Approve Surat Keluar</h5>
                             <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
                         </div>
-                        <form action="{{ route('surat-keluar.approval.approve', $suratKeluarApproval) }}" method="POST" class="requires-signature-pad">
+                        <form action="{{ route('surat-keluar.approval.approve', $suratKeluarApproval) }}" method="POST">
                             @csrf
                             <div class="modal-body">
                                 <div class="form-group">
                                     <label>Catatan Approval</label>
                                     <textarea name="note" class="form-control" rows="3" placeholder="Catatan approval"></textarea>
                                 </div>
-                                @include('partials.signature-pad', [
-                                    'id' => 'suratKeluarApprovalSignaturePad',
-                                    'name' => 'signature_data',
-                                    'label' => 'Bubuhkan Tanda Tangan',
-                                    'required' => true,
-                                ])
+                                @include('partials.profile-signature-notice')
                             </div>
                             <div class="modal-footer">
                                 <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Batal</button>

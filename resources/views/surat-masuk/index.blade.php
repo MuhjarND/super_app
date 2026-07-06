@@ -834,14 +834,17 @@
                 <tbody>
                     @foreach($suratMasuk as $surat)
                         @php
+                            $isSuratSelesai = $surat->status === 'selesai';
                             $latestDisposisi = $surat->disposisis->sortByDesc('created_at')->first();
-                            $pendingForMe = $surat->disposisis
-                                ->where('kepada_user_id', auth()->id())
-                                ->where('status', 'pending')
-                                ->sortByDesc('created_at')
-                                ->first();
-                            $needsDisposition = ($surat->status === 'baru' && auth()->user()->canForwardSuratMasuk($surat))
-                                || (bool) $pendingForMe;
+                            $pendingForMe = $isSuratSelesai
+                                ? null
+                                : auth()->user()->activePendingDisposisiForSurat($surat);
+                            $needsDisposition = !$isSuratSelesai
+                                && (
+                                    ($surat->status === 'baru' && auth()->user()->canForwardSuratMasuk($surat))
+                                    || (bool) $pendingForMe
+                                );
+                            $canNaikanSurat = auth()->user()->canNaikanSuratMasuk();
                         @endphp
                         <tr class="main-row {{ $needsDisposition ? 'surat-needs-disposition' : '' }}" data-surat-id="{{ $surat->id }}" data-creator="{{ optional($surat->creator)->name ?: '-' }}"
                             data-show-url="{{ route('surat-masuk.show', $surat) }}"
@@ -897,7 +900,7 @@
                             <td>
                                 @if($needsDisposition)
                                     <span class="badge-needs-disposition mb-1">
-                                        <i class="fas fa-exclamation-circle"></i> Perlu Disposisi
+                                        <i class="fas fa-exclamation-circle"></i> Perlu Disposisi/Tindaklanjut
                                     </span><br>
                                 @endif
                                 @if($surat->status == 'baru')
@@ -931,6 +934,9 @@
                                                 <button type="button" class="dropdown-item" onclick="openDisposisi({{ $surat->id }}, 'disposisi')">
                                                     <i class="fas fa-share"></i> Disposisi
                                                 </button>
+                                            @endif
+
+                                            @if($canNaikanSurat)
                                                 <button type="button" class="dropdown-item" onclick="openDisposisi({{ $surat->id }}, 'naikan')">
                                                     <i class="fas fa-level-up-alt"></i> Naikan
                                                 </button>
@@ -941,6 +947,12 @@
                                         @if(auth()->user()->canOpenTindakLanjutSuratMasuk($surat))
                                             <button type="button" class="dropdown-item" onclick="openTindakLanjut({{ $surat->id }})">
                                                 <i class="fas fa-flag"></i> Tindaklanjuti
+                                            </button>
+                                        @endif
+
+                                        @if($surat->status === 'selesai')
+                                            <button type="button" class="dropdown-item" onclick="openDetail({{ $surat->id }})">
+                                                <i class="fas fa-clipboard-check"></i> Preview Tindak Lanjut
                                             </button>
                                         @endif
 
@@ -968,6 +980,16 @@
                 </tbody>
             </table>
             </div>
+            @if(method_exists($suratMasuk, 'links'))
+                <div class="d-flex justify-content-between align-items-center flex-wrap mt-3">
+                    <div class="text-muted small mb-2 mb-md-0">
+                        Menampilkan {{ $suratMasuk->firstItem() ?: 0 }} - {{ $suratMasuk->lastItem() ?: 0 }} dari {{ $suratMasuk->total() }} surat
+                    </div>
+                    <div>
+                        {!! $suratMasuk->links() !!}
+                    </div>
+                </div>
+            @endif
         </div>
     </div>
 
@@ -1553,7 +1575,9 @@
 
             var table = $('#suratMasukTable').DataTable({
                 order: [],
-                pageLength: 10,
+                paging: false,
+                info: false,
+                lengthChange: false,
                 language: {
                     search: "Search:",
                     lengthMenu: "Show _MENU_ entries",
@@ -1881,6 +1905,11 @@
 
             if (Number(d.canForward) !== 1) {
                 showToast('Anda tidak memiliki akses untuk memproses surat ini.', 'warning');
+                return;
+            }
+
+            if (d.status === 'selesai') {
+                showToast('Surat ini sudah selesai dan tidak perlu didisposisi lagi.', 'warning');
                 return;
             }
 

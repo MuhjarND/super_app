@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Rapat;
 use App\RapatAttendance;
 use App\Services\RapatDocumentService;
+use App\Services\SignaturePadService;
 use App\Services\WhatsAppNotificationService;
 use Barryvdh\DomPDF\Facade as PDF;
 use Carbon\Carbon;
@@ -16,12 +17,14 @@ class RapatAbsensiController extends Controller
 {
     protected $whatsAppService;
     protected $documentService;
+    protected $signaturePadService;
 
-    public function __construct(WhatsAppNotificationService $whatsAppService, RapatDocumentService $documentService)
+    public function __construct(WhatsAppNotificationService $whatsAppService, RapatDocumentService $documentService, SignaturePadService $signaturePadService)
     {
         $this->middleware('auth')->except(['publicShow', 'publicStore', 'publicStoreGuest']);
         $this->whatsAppService = $whatsAppService;
         $this->documentService = $documentService;
+        $this->signaturePadService = $signaturePadService;
     }
 
     public function index()
@@ -195,10 +198,8 @@ class RapatAbsensiController extends Controller
 
         $data = $request->validate([
             'user_id' => ['required', 'integer'],
-            'signature_data' => ['required', 'string'],
         ], [
             'user_id.required' => 'Nama peserta wajib dipilih.',
-            'signature_data.required' => 'Tanda tangan wajib diisi.',
         ]);
 
         $participant = $rapat->pesertas()->where('users.id', $data['user_id'])->first();
@@ -214,7 +215,7 @@ class RapatAbsensiController extends Controller
             ], 422);
         }
 
-        $signature = $this->storeSignature($data['signature_data'], 'internal');
+        $signature = $this->signaturePadService->resolveForUser($participant, 'rapat/absensi/internal');
 
         RapatAttendance::create([
             'rapat_id' => $rapat->id,
@@ -326,8 +327,6 @@ class RapatAbsensiController extends Controller
             return null;
         }
 
-        $mime = mime_content_type($absolutePath) ?: 'image/png';
-
-        return 'data:' . $mime . ';base64,' . base64_encode(file_get_contents($absolutePath));
+        return app(\App\Services\SignaturePadService::class)->dataUriFromPublicPath($absolutePath);
     }
 }

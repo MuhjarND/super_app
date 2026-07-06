@@ -10,12 +10,12 @@
         }
 
         .dashboard-hero {
-            background: linear-gradient(135deg, #4f46e5 0%, #6366f1 40%, #7c3aed 100%);
+            background: linear-gradient(135deg, #4f46e5 0%, #6366f1 40%, #8b5cf6 100%);
             color: #ffffff;
             border-radius: 20px;
             padding: 30px 32px;
             border: none;
-            box-shadow: 0 8px 32px rgba(79, 70, 229, 0.2);
+            box-shadow: 0 8px 32px rgba(79, 70, 229, 0.20);
             position: relative;
             overflow: hidden;
         }
@@ -155,7 +155,7 @@
         .module-pill.persuratan { background: linear-gradient(135deg, #6366f1, #4f46e5); }
         .module-pill.rapat { background: linear-gradient(135deg, #0f766e, #0d9488); }
         .module-pill.cuti { background: linear-gradient(135deg, #15803d, #16a34a); }
-        .module-pill.zi { background: linear-gradient(135deg, #7c3aed, #4f46e5); }
+        .module-pill.zi { background: linear-gradient(135deg, #8b5cf6, #4f46e5); }
         .module-pill.persediaan { background: linear-gradient(135deg, #b45309, #d97706); }
 
         .mobile-app-launcher {
@@ -238,7 +238,7 @@
         .mobile-app-icon.leave { background: linear-gradient(135deg, #dc2626, #ef4444); }
         .mobile-app-icon.asset { background: linear-gradient(135deg, #d97706, #f59e0b); }
         .mobile-app-icon.supply { background: linear-gradient(135deg, #059669, #10b981); }
-        .mobile-app-icon.zi { background: linear-gradient(135deg, #7c3aed, #4f46e5); }
+        .mobile-app-icon.zi { background: linear-gradient(135deg, #8b5cf6, #4f46e5); }
         .mobile-app-icon.archive { background: linear-gradient(135deg, #475569, #0f172a); }
 
         .metric-grid {
@@ -1101,6 +1101,17 @@
     <div class="dashboard-shell dashboard-compact">
         @php($dashboardUser = auth()->user())
         @php($dashboardIsSuperAdmin = $dashboardUser && $dashboardUser->isSuperAdmin())
+        @if($dashboardUser && !$dashboardUser->hasProfileSignature())
+            <div class="alert alert-warning d-flex align-items-center justify-content-between flex-wrap" style="gap:10px;border-radius:12px;border:1px solid #fde68a;background:#fffbeb;color:#92400e;">
+                <div>
+                    <strong>Tanda tangan profil belum tersimpan.</strong>
+                    <span>Simpan tanda tangan agar approval dan PDF memakai tanda tangan otomatis.</span>
+                </div>
+                <a href="{{ route('profile.edit') }}" class="btn btn-sm btn-warning font-weight-bold">
+                    <i class="fas fa-signature mr-1"></i> Simpan TTD
+                </a>
+            </div>
+        @endif
         <section class="mobile-app-launcher">
             <div class="mobile-app-grid">
                 <a href="{{ route('mobile.menu.show', 'dashboard') }}" class="mobile-app-tile">

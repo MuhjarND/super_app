@@ -303,9 +303,7 @@ class RapatLaporanService
         }
 
         $absolutePath = storage_path('app/public/' . $relativePath);
-        $mime = mime_content_type($absolutePath) ?: 'image/png';
-
-        return 'data:' . $mime . ';base64,' . base64_encode(File::get($absolutePath));
+        return app(\App\Services\SignaturePadService::class)->dataUriFromPublicPath($absolutePath);
     }
 
     protected function resolvePublicImage(array $filenames)

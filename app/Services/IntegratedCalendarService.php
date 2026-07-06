@@ -358,7 +358,7 @@ class IntegratedCalendarService
             $query->where(function ($builder) use ($user) {
                 $builder->where('created_by', $user->id)
                     ->orWhereHas('penerimaInternal', function ($recipientQuery) use ($user) {
-                        $recipientQuery->where('users.id', $user->id);
+                        $recipientQuery->whereIn('users.id', $user->effectiveAssignmentUserIds());
                     });
             });
         }

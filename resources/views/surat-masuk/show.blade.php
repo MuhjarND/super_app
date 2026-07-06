@@ -236,16 +236,8 @@
 
                             <div class="form-group">
                                 <label>Tujuan Disposisi <span class="text-danger">*</span></label>
-                                <select class="form-control select2" name="kepada_user_id" required>
-                                    <option value="">-- Pilih Tujuan --</option>
-                                    @foreach($targetDisposisi as $jabatan)
-                                        @foreach($jabatan->users as $user)
-                                            <option value="{{ $user->id }}"
-                                                data-is-naikan="{{ in_array($jabatan->kode, ['KPTA', 'WKPTA']) ? '1' : '0' }}">
-                                                {{ $user->name }} ({{ $jabatan->nama }})
-                                            </option>
-                                        @endforeach
-                                    @endforeach
+                                <select class="form-control select2" name="kepada_user_id" id="disposisiTargetShow" required>
+                                    <option value="">Memuat tujuan...</option>
                                 </select>
                             </div>
 
@@ -253,7 +245,9 @@
                                 <label>Tipe</label>
                                 <select class="form-control" name="tipe" id="tipeDisposisi">
                                     <option value="disposisi">Disposisi</option>
-                                    <option value="naikan">Naikkan Surat</option>
+                                    @if($canNaikanSurat)
+                                        <option value="naikan">Naikkan Surat</option>
+                                    @endif
                                 </select>
                             </div>
 
@@ -353,7 +347,7 @@
                                 ({{ $disposisi->created_at->diffForHumans() }})
                             </small>
 
-                            @if($disposisi->kepada_user_id == auth()->id() && $disposisi->status == 'pending')
+                            @if(auth()->user()->canFollowUpDisposisi($disposisi) && $disposisi->status == 'pending')
                                 <div class="mt-2">
                                     <button class="btn btn-sm btn-outline-primary update-status" data-id="{{ $disposisi->id }}"
                                         data-status="dibaca">
@@ -392,11 +386,40 @@
 @push('scripts')
     <script>
         $(document).ready(function () {
-            // Auto-detect tipe based on selected target
+            function loadDisposisiTargetsShow() {
+                var tipe = $('#tipeDisposisi').val();
+                var $target = $('#disposisiTargetShow');
+
+                $target.html('<option value="">Memuat tujuan...</option>').trigger('change.select2');
+
+                $.get('{{ route("api.disposisi.targets") }}', {
+                    surat_masuk_id: '{{ $suratMasuk->id }}',
+                    tipe: tipe
+                }, function (res) {
+                    var options = '<option value="">-- Pilih Tujuan --</option>';
+                    if (res && res.length) {
+                        res.forEach(function (item) {
+                            options += '<option value="' + item.id + '">' + item.name + ' (' + (item.jabatan || '-') + ')</option>';
+                        });
+                    } else {
+                        options = '<option value="">Tidak ada pegawai tujuan untuk tipe ini</option>';
+                    }
+                    $target.html(options).trigger('change.select2');
+                }).fail(function () {
+                    $target.html('<option value="">Gagal memuat tujuan</option>').trigger('change.select2');
+                });
+            }
+
+            $('#tipeDisposisi').on('change', loadDisposisiTargetsShow);
+            loadDisposisiTargetsShow();
+
             $('select[name="kepada_user_id"]').on('change', function () {
+                if ($('#tipeDisposisi').val() === 'naikan') {
+                    return;
+                }
                 let isNaikan = $(this).find('option:selected').data('is-naikan');
                 if (isNaikan === 1 || isNaikan === '1') {
-                    $('#tipeDisposisi').val('naikan');
+                    $('#tipeDisposisi').val('naikan').trigger('change');
                 } else {
                     $('#tipeDisposisi').val('disposisi');
                 }

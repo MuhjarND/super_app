@@ -73,12 +73,35 @@ class AppServiceProvider extends ServiceProvider
             $suratMasukVisible = SuratMasuk::visibleTo($user);
             $suratKeluarVisible = SuratKeluar::visibleTo($user);
 
-            $counts['sidebarSuratMasukOpenCount'] = (clone $suratMasukVisible)
-                ->where('status', '!=', 'selesai')
-                ->count();
-            $counts['sidebarSuratKeluarDraftCount'] = (clone $suratKeluarVisible)
-                ->where('status', 'draft')
-                ->count();
+            $suratMasukBadgeQuery = SuratMasuk::visibleTo($user)
+                ->where(function ($query) use ($user) {
+                    $query->whereHas('disposisis', function ($disposisiQuery) use ($user) {
+                        $disposisiQuery->addressedToUser($user)
+                            ->where('status', 'pending');
+                    });
+
+                    if ($user->isSuperAdmin() || $user->canManageInitialSuratMasuk()) {
+                        $query->orWhere('status', 'baru');
+                    }
+                });
+
+            $suratKeluarBadgeQuery = SuratKeluar::visibleTo($user)
+                ->where(function ($query) use ($user) {
+                    $query->where(function ($createdQuery) use ($user) {
+                        $createdQuery->where('created_by', $user->id)
+                            ->where('status', 'draft');
+                    });
+
+                    if (Schema::hasColumn('surat_keluar_penerima', 'read_at')) {
+                        $query->orWhereHas('penerimaInternal', function ($penerimaQuery) use ($user) {
+                            $penerimaQuery->whereIn('users.id', $user->effectiveAssignmentUserIds())
+                                ->whereNull('surat_keluar_penerima.read_at');
+                        });
+                    }
+                });
+
+            $counts['sidebarSuratMasukOpenCount'] = (clone $suratMasukBadgeQuery)->count();
+            $counts['sidebarSuratKeluarDraftCount'] = (clone $suratKeluarBadgeQuery)->count();
             $counts['sidebarArsipCount'] = (clone $suratKeluarVisible)
                 ->where('status', 'lengkap')
                 ->count();
@@ -86,7 +109,7 @@ class AppServiceProvider extends ServiceProvider
             $actionItems = collect();
 
             $pendingDisposisiQuery = Disposisi::with(['suratMasuk'])
-                ->where('kepada_user_id', $user->id)
+                ->addressedToUser($user)
                 ->where('status', 'pending');
 
             foreach ((clone $pendingDisposisiQuery)->latest()->take(5)->get() as $disposisi) {
@@ -105,11 +128,35 @@ class AppServiceProvider extends ServiceProvider
                 ]);
             }
 
+            if (Schema::hasColumn('surat_keluar_penerima', 'read_at')) {
+                $taggedSuratKeluarQuery = SuratKeluar::visibleTo($user)
+                    ->with(['creator'])
+                    ->whereHas('penerimaInternal', function ($penerimaQuery) use ($user) {
+                        $penerimaQuery->where('users.id', $user->id)
+                            ->whereNull('surat_keluar_penerima.read_at');
+                    });
+
+                foreach ((clone $taggedSuratKeluarQuery)->latest()->take(5)->get() as $suratKeluar) {
+                    $actionItems->push([
+                        'type' => 'surat-keluar-tag',
+                        'icon' => 'fas fa-paper-plane',
+                        'icon_bg' => '#e0f2fe',
+                        'icon_color' => '#0369a1',
+                        'title' => 'Surat keluar untuk Anda',
+                        'subtitle' => $suratKeluar->nomor_surat_formatted ?: $suratKeluar->nomor_surat,
+                        'description' => $suratKeluar->perihal ?: 'Ada surat keluar baru yang menandai Anda.',
+                        'time' => optional($suratKeluar->created_at)->diffForHumans(),
+                        'url' => route('surat-keluar.file', $suratKeluar),
+                        'sort_at' => optional($suratKeluar->created_at)->timestamp ?: 0,
+                    ]);
+                }
+            }
+
             $pendingApprovalQuery = RapatApproval::with(['rapat'])
                 ->where('status', 'pending');
 
             if (!$user->isMeetingAdmin()) {
-                $pendingApprovalQuery->where('approver_id', $user->id);
+                $pendingApprovalQuery->whereIn('approver_id', $user->effectiveAssignmentUserIds());
             }
 
             $counts['sidebarApprovalPendingCount'] = (clone $pendingApprovalQuery)->count();
@@ -134,7 +181,7 @@ class AppServiceProvider extends ServiceProvider
                 ->where('status', 'pending');
 
             if (!$user->isMeetingAdmin()) {
-                $pendingNotulensiApprovalQuery->where('approver_id', $user->id);
+                $pendingNotulensiApprovalQuery->whereIn('approver_id', $user->effectiveAssignmentUserIds());
             }
 
             $counts['sidebarNotulensiApprovalPendingCount'] = (clone $pendingNotulensiApprovalQuery)->count();
@@ -191,7 +238,7 @@ class AppServiceProvider extends ServiceProvider
                     ->where('status', 'pending');
 
                 if (!$user->isSuperAdmin()) {
-                    $pendingLeaveApprovalQuery->where('approver_id', $user->id);
+                    $pendingLeaveApprovalQuery->whereIn('approver_id', $user->effectiveAssignmentUserIds());
                 }
 
                 $counts['sidebarLeaveApprovalPendingCount'] = (clone $pendingLeaveApprovalQuery)->count();
@@ -218,7 +265,7 @@ class AppServiceProvider extends ServiceProvider
                     ->where('status', 'pending');
 
                 if (!$user->isSuperAdmin()) {
-                    $pendingSuratKeluarApprovalQuery->where('approver_id', $user->id);
+                    $pendingSuratKeluarApprovalQuery->whereIn('approver_id', $user->effectiveAssignmentUserIds());
                 }
 
                 $counts['sidebarSuratKeluarApprovalPendingCount'] = (clone $pendingSuratKeluarApprovalQuery)->count();
@@ -332,7 +379,7 @@ class AppServiceProvider extends ServiceProvider
                     ->where('status', 'pending');
 
                 if (!$user->isSuperAdmin()) {
-                    $ziApprovalQuery->where('approver_id', $user->id);
+                    $ziApprovalQuery->whereIn('approver_id', $user->effectiveAssignmentUserIds());
                 }
 
                 $counts['sidebarProgressZiApprovalPendingCount'] = (clone $ziApprovalQuery)->count();
@@ -356,22 +403,9 @@ class AppServiceProvider extends ServiceProvider
             $counts['sidebarNotulensiFollowUpCount'] = (clone $pendingFollowUpQuery)->count();
             $counts['sidebarApprovalTotalCount'] = $counts['sidebarApprovalPendingCount'] + $counts['sidebarNotulensiApprovalPendingCount'] + $counts['sidebarLeaveApprovalPendingCount'] + $counts['sidebarSuratKeluarApprovalPendingCount'] + $counts['sidebarProgressZiApprovalPendingCount'];
 
-            $fallbackTopbarItems = $actionItems
-                ->sortByDesc('sort_at')
-                ->take(8)
-                ->values();
-            $fallbackTopbarCount = (clone $pendingDisposisiQuery)->count()
-                + $counts['sidebarApprovalPendingCount']
-                + $counts['sidebarNotulensiApprovalPendingCount']
-                + $counts['sidebarLeaveApprovalPendingCount']
-                + $counts['sidebarSuratKeluarApprovalPendingCount']
-                + $counts['sidebarProgressZiApprovalPendingCount']
-                + $counts['sidebarNotulensiFollowUpCount']
-                + $counts['sidebarProgressZiAttentionCount'];
-
             $unifiedPayload = app(UnifiedActionCenterService::class)->build($user, ['tab' => 'all']);
             $counts['sidebarActionCenterCount'] = $unifiedPayload['summary']['active_count'] ?? 0;
-            $counts['topbarActionCount'] = $counts['sidebarActionCenterCount'] ?: $fallbackTopbarCount;
+            $counts['topbarActionCount'] = $counts['sidebarActionCenterCount'];
             $counts['topbarActionItems'] = collect($unifiedPayload['items'] ?? [])->take(8)->map(function ($item) {
                 return [
                     'type' => $item['module_key'] ?? 'action-center',
@@ -386,10 +420,6 @@ class AppServiceProvider extends ServiceProvider
                     'sort_at' => $item['sort_at'] ?? 0,
                 ];
             })->values();
-
-            if ($counts['topbarActionItems']->isEmpty()) {
-                $counts['topbarActionItems'] = $fallbackTopbarItems;
-            }
 
             $view->with($counts);
         });

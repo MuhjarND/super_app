@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Verifikasi Tanda Tangan Elektronik Cuti</title>
+    @include('partials.app-icons')
     <style>
         body {
             margin: 0;
@@ -124,7 +125,7 @@
         <div class="card">
             <div class="header">
                 <h1 class="title">Verifikasi Tanda Tangan Elektronik</h1>
-                <p class="subtitle">SMART PTA Papua Barat</p>
+                <p class="subtitle">PAPEDA</p>
                 <div class="status {{ $data['valid'] ? 'valid' : 'invalid' }}">
                     {{ $data['valid'] ? 'Valid dan terverifikasi' : 'Tidak valid / belum final' }}
                 </div>

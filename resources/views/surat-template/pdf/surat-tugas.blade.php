@@ -34,12 +34,12 @@
     .st-section { text-align:center; font-weight:700; margin:8px 0 5px; }
     .st-sign { width:245px; margin-left:auto; text-align:center; margin-top:14px; page-break-inside:avoid; }
     .st-sign-city { margin-bottom:2px; }
-    .st-sign-role { display:block; margin-bottom:8px; }
-    .st-sign-image-wrap { width:100%; text-align:center; margin:0 auto 6px; }
-    .st-sign-image { width:150px; height:72px; display:block; margin:0 auto; object-fit:contain; }
+    .st-sign-role { display:block; margin-bottom:0; }
+    .st-sign-image-wrap { width:100%; text-align:center; margin:0 auto -16px; }
+    .st-sign-image { width:172px; height:88px; display:block; margin:0 auto; object-fit:contain; }
     .st-sign-placeholder { display:block; height:72px; }
-    .st-sign-name { display:block; font-weight:700; line-height:1.2; margin-top:2px; }
-    .st-sign-nip { display:block; margin-top:4px; }
+    .st-sign-name { display:block; font-weight:700; line-height:1.2; margin-top:0; position:relative; z-index:1; }
+    .st-sign-nip { display:block; margin-top:2px; position:relative; z-index:1; }
 </style>
 
 @if($kopImage)

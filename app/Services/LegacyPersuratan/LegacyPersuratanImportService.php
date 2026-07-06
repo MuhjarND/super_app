@@ -313,7 +313,7 @@ class LegacyPersuratanImportService
                 'perihal' => trim((string) $row->perihal),
                 'tanggal_surat' => $row->tgl_surat,
                 'sifat' => $this->mapLegacySifat($row),
-                'file_path' => $this->copyLegacyFile('surat_masuk', $row->file, 'surat-masuk/legacy', $row->id, true),
+                'file_path' => $this->copyLegacyFile('surat_masuk', $row->file, 'surat-masuk/legacy', $row->id, true, $suratMasuk->file_path),
                 'status' => $this->mapLegacySuratMasukStatus($row->id_status, (int) ($hasDetailRows[$row->id] ?? 0)),
                 'created_by' => $creatorId,
             ]);
@@ -486,7 +486,7 @@ class LegacyPersuratanImportService
                 'perihal' => $this->normalizeLegacyText($row->perihal, 'Surat keluar legacy #' . $row->id),
                 'tanggal_surat' => $this->normalizeLegacyDate($row->tgl_surat, $row->tahun),
                 'has_lampiran' => !empty($row->file),
-                'file_path' => $this->copyLegacyFile('surat_keluar', $row->file, 'surat-keluar/legacy', $row->id),
+                'file_path' => $this->copyLegacyFile('surat_keluar', $row->file, 'surat-keluar/legacy', $row->id, false, $suratKeluar->file_path),
                 'status' => ((int) $row->id_status === 2) ? 'lengkap' : 'draft',
                 'created_by' => $creatorId,
             ]);
@@ -661,9 +661,13 @@ class LegacyPersuratanImportService
         return $map[(int) $legacyId] ?? 'sekretaris';
     }
 
-    protected function copyLegacyFile($legacyFolder, $filename, $targetDir, $legacyId, $required = false)
+    protected function copyLegacyFile($legacyFolder, $filename, $targetDir, $legacyId, $required = false, $existingPath = null)
     {
         if ($this->skipFiles || !$filename) {
+            if ($existingPath) {
+                return $existingPath;
+            }
+
             return $required ? $this->ensureMissingFilePlaceholder($targetDir, $legacyId, $legacyFolder, $filename) : null;
         }
 
@@ -671,6 +675,11 @@ class LegacyPersuratanImportService
 
         if (!is_file($source)) {
             $this->summary['file_missing']++;
+
+            if ($existingPath) {
+                return $existingPath;
+            }
+
             return $required ? $this->ensureMissingFilePlaceholder($targetDir, $legacyId, $legacyFolder, $filename) : null;
         }
 

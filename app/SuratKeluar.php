@@ -36,12 +36,15 @@ class SuratKeluar extends Model
             return $query->whereRaw('1 = 0');
         }
 
-        if ($user->canManageSuratKeluar()) {
+        if ($user->isSuperAdmin() || $user->isKasubagTurt()) {
             return $query;
         }
 
-        return $query->whereHas('penerimaInternal', function ($penerimaQuery) use ($user) {
-            $penerimaQuery->where('users.id', $user->id);
+        return $query->where(function ($builder) use ($user) {
+            $builder->where('created_by', $user->id)
+                ->orWhereHas('penerimaInternal', function ($penerimaQuery) use ($user) {
+                    $penerimaQuery->whereIn('users.id', $user->effectiveAssignmentUserIds());
+                });
         });
     }
 
@@ -100,6 +103,54 @@ class SuratKeluar extends Model
         return $this->hasMany(PdfVerification::class, 'document_id', 'id')->where('module', 'surat_keluar');
     }
 
+    public function hasAvailableFile()
+    {
+        if (!empty($this->file_path)) {
+            return true;
+        }
+
+        $approval = $this->relationLoaded('templateApproval')
+            ? $this->templateApproval
+            : $this->templateApproval()->first();
+
+        if ($approval && trim((string) $approval->rendered_body) !== '') {
+            return true;
+        }
+
+        if (!empty($this->rapat_id)) {
+            return true;
+        }
+
+        $leaveRequest = $this->relationLoaded('leaveRequest')
+            ? $this->leaveRequest
+            : $this->leaveRequest()->first();
+
+        if ($leaveRequest) {
+            return true;
+        }
+
+        if ($this->relationLoaded('pdfVerifications')) {
+            return $this->pdfVerifications->contains(function ($verification) {
+                return trim((string) $verification->file_path) !== '';
+            });
+        }
+
+        return $this->pdfVerifications()
+            ->whereNotNull('file_path')
+            ->where('file_path', '!=', '')
+            ->exists();
+    }
+
+    public function syncCompletionStatusFromFile()
+    {
+        if ($this->status !== 'lengkap' && $this->hasAvailableFile()) {
+            $this->forceFill(['status' => 'lengkap'])->save();
+            $this->status = 'lengkap';
+        }
+
+        return $this;
+    }
+
     public function getNomenklaturKodeAttribute()
     {
         $map = [
@@ -117,7 +168,7 @@ class SuratKeluar extends Model
             ? $this->templateApproval
             : $this->templateApproval()->first();
 
-        if ($this->status === 'lengkap') {
+        if ($this->status === 'lengkap' || $this->hasAvailableFile()) {
             [$class, $label] = ['success', 'Lengkap'];
         } elseif ($approval && $approval->status === 'pending') {
             [$class, $label] = ['warning', 'Pending Approval'];

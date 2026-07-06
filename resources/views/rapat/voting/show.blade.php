@@ -11,6 +11,9 @@
         .bar-track { width:100%; background:#e5e7eb; border-radius:999px; overflow:hidden; height:16px; }
         .bar-fill { height:100%; background:linear-gradient(90deg, #4338ca, #0ea5e9); transition: width .45s ease; }
         .bar-fill.leading { background:linear-gradient(90deg, #f97316, #ef4444); }
+        .result-candidate-head { display:flex; justify-content:space-between; gap:12px; align-items:center; }
+        .result-candidate-name { display:flex; align-items:center; gap:10px; min-width:0; }
+        .result-candidate-img { width:42px; height:42px; border-radius:10px; object-fit:cover; background:#eef2ff; border:1px solid #dbe4ff; flex:0 0 auto; }
         .pending-list { max-height: 240px; overflow:auto; }
         .qr-box svg { max-width: 100%; height: auto; }
     </style>
@@ -135,8 +138,9 @@
                 const topCount = item.candidates.length ? item.candidates[0].count : 0;
                 const html = item.candidates.map(function (candidate) {
                     const leading = candidate.count === topCount && candidate.count > 0 ? 'leading' : '';
+                    const image = candidate.image_url ? '<img src=\"' + candidate.image_url + '\" class=\"result-candidate-img\" alt=\"\">' : '';
                     return '<div class=\"bar-row\">'
-                        + '<div class=\"d-flex justify-content-between\"><strong>' + candidate.nama + '</strong><span>' + candidate.count + ' (' + candidate.percentage + '%)</span></div>'
+                        + '<div class=\"result-candidate-head\"><div class=\"result-candidate-name\">' + image + '<strong>' + candidate.nama + '</strong></div><span>' + candidate.count + ' (' + candidate.percentage + '%)</span></div>'
                         + '<div class=\"bar-track\"><div class=\"bar-fill ' + leading + '\" style=\"width:' + candidate.percentage + '%\"></div></div>'
                         + '</div>';
                 }).join('');

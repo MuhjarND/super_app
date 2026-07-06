@@ -1,9 +1,14 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Sistem Informasi PTA Papua Barat</title>
+    <title>PAPEDA | Pusat Aplikasi Pengelolaan Dokumen dan Administrasi</title>
+    <link rel="icon" type="image/png" href="{{ asset('logo_app_new.png') }}">
+    <link rel="shortcut icon" href="{{ asset('logo_app_new.png') }}">
+    <link rel="apple-touch-icon" href="{{ asset('icons/logo-app-192.png') }}">
+    <link rel="manifest" href="{{ asset('site.webmanifest') }}">
+    <meta name="theme-color" content="#5b21b6">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <style>
@@ -816,11 +821,11 @@
         <div class="container site-header-inner">
             <a href="{{ url('/') }}" class="brand">
                 <div class="brand-mark">
-                    <img src="{{ asset('logo_app.png') }}" alt="Logo Sistem Informasi Terpadu PTA Papua Barat">
+                    <img src="{{ asset('logo_app_new.png') }}" alt="Logo PAPEDA">
                 </div>
                 <div class="brand-text">
-                    <strong>Sistem Informasi PTA Papua Barat</strong>
-                    <span>Persuratan, rapat, cuti, dan monitoring Zona Integritas</span>
+                    <strong>PAPEDA</strong>
+                    <span>Pusat Aplikasi Pengelolaan Dokumen dan Administrasi</span>
                 </div>
             </a>
             <div class="header-actions">
@@ -838,9 +843,9 @@
                 <section class="hero-card">
                     <div class="eyebrow"><i class="fas fa-landmark"></i>PTA Papua Barat</div>
                     <div class="hero-brand-strip">
-                        <img src="{{ asset('logo_app.png') }}" alt="Logo Resmi PTA Papua Barat">
+                        <img src="{{ asset('logo_app_new.png') }}" alt="Logo PAPEDA">
                         <div>
-                            <strong>Pengadilan Tinggi Agama Papua Barat</strong>
+                            <strong>PAPEDA</strong>
                             <span>Sistem informasi terpadu untuk persuratan, rapat, layanan kepegawaian, dan rekapan Zona Integritas.</span>
                         </div>
                     </div>
@@ -863,7 +868,7 @@
                             <span>Pusat approval untuk tindak lanjut dokumen, review, dan persetujuan pimpinan.</span>
                         </div>
                         <div class="stat-card">
-                            <strong>âˆž</strong>
+                            <strong>∞</strong>
                             <span>Siap dikembangkan untuk template surat, integrasi eviden, dan dashboard lintas unit.</span>
                         </div>
                     </div>

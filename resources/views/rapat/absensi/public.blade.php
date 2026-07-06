@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Absensi Rapat | PTA Papua Barat</title>
+    @include('partials.app-icons')
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -122,7 +123,7 @@
         .tab-button.active {
             background: var(--primary-soft);
             color: var(--primary);
-            border-color: #c7d2fe;
+            border-color: #e0e7ff;
         }
 
         .tab-panel { display: none; }
@@ -383,12 +384,8 @@
 
                     <div class="field">
                         <label>Tanda Tangan Digital</label>
-                        <div class="signature-wrap">
-                            <div class="signature-toolbar">
-                                <span class="hint" style="margin:0;">Latar putih, tinta hitam.</span>
-                                <button type="button" class="btn btn-secondary" onclick="clearSignature('internalCanvas')">Ulangi</button>
-                            </div>
-                            <canvas id="internalCanvas" class="signature-canvas"></canvas>
+                        <div style="border:1px solid #dbe4ff;background:#eef2ff;border-radius:16px;padding:12px 14px;color:#334155;font-size:.86rem;font-weight:600;">
+                            Absensi peserta undangan memakai tanda tangan yang tersimpan pada Profil Saya.
                         </div>
                     </div>
 
@@ -571,15 +568,10 @@
         function bindForms() {
             document.getElementById('internalAttendanceForm').addEventListener('submit', async function (event) {
                 event.preventDefault();
-                if (!canvases.internalCanvas.state.dirty) {
-                    showAlert('Tanda tangan peserta wajib diisi.', 'error');
-                    return;
-                }
 
                 try {
                     const result = await submitForm('{{ route('rapat.absensi.public.store', $rapat->public_code) }}', {
-                        user_id: document.getElementById('user_id').value,
-                        signature_data: document.getElementById('internalCanvas').toDataURL('image/png')
+                        user_id: document.getElementById('user_id').value
                     }, 'Mohon tunggu, absensi peserta sedang diproses.');
                     showAlert(result.message, 'success');
                     setTimeout(function () { window.location.reload(); }, 800);
@@ -610,7 +602,6 @@
         }
 
         setupTabs();
-        initSignature('internalCanvas');
         initSignature('guestCanvas');
         bindForms();
 

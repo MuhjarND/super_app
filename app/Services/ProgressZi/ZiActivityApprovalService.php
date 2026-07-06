@@ -59,7 +59,7 @@ class ZiActivityApprovalService
 
     public function approve(ZiActivityApproval $approval, User $approver, $reviewNotes = null)
     {
-        abort_unless((int) $approval->approver_id === (int) $approver->id || $approver->isSuperAdmin(), 403);
+        abort_unless($approver->canActAsAssignedUser($approval->approver_id) || $approver->isSuperAdmin(), 403);
         abort_unless($approval->status === 'pending', 422, 'Approval ini sudah diproses.');
         $previousStatus = $approval->status;
 
@@ -96,7 +96,7 @@ class ZiActivityApprovalService
 
     public function reject(ZiActivityApproval $approval, User $approver, $reviewNotes = null)
     {
-        abort_unless((int) $approval->approver_id === (int) $approver->id || $approver->isSuperAdmin(), 403);
+        abort_unless($approver->canActAsAssignedUser($approval->approver_id) || $approver->isSuperAdmin(), 403);
         abort_unless($approval->status === 'pending', 422, 'Approval ini sudah diproses.');
         $previousStatus = $approval->status;
 
@@ -146,9 +146,8 @@ class ZiActivityApprovalService
 
     protected function resolveApprover()
     {
-        return User::active()->whereHas('roles', function ($query) {
-            $query->whereIn('name', ['approval', 'super_admin']);
-        })
+        return User::active()
+            ->withRoleOrDelegatedJabatan(['approval', 'super_admin'])
             ->ordered()
             ->first();
     }

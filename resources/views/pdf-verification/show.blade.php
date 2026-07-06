@@ -3,7 +3,8 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Validasi PDF - SIMANTAP</title>
+    <title>Validasi PDF - PAPEDA</title>
+    @include('partials.app-icons')
     <link rel="stylesheet" href="{{ asset('adminlte/plugins/fontawesome-free/css/all.min.css') }}">
     <style>
         :root { --primary:#4f46e5; --accent:#7c3aed; --ink:#0f172a; --muted:#64748b; --line:#dbe3ef; }
@@ -39,7 +40,7 @@
             <section class="card">
                 <div class="head">
                     <h1>Validasi PDF</h1>
-                    <p>Informasi ini digunakan untuk memastikan dokumen berasal dari SIMANTAP dan belum diganti dari salinan yang tersimpan.</p>
+                    <p>Informasi ini digunakan untuk memastikan dokumen berasal dari PAPEDA dan belum diganti dari salinan yang tersimpan.</p>
                 </div>
                 <div class="body">
                     <div class="status"><i class="fas fa-check-circle"></i> Dokumen Terdaftar</div>

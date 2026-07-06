@@ -44,7 +44,7 @@ class TwoFactorStatusNotification extends Notification
     public function toMail($notifiable)
     {
         $mail = (new MailMessage)
-            ->subject($this->title . ' - PTA Papua Barat')
+            ->subject($this->title . ' - PAPEDA')
             ->greeting('Yth. Bapak/Ibu ' . $notifiable->name . ',')
             ->line($this->message);
 

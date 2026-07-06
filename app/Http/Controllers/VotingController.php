@@ -12,6 +12,7 @@ use App\VotingVote;
 use App\Services\WhatsAppNotificationService;
 use Barryvdh\DomPDF\Facade as PDF;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class VotingController extends Controller
@@ -118,6 +119,8 @@ class VotingController extends Controller
         $data = $request->validated();
 
         DB::transaction(function () use ($voting, $data) {
+            $oldImagePaths = $this->candidateImagePaths($voting);
+
             $voting->update([
                 'judul' => $data['judul'],
                 'deskripsi' => $data['deskripsi'] ?? null,
@@ -128,6 +131,9 @@ class VotingController extends Controller
 
             $this->replaceItems($voting, $data['items']);
             $this->syncParticipants($voting, $data);
+
+            $voting->load('items.candidates');
+            $this->deleteUnusedCandidateImages($oldImagePaths, $this->candidateImagePaths($voting));
         });
 
         $voting->refresh();
@@ -142,7 +148,9 @@ class VotingController extends Controller
     {
         abort_unless(auth()->user()->canManageVoting(), 403);
 
+        $imagePaths = $this->candidateImagePaths($voting);
         $voting->delete();
+        $this->deleteUnusedCandidateImages($imagePaths, []);
 
         return redirect()->route('rapat.voting.index')->with('success', 'Voting berhasil dihapus.');
     }
@@ -165,6 +173,7 @@ class VotingController extends Controller
                     return [
                         'id' => $candidate->id,
                         'nama' => $candidate->nama_snapshot,
+                        'image_url' => $candidate->image_url,
                         'count' => $count,
                         'percentage' => $totalVotes > 0 ? round(($count / $totalVotes) * 100, 2) : 0,
                     ];
@@ -236,7 +245,12 @@ class VotingController extends Controller
                 'urutan' => $index + 1,
             ]);
 
-            $this->syncCandidates($item, $itemData['candidate_ids']);
+            $this->syncCandidates(
+                $item,
+                $itemData['candidate_ids'],
+                $itemData['candidate_images'] ?? [],
+                $itemData['existing_candidate_images'] ?? []
+            );
         }
     }
 
@@ -249,7 +263,7 @@ class VotingController extends Controller
         $this->syncItems($voting, $items);
     }
 
-    protected function syncCandidates(VotingItem $item, array $candidateIds)
+    protected function syncCandidates(VotingItem $item, array $candidateIds, array $candidateImages = [], array $existingCandidateImages = [])
     {
         $users = User::with('jabatan')
             ->whereIn('id', array_values($candidateIds))
@@ -263,8 +277,85 @@ class VotingController extends Controller
                 'user_id' => $user->id,
                 'nama_snapshot' => $user->name,
                 'jabatan_snapshot' => $user->jabatan_keterangan ?: optional($user->jabatan)->nama,
+                'image_path' => $this->candidateImagePathFor($user->id, $candidateImages, $existingCandidateImages),
+                'image_name' => $this->candidateImageNameFor($user->id, $candidateImages),
+                'image_mime' => $this->candidateImageMimeFor($user->id, $candidateImages),
+                'image_size' => $this->candidateImageSizeFor($user->id, $candidateImages),
                 'urutan' => $index + 1,
             ]);
+        }
+    }
+
+    protected function candidateImagePathFor($userId, array $candidateImages, array $existingCandidateImages = [])
+    {
+        $file = $this->candidateImageFile($userId, $candidateImages);
+        if ($file) {
+            return $this->storeCandidateImage($file);
+        }
+
+        $existingPath = $existingCandidateImages[$userId] ?? $existingCandidateImages[(string) $userId] ?? null;
+
+        return $existingPath && Storage::disk('public')->exists($existingPath) ? $existingPath : null;
+    }
+
+    protected function candidateImageNameFor($userId, array $candidateImages)
+    {
+        $file = $this->candidateImageFile($userId, $candidateImages);
+
+        return $file ? $file->getClientOriginalName() : null;
+    }
+
+    protected function candidateImageMimeFor($userId, array $candidateImages)
+    {
+        $file = $this->candidateImageFile($userId, $candidateImages);
+
+        return $file ? $file->getClientMimeType() : null;
+    }
+
+    protected function candidateImageSizeFor($userId, array $candidateImages)
+    {
+        $file = $this->candidateImageFile($userId, $candidateImages);
+
+        return $file ? $file->getSize() : null;
+    }
+
+    protected function candidateImageFile($userId, array $candidateImages)
+    {
+        return $candidateImages[$userId] ?? $candidateImages[(string) $userId] ?? null;
+    }
+
+    protected function storeCandidateImage($file)
+    {
+        $extension = strtolower($file->getClientOriginalExtension() ?: 'jpg');
+        $path = 'voting/candidates/' . date('Y/m') . '/' . (string) Str::uuid() . '.' . $extension;
+
+        Storage::disk('public')->put($path, file_get_contents($file->getRealPath()));
+
+        return $path;
+    }
+
+    protected function candidateImagePaths(Voting $voting)
+    {
+        $voting->loadMissing('items.candidates');
+
+        return $voting->items
+            ->flatMap(function ($item) {
+                return $item->candidates->pluck('image_path');
+            })
+            ->filter()
+            ->unique()
+            ->values()
+            ->all();
+    }
+
+    protected function deleteUnusedCandidateImages(array $oldPaths, array $keptPaths)
+    {
+        $kept = array_flip(array_filter($keptPaths));
+
+        foreach (array_unique(array_filter($oldPaths)) as $path) {
+            if (!isset($kept[$path])) {
+                Storage::disk('public')->delete($path);
+            }
         }
     }
 

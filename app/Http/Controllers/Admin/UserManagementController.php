@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\AppSetting;
 use App\Bidang;
 use App\Http\Controllers\Controller;
 use App\Jabatan;
@@ -9,9 +10,11 @@ use App\Role;
 use App\Services\WhatsAppNotificationService;
 use App\Unit;
 use App\User;
+use App\UserJabatanDelegation;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 
 class UserManagementController extends Controller
@@ -26,7 +29,11 @@ class UserManagementController extends Controller
 
     public function index(Request $request)
     {
-        $query = User::with(['roles', 'jabatan', 'unit', 'bidang', 'atasanLangsung', 'pejabatBerwenang']);
+        $query = User::with(['roles', 'jabatan', 'unit', 'bidang', 'atasanLangsung', 'pejabatBerwenang', 'activeJabatanDelegations.jabatan'])
+            ->where(function ($builder) {
+                $builder->where('status_aktif_pegawai', true)
+                    ->orWhere('hirarki', '<', 999);
+            });
 
         if ($request->filled('search')) {
             $search = trim($request->search);
@@ -63,8 +70,9 @@ class UserManagementController extends Controller
         $bidangs = Bidang::orderBy('nama')->get();
         $supervisorOptions = User::with('jabatan')->active()->ordered()->get(['id', 'name', 'nip', 'jabatan_id', 'hirarki']);
         $filters = $request->only(['search', 'role_id', 'jabatan_id', 'unit_id', 'bidang_id']);
+        $whatsAppEnabled = $this->whatsAppService->isEnabled();
 
-        return view('admin.users.index', compact('users', 'roles', 'jabatans', 'units', 'bidangs', 'supervisorOptions', 'filters'));
+        return view('admin.users.index', compact('users', 'roles', 'jabatans', 'units', 'bidangs', 'supervisorOptions', 'filters', 'whatsAppEnabled'));
     }
 
     public function create()
@@ -76,7 +84,7 @@ class UserManagementController extends Controller
     {
         $data = $this->validateRequest($request);
 
-        DB::transaction(function () use ($data) {
+        DB::transaction(function () use ($data, $request) {
             $user = User::create([
                 'name' => $data['name'],
                 'email' => $data['email'],
@@ -92,7 +100,9 @@ class UserManagementController extends Controller
                 'pejabat_berwenang_id' => $data['pejabat_berwenang_id'] ?? null,
             ]);
 
+            $this->syncProfilePhoto($request, $user);
             $user->roles()->sync($data['role_ids']);
+            $this->syncJabatanDelegation($user, $data);
         });
 
         return redirect()->route('admin.users.index')->with('success', 'User berhasil ditambahkan.');
@@ -107,7 +117,7 @@ class UserManagementController extends Controller
     {
         $data = $this->validateRequest($request, $user->id);
 
-        DB::transaction(function () use ($data, $user) {
+        DB::transaction(function () use ($data, $user, $request) {
             $payload = [
                 'name' => $data['name'],
                 'email' => $data['email'],
@@ -127,7 +137,9 @@ class UserManagementController extends Controller
             }
 
             $user->update($payload);
+            $this->syncProfilePhoto($request, $user);
             $user->roles()->sync($data['role_ids']);
+            $this->syncJabatanDelegation($user, $data);
         });
 
         return redirect()->route('admin.users.index')->with('success', 'User berhasil diperbarui.');
@@ -157,13 +169,29 @@ class UserManagementController extends Controller
     public function sendLoginInfo(User $user)
     {
         $result = $this->whatsAppService->notifyLoginInfo($user);
-        $processed = $result || !$this->whatsAppService->isConfigured();
+        $processed = $result || !$this->whatsAppService->isConfigured() || !$this->whatsAppService->isEnabled();
 
         return redirect()->route('admin.users.index')->with(
             $processed ? 'success' : 'error',
-            $processed
+            !$this->whatsAppService->isEnabled()
+                ? 'Notifikasi WhatsApp sedang nonaktif. Informasi login tidak dikirim.'
+                : ($processed
                 ? 'Informasi login berhasil diproses ke WhatsApp user.'
-                : 'Informasi login tidak dapat dikirim. Pastikan nomor WhatsApp user sudah tersedia.'
+                : 'Informasi login tidak dapat dikirim. Pastikan nomor WhatsApp user sudah tersedia.')
+        );
+    }
+
+    public function toggleWhatsAppNotifications()
+    {
+        $enabled = !AppSetting::boolean('whatsapp_notifications_enabled', true);
+
+        AppSetting::putValue('whatsapp_notifications_enabled', $enabled ? '1' : '0');
+
+        return redirect()->route('admin.users.index')->with(
+            'success',
+            $enabled
+                ? 'Notifikasi WhatsApp berhasil diaktifkan kembali.'
+                : 'Notifikasi WhatsApp berhasil dinonaktifkan untuk seluruh user.'
         );
     }
 
@@ -204,6 +232,45 @@ class UserManagementController extends Controller
             'no_hp' => ['nullable', 'string', 'max:50'],
             'atasan_langsung_id' => array_filter(['nullable', Rule::exists('users', 'id')->where('status_aktif_pegawai', true), $userId ? Rule::notIn([$userId]) : null]),
             'pejabat_berwenang_id' => array_filter(['nullable', Rule::exists('users', 'id')->where('status_aktif_pegawai', true), $userId ? Rule::notIn([$userId]) : null]),
+            'delegasi_tipe' => ['nullable', 'required_with:delegasi_jabatan_id', 'in:plh,plt'],
+            'delegasi_jabatan_id' => ['nullable', 'required_with:delegasi_tipe', 'exists:jabatans,id'],
+            'profile_photo' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
+            'remove_photo' => ['nullable', 'boolean'],
+        ]);
+    }
+
+    protected function syncProfilePhoto(Request $request, User $user)
+    {
+        if ($request->boolean('remove_photo') && $user->profile_photo_path) {
+            Storage::disk('public')->delete($user->profile_photo_path);
+            $user->forceFill(['profile_photo_path' => null])->save();
+        }
+
+        if (!$request->hasFile('profile_photo')) {
+            return;
+        }
+
+        if ($user->profile_photo_path) {
+            Storage::disk('public')->delete($user->profile_photo_path);
+        }
+
+        $path = $request->file('profile_photo')->store('profile-photos', 'public');
+        $user->forceFill(['profile_photo_path' => $path])->save();
+    }
+
+    protected function syncJabatanDelegation(User $user, array $data)
+    {
+        UserJabatanDelegation::where('user_id', $user->id)->delete();
+
+        if (empty($data['delegasi_tipe']) || empty($data['delegasi_jabatan_id'])) {
+            return;
+        }
+
+        UserJabatanDelegation::create([
+            'user_id' => $user->id,
+            'jabatan_id' => $data['delegasi_jabatan_id'],
+            'delegation_type' => $data['delegasi_tipe'],
+            'is_active' => true,
         ]);
     }
 

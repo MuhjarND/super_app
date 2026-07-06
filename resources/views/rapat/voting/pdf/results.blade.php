@@ -15,6 +15,7 @@
         table { width: 100%; border-collapse: collapse; }
         th, td { border: 1px solid #cbd5e1; padding: 6px; vertical-align: top; }
         th { background: #f3f4f6; }
+        .candidate-image { width: 54px; height: 42px; object-fit: cover; }
     </style>
 </head>
 <body>
@@ -39,6 +40,7 @@
                 <thead>
                     <tr>
                         <th style="width:35px;">No</th>
+                        <th style="width:70px;">Gambar</th>
                         <th>Kandidat</th>
                         <th style="width:100px;">Suara</th>
                     </tr>
@@ -47,6 +49,13 @@
                     @foreach($item->candidates->sortByDesc(function ($candidate) { return $candidate->votes->count(); })->values() as $index => $candidate)
                         <tr>
                             <td>{{ $index + 1 }}</td>
+                            <td>
+                                @if($candidate->image_path && file_exists(public_path('storage/' . $candidate->image_path)))
+                                    <img src="{{ public_path('storage/' . $candidate->image_path) }}" class="candidate-image">
+                                @else
+                                    -
+                                @endif
+                            </td>
                             <td>{{ $candidate->nama_snapshot }}</td>
                             <td>{{ $candidate->votes->count() }}</td>
                         </tr>

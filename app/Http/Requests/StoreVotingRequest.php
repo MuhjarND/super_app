@@ -26,6 +26,10 @@ class StoreVotingRequest extends FormRequest
             'items.*.deskripsi' => ['nullable', 'string'],
             'items.*.candidate_ids' => ['required', 'array', 'min:2'],
             'items.*.candidate_ids.*' => ['distinct', Rule::exists('users', 'id')->where('status_aktif_pegawai', true)],
+            'items.*.candidate_images' => ['nullable', 'array'],
+            'items.*.candidate_images.*' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:4096'],
+            'items.*.existing_candidate_images' => ['nullable', 'array'],
+            'items.*.existing_candidate_images.*' => ['nullable', 'string', 'max:255'],
         ];
     }
 

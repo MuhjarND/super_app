@@ -60,9 +60,11 @@ class RapatController extends Controller
             ->active()
             ->ordered()
             ->get();
-        $approvers = User::whereHas('roles', function ($query) {
-            $query->whereIn('name', ['admin', 'approval', 'super_admin']);
-        })->active()->with('jabatan')->ordered()->get();
+        $approvers = User::withRoleOrDelegatedJabatan(['admin', 'approval', 'super_admin'])
+            ->active()
+            ->with('jabatan')
+            ->ordered()
+            ->get();
 
         return view('rapat.index', compact('rapats', 'kategoriSuratOptions', 'participants', 'approvers'));
     }

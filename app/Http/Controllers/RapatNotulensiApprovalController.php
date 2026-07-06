@@ -37,24 +37,24 @@ class RapatNotulensiApprovalController extends Controller
             'notulensi.rapat.pesertas',
         ]);
 
-        abort_unless($user->isMeetingAdmin() || (int) $notulensiApproval->approver_id === (int) $user->id, 403);
+        abort_unless($user->isMeetingAdmin() || $user->canActAsAssignedUser($notulensiApproval->approver_id), 403);
 
         $canAct = $notulensiApproval->status === 'pending'
-            && ($user->isMeetingAdmin() || (int) $notulensiApproval->approver_id === (int) $user->id);
+            && ($user->isMeetingAdmin() || $user->canActAsAssignedUser($notulensiApproval->approver_id));
 
         return view('rapat.notulensi-approval.show', compact('notulensiApproval', 'canAct'));
     }
 
     public function approve(Request $request, RapatNotulensiApproval $notulensiApproval)
     {
-        abort_unless(auth()->user()->canAccessMeetingApproval(), 403);
+        $user = auth()->user();
+        abort_unless($user->canAccessMeetingApproval(), 403);
+        abort_unless($user->isMeetingAdmin() || $user->canActAsAssignedUser($notulensiApproval->approver_id), 403);
         $request->validate([
-            'signature_data' => ['required', 'string'],
-        ], [
-            'signature_data.required' => 'Tanda tangan wajib diisi.',
+            'signature_data' => ['nullable', 'string'],
         ]);
 
-        $this->approvalService->approve($notulensiApproval, auth()->user(), $request->input('catatan'), $request->input('signature_data'));
+        $this->approvalService->approve($notulensiApproval, $user, $request->input('catatan'), $request->input('signature_data'));
 
         return response()->json([
             'success' => true,
@@ -64,7 +64,9 @@ class RapatNotulensiApprovalController extends Controller
 
     public function reject(Request $request, RapatNotulensiApproval $notulensiApproval)
     {
-        abort_unless(auth()->user()->canAccessMeetingApproval(), 403);
+        $user = auth()->user();
+        abort_unless($user->canAccessMeetingApproval(), 403);
+        abort_unless($user->isMeetingAdmin() || $user->canActAsAssignedUser($notulensiApproval->approver_id), 403);
 
         $request->validate([
             'catatan' => ['required', 'string'],
@@ -72,7 +74,7 @@ class RapatNotulensiApprovalController extends Controller
             'catatan.required' => 'Catatan reject wajib diisi.',
         ]);
 
-        $this->approvalService->reject($notulensiApproval, auth()->user(), $request->input('catatan'));
+        $this->approvalService->reject($notulensiApproval, $user, $request->input('catatan'));
 
         return response()->json([
             'success' => true,

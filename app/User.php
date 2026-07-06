@@ -7,6 +7,10 @@ use Illuminate\Notifications\Notifiable;
 
 class User extends Authenticatable
 {
+    protected $effectiveJabatansCache = null;
+    protected $effectiveAssignmentUserIdsCache = null;
+    protected $delegatedStructuralRoleNamesCache = null;
+
     use Notifiable;
 
     protected $fillable = [
@@ -15,6 +19,10 @@ class User extends Authenticatable
         'email',
         'password',
         'profile_photo_path',
+        'profile_signature_path',
+        'profile_signature_mime',
+        'profile_signature_size',
+        'profile_signature_method',
         'two_factor_secret',
         'two_factor_enabled',
         'two_factor_confirmed_at',
@@ -50,6 +58,16 @@ class User extends Authenticatable
         'two_factor_confirmed_at' => 'datetime',
     ];
 
+    public function hasProfileSignature()
+    {
+        return !empty($this->profile_signature_path);
+    }
+
+    public function getProfileSignatureUrlAttribute()
+    {
+        return $this->profile_signature_path ? asset('storage/' . $this->profile_signature_path) : null;
+    }
+
     public function roles()
     {
         return $this->belongsToMany(Role::class, 'role_user');
@@ -58,6 +76,16 @@ class User extends Authenticatable
     public function jabatan()
     {
         return $this->belongsTo(Jabatan::class);
+    }
+
+    public function jabatanDelegations()
+    {
+        return $this->hasMany(UserJabatanDelegation::class);
+    }
+
+    public function activeJabatanDelegations()
+    {
+        return $this->jabatanDelegations()->where('is_active', true)->with('jabatan');
     }
 
     public function unit()
@@ -106,9 +134,119 @@ class User extends Authenticatable
     public function hasRole($role)
     {
         if (is_string($role)) {
-            return $this->roles->contains('name', $role);
+            return $this->roles->contains('name', $role) || $this->hasDelegatedRole($role);
         }
-        return !!$role->intersect($this->roles)->count();
+
+        return collect($role)->contains(function ($candidate) {
+            return $this->hasRole(is_string($candidate) ? $candidate : optional($candidate)->name);
+        });
+    }
+
+    protected function hasDelegatedRole($role)
+    {
+        return in_array($role, $this->delegatedRoleNames(), true);
+    }
+
+    protected function delegatedRoleNames()
+    {
+        $delegations = $this->relationLoaded('activeJabatanDelegations')
+            ? $this->activeJabatanDelegations
+            : $this->activeJabatanDelegations()->get();
+
+        return $delegations
+            ->map(function ($delegation) {
+                return optional($delegation->jabatan)->kode;
+            })
+            ->filter()
+            ->flatMap(function ($kode) {
+                if ($kode === 'KPTA') {
+                    return ['ketua', 'approval', 'peserta', 'atasan_langsung'];
+                }
+                if ($kode === 'WKPTA') {
+                    return ['wakil_ketua', 'approval', 'peserta', 'atasan_langsung'];
+                }
+                if ($kode === 'SEK') {
+                    return ['sekretaris', 'approval', 'peserta', 'atasan_langsung'];
+                }
+                if ($kode === 'PAN') {
+                    return ['panitera', 'approval', 'peserta', 'atasan_langsung'];
+                }
+                if (strpos($kode, 'KABAG_') === 0) {
+                    return ['kabag', 'peserta', 'atasan_langsung'];
+                }
+                if (strpos($kode, 'KASUBAG_') === 0) {
+                    return ['kasubag', 'peserta', 'atasan_langsung'];
+                }
+                if (strpos($kode, 'PANMUD_') === 0) {
+                    return ['panmud', 'peserta', 'atasan_langsung'];
+                }
+
+                return [];
+            })
+            ->unique()
+            ->values()
+            ->all();
+    }
+
+    public function activeDelegationLabels()
+    {
+        $delegations = $this->relationLoaded('activeJabatanDelegations')
+            ? $this->activeJabatanDelegations
+            : $this->activeJabatanDelegations()->get();
+
+        return $delegations
+            ->map(function ($delegation) {
+                $jabatanName = optional($delegation->jabatan)->nama;
+
+                return $jabatanName ? trim($delegation->type_label . ' ' . $jabatanName) : null;
+            })
+            ->filter()
+            ->values();
+    }
+
+    public function scopeWithRoleOrDelegatedJabatan($query, $roles)
+    {
+        $roles = collect(is_array($roles) ? $roles : [$roles])->filter()->values()->all();
+        $jabatanCodes = static::jabatanCodesForRoleNames($roles);
+
+        return $query->where(function ($roleQuery) use ($roles, $jabatanCodes) {
+            $roleQuery->whereHas('roles', function ($query) use ($roles) {
+                $query->whereIn('name', $roles);
+            });
+
+            if (!empty($jabatanCodes)) {
+                $roleQuery
+                    ->orWhereHas('jabatan', function ($query) use ($jabatanCodes) {
+                        $query->whereIn('kode', $jabatanCodes);
+                    })
+                    ->orWhereHas('activeJabatanDelegations.jabatan', function ($query) use ($jabatanCodes) {
+                        $query->whereIn('kode', $jabatanCodes);
+                    });
+            }
+        });
+    }
+
+    public static function jabatanCodesForRoleNames($roles)
+    {
+        $map = [
+            'ketua' => ['KPTA'],
+            'wakil_ketua' => ['WKPTA'],
+            'sekretaris' => ['SEK'],
+            'panitera' => ['PAN'],
+            'approval' => ['KPTA', 'WKPTA', 'SEK', 'PAN'],
+            'atasan_langsung' => ['KPTA', 'WKPTA', 'SEK', 'PAN', 'KABAG_KEPEG', 'KABAG_UMUM', 'KASUBAG_KEPEG', 'KASUBAG_RENPRO', 'KASUBAG_LAPKEU', 'KASUBAG_TURT', 'PANMUD_BANDING', 'PANMUD_HUKUM'],
+            'kabag' => ['KABAG_KEPEG', 'KABAG_UMUM'],
+            'kasubag' => ['KASUBAG_KEPEG', 'KASUBAG_RENPRO', 'KASUBAG_LAPKEU', 'KASUBAG_TURT'],
+            'panmud' => ['PANMUD_BANDING', 'PANMUD_HUKUM'],
+        ];
+
+        return collect(is_array($roles) ? $roles : [$roles])
+            ->flatMap(function ($role) use ($map) {
+                return $map[$role] ?? [];
+            })
+            ->unique()
+            ->values()
+            ->all();
     }
 
     public function hasAnyRole($roles)
@@ -357,13 +495,7 @@ class User extends Authenticatable
 
     public function canAccessArsipMenu()
     {
-        if ($this->isSuperAdmin()) {
-            return true;
-        }
-
-        return $this->canAccessPersuratanMenu()
-            || $this->canAccessMeetingModule()
-            || $this->canAccessLeaveModule();
+        return $this->isSuperAdmin();
     }
 
     public function canAccessArchiveMenu()
@@ -660,7 +792,154 @@ class User extends Authenticatable
     public function hasJabatanKode($codes)
     {
         $codes = is_array($codes) ? $codes : [$codes];
-        return $this->jabatan && in_array($this->jabatan->kode, $codes);
+        return $this->effectiveJabatans()->contains(function ($jabatan) use ($codes) {
+            return $jabatan && in_array($jabatan->kode, $codes, true);
+        });
+    }
+
+    public function effectiveJabatans()
+    {
+        if ($this->effectiveJabatansCache !== null) {
+            return collect($this->effectiveJabatansCache);
+        }
+
+        $jabatans = collect();
+
+        if ($this->jabatan) {
+            $jabatans->push($this->jabatan);
+        }
+
+        $delegations = $this->relationLoaded('activeJabatanDelegations')
+            ? $this->activeJabatanDelegations
+            : $this->activeJabatanDelegations()->get();
+
+        foreach ($delegations as $delegation) {
+            if ($delegation->jabatan) {
+                $jabatans->push($delegation->jabatan);
+            }
+        }
+
+        $this->effectiveJabatansCache = $jabatans->unique('id')->values()->all();
+
+        return collect($this->effectiveJabatansCache);
+    }
+
+    public function effectiveJabatanIds()
+    {
+        return $this->effectiveJabatans()->pluck('id')->filter()->values()->all();
+    }
+
+    public function effectiveAssignmentUserIds()
+    {
+        if ($this->effectiveAssignmentUserIdsCache !== null) {
+            return $this->effectiveAssignmentUserIdsCache;
+        }
+
+        $ids = collect([$this->id])->filter();
+        $jabatanIds = $this->effectiveJabatanIds();
+        $delegatedStructuralRoles = $this->delegatedStructuralRoleNames();
+
+        if (!empty($jabatanIds)) {
+            $ids = $ids->merge(
+                static::active()
+                    ->whereIn('jabatan_id', $jabatanIds)
+                    ->pluck('id')
+            );
+        }
+
+        if (!empty($delegatedStructuralRoles)) {
+            $ids = $ids->merge(
+                static::active()
+                    ->whereHas('roles', function ($query) use ($delegatedStructuralRoles) {
+                        $query->whereIn('name', $delegatedStructuralRoles);
+                    })
+                    ->pluck('id')
+            );
+        }
+
+        $this->effectiveAssignmentUserIdsCache = $ids
+            ->map(function ($id) {
+                return (int) $id;
+            })
+            ->unique()
+            ->values()
+            ->all();
+
+        return $this->effectiveAssignmentUserIdsCache;
+    }
+
+    protected function delegatedStructuralRoleNames()
+    {
+        if ($this->delegatedStructuralRoleNamesCache !== null) {
+            return $this->delegatedStructuralRoleNamesCache;
+        }
+
+        $delegations = $this->relationLoaded('activeJabatanDelegations')
+            ? $this->activeJabatanDelegations
+            : $this->activeJabatanDelegations()->get();
+
+        $this->delegatedStructuralRoleNamesCache = $delegations
+            ->map(function ($delegation) {
+                return optional($delegation->jabatan)->kode;
+            })
+            ->filter()
+            ->flatMap(function ($kode) {
+                if ($kode === 'KPTA') {
+                    return ['ketua'];
+                }
+                if ($kode === 'WKPTA') {
+                    return ['wakil_ketua'];
+                }
+                if ($kode === 'SEK') {
+                    return ['sekretaris'];
+                }
+                if ($kode === 'PAN') {
+                    return ['panitera'];
+                }
+                if (strpos($kode, 'KABAG_') === 0) {
+                    return ['kabag'];
+                }
+                if (strpos($kode, 'KASUBAG_') === 0) {
+                    return ['kasubag'];
+                }
+                if (strpos($kode, 'PANMUD_') === 0) {
+                    return ['panmud'];
+                }
+
+                return [];
+            })
+            ->unique()
+            ->values()
+            ->all();
+
+        return $this->delegatedStructuralRoleNamesCache;
+    }
+
+    public function canActAsAssignedUser($userId)
+    {
+        return in_array((int) $userId, $this->effectiveAssignmentUserIds(), true);
+    }
+
+    public function targetDisposisiJabatanIds()
+    {
+        return $this->effectiveJabatans()
+            ->flatMap(function ($jabatan) {
+                return $jabatan ? $jabatan->getTargetDisposisi() : [];
+            })
+            ->unique()
+            ->values()
+            ->all();
+    }
+
+    public function sourceJabatanIdForTarget($targetJabatanId)
+    {
+        foreach ($this->effectiveJabatans() as $jabatan) {
+            if ($jabatan && in_array((int) $targetJabatanId, array_map('intval', $jabatan->getTargetDisposisi()), true)) {
+                return $jabatan->id;
+            }
+        }
+
+        return $this->jabatan_id;
     }
 
     public function isAdminSurat()
@@ -680,11 +959,9 @@ class User extends Authenticatable
 
     public function isKabagAtauKasubag()
     {
-        if (!$this->jabatan) {
-            return false;
-        }
-
-        return (bool) preg_match('/^(KABAG|KASUBAG)_/', $this->jabatan->kode);
+        return $this->effectiveJabatans()->contains(function ($jabatan) {
+            return $jabatan && (bool) preg_match('/^(KABAG|KASUBAG)_/', $jabatan->kode);
+        });
     }
 
     public function requiresPetunjukDisposisi()
@@ -707,12 +984,68 @@ class User extends Authenticatable
         return $this->isSuperAdmin() || $this->hasJabatanKode(['KASUBAG_TURT', 'KASUBAG_KEPEG', 'KABAG_KEPEG']);
     }
 
+    public function canNaikanSuratMasuk()
+    {
+        return $this->hasJabatanKode(['PAN', 'SEK', 'KASUBAG_TURT']);
+    }
+
     public function hasPendingDisposisiForSurat($suratMasuk)
     {
-        return $suratMasuk->disposisis()
-            ->where('kepada_user_id', $this->id)
+        return (bool) $this->activePendingDisposisiForSurat($suratMasuk);
+    }
+
+    public function activePendingDisposisiForSurat($suratMasuk)
+    {
+        if (!$suratMasuk || $suratMasuk->status === 'selesai') {
+            return null;
+        }
+
+        if ($suratMasuk->relationLoaded('disposisis')) {
+            $assignmentUserIds = $this->effectiveAssignmentUserIds();
+            $jabatanIds = array_map('intval', $this->effectiveJabatanIds());
+
+            $pending = $suratMasuk->disposisis
+                ->filter(function ($disposisi) use ($assignmentUserIds, $jabatanIds) {
+                    return $disposisi->status === 'pending'
+                        && (
+                            in_array((int) $disposisi->kepada_user_id, $assignmentUserIds, true)
+                            || ($disposisi->kepada_jabatan_id && in_array((int) $disposisi->kepada_jabatan_id, $jabatanIds, true))
+                        );
+                })
+                ->sortByDesc('created_at')
+                ->first();
+
+            if (!$pending) {
+                return null;
+            }
+
+            $hasForwardedAfterPending = $suratMasuk->disposisis
+                ->contains(function ($disposisi) use ($pending) {
+                    return (int) $disposisi->dari_user_id === (int) $this->id
+                        && $disposisi->created_at
+                        && $pending->created_at
+                        && $disposisi->created_at->gt($pending->created_at);
+                });
+
+            return $hasForwardedAfterPending ? null : $pending;
+        }
+
+        $pending = $suratMasuk->disposisis()
+            ->addressedToUser($this)
             ->where('status', 'pending')
+            ->latest()
+            ->first();
+
+        if (!$pending) {
+            return null;
+        }
+
+        $hasForwardedAfterPending = $suratMasuk->disposisis()
+            ->where('dari_user_id', $this->id)
+            ->where('created_at', '>', $pending->created_at)
             ->exists();
+
+        return $hasForwardedAfterPending ? null : $pending;
     }
 
     public function canViewSuratMasuk($suratMasuk)
@@ -725,29 +1058,26 @@ class User extends Authenticatable
             return true;
         }
 
-        if ($this->isAdminSurat()) {
-            return (int) $suratMasuk->created_by === (int) $this->id;
-        }
-
         if ((int) $suratMasuk->created_by === (int) $this->id) {
             return true;
         }
 
         return $suratMasuk->disposisis()
-            ->where(function ($query) {
-                $query->where('dari_user_id', $this->id)
-                    ->orWhere('kepada_user_id', $this->id);
-            })
+            ->involvingUser($this)
             ->exists();
     }
 
     public function canForwardSuratMasuk($suratMasuk)
     {
+        if ($suratMasuk->status === 'selesai') {
+            return false;
+        }
+
         if ($this->isSuperAdmin()) {
             return true;
         }
 
-        if (!$this->jabatan || empty($this->jabatan->getTargetDisposisi())) {
+        if (empty($this->targetDisposisiJabatanIds())) {
             return false;
         }
 
@@ -783,18 +1113,31 @@ class User extends Authenticatable
 
     public function canViewSuratKeluar($suratKeluar)
     {
-        if ($this->canManageSuratKeluar()) {
+        if ($this->isSuperAdmin() || $this->isKasubagTurt()) {
+            return true;
+        }
+
+        if ((int) $suratKeluar->created_by === (int) $this->id) {
             return true;
         }
 
         return $suratKeluar->penerimaInternal()
-            ->where('users.id', $this->id)
+            ->whereIn('users.id', $this->effectiveAssignmentUserIds())
             ->exists();
     }
 
     public function canFollowUpDisposisi($disposisi)
     {
-        return $this->isSuperAdmin() || (int) $disposisi->kepada_user_id === (int) $this->id;
+        if ($this->isSuperAdmin()) {
+            return true;
+        }
+
+        if ($this->canActAsAssignedUser($disposisi->kepada_user_id)) {
+            return true;
+        }
+
+        return $disposisi->kepada_jabatan_id
+            && in_array((int) $disposisi->kepada_jabatan_id, array_map('intval', $this->effectiveJabatanIds()), true);
     }
 
     public function canOpenTindakLanjutSuratMasuk($suratMasuk)

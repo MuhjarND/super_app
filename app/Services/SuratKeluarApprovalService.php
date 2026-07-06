@@ -61,7 +61,7 @@ class SuratKeluarApprovalService
         DB::transaction(function () use ($approval, $actor, $note, $signatureData) {
             $approval->refresh();
             $this->guardDecision($approval, $actor);
-            $signature = $this->signaturePadService->storeDataUri($signatureData, 'surat-keluar/approval-signatures');
+            $signature = $this->signaturePadService->resolveForUser($actor, 'surat-keluar/approval-signatures', $signatureData);
 
             $approval->update([
                 'status' => 'approved',
@@ -151,7 +151,7 @@ class SuratKeluarApprovalService
 
     protected function guardDecision(SuratKeluarApproval $approval, User $actor)
     {
-        if ((int) $approval->approver_id !== (int) $actor->id && !$actor->isSuperAdmin()) {
+        if (!$actor->canActAsAssignedUser($approval->approver_id) && !$actor->isSuperAdmin()) {
             abort(403, 'Anda tidak berhak memproses approval surat ini.');
         }
 

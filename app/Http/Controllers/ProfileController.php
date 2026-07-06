@@ -6,12 +6,16 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
+use App\Services\SignaturePadService;
 
 class ProfileController extends Controller
 {
-    public function __construct()
+    protected $signaturePadService;
+
+    public function __construct(SignaturePadService $signaturePadService)
     {
         $this->middleware('auth');
+        $this->signaturePadService = $signaturePadService;
     }
 
     public function edit()
@@ -30,8 +34,14 @@ class ProfileController extends Controller
             'username' => ['required', 'string', 'max:60', 'regex:/^[A-Za-z0-9._-]+$/', Rule::unique('users', 'username')->ignore($user->id)],
             'profile_photo' => ['nullable', 'image', 'max:2048'],
             'remove_photo' => ['nullable', 'boolean'],
+            'signature_method' => ['nullable', 'in:draw,upload'],
+            'profile_signature_data' => ['nullable', 'string'],
+            'profile_signature_file' => ['nullable', 'image', 'mimes:png,jpg,jpeg', 'max:2048'],
+            'remove_signature' => ['nullable', 'boolean'],
         ], [
             'username.regex' => 'Username hanya boleh berisi huruf, angka, titik, garis bawah, dan tanda hubung.',
+            'profile_signature_file.image' => 'File tanda tangan harus berupa gambar.',
+            'profile_signature_file.mimes' => 'File tanda tangan harus PNG, JPG, atau JPEG.',
         ]);
 
         $payload = [
@@ -50,6 +60,34 @@ class ProfileController extends Controller
             }
 
             $payload['profile_photo_path'] = $request->file('profile_photo')->store('profile-photos', 'public');
+        }
+
+        if ($request->boolean('remove_signature') && $user->profile_signature_path) {
+            Storage::disk('public')->delete($user->profile_signature_path);
+            $payload['profile_signature_path'] = null;
+            $payload['profile_signature_mime'] = null;
+            $payload['profile_signature_size'] = null;
+            $payload['profile_signature_method'] = null;
+        }
+
+        $signature = null;
+        if (($validated['signature_method'] ?? null) === 'draw' && !empty($validated['profile_signature_data'])) {
+            $signature = $this->signaturePadService->storeDataUri($validated['profile_signature_data'], 'profile-signatures');
+            $signature['method'] = 'draw';
+        } elseif (($validated['signature_method'] ?? null) === 'upload' && $request->hasFile('profile_signature_file')) {
+            $signature = $this->signaturePadService->storeUploadedFile($request->file('profile_signature_file'), 'profile-signatures');
+            $signature['method'] = 'upload';
+        }
+
+        if ($signature) {
+            if ($user->profile_signature_path) {
+                Storage::disk('public')->delete($user->profile_signature_path);
+            }
+
+            $payload['profile_signature_path'] = $signature['path'];
+            $payload['profile_signature_mime'] = $signature['mime'];
+            $payload['profile_signature_size'] = $signature['size'];
+            $payload['profile_signature_method'] = $signature['method'];
         }
 
         $user->update($payload);

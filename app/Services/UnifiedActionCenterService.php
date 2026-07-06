@@ -353,11 +353,8 @@ class UnifiedActionCenterService
         $items = collect();
 
         $disposisiQuery = Disposisi::with(['suratMasuk', 'dariUser', 'kepadaUser.unit'])
-            ->whereIn('status', ['pending', 'dibaca', 'diproses']);
-
-        if (!$user->isSuperAdmin()) {
-            $disposisiQuery->where('kepada_user_id', $user->id);
-        }
+            ->whereIn('status', ['pending', 'dibaca', 'diproses'])
+            ->addressedToUser($user);
 
         $items = $items->merge($disposisiQuery->latest()->take(10)->get()->map(function ($disposisi) {
             $targetAt = $disposisi->target_tindak_lanjut_at ?: $disposisi->created_at;
@@ -385,11 +382,8 @@ class UnifiedActionCenterService
         }));
 
         $draftQuery = SuratKeluar::with(['creator.unit', 'templateApproval'])
-            ->where('status', 'draft');
-
-        if (!$user->isSuperAdmin()) {
-            $draftQuery->where('created_by', $user->id);
-        }
+            ->where('status', 'draft')
+            ->where('created_by', $user->id);
 
         $items = $items->merge($draftQuery->latest()->take(10)->get()->map(function ($surat) {
             return $this->makeItem([
@@ -414,13 +408,41 @@ class UnifiedActionCenterService
             ]);
         }));
 
+        if (Schema::hasColumn('surat_keluar_penerima', 'read_at')) {
+            $taggedSuratKeluarQuery = SuratKeluar::with(['creator.unit'])
+                ->whereHas('penerimaInternal', function ($penerimaQuery) use ($user) {
+                    $penerimaQuery->whereIn('users.id', $user->effectiveAssignmentUserIds())
+                        ->whereNull('surat_keluar_penerima.read_at');
+                });
+
+            $items = $items->merge($taggedSuratKeluarQuery->latest()->take(10)->get()->map(function ($surat) use ($user) {
+                return $this->makeItem([
+                    'id' => 'persuratan-surat-keluar-tagged-' . $surat->id,
+                    'module_key' => 'persuratan',
+                    'module_label' => 'Persuratan',
+                    'module_icon' => 'fas fa-envelope-open-text',
+                    'type_label' => 'Surat Keluar Baru',
+                    'title' => $surat->perihal ?: 'Surat keluar',
+                    'subtitle' => $surat->nomor_surat_formatted ?: $surat->nomor_surat,
+                    'description' => 'Anda ditandai sebagai penerima surat keluar.',
+                    'status_key' => 'waiting',
+                    'priority_key' => 'normal',
+                    'target_at' => $surat->tanggal_surat ?: $surat->created_at,
+                    'is_overdue' => false,
+                    'assignee_id' => $user->id,
+                    'assignee_name' => $user->name,
+                    'action_url' => route('surat-keluar.index'),
+                    'action_text' => 'Buka Surat Keluar',
+                    'unit_label' => optional(optional($surat->creator)->unit)->nama ?: '-',
+                    'sort_at' => optional($surat->updated_at ?: $surat->created_at)->timestamp ?: 0,
+                ]);
+            }));
+        }
+
         if ($user->isSuperAdmin() || $user->canApproveSuratKeluarTemplate()) {
             $approvalQuery = SuratKeluarApproval::with(['suratKeluar.creator.unit', 'requester.unit'])
-                ->where('status', 'pending');
-
-            if (!$user->isSuperAdmin()) {
-                $approvalQuery->where('approver_id', $user->id);
-            }
+                ->where('status', 'pending')
+                ->whereIn('approver_id', $user->effectiveAssignmentUserIds());
 
             $items = $items->merge($approvalQuery->latest()->take(10)->get()->map(function ($approval) {
                 return $this->makeItem([
@@ -459,10 +481,8 @@ class UnifiedActionCenterService
 
         if ($user->canAccessMeetingApproval()) {
             $rapatApprovalQuery = RapatApproval::with(['rapat.creator.unit'])
-                ->where('status', 'pending');
-            if (!$user->isMeetingAdmin() && !$user->isSuperAdmin()) {
-                $rapatApprovalQuery->where('approver_id', $user->id);
-            }
+                ->where('status', 'pending')
+                ->whereIn('approver_id', $user->effectiveAssignmentUserIds());
 
             $items = $items->merge($rapatApprovalQuery->latest()->take(10)->get()->map(function ($approval) {
                 return $this->makeItem([
@@ -488,10 +508,8 @@ class UnifiedActionCenterService
             }));
 
             $notulensiApprovalQuery = RapatNotulensiApproval::with(['notulensi.rapat.creator.unit'])
-                ->where('status', 'pending');
-            if (!$user->isMeetingAdmin() && !$user->isSuperAdmin()) {
-                $notulensiApprovalQuery->where('approver_id', $user->id);
-            }
+                ->where('status', 'pending')
+                ->whereIn('approver_id', $user->effectiveAssignmentUserIds());
 
             $items = $items->merge($notulensiApprovalQuery->latest()->take(10)->get()->map(function ($approval) {
                 return $this->makeItem([
@@ -518,17 +536,8 @@ class UnifiedActionCenterService
         }
 
         $followUpQuery = RapatNotulensiTindakLanjut::with(['notulensi.rapat', 'user.unit'])
-            ->whereIn('status', ['pending', 'process']);
-
-        if (!$user->canAccessMeetingMinutes()) {
-            if ($user->canMonitorNotulensiFollowUps()) {
-                $followUpQuery->whereHas('user.unit', function ($query) use ($user) {
-                    $query->whereIn('kode', $user->monitorable_meeting_unit_codes);
-                });
-            } else {
-                $followUpQuery->where('user_id', $user->id);
-            }
-        }
+            ->whereIn('status', ['pending', 'process'])
+            ->where('user_id', $user->id);
 
         $items = $items->merge($followUpQuery->latest()->take(12)->get()->map(function ($followUp) {
             $isProcess = $followUp->status === 'process';
@@ -568,11 +577,8 @@ class UnifiedActionCenterService
 
         if ($user->canAccessLeaveApproval() || $user->isSuperAdmin()) {
             $approvalQuery = LeaveApproval::with(['leaveRequest.user.unit', 'leaveRequest.leaveType'])
-                ->whereIn('status', ['waiting', 'pending']);
-
-            if (!$user->isSuperAdmin()) {
-                $approvalQuery->where('approver_id', $user->id);
-            }
+                ->whereIn('status', ['waiting', 'pending'])
+                ->whereIn('approver_id', $user->effectiveAssignmentUserIds());
 
             $items = $items->merge($approvalQuery->latest()->take(10)->get()->map(function ($approval) {
                 return $this->makeItem([
@@ -638,10 +644,8 @@ class UnifiedActionCenterService
 
         if ($user->canVerifyProgressZi() || $user->isSuperAdmin()) {
             $approvalQuery = ZiActivityApproval::with(['activity.area', 'requester.unit'])
-                ->where('status', 'pending');
-            if (!$user->isSuperAdmin()) {
-                $approvalQuery->where('approver_id', $user->id);
-            }
+                ->where('status', 'pending')
+                ->whereIn('approver_id', $user->effectiveAssignmentUserIds());
 
             $items = $items->merge($approvalQuery->latest('requested_at')->take(10)->get()->map(function ($approval) {
                 return $this->makeItem([
@@ -696,10 +700,8 @@ class UnifiedActionCenterService
 
         $activities = ZiActivity::with(['area.pics', 'pic.unit'])
             ->whereNotIn('status', ['sudah_terlaksana', 'selesai'])
-            ->whereDate('target_end_date', '<', now('Asia/Jayapura')->toDateString());
-
-        if (!$user->canManageProgressZiMasterData()) {
-            $activities->where(function ($query) use ($user) {
+            ->whereDate('target_end_date', '<', now('Asia/Jayapura')->toDateString())
+            ->where(function ($query) use ($user) {
                 $query->where('pic_user_id', $user->id)
                     ->orWhereHas('area.pics', function ($areaQuery) use ($user) {
                         $areaQuery->where('users.id', $user->id);
@@ -708,9 +710,8 @@ class UnifiedActionCenterService
                         $areaQuery->where('pic_user_id', $user->id);
                     });
             });
-        }
 
-        $items = $items->merge($activities->orderBy('target_end_date')->take(8)->get()->map(function ($activity) {
+        $items = $items->merge($activities->orderBy('target_end_date')->take(8)->get()->map(function ($activity) use ($user) {
             return $this->makeItem([
                 'id' => 'zi-overdue-' . $activity->id,
                 'module_key' => 'progress_zi',
@@ -724,8 +725,8 @@ class UnifiedActionCenterService
                 'priority_key' => 'high',
                 'target_at' => $activity->target_end_date,
                 'is_overdue' => true,
-                'assignee_id' => $activity->pic_user_id,
-                'assignee_name' => optional($activity->pic)->name ?: '-',
+                'assignee_id' => $activity->pic_user_id ?: $user->id,
+                'assignee_name' => optional($activity->pic)->name ?: $user->name,
                 'action_url' => route('progress-zi.activities.index'),
                 'action_text' => 'Buka Monitoring',
                 'unit_label' => optional(optional($activity->pic)->unit)->nama ?: '-',
@@ -745,10 +746,8 @@ class UnifiedActionCenterService
         $items = collect();
 
         $draftQuery = InventoryMaintenanceTransaction::with(['item', 'detail.room', 'creator'])
-            ->where('status', 'draft');
-        if (!$user->isSuperAdmin() && !$user->canManageInventoryMasterData()) {
-            $draftQuery->where('created_by', $user->id);
-        }
+            ->where('status', 'draft')
+            ->where('created_by', $user->id);
 
         $items = $items->merge($draftQuery->latest()->take(10)->get()->map(function ($transaction) {
             return $this->makeItem([
@@ -776,10 +775,8 @@ class UnifiedActionCenterService
         $attachmentQuery = InventoryMaintenanceTransaction::with(['item', 'detail.room'])
             ->withCount('attachments')
             ->where('status', 'completed')
+            ->where('created_by', $user->id)
             ->having('attachments_count', '=', 0);
-        if (!$user->isSuperAdmin() && !$user->canManageInventoryMasterData()) {
-            $attachmentQuery->where('created_by', $user->id);
-        }
 
         $items = $items->merge($attachmentQuery->latest()->take(10)->get()->map(function ($transaction) {
             return $this->makeItem([
@@ -814,14 +811,11 @@ class UnifiedActionCenterService
         }
 
         $query = SuratKeluarApproval::with(['suratKeluar', 'requester.unit'])
-            ->whereIn('status', ['approved', 'rejected']);
-
-        if (!$user->isSuperAdmin()) {
-            $query->where(function ($builder) use ($user) {
-                $builder->where('approver_id', $user->id)
+            ->whereIn('status', ['approved', 'rejected'])
+            ->where(function ($builder) use ($user) {
+                $builder->whereIn('approver_id', $user->effectiveAssignmentUserIds())
                     ->orWhere('requested_by', $user->id);
             });
-        }
 
         return $query->latest('acted_at')->take(20)->get()->map(function ($approval) {
             $isApproved = $approval->status === 'approved';
@@ -859,10 +853,8 @@ class UnifiedActionCenterService
 
         if ($user->canAccessMeetingApproval()) {
             $rapatApprovalQuery = RapatApproval::with(['rapat.creator.unit'])
-                ->whereIn('status', ['approved', 'rejected']);
-            if (!$user->isMeetingAdmin() && !$user->isSuperAdmin()) {
-                $rapatApprovalQuery->where('approver_id', $user->id);
-            }
+                ->whereIn('status', ['approved', 'rejected'])
+                ->whereIn('approver_id', $user->effectiveAssignmentUserIds());
 
             $items = $items->merge($rapatApprovalQuery->latest('acted_at')->take(15)->get()->map(function ($approval) {
                 $isApproved = $approval->status === 'approved';
@@ -890,10 +882,8 @@ class UnifiedActionCenterService
             }));
 
             $notulensiApprovalQuery = RapatNotulensiApproval::with(['notulensi.rapat.creator.unit'])
-                ->whereIn('status', ['approved', 'rejected']);
-            if (!$user->isMeetingAdmin() && !$user->isSuperAdmin()) {
-                $notulensiApprovalQuery->where('approver_id', $user->id);
-            }
+                ->whereIn('status', ['approved', 'rejected'])
+                ->whereIn('approver_id', $user->effectiveAssignmentUserIds());
 
             $items = $items->merge($notulensiApprovalQuery->latest('acted_at')->take(15)->get()->map(function ($approval) {
                 $isApproved = $approval->status === 'approved';
@@ -922,17 +912,8 @@ class UnifiedActionCenterService
         }
 
         $followUpQuery = RapatNotulensiTindakLanjut::with(['notulensi.rapat', 'user.unit'])
-            ->where('status', 'completed');
-
-        if (!$user->canAccessMeetingMinutes()) {
-            if ($user->canMonitorNotulensiFollowUps()) {
-                $followUpQuery->whereHas('user.unit', function ($query) use ($user) {
-                    $query->whereIn('kode', $user->monitorable_meeting_unit_codes);
-                });
-            } else {
-                $followUpQuery->where('user_id', $user->id);
-            }
-        }
+            ->where('status', 'completed')
+            ->where('user_id', $user->id);
 
         $items = $items->merge($followUpQuery->latest('completed_at')->take(15)->get()->map(function ($followUp) {
             return $this->makeItem([
@@ -967,16 +948,13 @@ class UnifiedActionCenterService
         }
 
         $query = LeaveApproval::with(['leaveRequest.user.unit', 'leaveRequest.leaveType'])
-            ->whereIn('status', ['approved', 'rejected']);
-
-        if (!$user->isSuperAdmin()) {
-            $query->where(function ($builder) use ($user) {
-                $builder->where('approver_id', $user->id)
+            ->whereIn('status', ['approved', 'rejected'])
+            ->where(function ($builder) use ($user) {
+                $builder->whereIn('approver_id', $user->effectiveAssignmentUserIds())
                     ->orWhereHas('leaveRequest', function ($leaveQuery) use ($user) {
                         $leaveQuery->where('user_id', $user->id);
                     });
             });
-        }
 
         return $query->latest('acted_at')->take(20)->get()->map(function ($approval) {
             $isApproved = $approval->status === 'approved';
@@ -1011,14 +989,11 @@ class UnifiedActionCenterService
         }
 
         $query = ZiActivityApproval::with(['activity.area', 'activity.pic.unit', 'requester.unit'])
-            ->whereIn('status', ['approved', 'rejected']);
-
-        if (!$user->isSuperAdmin()) {
-            $query->where(function ($builder) use ($user) {
-                $builder->where('approver_id', $user->id)
+            ->whereIn('status', ['approved', 'rejected'])
+            ->where(function ($builder) use ($user) {
+                $builder->whereIn('approver_id', $user->effectiveAssignmentUserIds())
                     ->orWhere('requested_by', $user->id);
             });
-        }
 
         return $query->latest('acted_at')->take(20)->get()->map(function ($approval) {
             $isApproved = $approval->status === 'approved';
@@ -1053,11 +1028,8 @@ class UnifiedActionCenterService
         }
 
         $query = InventoryMaintenanceTransaction::with(['item', 'detail.room'])
-            ->where('status', 'completed');
-
-        if (!$user->isSuperAdmin() && !$user->canManageInventoryMasterData()) {
-            $query->where('created_by', $user->id);
-        }
+            ->where('status', 'completed')
+            ->where('created_by', $user->id);
 
         return $query->latest('updated_at')->take(20)->get()->map(function ($transaction) {
             return $this->makeItem([

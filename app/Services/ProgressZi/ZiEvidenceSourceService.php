@@ -78,7 +78,7 @@ class ZiEvidenceSourceService
             $query->where(function ($builder) use ($user) {
                 $builder->where('user_id', $user->id)
                     ->orWhereHas('approvals', function ($approvalQuery) use ($user) {
-                        $approvalQuery->where('approver_id', $user->id);
+                        $approvalQuery->whereIn('approver_id', $user->effectiveAssignmentUserIds());
                     });
             });
         }

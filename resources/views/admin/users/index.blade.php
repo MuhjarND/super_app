@@ -6,28 +6,38 @@
     <style>
         .admin-users-card {
             border: 0;
-            border-radius: 0;
+            border-radius: 14px;
+            overflow: hidden;
             box-shadow: 0 8px 22px rgba(15, 23, 42, 0.06);
         }
 
         .admin-users-card .card-header {
             background: #ffffff;
             border-bottom: 1px solid #e5edf5;
+            padding: 14px;
+        }
+
+        .admin-users-top-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
         }
 
         .admin-users-table {
             color: #14213d;
             table-layout: auto;
             width: 100%;
+            font-size: 0.72rem !important;
         }
 
         .admin-users-table thead th {
-            padding: 16px 15px;
+            padding: 11px 10px;
             border-top: 0;
-            border-bottom: 2px solid #064e3b;
-            background: #f1f6fb;
-            color: #064236;
-            font-size: 0.82rem;
+            border-bottom: 1px solid #c7d2fe;
+            background: linear-gradient(180deg, #f8fafc, #eef2ff);
+            color: #312e81;
+            font-size: 0.66rem !important;
             font-weight: 800;
             letter-spacing: 0.04em;
             text-transform: uppercase;
@@ -43,10 +53,10 @@
         }
 
         .admin-users-table td {
-            padding: 12px 10px;
+            padding: 9px 8px;
             border-top: 1px solid #edf2f7;
             vertical-align: middle;
-            font-size: 0.82rem;
+            font-size: 0.72rem !important;
         }
 
         .admin-users-table .col-no {
@@ -55,7 +65,7 @@
         }
 
         .admin-users-table .col-name {
-            width: 21%;
+            width: 24%;
         }
 
         .admin-users-table .col-wa {
@@ -63,11 +73,11 @@
         }
 
         .admin-users-table .col-role {
-            width: 18%;
+            width: 16%;
         }
 
         .admin-users-table .col-jabatan {
-            width: 20%;
+            width: 19%;
         }
 
         .admin-users-table .col-atasan {
@@ -79,22 +89,62 @@
         }
 
         .admin-users-table .col-aksi {
-            width: 166px;
+            width: 156px;
+        }
+
+        .user-identity {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            min-width: 210px;
+        }
+
+        .user-list-avatar {
+            width: 34px;
+            height: 34px;
+            border-radius: 10px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            overflow: hidden;
+            color: #ffffff;
+            background: linear-gradient(135deg, #4f46e5, #8b5cf6);
+            font-size: 0.72rem;
+            font-weight: 800;
+            box-shadow: 0 6px 14px rgba(79, 70, 229, 0.18);
+        }
+
+        .user-list-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
         }
 
         .user-name-main {
             color: #1f2a44;
-            font-size: 0.88rem;
+            font-size: 0.78rem;
             font-weight: 800;
-            line-height: 1.45;
+            line-height: 1.25;
         }
 
         .user-name-sub {
             display: block;
-            margin-top: 3px;
+            margin-top: 2px;
             color: #64748b;
-            font-size: 0.74rem;
+            font-size: 0.66rem;
             font-weight: 500;
+            line-height: 1.28;
+        }
+
+        .user-name-email {
+            display: block;
+            margin-top: 2px;
+            color: #4f46e5;
+            font-size: 0.64rem;
+            font-weight: 700;
+            line-height: 1.25;
+            word-break: break-all;
         }
 
         .user-role-list {
@@ -110,10 +160,10 @@
             align-items: center;
             justify-content: center;
             min-height: 22px;
-            padding: 4px 8px;
-            border-radius: 5px;
+            padding: 3px 7px;
+            border-radius: 999px;
             color: #ffffff;
-            font-size: 0.68rem;
+            font-size: 0.62rem !important;
             font-weight: 800;
             line-height: 1;
             white-space: nowrap;
@@ -147,17 +197,31 @@
             background: #64748b;
         }
 
+        .user-delegation-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            margin-top: 5px;
+            padding: 3px 7px;
+            border-radius: 999px;
+            background: #eef2ff;
+            color: #4338ca;
+            font-size: 0.62rem;
+            font-weight: 800;
+            line-height: 1.2;
+        }
+
         .admin-users-table .app-action-group {
             flex-wrap: nowrap;
             gap: 5px;
         }
 
         .admin-users-table .app-icon-btn {
-            width: 32px;
-            height: 32px;
-            min-width: 32px;
+            width: 30px;
+            height: 30px;
+            min-width: 30px;
             border-radius: 8px;
-            font-size: 0.82rem;
+            font-size: 0.76rem;
         }
 
         .admin-users-ajax-loading {
@@ -183,6 +247,107 @@
             background: #dc2626;
         }
 
+        .wa-global-toggle {
+            border: 1px solid {{ $whatsAppEnabled ? '#fecaca' : '#bbf7d0' }};
+            color: {{ $whatsAppEnabled ? '#dc2626' : '#047857' }} !important;
+            background: {{ $whatsAppEnabled ? '#fff1f2' : '#ecfdf5' }};
+            font-weight: 800;
+            border-radius: 999px;
+        }
+
+        .wa-global-toggle:hover {
+            color: #ffffff !important;
+            background: {{ $whatsAppEnabled ? '#dc2626' : '#059669' }};
+        }
+
+        .user-form-modal {
+            border: 0;
+            border-radius: 16px;
+            overflow: hidden;
+        }
+
+        .user-form-header {
+            background: linear-gradient(135deg, #eef2ff, #f8fafc);
+            border-bottom: 1px solid #dbe4ff;
+            align-items: center;
+        }
+
+        .user-form-subtitle {
+            margin-top: 2px;
+            color: #64748b;
+            font-size: 0.72rem;
+            font-weight: 600;
+        }
+
+        .user-form-grid {
+            display: grid;
+            gap: 12px;
+        }
+
+        .user-form-section {
+            padding: 14px;
+            border: 1px solid #e0e7ff;
+            border-radius: 12px;
+            background: #ffffff;
+        }
+
+        .user-form-section-title {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            margin-bottom: 12px;
+            color: #3730a3;
+            font-size: 0.76rem;
+            font-weight: 900;
+            letter-spacing: 0.02em;
+        }
+
+        .user-form-section-title i {
+            color: #4f46e5;
+        }
+
+        .user-photo-field {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 14px;
+            padding: 12px;
+            border-radius: 12px;
+            background: #f8fafc;
+            border: 1px dashed #c7d2fe;
+        }
+
+        .user-photo-preview {
+            width: 64px;
+            height: 64px;
+            border-radius: 16px;
+            overflow: hidden;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: #ffffff;
+            background: linear-gradient(135deg, #4f46e5, #8b5cf6);
+            font-size: 1.15rem;
+            font-weight: 900;
+            flex-shrink: 0;
+        }
+
+        .user-photo-preview img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .user-photo-control {
+            min-width: 0;
+            flex: 1;
+        }
+
+        .user-form-footer {
+            background: #f8fafc;
+            border-top: 1px solid #e5e7eb;
+        }
+
         @media (max-width: 767.98px) {
             .admin-users-top {
                 flex-direction: column;
@@ -191,6 +356,15 @@
             }
 
             .admin-users-top .btn {
+                width: 100%;
+            }
+
+            .admin-users-top-actions {
+                width: 100%;
+            }
+
+            .admin-users-top-actions form,
+            .admin-users-top-actions button {
                 width: 100%;
             }
 
@@ -268,6 +442,14 @@
                 width: 42px;
                 min-width: 42px;
             }
+
+            .user-identity {
+                min-width: 0;
+            }
+
+            .user-photo-field {
+                align-items: flex-start;
+            }
         }
     </style>
 @endpush
@@ -277,9 +459,19 @@
         <div class="container-fluid">
             <div class="d-flex justify-content-between align-items-center admin-users-top">
                 <h1>Kelola User</h1>
-                <button class="btn app-create-btn" data-toggle="modal" data-target="#createUserModal">
-                    <i class="fas fa-plus mr-1"></i> Tambah User
-                </button>
+                <div class="admin-users-top-actions">
+                    <form method="POST" action="{{ route('admin.whatsapp-notifications.toggle') }}" class="m-0">
+                        @csrf
+                        <button type="submit" class="btn wa-global-toggle"
+                            onclick="return confirm('{{ $whatsAppEnabled ? 'Nonaktifkan seluruh notifikasi WhatsApp?' : 'Aktifkan kembali notifikasi WhatsApp?' }}')">
+                            <i class="fab fa-whatsapp mr-1"></i>
+                            {{ $whatsAppEnabled ? 'Nonaktifkan WA' : 'Aktifkan WA' }}
+                        </button>
+                    </form>
+                    <button class="btn app-create-btn" data-toggle="modal" data-target="#createUserModal">
+                        <i class="fas fa-plus mr-1"></i> Tambah User
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -549,13 +741,27 @@
                                     ];
                                 });
                                 $jabatanText = $user->jabatan_keterangan ?: optional($user->jabatan)->nama ?: '-';
+                                $unitText = optional($user->unit)->nama ?: optional(optional($user->jabatan)->unit)->nama;
+                                $activeDelegation = $user->activeJabatanDelegations->first();
                                 $rowNumber = ($users->firstItem() ?: 1) + $loop->index;
                             @endphp
                             <tr>
                                 <td class="col-no" data-label="No">{{ $rowNumber }}</td>
                                 <td class="col-name" data-label="Nama / NIP">
-                                    <div class="user-name-main">{{ $user->name }}</div>
-                                    <span class="user-name-sub">{{ $user->nip ?? '-' }}</span>
+                                    <div class="user-identity">
+                                        <div class="user-list-avatar">
+                                            @if($user->profile_photo_path)
+                                                <img src="{{ asset('storage/' . $user->profile_photo_path) }}" alt="{{ $user->name }}">
+                                            @else
+                                                {{ strtoupper(substr($user->name ?: 'U', 0, 1)) }}
+                                            @endif
+                                        </div>
+                                        <div class="min-w-0">
+                                            <div class="user-name-main">{{ $user->name }}</div>
+                                            <span class="user-name-sub">NIP. {{ $user->nip ?? '-' }}</span>
+                                            <span class="user-name-email">{{ $user->email }}</span>
+                                        </div>
+                                    </div>
                                 </td>
                                 <td class="col-wa" data-label="WhatsApp">{{ $user->no_hp ?? '-' }}</td>
                                 <td class="col-role" data-label="Role">
@@ -567,7 +773,17 @@
                                         @endforelse
                                     </div>
                                 </td>
-                                <td class="col-jabatan" data-label="Jabatan">{{ $jabatanText }}</td>
+                                <td class="col-jabatan" data-label="Jabatan">
+                                    <div style="font-weight: 800; color: #1f2937;">{{ $jabatanText }}</div>
+                                    @if($unitText)
+                                        <div class="user-name-sub">{{ $unitText }}</div>
+                                    @endif
+                                    @if($activeDelegation && $activeDelegation->jabatan)
+                                        <div class="user-delegation-badge">
+                                            {{ $activeDelegation->type_label }} {{ $activeDelegation->jabatan->nama }}
+                                        </div>
+                                    @endif
+                                </td>
                                 <td class="col-atasan" data-label="Atasan">{{ optional($user->atasanLangsung)->name ?: '-' }}</td>
                                 <td class="col-status" data-label="Status">
                                     <span class="user-status-badge {{ $user->status_aktif_pegawai ? 'active' : 'inactive' }}">
@@ -606,126 +822,6 @@
                                     </div>
                                 </td>
                             </tr>
-
-                            <div class="modal fade" id="editUserModal{{ $user->id }}" tabindex="-1">
-                                <div class="modal-dialog modal-lg">
-                                    <div class="modal-content">
-                                        <div class="modal-header">
-                                            <h5 class="modal-title">Edit User</h5>
-                                            <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
-                                        </div>
-                                        <form method="POST" action="{{ route('admin.users.update', $user) }}">
-                                            @csrf
-                                            @method('PUT')
-                                            <div class="modal-body">
-                                                <div class="row">
-                                                    <div class="col-md-6 form-group">
-                                                        <label>Nama</label>
-                                                        <input type="text" name="name" class="form-control" value="{{ $user->name }}" required>
-                                                    </div>
-                                                    <div class="col-md-6 form-group">
-                                                        <label>Email</label>
-                                                        <input type="email" name="email" class="form-control" value="{{ $user->email }}" required>
-                                                    </div>
-                                                    <div class="col-md-6 form-group">
-                                                        <label>Password Baru (opsional)</label>
-                                                        <input type="password" name="password" class="form-control">
-                                                    </div>
-                                                    <div class="col-md-6 form-group">
-                                                        <label>Role</label>
-                                                        <select name="role_ids[]" class="form-control select2" multiple required>
-                                                            @foreach($roles as $role)
-                                                                <option value="{{ $role->id }}" {{ in_array((string) $role->id, $selectedRoles, true) ? 'selected' : '' }}>
-                                                                    {{ $role->display_name }}
-                                                                </option>
-                                                            @endforeach
-                                                        </select>
-                                                    </div>
-                                                    <div class="col-md-4 form-group">
-                                                        <label>Unit Kerja</label>
-                                                        <select name="unit_id" class="form-control">
-                                                            <option value="">-- Pilih Unit --</option>
-                                                            @foreach($units as $unit)
-                                                                <option value="{{ $unit->id }}" {{ (string) $user->unit_id === (string) $unit->id ? 'selected' : '' }}>
-                                                                    {{ $unit->nama }}
-                                                                </option>
-                                                            @endforeach
-                                                        </select>
-                                                    </div>
-                                                    <div class="col-md-4 form-group">
-                                                        <label>Bidang</label>
-                                                        <select name="bidang_id" class="form-control">
-                                                            <option value="">-- Pilih Bidang --</option>
-                                                            @foreach($bidangs as $bidang)
-                                                                <option value="{{ $bidang->id }}" {{ (string) $user->bidang_id === (string) $bidang->id ? 'selected' : '' }}>
-                                                                    {{ $bidang->nama }}
-                                                                </option>
-                                                            @endforeach
-                                                        </select>
-                                                    </div>
-                                                    <div class="col-md-4 form-group">
-                                                        <label>Hirarki</label>
-                                                        <input type="number" name="hirarki" class="form-control" value="{{ $user->hirarki ?? 999 }}" min="1">
-                                                    </div>
-                                                    <div class="col-md-6 form-group">
-                                                        <label>Jabatan</label>
-                                                        <select name="jabatan_id" class="form-control">
-                                                            <option value="">-- Pilih Jabatan --</option>
-                                                            @foreach($jabatans as $jabatan)
-                                                                <option value="{{ $jabatan->id }}" {{ (string) $user->jabatan_id === (string) $jabatan->id ? 'selected' : '' }}>
-                                                                    {{ $jabatan->nama }}{{ $jabatan->unit ? ' - ' . $jabatan->unit->nama : '' }}
-                                                                </option>
-                                                            @endforeach
-                                                        </select>
-                                                    </div>
-                                                    <div class="col-md-6 form-group">
-                                                        <label>Jabatan Keterangan</label>
-                                                        <input type="text" name="jabatan_keterangan" class="form-control" value="{{ $user->jabatan_keterangan }}">
-                                                    </div>
-                                                    <div class="col-md-6 form-group">
-                                                        <label>NIP</label>
-                                                        <input type="text" name="nip" class="form-control" value="{{ $user->nip }}">
-                                                    </div>
-                                                    <div class="col-md-6 form-group">
-                                                        <label>No. HP / WA</label>
-                                                        <input type="text" name="no_hp" class="form-control" value="{{ $user->no_hp }}">
-                                                    </div>
-                                                    <div class="col-md-6 form-group">
-                                                        <label>Atasan Langsung</label>
-                                                        <select name="atasan_langsung_id" class="form-control select2">
-                                                            <option value="">-- Pilih Atasan Langsung --</option>
-                                                            @foreach($supervisorOptions as $option)
-                                                                @if((int) $option->id !== (int) $user->id)
-                                                                    <option value="{{ $option->id }}" {{ (string) $user->atasan_langsung_id === (string) $option->id ? 'selected' : '' }}>
-                                                                        {{ $option->name }}{{ optional($option->jabatan)->nama ? ' - ' . optional($option->jabatan)->nama : '' }}
-                                                                    </option>
-                                                                @endif
-                                                            @endforeach
-                                                        </select>
-                                                    </div>
-                                                    <div class="col-md-6 form-group">
-                                                        <label>Pejabat Berwenang Cuti</label>
-                                                        <select name="pejabat_berwenang_id" class="form-control select2">
-                                                            <option value="">-- Pilih Pejabat Berwenang --</option>
-                                                            @foreach($supervisorOptions as $option)
-                                                                @if((int) $option->id !== (int) $user->id)
-                                                                    <option value="{{ $option->id }}" {{ (string) $user->pejabat_berwenang_id === (string) $option->id ? 'selected' : '' }}>
-                                                                        {{ $option->name }}{{ optional($option->jabatan)->nama ? ' - ' . optional($option->jabatan)->nama : '' }}
-                                                                    </option>
-                                                                @endif
-                                                            @endforeach
-                                                        </select>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div class="modal-footer">
-                                                <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Batal</button>
-                                                <button type="submit" class="btn btn-primary">Simpan</button>
-                                            </div>
-                                        </form>
-                                    </div>
-                                </div>
-                            </div>
                         @empty
                             <tr>
                                 <td colspan="8" class="text-center text-muted py-4">Belum ada data user.</td>
@@ -738,108 +834,40 @@
         <div class="card-footer clearfix">
             {{ $users->links() }}
         </div>
+        <div id="adminUsersEditModals">
+            @foreach($users as $user)
+                @include('admin.users._edit-modal', [
+                    'user' => $user,
+                    'roles' => $roles,
+                    'jabatans' => $jabatans,
+                    'units' => $units,
+                    'bidangs' => $bidangs,
+                    'supervisorOptions' => $supervisorOptions,
+                ])
+            @endforeach
+        </div>
         </div>
     </div>
 
     <div class="modal fade" id="createUserModal" tabindex="-1">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Tambah User</h5>
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content user-form-modal">
+                <div class="modal-header user-form-header">
+                    <div>
+                        <h5 class="modal-title">Tambah User</h5>
+                        <div class="user-form-subtitle">Lengkapi identitas, role, jabatan, dan relasi approval.</div>
+                    </div>
                     <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
                 </div>
-                <form method="POST" action="{{ route('admin.users.store') }}">
+                <form method="POST" action="{{ route('admin.users.store') }}" enctype="multipart/form-data">
                     @csrf
                     <div class="modal-body">
-                        <div class="row">
-                            <div class="col-md-6 form-group">
-                                <label>Nama</label>
-                                <input type="text" name="name" class="form-control" required>
-                            </div>
-                            <div class="col-md-6 form-group">
-                                <label>Email</label>
-                                <input type="email" name="email" class="form-control" required>
-                            </div>
-                            <div class="col-md-6 form-group">
-                                <label>Password</label>
-                                <input type="password" name="password" class="form-control" required>
-                            </div>
-                            <div class="col-md-6 form-group">
-                                <label>Role</label>
-                                <select name="role_ids[]" class="form-control select2" multiple required>
-                                    @foreach($roles as $role)
-                                        <option value="{{ $role->id }}">{{ $role->display_name }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                            <div class="col-md-4 form-group">
-                                <label>Unit Kerja</label>
-                                <select name="unit_id" class="form-control">
-                                    <option value="">-- Pilih Unit --</option>
-                                    @foreach($units as $unit)
-                                        <option value="{{ $unit->id }}">{{ $unit->nama }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                            <div class="col-md-4 form-group">
-                                <label>Bidang</label>
-                                <select name="bidang_id" class="form-control">
-                                    <option value="">-- Pilih Bidang --</option>
-                                    @foreach($bidangs as $bidang)
-                                        <option value="{{ $bidang->id }}">{{ $bidang->nama }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                            <div class="col-md-4 form-group">
-                                <label>Hirarki</label>
-                                <input type="number" name="hirarki" class="form-control" value="999" min="1">
-                            </div>
-                            <div class="col-md-6 form-group">
-                                <label>Jabatan</label>
-                                <select name="jabatan_id" class="form-control">
-                                    <option value="">-- Pilih Jabatan --</option>
-                                    @foreach($jabatans as $jabatan)
-                                        <option value="{{ $jabatan->id }}">{{ $jabatan->nama }}{{ $jabatan->unit ? ' - ' . $jabatan->unit->nama : '' }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                            <div class="col-md-6 form-group">
-                                <label>Jabatan Keterangan</label>
-                                <input type="text" name="jabatan_keterangan" class="form-control">
-                            </div>
-                            <div class="col-md-6 form-group">
-                                <label>NIP</label>
-                                <input type="text" name="nip" class="form-control">
-                            </div>
-                            <div class="col-md-6 form-group">
-                                <label>No. HP / WA</label>
-                                <input type="text" name="no_hp" class="form-control">
-                            </div>
-                            <div class="col-md-6 form-group">
-                                <label>Atasan Langsung</label>
-                                <select name="atasan_langsung_id" class="form-control select2">
-                                    <option value="">-- Pilih Atasan Langsung --</option>
-                                    @foreach($supervisorOptions as $option)
-                                        <option value="{{ $option->id }}">
-                                            {{ $option->name }}{{ optional($option->jabatan)->nama ? ' - ' . optional($option->jabatan)->nama : '' }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                            </div>
-                            <div class="col-md-6 form-group">
-                                <label>Pejabat Berwenang Cuti</label>
-                                <select name="pejabat_berwenang_id" class="form-control select2">
-                                    <option value="">-- Pilih Pejabat Berwenang --</option>
-                                    @foreach($supervisorOptions as $option)
-                                        <option value="{{ $option->id }}">
-                                            {{ $option->name }}{{ optional($option->jabatan)->nama ? ' - ' . optional($option->jabatan)->nama : '' }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                            </div>
-                        </div>
+                        @include('admin.users._form-fields', [
+                            'mode' => 'create',
+                            'user' => new \App\User(),
+                        ])
                     </div>
-                    <div class="modal-footer">
+                    <div class="modal-footer user-form-footer">
                         <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Batal</button>
                         <button type="submit" class="btn btn-primary">Simpan</button>
                     </div>

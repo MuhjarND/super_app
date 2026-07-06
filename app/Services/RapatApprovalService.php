@@ -101,7 +101,7 @@ class RapatApprovalService
         DB::transaction(function () use ($approval, $actor, $catatan, $signatureData) {
             $approval->refresh();
             $this->guardDecision($approval, $actor);
-            $signature = $this->signaturePadService->storeDataUri($signatureData, 'rapat/approval-signatures');
+            $signature = $this->signaturePadService->resolveForUser($actor, 'rapat/approval-signatures', $signatureData);
 
             $approval->update([
                 'status' => 'approved',
@@ -333,7 +333,7 @@ class RapatApprovalService
 
     protected function guardDecision(RapatApproval $approval, User $actor)
     {
-        if ((int) $approval->approver_id !== (int) $actor->id && !$actor->isMeetingAdmin()) {
+        if (!$actor->canActAsAssignedUser($approval->approver_id) && !$actor->isMeetingAdmin()) {
             abort(403, 'Anda tidak berhak memproses approval ini.');
         }
 

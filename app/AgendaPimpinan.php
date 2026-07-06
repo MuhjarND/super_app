@@ -108,7 +108,7 @@ class AgendaPimpinan extends Model
 
         $lines[] = '';
         $lines[] = 'Hormat kami,';
-        $lines[] = 'Sistem Informasi PTA Papua Barat';
+        $lines[] = 'PAPEDA';
 
         return implode("\n", $lines);
     }

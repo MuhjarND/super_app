@@ -4,6 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Verifikasi Tanda Tangan Surat Keluar</title>
+    @include('partials.app-icons')
     <style>
         body { font-family: "Segoe UI", Tahoma, sans-serif; background:#f8fafc; color:#0f172a; margin:0; }
         .page { max-width: 820px; margin: 0 auto; padding: 28px 16px 36px; }
@@ -34,7 +35,7 @@
         <div class="card">
             <div class="head">
                 <div class="title">Verifikasi Tanda Tangan Surat Keluar</div>
-                <div class="subtitle">SMART PTA Papua Barat</div>
+                <div class="subtitle">PAPEDA</div>
                 <span class="badge {{ $data['valid'] ? 'ok' : 'no' }}">{{ $data['valid'] ? 'Valid dan terverifikasi' : 'Tidak valid / belum final' }}</span>
             </div>
             <div class="body">

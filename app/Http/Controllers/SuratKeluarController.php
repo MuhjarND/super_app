@@ -8,29 +8,60 @@ use App\KategoriSurat;
 use App\Services\SuratTemplateDocumentService;
 use App\Services\LeaveDocumentService;
 use App\Services\RapatDocumentService;
+use App\Services\DocumentPreviewService;
+use App\Services\WhatsAppNotificationService;
 use App\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 
 class SuratKeluarController extends Controller
 {
     protected $templateDocumentService;
+    protected $documentPreviewService;
+    protected $whatsAppService;
 
     public function __construct()
     {
         $this->middleware('auth');
         $this->templateDocumentService = app(SuratTemplateDocumentService::class);
+        $this->documentPreviewService = app(DocumentPreviewService::class);
+        $this->whatsAppService = app(WhatsAppNotificationService::class);
     }
 
     public function index(Request $request)
     {
         $user = auth()->user();
 
+        if (Schema::hasColumn('surat_keluar_penerima', 'read_at')) {
+            DB::table('surat_keluar_penerima')
+                ->whereIn('user_id', $user->effectiveAssignmentUserIds())
+                ->whereNull('read_at')
+                ->update(['read_at' => now('Asia/Jayapura')]);
+        }
+
         $suratKeluar = SuratKeluar::visibleTo($user)
-            ->with('klasifikasiKode', 'kategoriSurat', 'kodeFungsi', 'kodeKegiatan', 'kodeTransaksi', 'creator', 'penerimaInternal.jabatan', 'templateApproval', 'pdfVerifications', 'rapat', 'leaveRequest')
+            ->with([
+                'klasifikasiKode',
+                'kategoriSurat',
+                'kodeFungsi',
+                'kodeKegiatan',
+                'kodeTransaksi',
+                'creator',
+                'penerimaInternal.jabatan',
+                'templateApproval',
+                'rapat',
+                'leaveRequest',
+                'pdfVerifications' => function ($query) {
+                    $query->whereNotNull('file_path')->where('file_path', '!=', '');
+                },
+            ])
+            ->withCount('penerimaInternal', 'pdfVerifications')
             ->orderBy('created_at', 'desc')
-            ->get();
+            ->paginate(25)
+            ->withQueryString();
         $kategoriSurats = KategoriSurat::where('aktif', true)->orderBy('kode')->get();
 
         $klasifikasiKodes = KlasifikasiKode::where('tipe', 'klasifikasi')
@@ -165,6 +196,7 @@ class SuratKeluarController extends Controller
 
         if ($request->opsi_penerima == 'internal' && $request->penerima_internal) {
             $suratKeluar->penerimaInternal()->attach($request->penerima_internal);
+            $this->notifyInternalRecipients($suratKeluar, $request->penerima_internal);
         }
 
         if ($request->template_source === 'template_surat' && $request->filled('template_rendered_body')) {
@@ -262,10 +294,16 @@ class SuratKeluarController extends Controller
             $payload['nomor_urut'] = $result['urut'];
         }
 
+        $oldRecipientIds = $suratKeluar->penerimaInternal()->pluck('users.id')->map(function ($id) {
+            return (int) $id;
+        })->all();
+
         $suratKeluar->update($payload);
 
         if ($request->opsi_penerima == 'internal' && $request->penerima_internal) {
             $suratKeluar->penerimaInternal()->sync($request->penerima_internal);
+            $newRecipientIds = array_values(array_unique(array_map('intval', $request->penerima_internal)));
+            $this->notifyInternalRecipients($suratKeluar, array_values(array_diff($newRecipientIds, $oldRecipientIds)));
         } else {
             $suratKeluar->penerimaInternal()->detach();
         }
@@ -343,8 +381,13 @@ class SuratKeluarController extends Controller
     {
         abort_unless(auth()->user()->canViewSuratKeluar($suratKeluar), 403);
 
+        $suratKeluar->syncCompletionStatusFromFile();
+
         if ($suratKeluar->file_path) {
-            return response()->file(storage_path('app/public/' . $suratKeluar->file_path));
+            return $this->documentPreviewService->streamPublicFile(
+                $suratKeluar->file_path,
+                $suratKeluar->nomor_surat_formatted . ' - ' . $suratKeluar->perihal
+            );
         }
 
         $suratKeluar->loadMissing('templateApproval', 'rapat', 'leaveRequest');
@@ -526,5 +569,20 @@ class SuratKeluarController extends Controller
         $decoded = json_decode($json, true);
 
         return is_array($decoded) ? $decoded : [];
+    }
+
+    protected function notifyInternalRecipients(SuratKeluar $suratKeluar, array $recipientIds)
+    {
+        $recipientIds = array_values(array_unique(array_filter(array_map('intval', $recipientIds))));
+        if (empty($recipientIds)) {
+            return;
+        }
+
+        $suratKeluar->loadMissing('creator');
+        $users = User::active()->whereIn('id', $recipientIds)->get();
+
+        foreach ($users as $user) {
+            $this->whatsAppService->notifySuratKeluarRecipient($suratKeluar, $user);
+        }
     }
 }

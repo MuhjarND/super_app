@@ -8,7 +8,7 @@ use Illuminate\Support\Str;
 
 class TwoFactorAuthenticationService
 {
-    protected $issuer = 'PTA Papua Barat';
+    protected $issuer = 'PAPEDA';
 
     public function generateSecret($length = 32)
     {

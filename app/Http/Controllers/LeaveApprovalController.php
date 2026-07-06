@@ -17,28 +17,25 @@ class LeaveApprovalController extends Controller
 
     public function index()
     {
-        abort_unless(auth()->user()->canAccessLeaveApproval(), 403);
+        $user = auth()->user();
+        abort_unless($user->canAccessLeaveApproval(), 403);
         if (!$this->moduleReady()) { return response()->view('cuti.setup', ['title' => 'Approval Cuti Belum Diaktifkan', 'message' => 'Tabel modul cuti belum dijalankan.']); }
-        $approvals = LeaveApproval::with(['leaveRequest.user', 'leaveRequest.leaveType'])->where('status', 'pending')->where('approver_id', auth()->id())->orderBy('step_no')->paginate(20);
+        $approvals = LeaveApproval::with(['leaveRequest.user', 'leaveRequest.leaveType'])->where('status', 'pending')->whereIn('approver_id', $user->effectiveAssignmentUserIds())->orderBy('step_no')->paginate(20);
         return view('cuti.approval.index', compact('approvals'));
     }
 
     public function show(LeaveApproval $leaveApproval)
     {
-        abort_unless(auth()->user()->canAccessLeaveApproval(), 403);
-        abort_unless((int) $leaveApproval->approver_id === (int) auth()->id() || auth()->user()->isSuperAdmin(), 403);
+        $this->abortUnlessCanAct($leaveApproval);
         $leaveApproval->load(['leaveRequest.user', 'leaveRequest.leaveType', 'leaveRequest.documents.verifier', 'leaveRequest.approvals.approver', 'leaveRequest.audits.actor']);
         return view('cuti.show', ['leaveRequest' => $leaveApproval->leaveRequest, 'leaveApproval' => $leaveApproval]);
     }
 
     public function approve(ApprovalActionRequest $request, LeaveApproval $leaveApproval)
     {
-        abort_unless(auth()->user()->canAccessLeaveApproval(), 403);
-        abort_unless((int) $leaveApproval->approver_id === (int) auth()->id() || auth()->user()->isSuperAdmin(), 403);
+        $this->abortUnlessCanAct($leaveApproval);
         $request->validate([
-            'signature_data' => ['required', 'string'],
-        ], [
-            'signature_data.required' => 'Tanda tangan wajib diisi.',
+            'signature_data' => ['nullable', 'string'],
         ]);
         $oldStatus = $leaveApproval->leaveRequest->status;
         $this->approvalService->approve($leaveApproval, auth()->user(), $request->note, $request->signature_data);
@@ -48,8 +45,7 @@ class LeaveApprovalController extends Controller
 
     public function reject(ApprovalActionRequest $request, LeaveApproval $leaveApproval)
     {
-        abort_unless(auth()->user()->canAccessLeaveApproval(), 403);
-        abort_unless((int) $leaveApproval->approver_id === (int) auth()->id() || auth()->user()->isSuperAdmin(), 403);
+        $this->abortUnlessCanAct($leaveApproval);
         $request->validate(['note' => 'required|string|max:2000']);
         $oldStatus = $leaveApproval->leaveRequest->status;
         $this->approvalService->reject($leaveApproval, auth()->user(), $request->note);
@@ -59,14 +55,12 @@ class LeaveApprovalController extends Controller
 
     public function change(ApprovalActionRequest $request, LeaveApproval $leaveApproval)
     {
-        abort_unless(auth()->user()->canAccessLeaveApproval(), 403);
-        abort_unless((int) $leaveApproval->approver_id === (int) auth()->id() || auth()->user()->isSuperAdmin(), 403);
+        $this->abortUnlessCanAct($leaveApproval);
         $request->validate([
             'note' => ['required', 'string', 'max:2000'],
-            'signature_data' => ['required', 'string'],
+            'signature_data' => ['nullable', 'string'],
         ], [
             'note.required' => 'Catatan perubahan wajib diisi.',
-            'signature_data.required' => 'Tanda tangan wajib diisi.',
         ]);
         $oldStatus = $leaveApproval->leaveRequest->status;
         $this->approvalService->requestChange($leaveApproval, auth()->user(), $request->note, $request->signature_data);
@@ -76,14 +70,12 @@ class LeaveApprovalController extends Controller
 
     public function defer(ApprovalActionRequest $request, LeaveApproval $leaveApproval)
     {
-        abort_unless(auth()->user()->canAccessLeaveApproval(), 403);
-        abort_unless((int) $leaveApproval->approver_id === (int) auth()->id() || auth()->user()->isSuperAdmin(), 403);
+        $this->abortUnlessCanAct($leaveApproval);
         $request->validate([
             'note' => ['required', 'string', 'max:2000'],
-            'signature_data' => ['required', 'string'],
+            'signature_data' => ['nullable', 'string'],
         ], [
             'note.required' => 'Alasan penangguhan wajib diisi.',
-            'signature_data.required' => 'Tanda tangan wajib diisi.',
         ]);
         $oldStatus = $leaveApproval->leaveRequest->status;
         $this->approvalService->defer($leaveApproval, auth()->user(), $request->note, $request->signature_data);
@@ -93,8 +85,7 @@ class LeaveApprovalController extends Controller
 
     public function verifyDocument(VerifyLeaveDocumentRequest $request, LeaveApproval $leaveApproval)
     {
-        abort_unless(auth()->user()->canAccessLeaveApproval(), 403);
-        abort_unless((int) $leaveApproval->approver_id === (int) auth()->id() || auth()->user()->isSuperAdmin(), 403);
+        $this->abortUnlessCanAct($leaveApproval);
         $document = LeaveRequestDocument::where('leave_request_id', $leaveApproval->leave_request_id)->findOrFail($request->document_id);
         $document->is_verified = (bool) $request->is_verified;
         $document->verification_note = $request->verification_note;
@@ -102,6 +93,14 @@ class LeaveApprovalController extends Controller
         $document->verified_at = now();
         $document->save();
         return back()->with('success', 'Verifikasi dokumen cuti diperbarui.');
+    }
+
+    protected function abortUnlessCanAct(LeaveApproval $leaveApproval)
+    {
+        $user = auth()->user();
+
+        abort_unless($user->canAccessLeaveApproval(), 403);
+        abort_unless($user->isSuperAdmin() || $user->canActAsAssignedUser($leaveApproval->approver_id), 403);
     }
 
     protected function moduleReady() { return Schema::hasTable('leave_requests') && Schema::hasTable('leave_approvals'); }

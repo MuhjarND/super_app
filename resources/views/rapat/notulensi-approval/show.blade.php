@@ -223,16 +223,11 @@
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title">Tanda Tangan Digital</h5>
+                        <h5 class="modal-title">Approve Notulen</h5>
                         <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
                     </div>
                     <div class="modal-body">
-                        @include('partials.signature-pad', [
-                            'id' => 'notulensiApprovalSignaturePad',
-                            'name' => 'signature_data',
-                            'label' => 'Bubuhkan Tanda Tangan',
-                            'required' => true,
-                        ])
+                        @include('partials.profile-signature-notice')
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Batal</button>
@@ -270,16 +265,6 @@
                 return;
             }
 
-            let signatureData = null;
-            if (action === 'approve') {
-                const signatureField = document.querySelector('#notulensiApprovalSignatureModal .js-signature-pad');
-                if (!window.AppSignaturePad.sync(signatureField)) {
-                    showToast('Tanda tangan wajib diisi sebelum menyetujui dokumen.', 'error');
-                    return;
-                }
-                signatureData = signatureField.querySelector('input[name="signature_data"]').value;
-            }
-
             if (action === 'reject' && !window.confirm('Tolak dokumen notulen ini?')) {
                 return;
             }
@@ -293,8 +278,7 @@
                 loadingMessage: action === 'approve' ? 'Memproses approval notulen...' : 'Memproses reject notulen...',
                 data: {
                     _token: '{{ csrf_token() }}',
-                    catatan: note,
-                    signature_data: signatureData
+                    catatan: note
                 },
                 success: function (res) {
                     showToast(res.message, 'success');

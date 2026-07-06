@@ -11,8 +11,17 @@ class VotingCandidate extends Model
         'user_id',
         'nama_snapshot',
         'jabatan_snapshot',
+        'image_path',
+        'image_name',
+        'image_mime',
+        'image_size',
         'urutan',
     ];
+
+    public function getImageUrlAttribute()
+    {
+        return $this->image_path ? asset('storage/' . $this->image_path) : null;
+    }
 
     public function item()
     {

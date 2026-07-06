@@ -105,7 +105,7 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/proposals/{proposal}/process', 'SuratTemplateController@processProposal')->name('proposals.process');
         Route::get('/sample/{type}/{id}', 'SuratTemplateController@sample')->name('sample');
     });
-    Route::get('/arsip', 'ArchiveController@index')->name('arsip.index');
+    Route::get('/arsip', 'ArchiveController@index')->middleware('role:admin')->name('arsip.index');
 
     // Disposisi
     Route::post('/disposisi', 'DisposisiController@store')->name('disposisi.store');
@@ -118,6 +118,7 @@ Route::middleware(['auth'])->group(function () {
         Route::resource('users', 'Admin\UserManagementController')->except(['show']);
         Route::post('users/{user}/send-login-info', 'Admin\UserManagementController@sendLoginInfo')->name('users.send-login-info');
         Route::patch('users/{user}/toggle-status', 'Admin\UserManagementController@toggleStatus')->name('users.toggle-status');
+        Route::post('whatsapp-notifications/toggle', 'Admin\UserManagementController@toggleWhatsAppNotifications')->name('whatsapp-notifications.toggle');
         Route::resource('jabatans', 'Admin\JabatanManagementController')->except(['show']);
         Route::resource('units', 'Admin\UnitManagementController')->except(['show']);
         Route::resource('bidangs', 'Admin\BidangManagementController')->except(['show']);

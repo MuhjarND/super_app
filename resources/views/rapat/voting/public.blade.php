@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{{ $voting->judul }} | Voting Publik</title>
+    @include('partials.app-icons')
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         body{margin:0;font-family:'Inter',sans-serif;background:linear-gradient(180deg,#0f172a,#1e293b 240px,#f8fafc 240px);color:#0f172a;}
@@ -20,6 +21,10 @@
         .candidate-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin-top:10px;}
         .candidate-option{border:1px solid #cbd5e1;border-radius:16px;padding:12px;cursor:pointer;transition:.2s;background:#fff;}
         .candidate-option.active{border-color:#4f46e5;background:#eef2ff;}
+        .candidate-option.has-image{padding:0;overflow:hidden;}
+        .candidate-image{width:100%;height:150px;object-fit:cover;background:#e2e8f0;display:block;}
+        .candidate-body{padding:12px;}
+        .comparison-note{display:inline-flex;align-items:center;gap:6px;margin-top:10px;background:#ecfdf5;color:#047857;border-radius:999px;padding:6px 10px;font-size:.76rem;font-weight:800;}
         .btn{border:0;border-radius:16px;padding:14px 16px;font-weight:800;font-size:.95rem;cursor:pointer;}
         .btn-primary{background:#4f46e5;color:#fff;width:100%;}
         .alert{display:none;border-radius:14px;padding:12px 14px;margin-bottom:14px;}
@@ -53,11 +58,15 @@
                 </div>
 
                 @foreach($voting->items as $item)
+                    @php($imageCandidateCount = $item->candidates->filter(function ($candidate) { return !empty($candidate->image_path); })->count())
                     <div class="item-card" data-item-id="{{ $item->id }}">
                         <div style="font-size:1rem;font-weight:800;">{{ $item->judul }}</div>
                         <div class="text-muted" style="font-size:.82rem;">{{ $item->deskripsi }}</div>
+                        @if($imageCandidateCount > 1)
+                            <div class="comparison-note">Mode perbandingan gambar</div>
+                        @endif
 
-                        @if($item->candidates->count() > 5)
+                        @if($item->candidates->count() > 5 && $imageCandidateCount <= 1)
                             <div class="field mt-3 mb-0">
                                 <label>Pilih Kandidat</label>
                                 <select class="select choice-select" data-item-id="{{ $item->id }}" required>
@@ -70,9 +79,17 @@
                         @else
                             <div class="candidate-grid">
                                 @foreach($item->candidates as $candidate)
-                                    <label class="candidate-option" data-item-id="{{ $item->id }}">
+                                    <label class="candidate-option {{ $candidate->image_path ? 'has-image' : '' }}" data-item-id="{{ $item->id }}">
                                         <input type="radio" name="choice_{{ $item->id }}" value="{{ $candidate->id }}" style="display:none;">
-                                        <div style="font-weight:700;">{{ $candidate->nama_snapshot }}</div>
+                                        @if($candidate->image_path)
+                                            <img src="{{ $candidate->image_url }}" class="candidate-image" alt="{{ $candidate->nama_snapshot }}">
+                                        @endif
+                                        <div class="candidate-body">
+                                            <div style="font-weight:700;">{{ $candidate->nama_snapshot }}</div>
+                                            @if($candidate->jabatan_snapshot)
+                                                <div style="font-size:.76rem;color:#64748b;margin-top:3px;">{{ $candidate->jabatan_snapshot }}</div>
+                                            @endif
+                                        </div>
                                     </label>
                                 @endforeach
                             </div>
@@ -113,7 +130,8 @@
             };
 
             @foreach($voting->items as $item)
-                @if($item->candidates->count() > 5)
+                @php($submitUsesSelect = $item->candidates->count() > 5 && $item->candidates->filter(function ($candidate) { return !empty($candidate->image_path); })->count() <= 1)
+                @if($submitUsesSelect)
                     payload.choices['{{ $item->id }}'] = document.querySelector('.choice-select[data-item-id="{{ $item->id }}"]').value;
                 @else
                     const checked{{ $item->id }} = document.querySelector('input[name="choice_{{ $item->id }}"]:checked');
