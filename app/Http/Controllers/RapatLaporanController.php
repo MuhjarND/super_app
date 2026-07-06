@@ -71,7 +71,7 @@ class RapatLaporanController extends Controller
         abort_unless(auth()->user()->canViewRapat($laporan->rapat), 403);
 
         if ($laporan->file_path) {
-            return response()->file(storage_path('app/public/' . $laporan->file_path));
+            return response()->file(Storage::disk('public')->path($laporan->file_path));
         }
 
         if ($laporan->jenis === 'tindak_lanjut') {
@@ -83,7 +83,7 @@ class RapatLaporanController extends Controller
                 ->first();
 
             if ($verification && $verification->file_path) {
-                return response()->file(storage_path('app/public/' . $verification->file_path));
+                return response()->file(Storage::disk('public')->path($verification->file_path));
             }
         }
 
@@ -95,7 +95,7 @@ class RapatLaporanController extends Controller
         abort_unless(auth()->user()->canViewRapat($laporan->rapat), 403);
 
         if ($laporan->file_path) {
-            return response()->download(storage_path('app/public/' . $laporan->file_path), $laporan->file_nama ?: basename($laporan->file_path));
+            return response()->download(Storage::disk('public')->path($laporan->file_path), $laporan->file_nama ?: basename($laporan->file_path));
         }
 
         if ($laporan->jenis === 'tindak_lanjut') {
@@ -107,7 +107,7 @@ class RapatLaporanController extends Controller
                 ->first();
 
             if ($verification && $verification->file_path) {
-                return response()->download(storage_path('app/public/' . $verification->file_path), $laporan->file_nama ?: basename($verification->file_path));
+                return response()->download(Storage::disk('public')->path($verification->file_path), $laporan->file_nama ?: basename($verification->file_path));
             }
         }
 

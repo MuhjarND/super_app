@@ -157,7 +157,7 @@ class RapatController extends Controller
         abort_unless(auth()->user()->canViewRapat($rapat), 403);
         abort_unless($rapat->lampiran_tambahan_path, 404);
 
-        return response()->file(storage_path('app/public/' . $rapat->lampiran_tambahan_path));
+        return response()->file(Storage::disk('public')->path($rapat->lampiran_tambahan_path));
     }
 
     public function previewNomorUndangan(\Illuminate\Http\Request $request)

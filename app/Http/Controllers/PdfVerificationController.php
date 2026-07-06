@@ -20,7 +20,7 @@ class PdfVerificationController extends Controller
 
         abort_unless($verification->file_path && Storage::disk('public')->exists($verification->file_path), 404);
 
-        return response()->file(storage_path('app/public/' . $verification->file_path), [
+        return response()->file(Storage::disk('public')->path($verification->file_path), [
             'Content-Type' => 'application/pdf',
             'Content-Disposition' => 'inline; filename="' . ($verification->original_filename ?: 'dokumen-terverifikasi.pdf') . '"',
         ]);

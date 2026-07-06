@@ -264,7 +264,7 @@ class RapatNotulensiController extends Controller
         abort_unless(auth()->user()->canAccessMeetingMinutes() || auth()->user()->canViewRapat($notulensi->rapat), 403);
 
         if ($notulensi->mode === 'upload' && $notulensi->file_path && $notulensi->file_mime === 'application/pdf') {
-            return response()->file(storage_path('app/public/' . $notulensi->file_path));
+            return response()->file(Storage::disk('public')->path($notulensi->file_path));
         }
 
         $notulensi->load('rapat.kategoriSuratKode', 'rapat.creator', 'rapat.pesertas.jabatan', 'rapat.approver1', 'notulis', 'approval.approver', 'tindakLanjuts.user');
@@ -309,7 +309,7 @@ class RapatNotulensiController extends Controller
         abort_unless(auth()->user()->canAccessMeetingMinutes(), 403);
         abort_unless($notulensi->file_path, 404);
 
-        return response()->file(storage_path('app/public/' . $notulensi->file_path));
+        return response()->file(Storage::disk('public')->path($notulensi->file_path));
     }
 
     public function followUpIndex()
@@ -431,7 +431,7 @@ class RapatNotulensiController extends Controller
 
         abort_unless($tindakLanjut->eviden_path, 404);
 
-        return response()->file(storage_path('app/public/' . $tindakLanjut->eviden_path));
+        return response()->file(Storage::disk('public')->path($tindakLanjut->eviden_path));
     }
 
     public function completeFollowUp(Request $request, RapatNotulensiTindakLanjut $tindakLanjut)
@@ -673,7 +673,7 @@ class RapatNotulensiController extends Controller
     {
         return collect($notulensi->dokumentasi_files ?: [])
             ->map(function ($item) {
-                $path = storage_path('app/public/' . $item['path']);
+                $path = Storage::disk('public')->path($item['path']);
                 if (!is_file($path)) {
                     return null;
                 }

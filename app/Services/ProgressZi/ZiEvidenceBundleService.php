@@ -109,7 +109,7 @@ class ZiEvidenceBundleService
                 $notulensi = RapatNotulensi::find($evidence->source_reference_id);
                 if ($notulensi && $notulensi->file_path && Storage::disk('public')->exists($notulensi->file_path) && $notulensi->file_mime === 'application/pdf') {
                     return [
-                        'path' => storage_path('app/public/' . $notulensi->file_path),
+                        'path' => Storage::disk('public')->path($notulensi->file_path),
                         'temporary' => false,
                     ];
                 }
@@ -119,7 +119,7 @@ class ZiEvidenceBundleService
                 $laporan = RapatLaporan::find($evidence->source_reference_id);
                 if ($laporan && $laporan->file_path && Storage::disk('public')->exists($laporan->file_path)) {
                     return [
-                        'path' => storage_path('app/public/' . $laporan->file_path),
+                        'path' => Storage::disk('public')->path($laporan->file_path),
                         'temporary' => false,
                     ];
                 }
@@ -142,7 +142,7 @@ class ZiEvidenceBundleService
             return $this->renderNoticePdf($documentName, 'File eviden tidak ditemukan di storage.');
         }
 
-        $absolutePath = storage_path('app/public/' . $relativePath);
+        $absolutePath = Storage::disk('public')->path($relativePath);
         $extension = strtolower(pathinfo($absolutePath, PATHINFO_EXTENSION));
 
         if ($extension === 'pdf') {

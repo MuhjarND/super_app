@@ -73,7 +73,7 @@ class RapatAbsensiController extends Controller
     {
         abort_unless(auth()->user()->canViewRapat($attendance->rapat), 403);
 
-        return response()->file(storage_path('app/public/' . $attendance->signature_path));
+        return response()->file(Storage::disk('public')->path($attendance->signature_path));
     }
 
     public function pdf(Rapat $rapat)
@@ -322,7 +322,7 @@ class RapatAbsensiController extends Controller
             return null;
         }
 
-        $absolutePath = storage_path('app/public/' . ltrim($relativePath, '/'));
+        $absolutePath = Storage::disk('public')->path(ltrim($relativePath, '/'));
         if (!file_exists($absolutePath)) {
             return null;
         }

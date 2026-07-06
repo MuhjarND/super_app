@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\RapatNotulensiTindakLanjut;
+use Illuminate\Support\Facades\Storage;
 
 class PublicFollowUpEvidenceController extends Controller
 {
@@ -11,6 +12,6 @@ class PublicFollowUpEvidenceController extends Controller
         $tindakLanjut = RapatNotulensiTindakLanjut::where('public_token', $token)->firstOrFail();
         abort_unless($tindakLanjut->eviden_path, 404);
 
-        return response()->file(storage_path('app/public/' . $tindakLanjut->eviden_path));
+        return response()->file(Storage::disk('public')->path($tindakLanjut->eviden_path));
     }
 }

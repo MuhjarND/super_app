@@ -409,7 +409,7 @@ class SuratKeluarController extends Controller
             ->first();
 
         if ($verification && $verification->file_path) {
-            return response()->file(storage_path('app/public/' . $verification->file_path));
+            return response()->file(Storage::disk('public')->path($verification->file_path));
         }
 
         abort(404, 'File tidak ditemukan.');

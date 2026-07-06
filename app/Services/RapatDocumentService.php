@@ -785,7 +785,7 @@ class RapatDocumentService
 
     protected function prepareLampiranTambahanPdf(Rapat $rapat)
     {
-        $absolutePath = storage_path('app/public/' . $rapat->lampiran_tambahan_path);
+        $absolutePath = Storage::disk('public')->path($rapat->lampiran_tambahan_path);
 
         if (!file_exists($absolutePath)) {
             throw new \RuntimeException('File lampiran tambahan tidak ditemukan.');

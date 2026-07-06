@@ -536,7 +536,7 @@ class LeaveDocumentService
 
     protected function prepareLeaveAttachmentPdf($document)
     {
-        $absolutePath = storage_path('app/public/' . $document->file_path);
+        $absolutePath = Storage::disk('public')->path($document->file_path);
 
         if (!file_exists($absolutePath)) {
             return [

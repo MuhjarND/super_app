@@ -207,7 +207,7 @@ class RapatLaporanService
 
         if ($notulensi->mode === 'upload' && $notulensi->file_path && Storage::disk('public')->exists($notulensi->file_path)) {
             return [
-                'path' => storage_path('app/public/' . $notulensi->file_path),
+                'path' => Storage::disk('public')->path($notulensi->file_path),
                 'temporary' => false,
             ];
         }
@@ -302,7 +302,7 @@ class RapatLaporanService
             return null;
         }
 
-        $absolutePath = storage_path('app/public/' . $relativePath);
+        $absolutePath = Storage::disk('public')->path($relativePath);
         return app(\App\Services\SignaturePadService::class)->dataUriFromPublicPath($absolutePath);
     }
 
