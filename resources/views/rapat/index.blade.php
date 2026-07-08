@@ -195,6 +195,63 @@
             box-shadow: none;
         }
 
+        .rapat-participant-toolbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            margin-bottom: 8px;
+        }
+
+        .rapat-participant-toolbar label {
+            margin-bottom: 0;
+        }
+
+        .rapat-select-all-participants {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid #c7d2fe;
+            border-radius: 999px;
+            background: #eef2ff;
+            color: #4f46e5;
+            font-size: 0.76rem;
+            font-weight: 800;
+            line-height: 1;
+            padding: 8px 12px;
+            white-space: nowrap;
+        }
+
+        .rapat-select-all-participants:hover,
+        .rapat-select-all-participants:focus {
+            background: #e0e7ff;
+            color: #4338ca;
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.12);
+        }
+
+        .rapat-select-all-participants.is-all-selected {
+            border-color: #fecaca;
+            background: #fff1f2;
+            color: #dc2626;
+        }
+
+        .rapat-form-modal .select2-container--bootstrap4 .select2-selection--multiple {
+            max-height: 156px;
+            overflow-y: auto;
+            padding: 7px 9px;
+        }
+
+        .rapat-form-modal .select2-container--bootstrap4 .select2-selection--multiple .select2-selection__rendered {
+            display: flex;
+            align-items: flex-start;
+            flex-wrap: wrap;
+            gap: 7px;
+            width: 100%;
+            min-width: 0;
+            margin: 0;
+            padding: 0;
+        }
+
         .rapat-form-modal .select2-container--bootstrap4 .select2-selection--multiple .select2-selection__choice {
             border: 0;
             border-radius: 999px;
@@ -202,7 +259,34 @@
             color: #5b21b6;
             font-size: 0.76rem;
             font-weight: 800;
-            padding: 3px 8px;
+            line-height: 1.25;
+            max-width: 100%;
+            margin: 0;
+            padding: 4px 10px 4px 28px;
+            white-space: normal;
+            word-break: break-word;
+        }
+
+        .rapat-form-modal .select2-container--bootstrap4 .select2-selection--multiple .select2-selection__choice__remove {
+            position: absolute;
+            left: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #64748b;
+            font-size: 0.95rem;
+        }
+
+        .rapat-form-modal .select2-container--bootstrap4 .select2-selection--multiple .select2-search--inline {
+            flex: 1 1 160px;
+            min-width: 160px;
+        }
+
+        .rapat-form-modal .select2-container--bootstrap4 .select2-selection--multiple .select2-search__field {
+            width: 100% !important;
+            min-width: 140px;
+            height: 26px;
+            margin: 0;
+            font-weight: 600;
         }
 
         .rapat-advanced {
@@ -367,6 +451,19 @@
             .rapat-form-section {
                 padding: 14px;
                 border-radius: 16px;
+            }
+
+            .rapat-participant-toolbar {
+                align-items: stretch;
+                flex-direction: column;
+            }
+
+            .rapat-select-all-participants {
+                width: 100%;
+            }
+
+            .rapat-form-modal .select2-container--bootstrap4 .select2-selection--multiple {
+                max-height: 190px;
             }
 
             .rapat-advanced summary {
@@ -894,8 +991,31 @@
                 bindFormBehavior('create');
                 bindFormBehavior('edit');
 
-                $('#createRapatModal').on('shown.bs.modal', function () {
-                    $(this).find('.select2').each(function () {
+                function refreshRapatParticipantSelectAll($scope) {
+                    const $selects = $scope && $scope.is('select[data-participant-select="1"]')
+                        ? $scope
+                        : ($scope || $(document)).find('select[data-participant-select="1"]');
+
+                    $selects.each(function () {
+                        const $select = $(this);
+                        const id = $select.attr('id');
+                        const $button = id ? $('[data-target="#' + id + '"]') : $();
+                        const values = $select.find('option').map(function () {
+                            return String(this.value);
+                        }).get();
+                        const selectedValues = ($select.val() || []).map(String);
+                        const isAllSelected = values.length > 0 && selectedValues.length >= values.length;
+
+                        $button
+                            .toggleClass('is-all-selected', isAllSelected)
+                            .html(isAllSelected
+                                ? '<i class="fas fa-times mr-1"></i> Hapus Semua'
+                                : '<i class="fas fa-check-double mr-1"></i> Pilih Semua');
+                    });
+                }
+
+                function initRapatSelect2($modal) {
+                    $modal.find('.select2').each(function () {
                         const $select = $(this);
                         if ($select.hasClass('select2-hidden-accessible')) {
                             $select.select2('destroy');
@@ -903,23 +1023,36 @@
                         $select.select2({
                             theme: 'bootstrap4',
                             width: '100%',
-                            dropdownParent: $('#createRapatModal')
+                            dropdownParent: $modal
                         });
                     });
+
+                    refreshRapatParticipantSelectAll($modal);
+                }
+
+                $('#createRapatModal').on('shown.bs.modal', function () {
+                    initRapatSelect2($(this));
                 });
 
                 $('#editRapatModal').on('shown.bs.modal', function () {
-                    $(this).find('.select2').each(function () {
-                        const $select = $(this);
-                        if ($select.hasClass('select2-hidden-accessible')) {
-                            $select.select2('destroy');
-                        }
-                        $select.select2({
-                            theme: 'bootstrap4',
-                            width: '100%',
-                            dropdownParent: $('#editRapatModal')
-                        });
-                    });
+                    initRapatSelect2($(this));
+                });
+
+                $(document).on('click', '.rapat-select-all-participants', function () {
+                    const $button = $(this);
+                    const $select = $($button.data('target'));
+                    const values = $select.find('option').map(function () {
+                        return String(this.value);
+                    }).get();
+                    const selectedValues = ($select.val() || []).map(String);
+                    const isAllSelected = values.length > 0 && selectedValues.length >= values.length;
+
+                    $select.val(isAllSelected ? [] : values).trigger('change');
+                    refreshRapatParticipantSelectAll($select);
+                });
+
+                $(document).on('change', 'select[data-participant-select="1"]', function () {
+                    refreshRapatParticipantSelectAll($(this));
                 });
 
                 $('#createRapatForm').on('submit', function (e) {
@@ -981,6 +1114,7 @@
                     $('#editWaktuMulai').val(row.data('waktuMulai'));
                     $('#editTempat').val(row.data('tempat'));
                     $('#editPesertaIds').val(pesertaIds).trigger('change');
+                    refreshRapatParticipantSelectAll($('#editPesertaIds'));
                     $('#editApprover1Id').val(row.data('approver1')).trigger('change');
                     $('#editApprover2Id').val(row.data('approver2')).trigger('change');
                     $('#editApproval1JabatanManual').val(row.data('approval1JabatanManual'));

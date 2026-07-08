@@ -66,13 +66,16 @@
 
                     <div class="rapat-form-section">
                         <div class="rapat-form-section-title">Peserta</div>
-                        <div class="form-group mb-0">
-                            <label>Peserta Undangan <span class="text-danger">*</span></label>
-                            <select class="form-control select2" name="peserta_ids[]" id="{{ $prefix }}PesertaIds" multiple required>
+                        <div class="form-group mb-0 rapat-participant-picker">
+                            <div class="rapat-participant-toolbar">
+                                <label>Peserta Undangan <span class="text-danger">*</span></label>
+                                <button type="button" class="btn rapat-select-all-participants" data-target="#{{ $prefix }}PesertaIds">
+                                    <i class="fas fa-check-double mr-1"></i> Pilih Semua
+                                </button>
+                            </div>
+                            <select class="form-control select2" name="peserta_ids[]" id="{{ $prefix }}PesertaIds" multiple required data-participant-select="1">
                                 @foreach($participants as $participant)
-                                    <option value="{{ $participant->id }}">
-                                        {{ $participant->name }}{{ $participant->jabatan_keterangan ? ' - ' . $participant->jabatan_keterangan : '' }}
-                                    </option>
+                                    <option value="{{ $participant->id }}">{{ $participant->name }}</option>
                                 @endforeach
                             </select>
                             <small class="form-hint">Pilih pegawai yang diundang.</small>
