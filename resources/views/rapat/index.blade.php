@@ -253,6 +253,9 @@
         }
 
         .rapat-form-modal .select2-container--bootstrap4 .select2-selection--multiple .select2-selection__choice {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
             border: 0;
             border-radius: 999px;
             background: #ede9fe;
