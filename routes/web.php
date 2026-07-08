@@ -8,6 +8,8 @@ Route::get('/', function () {
 });
 
 Auth::routes(['register' => false]); // Disable registration - admin adds users
+Route::get('/autologin', 'AutoLoginController@show')->name('autologin');
+Route::post('/autologin', 'AutoLoginController@login')->name('autologin.login');
 Route::get('/masuk/whatsapp/{token}', 'Auth\WhatsAppMagicLoginController@consume')
     ->where('token', '[A-Za-z0-9]{64}')
     ->middleware('throttle:10,1')
