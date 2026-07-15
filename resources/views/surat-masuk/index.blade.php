@@ -415,26 +415,40 @@
             transform: none !important;
         }
 
-        .agenda-pimpinan-box {
-            border: 1px solid #dbeafe;
-            border-radius: 14px;
-            background: linear-gradient(180deg, #f8fbff, #ffffff);
-            padding: 14px 16px;
-            margin-top: 8px;
+        #createModal .modal-content {
+            max-height: calc(100vh - 2rem);
+            overflow: hidden;
+        }
+
+        #createModal #createForm {
+            display: flex;
+            flex: 1 1 auto;
+            flex-direction: column;
+            min-height: 0;
+            overflow: hidden;
+        }
+
+        #createModal .modal-body {
+            flex: 1 1 auto;
+            min-height: 0;
+            overflow-y: auto;
+            overscroll-behavior: contain;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        #createModal .modal-footer {
+            flex: 0 0 auto;
+        }
+
+        .agenda-option {
+            margin-top: 12px;
+            padding: 2px 0;
         }
 
         .agenda-pimpinan-fields {
             display: none;
-            margin-top: 14px;
-            padding-top: 14px;
-            border-top: 1px dashed #bfdbfe;
-        }
-
-        .agenda-pimpinan-note {
-            color: #64748b;
-            font-size: 0.78rem;
-            line-height: 1.45;
-            margin-top: 4px;
+            margin-top: 12px;
+            padding: 4px 0 0 26px;
         }
 
         .history-panel {
@@ -803,6 +817,7 @@
                     </h1>
                 </div>
                 <div class="col-sm-6 text-right">
+                    @include('persuratan._legacy-sync-button')
                     @if(auth()->user()->canCreateSuratMasuk())
                         <button class="btn btn-add-surat" data-toggle="modal" data-target="#createModal">
                             <i class="fas fa-plus mr-1"></i> Add Surat Masuk
@@ -995,7 +1010,7 @@
 
     <!-- Create Modal -->
     <div class="modal fade" id="createModal" tabindex="-1" role="dialog">
-        <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable" role="document">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title"><i class="fas fa-plus-circle mr-2"></i>Tambah Surat Masuk</h5>
@@ -1084,15 +1099,12 @@
                             </div>
                         </div>
 
-                        <div class="agenda-pimpinan-box">
+                        <div class="agenda-option">
                             <div class="custom-control custom-checkbox">
                                 <input type="checkbox" class="custom-control-input" id="createAgendaPimpinan" name="agenda_pimpinan" value="1">
                                 <label class="custom-control-label font-weight-bold" for="createAgendaPimpinan">
-                                    Jadikan sebagai agenda pimpinan
+                                    Agenda Pimpinan
                                 </label>
-                            </div>
-                            <div class="agenda-pimpinan-note">
-                                Jika dicentang, sistem akan otomatis membuat agenda pimpinan dari surat masuk ini dan mengirim notifikasi ke role Protokoler untuk mengatur peserta kegiatan.
                             </div>
                             <div class="agenda-pimpinan-fields" id="createAgendaPimpinanFields">
                                 <div class="form-row">
@@ -1108,6 +1120,46 @@
                                 <div class="form-group mb-0">
                                     <label>Tempat <span class="text-danger">*</span></label>
                                     <input type="text" class="form-control agenda-required" name="agenda_tempat" id="createAgendaTempat" placeholder="Tempat kegiatan">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="agenda-option">
+                            <div class="custom-control custom-checkbox">
+                                <input type="checkbox" class="custom-control-input" id="createVirtualMeeting" name="agenda_virtual" value="1">
+                                <label class="custom-control-label font-weight-bold" for="createVirtualMeeting">
+                                    Agenda Virtual
+                                </label>
+                            </div>
+                            <div class="agenda-pimpinan-fields" id="createVirtualMeetingFields">
+                                <div class="form-row">
+                                    <div class="form-group col-md-4">
+                                        <label>Tanggal Pelaksanaan <span class="text-danger">*</span></label>
+                                        <input type="date" class="form-control virtual-required" name="virtual_tanggal_kegiatan" value="{{ date('Y-m-d') }}">
+                                    </div>
+                                    <div class="form-group col-md-4">
+                                        <label>Mulai (WIT) <span class="text-danger">*</span></label>
+                                        <input type="time" class="form-control virtual-required" name="virtual_waktu_mulai" step="60" value="{{ now()->timezone('Asia/Jayapura')->format('H:i') }}">
+                                    </div>
+                                    <div class="form-group col-md-4">
+                                        <label>Selesai (WIT)</label>
+                                        <input type="time" class="form-control" name="virtual_waktu_selesai" step="60">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label>Link Zoom <span class="text-danger">*</span></label>
+                                    <input type="url" class="form-control virtual-required" name="virtual_zoom_link" placeholder="https://zoom.us/j/...">
+                                </div>
+                                <div class="form-group mb-0">
+                                    <label>Peserta <span class="text-danger">*</span></label>
+                                    <select class="form-control select2" name="virtual_participant_ids[]" id="createVirtualParticipants" multiple>
+                                        @foreach($virtualMeetingUsers as $meetingUser)
+                                            <option value="{{ $meetingUser->id }}">
+                                                {{ $meetingUser->name }}{{ $meetingUser->jabatan ? ' - ' . $meetingUser->jabatan->nama : '' }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                    <small class="form-text text-muted">Ketik nama atau jabatan untuk mencari peserta.</small>
                                 </div>
                             </div>
                         </div>
@@ -1441,6 +1493,22 @@
                                         <textarea class="form-control" id="tindakLanjutCatatan" rows="4"
                                             placeholder="Isi catatan tindak lanjut surat" required></textarea>
                                     </div>
+                                    <div class="form-group">
+                                        <label for="tindakLanjutTautan">Link Dokumentasi</label>
+                                        <input type="url" class="form-control" id="tindakLanjutTautan"
+                                            name="tautan_tindak_lanjut" maxlength="2048"
+                                            placeholder="https://contoh.go.id/dokumentasi">
+                                        <small class="form-text text-muted">Opsional. Gunakan link yang diawali http:// atau https://.</small>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="tindakLanjutDokumentasi">File Dokumentasi</label>
+                                        <div class="custom-file">
+                                            <input type="file" class="custom-file-input" id="tindakLanjutDokumentasi"
+                                                name="dokumentasi[]" accept=".jpg,.jpeg,.png,.webp,.pdf,.docx" multiple>
+                                            <label class="custom-file-label" for="tindakLanjutDokumentasi">Pilih file</label>
+                                        </div>
+                                        <small class="form-text text-muted">Maksimal 5 file, masing-masing 10 MB. Format: gambar, PDF, atau DOCX.</small>
+                                    </div>
                                     <div class="history-panel">
                                         <div class="history-panel-title">
                                             <i class="fas fa-history mr-1 text-primary"></i> Riwayat Surat
@@ -1564,6 +1632,19 @@
                     if (item.catatan_tindak_lanjut) {
                         html += '<div class="history-note"><strong>Tindak Lanjut:</strong> ' + item.catatan_tindak_lanjut + '</div>';
                     }
+                    if (item.tautan_tindak_lanjut) {
+                        html += '<div class="history-note"><strong>Link:</strong> ';
+                        html += '<a href="' + escapeHtml(item.tautan_tindak_lanjut) + '" target="_blank" rel="noopener noreferrer">';
+                        html += '<i class="fas fa-link mr-1"></i>Buka dokumentasi</a></div>';
+                    }
+                    if (item.dokumentasi && item.dokumentasi.length) {
+                        html += '<div class="history-note"><strong>Dokumentasi:</strong><div class="mt-1">';
+                        item.dokumentasi.forEach(function (file) {
+                            html += '<a href="' + escapeHtml(file.preview_url) + '" target="_blank" rel="noopener" class="btn btn-xs btn-outline-primary mr-1 mb-1">';
+                            html += '<i class="fas fa-paperclip mr-1"></i>' + escapeHtml(file.nama) + ' <span class="text-muted">(' + escapeHtml(file.ukuran) + ')</span></a>';
+                        });
+                        html += '</div></div>';
+                    }
                     html += '<div class="history-meta"><i class="fas fa-clock mr-1"></i>' + item.waktu + ' (' + item.waktu_human + ')</div>';
                     html += '</div>';
                 });
@@ -1652,6 +1733,20 @@
             $('#createAgendaPimpinan').on('change', toggleCreateAgendaFields);
             toggleCreateAgendaFields();
 
+            function toggleCreateVirtualMeetingFields() {
+                const checked = $('#createVirtualMeeting').is(':checked');
+                $('#createVirtualMeetingFields').stop(true, true)[checked ? 'slideDown' : 'slideUp']();
+                $('#createVirtualMeetingFields .virtual-required').prop('required', checked);
+
+                if (!checked) {
+                    $('#createVirtualMeetingFields input[type="url"], #createVirtualMeetingFields input[name="virtual_waktu_selesai"]').val('');
+                    $('#createVirtualParticipants').val(null).trigger('change');
+                }
+            }
+
+            $('#createVirtualMeeting').on('change', toggleCreateVirtualMeetingFields);
+            toggleCreateVirtualMeetingFields();
+
             // Create form
             $('#createForm').on('submit', function (e) {
                 e.preventDefault();
@@ -1679,6 +1774,8 @@
                         toggleCreateSuratCategory();
                         $('#createAgendaPimpinan').prop('checked', false);
                         toggleCreateAgendaFields();
+                        $('#createVirtualMeeting').prop('checked', false);
+                        toggleCreateVirtualMeetingFields();
                         location.reload();
                     },
                     error: function (xhr) {
@@ -1779,16 +1876,18 @@
                 e.preventDefault();
                 let disposisiId = $('#tindakLanjutDisposisiId').val();
                 let btn = $('#btnTindakLanjutSubmit');
+                let formData = new FormData(this);
+                formData.append('_method', 'PATCH');
+                formData.append('status', 'ditindaklanjuti');
+                formData.append('catatan_tindak_lanjut', $('#tindakLanjutCatatan').val());
                 btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin mr-1"></i> Menyimpan...');
 
                 $.ajax({
                     url: '/disposisi/' + disposisiId + '/status',
-                    method: 'PATCH',
-                    data: {
-                        _token: '{{ csrf_token() }}',
-                        status: 'ditindaklanjuti',
-                        catatan_tindak_lanjut: $('#tindakLanjutCatatan').val()
-                    },
+                    method: 'POST',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
                     success: function (res) {
                         showToast(res.message, 'success');
                         $('#tindakLanjutModal').modal('hide');
@@ -1962,6 +2061,12 @@
                 $('#disposisiTarget').html('<option value="">Gagal memuat data</option>');
             });
 
+            $('#tindakLanjutDokumentasi').on('change', function () {
+                const count = this.files.length;
+                const label = count === 0 ? 'Pilih file' : (count === 1 ? this.files[0].name : count + ' file dipilih');
+                $(this).next('.custom-file-label').text(label);
+            });
+
             $('#disposisiModal').modal('show');
         }
 
@@ -1975,6 +2080,7 @@
             }
 
             $('#tindakLanjutForm')[0].reset();
+            $('#tindakLanjutDokumentasi').next('.custom-file-label').text('Pilih file');
             $('#tindakLanjutDisposisiId').val(d.pendingDisposisiId);
             window.renderSuratHistory(String(suratId), '#tindakLanjutHistory');
 

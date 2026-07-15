@@ -30,7 +30,18 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        //
+        spl_autoload_register(function ($class) {
+            $prefix = 'Picqer\\Barcode\\';
+            if (strpos($class, $prefix) !== 0) {
+                return;
+            }
+
+            $relative = substr($class, strlen($prefix));
+            $path = app_path('Support/PicqerBarcode/' . str_replace('\\', '/', $relative) . '.php');
+            if (is_file($path)) {
+                require_once $path;
+            }
+        });
     }
 
     /**
@@ -45,6 +56,10 @@ class AppServiceProvider extends ServiceProvider
         Carbon::setFallbackLocale(config('app.fallback_locale', 'id'));
 
         setlocale(LC_TIME, 'id_ID.UTF-8', 'id_ID', 'id', 'Indonesian_indonesia.1252', 'IND');
+
+        View::composer('library.*', function ($view) {
+            $view->with('canManageLibrary', Auth::check() && Auth::user()->canManageLibraryModule());
+        });
 
         View::composer('layouts.app', function ($view) {
             $counts = [

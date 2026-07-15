@@ -11,6 +11,48 @@
             border: 1px solid #e8eaed;
         }
 
+        .surat-keluar-filter-bar {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 14px;
+            padding: 5px;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            background: #ffffff;
+            box-shadow: 0 6px 18px rgba(15, 23, 42, 0.05);
+        }
+
+        .surat-filter-btn {
+            min-height: 36px;
+            padding: 7px 16px;
+            border: 0;
+            border-radius: 8px;
+            background: transparent;
+            color: #64748b;
+            font-size: 0.82rem;
+            font-weight: 700;
+            transition: background 0.18s ease, color 0.18s ease, box-shadow 0.18s ease;
+        }
+
+        .surat-filter-btn:hover {
+            color: #4f46e5;
+            background: #f5f3ff;
+        }
+
+        .surat-filter-btn.active {
+            color: #ffffff;
+            background: linear-gradient(135deg, #6366f1, #4f46e5);
+            box-shadow: 0 5px 12px rgba(79, 70, 229, 0.22);
+        }
+
+        #suratKeluarList.is-loading {
+            min-height: 220px;
+            opacity: 0.55;
+            pointer-events: none;
+            transition: opacity 0.15s ease;
+        }
+
         .surat-keluar-card .card-header {
             background: white;
             border-bottom: 1px solid #f3f4f6;
@@ -632,6 +674,17 @@
                 width: 100%;
                 justify-content: center;
             }
+
+            .surat-keluar-filter-bar {
+                display: grid;
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+                width: 100%;
+            }
+
+            .surat-filter-btn {
+                min-width: 0;
+                padding-inline: 8px;
+            }
         }
 
     </style>
@@ -651,7 +704,8 @@
                     </h1>
                 </div>
                 <div class="col-sm-6 text-right">
-                    <?php if($canManageSuratKeluar): ?>
+                    @include('persuratan._legacy-sync-button')
+                    <?php if($canCreateSuratKeluar): ?>
                         <button class="btn btn-add-surat" data-toggle="modal" data-target="#createModal">
                             <i class="fas fa-plus mr-1"></i> Add Surat Keluar
                         </button>
@@ -669,106 +723,18 @@
         </div>
     @endif
 
-    <div class="card surat-keluar-card">
-        <div class="card-body">
-            <div class="table-responsive surat-keluar-table-wrap">
-            <table id="suratKeluarTable" class="table surat-keluar-style" style="width:100%">
-                <thead>
-                    <tr>
-                        <th style="width: 3%;"></th>
-                        <th style="width: 20%;">Nomor Surat</th>
-                        <th style="width: 24%;">Perihal/Isi Ringkas</th>
-                        <th style="width: 20%;">Tujuan / Penerima</th>
-                        <th style="width: 10%;">Tanggal Surat</th>
-                        <th style="width: 10%;">Diinput Tanggal</th>
-                        <th style="width: 8%;">Lampiran</th>
-                        <th style="width: 8%;">Dibuat Oleh</th>
-                        <th style="width: 7%;">Status</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php $__currentLoopData = $suratKeluar; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $surat): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                        <tr class="main-row" data-surat-id="<?php echo e($surat->id); ?>"
-                            data-update-url="<?php echo e(route('surat-keluar.update', $surat)); ?>"
-                            data-delete-url="<?php echo e(route('surat-keluar.destroy', $surat)); ?>"
-                            data-file-url="<?php echo e(($surat->file_path || $surat->templateApproval || $surat->rapat || $surat->leaveRequest || ($surat->pdf_verifications_count ?? 0) > 0) ? route('surat-keluar.file', $surat) : ''); ?>"
-                            data-creator="<?php echo e($surat->creator->name); ?>"
-                            data-tahun-surat="<?php echo e($surat->tahun_surat); ?>"
-                            data-nomenklatur-jabatan="<?php echo e($surat->nomenklatur_jabatan); ?>"
-                            data-klasifikasi-kode="<?php echo e($surat->klasifikasi_kode_id); ?>"
-                            data-kategori-surat="<?php echo e($surat->kategori_surat_id); ?>"
-                            data-kode-fungsi="<?php echo e($surat->kode_fungsi_id); ?>"
-                            data-kode-kegiatan="<?php echo e($surat->kode_kegiatan_id); ?>"
-                            data-kode-transaksi="<?php echo e($surat->kode_transaksi_id); ?>"
-                            data-opsi-penerima="<?php echo e($surat->opsi_penerima); ?>"
-                            data-penerima-external="<?php echo e($surat->penerima_external); ?>"
-                            data-penerima-internal="<?php echo e($surat->penerimaInternal->pluck('id')->implode(',')); ?>"
-                            data-perihal="<?php echo e($surat->perihal); ?>"
-                            data-tanggal-surat="<?php echo e($surat->tanggal_surat->format('Y-m-d')); ?>"
-                            data-has-lampiran="<?php echo e($surat->has_lampiran ? 'ya' : 'tidak'); ?>"
-                            data-can-manage="<?php echo e($canManageSuratKeluar ? 1 : 0); ?>">
-                            <td>
-                                <button type="button" class="btn-expand dt-expand">
-                                    <i class="fas fa-plus" style="font-size: 10px;"></i>
-                                </button>
-                            </td>
-                            <td>
-                                <div class="nomor-surat-text"><?php echo e($surat->nomor_surat_formatted); ?></div>
-                                <div class="nomor-kode"><?php echo e($surat->deskripsi_kode ?: '-'); ?></div>
-                            </td>
-                            <td>
-                                <div class="perihal-text"><?php echo e(Str::limit($surat->perihal, 65)); ?></div>
-                            </td>
-                            <td>
-                                <span class="recipient-pill <?php echo e($surat->opsi_penerima == 'internal' ? 'internal' : 'external'); ?>">
-                                    <?php echo e($surat->opsi_penerima == 'internal' ? 'Internal' : 'External'); ?>
-                                </span>
-                                <?php if($surat->opsi_penerima == 'internal'): ?>
-                                    <button type="button" class="recipient-name recipient-count-btn js-recipient-modal"
-                                        data-surat-id="<?php echo e($surat->id); ?>"
-                                        data-nomor-surat="<?php echo e($surat->nomor_surat_formatted); ?>">
-                                        <?php echo e($surat->penerima_internal_count ?? $surat->penerimaInternal->count()); ?> orang
-                                    </button>
-                                <?php else: ?>
-                                    <div class="recipient-name">
-                                        <?php echo e(Str::limit($surat->penerima_external ?: '-', 36)); ?>
-                                    </div>
-                                <?php endif; ?>
-                            </td>
-                            <td>
-                                <?php echo e($surat->tanggal_surat->format('Y-m-d')); ?>
-                            </td>
-                            <td>
-                                <?php echo e($surat->created_at->format('y-m-d')); ?>
-                            </td>
-                            <td>
-                                <?php if($surat->file_path || $surat->templateApproval || $surat->rapat || $surat->leaveRequest || ($surat->pdf_verifications_count ?? 0) > 0): ?>
-                                    <a href="javascript:void(0)" class="lampiran-badge exists"
-                                        onclick="viewFile('<?php echo e(route('surat-keluar.file', $surat)); ?>')">Berkas</a>
-                                <?php else: ?>
-                                    <span class="lampiran-badge empty">Kosong</span>
-                                <?php endif; ?>
-                            </td>
-                            <td class="creator-text"><?php echo e($surat->creator->name); ?></td>
-                            <td>
-                                {!! $surat->status_badge !!}
-                            </td>
-                        </tr>
-                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
-                </tbody>
-            </table>
-            </div>
-            <?php if(method_exists($suratKeluar, 'links')): ?>
-                <div class="d-flex justify-content-between align-items-center flex-wrap mt-3">
-                    <div class="text-muted small mb-2 mb-md-0">
-                        Menampilkan <?php echo e($suratKeluar->firstItem() ?: 0); ?> - <?php echo e($suratKeluar->lastItem() ?: 0); ?> dari <?php echo e($suratKeluar->total()); ?> surat
-                    </div>
-                    <div>
-                        <?php echo $suratKeluar->links(); ?>
-                    </div>
-                </div>
-            <?php endif; ?>
-        </div>
+    <div class="surat-keluar-filter-bar" role="group" aria-label="Filter surat keluar">
+        @foreach(['semua' => 'Semua', 'dibuat' => 'Dibuat', 'terkait' => 'Terkait'] as $filterValue => $filterLabel)
+            <button type="button"
+                class="surat-filter-btn {{ $activeFilter === $filterValue ? 'active' : '' }}"
+                data-filter="{{ $filterValue }}">
+                {{ $filterLabel }}
+            </button>
+        @endforeach
+    </div>
+
+    <div id="suratKeluarList">
+        @include('surat-keluar._list')
     </div>
 
     <!-- Create Modal -->
@@ -1058,7 +1024,7 @@
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title"><i class="fas fa-upload mr-2"></i>Upload Lampiran</h5>
+                    <h5 class="modal-title"><i class="fas fa-upload mr-2"></i>Upload Berkas Surat</h5>
                     <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
                 </div>
                 <form id="uploadForm" enctype="multipart/form-data">
@@ -1066,10 +1032,12 @@
                     <div class="modal-body">
                         <input type="hidden" name="surat_id" id="uploadSuratId">
                         <div class="form-group">
-                            <label>File Lampiran <span class="text-danger">*</span></label>
+                            <label>Berkas Surat <span class="text-danger">*</span></label>
                             <input type="file" class="form-control-file" name="file" required
-                                accept=".pdf,.doc,.docx,.jpg,.jpeg,.png">
-                            <small class="text-muted">PDF, DOC, DOCX, JPG, PNG (maks. 10MB)</small>
+                                accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.jpg,.jpeg,.png,.webp,.txt,.csv,.zip,.rar">
+                            <small class="text-muted d-block mt-1">
+                                Dokumen, gambar, spreadsheet, presentasi, teks, atau arsip ZIP/RAR (maks. 10 MB).
+                            </small>
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -1089,7 +1057,13 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title"><i class="fas fa-file mr-2"></i>Lihat Berkas</h5>
-                    <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+                    <div class="d-flex align-items-center">
+                        <a href="#" id="openSuratKeluarFile" target="_blank" rel="noopener"
+                            class="btn btn-sm btn-outline-primary mr-2">
+                            <i class="fas fa-external-link-alt mr-1"></i>Buka / Unduh
+                        </a>
+                        <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+                    </div>
                 </div>
                 <div class="modal-body text-center">
                     <iframe id="fileViewer"
@@ -1128,8 +1102,8 @@
 
     <script>
         $(document).ready(function () {
-            const canManageSuratKeluar = <?php echo json_encode($canManageSuratKeluar, 15, 512) ?>;
-            const recipientMap = <?php echo json_encode($suratKeluar->getCollection()->mapWithKeys(function ($surat) {
+            const canCreateSuratKeluar = <?php echo json_encode($canCreateSuratKeluar, 15, 512) ?>;
+            let recipientMap = <?php echo json_encode($suratKeluar->getCollection()->mapWithKeys(function ($surat) {
                 return [
                     $surat->id => $surat->penerimaInternal->map(function ($user) {
                         return [
@@ -1163,24 +1137,85 @@
                 }).join('');
             }
 
-            // Initialize DataTable
-            const table = $('#suratKeluarTable').DataTable({
-                order: [],
-                paging: false,
-                info: false,
-                lengthChange: false,
-                autoWidth: false,
-                language: {
-                    search: "Search:",
-                    lengthMenu: "Show _MENU_ entries",
-                    info: "Showing _START_ to _END_ of _TOTAL_ entries",
-                    infoEmpty: "No entries found",
-                    emptyTable: '<div class="text-center py-4"><i class="fas fa-paper-plane fa-3x mb-3 d-block" style="opacity:0.2;color:#9ca3af;"></i><span style="color: #9ca3af;">Tidak ada surat keluar</span></div>',
-                    paginate: { first: "First", last: "Last", next: "Next", previous: "Previous" }
-                },
-                columnDefs: [
-                    { orderable: false, targets: [0] }
-                ]
+            function initializeSuratKeluarTable() {
+                return $('#suratKeluarTable').DataTable({
+                    order: [],
+                    paging: false,
+                    info: false,
+                    lengthChange: false,
+                    autoWidth: false,
+                    language: {
+                        search: "Search:",
+                        lengthMenu: "Show _MENU_ entries",
+                        info: "Showing _START_ to _END_ of _TOTAL_ entries",
+                        infoEmpty: "No entries found",
+                        emptyTable: '<div class="text-center py-4"><i class="fas fa-paper-plane fa-3x mb-3 d-block" style="opacity:0.2;color:#9ca3af;"></i><span style="color: #9ca3af;">Tidak ada surat keluar</span></div>',
+                        paginate: { first: "First", last: "Last", next: "Next", previous: "Previous" }
+                    },
+                    columnDefs: [
+                        { orderable: false, targets: [0] }
+                    ]
+                });
+            }
+
+            let table = initializeSuratKeluarTable();
+            let listRequest = null;
+
+            function loadSuratKeluarList(url, filter) {
+                const list = $('#suratKeluarList');
+                filter = filter || $('.surat-filter-btn.active').data('filter') || 'semua';
+
+                if (listRequest) {
+                    listRequest.abort();
+                }
+
+                list.addClass('is-loading');
+                $('.surat-filter-btn').prop('disabled', true);
+
+                listRequest = $.ajax({
+                    url: url,
+                    method: 'GET',
+                    data: filter ? { filter: filter } : {},
+                    success: function (response) {
+                        if (table) {
+                            table.destroy();
+                        }
+
+                        list.html(response.html);
+                        recipientMap = response.recipient_map || {};
+                        table = initializeSuratKeluarTable();
+
+                        $('.surat-filter-btn')
+                            .removeClass('active')
+                            .filter('[data-filter="' + response.filter + '"]')
+                            .addClass('active');
+
+                        const currentUrl = new URL(url, window.location.origin);
+                        currentUrl.searchParams.set('filter', response.filter);
+                        window.history.replaceState({}, '', currentUrl.pathname + currentUrl.search);
+                    },
+                    error: function (xhr, status) {
+                        if (status === 'abort') {
+                            return;
+                        }
+                        showToast(xhr.responseJSON?.message || 'Daftar surat keluar gagal dimuat.', 'error');
+                    },
+                    complete: function () {
+                        listRequest = null;
+                        list.removeClass('is-loading');
+                        $('.surat-filter-btn').prop('disabled', false);
+                    }
+                });
+            }
+
+            $(document).on('click', '.surat-filter-btn', function () {
+                const filter = $(this).data('filter');
+                loadSuratKeluarList('<?php echo e(route('surat-keluar.index')); ?>', filter);
+            });
+
+            $(document).on('click', '#suratKeluarList .pagination a', function (event) {
+                event.preventDefault();
+                loadSuratKeluarList($(this).attr('href'));
             });
 
             function formatDetailRow(data) {
@@ -1201,7 +1236,7 @@
                     '</div>';
             }
 
-            $('#suratKeluarTable tbody').on('click', '.dt-expand', function () {
+            $(document).on('click', '#suratKeluarTable tbody .dt-expand', function () {
                 const tr = $(this).closest('tr');
                 const btn = $(this);
                 const icon = btn.find('i');
@@ -1220,7 +1255,7 @@
                 }
             });
 
-            $('#suratKeluarTable tbody').on('click', '.js-recipient-modal', function () {
+            $(document).on('click', '#suratKeluarTable tbody .js-recipient-modal', function () {
                 const suratId = $(this).data('suratId');
                 const nomorSurat = $(this).data('nomorSurat') || '-';
                 const recipients = recipientMap[suratId] || [];
@@ -1412,7 +1447,7 @@
 
             $('#createForm').on('submit', function (e) {
                 e.preventDefault();
-                if (!canManageSuratKeluar) {
+                if (!canCreateSuratKeluar) {
                     showToast('Anda tidak memiliki akses untuk membuat surat keluar.', 'warning');
                     return;
                 }
@@ -1452,11 +1487,12 @@
 
             $('#editForm').on('submit', function (e) {
                 e.preventDefault();
-                if (!canManageSuratKeluar) {
+                const suratId = $('#editSuratId').val();
+                const row = $('tr[data-surat-id="' + suratId + '"]');
+                if (Number(row.data('canManage')) !== 1) {
                     showToast('Anda tidak memiliki akses untuk mengubah surat keluar.', 'warning');
                     return;
                 }
-                const suratId = $('#editSuratId').val();
                 let btn = $('#btnEditSubmit');
                 btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin mr-1"></i> Memperbarui...');
 
@@ -1486,12 +1522,12 @@
             });
 
             window.openEdit = function (suratId) {
-                if (!canManageSuratKeluar) {
+                const row = $('tr[data-surat-id="' + suratId + '"]');
+                if (Number(row.data('canManage')) !== 1) {
                     showToast('Anda tidak memiliki akses untuk mengubah surat keluar.', 'warning');
                     return;
                 }
 
-                const row = $('tr[data-surat-id="' + suratId + '"]');
                 const data = row.data();
                 const penerimaInternal = String(data.penerimaInternal || '')
                     .split(',')
@@ -1561,7 +1597,7 @@
                 applyKodeHierarchy('create', {});
             });
 
-            if (suratTemplatePrefill && canManageSuratKeluar) {
+            if (suratTemplatePrefill && canCreateSuratKeluar) {
                 $('input[name="tahun_surat"]', '#createForm').val(suratTemplatePrefill.tahun_surat || new Date().getFullYear());
                 $('textarea[name="perihal"]', '#createForm').val(suratTemplatePrefill.perihal || suratTemplatePrefill.template_name || 'Template Surat');
                 $('input[name="tanggal_surat"]', '#createForm').val(suratTemplatePrefill.tanggal_surat || '');
@@ -1594,11 +1630,13 @@
 
             $('#viewFileModal').on('hidden.bs.modal', function () {
                 $('#fileViewer').attr('src', 'about:blank');
+                $('#openSuratKeluarFile').attr('href', '#');
             });
         });
 
         function openUpload(suratId) {
-            if (!<?php echo json_encode($canManageSuratKeluar, 15, 512) ?>) {
+            const row = $('tr[data-surat-id="' + suratId + '"]');
+            if (Number(row.data('canManage')) !== 1) {
                 showToast('Anda tidak memiliki akses untuk mengupload lampiran.', 'warning');
                 return;
             }
@@ -1612,11 +1650,13 @@
                 return;
             }
             $('#fileViewer').attr('src', url);
+            $('#openSuratKeluarFile').attr('href', url);
             $('#viewFileModal').modal('show');
         }
 
         function deleteSurat(id, url) {
-            if (!<?php echo json_encode($canManageSuratKeluar, 15, 512) ?>) {
+            const row = $('tr[data-surat-id="' + id + '"]');
+            if (Number(row.data('canManage')) !== 1) {
                 showToast('Anda tidak memiliki akses untuk menghapus surat.', 'warning');
                 return;
             }

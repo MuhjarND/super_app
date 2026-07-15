@@ -17,13 +17,20 @@ class WhatsAppNotificationLog extends Model
         'target_name',
         'phone_number',
         'message',
+        'fingerprint',
         'status',
+        'scheduled_at',
+        'attempted_at',
+        'attempt_count',
         'response_body',
         'created_by',
         'sent_at',
     ];
 
     protected $casts = [
+        'scheduled_at' => 'datetime',
+        'attempted_at' => 'datetime',
+        'attempt_count' => 'integer',
         'sent_at' => 'datetime',
     ];
 

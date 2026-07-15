@@ -379,18 +379,7 @@ class LeaveDocumentService
 
     protected function nextLetterSequence()
     {
-        $suratKeluarMax = (int) (SuratKeluar::max('nomor_urut') ?: 0);
-        $leaveMax = 0;
-
-        LeaveRequest::whereNotNull('letter_number')
-            ->pluck('letter_number')
-            ->each(function ($number) use (&$leaveMax) {
-                if (preg_match('#^(\d+)/KPTA\.W31-A/KP5\.3/[IVXLCDM]+/\d{4}$#', (string) $number, $matches)) {
-                    $leaveMax = max($leaveMax, (int) $matches[1]);
-                }
-            });
-
-        return max($suratKeluarMax, $leaveMax) + 1;
+        return SuratKeluar::nextNomorUrut();
     }
 
     protected function buildDecisionPdfContent(LeaveRequest $leaveRequest)

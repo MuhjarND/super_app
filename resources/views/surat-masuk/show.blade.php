@@ -342,6 +342,28 @@
                                             class="fas fa-flag text-danger mr-1"></i>{{ $disposisi->catatan_tindak_lanjut }}</small>
                                 </div>
                             @endif
+                            @if($disposisi->tautan_tindak_lanjut)
+                                <div class="mt-2 p-2" style="background: #f0fdf4; border-radius: 6px;">
+                                    <a href="{{ $disposisi->tautan_tindak_lanjut }}" target="_blank"
+                                        rel="noopener noreferrer" class="small font-weight-bold">
+                                        <i class="fas fa-link text-success mr-1"></i>Buka link dokumentasi
+                                    </a>
+                                </div>
+                            @endif
+                            @if($disposisi->dokumentasis->isNotEmpty())
+                                <div class="mt-2 p-2" style="background: #eff6ff; border-radius: 6px;">
+                                    <small class="d-block font-weight-bold mb-1">
+                                        <i class="fas fa-paperclip text-primary mr-1"></i>Dokumentasi
+                                    </small>
+                                    @foreach($disposisi->dokumentasis as $dokumentasi)
+                                        <a href="{{ route('disposisi.dokumentasi.preview', $dokumentasi) }}"
+                                            target="_blank" rel="noopener" class="btn btn-xs btn-outline-primary mr-1 mb-1">
+                                            <i class="fas fa-file mr-1"></i>{{ $dokumentasi->original_name }}
+                                            <span class="text-muted">({{ $dokumentasi->formatted_size }})</span>
+                                        </a>
+                                    @endforeach
+                                </div>
+                            @endif
                             <small class="text-muted mt-1 d-block">
                                 <i class="fas fa-clock mr-1"></i>{{ $disposisi->created_at->format('d/m/Y H:i') }}
                                 ({{ $disposisi->created_at->diffForHumans() }})
@@ -379,6 +401,52 @@
             <a href="{{ route('surat-masuk.index') }}" class="btn btn-secondary btn-block surat-masuk-back-btn">
                 <i class="fas fa-arrow-left mr-1"></i> Kembali ke Daftar
             </a>
+        </div>
+    </div>
+
+    <div class="modal fade" id="followUpDokumentasiModal" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <form id="followUpDokumentasiForm" enctype="multipart/form-data">
+                    @csrf
+                    <input type="hidden" id="followUpDisposisiId">
+                    <div class="modal-header">
+                        <h5 class="modal-title"><i class="fas fa-clipboard-check mr-2 text-primary"></i>Selesaikan Tindak Lanjut</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Tutup">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label for="followUpCatatan">Catatan Tindak Lanjut <span class="text-danger">*</span></label>
+                            <textarea class="form-control" id="followUpCatatan" rows="4"
+                                placeholder="Jelaskan hasil tindak lanjut" required></textarea>
+                        </div>
+                        <div class="form-group mb-0">
+                            <label for="followUpTautan">Link Dokumentasi</label>
+                            <input type="url" class="form-control" id="followUpTautan"
+                                name="tautan_tindak_lanjut" maxlength="2048"
+                                placeholder="https://contoh.go.id/dokumentasi">
+                            <small class="form-text text-muted">Opsional. Gunakan link yang diawali http:// atau https://.</small>
+                        </div>
+                        <div class="form-group mt-3 mb-0">
+                            <label for="followUpDokumentasi">File Dokumentasi</label>
+                            <div class="custom-file">
+                                <input type="file" class="custom-file-input" id="followUpDokumentasi"
+                                    name="dokumentasi[]" accept=".jpg,.jpeg,.png,.webp,.pdf,.docx" multiple>
+                                <label class="custom-file-label" for="followUpDokumentasi">Pilih file</label>
+                            </div>
+                            <small class="form-text text-muted">Maksimal 5 file, masing-masing 10 MB. Format: gambar, PDF, atau DOCX.</small>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-primary" id="btnFollowUpDokumentasi">
+                            <i class="fas fa-check mr-1"></i>Simpan Tindak Lanjut
+                        </button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 @endsection
@@ -454,17 +522,13 @@
                 let id = $(this).data('id');
                 let status = $(this).data('status');
                 let btn = $(this);
-                let catatanTindakLanjut = '';
 
                 if (status === 'ditindaklanjuti') {
-                    catatanTindakLanjut = window.prompt('Masukkan catatan tindak lanjut:', '');
-                    if (catatanTindakLanjut === null) {
-                        return;
-                    }
-                    if (!catatanTindakLanjut.trim()) {
-                        showToast('Catatan tindak lanjut wajib diisi.', 'error');
-                        return;
-                    }
+                    $('#followUpDokumentasiForm')[0].reset();
+                    $('#followUpDokumentasi').next('.custom-file-label').text('Pilih file');
+                    $('#followUpDisposisiId').val(id);
+                    $('#followUpDokumentasiModal').modal('show');
+                    return;
                 }
 
                 btn.prop('disabled', true);
@@ -474,8 +538,7 @@
                     method: 'PATCH',
                     data: {
                         _token: '{{ csrf_token() }}',
-                        status: status,
-                        catatan_tindak_lanjut: catatanTindakLanjut
+                        status: status
                     },
                     success: function (res) {
                         showToast(res.message, 'success');
@@ -484,6 +547,48 @@
                     error: function (xhr) {
                         showToast('Gagal memperbarui status.', 'error');
                         btn.prop('disabled', false);
+                    }
+                });
+            });
+
+            $('#followUpDokumentasi').on('change', function () {
+                const count = this.files.length;
+                const label = count === 0 ? 'Pilih file' : (count === 1 ? this.files[0].name : count + ' file dipilih');
+                $(this).next('.custom-file-label').text(label);
+            });
+
+            $('#followUpDokumentasiForm').on('submit', function (event) {
+                event.preventDefault();
+
+                const disposisiId = $('#followUpDisposisiId').val();
+                const btn = $('#btnFollowUpDokumentasi');
+                const formData = new FormData(this);
+                formData.append('_method', 'PATCH');
+                formData.append('status', 'ditindaklanjuti');
+                formData.append('catatan_tindak_lanjut', $('#followUpCatatan').val());
+
+                btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin mr-1"></i>Menyimpan...');
+
+                $.ajax({
+                    url: '/disposisi/' + disposisiId + '/status',
+                    method: 'POST',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function (res) {
+                        showToast(res.message, 'success');
+                        $('#followUpDokumentasiModal').modal('hide');
+                        setTimeout(() => location.reload(), 1000);
+                    },
+                    error: function (xhr) {
+                        const errors = xhr.responseJSON?.errors;
+                        const message = errors
+                            ? Object.values(errors).flat().join('<br>')
+                            : (xhr.responseJSON?.message || 'Gagal menyimpan tindak lanjut.');
+                        showToast(message, 'error');
+                    },
+                    complete: function () {
+                        btn.prop('disabled', false).html('<i class="fas fa-check mr-1"></i>Simpan Tindak Lanjut');
                     }
                 });
             });

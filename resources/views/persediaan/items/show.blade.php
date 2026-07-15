@@ -3,6 +3,7 @@
 @section('title', 'Detail Barang Alat dan Mesin')
 
 @php
+    $canManageInventory = auth()->user()->canManageInventoryModule();
     $detailCount = $inventoryItem->details->count();
     $activeDetailCount = $inventoryItem->details->where('is_active', true)->count();
     $inactiveDetailCount = $detailCount - $activeDetailCount;
@@ -175,6 +176,7 @@
             </div>
 
             <div class="row">
+                @if($canManageInventory)
                 <div class="col-lg-4 mb-4">
                     <div class="inventory-module-panel mb-3">
                         <div class="inventory-module-panel-header">
@@ -287,8 +289,9 @@
                         </div>
                     </div>
                 </div>
+                @endif
 
-                <div class="col-lg-8 mb-4">
+                <div class="{{ $canManageInventory ? 'col-lg-8' : 'col-12' }} mb-4">
                     <div class="inventory-module-panel mb-4">
                         <div class="inventory-module-panel-header d-flex justify-content-between align-items-center">
                             <div class="inventory-module-panel-title"><i class="fas fa-layer-group text-muted mr-1" style="font-size:.78rem"></i> Sub Barang</div>

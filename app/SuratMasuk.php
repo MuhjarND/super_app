@@ -77,6 +77,11 @@ class SuratMasuk extends Model
         return $this->hasOne(AgendaPimpinan::class, 'surat_masuk_id');
     }
 
+    public function virtualMeeting()
+    {
+        return $this->hasOne(VirtualMeeting::class, 'surat_masuk_id');
+    }
+
     public function getNomorSuratLengkapAttribute()
     {
         $klasifikasi = $this->klasifikasiKode ? $this->klasifikasiKode->kode . ' / ' : '';

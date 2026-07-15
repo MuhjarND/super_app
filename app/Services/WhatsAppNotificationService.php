@@ -6,6 +6,7 @@ use App\AppSetting;
 use App\AgendaPimpinan;
 use App\LeaveApproval;
 use App\LeaveRequest;
+use App\InventoryMaintenanceSchedule;
 use App\Rapat;
 use App\RapatApproval;
 use App\SupplyRequest;
@@ -13,6 +14,7 @@ use App\SuratKeluar;
 use App\SuratKeluarApproval;
 use App\User;
 use App\Voting;
+use App\VirtualMeeting;
 use App\WhatsAppNotificationLog;
 use App\ZiActivity;
 use App\ZiActivityApproval;
@@ -38,7 +40,21 @@ class WhatsAppNotificationService
     {
         $normalizedPhone = $this->normalizePhoneNumber($phoneNumber);
         $message = $this->withNotificationHeader($message, $context);
-        $log = $this->createLog($normalizedPhone, $message, $context);
+        $fingerprint = $this->fingerprint($normalizedPhone, $message, $context);
+
+        if ($this->isDuplicate($fingerprint)) {
+            Log::info('[WA Notification] Duplicate notification suppressed.', [
+                'module' => $context['module'] ?? 'general',
+                'event' => $context['event'] ?? 'message',
+                'phone_number' => $normalizedPhone,
+            ]);
+
+            return true;
+        }
+
+        $log = $this->createLog($normalizedPhone, $message, array_merge($context, [
+            'fingerprint' => $fingerprint,
+        ]));
 
         if (!$this->isEnabled()) {
             $log->update([
@@ -58,6 +74,15 @@ class WhatsAppNotificationService
             return false;
         }
 
+        if (!$this->isValidPhoneNumber($normalizedPhone)) {
+            $log->update([
+                'status' => 'skipped',
+                'response_body' => 'Nomor WhatsApp tidak memenuhi format nomor internasional yang didukung.',
+            ]);
+
+            return false;
+        }
+
         if (empty($this->apiUrl) || empty($this->apiKey)) {
             Log::info('[WA Notification] API not configured. Message to ' . $normalizedPhone . ': ' . $message);
             $log->update([
@@ -68,23 +93,84 @@ class WhatsAppNotificationService
             return false;
         }
 
+        $now = Carbon::now('Asia/Jayapura');
+        if ($this->applyWorkingTime($now)->greaterThan($now)) {
+            $log->update([
+                'status' => 'skipped',
+                'response_body' => 'Pesan tidak dikirim karena berada di luar jam operasional WhatsApp.',
+            ]);
+
+            return false;
+        }
+
+        if ($limitReason = $this->rateLimitReason($normalizedPhone, $now)) {
+            $log->update([
+                'status' => 'skipped',
+                'response_body' => $limitReason,
+            ]);
+
+            return false;
+        }
+
+        $log->update([
+            'status' => 'queued',
+            'scheduled_at' => $now,
+            'response_body' => 'Pesan disiapkan untuk pengiriman langsung.',
+        ]);
+
+        $this->waitForMinimumInterval();
+
+        return $this->deliver($log->fresh());
+    }
+
+    public function deliver(WhatsAppNotificationLog $log)
+    {
+        if ($log->status !== 'queued') {
+            return $log->status === 'sent';
+        }
+
+        if (!$this->isEnabled() || !$this->isConfigured() || !$this->isValidPhoneNumber($log->phone_number)) {
+            $log->update([
+                'status' => 'skipped',
+                'response_body' => 'Pengiriman dibatalkan karena layanan nonaktif, konfigurasi tidak lengkap, atau nomor tidak valid.',
+            ]);
+
+            return false;
+        }
+
+        $now = Carbon::now('Asia/Jayapura');
+        $allowedAt = $this->applyWorkingTime($now);
+        if ($allowedAt->greaterThan($now)) {
+            $log->update(['scheduled_at' => $allowedAt]);
+            return true;
+        }
+
+        $log->update([
+            'status' => 'sending',
+            'attempted_at' => $now,
+            'attempt_count' => $log->attempt_count + 1,
+        ]);
+
         try {
             $response = Http::withHeaders([
                 'Authorization' => $this->apiKey,
-            ])->post($this->apiUrl, [
-                'target' => $normalizedPhone,
-                'message' => $message,
+            ])->timeout(max(5, (int) config('services.whatsapp.http_timeout', 15)))
+            ->post($this->apiUrl, [
+                'target' => $log->phone_number,
+                'message' => $log->message,
             ]);
+
+            $accepted = $this->providerAccepted($response);
 
             $log->update([
-                'status' => $response->successful() ? 'sent' : 'failed',
+                'status' => $accepted ? 'sent' : 'failed',
                 'response_body' => (string) $response->body(),
-                'sent_at' => Carbon::now('Asia/Jayapura'),
+                'sent_at' => $accepted ? Carbon::now('Asia/Jayapura') : null,
             ]);
 
-            Log::info('[WA Notification] Sent to ' . $normalizedPhone . ': ' . ($response->successful() ? 'Success' : 'Failed'));
+            Log::info('[WA Notification] Delivery to ' . $log->phone_number . ': ' . ($accepted ? 'Success' : 'Failed'));
 
-            return $response->successful();
+            return $accepted;
         } catch (\Throwable $e) {
             $log->update([
                 'status' => 'failed',
@@ -709,6 +795,45 @@ class WhatsAppNotificationService
         ]);
     }
 
+    public function notifyVirtualMeetingParticipants(VirtualMeeting $meeting)
+    {
+        $meeting->loadMissing(['participants.jabatan', 'suratMasuk']);
+
+        $lines = [
+            'Yth. Bapak/Ibu Peserta,',
+            'Dengan hormat, Anda diundang untuk mengikuti agenda virtual berikut.',
+            '',
+            'Agenda: ' . $meeting->judul,
+            'Tanggal: ' . $meeting->tanggal_formatted,
+            'Waktu: ' . $meeting->waktu_mulai_formatted . ' WIT' . ($meeting->waktu_selesai ? ' - ' . $meeting->waktu_selesai_formatted . ' WIT' : ''),
+            'Tautan Zoom: ' . $meeting->zoom_link,
+        ];
+
+        if ($meeting->catatan) {
+            $lines[] = 'Catatan: ' . $meeting->catatan;
+        }
+
+        if ($meeting->suratMasuk) {
+            $lines[] = 'Nomor Surat: ' . $meeting->suratMasuk->nomor_surat;
+        }
+
+        $lines[] = '';
+        $lines[] = 'Mohon hadir tepat waktu dan memastikan perangkat serta koneksi internet telah siap sebelum kegiatan dimulai.';
+        $lines[] = 'Informasi agenda dapat ditinjau melalui tautan berikut:';
+        $lines[] = route('rapat.virtual-meeting.index');
+
+        $result = $this->sendBulk($meeting->participants, $this->wrap($lines), [
+            'module' => 'virtual_meeting',
+            'event' => 'participant_invitation',
+            'notifiable_type' => get_class($meeting),
+            'notifiable_id' => $meeting->id,
+        ]);
+
+        $meeting->forceFill(['last_notified_at' => Carbon::now('Asia/Jayapura')])->save();
+
+        return $result;
+    }
+
     public function notifyVotingParticipants(Voting $voting)
     {
         $voting->loadMissing(['participantPivots.user', 'items']);
@@ -777,6 +902,35 @@ class WhatsAppNotificationService
             'event' => 'supply_request_submitted',
             'notifiable_type' => get_class($supplyRequest),
             'notifiable_id' => $supplyRequest->id,
+        ]);
+    }
+
+    public function notifyInventoryMaintenanceDue(InventoryMaintenanceSchedule $schedule, User $targetUser)
+    {
+        $schedule->loadMissing(['item', 'detail.room']);
+        $item = $schedule->item;
+        $detail = $schedule->detail;
+
+        $message = $this->wrap([
+            'Yth. ' . ($targetUser->display_jabatan ?: 'Bapak/Ibu') . ',',
+            'Dengan hormat, disampaikan bahwa jadwal perawatan alat dan mesin berikut telah jatuh tempo.',
+            '',
+            'Barang: ' . ($item ? trim(($item->code ?: '') . ' - ' . $item->name, ' -') : '-'),
+            'Sub Barang: ' . ($detail ? trim(($detail->sub_code ?: $detail->nup ?: '') . ' - ' . $detail->name, ' -') : '-'),
+            'Lokasi: ' . (optional(optional($detail)->room)->name ?: '-'),
+            'Waktu Perawatan: ' . $this->formatDateTimeValue($schedule->scheduled_at),
+            'Keterangan: ' . trim(preg_replace('/\s+/', ' ', (string) $schedule->description)),
+            '',
+            'Mohon dilakukan monitoring dan koordinasi pelaksanaan perawatan sesuai jadwal tersebut.',
+            'Detail jadwal dapat ditinjau melalui tautan berikut:',
+            route('perawatan-alat-mesin.schedules.index'),
+        ]);
+
+        return $this->sendToUser($targetUser, $message, [
+            'module' => 'perawatan',
+            'event' => 'maintenance_schedule_due',
+            'notifiable_type' => get_class($schedule),
+            'notifiable_id' => $schedule->id,
         ]);
     }
 
@@ -886,9 +1040,133 @@ class WhatsAppNotificationService
             'target_name' => $context['target_name'] ?? null,
             'phone_number' => $phoneNumber,
             'message' => $message,
+            'fingerprint' => $context['fingerprint'] ?? null,
             'status' => 'queued',
+            'scheduled_at' => $context['scheduled_at'] ?? null,
             'created_by' => auth()->id(),
         ]);
+    }
+
+    protected function fingerprint($phoneNumber, $message, array $context)
+    {
+        $stableMessage = preg_replace('/https?:\/\/[^\s]+/i', '[url]', (string) $message);
+        $stableMessage = trim(preg_replace('/\s+/', ' ', $stableMessage));
+
+        return hash('sha256', implode('|', [
+            (string) $phoneNumber,
+            (string) ($context['module'] ?? 'general'),
+            (string) ($context['event'] ?? 'message'),
+            (string) ($context['notifiable_type'] ?? ''),
+            (string) ($context['notifiable_id'] ?? ''),
+            (string) ($context['target_user_id'] ?? ''),
+            $stableMessage,
+        ]));
+    }
+
+    protected function isDuplicate($fingerprint)
+    {
+        $minutes = max(1, (int) config('services.whatsapp.deduplicate_minutes', 10));
+
+        return WhatsAppNotificationLog::where('fingerprint', $fingerprint)
+            ->whereIn('status', ['queued', 'sending', 'sent'])
+            ->where('created_at', '>=', Carbon::now('Asia/Jayapura')->subMinutes($minutes))
+            ->exists();
+    }
+
+    protected function rateLimitReason($phoneNumber, Carbon $now)
+    {
+        $activeStatuses = ['sending', 'sent'];
+
+        $dailyCount = WhatsAppNotificationLog::whereIn('status', $activeStatuses)
+            ->where('created_at', '>=', $now->copy()->startOfDay())
+            ->count();
+        if ($dailyCount >= max(1, (int) config('services.whatsapp.max_per_day', 150))) {
+            return 'Pesan tidak dikirim karena batas pengiriman WhatsApp harian telah tercapai.';
+        }
+
+        $hourlyCount = WhatsAppNotificationLog::whereIn('status', $activeStatuses)
+            ->where('created_at', '>=', $now->copy()->subHour())
+            ->count();
+        if ($hourlyCount >= max(1, (int) config('services.whatsapp.max_per_hour', 30))) {
+            return 'Pesan tidak dikirim karena batas pengiriman WhatsApp per jam telah tercapai.';
+        }
+
+        $recipientHourlyCount = WhatsAppNotificationLog::where('phone_number', $phoneNumber)
+            ->whereIn('status', $activeStatuses)
+            ->where('created_at', '>=', $now->copy()->subHour())
+            ->count();
+        if ($recipientHourlyCount >= max(1, (int) config('services.whatsapp.max_per_phone_hour', 5))) {
+            return 'Pesan tidak dikirim karena batas pengiriman ke nomor tujuan per jam telah tercapai.';
+        }
+
+        return null;
+    }
+
+    protected function waitForMinimumInterval()
+    {
+        $lastAttempt = WhatsAppNotificationLog::whereNotNull('attempted_at')
+            ->orderByDesc('attempted_at')
+            ->value('attempted_at');
+
+        if (!$lastAttempt) {
+            return;
+        }
+
+        $interval = max(1, (int) config('services.whatsapp.minimum_interval_seconds', 20));
+        $elapsed = Carbon::now('Asia/Jayapura')->timestamp
+            - Carbon::parse($lastAttempt, 'Asia/Jayapura')->timestamp;
+        $remaining = $interval - max(0, $elapsed);
+
+        if ($remaining > 0) {
+            sleep($remaining);
+        }
+    }
+
+    protected function applyWorkingTime(Carbon $time)
+    {
+        $candidate = $time->copy()->timezone('Asia/Jayapura');
+        $startHour = max(0, min(23, (int) config('services.whatsapp.work_start_hour', 0)));
+        $endHour = max($startHour + 1, min(24, (int) config('services.whatsapp.work_end_hour', 24)));
+        $workDays = collect(explode(',', (string) config('services.whatsapp.work_days', '1,2,3,4,5,6,7')))
+            ->map(function ($day) { return (int) trim($day); })
+            ->filter(function ($day) { return $day >= 1 && $day <= 7; })
+            ->values()
+            ->all();
+
+        if (empty($workDays)) {
+            $workDays = [1, 2, 3, 4, 5, 6, 7];
+        }
+
+        if ($candidate->hour < $startHour) {
+            $candidate->setTime($startHour, 0, 0);
+        } elseif ($candidate->hour >= $endHour) {
+            $candidate->addDay()->setTime($startHour, 0, 0);
+        }
+
+        while (!in_array($candidate->dayOfWeekIso, $workDays, true)) {
+            $candidate->addDay()->setTime($startHour, 0, 0);
+        }
+
+        return $candidate;
+    }
+
+    protected function isValidPhoneNumber($phoneNumber)
+    {
+        return (bool) preg_match('/^62[0-9]{8,13}$/', (string) $phoneNumber);
+    }
+
+    protected function providerAccepted($response)
+    {
+        if (!$response->successful()) {
+            return false;
+        }
+
+        $payload = $response->json();
+        if (!is_array($payload) || !array_key_exists('status', $payload)) {
+            return true;
+        }
+
+        return filter_var($payload['status'], FILTER_VALIDATE_BOOLEAN);
     }
 
     protected function wrap(array $lines)
@@ -919,8 +1197,10 @@ class WhatsAppNotificationService
             'progress_zi' => 'PROGRESS ZI',
             'rapat' => 'RAPAT',
             'agenda_pimpinan' => 'AGENDA PIMPINAN',
+            'virtual_meeting' => 'VIRTUAL MEETING',
             'voting' => 'E-VOTING',
             'persediaan' => 'PERSEDIAAN',
+            'perawatan' => 'PERAWATAN ALAT DAN MESIN',
             'master_data' => 'MASTER DATA',
             'general' => 'UMUM',
         ];

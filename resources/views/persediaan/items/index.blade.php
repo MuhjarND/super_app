@@ -3,6 +3,7 @@
 @section('title', 'Master Barang Alat dan Mesin')
 
 @php
+    $canManageInventory = auth()->user()->canManageInventoryModule();
     $itemStats = [
         'total' => $items->total(),
         'active' => $items->getCollection()->where('is_active', true)->count(),
@@ -90,6 +91,7 @@
         </div>
 
         <div class="row">
+            @if($canManageInventory)
             <div class="col-lg-4 mb-3">
                 <div class="inventory-module-panel h-100">
                     <div class="inventory-module-panel-header">
@@ -119,8 +121,9 @@
                     </div>
                 </div>
             </div>
+            @endif
 
-            <div class="col-lg-8 mb-3">
+            <div class="{{ $canManageInventory ? 'col-lg-8' : 'col-12' }} mb-3">
                 <div class="inventory-module-panel h-100">
                     <div class="inventory-module-panel-header d-flex justify-content-between align-items-center flex-wrap gap-2">
                         <div class="inventory-module-panel-title"><i class="fas fa-list text-muted mr-1" style="font-size:.82rem"></i> Daftar Barang</div>
@@ -147,7 +150,7 @@
                                         </td>
                                         <td data-label="Sub"><span class="inventory-module-chip">{{ $item->details_count }}</span></td>
                                         <td data-label="Status">{!! $item->status_badge !!}</td>
-                                        <td data-label=""><a href="{{ route('perawatan-alat-mesin.items.show', $item) }}" class="btn btn-sm btn-outline-primary" title="Kelola"><i class="fas fa-arrow-right"></i></a></td>
+                                        <td data-label=""><a href="{{ route('perawatan-alat-mesin.items.show', $item) }}" class="btn btn-sm btn-outline-primary" title="{{ $canManageInventory ? 'Kelola' : 'Detail' }}"><i class="fas fa-arrow-right"></i></a></td>
                                     </tr>
                                 @empty
                                     <tr><td colspan="5" class="text-center py-4"><div class="inventory-module-empty border-0 bg-transparent p-0"><i class="far fa-folder-open"></i> Belum ada barang</div></td></tr>

@@ -392,6 +392,26 @@ class User extends Authenticatable
         return $this->isMeetingAdmin() || $this->isMeetingProtokoler();
     }
 
+    public function virtualMeetings()
+    {
+        return $this->belongsToMany(VirtualMeeting::class, 'virtual_meeting_user')
+            ->withPivot('urutan')
+            ->withTimestamps();
+    }
+
+    public function canManageVirtualMeetings()
+    {
+        return $this->isSuperAdmin()
+            || $this->isMeetingAdmin()
+            || $this->isMeetingOperator()
+            || $this->isMeetingProtokoler();
+    }
+
+    public function canAccessVirtualMeetings()
+    {
+        return $this->canManageVirtualMeetings() || $this->virtualMeetings()->exists();
+    }
+
     public function canManageVoting()
     {
         if ($this->isSuperAdmin()) {
@@ -506,6 +526,7 @@ class User extends Authenticatable
     public function canAccessIntegratedCalendar()
     {
         return $this->canAccessMeetingModule()
+            || $this->canAccessVirtualMeetings()
             || $this->canAccessLeaveModule()
             || $this->canAccessProgressZiModule()
             || $this->canAccessInventoryModule();
@@ -641,6 +662,7 @@ class User extends Authenticatable
         }
 
         return $this->hasAnyRole([
+            'operator_siperlatin',
             'admin',
             'sekretaris',
             'panitera',
@@ -654,29 +676,24 @@ class User extends Authenticatable
 
     public function canManageInventoryMasterData()
     {
-        if ($this->isSuperAdmin()) {
-            return true;
-        }
-
-        return $this->hasAnyRole([
-            'admin',
-            'sekretaris',
-            'kabag',
-            'kasubag',
-        ]);
+        return $this->canManageInventoryModule();
     }
 
     public function canManageInventoryTransactions()
     {
-        if ($this->canManageInventoryMasterData()) {
-            return true;
-        }
+        return $this->canManageInventoryModule();
+    }
 
-        return $this->hasAnyRole([
-            'panmud',
-            'pegawai',
-            'peserta',
-        ]);
+    public function canManageInventoryModule()
+    {
+        return $this->isSuperAdmin()
+            || $this->hasRole('operator_siperlatin')
+            || $this->hasJabatanKode(['KASUBAG_TURT', 'KASUBAG_LAPKEU']);
+    }
+
+    public function canScheduleInventoryMaintenance()
+    {
+        return $this->isSuperAdmin() || $this->hasRole('operator_siperlatin');
     }
 
     public function canAccessSupplyModule()
@@ -696,6 +713,23 @@ class User extends Authenticatable
             'pegawai',
             'peserta',
         ]);
+    }
+
+    public function canAccessLibraryModule()
+    {
+        if ($this->isSuperAdmin() || $this->hasRole('operator_perpustakaan')) {
+            return true;
+        }
+
+        return $this->hasAnyRole([
+            'sekretaris', 'panitera', 'kabag', 'kasubag', 'panmud',
+            'pegawai', 'peserta', 'operator', 'notulis', 'protokoler',
+        ]);
+    }
+
+    public function canManageLibraryModule()
+    {
+        return $this->isSuperAdmin() || $this->hasRole('operator_perpustakaan');
     }
 
     public function canManageSupplyModule()
@@ -982,6 +1016,23 @@ class User extends Authenticatable
     public function canManageSuratKeluar()
     {
         return $this->isSuperAdmin() || $this->hasJabatanKode(['KASUBAG_TURT', 'KASUBAG_KEPEG', 'KABAG_KEPEG']);
+    }
+
+    public function canCreateSuratKeluar()
+    {
+        if ($this->canManageSuratKeluar()) {
+            return true;
+        }
+
+        return $this->effectiveJabatans()->contains(function ($jabatan) {
+            return $jabatan && (bool) preg_match('/^(KASUBAG|PANMUD)_/', (string) $jabatan->kode);
+        });
+    }
+
+    public function canModifySuratKeluar($suratKeluar)
+    {
+        return $this->canManageSuratKeluar()
+            || ($suratKeluar && (int) $suratKeluar->created_by === (int) $this->id);
     }
 
     public function canNaikanSuratMasuk()

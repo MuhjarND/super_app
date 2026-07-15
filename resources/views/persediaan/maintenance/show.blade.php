@@ -2,6 +2,10 @@
 
 @section('title', 'History Transaksi Perawatan')
 
+@php
+    $canManageInventory = auth()->user()->canManageInventoryModule();
+@endphp
+
 @section('content-header')
 <div class="container-fluid">
     <div class="inventory-module-hero d-flex justify-content-between align-items-center flex-wrap gap-3">
@@ -243,9 +247,11 @@
                             <span class="inventory-module-chip">{{ $inventoryItemDetail->maintenanceTransactions->count() }}</span>
                         </div>
                         <div class="inventory-module-panel-body">
+                            @if($canManageInventory)
                             <div class="history-action-row">
                                 <button type="button" class="btn app-create-btn btn-sm" data-toggle="modal" data-target="#maintenanceCreateModal"><i class="fas fa-plus mr-1"></i> Tambah</button>
                             </div>
+                            @endif
 
                             <div class="table-responsive">
                                 <table class="table table-bordered history-table mb-0">
@@ -256,7 +262,7 @@
                                             <th>Keterangan</th>
                                             <th>Nominal</th>
                                             <th><i class="fas fa-paperclip"></i></th>
-                                            <th width="100"></th>
+                                            @if($canManageInventory)<th width="100"></th>@endif
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -280,6 +286,7 @@
                                                         <span class="text-muted">-</span>
                                                     @endif
                                                 </td>
+                                                @if($canManageInventory)
                                                 <td class="text-right" data-label="Aksi">
                                                     <div class="d-flex flex-wrap justify-content-end" style="gap: 6px;">
                                                         <button
@@ -301,10 +308,11 @@
                                                         </form>
                                                     </div>
                                                 </td>
+                                                @endif
                                             </tr>
                                         @empty
                                             <tr>
-                                                <td colspan="6"><div class="inventory-module-empty"><i class="far fa-folder-open" style="margin-right:4px"></i> Belum ada transaksi</div></td>
+                                                <td colspan="{{ $canManageInventory ? 6 : 5 }}"><div class="inventory-module-empty"><i class="far fa-folder-open" style="margin-right:4px"></i> Belum ada transaksi</div></td>
                                             </tr>
                                         @endforelse
                                     </tbody>
@@ -318,6 +326,7 @@
     </div>
 </div>
 
+@if($canManageInventory)
 <div class="modal fade" id="maintenanceCreateModal" tabindex="-1" role="dialog" aria-hidden="true">
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
@@ -432,6 +441,7 @@
         </div>
     </div>
 </div>
+@endif
 
 <div class="modal fade" id="attachmentPreviewModal" tabindex="-1" role="dialog" aria-hidden="true">
     <div class="modal-dialog modal-xl modal-dialog-scrollable" role="document">

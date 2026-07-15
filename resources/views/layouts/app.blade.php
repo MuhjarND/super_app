@@ -17,6 +17,10 @@
         rel="stylesheet">
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    @if(request()->routeIs('library.*'))
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+        @include('library.partials.styles')
+    @endif
     <!-- AdminLTE -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/css/adminlte.min.css">
     <!-- Select2 -->
@@ -3333,13 +3337,14 @@
                             </li>
                         @endif
 
-                        @if($isSidebarSuperAdmin || $sidebarUser->canAccessMeetingModule())
+                        @if($isSidebarSuperAdmin || $sidebarUser->canAccessMeetingModule() || $sidebarUser->canAccessVirtualMeetings())
                             <li class="nav-section " data-section="rapat">
                                 <button type="button" class="nav-section-toggle {{ ($sidebarNotulensiFollowUpCount ?? 0) > 0 ? 'has-alert' : '' }}">
                                     <span>Rapat / Agenda</span>
                                     <i class="fas fa-chevron-down section-chevron"></i>
                                 </button>
                                 <ul class="nav nav-pills flex-column nav-section-menu">
+                                    @if($isSidebarSuperAdmin || $sidebarUser->canAccessMeetingModule())
                                     <li class="nav-item nav-item-sub">
                                         <a href="{{ route('rapat.index') }}"
                                             class="nav-link {{ request()->routeIs('rapat.index') ? 'active' : '' }}">
@@ -3393,12 +3398,30 @@
                                             </a>
                                         </li>
                                     @endif
+                                    @if($isSidebarSuperAdmin || $sidebarUser->canAccessVirtualMeetings())
+                                        <li class="nav-item nav-item-sub">
+                                            <a href="{{ route('rapat.virtual-meeting.index') }}"
+                                                class="nav-link {{ request()->routeIs('rapat.virtual-meeting.*') ? 'active' : '' }}">
+                                                <i class="nav-icon fas fa-video"></i>
+                                                <p>Virtual Meeting</p>
+                                            </a>
+                                        </li>
+                                    @endif
                                     @if($isSidebarSuperAdmin || $sidebarUser->canManageVoting())
                                         <li class="nav-item nav-item-sub">
                                             <a href="{{ route('rapat.voting.index') }}"
                                                 class="nav-link {{ request()->routeIs('rapat.voting.*') ? 'active' : '' }}">
                                                 <i class="nav-icon fas fa-poll"></i>
                                                 <p>E-Voting</p>
+                                            </a>
+                                        </li>
+                                    @endif
+                                    @elseif($sidebarUser->canAccessVirtualMeetings())
+                                        <li class="nav-item nav-item-sub">
+                                            <a href="{{ route('rapat.virtual-meeting.index') }}"
+                                                class="nav-link {{ request()->routeIs('rapat.virtual-meeting.*') ? 'active' : '' }}">
+                                                <i class="nav-icon fas fa-video"></i>
+                                                <p>Virtual Meeting</p>
                                             </a>
                                         </li>
                                     @endif
@@ -3508,6 +3531,13 @@
                                         </a>
                                     </li>
                                     <li class="nav-item nav-item-sub">
+                                        <a href="{{ route('perawatan-alat-mesin.schedules.index') }}"
+                                            class="nav-link {{ request()->routeIs('perawatan-alat-mesin.schedules.*') ? 'active' : '' }}">
+                                            <i class="nav-icon far fa-calendar-check"></i>
+                                            <p>Jadwal Perawatan</p>
+                                        </a>
+                                    </li>
+                                    <li class="nav-item nav-item-sub">
                                         <a href="{{ route('perawatan-alat-mesin.reports.index') }}"
                                             class="nav-link {{ request()->routeIs('perawatan-alat-mesin.reports.*') ? 'active' : '' }}">
                                             <i class="nav-icon fas fa-file-invoice-dollar"></i>
@@ -3561,6 +3591,30 @@
                                 </ul>
                             </li>
 
+                        @endif
+
+                        @if($isSidebarSuperAdmin || $sidebarUser->canAccessLibraryModule())
+                            <li class="nav-section" data-section="perpustakaan">
+                                <button type="button" class="nav-section-toggle">
+                                    <span>Perpustakaan</span>
+                                    <i class="fas fa-chevron-down section-chevron"></i>
+                                </button>
+                                <ul class="nav nav-pills flex-column nav-section-menu">
+                                    <li class="nav-item nav-item-sub"><a href="{{ route('library.index') }}" class="nav-link {{ request()->routeIs('library.index') ? 'active' : '' }}"><i class="nav-icon fas fa-chart-pie"></i><p>Dashboard</p></a></li>
+                                    <li class="nav-item nav-item-sub"><a href="{{ route('library.books.index') }}" class="nav-link {{ request()->routeIs('library.books.*') ? 'active' : '' }}"><i class="nav-icon fas fa-book"></i><p>Data Buku</p></a></li>
+                                    <li class="nav-item nav-item-sub"><a href="{{ route('library.book-copies.index') }}" class="nav-link {{ request()->routeIs('library.book-copies.*') ? 'active' : '' }}"><i class="nav-icon fas fa-copy"></i><p>Eksemplar</p></a></li>
+                                    <li class="nav-item nav-item-sub"><a href="{{ route('library.members.index') }}" class="nav-link {{ request()->routeIs('library.members.*') ? 'active' : '' }}"><i class="nav-icon fas fa-users"></i><p>Anggota</p></a></li>
+                                    <li class="nav-item nav-item-sub"><a href="{{ route('library.loans.index') }}" class="nav-link {{ request()->routeIs('library.loans.*') ? 'active' : '' }}"><i class="nav-icon fas fa-exchange-alt"></i><p>Peminjaman</p></a></li>
+                                    <li class="nav-item nav-item-sub"><a href="{{ route('library.returns.index') }}" class="nav-link {{ request()->routeIs('library.returns.*') ? 'active' : '' }}"><i class="nav-icon fas fa-undo-alt"></i><p>Pengembalian</p></a></li>
+                                    <li class="nav-item nav-item-sub"><a href="{{ route('library.fines.index') }}" class="nav-link {{ request()->routeIs('library.fines.*') ? 'active' : '' }}"><i class="nav-icon fas fa-coins"></i><p>Denda</p></a></li>
+                                    <li class="nav-item nav-item-sub"><a href="{{ route('library.barcode.index') }}" class="nav-link {{ request()->routeIs('library.barcode.*') ? 'active' : '' }}"><i class="nav-icon fas fa-barcode"></i><p>Barcode</p></a></li>
+                                    <li class="nav-item nav-item-sub"><a href="{{ route('library.scan.index') }}" class="nav-link {{ request()->routeIs('library.scan.*') ? 'active' : '' }}"><i class="nav-icon fas fa-camera"></i><p>Scan Kamera</p></a></li>
+                                    <li class="nav-item nav-item-sub"><a href="{{ route('library.reports.index') }}" class="nav-link {{ request()->routeIs('library.reports.*') ? 'active' : '' }}"><i class="nav-icon fas fa-file-alt"></i><p>Laporan</p></a></li>
+                                    @if($isSidebarSuperAdmin || $sidebarUser->canManageLibraryModule())
+                                        <li class="nav-item nav-item-sub"><a href="{{ route('library.settings.index') }}" class="nav-link {{ request()->routeIs('library.settings.*') ? 'active' : '' }}"><i class="nav-icon fas fa-cog"></i><p>Pengaturan</p></a></li>
+                                    @endif
+                                </ul>
+                            </li>
                         @endif
 
                         @if($isSidebarSuperAdmin || $sidebarUser->canAccessSupplyModule())
@@ -3746,7 +3800,7 @@
             @yield('content-header')
 
             <section class="content">
-                <div class="container-fluid">
+                <div class="container-fluid{{ request()->routeIs('library.*') ? ' library-module' : '' }}">
                     @yield('content')
                 </div>
             </section>
@@ -4589,6 +4643,9 @@
         });
     </script>
 
+    @if(request()->routeIs('library.*'))
+        <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+    @endif
     @stack('scripts')
 </body>
 

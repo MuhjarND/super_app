@@ -3,12 +3,15 @@
 namespace App\Http\Controllers;
 
 use App\Disposisi;
+use App\DisposisiDokumentasi;
 use App\SuratMasuk;
 use App\Jabatan;
 use App\User;
 use App\Services\ActivityAuditService;
 use App\Services\WhatsAppNotificationService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 
 class DisposisiController extends Controller
@@ -16,7 +19,10 @@ class DisposisiController extends Controller
     protected $waService;
     protected $auditService;
 
-    public function __construct(WhatsAppNotificationService $waService, ActivityAuditService $auditService)
+    public function __construct(
+        WhatsAppNotificationService $waService,
+        ActivityAuditService $auditService
+    )
     {
         $this->middleware('auth');
         $this->waService = $waService;
@@ -155,6 +161,18 @@ class DisposisiController extends Controller
 
         if ($request->status === 'ditindaklanjuti') {
             $rules['catatan_tindak_lanjut'] = 'required|string';
+            $rules['tautan_tindak_lanjut'] = [
+                'nullable',
+                'url',
+                'max:2048',
+                function ($attribute, $value, $fail) {
+                    if ($value && !preg_match('/^https?:\/\//i', $value)) {
+                        $fail('Link dokumentasi harus menggunakan http atau https.');
+                    }
+                },
+            ];
+            $rules['dokumentasi'] = 'nullable|array|max:5';
+            $rules['dokumentasi.*'] = 'file|mimes:jpg,jpeg,png,webp,pdf,docx|max:10240';
         } else {
             $rules['catatan_tindak_lanjut'] = 'nullable|string';
         }
@@ -162,31 +180,63 @@ class DisposisiController extends Controller
         $request->validate($rules);
 
         $oldStatus = $disposisi->status;
+        $storedPaths = [];
 
-        $disposisi->update([
-            'status' => $request->status,
-            'read_at' => in_array($request->status, ['dibaca', 'diproses', 'ditindaklanjuti'], true)
-                ? ($disposisi->read_at ?: now('Asia/Jayapura'))
-                : $disposisi->read_at,
-            'completed_at' => $request->status === 'ditindaklanjuti'
-                ? now('Asia/Jayapura')
-                : null,
-            'catatan_tindak_lanjut' => $request->status === 'ditindaklanjuti'
-                ? $request->catatan_tindak_lanjut
-                : $disposisi->catatan_tindak_lanjut,
-        ]);
+        DB::beginTransaction();
 
-        if ($request->status == 'ditindaklanjuti') {
-            // Check if all dispositions are resolved
-            $suratMasuk = $disposisi->suratMasuk;
-            $allResolved = !$suratMasuk->disposisis()
-                ->where('status', '!=', 'ditindaklanjuti')
-                ->exists();
+        try {
+            $disposisi->update([
+                'status' => $request->status,
+                'read_at' => in_array($request->status, ['dibaca', 'diproses', 'ditindaklanjuti'], true)
+                    ? ($disposisi->read_at ?: now('Asia/Jayapura'))
+                    : $disposisi->read_at,
+                'completed_at' => $request->status === 'ditindaklanjuti'
+                    ? now('Asia/Jayapura')
+                    : null,
+                'catatan_tindak_lanjut' => $request->status === 'ditindaklanjuti'
+                    ? $request->catatan_tindak_lanjut
+                    : $disposisi->catatan_tindak_lanjut,
+                'tautan_tindak_lanjut' => $request->status === 'ditindaklanjuti'
+                    ? $request->tautan_tindak_lanjut
+                    : $disposisi->tautan_tindak_lanjut,
+            ]);
 
-            if ($allResolved) {
-                $suratMasuk->update(['status' => 'selesai']);
+            if ($request->status === 'ditindaklanjuti') {
+                foreach ($request->file('dokumentasi', []) as $file) {
+                    $path = $file->store('surat-masuk/tindak-lanjut/' . $disposisi->id, 'local');
+                    $storedPaths[] = $path;
+
+                    $disposisi->dokumentasis()->create([
+                        'uploaded_by' => auth()->id(),
+                        'file_path' => $path,
+                        'original_name' => $file->getClientOriginalName(),
+                        'mime_type' => $file->getMimeType(),
+                        'file_size' => $file->getSize(),
+                    ]);
+                }
+
+                $suratMasuk = $disposisi->suratMasuk;
+                $allResolved = !$suratMasuk->disposisis()
+                    ->where('status', '!=', 'ditindaklanjuti')
+                    ->exists();
+
+                if ($allResolved) {
+                    $suratMasuk->update(['status' => 'selesai']);
+                }
             }
+
+            DB::commit();
+        } catch (\Throwable $exception) {
+            DB::rollBack();
+
+            foreach ($storedPaths as $path) {
+                Storage::disk('local')->delete($path);
+            }
+
+            throw $exception;
         }
+
+        $disposisi->load('dokumentasis');
 
         $this->auditService->log('persuratan', 'disposisi_status_updated', $disposisi, [
             'subject_type' => 'surat_masuk',
@@ -198,14 +248,49 @@ class DisposisiController extends Controller
             'new_values_json' => [
                 'status' => $disposisi->status,
                 'completed_at' => optional($disposisi->completed_at)->toDateTimeString(),
+                'tautan_tindak_lanjut' => $disposisi->tautan_tindak_lanjut,
+                'dokumentasi' => $disposisi->dokumentasis->pluck('original_name')->values()->all(),
             ],
             'note' => $request->catatan_tindak_lanjut,
         ]);
 
         return response()->json([
             'success' => true,
-            'message' => 'Status disposisi berhasil diperbarui.',
+            'message' => $request->status === 'ditindaklanjuti'
+                ? 'Tindak lanjut dan dokumentasi berhasil disimpan.'
+                : 'Status disposisi berhasil diperbarui.',
         ]);
+    }
+
+    public function previewDokumentasi(DisposisiDokumentasi $dokumentasi)
+    {
+        $this->authorizeDokumentasi($dokumentasi);
+
+        abort_unless(Storage::disk('local')->exists($dokumentasi->file_path), 404, 'Dokumentasi tidak ditemukan.');
+
+        $safeName = str_replace(['"', "\r", "\n"], '', $dokumentasi->original_name);
+
+        return response()->file(Storage::disk('local')->path($dokumentasi->file_path), [
+            'Content-Type' => $dokumentasi->mime_type ?: 'application/octet-stream',
+            'Content-Disposition' => 'inline; filename="' . $safeName . '"',
+            'X-Content-Type-Options' => 'nosniff',
+        ]);
+    }
+
+    public function downloadDokumentasi(DisposisiDokumentasi $dokumentasi)
+    {
+        $this->authorizeDokumentasi($dokumentasi);
+        abort_unless(Storage::disk('local')->exists($dokumentasi->file_path), 404, 'Dokumentasi tidak ditemukan.');
+
+        return Storage::disk('local')->download($dokumentasi->file_path, $dokumentasi->original_name);
+    }
+
+    protected function authorizeDokumentasi(DisposisiDokumentasi $dokumentasi)
+    {
+        $dokumentasi->loadMissing('disposisi.suratMasuk');
+        $suratMasuk = optional($dokumentasi->disposisi)->suratMasuk;
+
+        abort_unless($suratMasuk && auth()->user()->canViewSuratMasuk($suratMasuk), 403);
     }
 
     public function remind(Disposisi $disposisi)

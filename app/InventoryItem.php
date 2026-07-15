@@ -27,6 +27,11 @@ class InventoryItem extends Model
         return $this->hasMany(InventoryMaintenanceTransaction::class)->latest('transaction_date');
     }
 
+    public function maintenanceSchedules()
+    {
+        return $this->hasMany(InventoryMaintenanceSchedule::class)->latest('scheduled_at');
+    }
+
     public function getStatusBadgeAttribute()
     {
         return '<span class="badge badge-' . ($this->is_active ? 'success' : 'secondary') . ' app-status-badge">' . ($this->is_active ? 'Aktif' : 'Nonaktif') . '</span>';

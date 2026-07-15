@@ -26,7 +26,7 @@ class IntegratedCalendarController extends Controller
                 'scope' => request('scope', 'all'),
                 'unit_id' => request('unit_id'),
                 'status' => request('status'),
-                'modules' => request()->has('modules') ? (array) request('modules', []) : ['rapat', 'agenda_pimpinan', 'cuti', 'zi', 'surat_tugas'],
+                'modules' => request()->has('modules') ? (array) request('modules', []) : ['rapat', 'agenda_pimpinan', 'virtual_meeting', 'cuti', 'zi', 'surat_tugas'],
             ],
         ]);
     }

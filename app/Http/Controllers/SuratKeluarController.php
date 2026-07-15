@@ -34,6 +34,9 @@ class SuratKeluarController extends Controller
     public function index(Request $request)
     {
         $user = auth()->user();
+        $activeFilter = in_array($request->input('filter'), ['semua', 'dibuat', 'terkait'], true)
+            ? $request->input('filter')
+            : 'semua';
 
         if (Schema::hasColumn('surat_keluar_penerima', 'read_at')) {
             DB::table('surat_keluar_penerima')
@@ -42,7 +45,19 @@ class SuratKeluarController extends Controller
                 ->update(['read_at' => now('Asia/Jayapura')]);
         }
 
-        $suratKeluar = SuratKeluar::visibleTo($user)
+        $suratKeluarQuery = SuratKeluar::visibleTo($user);
+
+        if ($activeFilter === 'dibuat') {
+            $suratKeluarQuery->where('created_by', $user->id);
+        } elseif ($activeFilter === 'terkait') {
+            $suratKeluarQuery
+                ->where('created_by', '!=', $user->id)
+                ->whereHas('penerimaInternal', function ($recipientQuery) use ($user) {
+                    $recipientQuery->whereIn('users.id', $user->effectiveAssignmentUserIds());
+                });
+        }
+
+        $suratKeluar = $suratKeluarQuery
             ->with([
                 'klasifikasiKode',
                 'kategoriSurat',
@@ -62,6 +77,15 @@ class SuratKeluarController extends Controller
             ->orderBy('created_at', 'desc')
             ->paginate(25)
             ->withQueryString();
+
+        if ($request->ajax()) {
+            return response()->json([
+                'html' => view('surat-keluar._list', compact('suratKeluar'))->render(),
+                'recipient_map' => $this->buildRecipientMap($suratKeluar),
+                'filter' => $activeFilter,
+            ]);
+        }
+
         $kategoriSurats = KategoriSurat::where('aktif', true)->orderBy('kode')->get();
 
         $klasifikasiKodes = KlasifikasiKode::where('tipe', 'klasifikasi')
@@ -75,8 +99,9 @@ class SuratKeluarController extends Controller
         $kodeFungsi = KlasifikasiKode::where('tipe', 'fungsi')->get();
         $kodeKegiatan = KlasifikasiKode::where('tipe', 'kegiatan')->get();
         $kodeTransaksi = KlasifikasiKode::where('tipe', 'transaksi')->get();
-        $canManageSuratKeluar = $user->canManageSuratKeluar();
-        $users = $canManageSuratKeluar ? User::active()->ordered()->get() : collect();
+        $canCreateSuratKeluar = $user->canCreateSuratKeluar();
+        $users = $canCreateSuratKeluar ? User::active()->ordered()->get() : collect();
+
         $kodeFungsiOptions = $kodeFungsi->map(function ($k) {
             return [
                 'id' => $k->id,
@@ -113,14 +138,15 @@ class SuratKeluarController extends Controller
             'kodeFungsiOptions',
             'kodeKegiatanOptions',
             'kodeTransaksiOptions',
-            'canManageSuratKeluar',
+            'canCreateSuratKeluar',
+            'activeFilter',
             'templatePrefill'
         ));
     }
 
     public function store(Request $request)
     {
-        abort_unless(auth()->user()->canManageSuratKeluar(), 403);
+        abort_unless(auth()->user()->canCreateSuratKeluar(), 403);
 
         $request->validate([
             'tahun_surat' => 'required|integer|min:2020|max:2099',
@@ -216,7 +242,7 @@ class SuratKeluarController extends Controller
 
     public function update(Request $request, SuratKeluar $suratKeluar)
     {
-        abort_unless(auth()->user()->canManageSuratKeluar(), 403);
+        abort_unless(auth()->user()->canModifySuratKeluar($suratKeluar), 403);
 
         $request->validate([
             'tahun_surat' => 'required|integer|min:2020|max:2099',
@@ -316,7 +342,7 @@ class SuratKeluarController extends Controller
 
     public function destroy(SuratKeluar $suratKeluar)
     {
-        abort_unless(auth()->user()->canManageSuratKeluar(), 403);
+        abort_unless(auth()->user()->canModifySuratKeluar($suratKeluar), 403);
 
         if ($suratKeluar->file_path) {
             Storage::disk('public')->delete($suratKeluar->file_path);
@@ -333,10 +359,10 @@ class SuratKeluarController extends Controller
 
     public function uploadLampiran(Request $request, SuratKeluar $suratKeluar)
     {
-        abort_unless(auth()->user()->canManageSuratKeluar(), 403);
+        abort_unless(auth()->user()->canModifySuratKeluar($suratKeluar), 403);
 
         $request->validate([
-            'file' => 'required|file|mimes:pdf,doc,docx,jpg,jpeg,png|max:10240',
+            'file' => 'required|file|mimes:pdf,doc,docx,xls,xlsx,ppt,pptx,jpg,jpeg,png,webp,txt,csv,zip,rar|max:10240',
         ]);
 
         if ($suratKeluar->file_path) {
@@ -352,13 +378,13 @@ class SuratKeluarController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'Lampiran berhasil diupload.',
+            'message' => 'Berkas surat keluar berhasil diunggah.',
         ]);
     }
 
     public function previewNomor(Request $request)
     {
-        abort_unless(auth()->user()->canManageSuratKeluar(), 403);
+        abort_unless(auth()->user()->canCreateSuratKeluar(), 403);
 
         $kode = $this->resolveKodeHierarchy($request);
         if (isset($kode['error'])) {
@@ -558,6 +584,20 @@ class SuratKeluarController extends Controller
         }
 
         return KategoriSurat::whereRaw('UPPER(kode) = ?', [strtoupper(trim((string) $kode))])->first();
+    }
+
+    protected function buildRecipientMap($suratKeluar)
+    {
+        return $suratKeluar->getCollection()->mapWithKeys(function ($surat) {
+            return [
+                $surat->id => $surat->penerimaInternal->map(function ($user) {
+                    return [
+                        'name' => $user->name,
+                        'jabatan' => optional($user->jabatan)->nama ?: ($user->jabatan_keterangan ?: '-'),
+                    ];
+                })->values(),
+            ];
+        })->all();
     }
 
     protected function decodeTemplateFieldValues($json)

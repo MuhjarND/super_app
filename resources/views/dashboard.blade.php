@@ -1153,7 +1153,7 @@
                     </a>
                 @endif
 
-                @if($meeting['enabled'])
+                @if($meeting['enabled'] || ($dashboardUser && $dashboardUser->canAccessVirtualMeetings()))
                     <a href="{{ route('mobile.menu.show', 'rapat') }}" class="mobile-app-tile">
                         <span class="mobile-app-icon meeting"><i class="fas fa-users"></i></span>
                         <span class="mobile-app-title">Rapat</span>
@@ -1181,6 +1181,13 @@
                     <a href="{{ route('mobile.menu.show', 'persediaan') }}" class="mobile-app-tile">
                         <span class="mobile-app-icon supply"><i class="fas fa-warehouse"></i></span>
                         <span class="mobile-app-title">Persediaan</span>
+                    </a>
+                @endif
+
+                @if($dashboardIsSuperAdmin || ($dashboardUser && $dashboardUser->canAccessLibraryModule()))
+                    <a href="{{ route('mobile.menu.show', 'perpustakaan') }}" class="mobile-app-tile">
+                        <span class="mobile-app-icon mail"><i class="fas fa-book-reader"></i></span>
+                        <span class="mobile-app-title">Perpustakaan</span>
                     </a>
                 @endif
 
@@ -1275,6 +1282,10 @@
                     <div class="calendar-stat-card">
                         <div class="calendar-stat-value">{{ $calendarOverview['agenda_pimpinan_count'] }}</div>
                         <div class="calendar-stat-label">Agenda pimpinan</div>
+                    </div>
+                    <div class="calendar-stat-card">
+                        <div class="calendar-stat-value">{{ $calendarOverview['virtual_meeting_count'] }}</div>
+                        <div class="calendar-stat-label">Virtual meeting</div>
                     </div>
                     <div class="calendar-stat-card">
                         <div class="calendar-stat-value">{{ $calendarOverview['leave_count'] }}</div>

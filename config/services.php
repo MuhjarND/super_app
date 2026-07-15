@@ -35,6 +35,16 @@ return [
         'api_url' => env('WHATSAPP_API_URL', env('FONNTE_API_URL', 'https://api.fonnte.com/send')),
         'api_key' => env('WHATSAPP_API_KEY', env('FONNTE_TOKEN')),
         'magic_link_ttl' => env('WHATSAPP_MAGIC_LINK_TTL', 10080),
+        'work_start_hour' => env('WHATSAPP_WORK_START_HOUR', 0),
+        'work_end_hour' => env('WHATSAPP_WORK_END_HOUR', 24),
+        'work_days' => env('WHATSAPP_WORK_DAYS', '1,2,3,4,5,6,7'),
+        'minimum_interval_seconds' => env('WHATSAPP_MIN_INTERVAL_SECONDS', 20),
+        'max_per_hour' => env('WHATSAPP_MAX_PER_HOUR', 30),
+        'max_per_phone_hour' => env('WHATSAPP_MAX_PER_PHONE_HOUR', 5),
+        'max_per_day' => env('WHATSAPP_MAX_PER_DAY', 150),
+        'deduplicate_minutes' => env('WHATSAPP_DEDUPLICATE_MINUTES', 10),
+        'batch_size' => env('WHATSAPP_BATCH_SIZE', 3),
+        'http_timeout' => env('WHATSAPP_HTTP_TIMEOUT', 15),
     ],
 
 ];

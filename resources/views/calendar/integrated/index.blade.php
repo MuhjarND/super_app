@@ -36,6 +36,7 @@
         .calendar-dot { width: 10px; height: 10px; border-radius: 999px; display: inline-block; }
         .calendar-dot.rapat { background: #4f46e5; }
         .calendar-dot.agenda-pimpinan { background: #64748b; }
+        .calendar-dot.virtual-meeting { background: #7c3aed; }
         .calendar-dot.cuti { background: #dc2626; }
         .calendar-dot.zi { background: #d97706; }
         .calendar-dot.surat-tugas { background: #16a34a; }
@@ -115,7 +116,7 @@
     <div class="page-header-card">
         <div>
             <h3>Kalender Terpadu</h3>
-            <p class="text-muted mb-0">Monitoring jadwal lintas modul untuk rapat, agenda pimpinan, cuti, surat tugas, dan Progress ZI dalam satu workspace.</p>
+            <p class="text-muted mb-0">Monitoring rapat, agenda pimpinan, virtual meeting, cuti, surat tugas, dan Progress ZI.</p>
         </div>
     </div>
 @endsection
@@ -172,6 +173,7 @@
                         <div class="calendar-stat-box"><div class="value" id="calendarConflictCount">0</div><div class="label">Tanggal benturan</div></div>
                         <div class="calendar-stat-box"><div class="value" id="calendarCountRapat">0</div><div class="label">Rapat</div></div>
                         <div class="calendar-stat-box"><div class="value" id="calendarCountAgendaPimpinan">0</div><div class="label">Agenda pimpinan</div></div>
+                        <div class="calendar-stat-box"><div class="value" id="calendarCountVirtualMeeting">0</div><div class="label">Virtual meeting</div></div>
                         <div class="calendar-stat-box"><div class="value" id="calendarCountCuti">0</div><div class="label">Cuti</div></div>
                         <div class="calendar-stat-box"><div class="value" id="calendarCountSuratTugas">0</div><div class="label">Surat tugas</div></div>
                     </div>
@@ -181,6 +183,7 @@
                         <div class="calendar-legend">
                             <div class="calendar-legend-row"><span class="calendar-legend-label"><span class="calendar-dot rapat"></span> Rapat</span><span id="calendarLegendRapat">0</span></div>
                             <div class="calendar-legend-row"><span class="calendar-legend-label"><span class="calendar-dot agenda-pimpinan"></span> Agenda Pimpinan</span><span id="calendarLegendAgendaPimpinan">0</span></div>
+                            <div class="calendar-legend-row"><span class="calendar-legend-label"><span class="calendar-dot virtual-meeting"></span> Virtual Meeting</span><span id="calendarLegendVirtualMeeting">0</span></div>
                             <div class="calendar-legend-row"><span class="calendar-legend-label"><span class="calendar-dot cuti"></span> Cuti</span><span id="calendarLegendCuti">0</span></div>
                             <div class="calendar-legend-row"><span class="calendar-legend-label"><span class="calendar-dot zi"></span> Progress ZI</span><span id="calendarLegendZi">0</span></div>
                             <div class="calendar-legend-row"><span class="calendar-legend-label"><span class="calendar-dot surat-tugas"></span> Surat Tugas</span><span id="calendarLegendSuratTugas">0</span></div>
@@ -257,10 +260,12 @@
                 document.getElementById('calendarCountAll').textContent = meta.counts.all || 0;
                 document.getElementById('calendarCountRapat').textContent = meta.counts.rapat || 0;
                 document.getElementById('calendarCountAgendaPimpinan').textContent = meta.counts.agenda_pimpinan || 0;
+                document.getElementById('calendarCountVirtualMeeting').textContent = meta.counts.virtual_meeting || 0;
                 document.getElementById('calendarCountCuti').textContent = meta.counts.cuti || 0;
                 document.getElementById('calendarCountSuratTugas').textContent = meta.counts.surat_tugas || 0;
                 document.getElementById('calendarLegendRapat').textContent = meta.counts.rapat || 0;
                 document.getElementById('calendarLegendAgendaPimpinan').textContent = meta.counts.agenda_pimpinan || 0;
+                document.getElementById('calendarLegendVirtualMeeting').textContent = meta.counts.virtual_meeting || 0;
                 document.getElementById('calendarLegendCuti').textContent = meta.counts.cuti || 0;
                 document.getElementById('calendarLegendZi').textContent = meta.counts.zi || 0;
                 document.getElementById('calendarLegendSuratTugas').textContent = meta.counts.surat_tugas || 0;

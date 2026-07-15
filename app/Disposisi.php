@@ -16,6 +16,7 @@ class Disposisi extends Model
         'petunjuk',
         'catatan',
         'catatan_tindak_lanjut',
+        'tautan_tindak_lanjut',
         'tipe',
         'status',
         'priority_level',
@@ -111,6 +112,11 @@ class Disposisi extends Model
     public function kepadaJabatan()
     {
         return $this->belongsTo(Jabatan::class, 'kepada_jabatan_id');
+    }
+
+    public function dokumentasis()
+    {
+        return $this->hasMany(DisposisiDokumentasi::class)->latest();
     }
 
     public function getStatusBadgeAttribute()

@@ -2,6 +2,7 @@
 
 namespace App\Services\LegacyPersuratan;
 
+use App\AppSetting;
 use App\Disposisi;
 use App\Jabatan;
 use App\KategoriSurat;
@@ -77,6 +78,7 @@ class LegacyPersuratanImportService
             $this->syncLegacyTindakLanjut($legacyDb);
             $this->importSuratKeluar($legacyDb);
             $this->refreshSuratMasukStatus();
+            $this->refreshSuratKeluarSequenceBase();
         });
 
         return $this->summary;
@@ -537,6 +539,17 @@ class LegacyPersuratanImportService
                 }
             }
         });
+    }
+
+    protected function refreshSuratKeluarSequenceBase()
+    {
+        $legacyMax = (int) (SuratKeluar::whereNotNull('legacy_source_id')->max('nomor_urut') ?: 0);
+
+        AppSetting::putValue('surat_keluar_sequence_base_legacy_max', $legacyMax);
+
+        if (!AppSetting::valueOf('surat_keluar_sequence_started_at')) {
+            AppSetting::putValue('surat_keluar_sequence_started_at', now('Asia/Jayapura')->toDateTimeString());
+        }
     }
 
     protected function resolveFallbackUser()

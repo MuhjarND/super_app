@@ -130,14 +130,14 @@ class SuratTemplateController extends Controller
             'fieldValues' => $validatedFields,
             'renderedBody' => $renderedBody,
             'prefill' => $prefill,
-            'canManageSuratKeluar' => auth()->user()->canManageSuratKeluar(),
+            'canManageSuratKeluar' => auth()->user()->canCreateSuratKeluar(),
         ]);
     }
 
     public function handoffToSuratKeluar(GenerateSuratTemplatePreviewRequest $request, $slug)
     {
         $this->abortIfUnauthorized();
-        abort_unless(auth()->user()->canManageSuratKeluar(), 403);
+        abort_unless(auth()->user()->canCreateSuratKeluar(), 403);
 
         $template = $this->findTemplateBySlug($slug);
         abort_unless($template, 404);

@@ -3,6 +3,7 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Schema;
 
 class SuratKeluar extends Model
 {
@@ -252,12 +253,9 @@ class SuratKeluar extends Model
 
         $nomorPrefix = $prefixMap[$nomenklatur] ?? 'W31-A';
 
-        if ($nomorUrut === null) {
-            $lastNumber = self::max('nomor_urut');
-            $nextNumber = ($lastNumber ?? 0) + 1;
-        } else {
-            $nextNumber = (int) $nomorUrut;
-        }
+        $nextNumber = $nomorUrut === null
+            ? self::nextNomorUrut()
+            : (int) $nomorUrut;
 
         // Build code path:
         // - kode klasifikasi: huruf (contoh KU)
@@ -289,6 +287,39 @@ class SuratKeluar extends Model
         $nomor = "{$nextNumber}/{$nomorPrefix}/{$kodePath}/{$bulan}/{$tahun}";
 
         return ['nomor' => $nomor, 'urut' => $nextNumber];
+    }
+
+    public static function nextNomorUrut()
+    {
+        return ((int) static::sequenceBaseQuery()->max('nomor_urut')) + 1;
+    }
+
+    public static function currentNomorUrutBase()
+    {
+        return (int) static::sequenceBaseQuery()->max('nomor_urut');
+    }
+
+    protected static function sequenceBaseQuery()
+    {
+        $query = static::query();
+        $sequenceStartedAt = null;
+
+        try {
+            if (Schema::hasTable('app_settings')) {
+                $sequenceStartedAt = AppSetting::valueOf('surat_keluar_sequence_started_at');
+            }
+        } catch (\Throwable $exception) {
+            $sequenceStartedAt = null;
+        }
+
+        if ($sequenceStartedAt && Schema::hasColumn('surat_keluars', 'legacy_source_id')) {
+            $query->where(function ($builder) use ($sequenceStartedAt) {
+                $builder->whereNotNull('legacy_source_id')
+                    ->orWhere('created_at', '>=', $sequenceStartedAt);
+            });
+        }
+
+        return $query;
     }
 
     public static function getRomanMonth($month)

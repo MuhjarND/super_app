@@ -7,6 +7,7 @@ use App\LeaveRequest;
 use App\Rapat;
 use App\SuratKeluar;
 use App\User;
+use App\VirtualMeeting;
 use App\ZiActivity;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
@@ -25,6 +26,10 @@ class IntegratedCalendarService
 
         if (in_array('agenda_pimpinan', $filters['modules'], true)) {
             $events = $events->merge($this->buildAgendaEvents($user, $filters));
+        }
+
+        if (in_array('virtual_meeting', $filters['modules'], true)) {
+            $events = $events->merge($this->buildVirtualMeetingEvents($user, $filters));
         }
 
         if (in_array('cuti', $filters['modules'], true)) {
@@ -58,6 +63,7 @@ class IntegratedCalendarService
                     'all' => $events->count(),
                     'rapat' => $events->where('module_key', 'rapat')->count(),
                     'agenda_pimpinan' => $events->where('module_key', 'agenda_pimpinan')->count(),
+                    'virtual_meeting' => $events->where('module_key', 'virtual_meeting')->count(),
                     'cuti' => $events->where('module_key', 'cuti')->count(),
                     'zi' => $events->where('module_key', 'zi')->count(),
                     'surat_tugas' => $events->where('module_key', 'surat_tugas')->count(),
@@ -73,16 +79,16 @@ class IntegratedCalendarService
         $start = !empty($filters['start']) ? Carbon::parse($filters['start'], 'Asia/Jayapura')->startOfDay() : now('Asia/Jayapura')->startOfMonth();
         $end = !empty($filters['end']) ? Carbon::parse($filters['end'], 'Asia/Jayapura')->endOfDay() : now('Asia/Jayapura')->endOfMonth();
 
-        $modules = collect($filters['modules'] ?? ['rapat', 'agenda_pimpinan', 'cuti', 'zi', 'surat_tugas'])
+        $modules = collect($filters['modules'] ?? ['rapat', 'agenda_pimpinan', 'virtual_meeting', 'cuti', 'zi', 'surat_tugas'])
             ->filter(function ($module) {
-                return in_array($module, ['rapat', 'agenda_pimpinan', 'cuti', 'zi', 'surat_tugas'], true);
+                return in_array($module, ['rapat', 'agenda_pimpinan', 'virtual_meeting', 'cuti', 'zi', 'surat_tugas'], true);
             })
             ->unique()
             ->values()
             ->all();
 
         if (empty($modules)) {
-            $modules = ['rapat', 'agenda_pimpinan', 'cuti', 'zi', 'surat_tugas'];
+            $modules = ['rapat', 'agenda_pimpinan', 'virtual_meeting', 'cuti', 'zi', 'surat_tugas'];
         }
 
         return [
@@ -202,6 +208,65 @@ class IntegratedCalendarService
                     'time' => $agenda->waktu_formatted !== '-' ? $agenda->waktu_formatted . ' WIT' : '-',
                     'participants' => $participants,
                     'description' => $agenda->catatan ?: ('Yang menghadiri: ' . ($agenda->yang_menghadiri ?: '-')),
+                ],
+            ]);
+        });
+    }
+
+    protected function buildVirtualMeetingEvents(User $user, array $filters)
+    {
+        $query = VirtualMeeting::visibleTo($user)
+            ->with(['creator.unit', 'participants'])
+            ->whereBetween('tanggal_kegiatan', [$filters['start']->toDateString(), $filters['end']->toDateString()]);
+
+        if ($filters['scope'] === 'mine') {
+            $query->where(function ($builder) use ($user) {
+                $builder->where('created_by', $user->id)
+                    ->orWhereHas('participants', function ($participantQuery) use ($user) {
+                        $participantQuery->where('users.id', $user->id);
+                    });
+            });
+        }
+
+        if ($filters['unit_id']) {
+            $query->whereHas('creator', function ($creatorQuery) use ($filters) {
+                $creatorQuery->where('unit_id', $filters['unit_id']);
+            });
+        }
+
+        return $query->get()->map(function ($meeting) {
+            $start = Carbon::parse(
+                $meeting->tanggal_kegiatan->format('Y-m-d') . ' ' . ($meeting->waktu_mulai ?: '08:00:00'),
+                'Asia/Jayapura'
+            );
+            $end = $meeting->waktu_selesai
+                ? Carbon::parse($meeting->tanggal_kegiatan->format('Y-m-d') . ' ' . $meeting->waktu_selesai, 'Asia/Jayapura')
+                : (clone $start)->addHour();
+            $participants = $this->implodeNames($meeting->participants->pluck('name')->all());
+            $statusKey = $this->resolveTimeStatus($meeting->tanggal_kegiatan, $meeting->tanggal_kegiatan);
+
+            return $this->makeEvent([
+                'id' => 'virtual-meeting-' . $meeting->id,
+                'module_key' => 'virtual_meeting',
+                'module_label' => 'Virtual Meeting',
+                'source_key' => 'virtual_meeting',
+                'title' => $meeting->judul,
+                'start' => $start,
+                'end' => $end,
+                'allDay' => false,
+                'status_key' => $statusKey,
+                'status_label' => $this->statusLabel($statusKey),
+                'color' => '#7c3aed',
+                'textColor' => '#ffffff',
+                'url' => route('rapat.virtual-meeting.index'),
+                'meta' => [
+                    'kategori' => 'Agenda Virtual',
+                    'unit' => optional(optional($meeting->creator)->unit)->nama ?: '-',
+                    'pic' => optional($meeting->creator)->name ?: '-',
+                    'location' => 'Zoom Meeting',
+                    'time' => $meeting->waktu_mulai_formatted . ($meeting->waktu_selesai ? ' - ' . $meeting->waktu_selesai_formatted : '') . ' WIT',
+                    'participants' => $participants,
+                    'description' => $meeting->catatan ?: 'Pertemuan dilaksanakan secara virtual melalui Zoom.',
                 ],
             ]);
         });

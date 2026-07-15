@@ -82,6 +82,22 @@ return [
             ]) : [],
         ],
 
+        'library_legacy' => [
+            'driver' => 'mysql',
+            'host' => env('LIBRARY_LEGACY_DB_HOST', env('DB_HOST', '127.0.0.1')),
+            'port' => env('LIBRARY_LEGACY_DB_PORT', env('DB_PORT', '3306')),
+            'database' => env('LIBRARY_LEGACY_DB_DATABASE', 'perpus_db'),
+            'username' => env('LIBRARY_LEGACY_DB_USERNAME', env('DB_USERNAME', 'root')),
+            'password' => env('LIBRARY_LEGACY_DB_PASSWORD', env('DB_PASSWORD', '')),
+            'unix_socket' => env('LIBRARY_LEGACY_DB_SOCKET', ''),
+            'charset' => 'utf8mb4',
+            'collation' => 'utf8mb4_unicode_ci',
+            'prefix' => '',
+            'prefix_indexes' => true,
+            'strict' => true,
+            'engine' => null,
+        ],
+
         'legacy_persuratan' => [
             'driver' => 'mysql',
             'host' => env('LEGACY_PERSURATAN_DB_HOST', env('DB_HOST', '127.0.0.1')),

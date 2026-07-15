@@ -113,10 +113,15 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/disposisi', 'DisposisiController@store')->name('disposisi.store');
     Route::patch('/disposisi/{disposisi}/status', 'DisposisiController@updateStatus')->name('disposisi.update-status');
     Route::post('/disposisi/{disposisi}/remind', 'DisposisiController@remind')->name('disposisi.remind');
+    Route::get('/disposisi/dokumentasi/{dokumentasi}/preview', 'DisposisiController@previewDokumentasi')->name('disposisi.dokumentasi.preview');
+    Route::get('/disposisi/dokumentasi/{dokumentasi}/download', 'DisposisiController@downloadDokumentasi')->name('disposisi.dokumentasi.download');
     Route::get('/api/disposisi/targets', 'DisposisiController@getTargets')->name('api.disposisi.targets');
 
     // Master data - super admin only
     Route::prefix('admin')->name('admin.')->middleware('role:super_admin')->group(function () {
+        Route::post('persuratan/sync-legacy', 'Admin\LegacyPersuratanSyncController@store')
+            ->middleware('throttle:2,1')
+            ->name('legacy-persuratan.sync');
         Route::resource('users', 'Admin\UserManagementController')->except(['show']);
         Route::post('users/{user}/send-login-info', 'Admin\UserManagementController@sendLoginInfo')->name('users.send-login-info');
         Route::patch('users/{user}/toggle-status', 'Admin\UserManagementController@toggleStatus')->name('users.toggle-status');
@@ -239,6 +244,13 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/approvals/{ziActivityApproval}/reject', 'ProgressZiApprovalController@reject')->name('approvals.reject');
     });
 
+    Route::prefix('rapat/virtual-meeting')->name('rapat.virtual-meeting.')->group(function () {
+        Route::get('/', 'VirtualMeetingController@index')->name('index');
+        Route::put('/{virtualMeeting}', 'VirtualMeetingController@update')->name('update');
+        Route::post('/{virtualMeeting}/send-whatsapp', 'VirtualMeetingController@sendWhatsapp')->name('send-whatsapp');
+        Route::delete('/{virtualMeeting}', 'VirtualMeetingController@destroy')->name('destroy');
+    });
+
     Route::prefix('rapat')->name('rapat.')->middleware('role:admin,operator,notulis,peserta,approval,protokoler,super_admin')->group(function () {
         Route::get('/', 'RapatController@index')->name('index');
         Route::get('/preview-nomor', 'RapatController@previewNomorUndangan')->middleware('role:admin,operator,super_admin')->name('preview-nomor');
@@ -320,6 +332,80 @@ Route::middleware(['auth'])->group(function () {
         });
     });
 
+    Route::prefix('perpustakaan')->name('library.')->middleware('library.access')->group(function () {
+        Route::get('/', 'Library\DashboardController@index')->name('index');
+
+        Route::get('/buku', 'Library\BookController@index')->name('books.index');
+        Route::get('/buku/{book}', 'Library\BookController@show')->where('book', '[0-9]+')->name('books.show');
+        Route::get('/eksemplar', 'Library\BookCopyController@index')->name('book-copies.index');
+        Route::get('/eksemplar/lookup/data', 'Library\BookCopyController@lookup')->name('book-copies.lookup');
+
+        Route::get('/barcode', 'Library\BarcodeController@index')->name('barcode.index');
+        Route::get('/barcode/print', 'Library\BarcodeController@print')->name('barcode.print');
+        Route::get('/barcode/{bookCopy}', 'Library\BarcodeController@show')->name('barcode.show');
+        Route::get('/barcode/{bookCopy}/svg', 'Library\BarcodeController@generateSvg')->name('barcode.svg');
+
+        Route::get('/scan', 'Library\ScanController@index')->name('scan.index');
+        Route::post('/scan/lookup', 'Library\ScanController@lookup')->name('scan.lookup');
+
+        Route::get('/anggota/search/api', 'Library\MemberController@search')->name('members.search');
+        Route::get('/anggota', 'Library\MemberController@index')->name('members.index');
+        Route::get('/anggota/{member}', 'Library\MemberController@show')->where('member', '[0-9]+')->name('members.show');
+
+        Route::get('/peminjaman', 'Library\LoanController@index')->name('loans.index');
+        Route::get('/peminjaman/{loan}', 'Library\LoanController@show')->where('loan', '[0-9]+')->name('loans.show');
+
+        Route::get('/pengembalian/search/loan', 'Library\ReturnController@searchLoan')->name('returns.search-loan');
+        Route::get('/pengembalian', 'Library\ReturnController@index')->name('returns.index');
+        Route::get('/pengembalian/{return}', 'Library\ReturnController@show')->where('return', '[0-9]+')->name('returns.show');
+
+        Route::get('/denda', 'Library\FineController@index')->name('fines.index');
+        Route::get('/denda/{fine}', 'Library\FineController@show')->where('fine', '[0-9]+')->name('fines.show');
+
+        Route::prefix('laporan')->name('reports.')->group(function () {
+            Route::get('/', 'Library\ReportController@index')->name('index');
+            Route::get('/buku', 'Library\ReportController@books')->name('books');
+            Route::get('/anggota', 'Library\ReportController@members')->name('members');
+            Route::get('/peminjaman', 'Library\ReportController@loans')->name('loans');
+            Route::get('/pengembalian', 'Library\ReportController@returns')->name('returns');
+            Route::get('/keterlambatan', 'Library\ReportController@lates')->name('lates');
+            Route::get('/denda', 'Library\ReportController@fines')->name('fines');
+        });
+
+        Route::middleware('library.manage')->group(function () {
+            Route::get('/buku/create', 'Library\BookController@create')->name('books.create');
+            Route::post('/buku', 'Library\BookController@store')->name('books.store');
+            Route::get('/buku/{book}/edit', 'Library\BookController@edit')->name('books.edit');
+            Route::put('/buku/{book}', 'Library\BookController@update')->name('books.update');
+            Route::delete('/buku/{book}', 'Library\BookController@destroy')->name('books.destroy');
+
+            Route::get('/eksemplar/create', 'Library\BookCopyController@create')->name('book-copies.create');
+            Route::post('/eksemplar', 'Library\BookCopyController@store')->name('book-copies.store');
+            Route::get('/eksemplar/{bookCopy}/edit', 'Library\BookCopyController@edit')->name('book-copies.edit');
+            Route::put('/eksemplar/{bookCopy}', 'Library\BookCopyController@update')->name('book-copies.update');
+            Route::delete('/eksemplar/{bookCopy}', 'Library\BookCopyController@destroy')->name('book-copies.destroy');
+
+            Route::get('/anggota/create', 'Library\MemberController@create')->name('members.create');
+            Route::post('/anggota', 'Library\MemberController@store')->name('members.store');
+            Route::get('/anggota/{member}/edit', 'Library\MemberController@edit')->name('members.edit');
+            Route::put('/anggota/{member}', 'Library\MemberController@update')->name('members.update');
+            Route::delete('/anggota/{member}', 'Library\MemberController@destroy')->name('members.destroy');
+
+            Route::get('/peminjaman/create', 'Library\LoanController@create')->name('loans.create');
+            Route::post('/peminjaman', 'Library\LoanController@store')->name('loans.store');
+            Route::delete('/peminjaman/{loan}', 'Library\LoanController@destroy')->name('loans.destroy');
+
+            Route::get('/pengembalian/create', 'Library\ReturnController@create')->name('returns.create');
+            Route::post('/pengembalian', 'Library\ReturnController@store')->name('returns.store');
+
+            Route::post('/denda/{fine}/pay', 'Library\FineController@pay')->name('fines.pay');
+            Route::post('/denda/pay-all', 'Library\FineController@payAll')->name('fines.pay-all');
+
+            Route::get('/pengaturan', 'Library\SettingController@index')->name('settings.index');
+            Route::post('/pengaturan', 'Library\SettingController@update')->name('settings.update');
+        });
+    });
+
     Route::prefix('perawatan-alat-dan-mesin')->name('perawatan-alat-mesin.')->group(function () {
         Route::get('/', 'PersediaanDashboardController@index')->name('index');
 
@@ -344,6 +430,13 @@ Route::middleware(['auth'])->group(function () {
         Route::put('/transaksi-perawatan/{inventoryMaintenanceTransaction}', 'PersediaanTransaksiController@update')->name('maintenance.update');
         Route::delete('/transaksi-perawatan/{inventoryMaintenanceTransaction}', 'PersediaanTransaksiController@destroy')->name('maintenance.destroy');
         Route::get('/transaksi-perawatan/attachments/{inventoryTransactionAttachment}', 'PersediaanTransaksiController@file')->name('maintenance.attachments.file');
+
+        Route::get('/jadwal-perawatan', 'PersediaanJadwalPerawatanController@index')->name('schedules.index');
+        Route::post('/jadwal-perawatan', 'PersediaanJadwalPerawatanController@store')->name('schedules.store');
+        Route::put('/jadwal-perawatan/{inventoryMaintenanceSchedule}', 'PersediaanJadwalPerawatanController@update')->name('schedules.update');
+        Route::patch('/jadwal-perawatan/{inventoryMaintenanceSchedule}/complete', 'PersediaanJadwalPerawatanController@complete')->name('schedules.complete');
+        Route::patch('/jadwal-perawatan/{inventoryMaintenanceSchedule}/cancel', 'PersediaanJadwalPerawatanController@cancel')->name('schedules.cancel');
+        Route::delete('/jadwal-perawatan/{inventoryMaintenanceSchedule}', 'PersediaanJadwalPerawatanController@destroy')->name('schedules.destroy');
 
         Route::get('/laporan', 'PersediaanLaporanController@index')->name('reports.index');
         Route::get('/laporan/pdf', 'PersediaanLaporanController@pdf')->name('reports.pdf');

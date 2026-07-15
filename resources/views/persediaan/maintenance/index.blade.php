@@ -6,9 +6,11 @@
 <div class="container-fluid">
     <div class="maintenance-hero d-flex justify-content-between align-items-center flex-wrap gap-3">
         <h1 class="maintenance-hero-title mb-0">Transaksi Perawatan</h1>
+        @if(auth()->user()->canManageInventoryModule())
         <button type="button" class="btn app-create-btn" data-toggle="modal" data-target="#maintenanceCreateModal">
             <i class="fas fa-plus mr-1"></i> Tambah
         </button>
+        @endif
     </div>
 </div>
 @endsection
@@ -228,6 +230,7 @@
                 </div>
             </div>
 
+@if(auth()->user()->canManageInventoryModule())
 <div class="modal fade" id="maintenanceCreateModal" tabindex="-1" role="dialog" aria-hidden="true">
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
@@ -285,6 +288,7 @@
         </div>
     </div>
 </div>
+@endif
 @endsection
 
 @push('scripts')

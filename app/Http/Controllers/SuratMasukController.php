@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\SuratMasuk;
 use App\AgendaPimpinan;
+use App\VirtualMeeting;
 use App\KlasifikasiKode;
 use App\KategoriSurat;
 use App\User;
@@ -31,13 +32,14 @@ class SuratMasukController extends Controller
         $user = auth()->user();
 
         $suratMasuk = SuratMasuk::visibleTo($user)
-            ->with('klasifikasiKode', 'kategoriSurat', 'creator', 'agendaPimpinan', 'disposisis.dariUser', 'disposisis.kepadaUser', 'disposisis.kepadaJabatan')
+            ->with('klasifikasiKode', 'kategoriSurat', 'creator', 'agendaPimpinan', 'virtualMeeting.participants', 'disposisis.dariUser', 'disposisis.kepadaUser', 'disposisis.kepadaJabatan', 'disposisis.dokumentasis')
             ->orderBy('created_at', 'desc')
             ->paginate(25)
             ->withQueryString();
         $klasifikasiKodes = $this->getKlasifikasiHuruf();
         $kategoriSurats = KategoriSurat::where('aktif', true)->orderBy('kode')->get();
         $petunjukOptions = $this->getPetunjukOptions();
+        $virtualMeetingUsers = User::with('jabatan')->active()->ordered()->get();
         $suratHistories = $suratMasuk->getCollection()->mapWithKeys(function ($surat) {
             $items = $surat->disposisis
                 ->sortByDesc('created_at')
@@ -52,6 +54,15 @@ class SuratMasukController extends Controller
                         'petunjuk' => $disposisi->petunjuk,
                         'catatan' => $disposisi->catatan,
                         'catatan_tindak_lanjut' => $disposisi->catatan_tindak_lanjut,
+                        'tautan_tindak_lanjut' => $disposisi->tautan_tindak_lanjut,
+                        'dokumentasi' => $disposisi->dokumentasis->map(function ($dokumentasi) {
+                            return [
+                                'nama' => $dokumentasi->original_name,
+                                'ukuran' => $dokumentasi->formatted_size,
+                                'preview_url' => route('disposisi.dokumentasi.preview', $dokumentasi),
+                                'download_url' => route('disposisi.dokumentasi.download', $dokumentasi),
+                            ];
+                        })->values(),
                         'priority_badge' => $disposisi->priority_badge,
                         'target_label' => $disposisi->target_label,
                         'waktu' => $disposisi->created_at->format('d/m/Y H:i'),
@@ -67,7 +78,8 @@ class SuratMasukController extends Controller
             'klasifikasiKodes',
             'kategoriSurats',
             'petunjukOptions',
-            'suratHistories'
+            'suratHistories',
+            'virtualMeetingUsers'
         ));
     }
 
@@ -89,6 +101,13 @@ class SuratMasukController extends Controller
             'agenda_tanggal_kegiatan' => 'required_if:agenda_pimpinan,1|nullable|date',
             'agenda_waktu' => 'required_if:agenda_pimpinan,1|nullable|date_format:H:i',
             'agenda_tempat' => 'required_if:agenda_pimpinan,1|nullable|string|max:255',
+            'agenda_virtual' => 'nullable|boolean',
+            'virtual_tanggal_kegiatan' => 'required_if:agenda_virtual,1|nullable|date',
+            'virtual_waktu_mulai' => 'required_if:agenda_virtual,1|nullable|date_format:H:i',
+            'virtual_waktu_selesai' => 'nullable|date_format:H:i|after:virtual_waktu_mulai',
+            'virtual_zoom_link' => 'required_if:agenda_virtual,1|nullable|url|max:2000',
+            'virtual_participant_ids' => 'required_if:agenda_virtual,1|nullable|array|min:1',
+            'virtual_participant_ids.*' => 'exists:users,id',
         ]);
 
         $sync = $this->syncKategoriDanKlasifikasi(
@@ -100,6 +119,7 @@ class SuratMasukController extends Controller
         $filePath = $request->file('file')->store('surat-masuk', 'public');
 
         $agenda = null;
+        $virtualMeeting = null;
 
         try {
             DB::beginTransaction();
@@ -122,6 +142,10 @@ class SuratMasukController extends Controller
                 $agenda = $this->createAgendaPimpinanFromSuratMasuk($suratMasuk, $request);
             }
 
+            if ($request->boolean('agenda_virtual')) {
+                $virtualMeeting = $this->createVirtualMeetingFromSuratMasuk($suratMasuk, $request);
+            }
+
             DB::commit();
         } catch (\Throwable $e) {
             DB::rollBack();
@@ -142,17 +166,26 @@ class SuratMasukController extends Controller
             $this->notifyProtokolerAgendaPimpinan($agenda);
         }
 
+        if ($virtualMeeting) {
+            $this->waService->notifyVirtualMeetingParticipants($virtualMeeting->load('participants.jabatan'));
+        }
+
+        $createdItems = array_filter([
+            $agenda ? 'agenda pimpinan' : null,
+            $virtualMeeting ? 'agenda virtual' : null,
+        ]);
+
         return response()->json([
             'success' => true,
-            'message' => $agenda
-                ? 'Surat masuk dan agenda pimpinan berhasil disimpan.'
+            'message' => $createdItems
+                ? 'Surat masuk dan ' . implode(' serta ', $createdItems) . ' berhasil disimpan.'
                 : 'Surat masuk berhasil disimpan.',
         ]);
     }
 
     public function show(SuratMasuk $suratMasuk)
     {
-        $suratMasuk->load('klasifikasiKode', 'kategoriSurat', 'creator', 'agendaPimpinan', 'disposisis.dariUser', 'disposisis.kepadaUser', 'disposisis.kepadaJabatan');
+        $suratMasuk->load('klasifikasiKode', 'kategoriSurat', 'creator', 'agendaPimpinan', 'virtualMeeting.participants', 'disposisis.dariUser', 'disposisis.kepadaUser', 'disposisis.kepadaJabatan', 'disposisis.dokumentasis');
 
         $user = auth()->user();
         abort_unless($user->canViewSuratMasuk($suratMasuk), 403);
@@ -246,6 +279,33 @@ class SuratMasukController extends Controller
         foreach ($protokolerUsers as $protokoler) {
             $this->waService->notifyAgendaPimpinanCreatedForProtokoler($agenda, $protokoler);
         }
+    }
+
+    protected function createVirtualMeetingFromSuratMasuk(SuratMasuk $suratMasuk, Request $request)
+    {
+        $meeting = VirtualMeeting::create([
+            'surat_masuk_id' => $suratMasuk->id,
+            'judul' => $suratMasuk->perihal,
+            'tanggal_kegiatan' => $request->virtual_tanggal_kegiatan,
+            'waktu_mulai' => $request->virtual_waktu_mulai,
+            'waktu_selesai' => $request->virtual_waktu_selesai,
+            'zoom_link' => $request->virtual_zoom_link,
+            'catatan' => 'Agenda virtual dibuat otomatis dari Surat Masuk ' . $suratMasuk->nomor_surat . '.',
+            'created_by' => auth()->id(),
+            'updated_by' => auth()->id(),
+        ]);
+
+        $participants = User::whereIn('id', array_unique((array) $request->virtual_participant_ids))
+            ->active()
+            ->ordered()
+            ->get();
+        $syncData = [];
+        foreach ($participants as $index => $participant) {
+            $syncData[$participant->id] = ['urutan' => $index + 1];
+        }
+        $meeting->participants()->sync($syncData);
+
+        return $meeting;
     }
 
     public function update(Request $request, SuratMasuk $suratMasuk)

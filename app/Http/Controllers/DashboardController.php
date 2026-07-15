@@ -128,6 +128,7 @@ class DashboardController extends Controller
             'event_count' => $counts['all'] ?? 0,
             'meeting_count' => ($counts['rapat'] ?? 0) + ($counts['agenda_pimpinan'] ?? 0),
             'agenda_pimpinan_count' => $counts['agenda_pimpinan'] ?? 0,
+            'virtual_meeting_count' => $counts['virtual_meeting'] ?? 0,
             'leave_count' => $counts['cuti'] ?? 0,
             'zi_count' => $counts['zi'] ?? 0,
             'surat_tugas_count' => $counts['surat_tugas'] ?? 0,
