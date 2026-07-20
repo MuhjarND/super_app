@@ -218,7 +218,7 @@
                     <div class="calendar-modal-meta">
                         <div class="calendar-modal-meta-item"><div class="calendar-modal-meta-label">Waktu</div><div class="calendar-modal-meta-value" id="calendarEventTime">-</div></div>
                         <div class="calendar-modal-meta-item"><div class="calendar-modal-meta-label">Kategori</div><div class="calendar-modal-meta-value" id="calendarEventCategory">-</div></div>
-                        <div class="calendar-modal-meta-item"><div class="calendar-modal-meta-label">Unit / Bidang</div><div class="calendar-modal-meta-value" id="calendarEventUnit">-</div></div>
+                        <div class="calendar-modal-meta-item"><div class="calendar-modal-meta-label">Unit Kerja</div><div class="calendar-modal-meta-value" id="calendarEventUnit">-</div></div>
                         <div class="calendar-modal-meta-item"><div class="calendar-modal-meta-label">PIC / Pelaksana</div><div class="calendar-modal-meta-value" id="calendarEventPic">-</div></div>
                         <div class="calendar-modal-meta-item"><div class="calendar-modal-meta-label">Lokasi / Referensi</div><div class="calendar-modal-meta-value" id="calendarEventLocation">-</div></div>
                         <div class="calendar-modal-meta-item"><div class="calendar-modal-meta-label">Petugas / Peserta</div><div class="calendar-modal-meta-value" id="calendarEventParticipants">-</div></div>

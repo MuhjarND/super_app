@@ -1,0 +1,21 @@
+<?php
+
+return [
+    'catalog' => [
+        'dashboard' => ['name' => 'Dashboard', 'description' => 'Ringkasan utama aplikasi.', 'icon' => 'fas fa-th-large', 'mobile' => 'dashboard', 'routes' => ['dashboard', 'home']],
+        'leadership' => ['name' => 'Dashboard Pimpinan', 'description' => 'Ringkasan monitoring untuk pimpinan.', 'icon' => 'fas fa-user-tie', 'routes' => ['dashboard.leadership']],
+        'action_center' => ['name' => 'Tindak Lanjut Terpadu', 'description' => 'Inbox kerja dan tindak lanjut lintas modul.', 'icon' => 'fas fa-tasks', 'mobile' => 'action', 'prefixes' => ['action-center.']],
+        'calendar' => ['name' => 'Kalender Terpadu', 'description' => 'Kalender kerja lintas modul.', 'icon' => 'far fa-calendar-alt', 'mobile' => 'calendar', 'prefixes' => ['calendar.integrated.']],
+        'approval' => ['name' => 'Approval', 'description' => 'Pusat persetujuan dan riwayat keputusan.', 'icon' => 'fas fa-check-double', 'mobile' => 'approval', 'prefixes' => ['approval.']],
+        'persuratan' => ['name' => 'Persuratan', 'description' => 'Surat masuk, surat keluar, disposisi, dan template.', 'icon' => 'fas fa-envelope-open-text', 'mobile' => 'persuratan', 'routes' => ['admin.legacy-persuratan.sync'], 'prefixes' => ['surat-masuk.', 'surat-keluar.', 'surat-template.', 'disposisi.', 'api.disposisi.', 'api.klasifikasi']],
+        'rapat' => ['name' => 'Rapat / Agenda', 'description' => 'Rapat, agenda pimpinan, notulensi, dan virtual meeting.', 'icon' => 'fas fa-users', 'mobile' => 'rapat', 'prefixes' => ['rapat.']],
+        'cuti' => ['name' => 'Cuti', 'description' => 'Pengajuan, approval, saldo, dan laporan cuti.', 'icon' => 'fas fa-calendar-check', 'mobile' => 'cuti', 'prefixes' => ['cuti.']],
+        'inventory' => ['name' => 'Perawatan Alat dan Mesin', 'description' => 'Inventaris, jadwal, transaksi, dan laporan perawatan.', 'icon' => 'fas fa-tools', 'mobile' => 'perawatan', 'prefixes' => ['perawatan-alat-mesin.']],
+        'supply' => ['name' => 'Persediaan', 'description' => 'Pengajuan dan distribusi barang persediaan.', 'icon' => 'fas fa-warehouse', 'mobile' => 'persediaan', 'prefixes' => ['persediaan.']],
+        'library' => ['name' => 'Perpustakaan', 'description' => 'Koleksi, anggota, sirkulasi, dan laporan perpustakaan.', 'icon' => 'fas fa-book-reader', 'mobile' => 'perpustakaan', 'prefixes' => ['library.']],
+        'progress_zi' => ['name' => 'Progress ZI', 'description' => 'Monitoring kegiatan dan rekapan Zona Integritas.', 'icon' => 'fas fa-chart-line', 'mobile' => 'zi', 'prefixes' => ['progress-zi.']],
+        'archive' => ['name' => 'Arsip', 'description' => 'Pusat arsip dokumen lintas modul.', 'icon' => 'far fa-folder-open', 'mobile' => 'arsip', 'prefixes' => ['arsip.']],
+        'audit_trail' => ['name' => 'Audit Trail', 'description' => 'Riwayat aktivitas dan perubahan data.', 'icon' => 'fas fa-history', 'prefixes' => ['audit-trail.']],
+        'master_data' => ['name' => 'Master Data', 'description' => 'Pengaturan user, jabatan, unit, dan referensi.', 'icon' => 'fas fa-database', 'prefixes' => ['admin.']],
+    ],
+];

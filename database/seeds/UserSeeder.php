@@ -3,7 +3,6 @@
 use Illuminate\Database\Seeder;
 use App\User;
 use App\Role;
-use App\Bidang;
 use App\Jabatan;
 use App\Unit;
 use Illuminate\Support\Facades\Hash;
@@ -138,8 +137,7 @@ class UserSeeder extends Seeder
                 'email' => 'stafkepeg1@pta-papuabarat.go.id',
                 'roles' => ['peserta'],
                 'jabatan_keterangan' => 'Staf Kepegawaian',
-                'unit_kode' => 'KEPEGAWAIAN',
-                'bidang_kode' => 'KEPEGAWAIAN',
+                'unit_kode' => 'KESEKRETARIATAN',
                 'hirarki' => 200,
                 'nip' => '199001010016',
                 'no_hp' => '08123456016',
@@ -149,8 +147,7 @@ class UserSeeder extends Seeder
                 'email' => 'stafkepeg2@pta-papuabarat.go.id',
                 'roles' => ['peserta'],
                 'jabatan_keterangan' => 'Staf Kepegawaian',
-                'unit_kode' => 'KEPEGAWAIAN',
-                'bidang_kode' => 'KEPEGAWAIAN',
+                'unit_kode' => 'KESEKRETARIATAN',
                 'hirarki' => 210,
                 'nip' => '199001010017',
                 'no_hp' => '08123456017',
@@ -160,8 +157,7 @@ class UserSeeder extends Seeder
                 'email' => 'stafrenpro@pta-papuabarat.go.id',
                 'roles' => ['peserta'],
                 'jabatan_keterangan' => 'Staf Perencanaan',
-                'unit_kode' => 'KEPEGAWAIAN',
-                'bidang_kode' => 'PERENCANAAN',
+                'unit_kode' => 'KESEKRETARIATAN',
                 'hirarki' => 220,
                 'nip' => '199001010018',
                 'no_hp' => '08123456018',
@@ -171,8 +167,7 @@ class UserSeeder extends Seeder
                 'email' => 'stafkeuangan@pta-papuabarat.go.id',
                 'roles' => ['peserta'],
                 'jabatan_keterangan' => 'Staf Keuangan',
-                'unit_kode' => 'UMUM',
-                'bidang_kode' => 'KEUANGAN',
+                'unit_kode' => 'KESEKRETARIATAN',
                 'hirarki' => 230,
                 'nip' => '199001010019',
                 'no_hp' => '08123456019',
@@ -182,8 +177,7 @@ class UserSeeder extends Seeder
                 'email' => 'stafturt@pta-papuabarat.go.id',
                 'roles' => ['peserta'],
                 'jabatan_keterangan' => 'Staf TURT',
-                'unit_kode' => 'UMUM',
-                'bidang_kode' => 'TURT',
+                'unit_kode' => 'KESEKRETARIATAN',
                 'hirarki' => 240,
                 'nip' => '199001010020',
                 'no_hp' => '08123456020',
@@ -193,8 +187,7 @@ class UserSeeder extends Seeder
                 'email' => 'stafpersuratan@pta-papuabarat.go.id',
                 'roles' => ['peserta'],
                 'jabatan_keterangan' => 'Staf Persuratan',
-                'unit_kode' => 'PERSURATAN',
-                'bidang_kode' => 'PERSURATAN',
+                'unit_kode' => 'KESEKRETARIATAN',
                 'hirarki' => 250,
                 'nip' => '199001010021',
                 'no_hp' => '08123456021',
@@ -205,7 +198,6 @@ class UserSeeder extends Seeder
                 'roles' => ['peserta'],
                 'jabatan_keterangan' => 'Staf Kepaniteraan',
                 'unit_kode' => 'KEPANITERAAN',
-                'bidang_kode' => 'KEPANITERAAN',
                 'hirarki' => 260,
                 'nip' => '199001010022',
                 'no_hp' => '08123456022',
@@ -216,7 +208,6 @@ class UserSeeder extends Seeder
                 'roles' => ['peserta'],
                 'jabatan_keterangan' => 'Staf Kepaniteraan',
                 'unit_kode' => 'KEPANITERAAN',
-                'bidang_kode' => 'KEPANITERAAN',
                 'hirarki' => 270,
                 'nip' => '199001010023',
                 'no_hp' => '08123456023',
@@ -227,7 +218,6 @@ class UserSeeder extends Seeder
                 'roles' => ['peserta'],
                 'jabatan_keterangan' => 'Panitera Pengganti',
                 'unit_kode' => 'KEPANITERAAN',
-                'bidang_kode' => 'KEPANITERAAN',
                 'hirarki' => 280,
                 'nip' => '199001010024',
                 'no_hp' => '08123456024',
@@ -238,7 +228,6 @@ class UserSeeder extends Seeder
                 'roles' => ['peserta'],
                 'jabatan_keterangan' => 'Panitera Pengganti',
                 'unit_kode' => 'KEPANITERAAN',
-                'bidang_kode' => 'KEPANITERAAN',
                 'hirarki' => 290,
                 'nip' => '199001010025',
                 'no_hp' => '08123456025',
@@ -251,9 +240,6 @@ class UserSeeder extends Seeder
                 ? Unit::find($jabatan->unit_id)
                 : Unit::where('kode', $userData['unit_kode'] ?? null)->first();
             $unitId = optional($unit)->id;
-            $bidangKode = $userData['bidang_kode'] ?? $this->resolveBidangKode($userData['jabatan_kode'] ?? null);
-            $bidang = Bidang::where('kode', $bidangKode)->first();
-
             $user = User::updateOrCreate(
                 ['email' => $userData['email']],
                 [
@@ -262,7 +248,6 @@ class UserSeeder extends Seeder
                     'jabatan_id' => $jabatan ? $jabatan->id : null,
                     'jabatan_keterangan' => $jabatan ? $jabatan->nama : ($userData['jabatan_keterangan'] ?? null),
                     'unit_id' => $unitId,
-                    'bidang_id' => $bidang ? $bidang->id : null,
                     'hirarki' => $userData['hirarki'] ?? $this->resolveHirarki($userData['jabatan_kode'] ?? null),
                     'nip' => $userData['nip'],
                     'no_hp' => $userData['no_hp'],
@@ -274,28 +259,6 @@ class UserSeeder extends Seeder
 
             $user->roles()->sync($roleIds);
         }
-    }
-
-    protected function resolveBidangKode($jabatanKode)
-    {
-        $map = [
-            'KPTA' => 'PIMPINAN',
-            'WKPTA' => 'PIMPINAN',
-            'SEK' => 'PIMPINAN',
-            'PAN' => 'PIMPINAN',
-            'KABAG_KEPEG' => 'KEPEGAWAIAN',
-            'KASUBAG_KEPEG' => 'KEPEGAWAIAN',
-            'KASUBAG_RENPRO' => 'PERENCANAAN',
-            'KASUBAG_LAPKEU' => 'KEUANGAN',
-            'KABAG_UMUM' => 'TURT',
-            'KASUBAG_TURT' => 'TURT',
-            'PANMUD_BANDING' => 'KEPANITERAAN',
-            'PANMUD_HUKUM' => 'KEPANITERAAN',
-            'ADMIN_SURAT' => 'PERSURATAN',
-            'OPR_SM' => 'PERSURATAN',
-        ];
-
-        return $map[$jabatanKode] ?? null;
     }
 
     protected function resolveHirarki($jabatanKode)

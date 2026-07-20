@@ -27,7 +27,7 @@ class AgendaPimpinanController extends Controller
             ->orderByDesc('waktu')
             ->get();
 
-        $users = User::with(['jabatan', 'unit', 'bidang'])
+        $users = User::with(['jabatan', 'unit'])
             ->active()
             ->ordered()
             ->get();

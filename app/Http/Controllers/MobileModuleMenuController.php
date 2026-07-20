@@ -2,22 +2,37 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\ModuleSettingService;
 use Illuminate\Http\Request;
 
 class MobileModuleMenuController extends Controller
 {
-    public function __construct()
+    protected $moduleSettings;
+
+    public function __construct(ModuleSettingService $moduleSettings)
     {
+        $this->moduleSettings = $moduleSettings;
         $this->middleware('auth');
     }
 
     public function show(Request $request, $module)
     {
         $user = $request->user();
+        $moduleKey = $this->moduleSettings->resolveMobileModule($module);
+        $moduleState = $moduleKey ? $this->moduleSettings->state($moduleKey, $user) : null;
+
+        if ($moduleState && !$moduleState['visible_mobile']) {
+            return response()->view('errors.module-unavailable', ['module' => $moduleState], 503);
+        }
+
         $menu = $this->buildMenu($user, $module);
 
         abort_unless($menu, 404);
         abort_unless(!empty($menu['items']), 403);
+
+        if ($moduleState) {
+            $menu['title'] = $moduleState['label'];
+        }
 
         return view('mobile-menu.show', [
             'menu' => $menu,
@@ -38,6 +53,7 @@ class MobileModuleMenuController extends Controller
                     $this->item('Beranda', route('dashboard'), 'fas fa-home', 'indigo'),
                     $this->item('Profil Saya', route('profile.edit'), 'fas fa-user-cog', 'slate'),
                     $this->item('Authenticator', route('two-factor.edit'), 'fas fa-shield-alt', 'teal'),
+                    $isSuperAdmin ? $this->item('Pengaturan Modul', route('admin.module-settings.index'), 'fas fa-sliders-h', 'purple') : null,
                 ],
             ],
             'action' => [
@@ -85,10 +101,10 @@ class MobileModuleMenuController extends Controller
                 'subtitle' => 'Rapat, agenda pimpinan, dan pertemuan virtual.',
                 'icon' => 'fas fa-users',
                 'tone' => 'teal',
-                'items' => ($isSuperAdmin || $user->canAccessMeetingModule() || $user->canAccessVirtualMeetings()) ? array_values(array_filter([
+                'items' => ($isSuperAdmin || $user->canAccessMeetingModule() || $user->canAccessMeetingFollowUps() || $user->canAccessVirtualMeetings()) ? array_values(array_filter([
                     ($isSuperAdmin || $user->canAccessMeetingModule()) ? $this->item('Rapat', route('rapat.index'), 'far fa-calendar-alt', 'teal') : null,
                     ($isSuperAdmin || $user->canAccessMeetingMinutes()) ? $this->item('Notulensi', route('rapat.notulensi.index'), 'far fa-file-alt', 'indigo') : null,
-                    ($isSuperAdmin || $user->canAccessMeetingModule()) ? $this->item('Tindak Lanjut', route('rapat.notulensi.follow-ups'), 'fas fa-tasks', 'orange') : null,
+                    ($isSuperAdmin || $user->canAccessMeetingFollowUps()) ? $this->item('Tindak Lanjut', route('rapat.notulensi.follow-ups'), 'fas fa-tasks', 'orange') : null,
                     ($isSuperAdmin || $user->canAccessMeetingModule()) ? $this->item('Absensi', route('rapat.absensi.index'), 'fas fa-clipboard-check', 'green') : null,
                     ($isSuperAdmin || $user->canAccessMeetingModule()) ? $this->item('Laporan', route('rapat.laporan.index'), 'far fa-file-pdf', 'red') : null,
                     ($isSuperAdmin || $user->canAccessAgendaPimpinan()) ? $this->item('Agenda Pimpinan', route('rapat.agenda.index'), 'fas fa-calendar-day', 'blue') : null,
@@ -187,6 +203,10 @@ class MobileModuleMenuController extends Controller
                 ] : [],
             ],
         ];
+
+        if (isset($menus[$module])) {
+            $menus[$module]['items'] = array_values(array_filter($menus[$module]['items']));
+        }
 
         return $menus[$module] ?? null;
     }

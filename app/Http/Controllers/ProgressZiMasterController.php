@@ -230,7 +230,7 @@ class ProgressZiMasterController extends Controller
             'guidelineSubPoints' => $this->guidelineSubPointOptions(),
             'evidenceSourceOptions' => $evidenceSourceOptions,
             'kategoriSuratOptions' => $this->rapatDocumentService->getKategoriSuratLeafOptions(),
-            'meetingParticipants' => User::with(['unit', 'bidang', 'jabatan', 'roles'])->active()->ordered()->get(),
+            'meetingParticipants' => User::with(['unit', 'jabatan', 'roles'])->active()->ordered()->get(),
             'meetingApprovers' => User::withRoleOrDelegatedJabatan(['admin', 'approval', 'super_admin'])
                 ->active()
                 ->with('jabatan')

@@ -775,7 +775,6 @@ class LegacyPersuratanImportService
             'jabatan_id' => optional($jabatan)->id,
             'jabatan_keterangan' => $this->legacyJabatanName($legacyUser->id_jabatan ?? null),
             'unit_id' => $unitId,
-            'bidang_id' => null,
             'hirarki' => 999,
             'nip' => $this->normalizeLegacyNip($legacyUser->nip ?? null),
             'no_hp' => $legacyUser->no_wa ?? null,

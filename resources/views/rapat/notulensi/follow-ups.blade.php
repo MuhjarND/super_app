@@ -177,6 +177,12 @@
 @endsection
 
 @section('content')
+    @if(auth()->user()->canMonitorAllMeetingFollowUps() && !auth()->user()->canAccessMeetingMinutes())
+        <div class="alert alert-info d-flex align-items-center mb-3">
+            <i class="fas fa-eye mr-2"></i>
+            <span>Mode monitoring pimpinan: seluruh tindak lanjut rapat ditampilkan dalam akses baca.</span>
+        </div>
+    @endif
     @if(session('success'))
         <div class="alert alert-success">{{ session('success') }}</div>
     @endif
@@ -206,6 +212,7 @@
                     </thead>
                     <tbody>
                         @forelse($followUpItems as $item)
+                            @php($canManageItem = auth()->user()->canManageMeetingFollowUp($item))
                             <tr>
                                 <td>
                                     <div class="followup-item-title">{{ optional(optional($item->notulensi)->rapat)->judul ?: '-' }}</div>
@@ -223,14 +230,16 @@
                                 </td>
                                 <td class="followup-status-cell">
                                     <div class="followup-status-stack">
-                                        <div class="followup-status-wrap">
-                                            <select class="followup-status-select status-{{ $item->status }}" onchange="updateFollowUpStatus(this, {{ $item->id }}, '{{ $item->status }}')">
-                                                <option value="pending" {{ $item->status === 'pending' ? 'selected' : '' }}>Belum Ditindaklanjuti</option>
-                                                <option value="process" {{ $item->status === 'process' ? 'selected' : '' }}>Proses</option>
-                                                <option value="completed" {{ $item->status === 'completed' ? 'selected' : '' }}>Selesai</option>
-                                            </select>
-                                            <span class="followup-status-arrow"><i class="fas fa-chevron-down"></i></span>
-                                        </div>
+                                        @if($canManageItem)
+                                            <div class="followup-status-wrap">
+                                                <select class="followup-status-select status-{{ $item->status }}" onchange="updateFollowUpStatus(this, {{ $item->id }}, '{{ $item->status }}')">
+                                                    <option value="pending" {{ $item->status === 'pending' ? 'selected' : '' }}>Belum Ditindaklanjuti</option>
+                                                    <option value="process" {{ $item->status === 'process' ? 'selected' : '' }}>Proses</option>
+                                                    <option value="completed" {{ $item->status === 'completed' ? 'selected' : '' }}>Selesai</option>
+                                                </select>
+                                                <span class="followup-status-arrow"><i class="fas fa-chevron-down"></i></span>
+                                            </div>
+                                        @endif
                                         <span class="followup-status-badge {{ $item->status }}">
                                             {{ $item->status === 'pending' ? 'Belum Ditindaklanjuti' : ($item->status === 'process' ? 'Proses' : 'Selesai') }}
                                         </span>
@@ -244,9 +253,11 @@
                                             <div class="small text-muted">Belum ada eviden</div>
                                         @endif
                                         <div class="eviden-actions">
-                                            <button type="button" class="btn btn-sm btn-outline-primary" onclick="openEvidenceUploadModal({{ $item->id }}, '{{ e(optional(optional($item->notulensi)->rapat)->judul ?: '-') }}')">
-                                                <i class="fas fa-upload mr-1"></i>{{ $item->eviden_path ? 'Ganti Eviden' : 'Upload Eviden' }}
-                                            </button>
+                                            @if($canManageItem)
+                                                <button type="button" class="btn btn-sm btn-outline-primary" onclick="openEvidenceUploadModal({{ $item->id }}, '{{ e(optional(optional($item->notulensi)->rapat)->judul ?: '-') }}')">
+                                                    <i class="fas fa-upload mr-1"></i>{{ $item->eviden_path ? 'Ganti Eviden' : 'Upload Eviden' }}
+                                                </button>
+                                            @endif
                                             @if($item->eviden_path)
                                                 <button type="button"
                                                     class="btn btn-sm btn-outline-secondary"
@@ -258,9 +269,13 @@
                                     </div>
                                 </td>
                                 <td class="text-right">
-                                    <button type="button" class="btn btn-sm btn-primary" {{ !$item->eviden_path ? 'disabled' : '' }} onclick="openFollowUpModal({{ $item->id }}, '{{ e(optional(optional($item->notulensi)->rapat)->judul ?: '-') }}')">
-                                        <i class="fas fa-check mr-1"></i>Selesaikan
-                                    </button>
+                                    @if($canManageItem && $item->status !== 'completed')
+                                        <button type="button" class="btn btn-sm btn-primary" {{ !$item->eviden_path ? 'disabled' : '' }} onclick="openFollowUpModal({{ $item->id }}, '{{ e(optional(optional($item->notulensi)->rapat)->judul ?: '-') }}')">
+                                            <i class="fas fa-check mr-1"></i>Selesaikan
+                                        </button>
+                                    @else
+                                        <span class="text-muted">-</span>
+                                    @endif
                                 </td>
                             </tr>
                         @empty

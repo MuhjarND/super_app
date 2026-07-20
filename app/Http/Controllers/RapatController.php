@@ -56,7 +56,7 @@ class RapatController extends Controller
             ->get();
 
         $kategoriSuratOptions = $this->documentService->getKategoriSuratLeafOptions();
-        $participants = User::with(['unit', 'bidang', 'jabatan', 'roles'])
+        $participants = User::with(['unit', 'jabatan', 'roles'])
             ->active()
             ->ordered()
             ->get();

@@ -17,7 +17,8 @@ class UserWorkbookSyncService
     public function sync($path, $resetPasswords = false)
     {
         $rows = $this->parseWorkbook($path);
-        $unitMap = Unit::whereIn('kode', ['PIMPINAN', 'KESEKRETARIATAN', 'KEPANITERAAN'])->pluck('id', 'kode');
+        $unitMap = Unit::whereIn('kode', ['PIMPINAN', 'HAKIM_TINGGI', 'KESEKRETARIATAN', 'KEPANITERAAN'])
+            ->pluck('id', 'kode');
         $roleMap = Role::pluck('id', 'name');
         $summary = [
             'rows_read' => count($rows),
@@ -57,7 +58,6 @@ class UserWorkbookSyncService
                     'jabatan_id' => data_get($resolvedJabatan, 'id'),
                     'jabatan_keterangan' => $jabatanLabel,
                     'unit_id' => $unitId ?: optional($existingUser)->unit_id,
-                    'bidang_id' => optional($existingUser)->bidang_id,
                     'hirarki' => $this->resolveHirarki($row['hirarki'] ?? null, optional($existingUser)->hirarki),
                     'nip' => optional($existingUser)->nip,
                     'no_hp' => $this->normalizePhone($row['nomor hp'] ?? null) ?: optional($existingUser)->no_hp,
@@ -189,7 +189,7 @@ class UserWorkbookSyncService
         $unitCodeMap = [
             'ketua' => 'PIMPINAN',
             'wakil_ketua' => 'PIMPINAN',
-            'hakim_tinggi' => 'PIMPINAN',
+            'hakim_tinggi' => 'HAKIM_TINGGI',
             'sekretaris' => 'KESEKRETARIATAN',
             'kepala_bagian' => 'KESEKRETARIATAN',
             'kepala_sub_bagian' => 'KESEKRETARIATAN',

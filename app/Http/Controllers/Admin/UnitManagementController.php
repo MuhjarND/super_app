@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Unit;
 use Illuminate\Http\Request;
-use Illuminate\Validation\Rule;
 
 class UnitManagementController extends Controller
 {
@@ -33,49 +32,4 @@ class UnitManagementController extends Controller
         return view('admin.units.index', compact('units', 'filters'));
     }
 
-    public function create()
-    {
-        return redirect()->route('admin.units.index');
-    }
-
-    public function store(Request $request)
-    {
-        $data = $this->validateRequest($request);
-        Unit::create($data);
-
-        return redirect()->route('admin.units.index')->with('success', 'Unit berhasil ditambahkan.');
-    }
-
-    public function edit(Unit $unit)
-    {
-        return redirect()->route('admin.units.index');
-    }
-
-    public function update(Request $request, Unit $unit)
-    {
-        $data = $this->validateRequest($request, $unit->id);
-        $unit->update($data);
-
-        return redirect()->route('admin.units.index')->with('success', 'Unit berhasil diperbarui.');
-    }
-
-    public function destroy(Unit $unit)
-    {
-        if ($unit->users()->exists() || $unit->jabatans()->exists()) {
-            return redirect()->route('admin.units.index')->with('error', 'Unit masih dipakai oleh user atau jabatan.');
-        }
-
-        $unit->delete();
-
-        return redirect()->route('admin.units.index')->with('success', 'Unit berhasil dihapus.');
-    }
-
-    protected function validateRequest(Request $request, $unitId = null)
-    {
-        return $request->validate([
-            'nama' => ['required', 'string', 'max:255'],
-            'kode' => ['required', 'string', 'max:100', Rule::unique('units', 'kode')->ignore($unitId)],
-            'keterangan' => ['nullable', 'string'],
-        ]);
-    }
 }

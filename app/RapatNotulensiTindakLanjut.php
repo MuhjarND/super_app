@@ -42,6 +42,23 @@ class RapatNotulensiTindakLanjut extends Model
         return $this->belongsTo(User::class, 'completed_by');
     }
 
+    public function scopeVisibleTo($query, User $user)
+    {
+        if ($user->canAccessMeetingMinutes() || $user->canMonitorAllMeetingFollowUps()) {
+            return $query;
+        }
+
+        if ($user->canMonitorNotulensiFollowUps()) {
+            $monitorableUnits = $user->monitorable_meeting_unit_codes;
+
+            return $query->whereHas('user.unit', function ($unitQuery) use ($monitorableUnits) {
+                $unitQuery->whereIn('kode', $monitorableUnits);
+            });
+        }
+
+        return $query->where('user_id', $user->id);
+    }
+
     public function getStatusBadgeAttribute()
     {
         $map = [

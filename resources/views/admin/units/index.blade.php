@@ -70,12 +70,7 @@
 @section('content-header')
     <div class="content-header">
         <div class="container-fluid">
-            <div class="d-flex justify-content-between align-items-center admin-units-top">
-                <h1>Kelola Unit</h1>
-                <button class="btn app-create-btn" data-toggle="modal" data-target="#createUnitModal">
-                    <i class="fas fa-plus mr-1"></i> Tambah Unit
-                </button>
-            </div>
+            <h1>Unit Kerja</h1>
         </div>
     </div>
 @endsection
@@ -108,7 +103,6 @@
                             <th>Keterangan</th>
                             <th>User</th>
                             <th>Jabatan</th>
-                            <th class="text-right">Aksi</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -119,59 +113,10 @@
                                 <td data-label="Keterangan">{{ $unit->keterangan ?: '-' }}</td>
                                 <td data-label="User">{{ $unit->users_count }}</td>
                                 <td data-label="Jabatan">{{ $unit->jabatans_count }}</td>
-                                <td class="app-action-cell" data-label="Aksi">
-                                    <div class="app-action-group">
-                                    <button class="app-icon-btn edit" data-mobile-label="Edit" data-toggle="modal"
-                                        data-target="#editUnitModal{{ $unit->id }}">
-                                        <i class="fas fa-pen"></i>
-                                    </button>
-                                    <form action="{{ route('admin.units.destroy', $unit) }}" method="POST" class="d-inline">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="app-icon-btn delete" data-mobile-label="Hapus"
-                                            onclick="return confirm('Hapus unit ini?')">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
-                                    </form>
-                                    </div>
-                                </td>
                             </tr>
-
-                            <div class="modal fade" id="editUnitModal{{ $unit->id }}" tabindex="-1">
-                                <div class="modal-dialog">
-                                    <div class="modal-content">
-                                        <div class="modal-header">
-                                            <h5 class="modal-title">Edit Unit</h5>
-                                            <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
-                                        </div>
-                                        <form method="POST" action="{{ route('admin.units.update', $unit) }}">
-                                            @csrf
-                                            @method('PUT')
-                                            <div class="modal-body">
-                                                <div class="form-group">
-                                                    <label>Nama Unit</label>
-                                                    <input type="text" name="nama" class="form-control" value="{{ $unit->nama }}" required>
-                                                </div>
-                                                <div class="form-group">
-                                                    <label>Kode</label>
-                                                    <input type="text" name="kode" class="form-control" value="{{ $unit->kode }}" required>
-                                                </div>
-                                                <div class="form-group">
-                                                    <label>Keterangan</label>
-                                                    <textarea name="keterangan" class="form-control" rows="4">{{ $unit->keterangan }}</textarea>
-                                                </div>
-                                            </div>
-                                            <div class="modal-footer">
-                                                <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Batal</button>
-                                                <button type="submit" class="btn btn-primary">Simpan</button>
-                                            </div>
-                                        </form>
-                                    </div>
-                                </div>
-                            </div>
                         @empty
                             <tr>
-                                <td colspan="6" class="text-center text-muted py-4">Belum ada data unit.</td>
+                                <td colspan="5" class="text-center text-muted py-4">Belum ada data unit.</td>
                             </tr>
                         @endforelse
                     </tbody>
@@ -180,38 +125,6 @@
         </div>
         <div class="card-footer clearfix">
             {{ $units->links() }}
-        </div>
-    </div>
-
-    <div class="modal fade" id="createUnitModal" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Tambah Unit</h5>
-                    <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
-                </div>
-                <form method="POST" action="{{ route('admin.units.store') }}">
-                    @csrf
-                    <div class="modal-body">
-                        <div class="form-group">
-                            <label>Nama Unit</label>
-                            <input type="text" name="nama" class="form-control" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Kode</label>
-                            <input type="text" name="kode" class="form-control" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Keterangan</label>
-                            <textarea name="keterangan" class="form-control" rows="4"></textarea>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Batal</button>
-                        <button type="submit" class="btn btn-primary">Simpan</button>
-                    </div>
-                </form>
-            </div>
         </div>
     </div>
 @endsection

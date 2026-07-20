@@ -314,21 +314,11 @@ class RapatNotulensiController extends Controller
 
     public function followUpIndex()
     {
-        abort_unless(auth()->check() && auth()->user()->canAccessMeetingModule(), 403);
+        abort_unless(auth()->check() && auth()->user()->canAccessMeetingFollowUps(), 403);
 
         $user = auth()->user();
-        $query = RapatNotulensiTindakLanjut::with(['notulensi.rapat', 'user.unit', 'completedBy']);
-
-        if (!$user->canAccessMeetingMinutes()) {
-            if ($user->canMonitorNotulensiFollowUps()) {
-                $monitorableUnits = $user->monitorable_meeting_unit_codes;
-                $query->whereHas('user.unit', function ($unitQuery) use ($monitorableUnits) {
-                    $unitQuery->whereIn('kode', $monitorableUnits);
-                });
-            } else {
-                $query->where('user_id', $user->id);
-            }
-        }
+        $query = RapatNotulensiTindakLanjut::with(['notulensi.rapat', 'user.unit', 'completedBy'])
+            ->visibleTo($user);
 
         $items = $query->orderByRaw("CASE WHEN status = 'pending' THEN 0 WHEN status = 'process' THEN 1 ELSE 2 END")
             ->orderByDesc('updated_at')
@@ -342,12 +332,7 @@ class RapatNotulensiController extends Controller
 
     public function updateFollowUpStatus(Request $request, RapatNotulensiTindakLanjut $tindakLanjut)
     {
-        abort_unless(auth()->check() && auth()->user()->canAccessMeetingModule(), 403);
-
-        abort_unless(
-            auth()->user()->canAccessMeetingMinutes() || (int) $tindakLanjut->user_id === (int) auth()->id(),
-            403
-        );
+        abort_unless(auth()->check() && auth()->user()->canManageMeetingFollowUp($tindakLanjut), 403);
 
         $request->validate([
             'status' => ['required', 'in:pending,process,completed'],
@@ -385,12 +370,7 @@ class RapatNotulensiController extends Controller
 
     public function uploadFollowUpEvidence(Request $request, RapatNotulensiTindakLanjut $tindakLanjut)
     {
-        abort_unless(auth()->check() && auth()->user()->canAccessMeetingModule(), 403);
-
-        abort_unless(
-            auth()->user()->canAccessMeetingMinutes() || (int) $tindakLanjut->user_id === (int) auth()->id(),
-            403
-        );
+        abort_unless(auth()->check() && auth()->user()->canManageMeetingFollowUp($tindakLanjut), 403);
 
         $request->validate([
             'eviden_file' => ['required', 'file', 'mimes:pdf,jpg,jpeg,png,doc,docx,xls,xlsx', 'max:10240'],
@@ -420,14 +400,7 @@ class RapatNotulensiController extends Controller
 
     public function followUpEvidence(RapatNotulensiTindakLanjut $tindakLanjut)
     {
-        abort_unless(auth()->check() && auth()->user()->canAccessMeetingModule(), 403);
-
-        abort_unless(
-            auth()->user()->canAccessMeetingMinutes()
-            || auth()->user()->canMonitorFollowUpForUser($tindakLanjut->user)
-            || (int) $tindakLanjut->user_id === (int) auth()->id(),
-            403
-        );
+        abort_unless(auth()->check() && auth()->user()->canViewMeetingFollowUp($tindakLanjut), 403);
 
         abort_unless($tindakLanjut->eviden_path, 404);
 
@@ -436,12 +409,7 @@ class RapatNotulensiController extends Controller
 
     public function completeFollowUp(Request $request, RapatNotulensiTindakLanjut $tindakLanjut)
     {
-        abort_unless(auth()->check() && auth()->user()->canAccessMeetingModule(), 403);
-
-        abort_unless(
-            auth()->user()->canAccessMeetingMinutes() || (int) $tindakLanjut->user_id === (int) auth()->id(),
-            403
-        );
+        abort_unless(auth()->check() && auth()->user()->canManageMeetingFollowUp($tindakLanjut), 403);
 
         $request->validate([
             'catatan_penyelesaian' => ['nullable', 'string'],

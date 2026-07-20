@@ -731,18 +731,8 @@ class DashboardController extends Controller
     protected function pendingMeetingFollowUpQuery($user)
     {
         $query = RapatNotulensiTindakLanjut::with(['notulensi.rapat', 'user.unit'])
-            ->where('status', 'pending');
-
-        if (!$user->canAccessMeetingMinutes()) {
-            if ($user->canMonitorNotulensiFollowUps()) {
-                $monitorableUnits = $user->monitorable_meeting_unit_codes;
-                $query->whereHas('user.unit', function ($unitQuery) use ($monitorableUnits) {
-                    $unitQuery->whereIn('kode', $monitorableUnits);
-                });
-            } else {
-                $query->where('user_id', $user->id);
-            }
-        }
+            ->where('status', 'pending')
+            ->visibleTo($user);
 
         return $query;
     }

@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Admin;
 
 use App\AppSetting;
-use App\Bidang;
 use App\Http\Controllers\Controller;
 use App\Jabatan;
 use App\Role;
@@ -29,7 +28,7 @@ class UserManagementController extends Controller
 
     public function index(Request $request)
     {
-        $query = User::with(['roles', 'jabatan', 'unit', 'bidang', 'atasanLangsung', 'pejabatBerwenang', 'activeJabatanDelegations.jabatan'])
+        $query = User::with(['roles', 'jabatan', 'unit', 'atasanLangsung', 'pejabatBerwenang', 'activeJabatanDelegations.jabatan'])
             ->where(function ($builder) {
                 $builder->where('status_aktif_pegawai', true)
                     ->orWhere('hirarki', '<', 999);
@@ -59,20 +58,15 @@ class UserManagementController extends Controller
             $query->where('unit_id', $request->unit_id);
         }
 
-        if ($request->filled('bidang_id')) {
-            $query->where('bidang_id', $request->bidang_id);
-        }
-
         $users = $query->ordered()->paginate(15)->appends($request->query());
         $roles = Role::orderBy('display_name')->get();
         $jabatans = Jabatan::with('unit')->orderBy('nama')->get();
         $units = Unit::orderBy('nama')->get();
-        $bidangs = Bidang::orderBy('nama')->get();
         $supervisorOptions = User::with('jabatan')->active()->ordered()->get(['id', 'name', 'nip', 'jabatan_id', 'hirarki']);
-        $filters = $request->only(['search', 'role_id', 'jabatan_id', 'unit_id', 'bidang_id']);
+        $filters = $request->only(['search', 'role_id', 'jabatan_id', 'unit_id']);
         $whatsAppEnabled = $this->whatsAppService->isEnabled();
 
-        return view('admin.users.index', compact('users', 'roles', 'jabatans', 'units', 'bidangs', 'supervisorOptions', 'filters', 'whatsAppEnabled'));
+        return view('admin.users.index', compact('users', 'roles', 'jabatans', 'units', 'supervisorOptions', 'filters', 'whatsAppEnabled'));
     }
 
     public function create()
@@ -92,7 +86,6 @@ class UserManagementController extends Controller
                 'jabatan_id' => $data['jabatan_id'] ?? null,
                 'jabatan_keterangan' => $data['jabatan_keterangan'] ?? null,
                 'unit_id' => $data['unit_id'] ?? null,
-                'bidang_id' => $data['bidang_id'] ?? null,
                 'hirarki' => $data['hirarki'] ?? 999,
                 'nip' => $data['nip'] ?? null,
                 'no_hp' => $data['no_hp'] ?? null,
@@ -124,7 +117,6 @@ class UserManagementController extends Controller
                 'jabatan_id' => $data['jabatan_id'] ?? null,
                 'jabatan_keterangan' => $data['jabatan_keterangan'] ?? null,
                 'unit_id' => $data['unit_id'] ?? null,
-                'bidang_id' => $data['bidang_id'] ?? null,
                 'hirarki' => $data['hirarki'] ?? 999,
                 'nip' => $data['nip'] ?? null,
                 'no_hp' => $data['no_hp'] ?? null,
@@ -226,7 +218,6 @@ class UserManagementController extends Controller
             'jabatan_id' => ['nullable', 'exists:jabatans,id'],
             'jabatan_keterangan' => ['nullable', 'string', 'max:255'],
             'unit_id' => ['nullable', 'exists:units,id'],
-            'bidang_id' => ['nullable', 'exists:bidangs,id'],
             'hirarki' => ['nullable', 'integer', 'min:1'],
             'nip' => ['nullable', 'string', 'max:50'],
             'no_hp' => ['nullable', 'string', 'max:50'],
@@ -279,7 +270,6 @@ class UserManagementController extends Controller
         $data['roles'] = Role::orderBy('display_name')->get();
         $data['jabatans'] = Jabatan::with('unit')->orderBy('nama')->get();
         $data['units'] = Unit::orderBy('nama')->get();
-        $data['bidangs'] = Bidang::orderBy('nama')->get();
         $data['supervisorOptions'] = User::with('jabatan')->active()->ordered()->get(['id', 'name', 'nip', 'jabatan_id', 'hirarki']);
 
         return $data;

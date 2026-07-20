@@ -10,6 +10,7 @@ class User extends Authenticatable
     protected $effectiveJabatansCache = null;
     protected $effectiveAssignmentUserIdsCache = null;
     protected $delegatedStructuralRoleNamesCache = null;
+    protected $hasAssignedMeetingFollowUpsCache = null;
 
     use Notifiable;
 
@@ -30,7 +31,6 @@ class User extends Authenticatable
         'jabatan_id',
         'jabatan_keterangan',
         'unit_id',
-        'bidang_id',
         'hirarki',
         'nip',
         'no_hp',
@@ -91,11 +91,6 @@ class User extends Authenticatable
     public function unit()
     {
         return $this->belongsTo(Unit::class);
-    }
-
-    public function bidang()
-    {
-        return $this->belongsTo(Bidang::class);
     }
 
     public function atasanLangsung()
@@ -346,7 +341,7 @@ class User extends Authenticatable
     public function getMonitorableMeetingUnitCodesAttribute()
     {
         if ($this->hasJabatanKode('SEK')) {
-            return ['KESEKRETARIATAN', 'KEPEGAWAIAN', 'UMUM', 'PERSURATAN'];
+            return ['KESEKRETARIATAN'];
         }
 
         if ($this->hasJabatanKode('PAN')) {
@@ -358,11 +353,13 @@ class User extends Authenticatable
 
     public function canMonitorNotulensiFollowUps()
     {
-        if ($this->isSuperAdmin()) {
-            return true;
-        }
+        return $this->canMonitorAllMeetingFollowUps()
+            || !empty($this->monitorable_meeting_unit_codes);
+    }
 
-        return !empty($this->monitorable_meeting_unit_codes);
+    public function canMonitorAllMeetingFollowUps()
+    {
+        return $this->isSuperAdmin() || $this->isPimpinan();
     }
 
     public function canMonitorFollowUpForUser($targetUser)
@@ -371,7 +368,54 @@ class User extends Authenticatable
             return false;
         }
 
+        if ($this->canMonitorAllMeetingFollowUps()) {
+            return true;
+        }
+
         return in_array(optional($targetUser->unit)->kode, $this->monitorable_meeting_unit_codes, true);
+    }
+
+    public function hasAssignedMeetingFollowUps()
+    {
+        if ($this->relationLoaded('tindakLanjutNotulensiItems')) {
+            return $this->tindakLanjutNotulensiItems->isNotEmpty();
+        }
+
+        if ($this->hasAssignedMeetingFollowUpsCache === null) {
+            $this->hasAssignedMeetingFollowUpsCache = $this->tindakLanjutNotulensiItems()->exists();
+        }
+
+        return $this->hasAssignedMeetingFollowUpsCache;
+    }
+
+    public function canAccessMeetingFollowUps()
+    {
+        return $this->canAccessMeetingModule()
+            || $this->canMonitorNotulensiFollowUps()
+            || $this->hasAssignedMeetingFollowUps();
+    }
+
+    public function canManageMeetingFollowUp($followUp)
+    {
+        return $this->canAccessMeetingMinutes()
+            || ($followUp && (int) $followUp->user_id === (int) $this->id);
+    }
+
+    public function canViewMeetingFollowUp($followUp)
+    {
+        if ($this->canManageMeetingFollowUp($followUp)) {
+            return true;
+        }
+
+        if (!$followUp || !$this->canMonitorNotulensiFollowUps()) {
+            return false;
+        }
+
+        if ($this->canMonitorAllMeetingFollowUps()) {
+            return true;
+        }
+
+        return $this->canMonitorFollowUpForUser($followUp->user);
     }
 
     public function canAccessMeetingApproval()
@@ -536,6 +580,7 @@ class User extends Authenticatable
     {
         return $this->canAccessPersuratanMenu()
             || $this->canAccessMeetingModule()
+            || $this->canAccessMeetingFollowUps()
             || $this->canAccessLeaveModule()
             || $this->canAccessProgressZiModule()
             || $this->canAccessInventoryModule()

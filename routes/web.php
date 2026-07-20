@@ -126,9 +126,10 @@ Route::middleware(['auth'])->group(function () {
         Route::post('users/{user}/send-login-info', 'Admin\UserManagementController@sendLoginInfo')->name('users.send-login-info');
         Route::patch('users/{user}/toggle-status', 'Admin\UserManagementController@toggleStatus')->name('users.toggle-status');
         Route::post('whatsapp-notifications/toggle', 'Admin\UserManagementController@toggleWhatsAppNotifications')->name('whatsapp-notifications.toggle');
+        Route::get('module-settings', 'Admin\ModuleSettingController@index')->name('module-settings.index');
+        Route::put('module-settings', 'Admin\ModuleSettingController@update')->name('module-settings.update');
         Route::resource('jabatans', 'Admin\JabatanManagementController')->except(['show']);
-        Route::resource('units', 'Admin\UnitManagementController')->except(['show']);
-        Route::resource('bidangs', 'Admin\BidangManagementController')->except(['show']);
+        Route::resource('units', 'Admin\UnitManagementController')->only(['index']);
         Route::resource('kategori-surats', 'Admin\KategoriSuratManagementController')->except(['show']);
         Route::resource('kategori-rapats', 'Admin\KategoriRapatManagementController')->except(['show']);
         Route::resource('dasar-hukums', 'Admin\DasarHukumManagementController')->except(['show']);
@@ -274,11 +275,6 @@ Route::middleware(['auth'])->group(function () {
         Route::prefix('notulensi')->name('notulensi.')->group(function () {
             Route::get('/item/{notulensi}/pdf', 'RapatNotulensiController@pdf')->name('pdf');
             Route::get('/item/{notulensi}/file', 'RapatNotulensiController@file')->name('file');
-            Route::get('/tindak-lanjut', 'RapatNotulensiController@followUpIndex')->name('follow-ups');
-            Route::post('/tindak-lanjut/{tindakLanjut}/status', 'RapatNotulensiController@updateFollowUpStatus')->name('follow-ups.status');
-            Route::post('/tindak-lanjut/{tindakLanjut}/eviden', 'RapatNotulensiController@uploadFollowUpEvidence')->name('follow-ups.eviden');
-            Route::get('/tindak-lanjut/{tindakLanjut}/eviden', 'RapatNotulensiController@followUpEvidence')->name('follow-ups.eviden.view');
-            Route::post('/tindak-lanjut/{tindakLanjut}/complete', 'RapatNotulensiController@completeFollowUp')->name('follow-ups.complete');
         });
 
         Route::get('/approval', 'RapatApprovalController@index')->middleware('role:admin,approval,super_admin')->name('approval.index');
@@ -330,6 +326,14 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/{voting}/stats', 'VotingController@stats')->name('stats');
             Route::get('/{voting}/pdf', 'VotingController@resultsPdf')->name('pdf');
         });
+    });
+
+    Route::prefix('rapat/notulensi')->name('rapat.notulensi.')->group(function () {
+        Route::get('/tindak-lanjut', 'RapatNotulensiController@followUpIndex')->name('follow-ups');
+        Route::post('/tindak-lanjut/{tindakLanjut}/status', 'RapatNotulensiController@updateFollowUpStatus')->name('follow-ups.status');
+        Route::post('/tindak-lanjut/{tindakLanjut}/eviden', 'RapatNotulensiController@uploadFollowUpEvidence')->name('follow-ups.eviden');
+        Route::get('/tindak-lanjut/{tindakLanjut}/eviden', 'RapatNotulensiController@followUpEvidence')->name('follow-ups.eviden.view');
+        Route::post('/tindak-lanjut/{tindakLanjut}/complete', 'RapatNotulensiController@completeFollowUp')->name('follow-ups.complete');
     });
 
     Route::prefix('perpustakaan')->name('library.')->middleware('library.access')->group(function () {

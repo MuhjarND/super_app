@@ -87,17 +87,6 @@
                 </select>
             </div>
             <div class="col-md-6 form-group">
-                <label>Bidang</label>
-                <select name="bidang_id" class="form-control">
-                    <option value="">-- Pilih Bidang --</option>
-                    @foreach($bidangs as $bidang)
-                        <option value="{{ $bidang->id }}" {{ (string) old('bidang_id', $user->bidang_id) === (string) $bidang->id ? 'selected' : '' }}>
-                            {{ $bidang->nama }}
-                        </option>
-                    @endforeach
-                </select>
-            </div>
-            <div class="col-md-6 form-group">
                 <label>Jabatan</label>
                 <select name="jabatan_id" class="form-control">
                     <option value="">-- Pilih Jabatan --</option>

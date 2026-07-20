@@ -651,7 +651,7 @@
         <div class="card-header">
             <form method="GET" action="{{ route('admin.users.index') }}" class="admin-users-filter" id="adminUsersFilter">
                 <div class="row">
-                    <div class="col-md-3 form-group mb-md-0">
+                    <div class="col-md-4 form-group mb-md-0">
                         <input type="text" name="search" class="form-control" value="{{ $filters['search'] ?? '' }}"
                             placeholder="Cari nama, email, NIP, HP">
                     </div>
@@ -685,17 +685,7 @@
                             @endforeach
                         </select>
                     </div>
-                    <div class="col-md-2 form-group mb-md-0">
-                        <select name="bidang_id" class="form-control">
-                            <option value="">Semua Bidang</option>
-                            @foreach($bidangs as $bidang)
-                                <option value="{{ $bidang->id }}" {{ (string) ($filters['bidang_id'] ?? '') === (string) $bidang->id ? 'selected' : '' }}>
-                                    {{ $bidang->nama }}
-                                </option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div class="col-md-1 d-flex" style="gap: 6px;">
+                    <div class="col-md-2 d-flex" style="gap: 6px;">
                         <button type="submit" class="btn btn-primary btn-block">Filter</button>
                         <a href="{{ route('admin.users.index') }}" class="btn btn-outline-secondary admin-users-reset">Reset</a>
                     </div>
@@ -841,7 +831,6 @@
                     'roles' => $roles,
                     'jabatans' => $jabatans,
                     'units' => $units,
-                    'bidangs' => $bidangs,
                     'supervisorOptions' => $supervisorOptions,
                 ])
             @endforeach

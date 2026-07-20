@@ -9,11 +9,9 @@ class UnitSeeder extends Seeder
     {
         $units = [
             ['kode' => 'PIMPINAN', 'nama' => 'Pimpinan', 'keterangan' => 'Ketua dan Wakil Ketua PTA'],
+            ['kode' => 'HAKIM_TINGGI', 'nama' => 'Hakim Tinggi', 'keterangan' => 'Hakim Tinggi PTA Papua Barat'],
             ['kode' => 'KESEKRETARIATAN', 'nama' => 'Kesekretariatan', 'keterangan' => 'Sekretaris dan unsur pendukung kesekretariatan'],
             ['kode' => 'KEPANITERAAN', 'nama' => 'Kepaniteraan', 'keterangan' => 'Panitera dan unsur kepaniteraan'],
-            ['kode' => 'KEPEGAWAIAN', 'nama' => 'Kepegawaian', 'keterangan' => 'Kabag dan Kasubag kepegawaian'],
-            ['kode' => 'UMUM', 'nama' => 'Umum dan Keuangan', 'keterangan' => 'Kabag umum, pelaporan, dan TURT'],
-            ['kode' => 'PERSURATAN', 'nama' => 'Persuratan', 'keterangan' => 'Admin dan operator persuratan'],
         ];
 
         foreach ($units as $unit) {

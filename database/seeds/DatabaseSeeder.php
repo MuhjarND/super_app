@@ -1,7 +1,6 @@
 <?php
 
 use Illuminate\Database\Seeder;
-use App\Bidang;
 use App\Unit;
 use App\KategoriRapat;
 use App\KategoriSurat;
@@ -13,7 +12,6 @@ class DatabaseSeeder extends Seeder
     public function run()
     {
         $this->seedUnits();
-        $this->seedBidangs();
 
         $this->call([
             RoleSeeder::class,
@@ -39,11 +37,9 @@ class DatabaseSeeder extends Seeder
     {
         $units = [
             ['kode' => 'PIMPINAN', 'nama' => 'Pimpinan', 'keterangan' => 'Ketua dan Wakil Ketua PTA'],
+            ['kode' => 'HAKIM_TINGGI', 'nama' => 'Hakim Tinggi', 'keterangan' => 'Hakim Tinggi PTA Papua Barat'],
             ['kode' => 'KESEKRETARIATAN', 'nama' => 'Kesekretariatan', 'keterangan' => 'Sekretaris dan unsur pendukung kesekretariatan'],
             ['kode' => 'KEPANITERAAN', 'nama' => 'Kepaniteraan', 'keterangan' => 'Panitera dan unsur kepaniteraan'],
-            ['kode' => 'KEPEGAWAIAN', 'nama' => 'Kepegawaian', 'keterangan' => 'Kabag dan Kasubag kepegawaian'],
-            ['kode' => 'UMUM', 'nama' => 'Umum dan Keuangan', 'keterangan' => 'Kabag umum, pelaporan, dan TURT'],
-            ['kode' => 'PERSURATAN', 'nama' => 'Persuratan', 'keterangan' => 'Admin dan operator persuratan'],
         ];
 
         foreach ($units as $unit) {
@@ -69,23 +65,6 @@ class DatabaseSeeder extends Seeder
                     'aktif' => true,
                 ]
             );
-        }
-    }
-
-    protected function seedBidangs()
-    {
-        $bidangs = [
-            ['kode' => 'PIMPINAN', 'nama' => 'Pimpinan', 'keterangan' => 'Ketua, Wakil Ketua, Sekretaris, dan Panitera'],
-            ['kode' => 'KEPEGAWAIAN', 'nama' => 'Kepegawaian', 'keterangan' => 'Bidang kepegawaian dan pengembangan SDM'],
-            ['kode' => 'PERENCANAAN', 'nama' => 'Perencanaan', 'keterangan' => 'Bidang perencanaan, program, dan pelaporan'],
-            ['kode' => 'KEUANGAN', 'nama' => 'Keuangan', 'keterangan' => 'Bidang keuangan dan pelaporan'],
-            ['kode' => 'TURT', 'nama' => 'TURT', 'keterangan' => 'Bidang tata usaha, rumah tangga, dan protokoler'],
-            ['kode' => 'KEPANITERAAN', 'nama' => 'Kepaniteraan', 'keterangan' => 'Bidang kepaniteraan dan hukum'],
-            ['kode' => 'PERSURATAN', 'nama' => 'Persuratan', 'keterangan' => 'Bidang pengelolaan surat masuk dan keluar'],
-        ];
-
-        foreach ($bidangs as $bidang) {
-            Bidang::updateOrCreate(['kode' => $bidang['kode']], $bidang);
         }
     }
 

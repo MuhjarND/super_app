@@ -15,6 +15,7 @@ use App\ZiActivityApproval;
 use App\ZiEvidence;
 use App\ZiIndicator;
 use App\Services\UnifiedActionCenterService;
+use App\Services\ModuleSettingService;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\ServiceProvider;
@@ -80,6 +81,7 @@ class AppServiceProvider extends ServiceProvider
             ];
 
             $user = Auth::user();
+            $view->with('moduleControls', app(ModuleSettingService::class)->statesFor($user));
             if (!$user) {
                 $view->with($counts);
                 return;
@@ -219,18 +221,8 @@ class AppServiceProvider extends ServiceProvider
             }
 
             $pendingFollowUpQuery = RapatNotulensiTindakLanjut::with(['notulensi.rapat'])
-                ->where('status', 'pending');
-
-            if (!$user->canAccessMeetingMinutes()) {
-                if ($user->canMonitorNotulensiFollowUps()) {
-                    $monitorableUnits = $user->monitorable_meeting_unit_codes;
-                    $pendingFollowUpQuery->whereHas('user.unit', function ($unitQuery) use ($monitorableUnits) {
-                        $unitQuery->whereIn('kode', $monitorableUnits);
-                    });
-                } else {
-                    $pendingFollowUpQuery->where('user_id', $user->id);
-                }
-            }
+                ->where('status', 'pending')
+                ->visibleTo($user);
 
             foreach ((clone $pendingFollowUpQuery)->latest()->take(5)->get() as $followUp) {
                 $rapat = optional($followUp->notulensi)->rapat;

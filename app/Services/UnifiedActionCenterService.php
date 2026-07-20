@@ -473,7 +473,7 @@ class UnifiedActionCenterService
 
     protected function buildMeetingItems(User $user)
     {
-        if (!$user->canAccessMeetingModule()) {
+        if (!$user->canAccessMeetingFollowUps()) {
             return collect();
         }
 
@@ -537,7 +537,7 @@ class UnifiedActionCenterService
 
         $followUpQuery = RapatNotulensiTindakLanjut::with(['notulensi.rapat', 'user.unit'])
             ->whereIn('status', ['pending', 'process'])
-            ->where('user_id', $user->id);
+            ->visibleTo($user);
 
         $items = $items->merge($followUpQuery->latest()->take(12)->get()->map(function ($followUp) {
             $isProcess = $followUp->status === 'process';
@@ -845,7 +845,7 @@ class UnifiedActionCenterService
 
     protected function buildHistoricalMeetingItems(User $user)
     {
-        if (!$user->canAccessMeetingModule()) {
+        if (!$user->canAccessMeetingFollowUps()) {
             return collect();
         }
 
@@ -913,7 +913,7 @@ class UnifiedActionCenterService
 
         $followUpQuery = RapatNotulensiTindakLanjut::with(['notulensi.rapat', 'user.unit'])
             ->where('status', 'completed')
-            ->where('user_id', $user->id);
+            ->visibleTo($user);
 
         $items = $items->merge($followUpQuery->latest('completed_at')->take(15)->get()->map(function ($followUp) {
             return $this->makeItem([

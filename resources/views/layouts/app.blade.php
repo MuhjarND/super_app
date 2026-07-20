@@ -3207,50 +3207,57 @@
                 <nav class="mt-1">
                     @php($sidebarUser = Auth::user())
                     @php($isSidebarSuperAdmin = $sidebarUser && $sidebarUser->isSuperAdmin())
+                    @php($showDesktopModule = function ($key) use ($moduleControls) { return data_get($moduleControls, $key . '.visible_desktop', true); })
+                    @php($showMobileLayoutModule = function ($key) use ($moduleControls) { return data_get($moduleControls, $key . '.visible_mobile', true); })
+                    @php($moduleMenuLabel = function ($key, $fallback) use ($moduleControls) { return data_get($moduleControls, $key . '.label', $fallback); })
                     <ul class="nav nav-pills nav-sidebar flex-column" role="menu">
 
+                        @if($showDesktopModule('dashboard'))
                         <li class="nav-item">
                             <a href="{{ route('dashboard') }}"
                                 class="nav-link {{ request()->routeIs('dashboard') ? 'active' : '' }}">
                                 <i class="nav-icon fas fa-th-large"></i>
-                                <p>Dashboard</p>
+                                <p>{{ $moduleMenuLabel('dashboard', 'Dashboard') }}</p>
                             </a>
                         </li>
+                        @endif
 
-                        @if($sidebarUser->canAccessLeadershipDashboard())
+                        @if($showDesktopModule('leadership') && $sidebarUser->canAccessLeadershipDashboard())
                             <li class="nav-item">
                                 <a href="{{ route('dashboard.leadership') }}"
                                     class="nav-link {{ request()->routeIs('dashboard.leadership') ? 'active' : '' }}">
                                     <i class="nav-icon fas fa-user-tie"></i>
-                                    <p>Dashboard Pimpinan</p>
+                                    <p>{{ $moduleMenuLabel('leadership', 'Dashboard Pimpinan') }}</p>
                                 </a>
                             </li>
+                        @endif
+                        @if($showDesktopModule('audit_trail') && $sidebarUser->canAccessLeadershipDashboard())
                             <li class="nav-item">
                                 <a href="{{ route('audit-trail.index') }}"
                                     class="nav-link {{ request()->routeIs('audit-trail.*') ? 'active' : '' }}">
                                     <i class="nav-icon fas fa-history"></i>
-                                    <p>Audit Trail</p>
+                                    <p>{{ $moduleMenuLabel('audit_trail', 'Audit Trail') }}</p>
                                 </a>
                             </li>
                         @endif
 
-                        @if($sidebarUser->canAccessIntegratedCalendar())
+                        @if($showDesktopModule('calendar') && $sidebarUser->canAccessIntegratedCalendar())
                             <li class="nav-item">
                                 <a href="{{ route('calendar.integrated.index') }}"
                                     class="nav-link {{ request()->routeIs('calendar.integrated.*') ? 'active' : '' }}">
                                     <i class="nav-icon far fa-calendar-alt"></i>
-                                    <p>Kalender Terpadu</p>
+                                    <p>{{ $moduleMenuLabel('calendar', 'Kalender Terpadu') }}</p>
                                 </a>
                             </li>
                         @endif
 
-                        @if($sidebarUser->canAccessUnifiedActionCenter())
+                        @if($showDesktopModule('action_center') && $sidebarUser->canAccessUnifiedActionCenter())
                             <li class="nav-item">
                                 <a href="{{ route('action-center.index') }}"
                                     class="nav-link {{ request()->routeIs('action-center.*') ? 'active' : '' }}">
                                     <i class="nav-icon fas fa-tasks"></i>
                                     <p>
-                                        Tindak Lanjut Terpadu
+                                        {{ $moduleMenuLabel('action_center', 'Tindak Lanjut Terpadu') }}
                                         @if(($sidebarActionCenterCount ?? 0) > 0)
                                             <span class="right badge badge-danger">{{ ($sidebarActionCenterCount ?? 0) > 99 ? '99+' : $sidebarActionCenterCount }}</span>
                                         @endif
@@ -3259,10 +3266,10 @@
                             </li>
                         @endif
 
-                        @if($isSidebarSuperAdmin || $sidebarUser->canAccessApprovalCenter())
+                        @if($showDesktopModule('approval') && ($isSidebarSuperAdmin || $sidebarUser->canAccessApprovalCenter()))
                             <li class="nav-section " data-section="approval">
                                 <button type="button" class="nav-section-toggle {{ ($sidebarApprovalTotalCount ?? 0) > 0 ? 'has-alert' : '' }}">
-                                    <span>Approval</span>
+                                    <span>{{ $moduleMenuLabel('approval', 'Approval') }}</span>
                                     <i class="fas fa-chevron-down section-chevron"></i>
                                 </button>
                                 <ul class="nav nav-pills flex-column nav-section-menu">
@@ -3289,10 +3296,10 @@
                             </li>
                         @endif
 
-                        @if($isSidebarSuperAdmin || $sidebarUser->canAccessPersuratanMenu())
+                        @if($showDesktopModule('persuratan') && ($isSidebarSuperAdmin || $sidebarUser->canAccessPersuratanMenu()))
                             <li class="nav-section " data-section="persuratan">
                                 <button type="button" class="nav-section-toggle {{ (($sidebarSuratMasukOpenCount ?? 0) > 0 || ($sidebarSuratKeluarDraftCount ?? 0) > 0) ? 'has-alert' : '' }}">
-                                    <span>Persuratan</span>
+                                    <span>{{ $moduleMenuLabel('persuratan', 'Persuratan') }}</span>
                                     <i class="fas fa-chevron-down section-chevron"></i>
                                 </button>
                                 <ul class="nav nav-pills flex-column nav-section-menu">
@@ -3337,10 +3344,10 @@
                             </li>
                         @endif
 
-                        @if($isSidebarSuperAdmin || $sidebarUser->canAccessMeetingModule() || $sidebarUser->canAccessVirtualMeetings())
+                        @if($showDesktopModule('rapat') && ($isSidebarSuperAdmin || $sidebarUser->canAccessMeetingModule() || $sidebarUser->canAccessMeetingFollowUps() || $sidebarUser->canAccessVirtualMeetings()))
                             <li class="nav-section " data-section="rapat">
                                 <button type="button" class="nav-section-toggle {{ ($sidebarNotulensiFollowUpCount ?? 0) > 0 ? 'has-alert' : '' }}">
-                                    <span>Rapat / Agenda</span>
+                                    <span>{{ $moduleMenuLabel('rapat', 'Rapat / Agenda') }}</span>
                                     <i class="fas fa-chevron-down section-chevron"></i>
                                 </button>
                                 <ul class="nav nav-pills flex-column nav-section-menu">
@@ -3355,23 +3362,9 @@
                                     @if($isSidebarSuperAdmin || $sidebarUser->canAccessMeetingMinutes())
                                         <li class="nav-item nav-item-sub">
                                             <a href="{{ route('rapat.notulensi.index') }}"
-                                                class="nav-link {{ request()->routeIs('rapat.notulensi.*') ? 'active' : '' }}">
+                                                class="nav-link {{ request()->routeIs('rapat.notulensi.*') && !request()->routeIs('rapat.notulensi.follow-ups*') ? 'active' : '' }}">
                                                 <i class="nav-icon far fa-file-alt"></i>
                                                 <p>Notulensi</p>
-                                            </a>
-                                        </li>
-                                    @endif
-                                    @if($isSidebarSuperAdmin || (!$sidebarUser->canAccessMeetingMinutes()) || (($sidebarNotulensiFollowUpCount ?? 0) > 0))
-                                        <li class="nav-item nav-item-sub">
-                                            <a href="{{ route('rapat.notulensi.follow-ups') }}"
-                                                class="nav-link {{ request()->routeIs('rapat.notulensi.follow-ups') ? 'active' : '' }}">
-                                                <i class="nav-icon fas fa-tasks"></i>
-                                                <p>
-                                                    Tindak Lanjut
-                                                    @if(($sidebarNotulensiFollowUpCount ?? 0) > 0)
-                                                        <span class="right badge badge-danger">{{ $sidebarNotulensiFollowUpCount }}</span>
-                                                    @endif
-                                                </p>
                                             </a>
                                         </li>
                                     @endif
@@ -3425,14 +3418,28 @@
                                             </a>
                                         </li>
                                     @endif
+                                    @if($isSidebarSuperAdmin || $sidebarUser->canAccessMeetingFollowUps())
+                                        <li class="nav-item nav-item-sub">
+                                            <a href="{{ route('rapat.notulensi.follow-ups') }}"
+                                                class="nav-link {{ request()->routeIs('rapat.notulensi.follow-ups') ? 'active' : '' }}">
+                                                <i class="nav-icon fas fa-tasks"></i>
+                                                <p>
+                                                    Tindak Lanjut
+                                                    @if(($sidebarNotulensiFollowUpCount ?? 0) > 0)
+                                                        <span class="right badge badge-danger">{{ $sidebarNotulensiFollowUpCount }}</span>
+                                                    @endif
+                                                </p>
+                                            </a>
+                                        </li>
+                                    @endif
                                 </ul>
                             </li>
                         @endif
 
-                        @if($isSidebarSuperAdmin || $sidebarUser->canAccessLeaveModule())
+                        @if($showDesktopModule('cuti') && ($isSidebarSuperAdmin || $sidebarUser->canAccessLeaveModule()))
                             <li class="nav-section " data-section="cuti">
                                 <button type="button" class="nav-section-toggle">
-                                    <span>Cuti</span>
+                                    <span>{{ $moduleMenuLabel('cuti', 'Cuti') }}</span>
                                     <i class="fas fa-chevron-down section-chevron"></i>
                                 </button>
                                 <ul class="nav nav-pills flex-column nav-section-menu">
@@ -3502,10 +3509,10 @@
                             </li>
                         @endif
 
-                        @if($isSidebarSuperAdmin || $sidebarUser->canAccessInventoryModule())
+                        @if($showDesktopModule('inventory') && ($isSidebarSuperAdmin || $sidebarUser->canAccessInventoryModule()))
                             <li class="nav-section " data-section="perawatan-alat-mesin">
                                 <button type="button" class="nav-section-toggle">
-                                    <span>Perawatan Alat dan Mesin</span>
+                                    <span>{{ $moduleMenuLabel('inventory', 'Perawatan Alat dan Mesin') }}</span>
                                     <i class="fas fa-chevron-down section-chevron"></i>
                                 </button>
                                 <ul class="nav nav-pills flex-column nav-section-menu">
@@ -3593,10 +3600,10 @@
 
                         @endif
 
-                        @if($isSidebarSuperAdmin || $sidebarUser->canAccessLibraryModule())
+                        @if($showDesktopModule('library') && ($isSidebarSuperAdmin || $sidebarUser->canAccessLibraryModule()))
                             <li class="nav-section" data-section="perpustakaan">
                                 <button type="button" class="nav-section-toggle">
-                                    <span>Perpustakaan</span>
+                                    <span>{{ $moduleMenuLabel('library', 'Perpustakaan') }}</span>
                                     <i class="fas fa-chevron-down section-chevron"></i>
                                 </button>
                                 <ul class="nav nav-pills flex-column nav-section-menu">
@@ -3617,10 +3624,10 @@
                             </li>
                         @endif
 
-                        @if($isSidebarSuperAdmin || $sidebarUser->canAccessSupplyModule())
+                        @if($showDesktopModule('supply') && ($isSidebarSuperAdmin || $sidebarUser->canAccessSupplyModule()))
                             <li class="nav-section " data-section="persediaan">
                                 <button type="button" class="nav-section-toggle">
-                                    <span>Persediaan</span>
+                                    <span>{{ $moduleMenuLabel('supply', 'Persediaan') }}</span>
                                     <i class="fas fa-chevron-down section-chevron"></i>
                                 </button>
                                 <ul class="nav nav-pills flex-column nav-section-menu">
@@ -3658,10 +3665,10 @@
                             </li>
                         @endif
 
-                        @if($isSidebarSuperAdmin || $sidebarUser->canAccessProgressZiModule())
+                        @if($showDesktopModule('progress_zi') && ($isSidebarSuperAdmin || $sidebarUser->canAccessProgressZiModule()))
                             <li class="nav-section " data-section="progress-zi">
                                 <button type="button" class="nav-section-toggle {{ ($sidebarProgressZiAttentionCount ?? 0) > 0 ? 'has-alert' : '' }}">
-                                    <span>Progress ZI</span>
+                                    <span>{{ $moduleMenuLabel('progress_zi', 'Progress ZI') }}</span>
                                     <i class="fas fa-chevron-down section-chevron"></i>
                                 </button>
                                 <ul class="nav nav-pills flex-column nav-section-menu">
@@ -3695,10 +3702,10 @@
                             </li>
                         @endif
 
-                        @if($isSidebarSuperAdmin)
+                        @if($showDesktopModule('master_data') && $isSidebarSuperAdmin)
                             <li class="nav-section " data-section="master-data">
                                 <button type="button" class="nav-section-toggle">
-                                    <span>Master Data</span>
+                                    <span>{{ $moduleMenuLabel('master_data', 'Master Data') }}</span>
                                     <i class="fas fa-chevron-down section-chevron"></i>
                                 </button>
                                 <ul class="nav nav-pills flex-column nav-section-menu">
@@ -3721,13 +3728,6 @@
                                             class="nav-link {{ request()->routeIs('admin.units.*') ? 'active' : '' }}">
                                             <i class="nav-icon far fa-building"></i>
                                             <p>Unit Kerja</p>
-                                        </a>
-                                    </li>
-                                    <li class="nav-item nav-item-sub">
-                                        <a href="{{ route('admin.bidangs.index') }}"
-                                            class="nav-link {{ request()->routeIs('admin.bidangs.*') ? 'active' : '' }}">
-                                            <i class="nav-icon fas fa-sitemap"></i>
-                                            <p>Bidang</p>
                                         </a>
                                     </li>
                                     <li class="nav-item nav-item-sub">
@@ -3772,9 +3772,19 @@
                         @endif
 
                         @if($isSidebarSuperAdmin)
+                            <li class="nav-item">
+                                <a href="{{ route('admin.module-settings.index') }}"
+                                    class="nav-link {{ request()->routeIs('admin.module-settings.*') ? 'active' : '' }}">
+                                    <i class="nav-icon fas fa-sliders-h"></i>
+                                    <p>Pengaturan Modul</p>
+                                </a>
+                            </li>
+                        @endif
+
+                        @if($showDesktopModule('archive') && $isSidebarSuperAdmin)
                             <li class="nav-section " data-section="arsip">
                                 <button type="button" class="nav-section-toggle">
-                                    <span>Arsip</span>
+                                    <span>{{ $moduleMenuLabel('archive', 'Arsip') }}</span>
                                     <i class="fas fa-chevron-down section-chevron"></i>
                                 </button>
                                 <ul class="nav nav-pills flex-column nav-section-menu">
@@ -3817,12 +3827,14 @@
             @php($mobileIsSuperAdmin = $mobileUser && $mobileUser->isSuperAdmin())
             @php($mobileMenuModule = optional(request()->route())->parameter('module'))
             <nav class="mobile-bottom-nav" aria-label="Navigasi utama mobile">
+                @if($showMobileLayoutModule('dashboard'))
                 <a href="{{ route('dashboard') }}" class="mobile-bottom-nav-item {{ request()->routeIs('dashboard') || request()->routeIs('home') ? 'active' : '' }}">
                     <i class="fas fa-home"></i>
                     <span>Beranda</span>
                 </a>
+                @endif
 
-                @if($mobileUser && $mobileUser->canAccessUnifiedActionCenter())
+                @if($showMobileLayoutModule('action_center') && $mobileUser && $mobileUser->canAccessUnifiedActionCenter())
                     <a href="{{ route('mobile.menu.show', 'action') }}" class="mobile-bottom-nav-item {{ (request()->routeIs('mobile.menu.show') && $mobileMenuModule === 'action') || request()->routeIs('action-center.*') ? 'active' : '' }}">
                         <i class="fas fa-bell"></i>
                         <span>Tindak</span>
@@ -3832,14 +3844,14 @@
                     </a>
                 @endif
 
-                @if($mobileUser && $mobileUser->canAccessIntegratedCalendar())
+                @if($showMobileLayoutModule('calendar') && $mobileUser && $mobileUser->canAccessIntegratedCalendar())
                     <a href="{{ route('mobile.menu.show', 'calendar') }}" class="mobile-bottom-nav-item {{ (request()->routeIs('mobile.menu.show') && $mobileMenuModule === 'calendar') || request()->routeIs('calendar.integrated.*') ? 'active' : '' }}">
                         <i class="far fa-calendar-alt"></i>
                         <span>Kalender</span>
                     </a>
                 @endif
 
-                @if($mobileIsSuperAdmin || ($mobileUser && $mobileUser->canAccessLeaveModule()))
+                @if($showMobileLayoutModule('cuti') && ($mobileIsSuperAdmin || ($mobileUser && $mobileUser->canAccessLeaveModule())))
                     <a href="{{ route('mobile.menu.show', 'cuti') }}" class="mobile-bottom-nav-item {{ (request()->routeIs('mobile.menu.show') && $mobileMenuModule === 'cuti') || request()->routeIs('cuti.*') ? 'active' : '' }}">
                         <i class="fas fa-calendar-check"></i>
                         <span>Cuti</span>
@@ -4157,7 +4169,6 @@
                 table.classList.contains('laporan-arsip-table') ||
                 table.classList.contains('admin-users-table') ||
                 table.classList.contains('admin-units-table') ||
-                table.classList.contains('admin-bidangs-table') ||
                 table.classList.contains('admin-kategori-table') ||
                 table.classList.contains('leave-type-table')
             ) {

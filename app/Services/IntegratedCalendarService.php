@@ -106,7 +106,7 @@ class IntegratedCalendarService
     protected function buildRapatEvents(User $user, array $filters)
     {
         $query = Rapat::visibleTo($user)
-            ->with(['creator.unit', 'creator.bidang', 'kategoriRapat', 'approvals', 'pesertas'])
+            ->with(['creator.unit', 'kategoriRapat', 'approvals', 'pesertas'])
             ->whereBetween('tanggal', [$filters['start']->toDateString(), $filters['end']->toDateString()]);
 
         if ($filters['scope'] === 'mine' && ($user->canManageRapat() || $user->isSuperAdmin())) {
