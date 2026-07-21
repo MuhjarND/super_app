@@ -951,6 +951,15 @@
 @section('content')
     <div class="surat-workflow-filters" role="group" aria-label="Filter tindak lanjut surat masuk">
         @if($hasDelegationFilter)
+            <a href="{{ route('surat-masuk.index', array_merge(request()->except(['workflow', 'page']), ['workflow' => 'all'])) }}"
+                class="surat-workflow-filter {{ $workflowFilter === 'all' ? 'active' : '' }}" data-workflow="all">
+                Semua
+                <span class="surat-workflow-count {{ ($workflowCounts['all'] ?? 0) > 0 ? 'has-items' : '' }}"
+                    title="{{ $workflowCounts['all'] ?? 0 }} seluruh surat"
+                    aria-label="{{ $workflowCounts['all'] ?? 0 }} seluruh surat">
+                    {{ $workflowCounts['all'] ?? 0 }}
+                </span>
+            </a>
             <a href="{{ route('surat-masuk.index', array_merge(request()->except(['workflow', 'page']), ['workflow' => 'direct'])) }}"
                 class="surat-workflow-filter {{ $workflowFilter === 'direct' ? 'active' : '' }}" data-workflow="direct">
                 Untuk Saya

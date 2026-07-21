@@ -34,9 +34,9 @@ class SuratMasukController extends Controller
 
         $hasDelegationFilter = $user->hasActiveJabatanDelegation();
         $allowedWorkflowFilters = $hasDelegationFilter
-            ? ['direct', 'delegated']
+            ? ['all', 'direct', 'delegated']
             : ['all', 'disposition', 'follow_up'];
-        $defaultWorkflowFilter = $hasDelegationFilter ? 'direct' : 'all';
+        $defaultWorkflowFilter = 'all';
         $workflowFilter = in_array($request->input('workflow'), $allowedWorkflowFilters, true)
             ? $request->input('workflow')
             : $defaultWorkflowFilter;
@@ -45,6 +45,7 @@ class SuratMasukController extends Controller
 
         if ($hasDelegationFilter) {
             $workflowCounts = [
+                'all' => (clone $visibleQuery)->count(),
                 'direct' => $this->applyDelegationScopeFilter(clone $visibleQuery, $user, 'direct')->count(),
                 'delegated' => $this->applyDelegationScopeFilter(clone $visibleQuery, $user, 'delegated')->count(),
             ];
@@ -147,6 +148,10 @@ class SuratMasukController extends Controller
 
     protected function applyDelegationScopeFilter($query, User $user, $scope)
     {
+        if ($scope === 'all') {
+            return $query;
+        }
+
         $delegatedJabatanIds = $user->activeJabatanDelegations
             ->pluck('jabatan_id')
             ->filter()
@@ -170,19 +175,36 @@ class SuratMasukController extends Controller
             })
             ->all();
 
-        $delegatedTarget = function ($disposisiQuery) use ($delegatedJabatanIds, $definitiveUserIds) {
-            $disposisiQuery->where(function ($targetQuery) use ($delegatedJabatanIds, $definitiveUserIds) {
-                $targetQuery->whereIn('kepada_jabatan_id', $delegatedJabatanIds);
-
+        $delegatedTarget = function ($disposisiQuery) use ($delegatedJabatanIds, $definitiveUserIds, $user) {
+            $disposisiQuery->where(function ($targetQuery) use ($delegatedJabatanIds, $definitiveUserIds, $user) {
                 if (!empty($definitiveUserIds)) {
-                    $targetQuery->orWhereIn('kepada_user_id', $definitiveUserIds);
+                    $targetQuery->whereIn('kepada_user_id', $definitiveUserIds);
+                } else {
+                    $targetQuery->whereRaw('1 = 0');
                 }
+
+                $targetQuery->orWhere(function ($jabatanTargetQuery) use ($delegatedJabatanIds, $user) {
+                    $jabatanTargetQuery
+                        ->whereIn('kepada_jabatan_id', $delegatedJabatanIds)
+                        ->where(function ($recipientQuery) use ($user) {
+                            $recipientQuery->whereNull('kepada_user_id')
+                                ->orWhere('kepada_user_id', '!=', $user->id);
+                        });
+                });
             });
         };
 
-        return $scope === 'delegated'
-            ? $query->whereHas('disposisis', $delegatedTarget)
-            : $query->whereDoesntHave('disposisis', $delegatedTarget);
+        $directTarget = function ($disposisiQuery) use ($user) {
+            $disposisiQuery->where('kepada_user_id', $user->id);
+        };
+
+        if ($scope === 'delegated') {
+            return $query
+                ->whereHas('disposisis', $delegatedTarget)
+                ->whereDoesntHave('disposisis', $directTarget);
+        }
+
+        return $query->whereHas('disposisis', $directTarget);
     }
 
     protected function applySearchFilter($query, $search)
