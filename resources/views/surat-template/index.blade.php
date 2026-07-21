@@ -283,6 +283,11 @@
                     <button type="button" class="template-action-btn" data-toggle="modal" data-target="#useTemplateModal{{ $templateId }}" title="{{ $templateSlug === 'surat-tugas' ? 'Buat Surat Tugas' : 'Gunakan Template' }}">
                         <i class="fas fa-pen-alt"></i>
                     </button>
+                    @if($templateSlug === 'surat-tugas')
+                        <button type="button" class="template-action-btn secondary" data-toggle="modal" data-target="#suratTugasEditListModal" title="Edit Surat Tugas">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                    @endif
                     @if($isStoredTemplate && $samplePath)
                         <a href="{{ route('surat-template.sample', ['type' => 'template', 'id' => $templateId]) }}" target="_blank" class="template-action-btn secondary" title="Buka contoh">
                             <i class="fas fa-file-alt"></i>
@@ -308,6 +313,12 @@
                                 <div class="alert alert-light border small">
                                     {{ $templateSlug === 'surat-tugas' ? 'Isi field berikut untuk langsung membuat Surat Tugas dan menyimpannya ke Surat Keluar.' : 'Isi field berikut untuk membuat preview surat dari template yang dipilih.' }}
                                 </div>
+                                @if($templateSlug === 'surat-tugas')
+                                    @include('surat-template.partials.surat-tugas-fields', [
+                                        'fieldValues' => [],
+                                        'modalId' => 'useTemplateModal' . $templateId,
+                                    ])
+                                @else
                                 <div class="row">
                                     @foreach($fieldSchema as $field)
                                         @php
@@ -339,6 +350,7 @@
                                         </div>
                                     @endforeach
                                 </div>
+                                @endif
                             </div>
                             <div class="modal-footer">
                                 <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Batal</button>
@@ -371,6 +383,85 @@
         @endforelse
     </div>
 </div>
+
+<div class="modal fade" id="suratTugasEditListModal" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div>
+                    <h5 class="modal-title">Pilih Surat Tugas</h5>
+                    <small class="text-muted">Pilih draft yang akan diperbarui.</small>
+                </div>
+                <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+            </div>
+            <div class="modal-body p-0">
+                <div class="list-group list-group-flush">
+                    @forelse($suratTugasDrafts as $suratTugas)
+                        @php
+                            $taskApproval = $suratTugas->templateApproval;
+                            $canEditTask = $taskApproval && $taskApproval->status !== 'approved';
+                        @endphp
+                        <div class="list-group-item d-flex justify-content-between align-items-center" style="gap:14px;">
+                            <div class="min-w-0">
+                                <strong class="d-block">{{ $suratTugas->nomor_surat_formatted }}</strong>
+                                <span class="text-muted small d-block">{{ Str::limit($suratTugas->perihal, 100) }}</span>
+                                <span class="badge badge-{{ optional($taskApproval)->status_badge_class ?: 'secondary' }} mt-1">{{ optional($taskApproval)->status_label ?: ucfirst($suratTugas->status) }}</span>
+                            </div>
+                            @if($canEditTask)
+                                <button type="button" class="btn btn-sm btn-primary flex-shrink-0" onclick="openSuratTugasEdit({{ $suratTugas->id }})">
+                                    <i class="fas fa-edit mr-1"></i>Edit
+                                </button>
+                            @else
+                                <span class="text-muted small flex-shrink-0">Sudah disetujui</span>
+                            @endif
+                        </div>
+                    @empty
+                        <div class="text-center text-muted py-5">Belum ada Surat Tugas.</div>
+                    @endforelse
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Tutup</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@foreach($suratTugasDrafts as $suratTugas)
+    @php
+        $taskApproval = $suratTugas->templateApproval;
+        $taskFields = optional($taskApproval)->field_values ?: [];
+    @endphp
+    @if($taskApproval && $taskApproval->status !== 'approved')
+        <div class="modal fade" id="editSuratTugasModal{{ $suratTugas->id }}" tabindex="-1">
+            <div class="modal-dialog modal-xl modal-dialog-scrollable">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <div>
+                            <h5 class="modal-title">Edit Surat Tugas</h5>
+                            <small class="text-muted">{{ $suratTugas->nomor_surat_formatted }}</small>
+                        </div>
+                        <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+                    </div>
+                    <form method="POST" action="{{ route('surat-template.surat-tugas.update', $suratTugas) }}">
+                        @csrf
+                        @method('PUT')
+                        <div class="modal-body">
+                            @include('surat-template.partials.surat-tugas-fields', [
+                                'fieldValues' => $taskFields,
+                                'modalId' => 'editSuratTugasModal' . $suratTugas->id,
+                            ])
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Batal</button>
+                            <button type="submit" class="btn btn-primary"><i class="fas fa-save mr-1"></i>Simpan Perubahan</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    @endif
+@endforeach
 
 <div class="card border-0 shadow-sm template-proposal-panel">
     <div class="card-header bg-white d-flex justify-content-between align-items-center">
@@ -717,7 +808,35 @@
                 });
             });
         });
+
+        $(document).on('change', '.surat-tugas-legal-history', function () {
+            const value = String($(this).val() || '').trim();
+            const target = $(this).data('target');
+            const $textarea = $(target);
+            if (!value || !$textarea.length) {
+                return;
+            }
+
+            const currentLines = String($textarea.val() || '')
+                .split(/\r?\n/)
+                .map(function (line) { return line.trim(); })
+                .filter(Boolean);
+
+            if (!currentLines.includes(value)) {
+                currentLines.push(value);
+                $textarea.val(currentLines.join('\n')).trigger('change');
+            }
+
+            $(this).val('');
+        });
     });
+
+    function openSuratTugasEdit(suratId) {
+        $('#suratTugasEditListModal').modal('hide');
+        setTimeout(function () {
+            $('#editSuratTugasModal' + suratId).modal('show');
+        }, 250);
+    }
 </script>
 @endpush
 

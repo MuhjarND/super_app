@@ -158,7 +158,9 @@
                             <i class="fas {{ data_get($assignmentContext, 'mode') === 'delegated' ? 'fa-user-shield' : 'fa-user-check' }} mt-1"></i>
                             <div>
                                 <strong>{{ data_get($assignmentContext, 'badge') }}</strong>
-                                <div>{{ data_get($assignmentContext, 'description') }}</div>
+                                @if(data_get($assignmentContext, 'description'))
+                                    <div>{{ data_get($assignmentContext, 'description') }}</div>
+                                @endif
                             </div>
                         </div>
                     @endif

@@ -32,18 +32,33 @@ class SuratMasukController extends Controller
         $user = auth()->user();
         $user->loadMissing('jabatan', 'activeJabatanDelegations.jabatan');
 
-        $workflowFilter = in_array($request->input('workflow'), ['all', 'disposition', 'follow_up'], true)
+        $hasDelegationFilter = $user->hasActiveJabatanDelegation();
+        $allowedWorkflowFilters = $hasDelegationFilter
+            ? ['direct', 'delegated']
+            : ['all', 'disposition', 'follow_up'];
+        $defaultWorkflowFilter = $hasDelegationFilter ? 'direct' : 'all';
+        $workflowFilter = in_array($request->input('workflow'), $allowedWorkflowFilters, true)
             ? $request->input('workflow')
-            : 'all';
+            : $defaultWorkflowFilter;
         $search = trim((string) $request->input('search', ''));
         $visibleQuery = SuratMasuk::visibleTo($user);
-        $workflowCounts = [
-            'disposition' => $this->applyNeedsDispositionFilter(clone $visibleQuery, $user)->count(),
-            'follow_up' => $this->applyNeedsFollowUpFilter(clone $visibleQuery, $user)->count(),
-        ];
+
+        if ($hasDelegationFilter) {
+            $workflowCounts = [
+                'direct' => $this->applyDelegationScopeFilter(clone $visibleQuery, $user, 'direct')->count(),
+                'delegated' => $this->applyDelegationScopeFilter(clone $visibleQuery, $user, 'delegated')->count(),
+            ];
+        } else {
+            $workflowCounts = [
+                'disposition' => $this->applyNeedsDispositionFilter(clone $visibleQuery, $user)->count(),
+                'follow_up' => $this->applyNeedsFollowUpFilter(clone $visibleQuery, $user)->count(),
+            ];
+        }
 
         $suratQuery = clone $visibleQuery;
-        if ($workflowFilter === 'disposition') {
+        if ($hasDelegationFilter) {
+            $suratQuery = $this->applyDelegationScopeFilter($suratQuery, $user, $workflowFilter);
+        } elseif ($workflowFilter === 'disposition') {
             $suratQuery = $this->applyNeedsDispositionFilter($suratQuery, $user);
         } elseif ($workflowFilter === 'follow_up') {
             $suratQuery = $this->applyNeedsFollowUpFilter($suratQuery, $user);
@@ -62,6 +77,14 @@ class SuratMasukController extends Controller
         $kategoriSurats = KategoriSurat::where('aktif', true)->orderBy('kode')->get();
         $petunjukOptions = $this->getPetunjukOptions();
         $virtualMeetingUsers = User::with('jabatan')->active()->ordered()->get();
+        $delegationFilterLabel = 'Sebagai ' . $user->activeJabatanDelegations
+            ->pluck('delegation_type')
+            ->filter()
+            ->map(function ($type) {
+                return strtoupper((string) $type);
+            })
+            ->unique()
+            ->implode(' / ');
         $suratHistories = $suratMasuk->getCollection()->mapWithKeys(function ($surat) use ($user) {
             $items = $surat->disposisis
                 ->sortByDesc('created_at')
@@ -116,8 +139,50 @@ class SuratMasukController extends Controller
             'virtualMeetingUsers',
             'workflowFilter',
             'workflowCounts',
+            'hasDelegationFilter',
+            'delegationFilterLabel',
             'search'
         ));
+    }
+
+    protected function applyDelegationScopeFilter($query, User $user, $scope)
+    {
+        $delegatedJabatanIds = $user->activeJabatanDelegations
+            ->pluck('jabatan_id')
+            ->filter()
+            ->map(function ($id) {
+                return (int) $id;
+            })
+            ->unique()
+            ->values()
+            ->all();
+
+        if (empty($delegatedJabatanIds)) {
+            return $scope === 'delegated' ? $query->whereRaw('1 = 0') : $query;
+        }
+
+        $definitiveUserIds = User::active()
+            ->whereIn('jabatan_id', $delegatedJabatanIds)
+            ->where('id', '!=', $user->id)
+            ->pluck('id')
+            ->map(function ($id) {
+                return (int) $id;
+            })
+            ->all();
+
+        $delegatedTarget = function ($disposisiQuery) use ($delegatedJabatanIds, $definitiveUserIds) {
+            $disposisiQuery->where(function ($targetQuery) use ($delegatedJabatanIds, $definitiveUserIds) {
+                $targetQuery->whereIn('kepada_jabatan_id', $delegatedJabatanIds);
+
+                if (!empty($definitiveUserIds)) {
+                    $targetQuery->orWhereIn('kepada_user_id', $definitiveUserIds);
+                }
+            });
+        };
+
+        return $scope === 'delegated'
+            ? $query->whereHas('disposisis', $delegatedTarget)
+            : $query->whereDoesntHave('disposisis', $delegatedTarget);
     }
 
     protected function applySearchFilter($query, $search)

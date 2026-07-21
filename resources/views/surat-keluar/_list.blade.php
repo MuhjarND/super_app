@@ -35,7 +35,18 @@
                             data-perihal="{{ $surat->perihal }}"
                             data-tanggal-surat="{{ optional($surat->tanggal_surat)->format('Y-m-d') }}"
                             data-has-lampiran="{{ $surat->has_lampiran ? 'ya' : 'tidak' }}"
-                            data-can-manage="{{ auth()->user()->canModifySuratKeluar($surat) ? 1 : 0 }}">
+                            data-can-manage="{{ auth()->user()->canModifySuratKeluar($surat) ? 1 : 0 }}"
+                            data-can-calendar="{{ auth()->user()->isSuperAdmin() || (int) $surat->created_by === (int) auth()->id() ? 1 : 0 }}"
+                            data-calendar-exists="{{ $surat->calendarEvent ? 1 : 0 }}"
+                            data-calendar-action-url="{{ route('surat-keluar.calendar.upsert', $surat) }}"
+                            data-calendar-delete-url="{{ route('surat-keluar.calendar.destroy', $surat) }}"
+                            data-calendar-type="{{ optional($surat->calendarEvent)->type }}"
+                            data-calendar-start-date="{{ optional(optional($surat->calendarEvent)->start_date)->format('Y-m-d') }}"
+                            data-calendar-end-date="{{ optional(optional($surat->calendarEvent)->end_date)->format('Y-m-d') }}"
+                            data-calendar-start-time="{{ optional($surat->calendarEvent)->start_time ? substr($surat->calendarEvent->start_time, 0, 5) : '' }}"
+                            data-calendar-end-time="{{ optional($surat->calendarEvent)->end_time ? substr($surat->calendarEvent->end_time, 0, 5) : '' }}"
+                            data-calendar-location="{{ optional($surat->calendarEvent)->location }}"
+                            data-calendar-notes="{{ optional($surat->calendarEvent)->notes }}">
                             <td>
                                 <button type="button" class="btn-expand dt-expand" aria-label="Buka aksi surat">
                                     <i class="fas fa-plus" style="font-size: 10px;"></i>

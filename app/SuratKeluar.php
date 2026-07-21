@@ -104,6 +104,11 @@ class SuratKeluar extends Model
         return $this->hasMany(PdfVerification::class, 'document_id', 'id')->where('module', 'surat_keluar');
     }
 
+    public function calendarEvent()
+    {
+        return $this->hasOne(SuratKeluarCalendarEvent::class);
+    }
+
     public function hasAvailableFile()
     {
         if (!empty($this->file_path)) {

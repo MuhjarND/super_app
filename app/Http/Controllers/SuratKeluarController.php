@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\SuratKeluar;
+use App\SuratKeluarCalendarEvent;
 use App\KlasifikasiKode;
 use App\KategoriSurat;
 use App\Services\SuratTemplateDocumentService;
@@ -78,6 +79,7 @@ class SuratKeluarController extends Controller
                 'pdfVerifications' => function ($query) {
                     $query->whereNotNull('file_path')->where('file_path', '!=', '');
                 },
+                'calendarEvent',
             ])
             ->withCount('penerimaInternal', 'pdfVerifications')
             ->orderBy('created_at', 'desc')
@@ -134,6 +136,7 @@ class SuratKeluarController extends Controller
             ];
         })->values();
         $templatePrefill = session('surat_template_prefill');
+        $calendarTypeOptions = SuratKeluarCalendarEvent::typeOptions();
         return view('surat-keluar.index', compact(
             'suratKeluar',
             'klasifikasiKodes',
@@ -148,7 +151,8 @@ class SuratKeluarController extends Controller
             'canCreateSuratKeluar',
             'activeFilter',
             'search',
-            'templatePrefill'
+            'templatePrefill',
+            'calendarTypeOptions'
         ));
     }
 
@@ -496,6 +500,55 @@ class SuratKeluarController extends Controller
         abort(404, 'File tidak ditemukan.');
     }
 
+    public function upsertCalendarEvent(Request $request, SuratKeluar $suratKeluar)
+    {
+        $this->authorizeCalendarEvent($suratKeluar);
+
+        $data = $request->validate([
+            'type' => ['required', Rule::in(array_keys(SuratKeluarCalendarEvent::typeOptions()))],
+            'start_date' => 'required|date',
+            'end_date' => 'nullable|date|after_or_equal:start_date',
+            'start_time' => 'nullable|date_format:H:i|required_with:end_time',
+            'end_time' => 'nullable|date_format:H:i|required_with:start_time',
+            'location' => 'nullable|string|max:255',
+            'notes' => 'nullable|string|max:1000',
+        ]);
+
+        if (!empty($data['start_time']) && !empty($data['end_time'])) {
+            $startDate = $data['start_date'];
+            $endDate = $data['end_date'] ?? $startDate;
+
+            if ($startDate === $endDate && $data['end_time'] <= $data['start_time']) {
+                return back()
+                    ->withErrors(['end_time' => 'Waktu selesai harus setelah waktu mulai.'])
+                    ->withInput();
+            }
+        }
+
+        $event = $suratKeluar->calendarEvent()->firstOrNew();
+        $event->fill($data);
+        $event->surat_keluar_id = $suratKeluar->id;
+        $event->updated_by = $request->user()->id;
+
+        if (!$event->exists) {
+            $event->created_by = $request->user()->id;
+        }
+
+        $event->save();
+
+        return back()
+            ->with('success', 'Surat keluar berhasil ditambahkan ke Kalender Terpadu.');
+    }
+
+    public function destroyCalendarEvent(Request $request, SuratKeluar $suratKeluar)
+    {
+        $this->authorizeCalendarEvent($suratKeluar);
+        $suratKeluar->calendarEvent()->delete();
+
+        return back()
+            ->with('success', 'Jadwal surat keluar telah dihapus dari Kalender Terpadu.');
+    }
+
     public function arsip(Request $request)
     {
         $query = SuratKeluar::visibleTo(auth()->user())
@@ -653,6 +706,13 @@ class SuratKeluarController extends Controller
                 })->values(),
             ];
         })->all();
+    }
+
+    protected function authorizeCalendarEvent(SuratKeluar $suratKeluar)
+    {
+        $user = auth()->user();
+
+        abort_unless($user && ($user->isSuperAdmin() || (int) $suratKeluar->created_by === (int) $user->id), 403);
     }
 
     protected function decodeTemplateFieldValues($json)

@@ -6,6 +6,7 @@ use App\AgendaPimpinan;
 use App\LeaveRequest;
 use App\Rapat;
 use App\SuratKeluar;
+use App\SuratKeluarCalendarEvent;
 use App\User;
 use App\VirtualMeeting;
 use App\ZiActivity;
@@ -43,6 +44,8 @@ class IntegratedCalendarService
         if (in_array('surat_tugas', $filters['modules'], true)) {
             $events = $events->merge($this->buildSuratTugasEvents($user, $filters));
         }
+
+        $events = $events->merge($this->buildSuratKeluarCalendarEvents($user, $filters));
 
         if (!empty($filters['status'])) {
             $events = $events->where('status_key', $filters['status'])->values();
@@ -473,10 +476,102 @@ class IntegratedCalendarService
                     'kategori' => 'Surat Tugas',
                     'unit' => optional(optional($surat->creator)->unit)->nama ?: '-',
                     'pic' => optional($surat->creator)->name ?: '-',
-                    'location' => $fieldValues['dalam_rangka'] ?? '-',
+                    'location' => $fieldValues['lokasi'] ?? '-',
                     'time' => $startDate->translatedFormat('d M Y') . ' - ' . $endDate->translatedFormat('d M Y'),
                     'participants' => $petugas !== '-' ? $petugas : $this->implodeNames(optional($surat->penerimaInternal)->pluck('name')->all() ?? []),
                     'description' => $fieldValues['untuk_tugas'] ?? ($surat->perihal ?: 'Penugasan pegawai.'),
+                ],
+            ]);
+        })->values();
+    }
+
+    protected function buildSuratKeluarCalendarEvents(User $user, array $filters)
+    {
+        if (!$user->canAccessPersuratanMenu()) {
+            return collect();
+        }
+
+        $query = SuratKeluarCalendarEvent::query()
+            ->with(['suratKeluar.creator.unit', 'suratKeluar.penerimaInternal', 'suratKeluar.templateApproval'])
+            ->whereIn('type', $filters['modules'])
+            ->whereDate('start_date', '<=', $filters['end']->toDateString())
+            ->where(function ($dateQuery) use ($filters) {
+                $dateQuery->whereNull('end_date')
+                    ->orWhereDate('end_date', '>=', $filters['start']->toDateString());
+            })
+            ->whereHas('suratKeluar', function ($suratQuery) use ($user) {
+                $suratQuery->visibleTo($user);
+            });
+
+        if ($filters['scope'] === 'mine') {
+            $query->whereHas('suratKeluar', function ($suratQuery) use ($user) {
+                $suratQuery->where(function ($builder) use ($user) {
+                    $builder->where('created_by', $user->id)
+                        ->orWhereHas('penerimaInternal', function ($recipientQuery) use ($user) {
+                            $recipientQuery->whereIn('users.id', $user->effectiveAssignmentUserIds());
+                        });
+                });
+            });
+        }
+
+        if ($filters['unit_id']) {
+            $query->whereHas('suratKeluar.creator', function ($creatorQuery) use ($filters) {
+                $creatorQuery->where('unit_id', $filters['unit_id']);
+            });
+        }
+
+        return $query->get()->map(function ($calendarEvent) {
+            $surat = $calendarEvent->suratKeluar;
+            $allDay = empty($calendarEvent->start_time);
+            $startDateValue = $calendarEvent->start_date->format('Y-m-d');
+            $endDateValue = optional($calendarEvent->end_date)->format('Y-m-d') ?: $startDateValue;
+
+            if ($allDay) {
+                $start = Carbon::parse($startDateValue, 'Asia/Jayapura')->startOfDay();
+                $eventEnd = Carbon::parse($endDateValue, 'Asia/Jayapura')->addDay()->startOfDay();
+                $statusEnd = Carbon::parse($endDateValue, 'Asia/Jayapura')->endOfDay();
+                $timeLabel = $start->translatedFormat('d M Y');
+                if ($startDateValue !== $endDateValue) {
+                    $timeLabel .= ' - ' . $statusEnd->translatedFormat('d M Y');
+                }
+            } else {
+                $start = Carbon::parse($startDateValue . ' ' . $calendarEvent->start_time, 'Asia/Jayapura');
+                $eventEnd = Carbon::parse($endDateValue . ' ' . ($calendarEvent->end_time ?: $calendarEvent->start_time), 'Asia/Jayapura');
+                if ($eventEnd->lte($start)) {
+                    $eventEnd = (clone $start)->addHour();
+                }
+                $statusEnd = clone $eventEnd;
+                $timeLabel = $start->translatedFormat('d M Y, H:i') . ' WIT';
+                if ($eventEnd->ne($start)) {
+                    $timeLabel .= ' - ' . $eventEnd->translatedFormat('d M Y, H:i') . ' WIT';
+                }
+            }
+
+            $statusKey = $this->resolveTimeStatus($start, $statusEnd);
+            $participants = $this->implodeNames($surat->penerimaInternal->pluck('name')->all());
+
+            return $this->makeEvent([
+                'id' => 'surat-keluar-calendar-' . $calendarEvent->id,
+                'module_key' => $calendarEvent->type,
+                'module_label' => $calendarEvent->type_label,
+                'source_key' => 'surat_keluar_calendar',
+                'title' => $surat->perihal ?: $surat->nomor_surat_formatted,
+                'start' => $start,
+                'end' => $eventEnd,
+                'allDay' => $allDay,
+                'status_key' => $statusKey,
+                'status_label' => $this->statusLabel($statusKey),
+                'color' => $calendarEvent->type_color,
+                'textColor' => '#ffffff',
+                'url' => $surat->hasAvailableFile() ? route('surat-keluar.file', $surat) : route('surat-keluar.index'),
+                'meta' => [
+                    'kategori' => $calendarEvent->type_label,
+                    'unit' => optional(optional($surat->creator)->unit)->nama ?: '-',
+                    'pic' => optional($surat->creator)->name ?: '-',
+                    'location' => $calendarEvent->location ?: '-',
+                    'time' => $timeLabel,
+                    'participants' => $participants,
+                    'description' => $calendarEvent->notes ?: ($surat->perihal ?: 'Agenda dari surat keluar.'),
                 ],
             ]);
         })->values();

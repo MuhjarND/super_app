@@ -447,6 +447,54 @@ class WhatsAppNotificationService
         ]);
     }
 
+    public function notifySuratTugasParafPending(SuratKeluarApproval $approval, User $targetUser)
+    {
+        $approval->loadMissing('suratKeluar');
+        $suratKeluar = $approval->suratKeluar;
+        $message = $this->wrap([
+            'Yth. Bapak/Ibu ' . $targetUser->name . ',',
+            'Terdapat Surat Tugas yang memerlukan pemeriksaan dan paraf Anda.',
+            '',
+            'Nomor Surat: ' . optional($suratKeluar)->nomor_surat_formatted,
+            'Perihal: ' . (optional($suratKeluar)->perihal ?: 'Surat Tugas'),
+            'Status: Menunggu Paraf',
+            '',
+            'Silakan periksa dan proses melalui tautan berikut:',
+            route('surat-keluar.approval.show', $approval),
+        ]);
+
+        return $this->sendToUser($targetUser, $message, [
+            'module' => 'surat_tugas',
+            'event' => 'surat_tugas_paraf_pending',
+            'notifiable_type' => get_class($approval),
+            'notifiable_id' => $approval->id,
+        ]);
+    }
+
+    public function notifySuratTugasSignerPending(SuratKeluarApproval $approval, User $targetUser)
+    {
+        $approval->loadMissing('suratKeluar');
+        $suratKeluar = $approval->suratKeluar;
+        $message = $this->wrap([
+            'Yth. Bapak/Ibu ' . $targetUser->name . ',',
+            'Surat Tugas telah diparaf dan memerlukan persetujuan serta tanda tangan Anda.',
+            '',
+            'Nomor Surat: ' . optional($suratKeluar)->nomor_surat_formatted,
+            'Perihal: ' . (optional($suratKeluar)->perihal ?: 'Surat Tugas'),
+            'Status: Menunggu Persetujuan',
+            '',
+            'Silakan periksa dan proses melalui tautan berikut:',
+            route('surat-keluar.approval.show', $approval),
+        ]);
+
+        return $this->sendToUser($targetUser, $message, [
+            'module' => 'surat_tugas',
+            'event' => 'surat_tugas_approval_pending',
+            'notifiable_type' => get_class($approval),
+            'notifiable_id' => $approval->id,
+        ]);
+    }
+
     public function notifySuratKeluarRecipient(SuratKeluar $suratKeluar, User $targetUser)
     {
         $suratKeluar->loadMissing('creator');

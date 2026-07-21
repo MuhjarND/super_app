@@ -931,7 +931,23 @@ class User extends Authenticatable
 
     public function canAccessApprovalCenter()
     {
-        return $this->canAccessMeetingApproval() || $this->canAccessLeaveApproval() || $this->canApproveSuratKeluarTemplate();
+        return $this->canAccessMeetingApproval()
+            || $this->canAccessLeaveApproval()
+            || $this->canApproveSuratKeluarTemplate()
+            || $this->hasPendingSuratTugasParaf();
+    }
+
+    public function hasPendingSuratTugasParaf()
+    {
+        if (!\Illuminate\Support\Facades\Schema::hasTable('surat_keluar_approvals')
+            || !\Illuminate\Support\Facades\Schema::hasColumn('surat_keluar_approvals', 'paraf_user_id')) {
+            return false;
+        }
+
+        return SuratKeluarApproval::where('status', 'pending')
+            ->where('paraf_status', 'pending')
+            ->whereIn('paraf_user_id', $this->effectiveAssignmentUserIds())
+            ->exists();
     }
 
     public function canManageLeaveMasterData()

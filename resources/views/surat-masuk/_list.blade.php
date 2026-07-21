@@ -79,7 +79,7 @@
                                             <i class="fas {{ data_get($assignmentContext, 'mode') === 'delegated' ? 'fa-user-shield' : 'fa-user-check' }}"></i>
                                             {{ data_get($assignmentContext, 'badge') }}
                                         </span>
-                                        @if(data_get($assignmentContext, 'mode') === 'delegated')
+                                        @if(data_get($assignmentContext, 'description'))
                                             <div class="surat-assignment-note">{{ data_get($assignmentContext, 'description') }}</div>
                                         @endif
                                     </div>

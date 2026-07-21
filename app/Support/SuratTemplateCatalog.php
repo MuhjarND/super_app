@@ -22,11 +22,13 @@ class SuratTemplateCatalog
                 ],
                 'field_schema' => [
                     ['name' => 'dalam_rangka', 'label' => 'Dalam Rangka', 'type' => 'textarea', 'required' => true],
+                    ['name' => 'untuk_tugas', 'label' => 'Untuk', 'type' => 'textarea', 'required' => true],
                     ['name' => 'tambahan_dasar_hukum', 'label' => 'Tambahan Dasar Hukum (Opsional, 1 baris = 1 poin)', 'type' => 'textarea', 'required' => false],
                     ['name' => 'petugas_ids', 'label' => 'Daftar Petugas', 'type' => 'user_multi', 'required' => true],
                     ['name' => 'tanggal_mulai', 'label' => 'Tanggal Mulai', 'type' => 'date', 'required' => true],
                     ['name' => 'tanggal_selesai', 'label' => 'Tanggal Selesai', 'type' => 'date', 'required' => true],
                     ['name' => 'penanda_tangan_id', 'label' => 'Penanda Tangan', 'type' => 'user_select', 'required' => true],
+                    ['name' => 'paraf_user_id', 'label' => 'Paraf', 'type' => 'user_select', 'required' => true],
                     ['name' => 'jabatan_plh', 'label' => 'Jabatan Plh/Plt (Opsional)', 'type' => 'text', 'required' => false],
                     ['name' => 'lokasi', 'label' => 'Lokasi', 'type' => 'text', 'required' => true],
                 ],

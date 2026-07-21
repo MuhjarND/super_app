@@ -178,7 +178,7 @@ class Disposisi extends Model
         return [
             'mode' => 'delegated',
             'badge' => 'Sebagai ' . $type,
-            'description' => 'Ditujukan kepada ' . $originalName . '; ditangani oleh Anda sebagai ' . $type . ' ' . $jabatanName . '.',
+            'description' => null,
             'action_label' => 'Aksi akan dicatat atas nama Anda sebagai ' . $type . ' ' . $jabatanName . '.',
             'type' => $type,
             'jabatan' => $jabatanName,

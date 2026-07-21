@@ -92,17 +92,22 @@ Route::middleware(['auth'])->group(function () {
     Route::put('/surat-keluar/{suratKeluar}', 'SuratKeluarController@update')->name('surat-keluar.update');
     Route::delete('/surat-keluar/{suratKeluar}', 'SuratKeluarController@destroy')->name('surat-keluar.destroy');
     Route::post('/surat-keluar/{suratKeluar}/upload', 'SuratKeluarController@uploadLampiran')->name('surat-keluar.upload');
+    Route::put('/surat-keluar/{suratKeluar}/kalender', 'SuratKeluarController@upsertCalendarEvent')->name('surat-keluar.calendar.upsert');
+    Route::delete('/surat-keluar/{suratKeluar}/kalender', 'SuratKeluarController@destroyCalendarEvent')->name('surat-keluar.calendar.destroy');
     Route::get('/surat-keluar/preview-nomor', 'SuratKeluarController@previewNomor')->name('surat-keluar.preview-nomor');
     Route::get('/surat-keluar-approval/{suratKeluarApproval}', 'SuratKeluarApprovalController@show')->name('surat-keluar.approval.show');
     Route::get('/surat-keluar-approval/{suratKeluarApproval}/preview', 'SuratKeluarApprovalController@preview')->name('surat-keluar.approval.preview');
     Route::post('/surat-keluar-approval/{suratKeluarApproval}/approve', 'SuratKeluarApprovalController@approve')->name('surat-keluar.approval.approve');
     Route::post('/surat-keluar-approval/{suratKeluarApproval}/reject', 'SuratKeluarApprovalController@reject')->name('surat-keluar.approval.reject');
+    Route::post('/surat-keluar-approval/{suratKeluarApproval}/paraf', 'SuratKeluarApprovalController@approveParaf')->name('surat-keluar.approval.paraf');
+    Route::post('/surat-keluar-approval/{suratKeluarApproval}/paraf-reject', 'SuratKeluarApprovalController@rejectParaf')->name('surat-keluar.approval.paraf-reject');
     Route::prefix('template-surat')->name('surat-template.')->group(function () {
         Route::get('/', 'SuratTemplateController@index')->name('index');
         Route::post('/', 'SuratTemplateController@store')->name('store');
         Route::put('/{suratTemplate}', 'SuratTemplateController@update')->name('update');
         Route::post('/{slug}/preview', 'SuratTemplateController@preview')->name('preview');
         Route::post('/{slug}/surat-keluar', 'SuratTemplateController@handoffToSuratKeluar')->name('handoff');
+        Route::put('/surat-tugas/{suratKeluar}', 'SuratTemplateController@updateSuratTugas')->name('surat-tugas.update');
         Route::post('/proposals', 'SuratTemplateController@storeProposal')->name('proposals.store');
         Route::post('/proposals/{proposal}/process', 'SuratTemplateController@processProposal')->name('proposals.process');
         Route::get('/sample/{type}/{id}', 'SuratTemplateController@sample')->name('sample');

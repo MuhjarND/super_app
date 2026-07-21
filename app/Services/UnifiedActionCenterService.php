@@ -404,12 +404,15 @@ class UnifiedActionCenterService
 
     protected function buildPersuratanItems(User $user)
     {
-        if (!$user->canAccessPersuratanMenu()) {
+        $canAccessPersuratan = $user->canAccessPersuratanMenu();
+
+        if (!$canAccessPersuratan && !$user->hasPendingSuratTugasParaf()) {
             return collect();
         }
 
         $items = collect();
 
+        if ($canAccessPersuratan) {
         $disposisiQuery = Disposisi::with(['suratMasuk', 'dariUser', 'kepadaUser.unit'])
             ->whereIn('status', ['pending', 'dibaca', 'diproses'])
             ->addressedToUser($user);
@@ -496,30 +499,49 @@ class UnifiedActionCenterService
                 ]);
             }));
         }
+        }
 
-        if ($user->isSuperAdmin() || $user->canApproveSuratKeluarTemplate()) {
-            $approvalQuery = SuratKeluarApproval::with(['suratKeluar.creator.unit', 'requester.unit'])
-                ->where('status', 'pending')
-                ->whereIn('approver_id', $user->effectiveAssignmentUserIds());
+        if ($canAccessPersuratan || $user->hasPendingSuratTugasParaf()) {
+            $assignmentUserIds = $user->effectiveAssignmentUserIds();
+            $approvalQuery = SuratKeluarApproval::with(['suratKeluar.creator.unit', 'requester.unit', 'approver', 'parafUser'])
+                ->where('status', 'pending');
 
-            $items = $items->merge($approvalQuery->latest()->take(10)->get()->map(function ($approval) {
+            if (!$user->isSuperAdmin()) {
+                $approvalQuery->where(function ($workflowQuery) use ($user, $assignmentUserIds) {
+                    $workflowQuery->where(function ($parafQuery) use ($assignmentUserIds) {
+                        $parafQuery->where('paraf_status', 'pending')
+                            ->whereIn('paraf_user_id', $assignmentUserIds);
+                    });
+
+                    if ($user->canApproveSuratKeluarTemplate()) {
+                        $workflowQuery->orWhere(function ($approvalStepQuery) use ($assignmentUserIds) {
+                            $approvalStepQuery->whereIn('paraf_status', ['not_required', 'approved'])
+                                ->whereIn('approver_id', $assignmentUserIds);
+                        });
+                    }
+                });
+            }
+
+            $items = $items->merge($approvalQuery->latest()->take(10)->get()->map(function ($approval) use ($assignmentUserIds, $user) {
+                $isParafTask = $approval->paraf_status === 'pending'
+                    && ($user->isSuperAdmin() || in_array((int) $approval->paraf_user_id, array_map('intval', $assignmentUserIds), true));
                 return $this->makeItem([
                     'id' => 'persuratan-approval-' . $approval->id,
                     'module_key' => 'persuratan',
                     'module_label' => 'Persuratan',
                     'module_icon' => 'fas fa-envelope-open-text',
-                    'type_label' => 'Approval Surat Keluar',
+                    'type_label' => $isParafTask ? 'Paraf Surat Tugas' : 'Approval Surat Keluar',
                     'title' => optional($approval->suratKeluar)->perihal ?: ($approval->template_name ?: 'Approval surat keluar'),
                     'subtitle' => optional($approval->requester)->name ?: 'Menunggu persetujuan',
-                    'description' => 'Template surat keluar menunggu persetujuan.',
+                    'description' => $isParafTask ? 'Surat Tugas menunggu pemeriksaan dan paraf Anda.' : 'Template surat keluar menunggu persetujuan.',
                     'status_key' => 'waiting',
                     'priority_key' => 'high',
                     'target_at' => optional($approval->created_at),
                     'is_overdue' => optional($approval->created_at)->lt(now('Asia/Jayapura')->subDays(2)),
-                    'assignee_id' => $approval->approver_id,
-                    'assignee_name' => optional($approval->approver)->name ?: '-',
+                    'assignee_id' => $isParafTask ? $approval->paraf_user_id : $approval->approver_id,
+                    'assignee_name' => $isParafTask ? (optional($approval->parafUser)->name ?: '-') : (optional($approval->approver)->name ?: '-'),
                     'action_url' => route('surat-keluar.approval.show', $approval),
-                    'action_text' => 'Buka Approval',
+                    'action_text' => $isParafTask ? 'Buka Paraf' : 'Buka Approval',
                     'unit_label' => optional(optional($approval->requester)->unit)->nama ?: '-',
                     'sort_at' => optional($approval->updated_at ?: $approval->created_at)->timestamp ?: 0,
                 ]);

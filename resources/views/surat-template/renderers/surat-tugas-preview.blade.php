@@ -96,7 +96,7 @@
                 <td class="st-label">Untuk</td>
                 <td class="st-sep">:</td>
                 <td class="st-content">
-                    Melaksanakan {{ $fieldValues['dalam_rangka'] ?? '-' }}, pada tanggal {{ $tanggalTugas }}, di {{ $lokasi }}.
+                    {{ rtrim(trim((string) ($fieldValues['untuk_tugas'] ?? '-')), '.;') }}, pada tanggal {{ $tanggalTugas }}, bertempat di {{ $lokasi }}.
                 </td>
             </tr>
         </table>

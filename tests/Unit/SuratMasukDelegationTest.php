@@ -30,7 +30,8 @@ class SuratMasukDelegationTest extends TestCase
         $this->assertSame('delegated', $context['mode']);
         $this->assertSame('PLT', $context['type']);
         $this->assertSame('Pejabat Definitif', $context['original_user_name']);
-        $this->assertStringContainsString('ditangani oleh Anda sebagai PLT', $context['description']);
+        $this->assertNull($context['description']);
+        $this->assertStringContainsString('sebagai PLT', $context['action_label']);
         $this->assertTrue($delegate->canFollowUpDisposisi($disposisi));
     }
 

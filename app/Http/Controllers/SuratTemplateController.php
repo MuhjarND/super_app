@@ -9,7 +9,9 @@ use App\Http\Requests\StoreSuratTemplateProposalRequest;
 use App\Http\Requests\StoreSuratTemplateRequest;
 use App\Http\Requests\UpdateSuratTemplateRequest;
 use App\KategoriSurat;
+use App\DasarHukum;
 use App\SuratKeluar;
+use App\SuratKeluarApproval;
 use App\SuratTemplate;
 use App\SuratTemplateProposal;
 use App\Support\SuratTemplateCatalog;
@@ -20,6 +22,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 
@@ -90,6 +93,36 @@ class SuratTemplateController extends Controller
             $proposals = $proposalQuery->latest()->get();
         }
 
+        $suratTugasQuery = SuratKeluar::query()
+            ->with(['templateApproval.approver', 'penerimaInternal'])
+            ->whereHas('templateApproval', function ($approvalQuery) {
+                $approvalQuery->where('template_slug', 'surat-tugas');
+            });
+
+        if (!auth()->user()->isSuperAdmin()) {
+            $suratTugasQuery->where('created_by', auth()->id());
+        }
+
+        $suratTugasDrafts = $suratTugasQuery->latest()->take(50)->get();
+        $suratTugasLegalHistory = collect($this->defaultSuratTugasDasarHukum());
+
+        if (Schema::hasTable('dasar_hukums')) {
+            $suratTugasLegalHistory = $suratTugasLegalHistory->merge(
+                DasarHukum::where('aktif', true)->orderBy('urutan')->pluck('uraian')
+            );
+        }
+
+        $suratTugasLegalHistory = $suratTugasLegalHistory
+            ->merge($suratTugasDrafts->flatMap(function ($surat) {
+                return $this->parseLineItems((string) data_get($surat, 'templateApproval.field_values.tambahan_dasar_hukum', ''));
+            }))
+            ->map(function ($item) {
+                return trim((string) $item);
+            })
+            ->filter()
+            ->unique()
+            ->values();
+
         return view('surat-template.index', [
             'templates' => $templates,
             'proposals' => $proposals,
@@ -104,6 +137,8 @@ class SuratTemplateController extends Controller
                 ->withRoleOrDelegatedJabatan(['approval'])
                 ->ordered()
                 ->get(),
+            'suratTugasDrafts' => $suratTugasDrafts,
+            'suratTugasLegalHistory' => $suratTugasLegalHistory,
         ]);
     }
 
@@ -163,6 +198,53 @@ class SuratTemplateController extends Controller
             ->route('surat-keluar.index')
             ->with('surat_template_prefill', $prefill)
             ->with('success', 'Draft surat keluar dari template siap dilengkapi.');
+    }
+
+    public function updateSuratTugas(GenerateSuratTemplatePreviewRequest $request, SuratKeluar $suratKeluar)
+    {
+        $this->abortIfUnauthorized();
+        abort_unless(auth()->user()->isSuperAdmin() || (int) $suratKeluar->created_by === (int) auth()->id(), 403);
+
+        $suratKeluar->loadMissing('templateApproval');
+        $approval = $suratKeluar->templateApproval;
+        abort_unless($approval && $approval->template_slug === 'surat-tugas', 404);
+        abort_if($approval->status === 'approved', 422, 'Surat Tugas yang sudah disetujui tidak dapat diedit.');
+
+        $template = $this->findTemplateBySlug('surat-tugas');
+        abort_unless($template, 404);
+
+        $fields = $this->prepareFieldValuesForTemplate(
+            $template,
+            $this->validateDynamicFields($request, $this->extractFieldSchema($template))
+        );
+        $fields['nomor_surat'] = $suratKeluar->nomor_surat;
+        $fields['tanggal_surat'] = optional($suratKeluar->tanggal_surat)->format('Y-m-d') ?: now()->toDateString();
+
+        $renderedBody = $this->renderTemplateBody($template, $this->extractTemplateBody($template), $fields);
+        $prefill = $this->buildSuratKeluarPrefill($template, $fields, $renderedBody);
+
+        DB::transaction(function () use ($suratKeluar, $prefill) {
+            $suratKeluar->update([
+                'perihal' => $prefill['perihal'],
+                'status' => 'draft',
+            ]);
+            $suratKeluar->penerimaInternal()->sync($prefill['penerima_internal_ids']);
+
+            app(SuratKeluarApprovalService::class)->syncForTemplate(
+                $suratKeluar,
+                [
+                    'template_name' => $prefill['template_name'],
+                    'template_slug' => $prefill['template_slug'],
+                    'rendered_body' => $prefill['rendered_body'],
+                    'field_values' => $prefill['field_values'],
+                ],
+                User::findOrFail($prefill['field_values']['penanda_tangan']['id']),
+                auth()->user()
+            );
+        });
+
+        return redirect()->route('surat-template.index')
+            ->with('success', 'Surat Tugas ' . $suratKeluar->nomor_surat_formatted . ' berhasil diperbarui dan diajukan ulang.');
     }
 
     public function store(StoreSuratTemplateRequest $request)
@@ -379,7 +461,11 @@ class SuratTemplateController extends Controller
             $type = $field['type'] ?? 'text';
 
             if ($type === 'date') {
-                $rules['fields.' . $name] = $baseRule . '|date';
+                $dateRule = $baseRule . '|date';
+                if ($name === 'tanggal_selesai') {
+                    $dateRule .= '|after_or_equal:fields.tanggal_mulai';
+                }
+                $rules['fields.' . $name] = $dateRule;
             } elseif ($type === 'user_multi') {
                 $rules['fields.' . $name] = $baseRule . '|array|min:1';
                 $rules['fields.' . $name . '.*'] = Rule::exists('users', 'id')->where('status_aktif_pegawai', true);
@@ -404,6 +490,13 @@ class SuratTemplateController extends Controller
                     'fields.penanda_tangan_id' => ['Penanda tangan harus user dengan role approval.'],
                 ]);
             }
+        }
+
+        if (!empty($fields['penanda_tangan_id']) && !empty($fields['paraf_user_id'])
+            && (int) $fields['penanda_tangan_id'] === (int) $fields['paraf_user_id']) {
+            throw ValidationException::withMessages([
+                'fields.paraf_user_id' => ['Petugas paraf harus berbeda dari penanda tangan.'],
+            ]);
         }
 
         return $fields;
@@ -459,7 +552,6 @@ class SuratTemplateController extends Controller
         $fields['nomor_surat'] = $generated['nomor'];
         $fields['kota_tanda_tangan'] = 'Manokwari';
         $fields['lokasi'] = trim((string) ($fields['lokasi'] ?? '')) ?: '-';
-        unset($fields['untuk_tugas']);
         $fields['dasar_hukum_default'] = $this->defaultSuratTugasDasarHukum();
         $fields['dasar_hukum_rows'] = array_merge(
             $fields['dasar_hukum_default'],
@@ -495,6 +587,17 @@ class SuratTemplateController extends Controller
             'nip' => optional($penandaTangan)->nip ?: '-',
             'jabatan' => optional(optional($penandaTangan)->jabatan)->nama ?: (optional($penandaTangan)->jabatan_keterangan ?: '-'),
             'jabatan_ttd' => trim((string) ($fields['jabatan_plh'] ?? '')) ?: (optional(optional($penandaTangan)->jabatan)->nama ?: (optional($penandaTangan)->jabatan_keterangan ?: 'Ketua')),
+        ];
+
+        $parafUser = !empty($fields['paraf_user_id'])
+            ? User::with('jabatan')->active()->find($fields['paraf_user_id'])
+            : null;
+
+        $fields['paraf'] = [
+            'id' => optional($parafUser)->id,
+            'nama' => optional($parafUser)->name ?: 'Pejabat Paraf',
+            'nip' => optional($parafUser)->nip ?: '-',
+            'jabatan' => optional(optional($parafUser)->jabatan)->nama ?: (optional($parafUser)->jabatan_keterangan ?: '-'),
         ];
 
         return $fields;

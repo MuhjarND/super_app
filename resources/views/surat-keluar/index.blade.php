@@ -573,6 +573,11 @@
             color: #166534;
         }
 
+        .action-btn.calendar {
+            background: #eef2ff;
+            color: #4338ca;
+        }
+
         .action-btn.delete {
             background: #ffe9e9;
             color: #dc2626;
@@ -1051,6 +1056,87 @@
         </div>
     </div>
 
+    <!-- Integrated Calendar Modal -->
+    <div class="modal fade" id="calendarEventModal" tabindex="-1" aria-labelledby="calendarEventModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <div>
+                        <h5 class="modal-title" id="calendarEventModalLabel">
+                            <i class="far fa-calendar-plus mr-2"></i>Kalender Terpadu
+                        </h5>
+                        <small class="text-muted" id="calendarEventSuratTitle">-</small>
+                    </div>
+                    <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+                </div>
+                <form id="calendarEventForm" method="POST">
+                    <?php echo csrf_field(); ?>
+                    <?php echo method_field('PUT'); ?>
+                    <input type="hidden" name="calendar_surat_id" id="calendarEventSuratId" value="{{ old('calendar_surat_id') }}">
+                    <div class="modal-body">
+                        @if(old('calendar_surat_id') && $errors->any())
+                            <div class="alert alert-danger py-2">
+                                {{ $errors->first() }}
+                            </div>
+                        @endif
+                        <div class="form-group">
+                            <label for="calendarEventType">Tipe Agenda <span class="text-danger">*</span></label>
+                            <select class="form-control" name="type" id="calendarEventType" required>
+                                <option value="">-- Pilih tipe --</option>
+                                @foreach($calendarTypeOptions as $typeKey => $typeOption)
+                                    <option value="{{ $typeKey }}">{{ $typeOption['label'] }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group col-md-6">
+                                <label for="calendarStartDate">Tanggal Mulai <span class="text-danger">*</span></label>
+                                <input type="date" class="form-control" name="start_date" id="calendarStartDate" required>
+                            </div>
+                            <div class="form-group col-md-6">
+                                <label for="calendarEndDate">Tanggal Selesai</label>
+                                <input type="date" class="form-control" name="end_date" id="calendarEndDate">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group col-md-6">
+                                <label for="calendarStartTime">Waktu Mulai</label>
+                                <input type="time" class="form-control" name="start_time" id="calendarStartTime">
+                            </div>
+                            <div class="form-group col-md-6">
+                                <label for="calendarEndTime">Waktu Selesai</label>
+                                <input type="time" class="form-control" name="end_time" id="calendarEndTime">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="calendarLocation">Tempat</label>
+                            <input type="text" class="form-control" name="location" id="calendarLocation" maxlength="255" placeholder="Opsional">
+                        </div>
+                        <div class="form-group mb-0">
+                            <label for="calendarNotes">Keterangan</label>
+                            <textarea class="form-control" name="notes" id="calendarNotes" rows="2" maxlength="1000" placeholder="Opsional"></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer justify-content-between">
+                        <button type="button" class="btn btn-outline-danger" id="removeCalendarEventButton">
+                            <i class="fas fa-calendar-times mr-1"></i> Hapus dari Kalender
+                        </button>
+                        <div>
+                            <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Batal</button>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save mr-1"></i> Simpan
+                            </button>
+                        </div>
+                    </div>
+                </form>
+                <form id="removeCalendarEventForm" method="POST" class="d-none">
+                    <?php echo csrf_field(); ?>
+                    <?php echo method_field('DELETE'); ?>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <!-- View File Modal -->
     <div class="modal fade" id="viewFileModal" tabindex="-1">
         <div class="modal-dialog modal-lg">
@@ -1103,6 +1189,16 @@
     <script>
         $(document).ready(function () {
             const canCreateSuratKeluar = <?php echo json_encode($canCreateSuratKeluar, 15, 512) ?>;
+            const oldCalendarInput = @json(old('calendar_surat_id') ? [
+                'surat_id' => old('calendar_surat_id'),
+                'type' => old('type'),
+                'start_date' => old('start_date'),
+                'end_date' => old('end_date'),
+                'start_time' => old('start_time'),
+                'end_time' => old('end_time'),
+                'location' => old('location'),
+                'notes' => old('notes'),
+            ] : null);
             let currentSearch = @json($search);
             let searchTimer = null;
             let recipientMap = <?php echo json_encode($suratKeluar->getCollection()->mapWithKeys(function ($surat) {
@@ -1244,6 +1340,7 @@
 
             function formatDetailRow(data) {
                 const canManageRow = Number(data.canManage) === 1;
+                const canCalendarRow = Number(data.canCalendar) === 1;
                 let actions = '';
                 if (data.fileUrl) {
                     actions += '<button type="button" class="action-btn detail" onclick="viewFile(\'' + data.fileUrl + '\')"><i class="fas fa-eye"></i> Preview</button>';
@@ -1252,6 +1349,10 @@
                     actions += '<button type="button" class="action-btn detail" onclick="openEdit(' + data.suratId + ')"><i class="fas fa-edit"></i> Edit</button>';
                     actions += '<button type="button" class="action-btn upload" onclick="openUpload(' + data.suratId + ')"><i class="fas fa-upload"></i> Upload</button>';
                     actions += '<button type="button" class="action-btn delete" onclick="deleteSurat(' + data.suratId + ', \'' + data.deleteUrl + '\')"><i class="fas fa-trash"></i> Hapus</button>';
+                }
+                if (canCalendarRow) {
+                    const calendarLabel = Number(data.calendarExists) === 1 ? 'Edit Kalender Terpadu' : 'Tambahkan ke Kalender Terpadu';
+                    actions += '<button type="button" class="action-btn calendar" onclick="openCalendarEvent(' + data.suratId + ')"><i class="far fa-calendar-plus"></i> ' + calendarLabel + '</button>';
                 }
 
                 return '<div class="detail-content">' +
@@ -1656,6 +1757,58 @@
                 $('#fileViewer').attr('src', 'about:blank');
                 $('#openSuratKeluarFile').attr('href', '#');
             });
+
+            window.openCalendarEvent = function (suratId) {
+                const row = $('tr[data-surat-id="' + suratId + '"]');
+                if (!row.length || Number(row.attr('data-can-calendar')) !== 1) {
+                    showToast('Anda tidak memiliki akses untuk mengatur kalender surat ini.', 'warning');
+                    return;
+                }
+
+                let values = {
+                    type: row.attr('data-calendar-type') || '',
+                    start_date: row.attr('data-calendar-start-date') || row.attr('data-tanggal-surat') || '',
+                    end_date: row.attr('data-calendar-end-date') || '',
+                    start_time: row.attr('data-calendar-start-time') || '',
+                    end_time: row.attr('data-calendar-end-time') || '',
+                    location: row.attr('data-calendar-location') || '',
+                    notes: row.attr('data-calendar-notes') || ''
+                };
+
+                if (oldCalendarInput && Number(oldCalendarInput.surat_id) === Number(suratId)) {
+                    values = oldCalendarInput;
+                }
+
+                $('#calendarEventForm').attr('action', row.attr('data-calendar-action-url'));
+                $('#removeCalendarEventForm').attr('action', row.attr('data-calendar-delete-url'));
+                $('#calendarEventSuratId').val(suratId);
+                $('#calendarEventSuratTitle').text(row.attr('data-perihal') || '-');
+                $('#calendarEventType').val(values.type || '');
+                $('#calendarStartDate').val(values.start_date || '');
+                $('#calendarEndDate').val(values.end_date || '');
+                $('#calendarStartTime').val(values.start_time || '');
+                $('#calendarEndTime').val(values.end_time || '');
+                $('#calendarLocation').val(values.location || '');
+                $('#calendarNotes').val(values.notes || '');
+                $('#removeCalendarEventButton').toggle(Number(row.attr('data-calendar-exists')) === 1);
+                $('#calendarEventModal').modal('show');
+            };
+
+            $('#calendarStartDate').on('change', function () {
+                $('#calendarEndDate').attr('min', this.value || '');
+            });
+
+            $('#removeCalendarEventButton').on('click', function () {
+                if (confirm('Hapus jadwal surat ini dari Kalender Terpadu?')) {
+                    $('#removeCalendarEventForm').trigger('submit');
+                }
+            });
+
+            if (oldCalendarInput && oldCalendarInput.surat_id) {
+                setTimeout(function () {
+                    window.openCalendarEvent(oldCalendarInput.surat_id);
+                }, 250);
+            }
         });
 
         function openUpload(suratId) {

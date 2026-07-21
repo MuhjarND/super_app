@@ -121,9 +121,7 @@ class ApprovalCenterController extends Controller
 
         if ($category === 'surat_keluar' && Schema::hasTable('surat_keluar_approvals')) {
             $query = SuratKeluarApproval::where('status', 'pending');
-            if (!$user->isSuperAdmin()) {
-                $query->whereIn('approver_id', $user->effectiveAssignmentUserIds());
-            }
+            $this->applySuratKeluarWorkflowScope($query, $user);
             return $query->count();
         }
 
@@ -265,23 +263,23 @@ class ApprovalCenterController extends Controller
         }
 
         if ($category === 'surat_keluar' && Schema::hasTable('surat_keluar_approvals')) {
-            $query = SuratKeluarApproval::with(['suratKeluar.creator', 'suratKeluar.kategoriSurat', 'approver'])
+            $query = SuratKeluarApproval::with(['suratKeluar.creator', 'suratKeluar.kategoriSurat', 'approver', 'parafUser'])
                 ->where('status', 'pending')
                 ->orderByDesc('updated_at');
 
-            if (!$user->isSuperAdmin()) {
-                $query->whereIn('approver_id', $user->effectiveAssignmentUserIds());
-            }
+            $this->applySuratKeluarWorkflowScope($query, $user);
 
-            return $query->get()->map(function ($approval) {
+            return $query->get()->map(function ($approval) use ($user) {
                 $suratKeluar = $approval->suratKeluar;
+                $isParafTask = $approval->paraf_status === 'pending'
+                    && ($user->isSuperAdmin() || $user->canActAsAssignedUser($approval->paraf_user_id));
                 return [
                     'title' => $approval->template_name ?: 'Surat Keluar',
                     'number' => optional($suratKeluar)->nomor_surat_formatted ?: '-',
                     'date' => optional(optional($suratKeluar)->tanggal_surat)->translatedFormat('d F Y'),
-                    'subtitle' => optional(optional($suratKeluar)->kategoriSurat)->nama ?: 'Surat keluar template',
-                    'meta' => 'Penanda tangan: ' . ($approval->signer_name_snapshot ?: '-'),
-                    'count_label' => 'Status: ' . ($approval->status_label ?: 'Pending'),
+                    'subtitle' => $isParafTask ? 'Paraf Surat Tugas' : (optional(optional($suratKeluar)->kategoriSurat)->nama ?: 'Surat keluar template'),
+                    'meta' => $isParafTask ? 'Paraf: ' . (optional($approval->parafUser)->name ?: '-') : 'Penanda tangan: ' . ($approval->signer_name_snapshot ?: '-'),
+                    'count_label' => 'Status: ' . ($isParafTask ? $approval->paraf_status_label : ($approval->status_label ?: 'Pending')),
                     'detail_url' => route('surat-keluar.approval.show', $approval),
                     'status_label' => $approval->status_label,
                 ];
@@ -314,6 +312,29 @@ class ApprovalCenterController extends Controller
         }
 
         return collect();
+    }
+
+    protected function applySuratKeluarWorkflowScope($query, $user)
+    {
+        if ($user->isSuperAdmin()) {
+            return $query;
+        }
+
+        $assignmentUserIds = $user->effectiveAssignmentUserIds();
+
+        return $query->where(function ($workflowQuery) use ($user, $assignmentUserIds) {
+            $workflowQuery->where(function ($parafQuery) use ($assignmentUserIds) {
+                $parafQuery->where('paraf_status', 'pending')
+                    ->whereIn('paraf_user_id', $assignmentUserIds);
+            });
+
+            if ($user->canApproveSuratKeluarTemplate()) {
+                $workflowQuery->orWhere(function ($approvalQuery) use ($assignmentUserIds) {
+                    $approvalQuery->whereIn('paraf_status', ['not_required', 'approved'])
+                        ->whereIn('approver_id', $assignmentUserIds);
+                });
+            }
+        });
     }
 
     protected function resolveHistoryItems($category)

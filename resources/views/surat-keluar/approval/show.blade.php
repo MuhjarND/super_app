@@ -175,7 +175,7 @@
     </div>
     <div class="app-action-group">
         <a href="{{ route('surat-keluar.approval.preview', $suratKeluarApproval) }}" target="_blank" class="app-icon-btn preview" data-mobile-label="Buka PDF"><i class="fas fa-eye"></i></a>
-        <a href="{{ route('approval.index', ['category' => 'surat_keluar']) }}" class="app-icon-btn cancel" data-mobile-label="Kembali"><i class="fas fa-arrow-left"></i></a>
+        <a href="{{ auth()->user()->canAccessApprovalCenter() ? route('approval.index', ['category' => 'surat_keluar']) : route('action-center.index') }}" class="app-icon-btn cancel" data-mobile-label="Kembali"><i class="fas fa-arrow-left"></i></a>
     </div>
 </div>
 
@@ -196,6 +196,14 @@
                     <div class="surat-keluar-approval-meta-item">
                         <strong>Penanda Tangan</strong>
                         <span>{{ $suratKeluarApproval->signer_name_snapshot ?: '-' }}</span>
+                    </div>
+                    <div class="surat-keluar-approval-meta-item">
+                        <strong>Paraf</strong>
+                        <span>{{ optional($suratKeluarApproval->parafUser)->name ?: 'Tidak diperlukan' }}</span>
+                    </div>
+                    <div class="surat-keluar-approval-meta-item">
+                        <strong>Status Paraf</strong>
+                        <span><span class="badge badge-{{ $suratKeluarApproval->paraf_status_badge_class }}">{{ $suratKeluarApproval->paraf_status_label }}</span></span>
                     </div>
                     <div class="surat-keluar-approval-meta-item">
                         <strong>Jabatan TTD</strong>
@@ -223,7 +231,7 @@
                             <tr>
                                 <td data-label="Waktu">{{ optional($history->acted_at)->translatedFormat('d F Y H:i') }} WIT</td>
                                 <td data-label="Aktor">{{ optional($history->approver)->name ?: $history->signer_name_snapshot ?: '-' }}</td>
-                                <td data-label="Aksi">{{ ucfirst($history->action) }}</td>
+                                <td data-label="Aksi">{{ ucwords(str_replace('_', ' ', $history->action)) }}</td>
                                 <td data-label="Catatan">{{ $history->note ?: '-' }}</td>
                             </tr>
                         @empty
@@ -233,6 +241,29 @@
                 </table>
             </div>
         </div>
+
+        @if($canParaf)
+            <div class="surat-keluar-approval-action-grid mb-3">
+                <form action="{{ route('surat-keluar.approval.paraf', $suratKeluarApproval) }}" method="POST" class="card surat-keluar-approval-card border-0 mb-0">
+                    @csrf
+                    <div class="card-body">
+                        <div class="surat-keluar-approval-section-title">Berikan Paraf</div>
+                        <textarea name="note" class="form-control mb-3" rows="3" placeholder="Catatan paraf (opsional)"></textarea>
+                        <button type="submit" class="btn btn-success btn-block"><i class="fas fa-check mr-1"></i>Setujui & Paraf</button>
+                    </div>
+                </form>
+                <form action="{{ route('surat-keluar.approval.paraf-reject', $suratKeluarApproval) }}" method="POST" class="card surat-keluar-approval-card border-0 mb-0">
+                    @csrf
+                    <div class="card-body">
+                        <div class="surat-keluar-approval-section-title">Kembalikan Draft</div>
+                        <textarea name="note" class="form-control mb-3" rows="3" placeholder="Catatan perbaikan" required></textarea>
+                        <button type="submit" class="btn btn-danger btn-block"><i class="fas fa-undo mr-1"></i>Tolak Paraf</button>
+                    </div>
+                </form>
+            </div>
+        @elseif($suratKeluarApproval->status === 'pending' && !$suratKeluarApproval->isParafReady())
+            <div class="alert alert-warning">Dokumen masih menunggu paraf dari {{ optional($suratKeluarApproval->parafUser)->name ?: 'petugas paraf' }}.</div>
+        @endif
 
         @if($canAct)
             <div class="surat-keluar-approval-action-grid">

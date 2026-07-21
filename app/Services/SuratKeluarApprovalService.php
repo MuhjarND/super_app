@@ -27,11 +27,16 @@ class SuratKeluarApprovalService
 
     public function syncForTemplate(SuratKeluar $suratKeluar, array $payload, User $approver, User $requester)
     {
-        return DB::transaction(function () use ($suratKeluar, $payload, $approver, $requester) {
+        $approval = DB::transaction(function () use ($suratKeluar, $payload, $approver, $requester) {
+            $parafUserId = data_get($payload, 'field_values.paraf.id');
             $approval = SuratKeluarApproval::updateOrCreate(
                 ['surat_keluar_id' => $suratKeluar->id],
                 [
                     'approver_id' => $approver->id,
+                    'paraf_user_id' => $parafUserId,
+                    'paraf_status' => $parafUserId ? 'pending' : 'not_required',
+                    'paraf_note' => null,
+                    'paraf_at' => null,
                     'requested_by' => $requester->id,
                     'template_slug' => $payload['template_slug'] ?? null,
                     'template_name' => $payload['template_name'] ?? null,
@@ -52,6 +57,97 @@ class SuratKeluarApprovalService
 
             return $approval;
         });
+
+        if ($approval->paraf_user_id) {
+            $this->notifyParafPending($approval->fresh(['suratKeluar', 'parafUser']));
+        } else {
+            $this->notifySignerPending($approval->fresh(['suratKeluar', 'approver']));
+        }
+
+        return $approval;
+    }
+
+    public function approveParaf(SuratKeluarApproval $approval, User $actor, $note = null)
+    {
+        DB::transaction(function () use ($approval, $actor, $note) {
+            $approval->refresh();
+            $this->guardParafDecision($approval, $actor);
+
+            $approval->update([
+                'paraf_status' => 'approved',
+                'paraf_note' => $note,
+                'paraf_at' => now(),
+            ]);
+
+            SuratKeluarApprovalHistory::create([
+                'surat_keluar_approval_id' => $approval->id,
+                'surat_keluar_id' => $approval->surat_keluar_id,
+                'approver_id' => $actor->id,
+                'action' => 'paraf_approved',
+                'note' => $note,
+                'signer_name_snapshot' => $actor->name,
+                'signer_title_snapshot' => optional($actor->jabatan)->nama ?: $actor->jabatan_keterangan,
+                'acted_at' => now(),
+            ]);
+        });
+
+        $approval = $approval->fresh(['suratKeluar', 'approver', 'parafUser']);
+        $this->auditService->log('persuratan', 'surat_tugas_paraf_approved', $approval, [
+            'subject_type' => 'surat_keluar',
+            'subject_id' => $approval->surat_keluar_id,
+            'subject_title' => optional($approval->suratKeluar)->perihal ?: 'Surat Tugas',
+            'target_user_id' => $approval->approver_id,
+            'target_name' => optional($approval->approver)->name,
+            'note' => $note,
+        ], $actor);
+
+        $this->notifySignerPending($approval);
+
+        return $approval;
+    }
+
+    public function rejectParaf(SuratKeluarApproval $approval, User $actor, $note)
+    {
+        DB::transaction(function () use ($approval, $actor, $note) {
+            $approval->refresh();
+            $this->guardParafDecision($approval, $actor);
+
+            $approval->update([
+                'paraf_status' => 'rejected',
+                'paraf_note' => $note,
+                'paraf_at' => now(),
+                'status' => 'rejected',
+                'note' => $note,
+                'acted_at' => now(),
+            ]);
+
+            $approval->suratKeluar()->update(['status' => 'draft']);
+
+            SuratKeluarApprovalHistory::create([
+                'surat_keluar_approval_id' => $approval->id,
+                'surat_keluar_id' => $approval->surat_keluar_id,
+                'approver_id' => $actor->id,
+                'action' => 'paraf_rejected',
+                'note' => $note,
+                'signer_name_snapshot' => $actor->name,
+                'signer_title_snapshot' => optional($actor->jabatan)->nama ?: $actor->jabatan_keterangan,
+                'acted_at' => now(),
+            ]);
+        });
+
+        $approval = $approval->fresh(['suratKeluar', 'requester', 'parafUser']);
+        if ($approval->requester) {
+            $approval->requester->notify(new SuratTugasNotification(
+                $approval->suratKeluar,
+                'Paraf Surat Tugas ditolak',
+                'Surat Tugas perlu diperbaiki sesuai catatan petugas paraf.',
+                route('surat-template.index'),
+                'requester'
+            ));
+            $this->whatsAppService->notifySuratTugasRequester($approval, $approval->requester, false, $note);
+        }
+
+        return $approval;
     }
 
     public function approve(SuratKeluarApproval $approval, User $actor, $note = null, $signatureData = null)
@@ -158,6 +254,53 @@ class SuratKeluarApprovalService
         if ($approval->status !== 'pending') {
             abort(422, 'Approval surat ini tidak berada pada status pending.');
         }
+
+        if (!$approval->isParafReady()) {
+            abort(422, 'Surat Tugas masih menunggu paraf.');
+        }
+    }
+
+    protected function guardParafDecision(SuratKeluarApproval $approval, User $actor)
+    {
+        if (!$actor->canActAsAssignedUser($approval->paraf_user_id) && !$actor->isSuperAdmin()) {
+            abort(403, 'Anda tidak berhak memberikan paraf pada surat ini.');
+        }
+
+        if ($approval->status !== 'pending' || $approval->paraf_status !== 'pending') {
+            abort(422, 'Surat ini tidak berada pada tahap paraf.');
+        }
+    }
+
+    protected function notifyParafPending(SuratKeluarApproval $approval)
+    {
+        if (!$approval->parafUser || !$approval->suratKeluar) {
+            return;
+        }
+
+        $approval->parafUser->notify(new SuratTugasNotification(
+            $approval->suratKeluar,
+            'Surat Tugas memerlukan paraf',
+            'Terdapat draft Surat Tugas yang perlu diperiksa dan diparaf sebelum diajukan kepada penanda tangan.',
+            route('surat-keluar.approval.show', $approval),
+            'paraf'
+        ));
+        $this->whatsAppService->notifySuratTugasParafPending($approval, $approval->parafUser);
+    }
+
+    protected function notifySignerPending(SuratKeluarApproval $approval)
+    {
+        if (!$approval->approver || !$approval->suratKeluar) {
+            return;
+        }
+
+        $approval->approver->notify(new SuratTugasNotification(
+            $approval->suratKeluar,
+            'Surat Tugas menunggu persetujuan',
+            'Draft Surat Tugas telah diparaf dan menunggu persetujuan serta tanda tangan Anda.',
+            route('surat-keluar.approval.show', $approval),
+            'approver'
+        ));
+        $this->whatsAppService->notifySuratTugasSignerPending($approval, $approval->approver);
     }
 
     protected function notifyTemplateWorkflow(SuratKeluarApproval $approval, $approved, $note = null)

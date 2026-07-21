@@ -267,26 +267,40 @@ class AppServiceProvider extends ServiceProvider
                 }
             }
 
-            if (Schema::hasTable('surat_keluar_approvals') && $user->canApproveSuratKeluarTemplate()) {
-                $pendingSuratKeluarApprovalQuery = SuratKeluarApproval::with(['suratKeluar'])
+            if (Schema::hasTable('surat_keluar_approvals') && Schema::hasColumn('surat_keluar_approvals', 'paraf_user_id')) {
+                $assignmentUserIds = $user->effectiveAssignmentUserIds();
+                $pendingSuratKeluarApprovalQuery = SuratKeluarApproval::with(['suratKeluar', 'parafUser', 'approver'])
                     ->where('status', 'pending');
 
                 if (!$user->isSuperAdmin()) {
-                    $pendingSuratKeluarApprovalQuery->whereIn('approver_id', $user->effectiveAssignmentUserIds());
+                    $pendingSuratKeluarApprovalQuery->where(function ($workflowQuery) use ($user, $assignmentUserIds) {
+                        $workflowQuery->where(function ($parafQuery) use ($assignmentUserIds) {
+                            $parafQuery->where('paraf_status', 'pending')->whereIn('paraf_user_id', $assignmentUserIds);
+                        });
+
+                        if ($user->canApproveSuratKeluarTemplate()) {
+                            $workflowQuery->orWhere(function ($approvalQuery) use ($assignmentUserIds) {
+                                $approvalQuery->whereIn('paraf_status', ['not_required', 'approved'])
+                                    ->whereIn('approver_id', $assignmentUserIds);
+                            });
+                        }
+                    });
                 }
 
                 $counts['sidebarSuratKeluarApprovalPendingCount'] = (clone $pendingSuratKeluarApprovalQuery)->count();
 
                 foreach ((clone $pendingSuratKeluarApprovalQuery)->latest()->take(5)->get() as $approval) {
                     $suratKeluar = $approval->suratKeluar;
+                    $isParafTask = $approval->paraf_status === 'pending'
+                        && ($user->isSuperAdmin() || in_array((int) $approval->paraf_user_id, array_map('intval', $assignmentUserIds), true));
                     $actionItems->push([
                         'type' => 'surat-keluar-approval',
                         'icon' => 'fas fa-paper-plane',
                         'icon_bg' => '#fee2e2',
                         'icon_color' => '#b91c1c',
-                        'title' => 'Approval surat keluar',
+                        'title' => $isParafTask ? 'Paraf Surat Tugas' : 'Approval surat keluar',
                         'subtitle' => $approval->template_name ?: 'Surat Keluar',
-                        'description' => $suratKeluar ? ($suratKeluar->nomor_surat_formatted ?: $suratKeluar->nomor_surat) : 'Dokumen surat keluar dari template menunggu approval.',
+                        'description' => $suratKeluar ? ($suratKeluar->nomor_surat_formatted ?: $suratKeluar->nomor_surat) : ($isParafTask ? 'Surat Tugas menunggu paraf.' : 'Dokumen surat keluar dari template menunggu approval.'),
                         'time' => optional($approval->updated_at ?: $approval->created_at)->diffForHumans(),
                         'url' => route('surat-keluar.approval.show', $approval),
                         'sort_at' => optional($approval->updated_at ?: $approval->created_at)->timestamp ?: 0,

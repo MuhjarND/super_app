@@ -950,28 +950,49 @@
 
 @section('content')
     <div class="surat-workflow-filters" role="group" aria-label="Filter tindak lanjut surat masuk">
-        <a href="{{ route('surat-masuk.index', array_merge(request()->except(['workflow', 'page']), ['workflow' => 'all'])) }}"
-            class="surat-workflow-filter {{ $workflowFilter === 'all' ? 'active' : '' }}" data-workflow="all">
-            Semua
-        </a>
-        <a href="{{ route('surat-masuk.index', array_merge(request()->except(['workflow', 'page']), ['workflow' => 'disposition'])) }}"
-            class="surat-workflow-filter {{ $workflowFilter === 'disposition' ? 'active' : '' }}" data-workflow="disposition">
-            Perlu Disposisi
-            <span class="surat-workflow-count {{ ($workflowCounts['disposition'] ?? 0) > 0 ? 'has-items' : '' }}"
-                title="{{ $workflowCounts['disposition'] ?? 0 }} surat perlu disposisi"
-                aria-label="{{ $workflowCounts['disposition'] ?? 0 }} surat perlu disposisi">
-                {{ $workflowCounts['disposition'] ?? 0 }}
-            </span>
-        </a>
-        <a href="{{ route('surat-masuk.index', array_merge(request()->except(['workflow', 'page']), ['workflow' => 'follow_up'])) }}"
-            class="surat-workflow-filter {{ $workflowFilter === 'follow_up' ? 'active' : '' }}" data-workflow="follow_up">
-            Perlu Tindak Lanjut
-            <span class="surat-workflow-count {{ ($workflowCounts['follow_up'] ?? 0) > 0 ? 'has-items' : '' }}"
-                title="{{ $workflowCounts['follow_up'] ?? 0 }} surat perlu tindak lanjut"
-                aria-label="{{ $workflowCounts['follow_up'] ?? 0 }} surat perlu tindak lanjut">
-                {{ $workflowCounts['follow_up'] ?? 0 }}
-            </span>
-        </a>
+        @if($hasDelegationFilter)
+            <a href="{{ route('surat-masuk.index', array_merge(request()->except(['workflow', 'page']), ['workflow' => 'direct'])) }}"
+                class="surat-workflow-filter {{ $workflowFilter === 'direct' ? 'active' : '' }}" data-workflow="direct">
+                Untuk Saya
+                <span class="surat-workflow-count {{ ($workflowCounts['direct'] ?? 0) > 0 ? 'has-items' : '' }}"
+                    title="{{ $workflowCounts['direct'] ?? 0 }} surat untuk saya"
+                    aria-label="{{ $workflowCounts['direct'] ?? 0 }} surat untuk saya">
+                    {{ $workflowCounts['direct'] ?? 0 }}
+                </span>
+            </a>
+            <a href="{{ route('surat-masuk.index', array_merge(request()->except(['workflow', 'page']), ['workflow' => 'delegated'])) }}"
+                class="surat-workflow-filter {{ $workflowFilter === 'delegated' ? 'active' : '' }}" data-workflow="delegated">
+                {{ $delegationFilterLabel }}
+                <span class="surat-workflow-count {{ ($workflowCounts['delegated'] ?? 0) > 0 ? 'has-items' : '' }}"
+                    title="{{ $workflowCounts['delegated'] ?? 0 }} surat {{ strtolower($delegationFilterLabel) }}"
+                    aria-label="{{ $workflowCounts['delegated'] ?? 0 }} surat {{ strtolower($delegationFilterLabel) }}">
+                    {{ $workflowCounts['delegated'] ?? 0 }}
+                </span>
+            </a>
+        @else
+            <a href="{{ route('surat-masuk.index', array_merge(request()->except(['workflow', 'page']), ['workflow' => 'all'])) }}"
+                class="surat-workflow-filter {{ $workflowFilter === 'all' ? 'active' : '' }}" data-workflow="all">
+                Semua
+            </a>
+            <a href="{{ route('surat-masuk.index', array_merge(request()->except(['workflow', 'page']), ['workflow' => 'disposition'])) }}"
+                class="surat-workflow-filter {{ $workflowFilter === 'disposition' ? 'active' : '' }}" data-workflow="disposition">
+                Perlu Disposisi
+                <span class="surat-workflow-count {{ ($workflowCounts['disposition'] ?? 0) > 0 ? 'has-items' : '' }}"
+                    title="{{ $workflowCounts['disposition'] ?? 0 }} surat perlu disposisi"
+                    aria-label="{{ $workflowCounts['disposition'] ?? 0 }} surat perlu disposisi">
+                    {{ $workflowCounts['disposition'] ?? 0 }}
+                </span>
+            </a>
+            <a href="{{ route('surat-masuk.index', array_merge(request()->except(['workflow', 'page']), ['workflow' => 'follow_up'])) }}"
+                class="surat-workflow-filter {{ $workflowFilter === 'follow_up' ? 'active' : '' }}" data-workflow="follow_up">
+                Perlu Tindak Lanjut
+                <span class="surat-workflow-count {{ ($workflowCounts['follow_up'] ?? 0) > 0 ? 'has-items' : '' }}"
+                    title="{{ $workflowCounts['follow_up'] ?? 0 }} surat perlu tindak lanjut"
+                    aria-label="{{ $workflowCounts['follow_up'] ?? 0 }} surat perlu tindak lanjut">
+                    {{ $workflowCounts['follow_up'] ?? 0 }}
+                </span>
+            </a>
+        @endif
     </div>
 
     <div id="suratMasukList">
@@ -1606,7 +1627,10 @@
                     if (item.assignment_context && item.assignment_context.mode === 'delegated') {
                         html += '<div class="surat-delegation-banner mt-2">';
                         html += '<strong><i class="fas fa-user-shield mr-1"></i>' + escapeHtml(item.assignment_context.badge) + '</strong>';
-                        html += '<div class="mt-1">' + escapeHtml(item.assignment_context.description) + '</div></div>';
+                        if (item.assignment_context.description) {
+                            html += '<div class="mt-1">' + escapeHtml(item.assignment_context.description) + '</div>';
+                        }
+                        html += '</div>';
                     }
                     if (item.petunjuk) {
                         html += '<div class="history-note"><strong>Petunjuk:</strong> ' + item.petunjuk + '</div>';
@@ -2001,12 +2025,13 @@
             $('#detailSifat').text(d.sifat);
             $('#detailStatus').text(d.status);
             $('#detailCreator').text(d.creator);
-            if (d.assignmentDescription) {
+            if (d.assignmentBadge) {
                 var assignmentIcon = d.assignmentMode === 'delegated' ? 'fa-user-shield' : 'fa-user-check';
-                $('#detailAssignmentInfo').html(
-                    '<strong><i class="fas ' + assignmentIcon + ' mr-1"></i>' + escapeHtml(d.assignmentBadge) + '</strong>' +
-                    '<div class="mt-1">' + escapeHtml(d.assignmentDescription) + '</div>'
-                );
+                var assignmentInfo = '<strong><i class="fas ' + assignmentIcon + ' mr-1"></i>' + escapeHtml(d.assignmentBadge) + '</strong>';
+                if (d.assignmentDescription) {
+                    assignmentInfo += '<div class="mt-1">' + escapeHtml(d.assignmentDescription) + '</div>';
+                }
+                $('#detailAssignmentInfo').html(assignmentInfo);
                 $('#detailAssignmentRow').show();
             } else {
                 $('#detailAssignmentInfo').empty();
