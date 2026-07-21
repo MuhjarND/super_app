@@ -257,6 +257,7 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/', 'AgendaPimpinanController@store')->name('store');
         Route::put('/{agenda}', 'AgendaPimpinanController@update')->name('update');
         Route::patch('/{agenda}/participants', 'AgendaPimpinanController@updateParticipants')->name('participants');
+        Route::patch('/{agenda}/dokumentasi', 'AgendaPimpinanController@updateDocumentation')->name('documentation');
         Route::post('/{agenda}/send-whatsapp', 'AgendaPimpinanController@sendWhatsapp')->name('send-whatsapp');
         Route::delete('/{agenda}', 'AgendaPimpinanController@destroy')->name('destroy');
     });

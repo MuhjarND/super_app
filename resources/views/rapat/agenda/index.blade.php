@@ -8,7 +8,7 @@
         .agenda-table thead th { font-size: 0.72rem; text-transform: uppercase; color: #64748b; border-top: none; }
         .agenda-table tbody td { vertical-align: top; font-size: 0.85rem; }
         .agenda-preview { white-space: pre-line; font-size: 0.8rem; color: #334155; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 12px; }
-        .agenda-action-cell { width: 196px; vertical-align: middle !important; }
+        .agenda-action-cell { width: 228px; vertical-align: middle !important; }
         .agenda-action-cell .app-action-group { flex-wrap: nowrap; justify-content: flex-end; }
         .agenda-action-cell form { margin: 0; }
         .agenda-source-badge { display: inline-flex; align-items: center; gap: 5px; border-radius: 999px; padding: 3px 8px; background: #ecfdf5; color: #047857; font-size: 0.68rem; font-weight: 800; margin-top: 6px; }
@@ -55,6 +55,7 @@
                         <th>Peserta Kegiatan</th>
                         <th>Penerima</th>
                         <th>Lampiran</th>
+                        <th>Dokumentasi</th>
                         <th class="text-right">Aksi</th>
                     </tr>
                 </thead>
@@ -64,6 +65,7 @@
                             data-agenda-id="{{ $agenda->id }}"
                             data-action="{{ route('rapat.agenda.update', $agenda) }}"
                             data-participants-action="{{ route('rapat.agenda.participants', $agenda) }}"
+                            data-documentation-action="{{ route('rapat.agenda.documentation', $agenda) }}"
                             data-tanggal-kegiatan="{{ optional($agenda->tanggal_kegiatan)->format('Y-m-d') }}"
                             data-judul-agenda="{{ $agenda->judul_agenda }}"
                             data-tempat="{{ $agenda->tempat }}"
@@ -71,6 +73,7 @@
                             data-seragam-pakaian="{{ $agenda->seragam_pakaian }}"
                             data-nomor-naskah-dinas="{{ $agenda->nomor_naskah_dinas }}"
                             data-lampiran-link="{{ $agenda->lampiran_link }}"
+                            data-dokumentasi-link="{{ $agenda->dokumentasi_link }}"
                             data-catatan="{{ $agenda->catatan }}"
                             data-recipient-ids="{{ $agenda->recipients->pluck('id')->implode(',') }}"
                             data-whatsapp-preview="{{ $agenda->whatsapp_preview }}"
@@ -104,7 +107,16 @@
                             </td>
                             <td>
                                 @if($agenda->lampiran_link)
-                                    <a href="{{ $agenda->lampiran_link }}" target="_blank">Buka Link</a>
+                                    <a href="{{ $agenda->lampiran_link }}" target="_blank" rel="noopener">Buka Link</a>
+                                @else
+                                    <span class="text-muted">-</span>
+                                @endif
+                            </td>
+                            <td>
+                                @if($agenda->dokumentasi_link)
+                                    <a href="{{ $agenda->dokumentasi_link }}" target="_blank" rel="noopener" class="btn btn-outline-primary btn-sm">
+                                        <i class="fas fa-images mr-1"></i> Lihat
+                                    </a>
                                 @else
                                     <span class="text-muted">-</span>
                                 @endif
@@ -124,6 +136,9 @@
                                         <button type="button" class="app-icon-btn process" data-mobile-label="Peserta" title="Atur peserta" onclick="openParticipantsAgenda({{ $agenda->id }})">
                                             <i class="fas fa-user-plus"></i>
                                         </button>
+                                        <button type="button" class="app-icon-btn preview" data-mobile-label="Dokumentasi" title="Tautan dokumentasi" onclick="openDocumentationAgenda({{ $agenda->id }})">
+                                            <i class="fas fa-camera"></i>
+                                        </button>
                                     @endif
                                     @if($canManageAgendaDetails)
                                         <button type="button" class="app-icon-btn edit" data-mobile-label="Edit" title="Edit detail" onclick="openEditAgenda({{ $agenda->id }})">
@@ -142,7 +157,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="6" class="text-center text-muted py-4">Belum ada agenda pimpinan.</td>
+                            <td colspan="7" class="text-center text-muted py-4">Belum ada agenda pimpinan.</td>
                         </tr>
                     @endforelse
                 </tbody>
@@ -203,6 +218,34 @@
             </div>
         </div>
         </div>
+
+        <div class="modal fade" id="documentationAgendaModal" tabindex="-1">
+            <div class="modal-dialog modal-md modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title"><i class="fas fa-camera mr-2"></i>Dokumentasi Agenda</h5>
+                        <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+                    </div>
+                    <form id="documentationAgendaForm" action="#" method="POST">
+                        @csrf
+                        @method('PATCH')
+                        <div class="modal-body">
+                            <div class="form-group mb-0">
+                                <label for="agendaDokumentasiLink">Tautan Dokumentasi</label>
+                                <input type="url" name="dokumentasi_link" id="agendaDokumentasiLink" class="form-control" maxlength="2000" placeholder="https://drive.google.com/...">
+                                <small class="form-text text-muted">Gunakan tautan folder atau album dokumentasi yang dapat diakses penerima.</small>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Batal</button>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save mr-1"></i> Simpan
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
     @endif
 
     <div class="modal fade" id="whatsappPreviewModal" tabindex="-1">
@@ -254,6 +297,14 @@
             $('#participantsRecipientIds').val(recipientIds).trigger('change');
 
             $('#participantsAgendaModal').modal('show');
+        }
+
+        function openDocumentationAgenda(agendaId) {
+            const row = $('tr[data-agenda-id="' + agendaId + '"]');
+
+            $('#documentationAgendaForm').attr('action', row.data('documentationAction'));
+            $('#agendaDokumentasiLink').val(row.data('dokumentasiLink'));
+            $('#documentationAgendaModal').modal('show');
         }
 
         function openEditAgenda(agendaId) {

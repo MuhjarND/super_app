@@ -48,7 +48,7 @@ class IntegratedCalendarService
             $events = $events->where('status_key', $filters['status'])->values();
         }
 
-        $events = $events->sortBy(function ($event) {
+        $events = $this->deduplicateEvents($events)->sortBy(function ($event) {
             return $event['sort_ts'];
         })->values();
 
@@ -515,6 +515,11 @@ class IntegratedCalendarService
                 'description' => $data['meta']['description'],
             ],
         ];
+    }
+
+    protected function deduplicateEvents(Collection $events)
+    {
+        return $events->reverse()->unique('id')->reverse()->values();
     }
 
     protected function implodeNames(array $names)

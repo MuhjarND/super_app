@@ -140,6 +140,27 @@ class AgendaPimpinanController extends Controller
         );
     }
 
+    public function updateDocumentation(Request $request, AgendaPimpinan $agenda)
+    {
+        abort_unless(auth()->user()->canManageAgendaPimpinanParticipants(), 403);
+
+        $data = $request->validate([
+            'dokumentasi_link' => ['nullable', 'url', 'max:2000'],
+        ]);
+
+        $agenda->update([
+            'dokumentasi_link' => $data['dokumentasi_link'] ?? null,
+            'updated_by' => auth()->id(),
+        ]);
+
+        return back()->with(
+            'success',
+            $agenda->dokumentasi_link
+                ? 'Tautan dokumentasi agenda berhasil disimpan.'
+                : 'Tautan dokumentasi agenda berhasil dihapus.'
+        );
+    }
+
     protected function validateData(Request $request)
     {
         return $request->validate([

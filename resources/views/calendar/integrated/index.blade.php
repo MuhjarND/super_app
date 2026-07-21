@@ -239,6 +239,16 @@
             const form = document.getElementById('calendarFilterForm');
             const calendarEl = document.getElementById('integratedCalendar');
 
+            if (!form || !calendarEl || typeof FullCalendar === 'undefined') {
+                return;
+            }
+
+            if (window.integratedCalendarInstance) {
+                window.integratedCalendarInstance.destroy();
+            }
+
+            let activeCalendarRequest = null;
+
             function serializeFilters(extra = {}) {
                 const formData = new FormData(form);
                 const params = new URLSearchParams();
@@ -310,17 +320,35 @@
                     });
                 },
                 events: function (fetchInfo, successCallback, failureCallback) {
+                    if (activeCalendarRequest) {
+                        activeCalendarRequest.abort();
+                    }
+                    activeCalendarRequest = new AbortController();
                     const params = serializeFilters({ start: fetchInfo.startStr, end: fetchInfo.endStr });
-                    fetch(`{{ route('calendar.integrated.events') }}?${params.toString()}`, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+                    params.set('_ts', Date.now().toString());
+                    fetch(`{{ route('calendar.integrated.events') }}?${params.toString()}`, {
+                        cache: 'no-store',
+                        credentials: 'same-origin',
+                        signal: activeCalendarRequest.signal,
+                        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                    })
                         .then(function (response) {
                             if (!response.ok) { throw new Error('Gagal memuat kalender.'); }
                             return response.json();
                         })
                         .then(function (payload) {
                             renderSummary(payload.meta || {});
-                            successCallback(payload.events || []);
+                            const uniqueEvents = new Map();
+                            (payload.events || []).forEach(function (event) {
+                                uniqueEvents.set(String(event.id), event);
+                            });
+                            successCallback(Array.from(uniqueEvents.values()));
                         })
-                        .catch(function (error) { failureCallback(error); });
+                        .catch(function (error) {
+                            if (error.name !== 'AbortError') {
+                                failureCallback(error);
+                            }
+                        });
                 },
                 eventClick: function (info) {
                     info.jsEvent.preventDefault();
@@ -351,10 +379,26 @@
                 }
             });
 
+            function refreshCalendar() {
+                calendar.removeAllEvents();
+                calendar.refetchEvents();
+            }
+
+            window.integratedCalendarInstance = calendar;
             calendar.render();
-            form.addEventListener('submit', function (event) { event.preventDefault(); calendar.refetchEvents(); });
+            form.addEventListener('submit', function (event) { event.preventDefault(); refreshCalendar(); });
             form.querySelectorAll('select, input[type="checkbox"]').forEach(function (element) {
-                element.addEventListener('change', function () { calendar.refetchEvents(); });
+                element.addEventListener('change', refreshCalendar);
+            });
+            window.addEventListener('pageshow', function (event) {
+                if (event.persisted) {
+                    refreshCalendar();
+                }
+            });
+            document.addEventListener('visibilitychange', function () {
+                if (document.visibilityState === 'visible') {
+                    refreshCalendar();
+                }
             });
         });
     </script>

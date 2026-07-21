@@ -37,6 +37,10 @@ class IntegratedCalendarController extends Controller
 
         return response()->json(
             $this->calendarService->build($request->user(), $request->all())
-        );
+        )->withHeaders([
+            'Cache-Control' => 'no-store, no-cache, must-revalidate, max-age=0',
+            'Pragma' => 'no-cache',
+            'Expires' => '0',
+        ]);
     }
 }

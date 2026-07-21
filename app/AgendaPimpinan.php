@@ -17,6 +17,7 @@ class AgendaPimpinan extends Model
         'seragam_pakaian',
         'nomor_naskah_dinas',
         'lampiran_link',
+        'dokumentasi_link',
         'catatan',
         'created_by',
         'updated_by',

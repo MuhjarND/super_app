@@ -454,6 +454,15 @@ class SuratMasukController extends Controller
         }
 
         $suratMasuk->update($data);
+        $suratMasuk->agendaPimpinan()->update([
+            'judul_agenda' => $suratMasuk->perihal,
+            'nomor_naskah_dinas' => $suratMasuk->nomor_surat,
+            'updated_by' => auth()->id(),
+        ]);
+        $suratMasuk->virtualMeeting()->update([
+            'judul' => $suratMasuk->perihal,
+            'updated_by' => auth()->id(),
+        ]);
 
         return response()->json([
             'success' => true,
@@ -474,8 +483,12 @@ class SuratMasukController extends Controller
             Storage::disk('public')->delete($suratMasuk->file_path);
         }
 
-        $suratMasuk->disposisis()->delete();
-        $suratMasuk->delete();
+        DB::transaction(function () use ($suratMasuk) {
+            $suratMasuk->agendaPimpinan()->delete();
+            $suratMasuk->virtualMeeting()->delete();
+            $suratMasuk->disposisis()->delete();
+            $suratMasuk->delete();
+        });
 
         return response()->json([
             'success' => true,
