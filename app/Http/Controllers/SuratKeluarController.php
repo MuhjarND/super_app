@@ -38,6 +38,7 @@ class SuratKeluarController extends Controller
         $activeFilter = in_array($request->input('filter'), ['semua', 'dibuat', 'terkait'], true)
             ? $request->input('filter')
             : 'semua';
+        $search = trim((string) $request->input('search', ''));
 
         if (Schema::hasColumn('surat_keluar_penerima', 'read_at')) {
             DB::table('surat_keluar_penerima')
@@ -56,6 +57,10 @@ class SuratKeluarController extends Controller
                 ->whereHas('penerimaInternal', function ($recipientQuery) use ($user) {
                     $recipientQuery->whereIn('users.id', $user->effectiveAssignmentUserIds());
                 });
+        }
+
+        if ($search !== '') {
+            $suratKeluarQuery = $this->applySearchFilter($suratKeluarQuery, $search);
         }
 
         $suratKeluar = $suratKeluarQuery
@@ -84,6 +89,7 @@ class SuratKeluarController extends Controller
                 'html' => view('surat-keluar._list', compact('suratKeluar'))->render(),
                 'recipient_map' => $this->buildRecipientMap($suratKeluar),
                 'filter' => $activeFilter,
+                'search' => $search,
             ]);
         }
 
@@ -141,8 +147,33 @@ class SuratKeluarController extends Controller
             'kodeTransaksiOptions',
             'canCreateSuratKeluar',
             'activeFilter',
+            'search',
             'templatePrefill'
         ));
+    }
+
+    protected function applySearchFilter($query, $search)
+    {
+        $like = '%' . $search . '%';
+
+        return $query->where(function ($builder) use ($like) {
+            $builder->where('nomor_surat', 'like', $like)
+                ->orWhere('perihal', 'like', $like)
+                ->orWhere('penerima_external', 'like', $like)
+                ->orWhere('status', 'like', $like)
+                ->orWhere('tanggal_surat', 'like', $like)
+                ->orWhere('created_at', 'like', $like)
+                ->orWhereHas('creator', function ($creatorQuery) use ($like) {
+                    $creatorQuery->where('name', 'like', $like);
+                })
+                ->orWhereHas('penerimaInternal', function ($recipientQuery) use ($like) {
+                    $recipientQuery->where('users.name', 'like', $like);
+                })
+                ->orWhereHas('klasifikasiKode', function ($classificationQuery) use ($like) {
+                    $classificationQuery->where('kode', 'like', $like)
+                        ->orWhere('nama', 'like', $like);
+                });
+        });
     }
 
     public function store(Request $request)

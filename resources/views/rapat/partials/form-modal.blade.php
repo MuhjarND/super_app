@@ -69,13 +69,31 @@
                         <div class="form-group mb-0 rapat-participant-picker">
                             <div class="rapat-participant-toolbar">
                                 <label>Peserta Undangan <span class="text-danger">*</span></label>
-                                <button type="button" class="btn rapat-select-all-participants" data-target="#{{ $prefix }}PesertaIds">
-                                    <i class="fas fa-check-double mr-1"></i> Pilih Semua
-                                </button>
+                                <div class="rapat-participant-actions">
+                                    @if(isset($participantUnits) && collect($participantUnits)->isNotEmpty())
+                                        <div class="dropdown">
+                                            <button type="button" class="btn rapat-select-unit-trigger dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                <i class="fas fa-sitemap mr-1"></i> Pilih Unit
+                                            </button>
+                                            <div class="dropdown-menu dropdown-menu-right rapat-unit-menu">
+                                                @foreach($participantUnits as $participantUnit)
+                                                    <button type="button" class="dropdown-item rapat-select-unit-participants"
+                                                        data-target="#{{ $prefix }}PesertaIds" data-unit-id="{{ $participantUnit['id'] }}">
+                                                        <span><i class="far fa-square mr-2"></i>{{ $participantUnit['name'] }}</span>
+                                                        <span class="rapat-unit-count">{{ $participantUnit['count'] }}</span>
+                                                    </button>
+                                                @endforeach
+                                            </div>
+                                        </div>
+                                    @endif
+                                    <button type="button" class="btn rapat-select-all-participants" data-target="#{{ $prefix }}PesertaIds">
+                                        <i class="fas fa-check-double mr-1"></i> Pilih Semua
+                                    </button>
+                                </div>
                             </div>
                             <select class="form-control select2" name="peserta_ids[]" id="{{ $prefix }}PesertaIds" multiple required data-participant-select="1">
                                 @foreach($participants as $participant)
-                                    <option value="{{ $participant->id }}">{{ $participant->name }}</option>
+                                    <option value="{{ $participant->id }}" data-unit-id="{{ $participant->unit_id }}">{{ $participant->name }}</option>
                                 @endforeach
                             </select>
                             <small class="form-hint">Pilih pegawai yang diundang.</small>

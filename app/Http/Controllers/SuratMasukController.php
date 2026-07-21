@@ -35,6 +35,7 @@ class SuratMasukController extends Controller
         $workflowFilter = in_array($request->input('workflow'), ['all', 'disposition', 'follow_up'], true)
             ? $request->input('workflow')
             : 'all';
+        $search = trim((string) $request->input('search', ''));
         $visibleQuery = SuratMasuk::visibleTo($user);
         $workflowCounts = [
             'disposition' => $this->applyNeedsDispositionFilter(clone $visibleQuery, $user)->count(),
@@ -46,6 +47,10 @@ class SuratMasukController extends Controller
             $suratQuery = $this->applyNeedsDispositionFilter($suratQuery, $user);
         } elseif ($workflowFilter === 'follow_up') {
             $suratQuery = $this->applyNeedsFollowUpFilter($suratQuery, $user);
+        }
+
+        if ($search !== '') {
+            $suratQuery = $this->applySearchFilter($suratQuery, $search);
         }
 
         $suratMasuk = $suratQuery
@@ -93,6 +98,15 @@ class SuratMasukController extends Controller
             return [$surat->id => $items];
         });
 
+        if ($request->ajax()) {
+            return response()->json([
+                'html' => view('surat-masuk._list', compact('suratMasuk'))->render(),
+                'histories' => $suratHistories->all(),
+                'workflow' => $workflowFilter,
+                'search' => $search,
+            ]);
+        }
+
         return view('surat-masuk.index', compact(
             'suratMasuk',
             'klasifikasiKodes',
@@ -101,8 +115,31 @@ class SuratMasukController extends Controller
             'suratHistories',
             'virtualMeetingUsers',
             'workflowFilter',
-            'workflowCounts'
+            'workflowCounts',
+            'search'
         ));
+    }
+
+    protected function applySearchFilter($query, $search)
+    {
+        $like = '%' . $search . '%';
+
+        return $query->where(function ($builder) use ($like) {
+            $builder->where('nomor_surat', 'like', $like)
+                ->orWhere('pengirim', 'like', $like)
+                ->orWhere('perihal', 'like', $like)
+                ->orWhere('status', 'like', $like)
+                ->orWhere('sifat', 'like', $like)
+                ->orWhere('tanggal_surat', 'like', $like)
+                ->orWhere('created_at', 'like', $like)
+                ->orWhereHas('creator', function ($creatorQuery) use ($like) {
+                    $creatorQuery->where('name', 'like', $like);
+                })
+                ->orWhereHas('klasifikasiKode', function ($classificationQuery) use ($like) {
+                    $classificationQuery->where('kode', 'like', $like)
+                        ->orWhere('nama', 'like', $like);
+                });
+        });
     }
 
     protected function applyNeedsDispositionFilter($query, User $user)

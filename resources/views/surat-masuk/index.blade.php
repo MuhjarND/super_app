@@ -11,6 +11,13 @@
             border: 1px solid #e8eaed;
         }
 
+        #suratMasukList.is-loading {
+            min-height: 220px;
+            opacity: .55;
+            pointer-events: none;
+            transition: opacity .15s ease;
+        }
+
         .surat-masuk-card .card-header {
             background: white;
             border-bottom: 1px solid #f3f4f6;
@@ -225,10 +232,16 @@
         }
 
         .surat-workflow-filters {
-            display: flex;
+            display: inline-flex;
             align-items: center;
-            gap: 8px;
-            margin-bottom: 16px;
+            gap: 6px;
+            max-width: 100%;
+            margin-bottom: 14px;
+            padding: 5px;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            background: #fff;
+            box-shadow: 0 6px 18px rgba(15, 23, 42, .05);
             overflow-x: auto;
             scrollbar-width: thin;
         }
@@ -238,36 +251,36 @@
             align-items: center;
             gap: 7px;
             flex: 0 0 auto;
-            min-height: 38px;
-            padding: 7px 13px;
-            border: 1px solid #dbe5f3;
-            border-radius: 999px;
-            background: #fff;
-            color: #475569;
-            font-size: .78rem;
-            font-weight: 800;
-            transition: .16s ease;
+            min-height: 36px;
+            padding: 7px 16px;
+            border: 0;
+            border-radius: 8px;
+            background: transparent;
+            color: #64748b;
+            font-size: .82rem;
+            font-weight: 700;
+            white-space: nowrap;
+            transition: background .18s ease, color .18s ease, box-shadow .18s ease;
         }
 
         .surat-workflow-filter:hover {
-            border-color: #a5b4fc;
-            color: #4338ca;
+            color: #4f46e5;
+            background: #f5f3ff;
         }
 
         .surat-workflow-filter.active {
-            border-color: #4f46e5;
-            background: #4f46e5;
+            background: linear-gradient(135deg, #6366f1, #4f46e5);
             color: #fff;
-            box-shadow: 0 7px 16px rgba(79, 70, 229, .18);
+            box-shadow: 0 5px 12px rgba(79, 70, 229, .22);
         }
 
         .surat-workflow-count {
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            min-width: 24px;
-            height: 24px;
-            padding: 0 7px;
+            min-width: 21px;
+            height: 21px;
+            padding: 0 6px;
             border-radius: 999px;
             background: #e2e8f0;
             color: #64748b;
@@ -936,229 +949,33 @@
 @endsection
 
 @section('content')
-    <div class="card surat-masuk-card">
-        <div class="card-body" style="padding-top: 20px;">
-            <div class="surat-workflow-filters" aria-label="Filter tindak lanjut surat masuk">
-                <a href="{{ route('surat-masuk.index', array_merge(request()->except(['workflow', 'page']), ['workflow' => 'all'])) }}"
-                    class="surat-workflow-filter {{ $workflowFilter === 'all' ? 'active' : '' }}">
-                    <i class="fas fa-inbox"></i> Semua
-                </a>
-                <a href="{{ route('surat-masuk.index', array_merge(request()->except(['workflow', 'page']), ['workflow' => 'disposition'])) }}"
-                    class="surat-workflow-filter {{ $workflowFilter === 'disposition' ? 'active' : '' }}">
-                    <i class="fas fa-share-square"></i> Perlu Disposisi
-                    <span class="surat-workflow-count {{ ($workflowCounts['disposition'] ?? 0) > 0 ? 'has-items' : '' }}"
-                        title="{{ $workflowCounts['disposition'] ?? 0 }} surat perlu disposisi"
-                        aria-label="{{ $workflowCounts['disposition'] ?? 0 }} surat perlu disposisi">
-                        {{ $workflowCounts['disposition'] ?? 0 }}
-                    </span>
-                </a>
-                <a href="{{ route('surat-masuk.index', array_merge(request()->except(['workflow', 'page']), ['workflow' => 'follow_up'])) }}"
-                    class="surat-workflow-filter {{ $workflowFilter === 'follow_up' ? 'active' : '' }}">
-                    <i class="fas fa-flag"></i> Perlu Tindak Lanjut
-                    <span class="surat-workflow-count {{ ($workflowCounts['follow_up'] ?? 0) > 0 ? 'has-items' : '' }}"
-                        title="{{ $workflowCounts['follow_up'] ?? 0 }} surat perlu tindak lanjut"
-                        aria-label="{{ $workflowCounts['follow_up'] ?? 0 }} surat perlu tindak lanjut">
-                        {{ $workflowCounts['follow_up'] ?? 0 }}
-                    </span>
-                </a>
-            </div>
-            <div class="table-responsive surat-masuk-table-wrap">
-            <table id="suratMasukTable" class="table" style="width:100%">
-                <thead>
-                    <tr>
-                        <th>No. Surat</th>
-                        <th>Pengirim</th>
-                        <th>Perihal / Isi Ringkas</th>
-                        <th>Tanggal Surat</th>
-                        <th>Diinput Pada</th>
-                        <th>Dibuat Oleh</th>
-                        <th>Status</th>
-                        <th>Aksi</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach($suratMasuk as $surat)
-                        @php
-                            $isSuratSelesai = $surat->status === 'selesai';
-                            $latestDisposisi = $surat->disposisis->sortByDesc('created_at')->first();
-                            $pendingForMe = $isSuratSelesai
-                                ? null
-                                : auth()->user()->activePendingDisposisiForSurat($surat);
-                            $needsDisposition = !$isSuratSelesai
-                                && (
-                                    ($surat->status === 'baru' && auth()->user()->canForwardSuratMasuk($surat))
-                                    || (bool) $pendingForMe
-                                );
-                            $canNaikanSurat = auth()->user()->canNaikanSuratMasuk();
-                            $assignmentContext = $surat->assignmentContextFor(auth()->user());
-                            $showAssignmentContext = auth()->user()->hasActiveJabatanDelegation() && $assignmentContext;
-                        @endphp
-                        <tr class="main-row {{ $needsDisposition ? 'surat-needs-disposition' : '' }}" data-surat-id="{{ $surat->id }}" data-creator="{{ optional($surat->creator)->name ?: '-' }}"
-                            data-show-url="{{ route('surat-masuk.show', $surat) }}"
-                            data-download-url="{{ route('surat-masuk.download', $surat) }}"
-                            data-preview-url="{{ route('surat-masuk.preview', $surat) }}"
-                            data-update-url="{{ route('surat-masuk.update', $surat) }}"
-                            data-delete-url="{{ route('surat-masuk.destroy', $surat) }}" data-nomor="{{ $surat->nomor_surat }}"
-                            data-opsi-pengirim="{{ $surat->opsi_pengirim }}"
-                            data-kategori-surat="{{ $surat->kategori_surat_id }}"
-                            data-kategori-surat-label="{{ optional($surat->kategoriSurat)->kode ? optional($surat->kategoriSurat)->kode . ' - ' . optional($surat->kategoriSurat)->nama : '' }}"
-                            data-klasifikasi="{{ $surat->klasifikasi_kode_id }}" data-pengirim="{{ $surat->pengirim }}"
-                            data-perihal="{{ $surat->perihal }}" data-tanggal="{{ $surat->tanggal_surat->format('Y-m-d') }}"
-                            data-sifat="{{ $surat->sifat }}" data-status="{{ $surat->status }}"
-                            data-file-path="{{ $surat->file_path }}"
-                            data-agenda-title="{{ optional($surat->agendaPimpinan)->judul_agenda }}"
-                            data-agenda-date="{{ optional(optional($surat->agendaPimpinan)->tanggal_kegiatan)->format('Y-m-d') }}"
-                            data-agenda-time="{{ optional($surat->agendaPimpinan)->waktu_formatted }}"
-                            data-agenda-place="{{ optional($surat->agendaPimpinan)->tempat }}"
-                            data-agenda-clothing="{{ optional($surat->agendaPimpinan)->seragam_pakaian }}"
-                            data-can-forward="{{ auth()->user()->canForwardSuratMasuk($surat) ? 1 : 0 }}"
-                            data-can-edit="{{ auth()->user()->canEditSuratMasuk($surat) ? 1 : 0 }}"
-                            data-can-delete="{{ auth()->user()->canDeleteSuratMasuk($surat) ? 1 : 0 }}"
-                            data-can-follow-up="{{ auth()->user()->canOpenTindakLanjutSuratMasuk($surat) ? 1 : 0 }}"
-                            data-assignment-mode="{{ data_get($assignmentContext, 'mode') }}"
-                            data-assignment-badge="{{ data_get($assignmentContext, 'badge') }}"
-                            data-assignment-description="{{ data_get($assignmentContext, 'description') }}"
-                            data-assignment-action-label="{{ data_get($assignmentContext, 'action_label') }}"
-                            data-pending-disposisi-id="{{ $pendingForMe ? $pendingForMe->id : '' }}">
-                            <td>
-                                <button type="button" class="surat-mobile-row-toggle" aria-label="Lihat detail surat" aria-expanded="false">
-                                    <i class="fas fa-plus"></i>
-                                </button>
-                                @if($surat->klasifikasiKode)
-                                    <span class="klasifikasi-prefix">{{ $surat->klasifikasiKode->kode }} -
-                                        {{ $surat->klasifikasiKode->nama }}</span><br>
-                                @endif
-                                <span class="nomor-surat-text">{{ $surat->nomor_surat }}</span><br>
-                                @php
-                                    $sifatClass = ['biasa' => 'badge-sifat-biasa', 'rahasia' => 'badge-sifat-rahasia', 'sangat_rahasia' => 'badge-sifat-sangat-rahasia'];
-                                    $sifatLabel = ['biasa' => 'Biasa', 'rahasia' => 'Rahasia', 'sangat_rahasia' => 'Sangat Rahasia'];
-                                @endphp
-                                <span
-                                    class="{{ $sifatClass[$surat->sifat] ?? 'badge-sifat-biasa' }}">{{ $sifatLabel[$surat->sifat] ?? $surat->sifat }}</span>
-                                @if($showAssignmentContext)
-                                    <div>
-                                        <span class="surat-assignment-badge {{ data_get($assignmentContext, 'mode') === 'delegated' ? 'is-delegated' : '' }}">
-                                            <i class="fas {{ data_get($assignmentContext, 'mode') === 'delegated' ? 'fa-user-shield' : 'fa-user-check' }}"></i>
-                                            {{ data_get($assignmentContext, 'badge') }}
-                                        </span>
-                                        @if(data_get($assignmentContext, 'mode') === 'delegated')
-                                            <div class="surat-assignment-note">{{ data_get($assignmentContext, 'description') }}</div>
-                                        @endif
-                                    </div>
-                                @endif
-                            </td>
-                            <td class="surat-mobile-extra">
-                                <span class="{{ $surat->opsi_pengirim == 'mahkamah_agung' ? 'badge-ma' : 'badge-non-ma' }}">
-                                    {{ $surat->opsi_pengirim == 'mahkamah_agung' ? 'Mahkamah Agung' : 'Non Mahkamah Agung' }}
-                                </span>
-                                <div class="pengirim-nama">{{ $surat->pengirim }}</div>
-                            </td>
-                            <td style="max-width: 220px;">
-                                {{ Str::limit($surat->perihal, 80) }}
-                            </td>
-                            <td class="surat-mobile-extra">{{ $surat->tanggal_surat->format('Y-m-d') }}</td>
-                            <td class="surat-mobile-extra">{{ $surat->created_at->format('Y-m-d') }}</td>
-                            <td class="surat-mobile-extra">{{ optional($surat->creator)->name ?: '-' }}</td>
-                            <td>
-                                @if($needsDisposition)
-                                    <span class="badge-needs-disposition mb-1">
-                                        <i class="fas fa-exclamation-circle"></i> Perlu Disposisi/Tindaklanjut
-                                    </span><br>
-                                @endif
-                                @if($surat->status == 'baru')
-                                    <span class="status-text">Baru</span><br>
-                                    <span class="badge-new-status">New</span>
-                                @elseif($surat->status == 'didisposisi')
-                                    @if($latestDisposisi)
-                                        <span
-                                            class="status-text">{{ $latestDisposisi->tipe == 'naikan' ? 'Dinaikan' : 'Diteruskan' }}</span><br>
-                                    @else
-                                        <span class="status-text">Didisposisi</span><br>
-                                    @endif
-                                    <span class="badge-on-process">On-Process</span>
-                                @else
-                                    <span class="status-text">Selesai</span><br>
-                                    <span class="badge-done">Done</span>
-                                @endif
-                            </td>
-                            <td class="surat-actions-cell">
-                                <div class="dropdown surat-action-dropdown">
-                                    <button class="btn dropdown-toggle" type="button" id="suratMasukAction{{ $surat->id }}" data-toggle="dropdown" data-boundary="window" aria-haspopup="true" aria-expanded="false">
-                                        <i class="fas fa-ellipsis-h"></i> Aksi
-                                    </button>
-                                    <div class="dropdown-menu dropdown-menu-right surat-action-menu" aria-labelledby="suratMasukAction{{ $surat->id }}">
-                                        @if(data_get($assignmentContext, 'mode') === 'delegated')
-                                            <div class="px-3 py-2 small text-muted" style="max-width: 260px; white-space: normal;">
-                                                <i class="fas fa-user-shield mr-1 text-warning"></i>{{ data_get($assignmentContext, 'action_label') }}
-                                            </div>
-                                            <div class="dropdown-divider"></div>
-                                        @endif
-                                        @if(auth()->user()->canForwardSuratMasuk($surat))
-                                            @if(auth()->user()->isKasubagTurt())
-                                                <button type="button" class="dropdown-item" onclick="openDisposisi({{ $surat->id }}, 'teruskan')">
-                                                    <i class="fas fa-share"></i> Teruskan
-                                                </button>
-                                            @else
-                                                <button type="button" class="dropdown-item" onclick="openDisposisi({{ $surat->id }}, 'disposisi')">
-                                                    <i class="fas fa-share"></i> Disposisi
-                                                </button>
-                                            @endif
+    <div class="surat-workflow-filters" role="group" aria-label="Filter tindak lanjut surat masuk">
+        <a href="{{ route('surat-masuk.index', array_merge(request()->except(['workflow', 'page']), ['workflow' => 'all'])) }}"
+            class="surat-workflow-filter {{ $workflowFilter === 'all' ? 'active' : '' }}" data-workflow="all">
+            Semua
+        </a>
+        <a href="{{ route('surat-masuk.index', array_merge(request()->except(['workflow', 'page']), ['workflow' => 'disposition'])) }}"
+            class="surat-workflow-filter {{ $workflowFilter === 'disposition' ? 'active' : '' }}" data-workflow="disposition">
+            Perlu Disposisi
+            <span class="surat-workflow-count {{ ($workflowCounts['disposition'] ?? 0) > 0 ? 'has-items' : '' }}"
+                title="{{ $workflowCounts['disposition'] ?? 0 }} surat perlu disposisi"
+                aria-label="{{ $workflowCounts['disposition'] ?? 0 }} surat perlu disposisi">
+                {{ $workflowCounts['disposition'] ?? 0 }}
+            </span>
+        </a>
+        <a href="{{ route('surat-masuk.index', array_merge(request()->except(['workflow', 'page']), ['workflow' => 'follow_up'])) }}"
+            class="surat-workflow-filter {{ $workflowFilter === 'follow_up' ? 'active' : '' }}" data-workflow="follow_up">
+            Perlu Tindak Lanjut
+            <span class="surat-workflow-count {{ ($workflowCounts['follow_up'] ?? 0) > 0 ? 'has-items' : '' }}"
+                title="{{ $workflowCounts['follow_up'] ?? 0 }} surat perlu tindak lanjut"
+                aria-label="{{ $workflowCounts['follow_up'] ?? 0 }} surat perlu tindak lanjut">
+                {{ $workflowCounts['follow_up'] ?? 0 }}
+            </span>
+        </a>
+    </div>
 
-                                            @if($canNaikanSurat)
-                                                <button type="button" class="dropdown-item" onclick="openDisposisi({{ $surat->id }}, 'naikan')">
-                                                    <i class="fas fa-level-up-alt"></i> Naikan
-                                                </button>
-                                            @endif
-                                            <div class="dropdown-divider"></div>
-                                        @endif
-
-                                        @if(auth()->user()->canOpenTindakLanjutSuratMasuk($surat))
-                                            <button type="button" class="dropdown-item" onclick="openTindakLanjut({{ $surat->id }})">
-                                                <i class="fas fa-flag"></i> Tindaklanjuti
-                                            </button>
-                                        @endif
-
-                                        @if($surat->status === 'selesai')
-                                            <button type="button" class="dropdown-item" onclick="openDetail({{ $surat->id }})">
-                                                <i class="fas fa-clipboard-check"></i> Preview Tindak Lanjut
-                                            </button>
-                                        @endif
-
-                                        <button type="button" class="dropdown-item" onclick="openDetail({{ $surat->id }})">
-                                            <i class="fas fa-eye"></i> Detail
-                                        </button>
-
-                                        @if(auth()->user()->canEditSuratMasuk($surat))
-                                            <button type="button" class="dropdown-item" onclick="openEdit({{ $surat->id }})">
-                                                <i class="fas fa-edit"></i> Edit
-                                            </button>
-                                        @endif
-
-                                        @if(auth()->user()->canDeleteSuratMasuk($surat))
-                                            <div class="dropdown-divider"></div>
-                                            <button type="button" class="dropdown-item text-danger" data-delete-url="{{ route('surat-masuk.destroy', $surat) }}" onclick="deleteSurat({{ $surat->id }}, this.dataset.deleteUrl)">
-                                                <i class="fas fa-trash"></i> Hapus
-                                            </button>
-                                        @endif
-                                    </div>
-                                </div>
-                            </td>
-                        </tr>
-                    @endforeach
-                </tbody>
-            </table>
-            </div>
-            @if(method_exists($suratMasuk, 'links'))
-                <div class="d-flex justify-content-between align-items-center flex-wrap mt-3">
-                    <div class="text-muted small mb-2 mb-md-0">
-                        Menampilkan {{ $suratMasuk->firstItem() ?: 0 }} - {{ $suratMasuk->lastItem() ?: 0 }} dari {{ $suratMasuk->total() }} surat
-                    </div>
-                    <div>
-                        {!! $suratMasuk->links() !!}
-                    </div>
-                </div>
-            @endif
-        </div>
+    <div id="suratMasukList">
+        @include('surat-masuk._list')
     </div>
 
     <!-- Create Modal -->
@@ -1700,7 +1517,11 @@
             const canCreateSuratMasuk = @json(auth()->user()->canCreateSuratMasuk());
             const requiresPetunjuk = @json(auth()->user()->requiresPetunjukDisposisi());
             const isKasubagTurt = @json(auth()->user()->isKasubagTurt());
-            const suratHistories = @json($suratHistories);
+            let suratHistories = @json($suratHistories);
+            let currentSearch = @json($search);
+            let currentWorkflow = @json($workflowFilter);
+            let listRequest = null;
+            let searchTimer = null;
             const klasifikasiKodeMap = @json($klasifikasiKodes->map(function ($kode) {
                 return ['id' => $kode->id, 'kode' => strtoupper($kode->kode)];
             })->values());
@@ -1818,25 +1639,107 @@
 
             window.renderSuratHistory = renderHistory;
 
-            var table = $('#suratMasukTable').DataTable({
-                order: [],
-                paging: false,
-                info: false,
-                lengthChange: false,
-                language: {
-                    search: "Search:",
-                    lengthMenu: "Show _MENU_ entries",
-                    info: "Showing _START_ to _END_ of _TOTAL_ entries",
-                    infoEmpty: "No entries found",
-                    emptyTable: '<div class="text-center py-4"><i class="fas fa-inbox fa-3x mb-3 d-block" style="opacity:0.2;color:#9ca3af;"></i><span style="color:#9ca3af;">Tidak ada surat masuk</span></div>',
-                    paginate: { first: "First", last: "Last", next: "Next", previous: "Previous" }
-                },
-                columnDefs: [
-                    { orderable: false, targets: -1 }
-                ]
+            function initializeSuratMasukTable() {
+                const instance = $('#suratMasukTable').DataTable({
+                    order: [],
+                    paging: false,
+                    info: false,
+                    lengthChange: false,
+                    language: {
+                        search: "Search:",
+                        lengthMenu: "Show _MENU_ entries",
+                        info: "Showing _START_ to _END_ of _TOTAL_ entries",
+                        infoEmpty: "No entries found",
+                        emptyTable: '<div class="text-center py-4"><i class="fas fa-inbox fa-3x mb-3 d-block" style="opacity:0.2;color:#9ca3af;"></i><span style="color:#9ca3af;">Tidak ada surat masuk</span></div>',
+                        paginate: { first: "First", last: "Last", next: "Next", previous: "Previous" }
+                    },
+                    columnDefs: [
+                        { orderable: false, targets: -1 }
+                    ]
+                });
+
+                $('#suratMasukTable_filter input')
+                    .val(currentSearch)
+                    .off('.DT')
+                    .off('.suratAjax')
+                    .on('input.suratAjax', function () {
+                        currentSearch = $(this).val();
+                        clearTimeout(searchTimer);
+                        searchTimer = setTimeout(function () {
+                            loadSuratMasukList(@json(route('surat-masuk.index')), currentWorkflow, currentSearch);
+                        }, 350);
+                    });
+
+                return instance;
+            }
+
+            let table = initializeSuratMasukTable();
+
+            function loadSuratMasukList(url, workflow, search) {
+                const list = $('#suratMasukList');
+                const requestUrl = new URL(url, window.location.origin);
+                currentWorkflow = workflow || currentWorkflow || 'all';
+                currentSearch = typeof search === 'string' ? search : currentSearch;
+
+                requestUrl.searchParams.set('workflow', currentWorkflow);
+                if (currentSearch.trim() === '') {
+                    requestUrl.searchParams.delete('search');
+                } else {
+                    requestUrl.searchParams.set('search', currentSearch.trim());
+                }
+
+                if (listRequest) {
+                    listRequest.abort();
+                }
+
+                list.addClass('is-loading');
+                $('.surat-workflow-filter').addClass('disabled').attr('aria-disabled', 'true');
+
+                listRequest = $.ajax({
+                    url: requestUrl.toString(),
+                    method: 'GET',
+                    success: function (response) {
+                        if (table) {
+                            table.destroy();
+                        }
+
+                        list.html(response.html);
+                        suratHistories = response.histories || {};
+                        currentWorkflow = response.workflow || 'all';
+                        currentSearch = response.search || '';
+                        table = initializeSuratMasukTable();
+
+                        $('.surat-workflow-filter')
+                            .removeClass('active')
+                            .filter('[data-workflow="' + currentWorkflow + '"]')
+                            .addClass('active');
+
+                        window.history.replaceState({}, '', requestUrl.pathname + requestUrl.search);
+                    },
+                    error: function (xhr, status) {
+                        if (status !== 'abort') {
+                            showToast(xhr.responseJSON?.message || 'Daftar surat masuk gagal dimuat.', 'error');
+                        }
+                    },
+                    complete: function () {
+                        listRequest = null;
+                        list.removeClass('is-loading');
+                        $('.surat-workflow-filter').removeClass('disabled').removeAttr('aria-disabled');
+                    }
+                });
+            }
+
+            $(document).on('click', '.surat-workflow-filter', function (event) {
+                event.preventDefault();
+                loadSuratMasukList(@json(route('surat-masuk.index')), $(this).data('workflow'), currentSearch);
             });
 
-            $('#suratMasukTable').on('click', '.surat-mobile-row-toggle', function (event) {
+            $(document).on('click', '#suratMasukList .pagination a', function (event) {
+                event.preventDefault();
+                loadSuratMasukList($(this).attr('href'), currentWorkflow, currentSearch);
+            });
+
+            $('#suratMasukList').on('click', '.surat-mobile-row-toggle', function (event) {
                 event.preventDefault();
                 event.stopPropagation();
 
@@ -1847,7 +1750,7 @@
                 $button.attr('aria-expanded', isOpen ? 'true' : 'false');
             });
 
-            $('#suratMasukTable')
+            $('#suratMasukList')
                 .on('show.bs.dropdown', '.surat-action-dropdown', function () {
                     $('#suratMasukTable tbody tr.surat-action-open').removeClass('surat-action-open');
                     $(this).closest('tr').addClass('surat-action-open');

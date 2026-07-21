@@ -60,13 +60,29 @@ class RapatController extends Controller
             ->active()
             ->ordered()
             ->get();
+        $participantUnits = $participants
+            ->filter(function ($participant) {
+                return $participant->unit_id && $participant->unit;
+            })
+            ->groupBy('unit_id')
+            ->map(function ($unitParticipants) {
+                $unit = $unitParticipants->first()->unit;
+
+                return [
+                    'id' => (int) $unit->id,
+                    'name' => $unit->nama,
+                    'count' => $unitParticipants->count(),
+                ];
+            })
+            ->sortBy('name')
+            ->values();
         $approvers = User::withRoleOrDelegatedJabatan(['admin', 'approval', 'super_admin'])
             ->active()
             ->with('jabatan')
             ->ordered()
             ->get();
 
-        return view('rapat.index', compact('rapats', 'kategoriSuratOptions', 'participants', 'approvers'));
+        return view('rapat.index', compact('rapats', 'kategoriSuratOptions', 'participants', 'participantUnits', 'approvers'));
     }
 
     public function store(StoreRapatRequest $request)

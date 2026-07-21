@@ -207,7 +207,15 @@
             margin-bottom: 0;
         }
 
-        .rapat-select-all-participants {
+        .rapat-participant-actions {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 8px;
+        }
+
+        .rapat-select-all-participants,
+        .rapat-select-unit-trigger {
             display: inline-flex;
             align-items: center;
             justify-content: center;
@@ -223,10 +231,56 @@
         }
 
         .rapat-select-all-participants:hover,
-        .rapat-select-all-participants:focus {
+        .rapat-select-all-participants:focus,
+        .rapat-select-unit-trigger:hover,
+        .rapat-select-unit-trigger:focus {
             background: #e0e7ff;
             color: #4338ca;
             box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.12);
+        }
+
+        .rapat-unit-menu {
+            min-width: 250px;
+            padding: 6px;
+            border: 1px solid #dbe4f0;
+            border-radius: 13px;
+            box-shadow: 0 14px 32px rgba(15, 23, 42, .12);
+        }
+
+        .rapat-select-unit-participants {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            min-height: 40px;
+            padding: 8px 10px;
+            border-radius: 9px;
+            color: #334155;
+            font-size: .78rem;
+            font-weight: 700;
+        }
+
+        .rapat-select-unit-participants.is-unit-selected {
+            background: #eef2ff;
+            color: #4338ca;
+        }
+
+        .rapat-unit-count {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 24px;
+            height: 22px;
+            padding: 0 7px;
+            border-radius: 999px;
+            background: #f1f5f9;
+            color: #64748b;
+            font-size: .68rem;
+        }
+
+        .rapat-select-unit-participants.is-unit-selected .rapat-unit-count {
+            background: #fff;
+            color: #4338ca;
         }
 
         .rapat-select-all-participants.is-all-selected {
@@ -463,6 +517,21 @@
 
             .rapat-select-all-participants {
                 width: 100%;
+            }
+
+            .rapat-participant-actions {
+                display: grid;
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                width: 100%;
+            }
+
+            .rapat-participant-actions .dropdown,
+            .rapat-select-unit-trigger {
+                width: 100%;
+            }
+
+            .rapat-unit-menu {
+                width: min(300px, calc(100vw - 48px));
             }
 
             .rapat-form-modal .select2-container--bootstrap4 .select2-selection--multiple {
@@ -1002,7 +1071,7 @@
                     $selects.each(function () {
                         const $select = $(this);
                         const id = $select.attr('id');
-                        const $button = id ? $('[data-target="#' + id + '"]') : $();
+                        const $button = id ? $('.rapat-select-all-participants[data-target="#' + id + '"]') : $();
                         const values = $select.find('option').map(function () {
                             return String(this.value);
                         }).get();
@@ -1014,6 +1083,24 @@
                             .html(isAllSelected
                                 ? '<i class="fas fa-times mr-1"></i> Hapus Semua'
                                 : '<i class="fas fa-check-double mr-1"></i> Pilih Semua');
+
+                        $('.rapat-select-unit-participants[data-target="#' + id + '"]').each(function () {
+                            const $unitButton = $(this);
+                            const unitId = String($unitButton.data('unit-id'));
+                            const unitValues = $select.find('option').filter(function () {
+                                return String($(this).data('unit-id')) === unitId;
+                            }).map(function () {
+                                return String(this.value);
+                            }).get();
+                            const isUnitSelected = unitValues.length > 0 && unitValues.every(function (value) {
+                                return selectedValues.includes(value);
+                            });
+
+                            $unitButton.toggleClass('is-unit-selected', isUnitSelected);
+                            $unitButton.find('i')
+                                .toggleClass('far fa-square', !isUnitSelected)
+                                .toggleClass('fas fa-check-square', isUnitSelected);
+                        });
                     });
                 }
 
@@ -1051,6 +1138,33 @@
                     const isAllSelected = values.length > 0 && selectedValues.length >= values.length;
 
                     $select.val(isAllSelected ? [] : values).trigger('change');
+                    refreshRapatParticipantSelectAll($select);
+                });
+
+                $(document).on('click', '.rapat-select-unit-participants', function () {
+                    const $button = $(this);
+                    const $select = $($button.data('target'));
+                    const unitId = String($button.data('unit-id'));
+                    const unitValues = $select.find('option').filter(function () {
+                        return String($(this).data('unit-id')) === unitId;
+                    }).map(function () {
+                        return String(this.value);
+                    }).get();
+                    const selectedValues = ($select.val() || []).map(String);
+                    const selectedSet = new Set(selectedValues);
+                    const isUnitSelected = unitValues.length > 0 && unitValues.every(function (value) {
+                        return selectedSet.has(value);
+                    });
+
+                    unitValues.forEach(function (value) {
+                        if (isUnitSelected) {
+                            selectedSet.delete(value);
+                        } else {
+                            selectedSet.add(value);
+                        }
+                    });
+
+                    $select.val(Array.from(selectedSet)).trigger('change');
                     refreshRapatParticipantSelectAll($select);
                 });
 

@@ -1103,6 +1103,8 @@
     <script>
         $(document).ready(function () {
             const canCreateSuratKeluar = <?php echo json_encode($canCreateSuratKeluar, 15, 512) ?>;
+            let currentSearch = @json($search);
+            let searchTimer = null;
             let recipientMap = <?php echo json_encode($suratKeluar->getCollection()->mapWithKeys(function ($surat) {
                 return [
                     $surat->id => $surat->penerimaInternal->map(function ($user) {
@@ -1138,7 +1140,7 @@
             }
 
             function initializeSuratKeluarTable() {
-                return $('#suratKeluarTable').DataTable({
+                const instance = $('#suratKeluarTable').DataTable({
                     order: [],
                     paging: false,
                     info: false,
@@ -1156,14 +1158,37 @@
                         { orderable: false, targets: [0] }
                     ]
                 });
+
+                $('#suratKeluarTable_filter input')
+                    .val(currentSearch)
+                    .off('.DT')
+                    .off('.suratAjax')
+                    .on('input.suratAjax', function () {
+                        currentSearch = $(this).val();
+                        clearTimeout(searchTimer);
+                        searchTimer = setTimeout(function () {
+                            loadSuratKeluarList(@json(route('surat-keluar.index')), null, currentSearch);
+                        }, 350);
+                    });
+
+                return instance;
             }
 
             let table = initializeSuratKeluarTable();
             let listRequest = null;
 
-            function loadSuratKeluarList(url, filter) {
+            function loadSuratKeluarList(url, filter, search) {
                 const list = $('#suratKeluarList');
                 filter = filter || $('.surat-filter-btn.active').data('filter') || 'semua';
+                currentSearch = typeof search === 'string' ? search : currentSearch;
+                const requestUrl = new URL(url, window.location.origin);
+
+                requestUrl.searchParams.set('filter', filter);
+                if (currentSearch.trim() === '') {
+                    requestUrl.searchParams.delete('search');
+                } else {
+                    requestUrl.searchParams.set('search', currentSearch.trim());
+                }
 
                 if (listRequest) {
                     listRequest.abort();
@@ -1173,9 +1198,8 @@
                 $('.surat-filter-btn').prop('disabled', true);
 
                 listRequest = $.ajax({
-                    url: url,
+                    url: requestUrl.toString(),
                     method: 'GET',
-                    data: filter ? { filter: filter } : {},
                     success: function (response) {
                         if (table) {
                             table.destroy();
@@ -1183,6 +1207,7 @@
 
                         list.html(response.html);
                         recipientMap = response.recipient_map || {};
+                        currentSearch = response.search || '';
                         table = initializeSuratKeluarTable();
 
                         $('.surat-filter-btn')
@@ -1190,9 +1215,8 @@
                             .filter('[data-filter="' + response.filter + '"]')
                             .addClass('active');
 
-                        const currentUrl = new URL(url, window.location.origin);
-                        currentUrl.searchParams.set('filter', response.filter);
-                        window.history.replaceState({}, '', currentUrl.pathname + currentUrl.search);
+                        requestUrl.searchParams.set('filter', response.filter);
+                        window.history.replaceState({}, '', requestUrl.pathname + requestUrl.search);
                     },
                     error: function (xhr, status) {
                         if (status === 'abort') {
