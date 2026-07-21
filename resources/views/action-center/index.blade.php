@@ -84,7 +84,7 @@
 
         .action-compact-toolbar {
             display: grid;
-            grid-template-columns: minmax(220px, 1fr) repeat(4, minmax(122px, 150px)) auto;
+            grid-template-columns: minmax(240px, 1fr) repeat(3, minmax(132px, 170px)) auto;
             gap: 10px;
             align-items: center;
             padding: 12px 14px;
@@ -134,6 +134,62 @@
             font-size: 0.82rem;
         }
 
+        .action-type-filters {
+            display: flex;
+            gap: 8px;
+            padding: 10px 14px;
+            overflow-x: auto;
+            border-bottom: 1px solid #eaf0f8;
+            background: #fff;
+            scrollbar-width: thin;
+        }
+
+        .action-type-filter {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            flex: 0 0 auto;
+            min-height: 36px;
+            padding: 7px 12px;
+            border: 1px solid #dbe5f3;
+            border-radius: 999px;
+            background: #fff;
+            color: #475569;
+            font-size: .76rem;
+            font-weight: 800;
+            transition: .16s ease;
+        }
+
+        .action-type-filter:hover {
+            border-color: #a5b4fc;
+            color: #4338ca;
+        }
+
+        .action-type-filter.active {
+            border-color: #4f46e5;
+            background: #4f46e5;
+            color: #fff;
+            box-shadow: 0 7px 16px rgba(79, 70, 229, .18);
+        }
+
+        .action-type-count {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 20px;
+            height: 20px;
+            padding: 0 6px;
+            border-radius: 999px;
+            background: #eef2ff;
+            color: #4338ca;
+            font-size: .68rem;
+        }
+
+        .action-type-filter.active .action-type-count {
+            background: rgba(255, 255, 255, .2);
+            color: #fff;
+        }
+
         .action-list {
             padding: 14px;
             display: grid;
@@ -146,9 +202,9 @@
         }
 
         .action-group-head {
-            display: flex;
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) auto;
             align-items: center;
-            justify-content: space-between;
             gap: 12px;
             padding: 2px 2px 0;
         }
@@ -182,9 +238,9 @@
         }
 
         .action-item-top {
-            display: flex;
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) auto;
             align-items: center;
-            justify-content: space-between;
             gap: 12px;
         }
 
@@ -192,6 +248,10 @@
             display: flex;
             align-items: center;
             gap: 12px;
+            min-width: 0;
+        }
+
+        .action-item-main > .min-w-0 {
             min-width: 0;
         }
 
@@ -211,9 +271,7 @@
             font-weight: 800;
             color: #0f172a;
             line-height: 1.25;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
+            overflow-wrap: anywhere;
         }
 
         .action-item-meta {
@@ -238,6 +296,14 @@
             gap: 8px;
         }
 
+        .action-state-row {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 8px;
+        }
+
         .action-chip {
             display: inline-flex;
             align-items: center;
@@ -249,12 +315,10 @@
         }
 
         .action-item-side {
-            min-width: 250px;
+            min-width: 38px;
             display: flex;
-            flex-direction: row;
             align-items: center;
-            justify-content: flex-end;
-            gap: 8px;
+            justify-content: center;
         }
 
         .action-item-side .btn {
@@ -286,7 +350,7 @@
             }
 
             .action-item-side {
-                min-width: 220px;
+                min-width: 38px;
             }
         }
 
@@ -308,59 +372,67 @@
                 padding: 10px;
             }
 
+            .action-type-filters {
+                padding: 9px 10px;
+            }
+
             .action-item {
                 padding: 11px;
             }
 
             .action-item-top {
+                grid-template-columns: minmax(0, 1fr) 38px;
                 align-items: flex-start;
-                flex-direction: column;
             }
 
             .action-item-side {
-                width: 100%;
+                width: auto;
                 min-width: 0;
                 align-items: center;
-                justify-content: space-between;
-            }
-
-            .action-item-title {
-                white-space: normal;
+                justify-content: center;
             }
         }
     </style>
 
     <div class="action-center-shell">
         <div class="action-center-board">
-            <form method="GET" action="{{ route('action-center.index') }}" class="action-compact-toolbar" id="actionCenterFilter">
-                <div class="action-compact-search">
-                    <i class="fas fa-search"></i>
-                    <input type="text" name="search" class="form-control action-compact-control" value="{{ $filters['search'] }}" placeholder="Cari tugas...">
+            <form method="GET" action="{{ route('action-center.index') }}" id="actionCenterFilter">
+                <div class="action-compact-toolbar">
+                    <div class="action-compact-search">
+                        <i class="fas fa-search"></i>
+                        <input type="text" name="search" class="form-control action-compact-control" value="{{ $filters['search'] }}" placeholder="Cari tugas...">
+                    </div>
+                    <select name="tab" class="form-control action-compact-control" aria-label="Tab">
+                        @foreach($tab_options as $key => $label)
+                            <option value="{{ $key }}" {{ $filters['tab'] === $key ? 'selected' : '' }}>{{ $label }} ({{ $tab_counts[$key] ?? 0 }})</option>
+                        @endforeach
+                    </select>
+                    <select name="status" class="form-control action-compact-control" aria-label="Status">
+                        @foreach($status_options as $key => $label)
+                            <option value="{{ $key }}" {{ $filters['status'] === $key ? 'selected' : '' }}>{{ $label }}</option>
+                        @endforeach
+                    </select>
+                    <select name="group" class="form-control action-compact-control" aria-label="Kelompok">
+                        @foreach($group_options as $key => $label)
+                            <option value="{{ $key }}" {{ $filters['group'] === $key ? 'selected' : '' }}>{{ $label }}</option>
+                        @endforeach
+                    </select>
+                    <input type="hidden" name="module" value="all">
+                    <input type="hidden" name="type" id="actionCenterType" value="{{ $filters['type'] }}">
+                    <input type="hidden" name="unit" value="all">
+                    <input type="hidden" name="assignee" value="all">
+                    <button type="submit" class="d-none">Terapkan</button>
+                    <div class="action-compact-count">{{ $summary['visible_count'] }} item</div>
                 </div>
-                <select name="tab" class="form-control action-compact-control" aria-label="Tab">
-                    @foreach($tab_options as $key => $label)
-                        <option value="{{ $key }}" {{ $filters['tab'] === $key ? 'selected' : '' }}>{{ $label }} ({{ $tab_counts[$key] ?? 0 }})</option>
+
+                <div class="action-type-filters" aria-label="Filter jenis tindak lanjut">
+                    @foreach($type_options as $key => $label)
+                        <button type="button" class="action-type-filter {{ $filters['type'] === $key ? 'active' : '' }}" data-action-type="{{ $key }}">
+                            {{ $label }}
+                            <span class="action-type-count">{{ $type_counts[$key] ?? 0 }}</span>
+                        </button>
                     @endforeach
-                </select>
-                <select name="module" class="form-control action-compact-control" aria-label="Modul">
-                    @foreach($module_options as $key => $label)
-                        <option value="{{ $key }}" {{ $filters['module'] === $key ? 'selected' : '' }}>{{ $label }}</option>
-                    @endforeach
-                </select>
-                <select name="status" class="form-control action-compact-control" aria-label="Status">
-                    @foreach($status_options as $key => $label)
-                        <option value="{{ $key }}" {{ $filters['status'] === $key ? 'selected' : '' }}>{{ $label }}</option>
-                    @endforeach
-                </select>
-                <select name="group" class="form-control action-compact-control" aria-label="Kelompok">
-                    @foreach($group_options as $key => $label)
-                        <option value="{{ $key }}" {{ $filters['group'] === $key ? 'selected' : '' }}>{{ $label }}</option>
-                    @endforeach
-                </select>
-                <input type="hidden" name="unit" value="all">
-                <input type="hidden" name="assignee" value="all">
-                <button type="submit" class="d-none">Terapkan</button>
-                <div class="action-compact-count">{{ $summary['visible_count'] }} item</div>
+                </div>
             </form>
 
             <div class="action-list">
@@ -397,20 +469,23 @@
                                                     @if(($item['assignee_name'] ?? '-') !== '-')
                                                         <span><i class="fas fa-user"></i>{{ $item['assignee_name'] }}</span>
                                                     @endif
-                                                    <span><i class="fas fa-clock"></i>{{ $item['target_label'] }}</span>
+                                                    <span><i class="fas fa-history"></i>{{ $item['activity_label'] }}</span>
+                                                    @if(($item['target_label'] ?? '-') !== '-')
+                                                        <span><i class="fas fa-bullseye"></i>Target {{ $item['target_label'] }}</span>
+                                                    @endif
+                                                </div>
+                                                <div class="action-state-row">
+                                                    <span class="action-chip" style="background: {{ $statusTone['bg'] }}; color: {{ $statusTone['text'] }};">
+                                                        {{ $item['status_label'] }}
+                                                    </span>
+                                                    @if(($item['priority_key'] ?? 'normal') === 'high')
+                                                        <span class="action-chip" style="background: {{ $priorityTone['bg'] }}; color: {{ $priorityTone['text'] }};">Prioritas Tinggi</span>
+                                                    @endif
                                                 </div>
                                             </div>
                                         </div>
 
                                         <div class="action-item-side">
-                                            <div class="action-quick-row">
-                                                <span class="action-chip" style="background: {{ $statusTone['bg'] }}; color: {{ $statusTone['text'] }};">
-                                                    {{ $item['status_label'] }}
-                                                </span>
-                                                @if(($item['priority_key'] ?? 'normal') === 'high')
-                                                    <span class="action-chip" style="background: {{ $priorityTone['bg'] }}; color: {{ $priorityTone['text'] }};">Prioritas</span>
-                                                @endif
-                                            </div>
                                             <a href="{{ $item['action_url'] }}" class="btn btn-primary btn-sm" title="{{ $item['action_text'] }}">
                                                 <i class="fas fa-arrow-right"></i>
                                             </a>
@@ -432,6 +507,13 @@
 
             form.querySelectorAll('select').forEach(function (select) {
                 select.addEventListener('change', function () {
+                    form.submit();
+                });
+            });
+
+            form.querySelectorAll('[data-action-type]').forEach(function (button) {
+                button.addEventListener('click', function () {
+                    document.getElementById('actionCenterType').value = button.getAttribute('data-action-type');
                     form.submit();
                 });
             });

@@ -447,7 +447,7 @@ class WhatsAppNotificationService
 
         $message = $this->wrap([
             'Yth. Bapak/Ibu,',
-            'Dengan hormat, terdapat surat keluar yang menandai Bapak/Ibu sebagai penerima internal.',
+            'Dengan hormat, surat keluar yang menandai Bapak/Ibu sebagai penerima internal telah dinyatakan lengkap dan dokumennya telah tersedia.',
             '',
             'Nomor Surat: ' . $suratKeluar->nomor_surat_formatted,
             'Perihal: ' . ($suratKeluar->perihal ?: '-'),
@@ -460,7 +460,7 @@ class WhatsAppNotificationService
 
         return $this->sendToUser($targetUser, $message, [
             'module' => 'persuratan',
-            'event' => 'surat_keluar_recipient',
+            'event' => 'surat_keluar_ready',
             'notifiable_type' => get_class($suratKeluar),
             'notifiable_id' => $suratKeluar->id,
         ]);
@@ -965,17 +965,12 @@ class WhatsAppNotificationService
     public function notifyLoginInfo(User $user)
     {
         $message = $this->wrap([
-            'Yth. Bapak/Ibu,',
-            'Dengan hormat, berikut informasi akses aplikasi.',
-            '',
+            'Akses akun SIMANTAP telah tersedia.',
             'Nama: ' . $user->name,
-            'Email: ' . $user->email,
-            'Username: ' . ($user->username ?: '-'),
-            'Password standar: ptapabar',
+            'NIP: ' . ($user->nip ?: $user->username ?: '-'),
             '',
-            'Apabila password pernah diubah sebelumnya, gunakan password terakhir yang masih berlaku.',
-            'Halaman login:',
-            url('/login'),
+            'Buka akun melalui tautan berikut:',
+            route('dashboard'),
         ]);
 
         return $this->sendToUser($user, $message, [
@@ -1171,20 +1166,82 @@ class WhatsAppNotificationService
 
     protected function wrap(array $lines)
     {
-        return implode("\n", $lines) . "\n\nHormat kami,\nPAPEDA";
+        return implode("\n", $lines);
     }
 
     protected function withNotificationHeader($message, array $context = [])
     {
-        $message = trim((string) $message);
+        $message = $this->compactMessage($message);
 
-        if (preg_match('/^\*\[[^\]]+ NOTIF\]\*/i', $message)) {
-            return $message;
+        return '*SIMANTAP | ' . $this->notificationModuleTitle($context['module'] ?? null) . '*'
+            . "\n"
+            . $message;
+    }
+
+    protected function compactMessage($message)
+    {
+        $message = str_replace(["\r\n", "\r"], "\n", trim((string) $message));
+        $lines = explode("\n", $message);
+        $result = [];
+        $hasMagicLink = strpos($message, '/masuk/whatsapp/') !== false;
+
+        foreach ($lines as $line) {
+            $line = trim($line);
+
+            if ($line === '') {
+                if (!empty($result) && end($result) !== '') {
+                    $result[] = '';
+                }
+                continue;
+            }
+
+            if (preg_match('/^\*?(?:\[[^\]]+ NOTIF\]|SIMANTAP\s*\|[^*]+)\*?$/i', $line)
+                || preg_match('/^Yth\..+,$/i', $line)
+                || preg_match('/^(?:Hormat kami,?|PAPEDA|SIMANTAP)$/i', $line)) {
+                continue;
+            }
+
+            if (preg_match('/^Dengan hormat,\s*(.+)$/i', $line, $matches)) {
+                $line = ucfirst(trim($matches[1]));
+            }
+
+            if (preg_match('/^(?:Berikut disampaikan (?:informasi|pembaruan).+|Disampaikan informasi .+ sebagai berikut)\.?$/i', $line)) {
+                continue;
+            }
+
+            if ($this->isActionPrompt($line)) {
+                $line = $hasMagicLink
+                    ? '*Buka di SIMANTAP (login otomatis):*'
+                    : '*Buka tautan:*';
+            } elseif (!preg_match('/^https?:\/\//i', $line)
+                && preg_match('/^([^:*]{2,45}):\s*(.+)$/u', $line, $matches)) {
+                $line = '*' . trim($matches[1]) . ':* ' . trim($matches[2]);
+            }
+
+            if (empty($result) || end($result) !== $line) {
+                $result[] = $line;
+            }
         }
 
-        return '*[' . $this->notificationModuleTitle($context['module'] ?? null) . ' NOTIF]*'
-            . "\n\n"
-            . $message;
+        while (!empty($result) && end($result) === '') {
+            array_pop($result);
+        }
+
+        if ($hasMagicLink) {
+            $result[] = '';
+            $result[] = '_Tautan khusus penerima dan hanya dapat digunakan satu kali._';
+        }
+
+        return implode("\n", $result);
+    }
+
+    protected function isActionPrompt($line)
+    {
+        if (!preg_match('/(?:tautan|aplikasi|modul|halaman login)/i', (string) $line)) {
+            return false;
+        }
+
+        return (bool) preg_match('/^(?:Silakan|Mohon|Tinjau|Buka|Informasi agenda|Detail jadwal|Halaman login)/i', (string) $line);
     }
 
     protected function notificationModuleTitle($module)

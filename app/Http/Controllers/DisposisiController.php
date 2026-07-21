@@ -101,11 +101,14 @@ class DisposisiController extends Controller
             ? now('Asia/Jayapura')->addDay()
             : ($priorityLevel === 'low' ? now('Asia/Jayapura')->addDays(5) : now('Asia/Jayapura')->addDays(3));
 
+        $sourceJabatanId = $user->sourceJabatanIdForTarget($kepadaJabatanId);
+        $actingDelegation = $user->activeDelegationForJabatan($sourceJabatanId);
+
         $disposisi = Disposisi::create([
             'surat_masuk_id' => $request->surat_masuk_id,
             'dari_user_id' => $user->id,
             'kepada_user_id' => $request->kepada_user_id,
-            'dari_jabatan_id' => $user->sourceJabatanIdForTarget($kepadaJabatanId),
+            'dari_jabatan_id' => $sourceJabatanId,
             'kepada_jabatan_id' => $kepadaJabatanId,
             'petunjuk' => $user->requiresPetunjukDisposisi() ? $request->petunjuk : null,
             'catatan' => $request->catatan,
@@ -140,6 +143,11 @@ class DisposisiController extends Controller
             'note' => $request->catatan,
             'metadata_json' => [
                 'petunjuk' => $disposisi->petunjuk,
+                'acting_as_delegation' => $actingDelegation ? [
+                    'type' => strtoupper((string) $actingDelegation->delegation_type),
+                    'jabatan_id' => $actingDelegation->jabatan_id,
+                    'jabatan' => optional($actingDelegation->jabatan)->nama,
+                ] : null,
             ],
         ], $user);
 
@@ -153,7 +161,8 @@ class DisposisiController extends Controller
 
     public function updateStatus(Request $request, Disposisi $disposisi)
     {
-        abort_unless(auth()->user()->canFollowUpDisposisi($disposisi), 403);
+        $user = auth()->user();
+        abort_unless($user->canFollowUpDisposisi($disposisi), 403);
 
         $rules = [
             'status' => 'required|in:dibaca,diproses,ditindaklanjuti',
@@ -207,7 +216,7 @@ class DisposisiController extends Controller
                     $storedPaths[] = $path;
 
                     $disposisi->dokumentasis()->create([
-                        'uploaded_by' => auth()->id(),
+                        'uploaded_by' => $user->id,
                         'file_path' => $path,
                         'original_name' => $file->getClientOriginalName(),
                         'mime_type' => $file->getMimeType(),
@@ -238,6 +247,8 @@ class DisposisiController extends Controller
 
         $disposisi->load('dokumentasis');
 
+        $actingDelegation = $user->activeDelegationForJabatan($disposisi->kepada_jabatan_id);
+
         $this->auditService->log('persuratan', 'disposisi_status_updated', $disposisi, [
             'subject_type' => 'surat_masuk',
             'subject_id' => optional($disposisi->suratMasuk)->id,
@@ -252,7 +263,14 @@ class DisposisiController extends Controller
                 'dokumentasi' => $disposisi->dokumentasis->pluck('original_name')->values()->all(),
             ],
             'note' => $request->catatan_tindak_lanjut,
-        ]);
+            'metadata_json' => [
+                'acting_as_delegation' => $actingDelegation ? [
+                    'type' => strtoupper((string) $actingDelegation->delegation_type),
+                    'jabatan_id' => $actingDelegation->jabatan_id,
+                    'jabatan' => optional($actingDelegation->jabatan)->nama,
+                ] : null,
+            ],
+        ], $user);
 
         return response()->json([
             'success' => true,
@@ -347,7 +365,7 @@ class DisposisiController extends Controller
             ->get();
 
         foreach ($targetJabatans as $jabatan) {
-            $users = User::with('jabatan')
+            $users = User::with('jabatan', 'activeJabatanDelegations.jabatan')
                 ->active()
                 ->where('id', '!=', $user->id)
                 ->where(function ($query) use ($jabatan) {
@@ -360,13 +378,22 @@ class DisposisiController extends Controller
                 ->get();
 
             foreach ($users as $u) {
+                $targetDelegation = $u->activeJabatanDelegations->first(function ($delegation) use ($jabatan) {
+                    return (int) $delegation->jabatan_id === (int) $jabatan->id;
+                });
+                $assignmentLabel = $targetDelegation
+                    ? strtoupper((string) $targetDelegation->delegation_type) . ' ' . $jabatan->nama
+                    : $jabatan->nama;
+
                 $targets[] = [
                     'id' => $u->id,
                     'name' => $u->name,
                     'user_id' => $u->id,
                     'user_name' => $u->name,
-                    'jabatan' => $jabatan->nama,
+                    'jabatan' => $assignmentLabel,
                     'jabatan_kode' => $jabatan->kode,
+                    'is_delegated' => (bool) $targetDelegation,
+                    'delegation_type' => $targetDelegation ? strtoupper((string) $targetDelegation->delegation_type) : null,
                     'is_naikan' => in_array($jabatan->kode, ['KPTA', 'WKPTA']),
                 ];
             }

@@ -684,18 +684,7 @@ class IntegratedCalendarService
 
     protected function visibleAgendaQuery(User $user)
     {
-        $query = AgendaPimpinan::query();
-
-        if (!$user->isSuperAdmin() && !$user->canAccessAgendaPimpinan()) {
-            $query->where(function ($builder) use ($user) {
-                $builder->where('created_by', $user->id)
-                    ->orWhereHas('recipients', function ($recipientQuery) use ($user) {
-                        $recipientQuery->where('users.id', $user->id);
-                    });
-            });
-        }
-
-        return $query;
+        return AgendaPimpinan::visibleTo($user);
     }
 }
 

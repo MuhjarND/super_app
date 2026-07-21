@@ -92,9 +92,28 @@
                 gap: 8px;
             }
 
-            .surat-masuk-back-btn {
+        .surat-masuk-back-btn {
                 margin-top: 14px;
             }
+        }
+
+        .surat-delegation-context {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 14px;
+            padding: 12px 14px;
+            border: 1px solid #fed7aa;
+            border-radius: 11px;
+            background: #fff7ed;
+            color: #9a3412;
+            font-size: .82rem;
+            line-height: 1.45;
+        }
+
+        .surat-delegation-context.direct {
+            border-color: #c7d2fe;
+            background: #eef2ff;
+            color: #3730a3;
         }
     </style>
 @endpush
@@ -134,6 +153,15 @@
                     {!! $suratMasuk->status_badge !!}
                 </div>
                 <div class="card-body">
+                    @if(auth()->user()->hasActiveJabatanDelegation() && $assignmentContext)
+                        <div class="surat-delegation-context {{ data_get($assignmentContext, 'mode') === 'direct' ? 'direct' : '' }}">
+                            <i class="fas {{ data_get($assignmentContext, 'mode') === 'delegated' ? 'fa-user-shield' : 'fa-user-check' }} mt-1"></i>
+                            <div>
+                                <strong>{{ data_get($assignmentContext, 'badge') }}</strong>
+                                <div>{{ data_get($assignmentContext, 'description') }}</div>
+                            </div>
+                        </div>
+                    @endif
                     <table class="table table-borderless surat-masuk-detail-table mb-0">
                         <tr>
                             <td>Nomor Surat</td>
@@ -230,6 +258,12 @@
                         <h3 class="card-title"><i class="fas fa-share mr-2"></i>Tindak Lanjut Surat</h3>
                     </div>
                     <div class="card-body">
+                        @if(data_get($assignmentContext, 'mode') === 'delegated')
+                            <div class="surat-delegation-context mb-3">
+                                <i class="fas fa-user-shield mt-1"></i>
+                                <div>{{ data_get($assignmentContext, 'action_label') }}</div>
+                            </div>
+                        @endif
                         <form id="disposisiForm">
                             @csrf
                             <input type="hidden" name="surat_masuk_id" value="{{ $suratMasuk->id }}">
@@ -324,6 +358,15 @@
                             </div>
                             @if($disposisi->kepadaJabatan)
                                 <small class="text-muted d-block">{{ $disposisi->kepadaJabatan->nama }}</small>
+                            @endif
+                            @php
+                                $historyAssignmentContext = $disposisi->assignmentContextFor(auth()->user());
+                            @endphp
+                            @if(data_get($historyAssignmentContext, 'mode') === 'delegated')
+                                <div class="surat-delegation-context mt-2 mb-0 py-2">
+                                    <i class="fas fa-user-shield mt-1"></i>
+                                    <div>{{ data_get($historyAssignmentContext, 'description') }}</div>
+                                </div>
                             @endif
                             @if($disposisi->catatan)
                                 <div class="mt-2 p-2" style="background: #f7fafc; border-radius: 6px;">

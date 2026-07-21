@@ -9,6 +9,7 @@ class User extends Authenticatable
 {
     protected $effectiveJabatansCache = null;
     protected $effectiveAssignmentUserIdsCache = null;
+    protected $suratMasukAssignmentUserIdsCache = null;
     protected $delegatedStructuralRoleNamesCache = null;
     protected $hasAssignedMeetingFollowUpsCache = null;
 
@@ -429,11 +430,33 @@ class User extends Authenticatable
 
     public function canAccessAgendaPimpinan()
     {
-        if ($this->isSuperAdmin()) {
-            return true;
+        return $this->canManageAgendaPimpinanParticipants()
+            || $this->hasTaggedAgendaPimpinan();
+    }
+
+    public function agendaPimpinans()
+    {
+        return $this->belongsToMany(AgendaPimpinan::class, 'agenda_pimpinan_user')
+            ->withPivot('urutan');
+    }
+
+    public function canManageAgendaPimpinanDetails()
+    {
+        return $this->isSuperAdmin() || $this->isMeetingAdmin();
+    }
+
+    public function canManageAgendaPimpinanParticipants()
+    {
+        return $this->canManageAgendaPimpinanDetails() || $this->isMeetingProtokoler();
+    }
+
+    public function hasTaggedAgendaPimpinan()
+    {
+        if ($this->relationLoaded('agendaPimpinans')) {
+            return $this->agendaPimpinans->isNotEmpty();
         }
 
-        return $this->isMeetingAdmin() || $this->isMeetingProtokoler();
+        return $this->exists && $this->agendaPimpinans()->exists();
     }
 
     public function virtualMeetings()
@@ -453,7 +476,16 @@ class User extends Authenticatable
 
     public function canAccessVirtualMeetings()
     {
-        return $this->canManageVirtualMeetings() || $this->virtualMeetings()->exists();
+        return $this->canManageVirtualMeetings() || $this->hasTaggedVirtualMeeting();
+    }
+
+    public function hasTaggedVirtualMeeting()
+    {
+        if ($this->relationLoaded('virtualMeetings')) {
+            return $this->virtualMeetings->isNotEmpty();
+        }
+
+        return $this->exists && $this->virtualMeetings()->exists();
     }
 
     public function canManageVoting()
@@ -463,6 +495,11 @@ class User extends Authenticatable
         }
 
         return $this->isMeetingAdmin();
+    }
+
+    public function canAccessVoting()
+    {
+        return true;
     }
 
     public function canViewRapat($rapat)
@@ -570,6 +607,7 @@ class User extends Authenticatable
     public function canAccessIntegratedCalendar()
     {
         return $this->canAccessMeetingModule()
+            || $this->canAccessAgendaPimpinan()
             || $this->canAccessVirtualMeetings()
             || $this->canAccessLeaveModule()
             || $this->canAccessProgressZiModule()
@@ -947,6 +985,66 @@ class User extends Authenticatable
         return $this->effectiveAssignmentUserIdsCache;
     }
 
+    public function activeDelegationForJabatan($jabatanId)
+    {
+        if (!$jabatanId) {
+            return null;
+        }
+
+        $delegations = $this->relationLoaded('activeJabatanDelegations')
+            ? $this->activeJabatanDelegations
+            : $this->activeJabatanDelegations()->get();
+
+        return $delegations->first(function ($delegation) use ($jabatanId) {
+            return (int) $delegation->jabatan_id === (int) $jabatanId;
+        });
+    }
+
+    public function hasActiveJabatanDelegation()
+    {
+        $delegations = $this->relationLoaded('activeJabatanDelegations')
+            ? $this->activeJabatanDelegations
+            : $this->activeJabatanDelegations()->get();
+
+        return $delegations->isNotEmpty();
+    }
+
+    /**
+     * User IDs whose incoming letters may be handled by this user.
+     * Unlike general approval delegation, incoming-letter authority is tied
+     * strictly to the delegated position and never expanded by a shared role.
+     */
+    public function suratMasukAssignmentUserIds()
+    {
+        if ($this->suratMasukAssignmentUserIdsCache !== null) {
+            return $this->suratMasukAssignmentUserIdsCache;
+        }
+
+        $ids = collect([$this->id])->filter();
+        $delegations = $this->relationLoaded('activeJabatanDelegations')
+            ? $this->activeJabatanDelegations
+            : $this->activeJabatanDelegations()->get();
+        $delegatedJabatanIds = $delegations->pluck('jabatan_id')->filter()->unique()->values()->all();
+
+        if (!empty($delegatedJabatanIds)) {
+            $ids = $ids->merge(
+                static::active()
+                    ->whereIn('jabatan_id', $delegatedJabatanIds)
+                    ->pluck('id')
+            );
+        }
+
+        $this->suratMasukAssignmentUserIdsCache = $ids
+            ->map(function ($id) {
+                return (int) $id;
+            })
+            ->unique()
+            ->values()
+            ->all();
+
+        return $this->suratMasukAssignmentUserIdsCache;
+    }
+
     protected function delegatedStructuralRoleNames()
     {
         if ($this->delegatedStructuralRoleNamesCache !== null) {
@@ -1097,7 +1195,7 @@ class User extends Authenticatable
         }
 
         if ($suratMasuk->relationLoaded('disposisis')) {
-            $assignmentUserIds = $this->effectiveAssignmentUserIds();
+            $assignmentUserIds = $this->suratMasukAssignmentUserIds();
             $jabatanIds = array_map('intval', $this->effectiveJabatanIds());
 
             $pending = $suratMasuk->disposisis
@@ -1155,6 +1253,10 @@ class User extends Authenticatable
         }
 
         if ((int) $suratMasuk->created_by === (int) $this->id) {
+            return true;
+        }
+
+        if ($suratMasuk->isAgendaRelatedTo($this)) {
             return true;
         }
 
@@ -1228,7 +1330,7 @@ class User extends Authenticatable
             return true;
         }
 
-        if ($this->canActAsAssignedUser($disposisi->kepada_user_id)) {
+        if (in_array((int) $disposisi->kepada_user_id, $this->suratMasukAssignmentUserIds(), true)) {
             return true;
         }
 

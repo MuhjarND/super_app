@@ -1158,7 +1158,7 @@
                     </a>
                 @endif
 
-                @if($showMobileModule('rapat') && ($meeting['enabled'] || ($dashboardUser && ($dashboardUser->canAccessMeetingFollowUps() || $dashboardUser->canAccessVirtualMeetings()))))
+                @if($showMobileModule('rapat') && ($meeting['enabled'] || ($dashboardUser && ($dashboardUser->canAccessMeetingFollowUps() || $dashboardUser->canAccessAgendaPimpinan() || $dashboardUser->canAccessVirtualMeetings() || $dashboardUser->canAccessVoting()))))
                     <a href="{{ route('mobile.menu.show', 'rapat') }}" class="mobile-app-tile">
                         <span class="mobile-app-icon meeting"><i class="fas fa-users"></i></span>
                         <span class="mobile-app-title">{{ $mobileModuleLabel('rapat', 'Rapat') }}</span>

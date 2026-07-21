@@ -27,13 +27,15 @@ class VotingController extends Controller
 
     public function index()
     {
-        abort_unless(auth()->user()->canManageVoting(), 403);
+        $user = auth()->user();
+        abort_unless($user->canAccessVoting(), 403);
 
         $votings = Voting::with(['creator', 'participantPivots', 'votes'])
             ->orderByDesc('created_at')
             ->get();
+        $canManage = $user->canManageVoting();
 
-        return view('rapat.voting.index', compact('votings'));
+        return view('rapat.voting.index', compact('votings', 'canManage'));
     }
 
     public function create()
@@ -84,7 +86,8 @@ class VotingController extends Controller
 
     public function show(Voting $voting)
     {
-        abort_unless(auth()->user()->canManageVoting(), 403);
+        $user = auth()->user();
+        abort_unless($user->canAccessVoting(), 403);
 
         $voting->load([
             'creator',
@@ -93,7 +96,9 @@ class VotingController extends Controller
             'votes',
         ]);
 
-        return view('rapat.voting.show', compact('voting'));
+        $canManage = $user->canManageVoting();
+
+        return view('rapat.voting.show', compact('voting', 'canManage'));
     }
 
     public function edit(Voting $voting)
@@ -157,7 +162,7 @@ class VotingController extends Controller
 
     public function stats(Voting $voting)
     {
-        abort_unless(auth()->user()->canManageVoting(), 403);
+        abort_unless(auth()->user()->canAccessVoting(), 403);
 
         $voting->load(['items.candidates.votes', 'participantPivots.user']);
 
@@ -205,7 +210,7 @@ class VotingController extends Controller
 
     public function resultsPdf(Voting $voting)
     {
-        abort_unless(auth()->user()->canManageVoting(), 403);
+        abort_unless(auth()->user()->canAccessVoting(), 403);
 
         $voting->load(['items.candidates.votes', 'participantPivots.user']);
         $verifier = app(\App\Services\PdfVerificationService::class);

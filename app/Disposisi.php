@@ -56,7 +56,7 @@ class Disposisi extends Model
 
     public function scopeAddressedToUser($query, User $user)
     {
-        $userIds = $user->effectiveAssignmentUserIds();
+        $userIds = $user->suratMasukAssignmentUserIds();
         $jabatanIds = $user->effectiveJabatanIds();
 
         return $query->where(function ($targetQuery) use ($userIds, $jabatanIds) {
@@ -73,7 +73,7 @@ class Disposisi extends Model
 
     public function scopeInvolvingUser($query, User $user)
     {
-        $userIds = $user->effectiveAssignmentUserIds();
+        $userIds = $user->suratMasukAssignmentUserIds();
         $jabatanIds = $user->effectiveJabatanIds();
 
         return $query->where(function ($targetQuery) use ($user, $userIds, $jabatanIds) {
@@ -117,6 +117,73 @@ class Disposisi extends Model
     public function dokumentasis()
     {
         return $this->hasMany(DisposisiDokumentasi::class)->latest();
+    }
+
+    public function isAddressedTo(User $user)
+    {
+        if (in_array((int) $this->kepada_user_id, $user->suratMasukAssignmentUserIds(), true)) {
+            return true;
+        }
+
+        return $this->kepada_jabatan_id
+            && in_array((int) $this->kepada_jabatan_id, array_map('intval', $user->effectiveJabatanIds()), true);
+    }
+
+    public function assignmentContextFor(User $user)
+    {
+        if (!$this->isAddressedTo($user)) {
+            return null;
+        }
+
+        $targetJabatanId = $this->kepada_jabatan_id
+            ?: optional($this->kepadaUser)->jabatan_id;
+        $delegation = $user->activeDelegationForJabatan($targetJabatanId);
+
+        if (!$delegation) {
+            return [
+                'mode' => 'direct',
+                'badge' => 'Untuk Saya',
+                'description' => 'Surat ditujukan langsung kepada ' . $user->name . '.',
+                'action_label' => 'Aksi dilakukan sebagai ' . $user->display_jabatan . '.',
+                'type' => null,
+                'jabatan' => optional($this->kepadaJabatan)->nama ?: $user->display_jabatan,
+                'original_user_name' => $user->name,
+            ];
+        }
+
+        $jabatan = $delegation->jabatan ?: $this->kepadaJabatan;
+        $originalUser = null;
+
+        if ($this->kepadaUser
+            && (int) $this->kepadaUser->id !== (int) $user->id
+            && (int) $this->kepadaUser->jabatan_id === (int) $targetJabatanId) {
+            $originalUser = $this->kepadaUser;
+        }
+
+        if (!$originalUser && $this->kepadaJabatan) {
+            $users = $this->kepadaJabatan->relationLoaded('users')
+                ? $this->kepadaJabatan->users
+                : $this->kepadaJabatan->users()->active()->get();
+            $originalUser = $users->first(function ($candidate) use ($user, $targetJabatanId) {
+                return (int) $candidate->id !== (int) $user->id
+                    && (int) $candidate->jabatan_id === (int) $targetJabatanId
+                    && (bool) $candidate->status_aktif_pegawai;
+            });
+        }
+
+        $type = strtoupper((string) $delegation->delegation_type);
+        $jabatanName = optional($jabatan)->nama ?: 'jabatan yang didelegasikan';
+        $originalName = optional($originalUser)->name ?: 'Pejabat definitif ' . $jabatanName;
+
+        return [
+            'mode' => 'delegated',
+            'badge' => 'Sebagai ' . $type,
+            'description' => 'Ditujukan kepada ' . $originalName . '; ditangani oleh Anda sebagai ' . $type . ' ' . $jabatanName . '.',
+            'action_label' => 'Aksi akan dicatat atas nama Anda sebagai ' . $type . ' ' . $jabatanName . '.',
+            'type' => $type,
+            'jabatan' => $jabatanName,
+            'original_user_name' => $originalName,
+        ];
     }
 
     public function getStatusBadgeAttribute()

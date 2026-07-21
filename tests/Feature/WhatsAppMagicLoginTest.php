@@ -46,7 +46,7 @@ class WhatsAppMagicLoginTest extends TestCase
         parent::tearDown();
     }
 
-    public function testMagicLinkCanBeUsedRepeatedlyBeforeItExpires()
+    public function testMagicLinkCanOnlyBeUsedOnce()
     {
         $user = factory(User::class)->create(['no_hp' => '081234567890']);
         $destination = route('dashboard');
@@ -64,8 +64,8 @@ class WhatsAppMagicLoginTest extends TestCase
         auth()->logout();
         $response = $this->get($magicUrl);
 
-        $response->assertRedirect($destination);
-        $this->assertAuthenticatedAs($user);
+        $response->assertRedirect(route('login'));
+        $this->assertGuest();
     }
 
     public function testExpiredMagicLinkCannotLogIn()
@@ -85,5 +85,22 @@ class WhatsAppMagicLoginTest extends TestCase
         $response->assertRedirect(route('login'));
         $this->assertGuest();
         $this->assertNull(WhatsAppMagicLoginToken::first()->used_at);
+    }
+
+    public function testOnlyInternalApplicationUrlsAreReplaced()
+    {
+        $user = factory(User::class)->create();
+        $internalUrl = route('dashboard');
+        $externalUrl = 'https://zoom.us/j/123456789';
+
+        $message = app(WhatsAppMagicLinkService::class)->replaceApplicationUrls(
+            $user,
+            'SIMANTAP: ' . $internalUrl . "\nZoom: " . $externalUrl
+        );
+
+        $this->assertStringContainsString('/masuk/whatsapp/', $message);
+        $this->assertStringNotContainsString($internalUrl, $message);
+        $this->assertStringContainsString($externalUrl, $message);
+        $this->assertSame(1, WhatsAppMagicLoginToken::count());
     }
 }

@@ -175,16 +175,7 @@ class ArchiveController extends Controller
 
     protected function buildAgendaItems($user)
     {
-        $query = AgendaPimpinan::with(['creator', 'recipients']);
-
-        if (!$user->isSuperAdmin() && !$user->canAccessAgendaPimpinan()) {
-            $query->where(function ($builder) use ($user) {
-                $builder->where('created_by', $user->id)
-                    ->orWhereHas('recipients', function ($recipientQuery) use ($user) {
-                        $recipientQuery->where('users.id', $user->id);
-                    });
-            });
-        }
+        $query = AgendaPimpinan::visibleTo($user)->with(['creator', 'recipients']);
 
         return $query->get()->map(function ($agenda) {
             $recipientText = 'Internal / ' . $agenda->recipients->count() . ' orang';

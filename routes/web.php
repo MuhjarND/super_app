@@ -252,6 +252,28 @@ Route::middleware(['auth'])->group(function () {
         Route::delete('/{virtualMeeting}', 'VirtualMeetingController@destroy')->name('destroy');
     });
 
+    Route::prefix('rapat/agenda-pimpinan')->name('rapat.agenda.')->group(function () {
+        Route::get('/', 'AgendaPimpinanController@index')->name('index');
+        Route::post('/', 'AgendaPimpinanController@store')->name('store');
+        Route::put('/{agenda}', 'AgendaPimpinanController@update')->name('update');
+        Route::patch('/{agenda}/participants', 'AgendaPimpinanController@updateParticipants')->name('participants');
+        Route::post('/{agenda}/send-whatsapp', 'AgendaPimpinanController@sendWhatsapp')->name('send-whatsapp');
+        Route::delete('/{agenda}', 'AgendaPimpinanController@destroy')->name('destroy');
+    });
+
+    Route::prefix('rapat/voting')->name('rapat.voting.')->group(function () {
+        Route::get('/', 'VotingController@index')->name('index');
+        Route::get('/create', 'VotingController@create')->name('create');
+        Route::post('/', 'VotingController@store')->name('store');
+        Route::get('/{voting}', 'VotingController@show')->name('show');
+        Route::get('/{voting}/edit', 'VotingController@edit')->name('edit');
+        Route::put('/{voting}', 'VotingController@update')->name('update');
+        Route::post('/{voting}/send-whatsapp', 'VotingController@sendWhatsapp')->name('send-whatsapp');
+        Route::delete('/{voting}', 'VotingController@destroy')->name('destroy');
+        Route::get('/{voting}/stats', 'VotingController@stats')->name('stats');
+        Route::get('/{voting}/pdf', 'VotingController@resultsPdf')->name('pdf');
+    });
+
     Route::prefix('rapat')->name('rapat.')->middleware('role:admin,operator,notulis,peserta,approval,protokoler,super_admin')->group(function () {
         Route::get('/', 'RapatController@index')->name('index');
         Route::get('/preview-nomor', 'RapatController@previewNomorUndangan')->middleware('role:admin,operator,super_admin')->name('preview-nomor');
@@ -287,15 +309,6 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/notulensi-approval/{notulensiApproval}/approve', 'RapatNotulensiApprovalController@approve')->middleware('role:admin,approval,super_admin')->name('notulensi-approval.approve');
         Route::post('/notulensi-approval/{notulensiApproval}/reject', 'RapatNotulensiApprovalController@reject')->middleware('role:admin,approval,super_admin')->name('notulensi-approval.reject');
 
-        Route::prefix('agenda-pimpinan')->middleware('role:admin,protokoler,super_admin')->name('agenda.')->group(function () {
-            Route::get('/', 'AgendaPimpinanController@index')->name('index');
-            Route::post('/', 'AgendaPimpinanController@store')->name('store');
-            Route::put('/{agenda}', 'AgendaPimpinanController@update')->name('update');
-            Route::patch('/{agenda}/participants', 'AgendaPimpinanController@updateParticipants')->name('participants');
-            Route::post('/{agenda}/send-whatsapp', 'AgendaPimpinanController@sendWhatsapp')->name('send-whatsapp');
-            Route::delete('/{agenda}', 'AgendaPimpinanController@destroy')->name('destroy');
-        });
-
         Route::get('/absensi', 'RapatAbsensiController@index')->name('absensi.index');
         Route::get('/absensi/{rapat}', 'RapatAbsensiController@show')->name('absensi.show');
         Route::get('/absensi/{rapat}/pdf', 'RapatAbsensiController@pdf')->name('absensi.pdf');
@@ -314,18 +327,6 @@ Route::middleware(['auth'])->group(function () {
             Route::post('/{laporan}/unarchive', 'RapatLaporanController@unarchive')->middleware('role:admin,operator,notulis,super_admin')->name('unarchive');
         });
 
-        Route::prefix('voting')->middleware('role:admin,super_admin')->name('voting.')->group(function () {
-            Route::get('/', 'VotingController@index')->name('index');
-            Route::get('/create', 'VotingController@create')->name('create');
-            Route::post('/', 'VotingController@store')->name('store');
-            Route::get('/{voting}', 'VotingController@show')->name('show');
-            Route::get('/{voting}/edit', 'VotingController@edit')->name('edit');
-            Route::put('/{voting}', 'VotingController@update')->name('update');
-            Route::post('/{voting}/send-whatsapp', 'VotingController@sendWhatsapp')->name('send-whatsapp');
-            Route::delete('/{voting}', 'VotingController@destroy')->name('destroy');
-            Route::get('/{voting}/stats', 'VotingController@stats')->name('stats');
-            Route::get('/{voting}/pdf', 'VotingController@resultsPdf')->name('pdf');
-        });
     });
 
     Route::prefix('rapat/notulensi')->name('rapat.notulensi.')->group(function () {

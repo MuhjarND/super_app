@@ -44,6 +44,7 @@ class ResetPersuratanSequenceFromImportCommand extends Command
 
             $deleted = DB::transaction(function () {
                 $now = Carbon::now('Asia/Jayapura')->toDateTimeString();
+                $currentYear = (int) Carbon::now('Asia/Jayapura')->year;
 
                 $suratKeluarColumns = ['id', 'nomor_surat'];
                 if (Schema::hasColumn('surat_keluars', 'rapat_id')) {
@@ -96,13 +97,17 @@ class ResetPersuratanSequenceFromImportCommand extends Command
                 $deletedSuratKeluar = empty($suratKeluarIds) ? 0 : DB::table('surat_keluars')->whereIn('id', $suratKeluarIds)->delete();
                 $deletedSuratMasuk = empty($suratMasukIds) ? 0 : DB::table('surat_masuks')->whereIn('id', $suratMasukIds)->delete();
 
-                $legacyMax = (int) (SuratKeluar::whereNotNull('legacy_source_id')->max('nomor_urut') ?: 0);
+                $legacyMax = (int) (SuratKeluar::whereNotNull('legacy_source_id')
+                    ->where('tahun_surat', $currentYear)
+                    ->max('nomor_urut') ?: 0);
                 AppSetting::putValue('surat_keluar_sequence_started_at', $now);
                 AppSetting::putValue('surat_keluar_sequence_base_legacy_max', $legacyMax);
+                AppSetting::putValue('surat_keluar_sequence_base_year', $currentYear);
 
                 return [
                     'surat_keluar' => $deletedSuratKeluar,
                     'surat_masuk' => $deletedSuratMasuk,
+                    'tahun_sequence' => $currentYear,
                     'legacy_max' => $legacyMax,
                     'next_number' => $legacyMax + 1,
                     'sequence_started_at' => $now,
@@ -150,6 +155,8 @@ class ResetPersuratanSequenceFromImportCommand extends Command
 
     protected function collectStats()
     {
+        $currentYear = (int) Carbon::now('Asia/Jayapura')->year;
+
         return [
             'surat_masuk_total' => DB::table('surat_masuks')->count(),
             'surat_masuk_import' => DB::table('surat_masuks')->whereNotNull('legacy_source_id')->count(),
@@ -157,8 +164,12 @@ class ResetPersuratanSequenceFromImportCommand extends Command
             'surat_keluar_total' => DB::table('surat_keluars')->count(),
             'surat_keluar_import' => DB::table('surat_keluars')->whereNotNull('legacy_source_id')->count(),
             'surat_keluar_non_import_akan_dihapus' => DB::table('surat_keluars')->whereNull('legacy_source_id')->count(),
-            'nomor_urut_tertinggi_import' => (int) (DB::table('surat_keluars')->whereNotNull('legacy_source_id')->max('nomor_urut') ?: 0),
-            'nomor_urut_tertinggi_semua_saat_ini' => (int) (DB::table('surat_keluars')->max('nomor_urut') ?: 0),
+            'tahun_sequence' => $currentYear,
+            'nomor_urut_tertinggi_import_tahun_ini' => (int) (DB::table('surat_keluars')
+                ->whereNotNull('legacy_source_id')
+                ->where('tahun_surat', $currentYear)
+                ->max('nomor_urut') ?: 0),
+            'nomor_urut_berikutnya_tahun_ini' => SuratKeluar::nextNomorUrut($currentYear),
         ];
     }
 

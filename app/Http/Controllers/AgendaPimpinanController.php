@@ -20,24 +20,32 @@ class AgendaPimpinanController extends Controller
 
     public function index()
     {
-        abort_unless(auth()->user()->canAccessAgendaPimpinan(), 403);
+        $user = auth()->user();
+        abort_unless($user->canAccessAgendaPimpinan(), 403);
 
-        $agendas = AgendaPimpinan::with(['creator', 'suratMasuk', 'recipients.jabatan'])
+        $agendas = AgendaPimpinan::visibleTo($user)
+            ->with(['creator', 'suratMasuk', 'recipients.jabatan'])
             ->orderByDesc('tanggal_kegiatan')
             ->orderByDesc('waktu')
             ->get();
 
-        $users = User::with(['jabatan', 'unit'])
-            ->active()
-            ->ordered()
-            ->get();
+        $canManageAgendaDetails = $user->canManageAgendaPimpinanDetails();
+        $canManageAgendaParticipants = $user->canManageAgendaPimpinanParticipants();
+        $users = $canManageAgendaParticipants
+            ? User::with(['jabatan', 'unit'])->active()->ordered()->get()
+            : collect();
 
-        return view('rapat.agenda.index', compact('agendas', 'users'));
+        return view('rapat.agenda.index', compact(
+            'agendas',
+            'users',
+            'canManageAgendaDetails',
+            'canManageAgendaParticipants'
+        ));
     }
 
     public function store(Request $request)
     {
-        abort_unless($this->canManageAgendaDetails(auth()->user()), 403);
+        abort_unless(auth()->user()->canManageAgendaPimpinanDetails(), 403);
 
         $data = $this->validateData($request);
 
@@ -63,7 +71,7 @@ class AgendaPimpinanController extends Controller
 
     public function update(Request $request, AgendaPimpinan $agenda)
     {
-        abort_unless($this->canManageAgendaDetails(auth()->user()), 403);
+        abort_unless(auth()->user()->canManageAgendaPimpinanDetails(), 403);
 
         $data = $this->validateData($request);
 
@@ -88,7 +96,7 @@ class AgendaPimpinanController extends Controller
 
     public function destroy(AgendaPimpinan $agenda)
     {
-        abort_unless($this->canManageAgendaDetails(auth()->user()), 403);
+        abort_unless(auth()->user()->canManageAgendaPimpinanDetails(), 403);
 
         $agenda->recipients()->detach();
         $agenda->delete();
@@ -98,7 +106,7 @@ class AgendaPimpinanController extends Controller
 
     public function updateParticipants(Request $request, AgendaPimpinan $agenda)
     {
-        abort_unless(auth()->user()->canAccessAgendaPimpinan(), 403);
+        abort_unless(auth()->user()->canManageAgendaPimpinanParticipants(), 403);
 
         $data = $request->validate([
             'seragam_pakaian' => ['nullable', 'string', 'max:255'],
@@ -119,7 +127,7 @@ class AgendaPimpinanController extends Controller
 
     public function sendWhatsapp(AgendaPimpinan $agenda)
     {
-        abort_unless(auth()->user()->canAccessAgendaPimpinan(), 403);
+        abort_unless(auth()->user()->canManageAgendaPimpinanParticipants(), 403);
 
         $result = $this->whatsAppService->notifyAgendaPimpinan($agenda->load('recipients.jabatan'));
         $processed = $result['attempted'] > 0 || !$this->whatsAppService->isConfigured();
@@ -173,8 +181,4 @@ class AgendaPimpinanController extends Controller
         return $users->pluck('name')->implode(', ');
     }
 
-    protected function canManageAgendaDetails($user)
-    {
-        return $user && ($user->isSuperAdmin() || $user->isMeetingAdmin());
-    }
 }

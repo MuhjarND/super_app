@@ -20,7 +20,11 @@ class UnifiedActionCenterController extends Controller
         $payload = $service->build($user, $request->only([
             'tab',
             'module',
+            'type',
             'status',
+            'group',
+            'unit',
+            'assignee',
             'search',
         ]));
 

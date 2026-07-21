@@ -25,9 +25,11 @@
                 <h1 class="mb-1">E-Voting</h1>
                 <div class="text-muted" style="font-size: 0.82rem;">Kelola voting, link publik, QR code, dan monitoring hasil realtime.</div>
             </div>
-            <a href="{{ route('rapat.voting.create') }}" class="btn app-create-btn">
-                <i class="fas fa-plus mr-1"></i> Buat Voting
-            </a>
+            @if($canManage)
+                <a href="{{ route('rapat.voting.create') }}" class="btn app-create-btn">
+                    <i class="fas fa-plus mr-1"></i> Buat Voting
+                </a>
+            @endif
         </div>
     </div>
 @endsection
@@ -72,16 +74,18 @@
                                     <a href="{{ route('rapat.voting.show', $voting) }}" class="meeting-action-btn primary">
                                         <i class="fas fa-chart-bar"></i> Detail
                                     </a>
-                                    <a href="{{ route('rapat.voting.edit', $voting) }}" class="meeting-action-btn secondary">
-                                        <i class="fas fa-pen"></i> Edit
-                                    </a>
-                                    <form action="{{ route('rapat.voting.destroy', $voting) }}" method="POST" class="d-inline">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="meeting-action-btn danger" onclick="return confirm('Hapus voting ini?')">
-                                            <i class="fas fa-trash"></i> Hapus
-                                        </button>
-                                    </form>
+                                    @if($canManage)
+                                        <a href="{{ route('rapat.voting.edit', $voting) }}" class="meeting-action-btn secondary">
+                                            <i class="fas fa-pen"></i> Edit
+                                        </a>
+                                        <form action="{{ route('rapat.voting.destroy', $voting) }}" method="POST" class="d-inline">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="meeting-action-btn danger" onclick="return confirm('Hapus voting ini?')">
+                                                <i class="fas fa-trash"></i> Hapus
+                                            </button>
+                                        </form>
+                                    @endif
                                 </div>
                             </td>
                         </tr>

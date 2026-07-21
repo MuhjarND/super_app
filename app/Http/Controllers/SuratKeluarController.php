@@ -11,6 +11,7 @@ use App\Services\RapatDocumentService;
 use App\Services\DocumentPreviewService;
 use App\Services\WhatsAppNotificationService;
 use App\User;
+use App\WhatsAppNotificationLog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
@@ -221,8 +222,7 @@ class SuratKeluarController extends Controller
         ]);
 
         if ($request->opsi_penerima == 'internal' && $request->penerima_internal) {
-            $suratKeluar->penerimaInternal()->attach($request->penerima_internal);
-            $this->notifyInternalRecipients($suratKeluar, $request->penerima_internal);
+            $this->attachDraftRecipients($suratKeluar, $request->penerima_internal);
         }
 
         if ($request->template_source === 'template_surat' && $request->filled('template_rendered_body')) {
@@ -232,6 +232,13 @@ class SuratKeluarController extends Controller
                 'rendered_body' => $request->template_rendered_body,
                 'field_values' => $this->decodeTemplateFieldValues($request->template_field_values),
             ]);
+        }
+
+        $suratKeluar->refresh()->syncCompletionStatusFromFile();
+        if ($suratKeluar->isReadyForRecipientNotification()) {
+            $recipientIds = $suratKeluar->penerimaInternal()->pluck('users.id')->all();
+            $this->markRecipientsUnread($suratKeluar, $recipientIds);
+            $this->notifyInternalRecipients($suratKeluar, $recipientIds);
         }
 
         return response()->json([
@@ -329,7 +336,9 @@ class SuratKeluarController extends Controller
         if ($request->opsi_penerima == 'internal' && $request->penerima_internal) {
             $suratKeluar->penerimaInternal()->sync($request->penerima_internal);
             $newRecipientIds = array_values(array_unique(array_map('intval', $request->penerima_internal)));
-            $this->notifyInternalRecipients($suratKeluar, array_values(array_diff($newRecipientIds, $oldRecipientIds)));
+            $addedRecipientIds = array_values(array_diff($newRecipientIds, $oldRecipientIds));
+            $this->setNewRecipientReadState($suratKeluar, $addedRecipientIds);
+            $this->notifyInternalRecipients($suratKeluar, $addedRecipientIds);
         } else {
             $suratKeluar->penerimaInternal()->detach();
         }
@@ -365,6 +374,8 @@ class SuratKeluarController extends Controller
             'file' => 'required|file|mimes:pdf,doc,docx,xls,xlsx,ppt,pptx,jpg,jpeg,png,webp,txt,csv,zip,rar|max:10240',
         ]);
 
+        $wasReady = $suratKeluar->isReadyForRecipientNotification();
+
         if ($suratKeluar->file_path) {
             Storage::disk('public')->delete($suratKeluar->file_path);
         }
@@ -375,6 +386,12 @@ class SuratKeluarController extends Controller
             'file_path' => $filePath,
             'status' => 'lengkap',
         ]);
+
+        $recipientIds = $suratKeluar->penerimaInternal()->pluck('users.id')->all();
+        if (!$wasReady) {
+            $this->markRecipientsUnread($suratKeluar, $recipientIds);
+        }
+        $this->notifyInternalRecipients($suratKeluar->fresh(), $recipientIds);
 
         return response()->json([
             'success' => true,
@@ -613,7 +630,29 @@ class SuratKeluarController extends Controller
 
     protected function notifyInternalRecipients(SuratKeluar $suratKeluar, array $recipientIds)
     {
+        if (!$suratKeluar->isReadyForRecipientNotification()) {
+            return;
+        }
+
         $recipientIds = array_values(array_unique(array_filter(array_map('intval', $recipientIds))));
+        if (empty($recipientIds)) {
+            return;
+        }
+
+        $alreadyNotifiedIds = WhatsAppNotificationLog::query()
+            ->where('module', 'persuratan')
+            ->where('event', 'surat_keluar_ready')
+            ->where('notifiable_type', get_class($suratKeluar))
+            ->where('notifiable_id', $suratKeluar->id)
+            ->whereIn('target_user_id', $recipientIds)
+            ->whereIn('status', ['queued', 'sending', 'sent'])
+            ->pluck('target_user_id')
+            ->map(function ($id) {
+                return (int) $id;
+            })
+            ->all();
+
+        $recipientIds = array_values(array_diff($recipientIds, $alreadyNotifiedIds));
         if (empty($recipientIds)) {
             return;
         }
@@ -624,5 +663,48 @@ class SuratKeluarController extends Controller
         foreach ($users as $user) {
             $this->whatsAppService->notifySuratKeluarRecipient($suratKeluar, $user);
         }
+    }
+
+    protected function attachDraftRecipients(SuratKeluar $suratKeluar, array $recipientIds)
+    {
+        $recipientIds = array_values(array_unique(array_filter(array_map('intval', $recipientIds))));
+        $pivot = [];
+        $hasReadAt = Schema::hasColumn('surat_keluar_penerima', 'read_at');
+
+        foreach ($recipientIds as $recipientId) {
+            $pivot[$recipientId] = $hasReadAt
+                ? ['read_at' => now('Asia/Jayapura')]
+                : [];
+        }
+
+        $suratKeluar->penerimaInternal()->attach($pivot);
+    }
+
+    protected function setNewRecipientReadState(SuratKeluar $suratKeluar, array $recipientIds)
+    {
+        if (empty($recipientIds) || !Schema::hasColumn('surat_keluar_penerima', 'read_at')) {
+            return;
+        }
+
+        DB::table('surat_keluar_penerima')
+            ->where('surat_keluar_id', $suratKeluar->id)
+            ->whereIn('user_id', $recipientIds)
+            ->update([
+                'read_at' => $suratKeluar->isReadyForRecipientNotification()
+                    ? null
+                    : now('Asia/Jayapura'),
+            ]);
+    }
+
+    protected function markRecipientsUnread(SuratKeluar $suratKeluar, array $recipientIds)
+    {
+        if (empty($recipientIds) || !Schema::hasColumn('surat_keluar_penerima', 'read_at')) {
+            return;
+        }
+
+        DB::table('surat_keluar_penerima')
+            ->where('surat_keluar_id', $suratKeluar->id)
+            ->whereIn('user_id', $recipientIds)
+            ->update(['read_at' => null]);
     }
 }

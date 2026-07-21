@@ -101,7 +101,7 @@ class MobileModuleMenuController extends Controller
                 'subtitle' => 'Rapat, agenda pimpinan, dan pertemuan virtual.',
                 'icon' => 'fas fa-users',
                 'tone' => 'teal',
-                'items' => ($isSuperAdmin || $user->canAccessMeetingModule() || $user->canAccessMeetingFollowUps() || $user->canAccessVirtualMeetings()) ? array_values(array_filter([
+                'items' => ($isSuperAdmin || $user->canAccessMeetingModule() || $user->canAccessMeetingFollowUps() || $user->canAccessAgendaPimpinan() || $user->canAccessVirtualMeetings() || $user->canAccessVoting()) ? array_values(array_filter([
                     ($isSuperAdmin || $user->canAccessMeetingModule()) ? $this->item('Rapat', route('rapat.index'), 'far fa-calendar-alt', 'teal') : null,
                     ($isSuperAdmin || $user->canAccessMeetingMinutes()) ? $this->item('Notulensi', route('rapat.notulensi.index'), 'far fa-file-alt', 'indigo') : null,
                     ($isSuperAdmin || $user->canAccessMeetingFollowUps()) ? $this->item('Tindak Lanjut', route('rapat.notulensi.follow-ups'), 'fas fa-tasks', 'orange') : null,
@@ -109,7 +109,7 @@ class MobileModuleMenuController extends Controller
                     ($isSuperAdmin || $user->canAccessMeetingModule()) ? $this->item('Laporan', route('rapat.laporan.index'), 'far fa-file-pdf', 'red') : null,
                     ($isSuperAdmin || $user->canAccessAgendaPimpinan()) ? $this->item('Agenda Pimpinan', route('rapat.agenda.index'), 'fas fa-calendar-day', 'blue') : null,
                     ($isSuperAdmin || $user->canAccessVirtualMeetings()) ? $this->item('Virtual Meeting', route('rapat.virtual-meeting.index'), 'fas fa-video', 'indigo') : null,
-                    ($isSuperAdmin || $user->canManageVoting()) ? $this->item('E-Voting', route('rapat.voting.index'), 'fas fa-poll', 'slate') : null,
+                    ($isSuperAdmin || $user->canAccessVoting()) ? $this->item('E-Voting', route('rapat.voting.index'), 'fas fa-poll', 'slate') : null,
                 ])) : [],
             ],
             'cuti' => [

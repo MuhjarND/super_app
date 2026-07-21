@@ -543,9 +543,13 @@ class LegacyPersuratanImportService
 
     protected function refreshSuratKeluarSequenceBase()
     {
-        $legacyMax = (int) (SuratKeluar::whereNotNull('legacy_source_id')->max('nomor_urut') ?: 0);
+        $currentYear = (int) now('Asia/Jayapura')->year;
+        $legacyMax = (int) (SuratKeluar::whereNotNull('legacy_source_id')
+            ->where('tahun_surat', $currentYear)
+            ->max('nomor_urut') ?: 0);
 
         AppSetting::putValue('surat_keluar_sequence_base_legacy_max', $legacyMax);
+        AppSetting::putValue('surat_keluar_sequence_base_year', $currentYear);
 
         if (!AppSetting::valueOf('surat_keluar_sequence_started_at')) {
             AppSetting::putValue('surat_keluar_sequence_started_at', now('Asia/Jayapura')->toDateTimeString());

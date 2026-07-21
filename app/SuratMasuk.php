@@ -39,7 +39,94 @@ class SuratMasuk extends Model
             $builder->orWhereHas('disposisis', function ($disposisiQuery) use ($user) {
                 $disposisiQuery->involvingUser($user);
             });
+
+            if ($user->canManageAgendaPimpinanParticipants()) {
+                $builder->orWhereHas('agendaPimpinan');
+            } else {
+                $builder->orWhereHas('agendaPimpinan.recipients', function ($recipientQuery) use ($user) {
+                    $recipientQuery->where('users.id', $user->id);
+                });
+            }
+
+            if ($user->canManageVirtualMeetings()) {
+                $builder->orWhereHas('virtualMeeting');
+            } else {
+                $builder->orWhereHas('virtualMeeting.participants', function ($participantQuery) use ($user) {
+                    $participantQuery->where('users.id', $user->id);
+                });
+            }
         });
+    }
+
+    public function isAgendaRelatedTo(User $user)
+    {
+        if ($this->isAgendaPimpinanRelatedTo($user)) {
+            return true;
+        }
+
+        return $this->isVirtualMeetingRelatedTo($user);
+    }
+
+    protected function isAgendaPimpinanRelatedTo(User $user)
+    {
+        if ($this->relationLoaded('agendaPimpinan')) {
+            $agenda = $this->agendaPimpinan;
+            if (!$agenda) {
+                return false;
+            }
+
+            if ($user->canManageAgendaPimpinanParticipants()) {
+                return true;
+            }
+
+            if ($agenda->relationLoaded('recipients')) {
+                return $agenda->recipients->contains('id', $user->id);
+            }
+
+            return $agenda->recipients()->where('users.id', $user->id)->exists();
+        }
+
+        $query = $this->agendaPimpinan();
+        if ($user->canManageAgendaPimpinanParticipants()) {
+            return $query->exists();
+        }
+
+        return $query
+            ->whereHas('recipients', function ($recipientQuery) use ($user) {
+                $recipientQuery->where('users.id', $user->id);
+            })
+            ->exists();
+    }
+
+    protected function isVirtualMeetingRelatedTo(User $user)
+    {
+        if ($this->relationLoaded('virtualMeeting')) {
+            $meeting = $this->virtualMeeting;
+            if (!$meeting) {
+                return false;
+            }
+
+            if ($user->canManageVirtualMeetings()) {
+                return true;
+            }
+
+            if ($meeting->relationLoaded('participants')) {
+                return $meeting->participants->contains('id', $user->id);
+            }
+
+            return $meeting->participants()->where('users.id', $user->id)->exists();
+        }
+
+        $query = $this->virtualMeeting();
+        if ($user->canManageVirtualMeetings()) {
+            return $query->exists();
+        }
+
+        return $query
+            ->whereHas('participants', function ($participantQuery) use ($user) {
+                $participantQuery->where('users.id', $user->id);
+            })
+            ->exists();
     }
 
     public function klasifikasiKode()
@@ -80,6 +167,24 @@ class SuratMasuk extends Model
     public function virtualMeeting()
     {
         return $this->hasOne(VirtualMeeting::class, 'surat_masuk_id');
+    }
+
+    public function assignmentContextFor(User $user)
+    {
+        $disposisis = $this->relationLoaded('disposisis')
+            ? $this->disposisis
+            : $this->disposisis()
+                ->with('kepadaUser.jabatan', 'kepadaJabatan.users')
+                ->get();
+
+        $disposisi = $disposisis
+            ->filter(function ($item) use ($user) {
+                return $item->isAddressedTo($user);
+            })
+            ->sortByDesc('created_at')
+            ->first();
+
+        return $disposisi ? $disposisi->assignmentContextFor($user) : null;
     }
 
     public function getNomorSuratLengkapAttribute()

@@ -197,6 +197,112 @@
             gap: 8px;
         }
 
+        .surat-assignment-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            margin-top: 7px;
+            padding: 4px 8px;
+            border-radius: 999px;
+            background: #eef2ff;
+            color: #3730a3;
+            font-size: .68rem;
+            font-weight: 700;
+            line-height: 1.2;
+        }
+
+        .surat-assignment-badge.is-delegated {
+            background: #fff7ed;
+            color: #9a3412;
+        }
+
+        .surat-assignment-note {
+            max-width: 260px;
+            margin-top: 5px;
+            color: #64748b;
+            font-size: .72rem;
+            line-height: 1.4;
+        }
+
+        .surat-workflow-filters {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 16px;
+            overflow-x: auto;
+            scrollbar-width: thin;
+        }
+
+        .surat-workflow-filter {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            flex: 0 0 auto;
+            min-height: 38px;
+            padding: 7px 13px;
+            border: 1px solid #dbe5f3;
+            border-radius: 999px;
+            background: #fff;
+            color: #475569;
+            font-size: .78rem;
+            font-weight: 800;
+            transition: .16s ease;
+        }
+
+        .surat-workflow-filter:hover {
+            border-color: #a5b4fc;
+            color: #4338ca;
+        }
+
+        .surat-workflow-filter.active {
+            border-color: #4f46e5;
+            background: #4f46e5;
+            color: #fff;
+            box-shadow: 0 7px 16px rgba(79, 70, 229, .18);
+        }
+
+        .surat-workflow-count {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 24px;
+            height: 24px;
+            padding: 0 7px;
+            border-radius: 999px;
+            background: #e2e8f0;
+            color: #64748b;
+            font-size: .7rem;
+            font-weight: 900;
+            line-height: 1;
+        }
+
+        .surat-workflow-count.has-items {
+            background: #ef4444;
+            color: #fff;
+            box-shadow: 0 3px 8px rgba(239, 68, 68, .22);
+        }
+
+        .surat-workflow-filter.active .surat-workflow-count {
+            background: rgba(255, 255, 255, .2);
+            color: #fff;
+        }
+
+        .surat-workflow-filter.active .surat-workflow-count.has-items {
+            background: #fff;
+            color: #dc2626;
+            box-shadow: none;
+        }
+
+        .surat-delegation-banner {
+            padding: 10px 12px;
+            border: 1px solid #fed7aa;
+            border-radius: 10px;
+            background: #fff7ed;
+            color: #9a3412;
+            font-size: .78rem;
+            line-height: 1.45;
+        }
+
         .surat-actions-cell {
             min-width: 120px;
         }
@@ -832,6 +938,30 @@
 @section('content')
     <div class="card surat-masuk-card">
         <div class="card-body" style="padding-top: 20px;">
+            <div class="surat-workflow-filters" aria-label="Filter tindak lanjut surat masuk">
+                <a href="{{ route('surat-masuk.index', array_merge(request()->except(['workflow', 'page']), ['workflow' => 'all'])) }}"
+                    class="surat-workflow-filter {{ $workflowFilter === 'all' ? 'active' : '' }}">
+                    <i class="fas fa-inbox"></i> Semua
+                </a>
+                <a href="{{ route('surat-masuk.index', array_merge(request()->except(['workflow', 'page']), ['workflow' => 'disposition'])) }}"
+                    class="surat-workflow-filter {{ $workflowFilter === 'disposition' ? 'active' : '' }}">
+                    <i class="fas fa-share-square"></i> Perlu Disposisi
+                    <span class="surat-workflow-count {{ ($workflowCounts['disposition'] ?? 0) > 0 ? 'has-items' : '' }}"
+                        title="{{ $workflowCounts['disposition'] ?? 0 }} surat perlu disposisi"
+                        aria-label="{{ $workflowCounts['disposition'] ?? 0 }} surat perlu disposisi">
+                        {{ $workflowCounts['disposition'] ?? 0 }}
+                    </span>
+                </a>
+                <a href="{{ route('surat-masuk.index', array_merge(request()->except(['workflow', 'page']), ['workflow' => 'follow_up'])) }}"
+                    class="surat-workflow-filter {{ $workflowFilter === 'follow_up' ? 'active' : '' }}">
+                    <i class="fas fa-flag"></i> Perlu Tindak Lanjut
+                    <span class="surat-workflow-count {{ ($workflowCounts['follow_up'] ?? 0) > 0 ? 'has-items' : '' }}"
+                        title="{{ $workflowCounts['follow_up'] ?? 0 }} surat perlu tindak lanjut"
+                        aria-label="{{ $workflowCounts['follow_up'] ?? 0 }} surat perlu tindak lanjut">
+                        {{ $workflowCounts['follow_up'] ?? 0 }}
+                    </span>
+                </a>
+            </div>
             <div class="table-responsive surat-masuk-table-wrap">
             <table id="suratMasukTable" class="table" style="width:100%">
                 <thead>
@@ -860,6 +990,8 @@
                                     || (bool) $pendingForMe
                                 );
                             $canNaikanSurat = auth()->user()->canNaikanSuratMasuk();
+                            $assignmentContext = $surat->assignmentContextFor(auth()->user());
+                            $showAssignmentContext = auth()->user()->hasActiveJabatanDelegation() && $assignmentContext;
                         @endphp
                         <tr class="main-row {{ $needsDisposition ? 'surat-needs-disposition' : '' }}" data-surat-id="{{ $surat->id }}" data-creator="{{ optional($surat->creator)->name ?: '-' }}"
                             data-show-url="{{ route('surat-masuk.show', $surat) }}"
@@ -883,6 +1015,10 @@
                             data-can-edit="{{ auth()->user()->canEditSuratMasuk($surat) ? 1 : 0 }}"
                             data-can-delete="{{ auth()->user()->canDeleteSuratMasuk($surat) ? 1 : 0 }}"
                             data-can-follow-up="{{ auth()->user()->canOpenTindakLanjutSuratMasuk($surat) ? 1 : 0 }}"
+                            data-assignment-mode="{{ data_get($assignmentContext, 'mode') }}"
+                            data-assignment-badge="{{ data_get($assignmentContext, 'badge') }}"
+                            data-assignment-description="{{ data_get($assignmentContext, 'description') }}"
+                            data-assignment-action-label="{{ data_get($assignmentContext, 'action_label') }}"
                             data-pending-disposisi-id="{{ $pendingForMe ? $pendingForMe->id : '' }}">
                             <td>
                                 <button type="button" class="surat-mobile-row-toggle" aria-label="Lihat detail surat" aria-expanded="false">
@@ -899,6 +1035,17 @@
                                 @endphp
                                 <span
                                     class="{{ $sifatClass[$surat->sifat] ?? 'badge-sifat-biasa' }}">{{ $sifatLabel[$surat->sifat] ?? $surat->sifat }}</span>
+                                @if($showAssignmentContext)
+                                    <div>
+                                        <span class="surat-assignment-badge {{ data_get($assignmentContext, 'mode') === 'delegated' ? 'is-delegated' : '' }}">
+                                            <i class="fas {{ data_get($assignmentContext, 'mode') === 'delegated' ? 'fa-user-shield' : 'fa-user-check' }}"></i>
+                                            {{ data_get($assignmentContext, 'badge') }}
+                                        </span>
+                                        @if(data_get($assignmentContext, 'mode') === 'delegated')
+                                            <div class="surat-assignment-note">{{ data_get($assignmentContext, 'description') }}</div>
+                                        @endif
+                                    </div>
+                                @endif
                             </td>
                             <td class="surat-mobile-extra">
                                 <span class="{{ $surat->opsi_pengirim == 'mahkamah_agung' ? 'badge-ma' : 'badge-non-ma' }}">
@@ -940,6 +1087,12 @@
                                         <i class="fas fa-ellipsis-h"></i> Aksi
                                     </button>
                                     <div class="dropdown-menu dropdown-menu-right surat-action-menu" aria-labelledby="suratMasukAction{{ $surat->id }}">
+                                        @if(data_get($assignmentContext, 'mode') === 'delegated')
+                                            <div class="px-3 py-2 small text-muted" style="max-width: 260px; white-space: normal;">
+                                                <i class="fas fa-user-shield mr-1 text-warning"></i>{{ data_get($assignmentContext, 'action_label') }}
+                                            </div>
+                                            <div class="dropdown-divider"></div>
+                                        @endif
                                         @if(auth()->user()->canForwardSuratMasuk($surat))
                                             @if(auth()->user()->isKasubagTurt())
                                                 <button type="button" class="dropdown-item" onclick="openDisposisi({{ $surat->id }}, 'teruskan')">
@@ -1246,6 +1399,12 @@
                                     <tr id="detailAgendaRow" style="display: none;">
                                         <td class="detail-info-label">Agenda Pimpinan</td>
                                         <td class="detail-info-value" id="detailAgendaInfo">-</td>
+                                    </tr>
+                                    <tr id="detailAssignmentRow" style="display: none;">
+                                        <td class="detail-info-label">Penerima</td>
+                                        <td class="detail-info-value">
+                                            <div id="detailAssignmentInfo" class="surat-delegation-banner"></div>
+                                        </td>
                                     </tr>
                                 </table>
                                 <div class="mt-3 d-flex" style="gap: 8px;">
@@ -1623,6 +1782,11 @@
                     if (item.jabatan) {
                         html += '<div class="history-meta">' + item.jabatan + '</div>';
                     }
+                    if (item.assignment_context && item.assignment_context.mode === 'delegated') {
+                        html += '<div class="surat-delegation-banner mt-2">';
+                        html += '<strong><i class="fas fa-user-shield mr-1"></i>' + escapeHtml(item.assignment_context.badge) + '</strong>';
+                        html += '<div class="mt-1">' + escapeHtml(item.assignment_context.description) + '</div></div>';
+                    }
                     if (item.petunjuk) {
                         html += '<div class="history-note"><strong>Petunjuk:</strong> ' + item.petunjuk + '</div>';
                     }
@@ -1934,6 +2098,17 @@
             $('#detailSifat').text(d.sifat);
             $('#detailStatus').text(d.status);
             $('#detailCreator').text(d.creator);
+            if (d.assignmentDescription) {
+                var assignmentIcon = d.assignmentMode === 'delegated' ? 'fa-user-shield' : 'fa-user-check';
+                $('#detailAssignmentInfo').html(
+                    '<strong><i class="fas ' + assignmentIcon + ' mr-1"></i>' + escapeHtml(d.assignmentBadge) + '</strong>' +
+                    '<div class="mt-1">' + escapeHtml(d.assignmentDescription) + '</div>'
+                );
+                $('#detailAssignmentRow').show();
+            } else {
+                $('#detailAssignmentInfo').empty();
+                $('#detailAssignmentRow').hide();
+            }
             if (d.agendaTitle) {
                 var agendaInfo = '<div class="font-weight-bold">' + escapeHtml(d.agendaTitle) + '</div>';
                 agendaInfo += '<div class="text-muted small">' + escapeHtml(d.agendaDate) + ' ' + escapeHtml(d.agendaTime) + ' WIT</div>';
@@ -2005,6 +2180,10 @@
             if (Number(d.canForward) !== 1) {
                 showToast('Anda tidak memiliki akses untuk memproses surat ini.', 'warning');
                 return;
+            }
+
+            if (d.assignmentMode === 'delegated' && d.assignmentActionLabel) {
+                showToast(d.assignmentActionLabel, 'info');
             }
 
             if (d.status === 'selesai') {

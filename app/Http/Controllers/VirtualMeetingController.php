@@ -29,12 +29,15 @@ class VirtualMeetingController extends Controller
             ->orderByDesc('waktu_mulai')
             ->get();
 
-        $users = User::with('jabatan')->active()->ordered()->get();
+        $canManage = $request->user()->canManageVirtualMeetings();
+        $users = $canManage
+            ? User::with('jabatan')->active()->ordered()->get()
+            : collect();
 
         return view('rapat.virtual-meetings.index', [
             'meetings' => $meetings,
             'users' => $users,
-            'canManage' => $request->user()->canManageVirtualMeetings(),
+            'canManage' => $canManage,
         ]);
     }
 

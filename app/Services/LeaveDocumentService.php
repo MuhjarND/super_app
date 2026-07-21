@@ -143,7 +143,7 @@ class LeaveDocumentService
             null,
             $issueDate->year,
             $issueDate->month,
-            $this->nextLetterSequence()
+            $this->nextLetterSequence($issueDate->year)
         );
 
         $leaveRequest->letter_number = $number['nomor'];
@@ -377,9 +377,9 @@ class LeaveDocumentService
         return Carbon::parse($value);
     }
 
-    protected function nextLetterSequence()
+    protected function nextLetterSequence($year = null)
     {
-        return SuratKeluar::nextNomorUrut();
+        return SuratKeluar::nextNomorUrut($year);
     }
 
     protected function buildDecisionPdfContent(LeaveRequest $leaveRequest)

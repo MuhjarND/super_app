@@ -30,9 +30,26 @@ class SuratMasukController extends Controller
     public function index(Request $request)
     {
         $user = auth()->user();
+        $user->loadMissing('jabatan', 'activeJabatanDelegations.jabatan');
 
-        $suratMasuk = SuratMasuk::visibleTo($user)
-            ->with('klasifikasiKode', 'kategoriSurat', 'creator', 'agendaPimpinan', 'virtualMeeting.participants', 'disposisis.dariUser', 'disposisis.kepadaUser', 'disposisis.kepadaJabatan', 'disposisis.dokumentasis')
+        $workflowFilter = in_array($request->input('workflow'), ['all', 'disposition', 'follow_up'], true)
+            ? $request->input('workflow')
+            : 'all';
+        $visibleQuery = SuratMasuk::visibleTo($user);
+        $workflowCounts = [
+            'disposition' => $this->applyNeedsDispositionFilter(clone $visibleQuery, $user)->count(),
+            'follow_up' => $this->applyNeedsFollowUpFilter(clone $visibleQuery, $user)->count(),
+        ];
+
+        $suratQuery = clone $visibleQuery;
+        if ($workflowFilter === 'disposition') {
+            $suratQuery = $this->applyNeedsDispositionFilter($suratQuery, $user);
+        } elseif ($workflowFilter === 'follow_up') {
+            $suratQuery = $this->applyNeedsFollowUpFilter($suratQuery, $user);
+        }
+
+        $suratMasuk = $suratQuery
+            ->with('klasifikasiKode', 'kategoriSurat', 'creator', 'agendaPimpinan.recipients', 'virtualMeeting.participants', 'disposisis.dariUser', 'disposisis.kepadaUser.jabatan', 'disposisis.kepadaJabatan.users', 'disposisis.dokumentasis')
             ->orderBy('created_at', 'desc')
             ->paginate(25)
             ->withQueryString();
@@ -40,11 +57,13 @@ class SuratMasukController extends Controller
         $kategoriSurats = KategoriSurat::where('aktif', true)->orderBy('kode')->get();
         $petunjukOptions = $this->getPetunjukOptions();
         $virtualMeetingUsers = User::with('jabatan')->active()->ordered()->get();
-        $suratHistories = $suratMasuk->getCollection()->mapWithKeys(function ($surat) {
+        $suratHistories = $suratMasuk->getCollection()->mapWithKeys(function ($surat) use ($user) {
             $items = $surat->disposisis
                 ->sortByDesc('created_at')
                 ->values()
-                ->map(function ($disposisi) {
+                ->map(function ($disposisi) use ($user) {
+                    $assignmentContext = $disposisi->assignmentContextFor($user);
+
                     return [
                         'tipe_badge' => $disposisi->tipe_badge,
                         'status_badge' => $disposisi->status_badge,
@@ -67,6 +86,7 @@ class SuratMasukController extends Controller
                         'target_label' => $disposisi->target_label,
                         'waktu' => $disposisi->created_at->format('d/m/Y H:i'),
                         'waktu_human' => $disposisi->created_at->diffForHumans(),
+                        'assignment_context' => $assignmentContext,
                     ];
                 });
 
@@ -79,8 +99,48 @@ class SuratMasukController extends Controller
             'kategoriSurats',
             'petunjukOptions',
             'suratHistories',
-            'virtualMeetingUsers'
+            'virtualMeetingUsers',
+            'workflowFilter',
+            'workflowCounts'
         ));
+    }
+
+    protected function applyNeedsDispositionFilter($query, User $user)
+    {
+        if ($user->isSuperAdmin()) {
+            return $query->where('status', '!=', 'selesai');
+        }
+
+        if (empty($user->targetDisposisiJabatanIds())) {
+            return $query->whereRaw('1 = 0');
+        }
+
+        return $query->where(function ($builder) use ($user) {
+            if ($user->canManageInitialSuratMasuk()) {
+                $builder->where('status', 'baru');
+            }
+
+            $method = $user->canManageInitialSuratMasuk() ? 'orWhere' : 'where';
+            $builder->{$method}(function ($pendingQuery) use ($user) {
+                $pendingQuery->where('status', 'didisposisi')
+                    ->whereHas('disposisis', function ($disposisiQuery) use ($user) {
+                        $disposisiQuery->where('status', 'pending')->addressedToUser($user);
+                    });
+            });
+        });
+    }
+
+    protected function applyNeedsFollowUpFilter($query, User $user)
+    {
+        if (!$user->isSuperAdmin() && !$user->isKabagAtauKasubag()) {
+            return $query->whereRaw('1 = 0');
+        }
+
+        return $query
+            ->where('status', 'didisposisi')
+            ->whereHas('disposisis', function ($disposisiQuery) use ($user) {
+                $disposisiQuery->where('status', 'pending')->addressedToUser($user);
+            });
     }
 
     public function store(Request $request)
@@ -185,9 +245,10 @@ class SuratMasukController extends Controller
 
     public function show(SuratMasuk $suratMasuk)
     {
-        $suratMasuk->load('klasifikasiKode', 'kategoriSurat', 'creator', 'agendaPimpinan', 'virtualMeeting.participants', 'disposisis.dariUser', 'disposisis.kepadaUser', 'disposisis.kepadaJabatan', 'disposisis.dokumentasis');
+        $suratMasuk->load('klasifikasiKode', 'kategoriSurat', 'creator', 'agendaPimpinan.recipients', 'virtualMeeting.participants', 'disposisis.dariUser', 'disposisis.kepadaUser.jabatan', 'disposisis.kepadaJabatan.users', 'disposisis.dokumentasis');
 
         $user = auth()->user();
+        $user->loadMissing('jabatan', 'activeJabatanDelegations.jabatan');
         abort_unless($user->canViewSuratMasuk($suratMasuk), 403);
 
         $suratMasuk->disposisis()
@@ -201,6 +262,7 @@ class SuratMasukController extends Controller
         $canNaikanSurat = $user->canNaikanSuratMasuk();
         $canEdit = $user->canEditSuratMasuk($suratMasuk);
         $canDelete = $user->canDeleteSuratMasuk($suratMasuk);
+        $assignmentContext = $suratMasuk->assignmentContextFor($user);
 
         if ($canDisposisi) {
             $targetIds = $user->targetDisposisiJabatanIds();
@@ -219,7 +281,8 @@ class SuratMasukController extends Controller
             'showPetunjuk',
             'canNaikanSurat',
             'canEdit',
-            'canDelete'
+            'canDelete',
+            'assignmentContext'
         ));
     }
 

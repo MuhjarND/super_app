@@ -49,6 +49,12 @@ class UnifiedActionCenterService
             ->values();
 
         $baseItems = in_array($filters['tab'], ['history', 'done_today'], true) ? $historyItems : $activeItems;
+        $typeCountFilters = array_merge($filters, ['type' => 'all', 'module' => 'all']);
+        $typeCountItems = $this->applyTabFilter(
+            $this->applyBaseFilters($baseItems, $typeCountFilters),
+            $filters['tab'],
+            $user
+        )->values();
         $filteredWithoutTab = $this->applyBaseFilters($baseItems, $filters);
         $filtered = $this->applyTabFilter($filteredWithoutTab, $filters['tab'], $user)->values();
         $sorted = $this->sortItems($filtered)->values();
@@ -59,6 +65,8 @@ class UnifiedActionCenterService
             'tab_counts' => $this->buildTabCounts($activeItems, $historyItems, $user),
             'filters' => $filters,
             'module_options' => $this->moduleOptions(),
+            'type_options' => $this->typeOptions(),
+            'type_counts' => $this->buildTypeCounts($typeCountItems),
             'status_options' => $this->statusOptions(),
             'tab_options' => $this->tabOptions(),
             'group_options' => $this->groupOptions(),
@@ -72,10 +80,11 @@ class UnifiedActionCenterService
         return [
             'tab' => $filters['tab'] ?? 'all',
             'module' => $filters['module'] ?? 'all',
+            'type' => $filters['type'] ?? 'all',
             'status' => $filters['status'] ?? 'all',
             'unit' => $filters['unit'] ?? 'all',
             'assignee' => $filters['assignee'] ?? 'all',
-            'group' => $filters['group'] ?? 'module',
+            'group' => $filters['group'] ?? 'none',
             'search' => trim((string) ($filters['search'] ?? '')),
         ];
     }
@@ -83,6 +92,8 @@ class UnifiedActionCenterService
     protected function normalizeItem(array $item)
     {
         $targetAt = $this->normalizeDateTime($item['target_at'] ?? null);
+        $typeKey = $item['type_key'] ?? $this->inferTypeKey($item);
+        $typeLabel = $this->typeOptions()[$typeKey] ?? ($item['module_label'] ?? 'Lainnya');
 
         $statusMap = [
             'waiting' => 'Menunggu Aksi',
@@ -122,6 +133,7 @@ class UnifiedActionCenterService
 
         $searchText = collect([
             $item['module_label'] ?? null,
+            $typeLabel,
             $item['type_label'] ?? null,
             $item['title'] ?? null,
             $item['subtitle'] ?? null,
@@ -130,7 +142,17 @@ class UnifiedActionCenterService
             $statusLabel,
         ])->filter()->implode(' ');
 
+        $sortAt = $item['sort_at'] ?? optional($targetAt)->timestamp ?? 0;
+        if ($sortAt instanceof DateTimeInterface) {
+            $sortAt = $sortAt->getTimestamp();
+        } elseif (!is_numeric($sortAt) && $sortAt) {
+            $sortAt = Carbon::parse($sortAt, 'Asia/Jayapura')->timestamp;
+        }
+        $sortAt = (int) $sortAt;
+
         return array_merge($item, [
+            'type_key' => $typeKey,
+            'type_filter_label' => $typeLabel,
             'status_key' => $statusKey,
             'status_label' => $statusLabel,
             'priority_label' => $item['priority_label'] ?? $priority['label'],
@@ -139,7 +161,10 @@ class UnifiedActionCenterService
             'target_date' => optional($targetAt)->toDateString(),
             'target_label' => $item['target_label'] ?? $targetLabel,
             'is_overdue' => $isOverdue,
-            'sort_at' => $item['sort_at'] ?? optional($targetAt)->timestamp ?? 0,
+            'sort_at' => $sortAt,
+            'activity_label' => $sortAt
+                ? Carbon::createFromTimestamp($sortAt, 'Asia/Jayapura')->translatedFormat('d M Y H:i')
+                : '-',
             'search_text' => mb_strtolower($searchText),
             'action_text' => $item['action_text'] ?? 'Buka',
             'subtitle' => $item['subtitle'] ?? '-',
@@ -174,6 +199,10 @@ class UnifiedActionCenterService
     {
         return $items->filter(function (array $item) use ($filters) {
             if ($filters['module'] !== 'all' && $item['module_key'] !== $filters['module']) {
+                return false;
+            }
+
+            if ($filters['type'] !== 'all' && ($item['type_key'] ?? '') !== $filters['type']) {
                 return false;
             }
 
@@ -223,24 +252,40 @@ class UnifiedActionCenterService
     protected function sortItems(Collection $items)
     {
         return $items->sort(function (array $left, array $right) {
-            $leftOverdue = $left['is_overdue'] ? 1 : 0;
-            $rightOverdue = $right['is_overdue'] ? 1 : 0;
-            if ($leftOverdue !== $rightOverdue) {
-                return $rightOverdue <=> $leftOverdue;
+            $timeComparison = ($right['sort_at'] ?? 0) <=> ($left['sort_at'] ?? 0);
+            if ($timeComparison !== 0) {
+                return $timeComparison;
             }
 
-            if (($left['priority_weight'] ?? 0) !== ($right['priority_weight'] ?? 0)) {
-                return ($right['priority_weight'] ?? 0) <=> ($left['priority_weight'] ?? 0);
-            }
-
-            $leftTarget = $left['target_at'] ? $left['target_at']->timestamp : PHP_INT_MAX;
-            $rightTarget = $right['target_at'] ? $right['target_at']->timestamp : PHP_INT_MAX;
-            if ($leftTarget !== $rightTarget) {
-                return $leftTarget <=> $rightTarget;
-            }
-
-            return ($right['sort_at'] ?? 0) <=> ($left['sort_at'] ?? 0);
+            return strcmp((string) ($right['id'] ?? ''), (string) ($left['id'] ?? ''));
         });
+    }
+
+    protected function inferTypeKey(array $item)
+    {
+        $moduleKey = $item['module_key'] ?? '';
+        $id = (string) ($item['id'] ?? '');
+
+        if ($moduleKey === 'persuratan') {
+            return strpos($id, 'persuratan-disposisi-') === 0 ? 'surat_masuk' : 'surat_keluar';
+        }
+
+        return in_array($moduleKey, ['rapat', 'cuti', 'progress_zi', 'perawatan'], true)
+            ? $moduleKey
+            : 'other';
+    }
+
+    protected function buildTypeCounts(Collection $items)
+    {
+        $counts = ['all' => $items->count()];
+
+        foreach (array_keys($this->typeOptions()) as $key) {
+            if ($key !== 'all') {
+                $counts[$key] = $items->where('type_key', $key)->count();
+            }
+        }
+
+        return $counts;
     }
 
     protected function buildSummary(Collection $allItems, Collection $filteredWithoutTab, Collection $items)
@@ -283,6 +328,19 @@ class UnifiedActionCenterService
             'cuti' => 'Cuti',
             'progress_zi' => 'Progress ZI',
             'perawatan' => 'Perawatan Alat dan Mesin',
+        ];
+    }
+
+    protected function typeOptions()
+    {
+        return [
+            'all' => 'Semua',
+            'surat_masuk' => 'Surat Masuk',
+            'surat_keluar' => 'Surat Keluar',
+            'rapat' => 'Rapat',
+            'cuti' => 'Cuti',
+            'progress_zi' => 'Progress ZI',
+            'perawatan' => 'Perawatan',
         ];
     }
 
@@ -367,7 +425,7 @@ class UnifiedActionCenterService
                 'type_label' => 'Tindak Lanjut Disposisi',
                 'title' => optional($disposisi->suratMasuk)->nomor_surat ?: 'Surat masuk',
                 'subtitle' => optional($disposisi->suratMasuk)->perihal ?: 'Disposisi menunggu tindak lanjut',
-                'description' => 'Dari ' . (optional($disposisi->dariUser)->name ?: '-') . ' • ' . ($disposisi->petunjuk ?: 'Belum ada petunjuk'),
+                'description' => 'Dari ' . (optional($disposisi->dariUser)->name ?: '-') . ' - ' . ($disposisi->petunjuk ?: 'Belum ada petunjuk'),
                 'status_key' => in_array($disposisi->status, ['dibaca', 'diproses'], true) ? 'process' : 'waiting',
                 'priority_key' => $disposisi->priority_level ?: 'normal',
                 'target_at' => $targetAt,

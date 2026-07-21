@@ -15,6 +15,7 @@ class WhatsAppMagicLoginController extends Controller
         $magicToken = DB::transaction(function () use ($token) {
             $record = WhatsAppMagicLoginToken::with('user')
                 ->where('token_hash', hash('sha256', (string) $token))
+                ->whereNull('used_at')
                 ->lockForUpdate()
                 ->first();
 

@@ -22,22 +22,22 @@
 @endpush
 
 @section('content-header')
-    @php($canManageAgendaDetails = auth()->user()->isSuperAdmin() || auth()->user()->isMeetingAdmin())
     <div class="content-header">
         <div class="container-fluid d-flex justify-content-between align-items-center">
             <div>
                 <h1 class="mb-1">Agenda Pimpinan</h1>
                 <div class="text-muted" style="font-size: 0.82rem;">Agenda dibuat dari Surat Masuk. Protokoler mengatur peserta kegiatan dan mengirim notifikasi formal.</div>
             </div>
-            <a href="{{ route('surat-masuk.index') }}" class="btn app-create-btn">
-                <i class="fas fa-inbox mr-1"></i> Input dari Surat Masuk
-            </a>
+            @if($canManageAgendaDetails)
+                <a href="{{ route('surat-masuk.index') }}" class="btn app-create-btn">
+                    <i class="fas fa-inbox mr-1"></i> Input dari Surat Masuk
+                </a>
+            @endif
         </div>
     </div>
 @endsection
 
 @section('content')
-    @php($canManageAgendaDetails = auth()->user()->isSuperAdmin() || auth()->user()->isMeetingAdmin())
     @if(session('success'))
         <div class="alert alert-success">{{ session('success') }}</div>
     @endif
@@ -114,15 +114,17 @@
                                     <button type="button" class="app-icon-btn preview" data-mobile-label="Preview WA" title="Preview WhatsApp" onclick="previewWhatsapp({{ $agenda->id }})">
                                         <i class="fas fa-comment-dots"></i>
                                     </button>
-                                    <form action="{{ route('rapat.agenda.send-whatsapp', $agenda) }}" method="POST" class="d-inline">
-                                        @csrf
-                                        <button type="submit" class="app-icon-btn send" data-mobile-label="Kirim WA" title="Kirim WhatsApp" onclick="return confirm('Kirim notifikasi WhatsApp agenda ini sekarang?')">
-                                            <i class="fas fa-paper-plane"></i>
+                                    @if($canManageAgendaParticipants)
+                                        <form action="{{ route('rapat.agenda.send-whatsapp', $agenda) }}" method="POST" class="d-inline">
+                                            @csrf
+                                            <button type="submit" class="app-icon-btn send" data-mobile-label="Kirim WA" title="Kirim WhatsApp" onclick="return confirm('Kirim notifikasi WhatsApp agenda ini sekarang?')">
+                                                <i class="fas fa-paper-plane"></i>
+                                            </button>
+                                        </form>
+                                        <button type="button" class="app-icon-btn process" data-mobile-label="Peserta" title="Atur peserta" onclick="openParticipantsAgenda({{ $agenda->id }})">
+                                            <i class="fas fa-user-plus"></i>
                                         </button>
-                                    </form>
-                                    <button type="button" class="app-icon-btn process" data-mobile-label="Peserta" title="Atur peserta" onclick="openParticipantsAgenda({{ $agenda->id }})">
-                                        <i class="fas fa-user-plus"></i>
-                                    </button>
+                                    @endif
                                     @if($canManageAgendaDetails)
                                         <button type="button" class="app-icon-btn edit" data-mobile-label="Edit" title="Edit detail" onclick="openEditAgenda({{ $agenda->id }})">
                                             <i class="fas fa-pen"></i>
@@ -148,17 +150,20 @@
         </div>
     </div>
 
-    @include('rapat.agenda.partials.form-modal', [
-        'modalId' => 'editAgendaModal',
-        'formId' => 'editAgendaForm',
-        'title' => 'Edit Agenda Pimpinan',
-        'action' => '#',
-        'method' => 'PUT',
-        'submitLabel' => 'Perbarui Agenda',
-        'users' => $users,
-    ])
+    @if($canManageAgendaDetails)
+        @include('rapat.agenda.partials.form-modal', [
+            'modalId' => 'editAgendaModal',
+            'formId' => 'editAgendaForm',
+            'title' => 'Edit Agenda Pimpinan',
+            'action' => '#',
+            'method' => 'PUT',
+            'submitLabel' => 'Perbarui Agenda',
+            'users' => $users,
+        ])
+    @endif
 
-    <div class="modal fade" id="participantsAgendaModal" tabindex="-1">
+    @if($canManageAgendaParticipants)
+        <div class="modal fade" id="participantsAgendaModal" tabindex="-1">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
@@ -197,7 +202,8 @@
                 </form>
             </div>
         </div>
-    </div>
+        </div>
+    @endif
 
     <div class="modal fade" id="whatsappPreviewModal" tabindex="-1">
         <div class="modal-dialog modal-lg">

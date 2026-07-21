@@ -3,6 +3,8 @@
 namespace Tests\Feature;
 
 use App\Services\WhatsAppNotificationService;
+use App\User;
+use App\WhatsAppMagicLoginToken;
 use App\WhatsAppNotificationLog;
 use Carbon\Carbon;
 use Illuminate\Database\Schema\Blueprint;
@@ -16,6 +18,27 @@ class WhatsAppOutboxTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+
+        Schema::create('users', function (Blueprint $table) {
+            $table->id();
+            $table->string('name');
+            $table->string('email')->unique();
+            $table->timestamp('email_verified_at')->nullable();
+            $table->string('password');
+            $table->string('no_hp')->nullable();
+            $table->rememberToken();
+            $table->timestamps();
+        });
+
+        Schema::create('whatsapp_magic_login_tokens', function (Blueprint $table) {
+            $table->id();
+            $table->unsignedBigInteger('user_id');
+            $table->string('token_hash', 64)->unique();
+            $table->text('destination_url');
+            $table->timestamp('expires_at');
+            $table->timestamp('used_at')->nullable();
+            $table->timestamps();
+        });
 
         Schema::create('app_settings', function (Blueprint $table) {
             $table->id();
@@ -71,6 +94,8 @@ class WhatsAppOutboxTest extends TestCase
         Carbon::setTestNow();
         Schema::dropIfExists('whatsapp_notification_logs');
         Schema::dropIfExists('app_settings');
+        Schema::dropIfExists('whatsapp_magic_login_tokens');
+        Schema::dropIfExists('users');
 
         parent::tearDown();
     }
@@ -145,5 +170,48 @@ class WhatsAppOutboxTest extends TestCase
             '2026-07-12',
             WhatsAppNotificationLog::first()->scheduled_at->timezone('Asia/Jayapura')->format('Y-m-d')
         );
+    }
+
+    public function testMessageUsesCompactSimantapFormat()
+    {
+        Http::fake([
+            'api.example.test/*' => Http::response(['status' => true], 200),
+        ]);
+
+        app(WhatsAppNotificationService::class)->send(
+            '081234567890',
+            "Yth. Bapak/Ibu,\nDengan hormat, terdapat surat yang perlu ditinjau.\n\nNomor Surat: 123/ABC\nSilakan meninjau surat melalui tautan berikut:\nhttps://example.test/surat/123\n\nHormat kami,\nPAPEDA",
+            ['module' => 'persuratan', 'event' => 'format']
+        );
+
+        $message = WhatsAppNotificationLog::first()->message;
+
+        $this->assertStringStartsWith('*SIMANTAP | PERSURATAN*', $message);
+        $this->assertStringContainsString('*Nomor Surat:* 123/ABC', $message);
+        $this->assertStringContainsString('*Buka tautan:*', $message);
+        $this->assertStringNotContainsString('login otomatis', $message);
+        $this->assertStringNotContainsString('Dengan hormat', $message);
+        $this->assertStringNotContainsString('PAPEDA', $message);
+    }
+
+    public function testUserNotificationContainsOneClickLoginLink()
+    {
+        Http::fake([
+            'api.example.test/*' => Http::response(['status' => true], 200),
+        ]);
+        $user = factory(User::class)->create(['no_hp' => '081234567890']);
+
+        app(WhatsAppNotificationService::class)->sendToUser(
+            $user,
+            "Dengan hormat, terdapat tugas baru.\n\nSilakan meninjau melalui tautan berikut:\n" . route('dashboard'),
+            ['module' => 'general', 'event' => 'one_click']
+        );
+
+        $message = WhatsAppNotificationLog::first()->message;
+
+        $this->assertStringContainsString('/masuk/whatsapp/', $message);
+        $this->assertStringContainsString('*Buka di SIMANTAP (login otomatis):*', $message);
+        $this->assertStringContainsString('hanya dapat digunakan satu kali', $message);
+        $this->assertSame((int) $user->id, (int) WhatsAppMagicLoginToken::first()->user_id);
     }
 }

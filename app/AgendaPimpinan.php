@@ -50,6 +50,17 @@ class AgendaPimpinan extends Model
             ->orderBy('pivot_urutan');
     }
 
+    public function scopeVisibleTo($query, User $user)
+    {
+        if ($user->canManageAgendaPimpinanParticipants()) {
+            return $query;
+        }
+
+        return $query->whereHas('recipients', function ($recipientQuery) use ($user) {
+            $recipientQuery->where('users.id', $user->id);
+        });
+    }
+
     public function getWaktuFormattedAttribute()
     {
         if (!$this->waktu) {

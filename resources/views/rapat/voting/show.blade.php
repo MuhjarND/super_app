@@ -27,11 +27,13 @@
                 <div class="text-muted" style="font-size:0.82rem;">Monitoring realtime, QR publik, hasil admin, dan peserta belum voting.</div>
             </div>
             <div class="app-action-group">
-                <a href="{{ route('rapat.voting.edit', $voting) }}" class="app-icon-btn edit"><i class="fas fa-pen"></i></a>
-                <form action="{{ route('rapat.voting.send-whatsapp', $voting) }}" method="POST" class="d-inline">
-                    @csrf
-                    <button type="submit" class="app-icon-btn send" onclick="return confirm('Kirim link voting ke peserta sekarang?')"><i class="fas fa-paper-plane"></i></button>
-                </form>
+                @if($canManage)
+                    <a href="{{ route('rapat.voting.edit', $voting) }}" class="app-icon-btn edit"><i class="fas fa-pen"></i></a>
+                    <form action="{{ route('rapat.voting.send-whatsapp', $voting) }}" method="POST" class="d-inline">
+                        @csrf
+                        <button type="submit" class="app-icon-btn send" onclick="return confirm('Kirim link voting ke peserta sekarang?')"><i class="fas fa-paper-plane"></i></button>
+                    </form>
+                @endif
                 <a href="{{ route('rapat.voting.pdf', $voting) }}" target="_blank" class="app-icon-btn pdf"><i class="fas fa-file-pdf"></i></a>
             </div>
         </div>

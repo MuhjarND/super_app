@@ -152,6 +152,11 @@ class SuratKeluar extends Model
         return $this;
     }
 
+    public function isReadyForRecipientNotification()
+    {
+        return $this->status === 'lengkap' && $this->hasAvailableFile();
+    }
+
     public function getNomenklaturKodeAttribute()
     {
         $map = [
@@ -254,7 +259,7 @@ class SuratKeluar extends Model
         $nomorPrefix = $prefixMap[$nomenklatur] ?? 'W31-A';
 
         $nextNumber = $nomorUrut === null
-            ? self::nextNomorUrut()
+            ? self::nextNomorUrut($tahun)
             : (int) $nomorUrut;
 
         // Build code path:
@@ -289,37 +294,58 @@ class SuratKeluar extends Model
         return ['nomor' => $nomor, 'urut' => $nextNumber];
     }
 
-    public static function nextNomorUrut()
+    public static function nextNomorUrut($tahun = null)
     {
-        return ((int) static::sequenceBaseQuery()->max('nomor_urut')) + 1;
+        return static::currentNomorUrutBase($tahun) + 1;
     }
 
-    public static function currentNomorUrutBase()
+    public static function currentNomorUrutBase($tahun = null)
     {
-        return (int) static::sequenceBaseQuery()->max('nomor_urut');
+        $tahun = (int) ($tahun ?: now('Asia/Jayapura')->year);
+        $yearQuery = static::query()->where('tahun_surat', $tahun);
+
+        if (!Schema::hasColumn('surat_keluars', 'legacy_source_id')) {
+            return (int) $yearQuery->max('nomor_urut');
+        }
+
+        $legacyMax = (int) (clone $yearQuery)
+            ->whereNotNull('legacy_source_id')
+            ->max('nomor_urut');
+
+        // Instalasi tanpa data SIMISOL tetap memakai sequence lokal biasa.
+        if ($legacyMax === 0) {
+            return (int) $yearQuery->max('nomor_urut');
+        }
+
+        $localNumbers = (clone $yearQuery)
+            ->whereNull('legacy_source_id')
+            ->where('nomor_urut', '>', $legacyMax)
+            ->orderBy('nomor_urut')
+            ->pluck('nomor_urut')
+            ->all();
+
+        return static::resolveContiguousSequenceBase($legacyMax, $localNumbers);
     }
 
-    protected static function sequenceBaseQuery()
+    public static function resolveContiguousSequenceBase($legacyMax, array $localNumbers)
     {
-        $query = static::query();
-        $sequenceStartedAt = null;
+        $current = (int) $legacyMax;
+        $numbers = array_values(array_unique(array_map('intval', $localNumbers)));
+        sort($numbers, SORT_NUMERIC);
 
-        try {
-            if (Schema::hasTable('app_settings')) {
-                $sequenceStartedAt = AppSetting::valueOf('surat_keluar_sequence_started_at');
+        foreach ($numbers as $number) {
+            if ($number <= $current) {
+                continue;
             }
-        } catch (\Throwable $exception) {
-            $sequenceStartedAt = null;
+
+            if ($number !== $current + 1) {
+                break;
+            }
+
+            $current = $number;
         }
 
-        if ($sequenceStartedAt && Schema::hasColumn('surat_keluars', 'legacy_source_id')) {
-            $query->where(function ($builder) use ($sequenceStartedAt) {
-                $builder->whereNotNull('legacy_source_id')
-                    ->orWhere('created_at', '>=', $sequenceStartedAt);
-            });
-        }
-
-        return $query;
+        return $current;
     }
 
     public static function getRomanMonth($month)

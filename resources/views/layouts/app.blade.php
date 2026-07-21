@@ -3344,7 +3344,7 @@
                             </li>
                         @endif
 
-                        @if($showDesktopModule('rapat') && ($isSidebarSuperAdmin || $sidebarUser->canAccessMeetingModule() || $sidebarUser->canAccessMeetingFollowUps() || $sidebarUser->canAccessVirtualMeetings()))
+                        @if($showDesktopModule('rapat') && ($isSidebarSuperAdmin || $sidebarUser->canAccessMeetingModule() || $sidebarUser->canAccessMeetingFollowUps() || $sidebarUser->canAccessAgendaPimpinan() || $sidebarUser->canAccessVirtualMeetings() || $sidebarUser->canAccessVoting()))
                             <li class="nav-section " data-section="rapat">
                                 <button type="button" class="nav-section-toggle {{ ($sidebarNotulensiFollowUpCount ?? 0) > 0 ? 'has-alert' : '' }}">
                                     <span>{{ $moduleMenuLabel('rapat', 'Rapat / Agenda') }}</span>
@@ -3382,6 +3382,7 @@
                                             <p>Laporan</p>
                                         </a>
                                     </li>
+                                    @endif
                                     @if($isSidebarSuperAdmin || $sidebarUser->canAccessAgendaPimpinan())
                                         <li class="nav-item nav-item-sub">
                                             <a href="{{ route('rapat.agenda.index') }}"
@@ -3400,21 +3401,12 @@
                                             </a>
                                         </li>
                                     @endif
-                                    @if($isSidebarSuperAdmin || $sidebarUser->canManageVoting())
+                                    @if($isSidebarSuperAdmin || $sidebarUser->canAccessVoting())
                                         <li class="nav-item nav-item-sub">
                                             <a href="{{ route('rapat.voting.index') }}"
                                                 class="nav-link {{ request()->routeIs('rapat.voting.*') ? 'active' : '' }}">
                                                 <i class="nav-icon fas fa-poll"></i>
                                                 <p>E-Voting</p>
-                                            </a>
-                                        </li>
-                                    @endif
-                                    @elseif($sidebarUser->canAccessVirtualMeetings())
-                                        <li class="nav-item nav-item-sub">
-                                            <a href="{{ route('rapat.virtual-meeting.index') }}"
-                                                class="nav-link {{ request()->routeIs('rapat.virtual-meeting.*') ? 'active' : '' }}">
-                                                <i class="nav-icon fas fa-video"></i>
-                                                <p>Virtual Meeting</p>
                                             </a>
                                         </li>
                                     @endif
