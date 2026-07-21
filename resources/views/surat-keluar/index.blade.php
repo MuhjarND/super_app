@@ -1186,31 +1186,37 @@
     <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap4.min.js"></script>
 
+    @php
+        $oldCalendarInputPayload = old('calendar_surat_id') ? [
+            'surat_id' => old('calendar_surat_id'),
+            'type' => old('type'),
+            'start_date' => old('start_date'),
+            'end_date' => old('end_date'),
+            'start_time' => old('start_time'),
+            'end_time' => old('end_time'),
+            'location' => old('location'),
+            'notes' => old('notes'),
+        ] : null;
+
+        $recipientMapPayload = $suratKeluar->getCollection()->mapWithKeys(function ($surat) {
+            return [
+                $surat->id => $surat->penerimaInternal->map(function ($user) {
+                    return [
+                        'name' => $user->name,
+                        'jabatan' => optional($user->jabatan)->nama ?: ($user->jabatan_keterangan ?: '-'),
+                    ];
+                })->values(),
+            ];
+        })->all();
+    @endphp
+
     <script>
         $(document).ready(function () {
             const canCreateSuratKeluar = <?php echo json_encode($canCreateSuratKeluar, 15, 512) ?>;
-            const oldCalendarInput = @json(old('calendar_surat_id') ? [
-                'surat_id' => old('calendar_surat_id'),
-                'type' => old('type'),
-                'start_date' => old('start_date'),
-                'end_date' => old('end_date'),
-                'start_time' => old('start_time'),
-                'end_time' => old('end_time'),
-                'location' => old('location'),
-                'notes' => old('notes'),
-            ] : null);
+            const oldCalendarInput = @json($oldCalendarInputPayload);
             let currentSearch = @json($search);
             let searchTimer = null;
-            let recipientMap = <?php echo json_encode($suratKeluar->getCollection()->mapWithKeys(function ($surat) {
-                return [
-                    $surat->id => $surat->penerimaInternal->map(function ($user) {
-                        return [
-                            'name' => $user->name,
-                            'jabatan' => optional($user->jabatan)->nama ?: ($user->jabatan_keterangan ?: '-'),
-                        ];
-                    })->values(),
-                ];
-            })->all(), 15, 512) ?>;
+            let recipientMap = @json($recipientMapPayload);
 
             function escapeHtml(value) {
                 return String(value ?? '').replace(/[&<>"']/g, function (char) {
