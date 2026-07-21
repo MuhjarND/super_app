@@ -146,12 +146,28 @@
 
     .surat-tugas-modal .modal-content {
         overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        max-height: calc(100vh - 32px);
         border: 1px solid #e3e0ff;
         border-radius: 18px;
         box-shadow: 0 22px 60px rgba(67, 56, 202, 0.18);
     }
 
+    .surat-tugas-modal .modal-dialog {
+        margin-top: 16px;
+        margin-bottom: 16px;
+    }
+
+    .surat-tugas-modal .modal-content > form {
+        display: flex;
+        flex: 1 1 auto;
+        flex-direction: column;
+        min-height: 0;
+    }
+
     .surat-tugas-modal .modal-header {
+        flex: 0 0 auto;
         align-items: center;
         padding: 18px 22px;
         border-bottom: 1px solid #ebe9ff;
@@ -165,7 +181,13 @@
     }
 
     .surat-tugas-modal .modal-body {
+        flex: 1 1 auto;
+        min-height: 0;
         padding: 22px;
+        overflow-x: hidden;
+        overflow-y: auto;
+        overscroll-behavior: contain;
+        -webkit-overflow-scrolling: touch;
         background: #ffffff;
     }
 
@@ -223,6 +245,7 @@
     }
 
     .surat-tugas-modal .modal-footer {
+        flex: 0 0 auto;
         padding: 14px 22px;
         border-top: 1px solid #ebe9ff;
         background: #fafaff;
@@ -241,6 +264,16 @@
         border-color: #6957f5;
         background: linear-gradient(135deg, #6957f5, #4f46e5);
         box-shadow: 0 8px 18px rgba(79, 70, 229, 0.2);
+    }
+
+    @media (max-width: 767.98px) {
+        .surat-tugas-modal .modal-content {
+            max-height: calc(100vh - 20px);
+        }
+
+        .surat-tugas-modal .modal-body {
+            padding: 16px !important;
+        }
     }
 
     .template-proposal-panel .card-header {
