@@ -9,7 +9,6 @@ use App\Http\Requests\StoreSuratTemplateProposalRequest;
 use App\Http\Requests\StoreSuratTemplateRequest;
 use App\Http\Requests\UpdateSuratTemplateRequest;
 use App\KategoriSurat;
-use App\DasarHukum;
 use App\SuratKeluar;
 use App\SuratKeluarApproval;
 use App\SuratTemplate;
@@ -104,25 +103,6 @@ class SuratTemplateController extends Controller
         }
 
         $suratTugasDrafts = $suratTugasQuery->latest()->take(50)->get();
-        $suratTugasLegalHistory = collect($this->defaultSuratTugasDasarHukum());
-
-        if (Schema::hasTable('dasar_hukums')) {
-            $suratTugasLegalHistory = $suratTugasLegalHistory->merge(
-                DasarHukum::where('aktif', true)->orderBy('urutan')->pluck('uraian')
-            );
-        }
-
-        $suratTugasLegalHistory = $suratTugasLegalHistory
-            ->merge($suratTugasDrafts->flatMap(function ($surat) {
-                return $this->parseLineItems((string) data_get($surat, 'templateApproval.field_values.tambahan_dasar_hukum', ''));
-            }))
-            ->map(function ($item) {
-                return trim((string) $item);
-            })
-            ->filter()
-            ->unique()
-            ->values();
-
         return view('surat-template.index', [
             'templates' => $templates,
             'proposals' => $proposals,
@@ -138,7 +118,6 @@ class SuratTemplateController extends Controller
                 ->ordered()
                 ->get(),
             'suratTugasDrafts' => $suratTugasDrafts,
-            'suratTugasLegalHistory' => $suratTugasLegalHistory,
         ]);
     }
 

@@ -144,6 +144,105 @@
         color: #94a3b8;
     }
 
+    .surat-tugas-modal .modal-content {
+        overflow: hidden;
+        border: 1px solid #e3e0ff;
+        border-radius: 18px;
+        box-shadow: 0 22px 60px rgba(67, 56, 202, 0.18);
+    }
+
+    .surat-tugas-modal .modal-header {
+        align-items: center;
+        padding: 18px 22px;
+        border-bottom: 1px solid #ebe9ff;
+        background: linear-gradient(135deg, #f8f7ff 0%, #efedff 100%);
+    }
+
+    .surat-tugas-modal .modal-title {
+        color: #312e81;
+        font-size: 1.05rem;
+        font-weight: 800;
+    }
+
+    .surat-tugas-modal .modal-body {
+        padding: 22px;
+        background: #ffffff;
+    }
+
+    .surat-tugas-modal .surat-tugas-form-grid {
+        margin-right: -8px;
+        margin-left: -8px;
+    }
+
+    .surat-tugas-modal .surat-tugas-form-grid > [class*="col-"] {
+        padding-right: 8px;
+        padding-left: 8px;
+    }
+
+    .surat-tugas-modal .form-group {
+        margin-bottom: 16px;
+    }
+
+    .surat-tugas-modal label {
+        margin-bottom: 7px;
+        color: #312e81;
+        font-size: 0.8rem;
+        font-weight: 800;
+    }
+
+    .surat-tugas-modal .form-control,
+    .surat-tugas-modal .select2-container--bootstrap4 .select2-selection {
+        min-height: 44px;
+        border-color: #d9d6fe;
+        border-radius: 10px;
+        background-color: #fbfaff;
+        color: #1e1b4b;
+        box-shadow: none;
+    }
+
+    .surat-tugas-modal textarea.form-control {
+        min-height: 86px;
+        padding: 11px 13px;
+        resize: vertical;
+    }
+
+    .surat-tugas-modal .form-control:focus,
+    .surat-tugas-modal .select2-container--bootstrap4.select2-container--focus .select2-selection {
+        border-color: #6957f5;
+        background-color: #ffffff;
+        box-shadow: 0 0 0 3px rgba(105, 87, 245, 0.12);
+    }
+
+    .surat-tugas-modal .select2-container--bootstrap4 .select2-selection--multiple .select2-selection__choice {
+        border: 0;
+        border-radius: 7px;
+        background: #e9e7ff;
+        color: #4338ca;
+        font-size: 0.76rem;
+        font-weight: 700;
+    }
+
+    .surat-tugas-modal .modal-footer {
+        padding: 14px 22px;
+        border-top: 1px solid #ebe9ff;
+        background: #fafaff;
+    }
+
+    .surat-tugas-modal .modal-footer .btn {
+        min-height: 40px;
+        border-radius: 9px;
+        padding-right: 18px;
+        padding-left: 18px;
+        font-size: 0.82rem;
+        font-weight: 800;
+    }
+
+    .surat-tugas-modal .modal-footer .btn-primary {
+        border-color: #6957f5;
+        background: linear-gradient(135deg, #6957f5, #4f46e5);
+        box-shadow: 0 8px 18px rgba(79, 70, 229, 0.2);
+    }
+
     .template-proposal-panel .card-header {
         padding: 14px 16px;
     }
@@ -301,8 +400,8 @@
                 </div>
             </div>
 
-                <div class="modal fade" id="useTemplateModal{{ $templateId }}" tabindex="-1">
-                    <div class="modal-dialog modal-lg"><div class="modal-content">
+                <div class="modal fade {{ $templateSlug === 'surat-tugas' ? 'surat-tugas-modal' : '' }}" id="useTemplateModal{{ $templateId }}" tabindex="-1">
+                    <div class="modal-dialog modal-lg {{ $templateSlug === 'surat-tugas' ? 'modal-dialog-scrollable' : '' }}"><div class="modal-content">
                         <div class="modal-header">
                             <h5 class="modal-title">Gunakan {{ $templateName }}</h5>
                             <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
@@ -310,9 +409,9 @@
                         <form method="POST" action="{{ $templateSlug === 'surat-tugas' ? route('surat-template.handoff', $templateSlug) : route('surat-template.preview', $templateSlug) }}">
                             @csrf
                             <div class="modal-body">
-                                <div class="alert alert-light border small">
-                                    {{ $templateSlug === 'surat-tugas' ? 'Isi field berikut untuk langsung membuat Surat Tugas dan menyimpannya ke Surat Keluar.' : 'Isi field berikut untuk membuat preview surat dari template yang dipilih.' }}
-                                </div>
+                                @if($templateSlug !== 'surat-tugas')
+                                    <div class="alert alert-light border small">Isi field berikut untuk membuat preview surat dari template yang dipilih.</div>
+                                @endif
                                 @if($templateSlug === 'surat-tugas')
                                     @include('surat-template.partials.surat-tugas-fields', [
                                         'fieldValues' => [],
@@ -433,7 +532,7 @@
         $taskFields = optional($taskApproval)->field_values ?: [];
     @endphp
     @if($taskApproval && $taskApproval->status !== 'approved')
-        <div class="modal fade" id="editSuratTugasModal{{ $suratTugas->id }}" tabindex="-1">
+        <div class="modal fade surat-tugas-modal" id="editSuratTugasModal{{ $suratTugas->id }}" tabindex="-1">
             <div class="modal-dialog modal-xl modal-dialog-scrollable">
                 <div class="modal-content">
                     <div class="modal-header">
@@ -809,26 +908,6 @@
             });
         });
 
-        $(document).on('change', '.surat-tugas-legal-history', function () {
-            const value = String($(this).val() || '').trim();
-            const target = $(this).data('target');
-            const $textarea = $(target);
-            if (!value || !$textarea.length) {
-                return;
-            }
-
-            const currentLines = String($textarea.val() || '')
-                .split(/\r?\n/)
-                .map(function (line) { return line.trim(); })
-                .filter(Boolean);
-
-            if (!currentLines.includes(value)) {
-                currentLines.push(value);
-                $textarea.val(currentLines.join('\n')).trigger('change');
-            }
-
-            $(this).val('');
-        });
     });
 
     function openSuratTugasEdit(suratId) {

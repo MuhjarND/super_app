@@ -17,15 +17,7 @@
     </div>
 
     <div class="col-12 form-group">
-        <div class="d-flex justify-content-between align-items-center flex-wrap mb-1" style="gap:8px;">
-            <label class="mb-0">Tambahan Dasar Hukum</label>
-            <select class="form-control form-control-sm surat-tugas-legal-history" style="max-width:420px;" data-target="#{{ $modalId }} .surat-tugas-legal-input">
-                <option value="">Pilih dari riwayat...</option>
-                @foreach($suratTugasLegalHistory as $legalText)
-                    <option value="{{ $legalText }}">{{ Str::limit($legalText, 100) }}</option>
-                @endforeach
-            </select>
-        </div>
+        <label>Tambahan Dasar Hukum</label>
         <textarea name="fields[tambahan_dasar_hukum]" class="form-control surat-tugas-legal-input" rows="3" placeholder="Satu baris untuk satu dasar hukum">{{ old('fields.tambahan_dasar_hukum', $fieldValues['tambahan_dasar_hukum'] ?? '') }}</textarea>
     </div>
 
@@ -70,7 +62,6 @@
                 </option>
             @endforeach
         </select>
-        <small class="text-muted">Paraf diselesaikan sebelum dokumen masuk ke penanda tangan.</small>
     </div>
 
     <div class="col-md-6 form-group mb-md-0">
