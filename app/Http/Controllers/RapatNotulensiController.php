@@ -33,7 +33,7 @@ class RapatNotulensiController extends Controller
     {
         abort_unless(auth()->user()->canAccessMeetingMinutes(), 403);
 
-        $rapats = Rapat::with([
+        $rapats = Rapat::visibleTo(auth()->user())->with([
                 'kategoriSuratKode',
                 'creator',
                 'pesertas',
@@ -57,7 +57,7 @@ class RapatNotulensiController extends Controller
 
     public function create(Rapat $rapat)
     {
-        abort_unless(auth()->user()->canAccessMeetingMinutes(), 403);
+        abort_unless(auth()->user()->canManageMeetingMinutes() && auth()->user()->canViewRapat($rapat), 403);
 
         if ($rapat->notulensi) {
             return redirect()->route('rapat.notulensi.edit', $rapat->notulensi);
@@ -81,7 +81,7 @@ class RapatNotulensiController extends Controller
 
     public function store(StoreRapatNotulensiRequest $request, Rapat $rapat)
     {
-        abort_unless(auth()->user()->canAccessMeetingMinutes(), 403);
+        abort_unless(auth()->user()->canManageMeetingMinutes() && auth()->user()->canViewRapat($rapat), 403);
 
         if ($rapat->notulensi) {
             return redirect()->route('rapat.notulensi.edit', $rapat->notulensi)
@@ -128,7 +128,7 @@ class RapatNotulensiController extends Controller
 
     public function uploadFromRapat(UploadRapatNotulensiRequest $request, Rapat $rapat)
     {
-        abort_unless(auth()->user()->canAccessMeetingMinutes(), 403);
+        abort_unless(auth()->user()->canManageMeetingMinutes() && auth()->user()->canViewRapat($rapat), 403);
 
         $notulensi = $rapat->notulensi;
 
@@ -149,7 +149,7 @@ class RapatNotulensiController extends Controller
 
     public function edit(RapatNotulensi $notulensi)
     {
-        abort_unless(auth()->user()->canAccessMeetingMinutes(), 403);
+        abort_unless(auth()->user()->canManageMeetingMinutes() && auth()->user()->canViewRapat($notulensi->rapat), 403);
 
         $notulensi->load('rapat.kategoriSuratKode', 'rapat.creator', 'rapat.pesertas.jabatan', 'notulis', 'tindakLanjuts.user');
 
@@ -164,7 +164,7 @@ class RapatNotulensiController extends Controller
 
     public function update(StoreRapatNotulensiRequest $request, RapatNotulensi $notulensi)
     {
-        abort_unless(auth()->user()->canAccessMeetingMinutes(), 403);
+        abort_unless(auth()->user()->canManageMeetingMinutes() && auth()->user()->canViewRapat($notulensi->rapat), 403);
 
         $notulensi->loadMissing('rapat.pesertas.jabatan', 'rapat.kategoriSuratKode', 'rapat.creator');
         $data = $request->validated();
@@ -205,7 +205,7 @@ class RapatNotulensiController extends Controller
 
     public function upload(UploadRapatNotulensiRequest $request, RapatNotulensi $notulensi)
     {
-        abort_unless(auth()->user()->canAccessMeetingMinutes(), 403);
+        abort_unless(auth()->user()->canManageMeetingMinutes() && auth()->user()->canViewRapat($notulensi->rapat), 403);
 
         $file = $request->file('notulensi_file');
 
@@ -235,7 +235,7 @@ class RapatNotulensiController extends Controller
 
     public function skip(Rapat $rapat)
     {
-        abort_unless(auth()->user()->canAccessMeetingMinutes(), 403);
+        abort_unless(auth()->user()->canManageMeetingMinutes() && auth()->user()->canViewRapat($rapat), 403);
 
         $notulensi = $rapat->notulensi ?: new RapatNotulensi([
             'rapat_id' => $rapat->id,
@@ -261,7 +261,7 @@ class RapatNotulensiController extends Controller
 
     public function pdf(RapatNotulensi $notulensi)
     {
-        abort_unless(auth()->user()->canAccessMeetingMinutes() || auth()->user()->canViewRapat($notulensi->rapat), 403);
+        abort_unless(auth()->user()->canManageMeetingMinutes() || auth()->user()->canViewRapat($notulensi->rapat), 403);
 
         if ($notulensi->mode === 'upload' && $notulensi->file_path && $notulensi->file_mime === 'application/pdf') {
             return response()->file(Storage::disk('public')->path($notulensi->file_path));
@@ -306,7 +306,7 @@ class RapatNotulensiController extends Controller
 
     public function file(RapatNotulensi $notulensi)
     {
-        abort_unless(auth()->user()->canAccessMeetingMinutes(), 403);
+        abort_unless(auth()->user()->canViewRapat($notulensi->rapat), 403);
         abort_unless($notulensi->file_path, 404);
 
         return response()->file(Storage::disk('public')->path($notulensi->file_path));

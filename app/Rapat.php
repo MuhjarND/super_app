@@ -22,6 +22,7 @@ class Rapat extends Model
         'approval1_jabatan_manual',
         'detail_tambahan',
         'tujuan_surat',
+        'bersama_satker',
         'jenis_pakaian',
         'is_virtual',
         'meeting_id',
@@ -45,6 +46,7 @@ class Rapat extends Model
         'tanggal' => 'date',
         'recurring_until' => 'date',
         'is_virtual' => 'boolean',
+        'bersama_satker' => 'boolean',
         'is_recurring' => 'boolean',
         'lampiran_tambahan_size' => 'integer',
         'participant_notified_at' => 'datetime',
@@ -59,6 +61,14 @@ class Rapat extends Model
 
         if ($user->canManageRapat()) {
             return $query;
+        }
+
+        if ($user->hasRole('satker')) {
+            return $query->where('bersama_satker', true)
+                ->whereIn('status', ['disetujui', 'selesai'])
+                ->whereHas('pesertas', function ($pesertaQuery) use ($user) {
+                    $pesertaQuery->where('users.id', $user->id);
+                });
         }
 
         return $query->where(function ($builder) use ($user) {

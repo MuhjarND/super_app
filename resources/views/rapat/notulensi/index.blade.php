@@ -93,6 +93,7 @@
                             <td>{{ optional($rapat->creator)->name ?: '-' }}</td>
                             <td class="app-action-cell notulensi-action-cell" data-label="Aksi">
                                 <div class="app-action-group">
+                                    @if(auth()->user()->canManageMeetingMinutes())
                                     <a href="{{ route('rapat.notulensi.create', $rapat) }}" class="app-icon-btn process" data-mobile-label="Buat" title="Buat notulensi">
                                         <i class="fas fa-file-signature"></i>
                                     </a>
@@ -105,6 +106,9 @@
                                             <i class="fas fa-ban"></i>
                                         </button>
                                     </form>
+                                    @else
+                                        <span class="text-muted small">Menunggu notulensi</span>
+                                    @endif
                                 </div>
                             </td>
                         </tr>
@@ -149,9 +153,11 @@
                             <td>{{ optional($rapat->notulensi->updated_at)->timezone('Asia/Jayapura')->format('d/m/Y H:i') ?: '-' }}</td>
                             <td class="app-action-cell notulensi-action-cell" data-label="Aksi">
                                 <div class="app-action-group">
+                                    @if(auth()->user()->canManageMeetingMinutes())
                                     <a href="{{ route('rapat.notulensi.edit', $rapat->notulensi) }}" class="app-icon-btn edit" data-mobile-label="Edit" title="Edit notulensi">
                                         <i class="fas fa-pen"></i>
                                     </a>
+                                    @endif
                                     <a href="{{ route('rapat.notulensi.pdf', $rapat->notulensi) }}" target="_blank" class="app-icon-btn pdf" data-mobile-label="PDF" title="Buka PDF">
                                         <i class="fas fa-file-pdf"></i>
                                     </a>

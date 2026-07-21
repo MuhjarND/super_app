@@ -27,9 +27,6 @@ class UpdateRapatRequest extends StoreRapatRequest
                 $validator->errors()->add('lampiran_tambahan', 'Lampiran tambahan wajib diunggah jika opsi lampiran tambahan diaktifkan.');
             }
 
-            if ($gunakanLampiran && trim((string) $this->input('tujuan_surat')) === '') {
-                $validator->errors()->add('tujuan_surat', 'Tujuan surat wajib diisi jika lampiran tambahan digunakan.');
-            }
         });
     }
 }

@@ -7,7 +7,6 @@ use App\Http\Requests\UpdateRapatRequest;
 use App\Rapat;
 use App\Services\RapatApprovalService;
 use App\Services\RapatDocumentService;
-use App\Services\WhatsAppNotificationService;
 use App\User;
 use App\ZiActivity;
 use App\ZiGuidelineSubPoint;
@@ -19,18 +18,15 @@ use Illuminate\Validation\Rule;
 class RapatController extends Controller
 {
     protected $approvalService;
-    protected $whatsAppService;
     protected $documentService;
 
     public function __construct(
         RapatApprovalService $approvalService,
-        WhatsAppNotificationService $whatsAppService,
         RapatDocumentService $documentService
     )
     {
         $this->middleware('auth');
         $this->approvalService = $approvalService;
-        $this->whatsAppService = $whatsAppService;
         $this->documentService = $documentService;
     }
 
@@ -117,7 +113,7 @@ class RapatController extends Controller
         abort_unless(auth()->user()->canManageRapat(), 403);
 
         $data = $request->validated();
-        $wasApproved = $rapat->status === 'disetujui' || !is_null($rapat->participant_notified_at);
+        $wasApproved = $rapat->status === 'disetujui';
 
         DB::transaction(function () use ($request, $rapat, $data) {
             $rapat->update($this->payloadFromRequest($request, $data, $rapat));
@@ -201,7 +197,19 @@ class RapatController extends Controller
     {
         abort_unless(auth()->user()->canViewRapat($rapat) || auth()->user()->canAccessMeetingApproval(), 403);
 
+        if (auth()->user()->isSatker() && $rapat->bersama_satker) {
+            return $this->documentService->streamUndanganSatkerPdf($rapat);
+        }
+
         return $this->documentService->streamUndanganPdf($rapat);
+    }
+
+    public function previewUndanganSatker(Rapat $rapat)
+    {
+        abort_unless($rapat->bersama_satker, 404);
+        abort_unless(auth()->user()->canViewRapat($rapat) || auth()->user()->canAccessMeetingApproval(), 403);
+
+        return $this->documentService->streamUndanganSatkerPdf($rapat);
     }
 
     protected function payloadFromRequest($request, array $data, Rapat $rapat = null)
@@ -219,7 +227,8 @@ class RapatController extends Controller
             'approver_2_id' => $data['approver_2_id'] ?? null,
             'approval1_jabatan_manual' => $data['approval1_jabatan_manual'] ?? null,
             'detail_tambahan' => !empty($data['include_detail_tambahan']) ? ($data['detail_tambahan'] ?? null) : null,
-            'tujuan_surat' => $data['tujuan_surat'] ?? null,
+            'bersama_satker' => (bool) ($data['bersama_satker'] ?? false),
+            'tujuan_surat' => !empty($data['bersama_satker']) ? ($data['tujuan_surat'] ?? null) : null,
             'jenis_pakaian' => !empty($data['include_pakaian']) ? ($data['jenis_pakaian'] ?? null) : null,
             'is_virtual' => (bool) ($data['is_virtual'] ?? false),
             'meeting_id' => $data['meeting_id'] ?? null,
@@ -316,9 +325,7 @@ class RapatController extends Controller
             return;
         }
 
-        if (in_array($rapat->status, ['terjadwal', 'disetujui'], true)) {
-            $this->whatsAppService->notifyRapatParticipants($rapat);
-        }
+        // Participant invitations are sent only by the final approval workflow.
     }
 
     protected function syncProgressZiContext(Rapat $rapat, $request)

@@ -163,6 +163,7 @@ class RapatDocumentService
         $rapat->loadMissing([
             'pesertas.jabatan',
             'pesertas.unit',
+            'pesertas.roles',
             'approvals',
             'approver1.jabatan',
             'approver2.jabatan',
@@ -184,6 +185,19 @@ class RapatDocumentService
         $content = $this->buildUndanganPdfContent($rapat, $signed, $verification);
         $this->pdfVerificationService->finalize($verification, $content, 'undangan-rapat-' . $rapat->id . '.pdf');
 
+        if ($rapat->bersama_satker) {
+            $satkerVerification = $this->pdfVerificationService->begin(
+                'rapat',
+                'undangan_rapat_satker',
+                $rapat->id,
+                'Undangan Rapat Satuan Kerja - ' . ($rapat->judul ?: 'Rapat'),
+                $this->buildRapatSigners($rapat),
+                ['nomor' => $suratKeluar->nomor_surat ?: $rapat->nomor_undangan]
+            );
+            $satkerContent = $this->buildUndanganPdfContent($rapat, $signed, $satkerVerification, 'satker');
+            $this->pdfVerificationService->finalize($satkerVerification, $satkerContent, 'undangan-rapat-satker-' . $rapat->id . '.pdf');
+        }
+
         $suratKeluar->update([
             'status' => $signed ? 'lengkap' : 'draft',
         ]);
@@ -196,6 +210,7 @@ class RapatDocumentService
         $rapat->loadMissing([
             'pesertas.jabatan',
             'pesertas.unit',
+            'pesertas.roles',
             'approvals',
             'approver1.jabatan',
             'approver2.jabatan',
@@ -220,11 +235,46 @@ class RapatDocumentService
         return $this->pdfVerificationService->response($content, $verification, $filename);
     }
 
+    public function streamUndanganSatkerPdf(Rapat $rapat)
+    {
+        if (!$rapat->bersama_satker) {
+            abort(404);
+        }
+
+        $rapat->loadMissing([
+            'pesertas.jabatan',
+            'pesertas.unit',
+            'pesertas.roles',
+            'approvals',
+            'approver1.jabatan',
+            'approver2.jabatan',
+            'creator',
+            'kategoriSuratKode.parent.parent.parent',
+            'suratKeluar',
+        ]);
+
+        $signed = $this->shouldUseSignedDocument($rapat);
+        $suratKeluar = $this->syncSuratKeluar($rapat, $signed);
+        $verification = $this->pdfVerificationService->begin(
+            'rapat',
+            'undangan_rapat_satker',
+            $rapat->id,
+            'Undangan Rapat Satuan Kerja - ' . ($rapat->judul ?: 'Rapat'),
+            $this->buildRapatSigners($rapat),
+            ['nomor' => $suratKeluar->nomor_surat ?: $rapat->nomor_undangan]
+        );
+        $filename = 'undangan-rapat-satker-' . $rapat->id . '.pdf';
+        $content = $this->buildUndanganPdfContent($rapat, $signed, $verification, 'satker');
+
+        return $this->pdfVerificationService->response($content, $verification, $filename);
+    }
+
     public function createUndanganTempFile(Rapat $rapat, $prefix = 'undangan-rapat')
     {
         $rapat->loadMissing([
             'pesertas.jabatan',
             'pesertas.unit',
+            'pesertas.roles',
             'approvals',
             'approver1.jabatan',
             'approver2.jabatan',
@@ -254,12 +304,12 @@ class RapatDocumentService
         ];
     }
 
-    protected function buildUndanganPdfContent(Rapat $rapat, $signed, $verification)
+    protected function buildUndanganPdfContent(Rapat $rapat, $signed, $verification, $variant = 'internal')
     {
         $tempFiles = [];
 
         try {
-            $basePdf = PDF::loadView('rapat.pdf.undangan', $this->buildPdfViewData($rapat, $signed, $this->pdfVerificationService->viewData($verification)))
+            $basePdf = PDF::loadView('rapat.pdf.undangan', $this->buildPdfViewData($rapat, $signed, $this->pdfVerificationService->viewData($verification), $variant))
                 ->setPaper('a4', 'portrait');
 
             $baseTempPath = $this->makeTempPdfPath('undangan-base-' . $rapat->id);
@@ -312,10 +362,11 @@ class RapatDocumentService
         return in_array($rapat->status, ['disetujui', 'selesai'], true);
     }
 
-    public function buildPdfViewData(Rapat $rapat, $signed = false, array $pdfVerification = null)
+    public function buildPdfViewData(Rapat $rapat, $signed = false, array $pdfVerification = null, $variant = 'internal')
     {
         $rapat->loadMissing([
             'pesertas.jabatan',
+            'pesertas.roles',
             'approvals.approver.jabatan',
             'approver1.jabatan',
             'approver2.jabatan',
@@ -329,11 +380,17 @@ class RapatDocumentService
         $selectedCategory = $rapat->kategoriSuratKode;
         $hierarchy = $selectedCategory ? $this->resolveHierarchy($selectedCategory) : null;
 
-        $displayRecipients = $rapat->pesertas->filter(function ($user) use ($signatory) {
-            return !$signatory || (int) $user->id !== (int) $signatory->id;
+        $isSatkerInvitation = $variant === 'satker';
+        $displayRecipients = $rapat->pesertas->filter(function ($user) use ($signatory, $isSatkerInvitation) {
+            if ($signatory && (int) $user->id === (int) $signatory->id) {
+                return false;
+            }
+
+            return $isSatkerInvitation ? $user->hasRole('satker') : !$user->hasRole('satker');
         })->values();
 
-        $tujuanManual = trim((string) $rapat->tujuan_surat) !== '';
+        $tujuanSurat = $isSatkerInvitation ? trim((string) $rapat->tujuan_surat) : '';
+        $tujuanManual = $tujuanSurat !== '';
         $singleRecipient = $displayRecipients->count() === 1;
         $showLampiranDaftar = $displayRecipients->count() > 1;
         $hasSignatoryContext = $signatory || trim((string) $rapat->approval1_jabatan_manual) !== '';
@@ -344,7 +401,7 @@ class RapatDocumentService
             ? $rapat->created_at->copy()->timezone('Asia/Jayapura')
             : Carbon::now('Asia/Jayapura');
         $hasLampiranTambahan = (bool) $rapat->lampiran_tambahan_path;
-        $showLampiranPage = !$hasLampiranTambahan && $displayRecipients->count() > 1;
+        $showLampiranPage = !$tujuanManual && !$hasLampiranTambahan && $displayRecipients->count() > 1;
         $showRecipientListInLetter = !$tujuanManual && !$showLampiranPage && $displayRecipients->count() > 1;
 
         return [
@@ -354,6 +411,8 @@ class RapatDocumentService
             'hierarchy' => $hierarchy,
             'displayRecipients' => $displayRecipients,
             'tujuanManual' => $tujuanManual,
+            'tujuanSurat' => $tujuanSurat,
+            'isSatkerInvitation' => $isSatkerInvitation,
             'singleRecipient' => $singleRecipient,
             'showLampiranDaftar' => $showLampiranDaftar,
             'showLampiranPage' => $showLampiranPage,
@@ -745,7 +804,7 @@ class RapatDocumentService
     {
         $manualTitle = trim((string) $manualTitle);
 
-        if ($manualTitle !== '') {
+        if (!$signatory && $manualTitle !== '') {
             return [
                 'line1' => rtrim($manualTitle, ',') . ',',
                 'line2' => 'Pengadilan Tinggi Agama Papua Barat',

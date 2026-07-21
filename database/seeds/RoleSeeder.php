@@ -33,6 +33,7 @@ class RoleSeeder extends Seeder
             ['name' => 'operator_persediaan', 'display_name' => 'Operator Persediaan'],
             ['name' => 'operator_siperlatin', 'display_name' => 'Operator SIPERLATIN'],
             ['name' => 'operator_perpustakaan', 'display_name' => 'Operator Perpustakaan'],
+            ['name' => 'satker', 'display_name' => 'Satuan Kerja'],
         ];
 
         foreach ($roles as $role) {

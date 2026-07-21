@@ -31,6 +31,7 @@ Route::get('/verifikasi/surat-keluar/{approval}', 'SuratKeluarSignatureVerificat
 Route::get('/verifikasi/pdf/{token}', 'PdfVerificationController@show')->name('pdf-verification.show');
 Route::get('/verifikasi/pdf/{token}/preview', 'PdfVerificationController@preview')->name('pdf-verification.preview');
 Route::get('/publik/tindak-lanjut/eviden/{token}', 'PublicFollowUpEvidenceController@show')->name('rapat.notulensi.follow-ups.eviden.public');
+Route::get('/surat-keluar/{suratKeluar}/file', 'SuratKeluarController@viewFile')->name('surat-keluar.file');
 
 // Authenticated routes
 Route::middleware(['auth'])->group(function () {
@@ -91,7 +92,6 @@ Route::middleware(['auth'])->group(function () {
     Route::put('/surat-keluar/{suratKeluar}', 'SuratKeluarController@update')->name('surat-keluar.update');
     Route::delete('/surat-keluar/{suratKeluar}', 'SuratKeluarController@destroy')->name('surat-keluar.destroy');
     Route::post('/surat-keluar/{suratKeluar}/upload', 'SuratKeluarController@uploadLampiran')->name('surat-keluar.upload');
-    Route::get('/surat-keluar/{suratKeluar}/file', 'SuratKeluarController@viewFile')->name('surat-keluar.file');
     Route::get('/surat-keluar/preview-nomor', 'SuratKeluarController@previewNomor')->name('surat-keluar.preview-nomor');
     Route::get('/surat-keluar-approval/{suratKeluarApproval}', 'SuratKeluarApprovalController@show')->name('surat-keluar.approval.show');
     Route::get('/surat-keluar-approval/{suratKeluarApproval}/preview', 'SuratKeluarApprovalController@preview')->name('surat-keluar.approval.preview');
@@ -274,7 +274,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/{voting}/pdf', 'VotingController@resultsPdf')->name('pdf');
     });
 
-    Route::prefix('rapat')->name('rapat.')->middleware('role:admin,operator,notulis,peserta,approval,protokoler,super_admin')->group(function () {
+    Route::prefix('rapat')->name('rapat.')->middleware('role:admin,operator,notulis,peserta,approval,protokoler,satker,super_admin')->group(function () {
         Route::get('/', 'RapatController@index')->name('index');
         Route::get('/preview-nomor', 'RapatController@previewNomorUndangan')->middleware('role:admin,operator,super_admin')->name('preview-nomor');
         Route::post('/', 'RapatController@store')->middleware('role:admin,operator,super_admin')->name('store');
@@ -282,8 +282,9 @@ Route::middleware(['auth'])->group(function () {
         Route::delete('/{rapat}', 'RapatController@destroy')->middleware('role:admin,operator,super_admin')->name('destroy');
         Route::get('/{rapat}/lampiran', 'RapatController@lampiran')->name('lampiran');
         Route::get('/{rapat}/undangan', 'RapatController@previewUndangan')->name('undangan.preview');
+        Route::get('/{rapat}/undangan-satker', 'RapatController@previewUndanganSatker')->name('undangan-satker.preview');
 
-        Route::prefix('notulensi')->middleware('role:admin,operator,notulis,super_admin')->name('notulensi.')->group(function () {
+        Route::prefix('notulensi')->middleware('role:admin,operator,notulis,satker,super_admin')->name('notulensi.')->group(function () {
             Route::get('/', 'RapatNotulensiController@index')->name('index');
             Route::get('/create/{rapat}', 'RapatNotulensiController@create')->name('create');
             Route::post('/{rapat}', 'RapatNotulensiController@store')->name('store');

@@ -9,7 +9,7 @@ class StoreRapatNotulensiRequest extends FormRequest
 {
     public function authorize()
     {
-        return auth()->check() && auth()->user()->canAccessMeetingMinutes();
+        return auth()->check() && auth()->user()->canManageMeetingMinutes();
     }
 
     public function rules()

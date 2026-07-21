@@ -35,6 +35,7 @@ return [
         'api_url' => env('WHATSAPP_API_URL', env('FONNTE_API_URL', 'https://api.fonnte.com/send')),
         'api_key' => env('WHATSAPP_API_KEY', env('FONNTE_TOKEN')),
         'magic_link_ttl' => env('WHATSAPP_MAGIC_LINK_TTL', 10080),
+        'document_link_ttl_days' => env('WHATSAPP_DOCUMENT_LINK_TTL_DAYS', 30),
         'work_start_hour' => env('WHATSAPP_WORK_START_HOUR', 0),
         'work_end_hour' => env('WHATSAPP_WORK_END_HOUR', 24),
         'work_days' => env('WHATSAPP_WORK_DAYS', '1,2,3,4,5,6,7'),

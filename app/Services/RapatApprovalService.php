@@ -92,6 +92,11 @@ class RapatApprovalService
 
         $this->normalizeStatuses($rapat);
         $this->refreshRapatStatus($rapat, $fallbackStatus);
+        $rapat->refresh();
+
+        if ($rapat->status === 'pending_approval' && $rapat->participant_notified_at) {
+            $rapat->forceFill(['participant_notified_at' => null])->save();
+        }
     }
 
     public function approve(RapatApproval $approval, User $actor, $catatan = null, $signatureData = null)
@@ -137,6 +142,12 @@ class RapatApprovalService
         ], $actor);
 
         if ($approval->rapat->status === 'disetujui') {
+            try {
+                $this->documentService->generateAndStoreUndangan($approval->rapat->fresh(), true);
+            } catch (\Throwable $exception) {
+                report($exception);
+            }
+
             $this->whatsAppService->notifyRapatParticipants($approval->rapat);
             return;
         }

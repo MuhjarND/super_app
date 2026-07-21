@@ -44,7 +44,7 @@ class RapatNotulensiTindakLanjut extends Model
 
     public function scopeVisibleTo($query, User $user)
     {
-        if ($user->canAccessMeetingMinutes() || $user->canMonitorAllMeetingFollowUps()) {
+        if ($user->canManageMeetingMinutes() || $user->canMonitorAllMeetingFollowUps()) {
             return $query;
         }
 

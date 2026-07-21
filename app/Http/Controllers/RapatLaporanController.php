@@ -24,7 +24,7 @@ class RapatLaporanController extends Controller
 
     public function index()
     {
-        abort_unless(auth()->user()->canAccessMeetingModule(), 403);
+        abort_unless(auth()->user()->canAccessMeetingReports(), 403);
 
         $rapats = \App\Rapat::visibleTo(auth()->user())
             ->with([
@@ -52,7 +52,7 @@ class RapatLaporanController extends Controller
 
     public function arsip()
     {
-        abort_unless(auth()->user()->canAccessMeetingModule(), 403);
+        abort_unless(auth()->user()->canAccessMeetingReports(), 403);
 
         $rapatIds = \App\Rapat::visibleTo(auth()->user())->pluck('id');
 
@@ -68,7 +68,7 @@ class RapatLaporanController extends Controller
 
     public function preview(RapatLaporan $laporan)
     {
-        abort_unless(auth()->user()->canViewRapat($laporan->rapat), 403);
+        abort_unless(auth()->user()->canAccessMeetingReports() && auth()->user()->canViewRapat($laporan->rapat), 403);
 
         if ($laporan->file_path) {
             return response()->file(Storage::disk('public')->path($laporan->file_path));
@@ -92,7 +92,7 @@ class RapatLaporanController extends Controller
 
     public function download(RapatLaporan $laporan)
     {
-        abort_unless(auth()->user()->canViewRapat($laporan->rapat), 403);
+        abort_unless(auth()->user()->canAccessMeetingReports() && auth()->user()->canViewRapat($laporan->rapat), 403);
 
         if ($laporan->file_path) {
             return response()->download(Storage::disk('public')->path($laporan->file_path), $laporan->file_nama ?: basename($laporan->file_path));
@@ -116,7 +116,7 @@ class RapatLaporanController extends Controller
 
     public function upload(UploadRapatLaporanRequest $request, RapatLaporan $laporan)
     {
-        abort_unless(auth()->user()->canAccessMeetingMinutes(), 403);
+        abort_unless(auth()->user()->canManageMeetingMinutes(), 403);
 
         $file = $request->file('laporan_file');
 
@@ -142,7 +142,7 @@ class RapatLaporanController extends Controller
 
     public function archive(RapatLaporan $laporan)
     {
-        abort_unless(auth()->user()->canAccessMeetingMinutes(), 403);
+        abort_unless(auth()->user()->canManageMeetingMinutes(), 403);
 
         $laporan->update([
             'archived_at' => now(),
@@ -155,7 +155,7 @@ class RapatLaporanController extends Controller
 
     public function unarchive(RapatLaporan $laporan)
     {
-        abort_unless(auth()->user()->canAccessMeetingMinutes(), 403);
+        abort_unless(auth()->user()->canManageMeetingMinutes(), 403);
 
         $laporan->update([
             'archived_at' => null,
@@ -210,7 +210,7 @@ class RapatLaporanController extends Controller
 
     public function edit(RapatLaporan $laporan)
     {
-        abort_unless(auth()->user()->canAccessMeetingMinutes(), 403);
+        abort_unless(auth()->user()->canManageMeetingMinutes(), 403);
         abort_unless($laporan->jenis === 'tindak_lanjut', 404);
 
         $laporan->load([
@@ -234,7 +234,7 @@ class RapatLaporanController extends Controller
 
     public function update(StoreRapatLaporanRequest $request, RapatLaporan $laporan)
     {
-        abort_unless(auth()->user()->canAccessMeetingMinutes(), 403);
+        abort_unless(auth()->user()->canManageMeetingMinutes(), 403);
         abort_unless($laporan->jenis === 'tindak_lanjut', 404);
 
         $laporan->update([

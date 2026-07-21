@@ -3375,6 +3375,7 @@
                                             <p>Absensi</p>
                                         </a>
                                     </li>
+                                    @if($isSidebarSuperAdmin || $sidebarUser->canAccessMeetingReports())
                                     <li class="nav-item nav-item-sub">
                                         <a href="{{ route('rapat.laporan.index') }}"
                                             class="nav-link {{ request()->routeIs('rapat.laporan.*') ? 'active' : '' }}">
@@ -3382,6 +3383,7 @@
                                             <p>Laporan</p>
                                         </a>
                                     </li>
+                                    @endif
                                     @endif
                                     @if($isSidebarSuperAdmin || $sidebarUser->canAccessAgendaPimpinan())
                                         <li class="nav-item nav-item-sub">
@@ -3460,6 +3462,7 @@
                                             </a>
                                         </li>
                                     @endif
+                                    @if($isSidebarSuperAdmin || $sidebarUser->canAccessLeaveReports())
                                     <li class="nav-item nav-item-sub">
                                         <a href="{{ route('cuti.reports.index') }}"
                                             class="nav-link {{ request()->routeIs('cuti.reports.*') ? 'active' : '' }}">
@@ -3467,6 +3470,7 @@
                                             <p>Laporan Cuti</p>
                                         </a>
                                     </li>
+                                    @endif
                                     @if($isSidebarSuperAdmin || $sidebarUser->canManageLeaveMasterData())
                                         <li class="nav-item nav-item-sub">
                                             <a href="{{ route('cuti.master.types.index') }}"

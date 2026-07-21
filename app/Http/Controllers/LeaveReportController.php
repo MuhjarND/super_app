@@ -356,7 +356,7 @@ class LeaveReportController extends Controller
 
     protected function abortIfUnauthorized()
     {
-        abort_unless(auth()->check() && auth()->user()->canAccessLeaveModule(), 403);
+        abort_unless(auth()->check() && auth()->user()->canAccessLeaveReports(), 403);
     }
 
     protected function abortIfBalanceUnauthorized()

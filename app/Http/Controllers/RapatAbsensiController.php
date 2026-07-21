@@ -164,7 +164,11 @@ class RapatAbsensiController extends Controller
 
     public function remindPending(Rapat $rapat)
     {
-        abort_unless(auth()->user()->canViewRapat($rapat), 403);
+        abort_unless(
+            (auth()->user()->canManageRapat() || auth()->user()->canManageMeetingMinutes())
+                && auth()->user()->canViewRapat($rapat),
+            403
+        );
 
         $result = $this->whatsAppService->notifyAttendanceReminder($rapat->fresh(['pesertas', 'internalAttendances']));
         $processed = $result['attempted'] > 0 || !$this->whatsAppService->isConfigured();

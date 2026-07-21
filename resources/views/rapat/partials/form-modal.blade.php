@@ -93,7 +93,7 @@
                             </div>
                             <select class="form-control select2" name="peserta_ids[]" id="{{ $prefix }}PesertaIds" multiple required data-participant-select="1">
                                 @foreach($participants as $participant)
-                                    <option value="{{ $participant->id }}" data-unit-id="{{ $participant->unit_id }}">{{ $participant->name }}</option>
+                                    <option value="{{ $participant->id }}" data-unit-id="{{ $participant->unit_id }}" data-is-satker="{{ $participant->hasRole('satker') ? 1 : 0 }}">{{ $participant->name }}{{ $participant->hasRole('satker') ? ' - Satker' : '' }}</option>
                                 @endforeach
                             </select>
                             <small class="form-hint">Pilih pegawai yang diundang.</small>
@@ -109,7 +109,7 @@
                         <div class="rapat-advanced-body">
                             <div class="row">
                                 <div class="col-md-6 form-group">
-                                    <label>Approver 1</label>
+                                    <label>Approver 1 <span class="text-danger" id="{{ $prefix }}SatkerApproverRequired" style="display:none;">*</span></label>
                                     <select class="form-control select2" name="approver_1_id" id="{{ $prefix }}Approver1Id">
                                         <option value="">Pilih approver</option>
                                         @foreach($approvers as $approver)
@@ -129,10 +129,6 @@
                                 <div class="col-md-6 form-group">
                                     <label>Jabatan Manual Approver 1</label>
                                     <input type="text" class="form-control" name="approval1_jabatan_manual" id="{{ $prefix }}Approval1JabatanManual" placeholder="Opsional">
-                                </div>
-                                <div class="col-md-6 form-group">
-                                    <label>Tujuan Surat <span class="text-danger" id="{{ $prefix }}TujuanSuratRequired" style="display:none;">*</span></label>
-                                    <textarea class="form-control" name="tujuan_surat" id="{{ $prefix }}TujuanSurat" rows="2" placeholder="Opsional"></textarea>
                                 </div>
                             </div>
 
@@ -172,6 +168,19 @@
                                         <small>Upload dokumen tambahan.</small>
                                     </span>
                                 </label>
+                                <label class="rapat-option-card" for="{{ $prefix }}BersamaSatker">
+                                    <input type="checkbox" name="bersama_satker" value="1" id="{{ $prefix }}BersamaSatker">
+                                    <span>
+                                        <strong>Bersama Satker</strong>
+                                        <small>Buat undangan khusus satuan kerja.</small>
+                                    </span>
+                                </label>
+                            </div>
+
+                            <div id="{{ $prefix }}SatkerGroup" class="rapat-conditional-field" style="display:none;">
+                                <label>Tujuan Surat Satuan Kerja <span class="text-danger">*</span></label>
+                                <textarea class="form-control" name="tujuan_surat" id="{{ $prefix }}TujuanSurat" rows="2" placeholder="Contoh: Ketua Pengadilan Agama se-wilayah Pengadilan Tinggi Agama Papua Barat"></textarea>
+                                <small class="form-hint">Tujuan ini hanya digunakan pada PDF undangan satuan kerja.</small>
                             </div>
 
                             <div id="{{ $prefix }}PakaianGroup" class="rapat-conditional-field" style="display:none;">

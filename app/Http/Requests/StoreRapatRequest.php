@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use App\KlasifikasiKode;
+use App\User;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -25,12 +26,13 @@ class StoreRapatRequest extends FormRequest
             'tempat' => ['required', 'string', 'max:255'],
             'peserta_ids' => ['required', 'array', 'min:1'],
             'peserta_ids.*' => [Rule::exists('users', 'id')->where('status_aktif_pegawai', true)],
-            'approver_1_id' => ['nullable', Rule::exists('users', 'id')->where('status_aktif_pegawai', true)],
+            'approver_1_id' => ['nullable', 'required_if:bersama_satker,1', Rule::exists('users', 'id')->where('status_aktif_pegawai', true)],
             'approver_2_id' => ['nullable', 'different:approver_1_id', Rule::exists('users', 'id')->where('status_aktif_pegawai', true)],
             'approval1_jabatan_manual' => ['nullable', 'string', 'max:255'],
             'include_detail_tambahan' => ['nullable', 'boolean'],
             'detail_tambahan' => ['nullable', 'required_if:include_detail_tambahan,1', 'string'],
-            'tujuan_surat' => ['nullable', 'required_if:gunakan_lampiran_tambahan,1', 'string'],
+            'bersama_satker' => ['nullable', 'boolean'],
+            'tujuan_surat' => ['nullable', 'required_if:bersama_satker,1', 'string'],
             'include_pakaian' => ['nullable', 'boolean'],
             'jenis_pakaian' => ['nullable', 'required_if:include_pakaian,1', 'string', 'max:255'],
             'is_virtual' => ['nullable', 'boolean'],
@@ -73,8 +75,22 @@ class StoreRapatRequest extends FormRequest
                 $this->merge(['jenis_pakaian' => null]);
             }
 
-            if ($this->boolean('gunakan_lampiran_tambahan') && trim((string) $this->input('tujuan_surat')) === '') {
-                $validator->errors()->add('tujuan_surat', 'Tujuan surat wajib diisi jika lampiran tambahan digunakan.');
+            if ($this->boolean('bersama_satker') && trim((string) $this->input('tujuan_surat')) === '') {
+                $validator->errors()->add('tujuan_surat', 'Tujuan surat satuan kerja wajib diisi.');
+            }
+
+            if (!$this->boolean('bersama_satker')) {
+                $this->merge(['tujuan_surat' => null]);
+
+                $hasSatkerParticipant = User::whereIn('id', (array) $this->input('peserta_ids', []))
+                    ->whereHas('roles', function ($query) {
+                        $query->where('name', 'satker');
+                    })
+                    ->exists();
+
+                if ($hasSatkerParticipant) {
+                    $validator->errors()->add('peserta_ids', 'Peserta satuan kerja hanya dapat dipilih saat opsi Bersama Satker diaktifkan.');
+                }
             }
         });
     }

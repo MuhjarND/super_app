@@ -22,6 +22,7 @@ use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\URL;
 
 class WhatsAppNotificationService
 {
@@ -127,6 +128,11 @@ class WhatsAppNotificationService
     {
         if ($log->status !== 'queued') {
             return $log->status === 'sent';
+        }
+
+        $normalizedMessage = $this->normalizeNotificationBrandAndTitle($log->message, $log->module);
+        if ($normalizedMessage !== $log->message) {
+            $log->update(['message' => $normalizedMessage]);
         }
 
         if (!$this->isEnabled() || !$this->isConfigured() || !$this->isValidPhoneNumber($log->phone_number)) {
@@ -429,8 +435,8 @@ class WhatsAppNotificationService
             'Periode Tugas: ' . $this->formatTaskLetterPeriod($fieldValues),
             'Uraian Tugas: ' . ($fieldValues['untuk_tugas'] ?? 'Sesuai Surat Tugas yang diterbitkan.'),
             '',
-            'Silakan meninjau dokumen melalui tautan berikut:',
-            route('surat-keluar.signature.verify', optional($suratKeluar->templateApproval)->id),
+            'File Surat Tugas:',
+            $this->directSuratKeluarFileUrl($suratKeluar),
         ]);
 
         return $this->sendToUser($targetUser, $message, [
@@ -454,8 +460,8 @@ class WhatsAppNotificationService
             'Tanggal Surat: ' . $this->formatDateValue($suratKeluar->tanggal_surat),
             'Dibuat Oleh: ' . (optional($suratKeluar->creator)->name ?: '-'),
             '',
-            'Silakan meninjau dokumen melalui tautan berikut:',
-            route('surat-keluar.file', $suratKeluar),
+            'File Surat Keluar:',
+            $this->directSuratKeluarFileUrl($suratKeluar),
         ]);
 
         return $this->sendToUser($targetUser, $message, [
@@ -486,8 +492,13 @@ class WhatsAppNotificationService
         }
 
         $lines[] = '';
-        $lines[] = 'Silakan membuka modul Surat Keluar untuk tindak lanjut lebih lanjut:';
-        $lines[] = route('surat-keluar.index');
+        if ($approved && $suratKeluar) {
+            $lines[] = 'File Surat Tugas:';
+            $lines[] = $this->directSuratKeluarFileUrl($suratKeluar);
+        } else {
+            $lines[] = 'Silakan membuka modul Surat Keluar untuk melakukan perbaikan:';
+            $lines[] = route('surat-keluar.index');
+        }
 
         return $this->sendToUser($targetUser, $this->wrap($lines), [
             'module' => 'surat_tugas',
@@ -635,7 +646,7 @@ class WhatsAppNotificationService
 
     public function notifyRapatParticipants(Rapat $rapat)
     {
-        $rapat->loadMissing(['kategoriSuratKode', 'pesertas.jabatan']);
+        $rapat->loadMissing(['kategoriSuratKode', 'pesertas.jabatan', 'pesertas.roles', 'suratKeluar']);
 
         if ($rapat->participant_notified_at) {
             return false;
@@ -643,7 +654,7 @@ class WhatsAppNotificationService
 
         $lines = [
             'Yth. Bapak/Ibu,',
-            'Dengan hormat, berikut disampaikan informasi rapat.',
+            'Dengan hormat, berikut disampaikan undangan rapat yang telah disetujui.',
             '',
             'Judul: ' . $rapat->judul,
             'Nomor Undangan: ' . $rapat->nomor_undangan,
@@ -666,17 +677,19 @@ class WhatsAppNotificationService
             $lines[] = 'Deskripsi: ' . trim(preg_replace('/\s+/', ' ', $rapat->deskripsi));
         }
 
-        $lines[] = '';
-        $lines[] = 'Mohon kehadiran tepat waktu sesuai jadwal yang telah ditetapkan.';
-        $lines[] = 'Tinjau undangan melalui tautan berikut:';
-        $lines[] = route('rapat.undangan.preview', $rapat);
-
-        $message = $this->wrap($lines);
         $users = $rapat->pesertas->filter(function ($user) {
             return !empty($user->no_hp);
         });
 
-        $result = $this->sendBulk($users, $message, [
+        $fileUrl = $rapat->suratKeluar
+            ? $this->directSuratKeluarFileUrl($rapat->suratKeluar)
+            : route('rapat.undangan.preview', $rapat);
+        $lines[] = '';
+        $lines[] = 'Mohon kehadiran tepat waktu sesuai jadwal yang telah ditetapkan.';
+        $lines[] = 'File Undangan:';
+        $lines[] = $fileUrl;
+
+        $result = $this->sendBulk($users, $this->wrap($lines), [
             'module' => 'rapat',
             'event' => 'participant_invitation',
             'notifiable_type' => get_class($rapat),
@@ -965,7 +978,7 @@ class WhatsAppNotificationService
     public function notifyLoginInfo(User $user)
     {
         $message = $this->wrap([
-            'Akses akun SIMANTAP telah tersedia.',
+            'Akses akun PAPEDA telah tersedia.',
             'Nama: ' . $user->name,
             'NIP: ' . ($user->nip ?: $user->username ?: '-'),
             '',
@@ -1173,7 +1186,7 @@ class WhatsAppNotificationService
     {
         $message = $this->compactMessage($message);
 
-        return '*SIMANTAP | ' . $this->notificationModuleTitle($context['module'] ?? null) . '*'
+        return '*PAPEDA | ' . $this->notificationModuleTitle($context['module'] ?? null) . '*'
             . "\n"
             . $message;
     }
@@ -1195,9 +1208,9 @@ class WhatsAppNotificationService
                 continue;
             }
 
-            if (preg_match('/^\*?(?:\[[^\]]+ NOTIF\]|SIMANTAP\s*\|[^*]+)\*?$/i', $line)
+            if (preg_match('/^\*?(?:\[[^\]]+ NOTIF\]|PAPEDA\s*\|[^*]+)\*?$/i', $line)
                 || preg_match('/^Yth\..+,$/i', $line)
-                || preg_match('/^(?:Hormat kami,?|PAPEDA|SIMANTAP)$/i', $line)) {
+                || preg_match('/^(?:Hormat kami,?|PAPEDA)$/i', $line)) {
                 continue;
             }
 
@@ -1211,7 +1224,7 @@ class WhatsAppNotificationService
 
             if ($this->isActionPrompt($line)) {
                 $line = $hasMagicLink
-                    ? '*Buka di SIMANTAP (login otomatis):*'
+                    ? '*Buka di PAPEDA (login otomatis):*'
                     : '*Buka tautan:*';
             } elseif (!preg_match('/^https?:\/\//i', $line)
                 && preg_match('/^([^:*]{2,45}):\s*(.+)$/u', $line, $matches)) {
@@ -1247,7 +1260,7 @@ class WhatsAppNotificationService
     protected function notificationModuleTitle($module)
     {
         $map = [
-            'security' => 'KEAMANAN',
+            'security' => 'KEAMANAN AKUN',
             'persuratan' => 'PERSURATAN',
             'surat_tugas' => 'SURAT TUGAS',
             'cuti' => 'CUTI',
@@ -1258,7 +1271,7 @@ class WhatsAppNotificationService
             'voting' => 'E-VOTING',
             'persediaan' => 'PERSEDIAAN',
             'perawatan' => 'PERAWATAN ALAT DAN MESIN',
-            'master_data' => 'MASTER DATA',
+            'master_data' => 'AKUN PENGGUNA',
             'general' => 'UMUM',
         ];
 
@@ -1269,6 +1282,33 @@ class WhatsAppNotificationService
         }
 
         return $map[$module] ?? strtoupper(str_replace('_', ' ', $module));
+    }
+
+    protected function normalizeNotificationBrandAndTitle($message, $module)
+    {
+        $message = str_replace(
+            ['Buka di SIMANTAP', 'Akses akun SIMANTAP'],
+            ['Buka di PAPEDA', 'Akses akun PAPEDA'],
+            (string) $message
+        );
+        $header = '*PAPEDA | ' . $this->notificationModuleTitle($module) . '*';
+
+        if (preg_match('/^\*(?:SIMANTAP|PAPEDA)\s*\|[^*]+\*/u', $message)) {
+            return preg_replace('/^\*(?:SIMANTAP|PAPEDA)\s*\|[^*]+\*/u', $header, $message, 1);
+        }
+
+        return $header . "\n" . ltrim($message);
+    }
+
+    protected function directSuratKeluarFileUrl(SuratKeluar $suratKeluar)
+    {
+        $ttlDays = max(1, (int) config('services.whatsapp.document_link_ttl_days', 30));
+
+        return URL::temporarySignedRoute(
+            'surat-keluar.file',
+            now()->addDays($ttlDays),
+            ['suratKeluar' => $suratKeluar->getKey()]
+        );
     }
 
     protected function normalizePhoneNumber($phoneNumber)

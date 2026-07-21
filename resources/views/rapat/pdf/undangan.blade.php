@@ -235,7 +235,7 @@
     <div class="tujuan">
         <div>Kepada Yth.</div>
         @if($tujuanManual)
-            <div>{!! nl2br(e($rapat->tujuan_surat)) !!}</div>
+            <div>{!! nl2br(e($tujuanSurat)) !!}</div>
         @elseif($singleRecipient)
             @php $recipient = $displayRecipients->first(); @endphp
             <div>{{ $recipient->name }}{{ $recipient->jabatan_keterangan ? ', ' . $recipient->jabatan_keterangan : '' }}</div>

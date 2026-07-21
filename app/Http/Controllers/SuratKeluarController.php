@@ -26,7 +26,7 @@ class SuratKeluarController extends Controller
 
     public function __construct()
     {
-        $this->middleware('auth');
+        $this->middleware('auth')->except('viewFile');
         $this->templateDocumentService = app(SuratTemplateDocumentService::class);
         $this->documentPreviewService = app(DocumentPreviewService::class);
         $this->whatsAppService = app(WhatsAppNotificationService::class);
@@ -453,7 +453,10 @@ class SuratKeluarController extends Controller
 
     public function viewFile(SuratKeluar $suratKeluar)
     {
-        abort_unless(auth()->user()->canViewSuratKeluar($suratKeluar), 403);
+        $user = auth()->user();
+        $hasSignedAccess = request()->hasValidSignature();
+
+        abort_unless($hasSignedAccess || ($user && $user->canViewSuratKeluar($suratKeluar)), 403);
 
         $suratKeluar->syncCompletionStatusFromFile();
 
@@ -470,6 +473,10 @@ class SuratKeluarController extends Controller
         }
 
         if ($suratKeluar->rapat) {
+            if (auth()->user()->isSatker() && $suratKeluar->rapat->bersama_satker) {
+                return app(RapatDocumentService::class)->streamUndanganSatkerPdf($suratKeluar->rapat);
+            }
+
             return app(RapatDocumentService::class)->streamUndanganPdf($suratKeluar->rapat);
         }
 

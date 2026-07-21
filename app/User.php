@@ -293,6 +293,11 @@ class User extends Authenticatable
         return $this->hasRole('protokoler');
     }
 
+    public function isSatker()
+    {
+        return $this->hasRole('satker');
+    }
+
     public function hasMeetingRole()
     {
         return $this->isMeetingAdmin()
@@ -300,7 +305,8 @@ class User extends Authenticatable
             || $this->isMeetingNotulis()
             || $this->isMeetingParticipant()
             || $this->isMeetingApproval()
-            || $this->isMeetingProtokoler();
+            || $this->isMeetingProtokoler()
+            || $this->isSatker();
     }
 
     public function canAccessMeetingModule()
@@ -336,7 +342,21 @@ class User extends Authenticatable
             return true;
         }
 
+        return $this->canManageMeetingMinutes() || $this->isSatker();
+    }
+
+    public function canManageMeetingMinutes()
+    {
+        if ($this->isSuperAdmin()) {
+            return true;
+        }
+
         return $this->isMeetingAdmin() || $this->isMeetingOperator() || $this->isMeetingNotulis();
+    }
+
+    public function canAccessMeetingReports()
+    {
+        return $this->canAccessMeetingModule() && !$this->isSatker();
     }
 
     public function getMonitorableMeetingUnitCodesAttribute()
@@ -391,6 +411,10 @@ class User extends Authenticatable
 
     public function canAccessMeetingFollowUps()
     {
+        if ($this->isSatker()) {
+            return false;
+        }
+
         return $this->canAccessMeetingModule()
             || $this->canMonitorNotulensiFollowUps()
             || $this->hasAssignedMeetingFollowUps();
@@ -398,7 +422,7 @@ class User extends Authenticatable
 
     public function canManageMeetingFollowUp($followUp)
     {
-        return $this->canAccessMeetingMinutes()
+        return $this->canManageMeetingMinutes()
             || ($followUp && (int) $followUp->user_id === (int) $this->id);
     }
 
@@ -499,13 +523,19 @@ class User extends Authenticatable
 
     public function canAccessVoting()
     {
-        return true;
+        return !$this->isSatker();
     }
 
     public function canViewRapat($rapat)
     {
         if ($this->canManageRapat()) {
             return true;
+        }
+
+        if ($this->isSatker()) {
+            return (bool) $rapat->bersama_satker
+                && in_array($rapat->status, ['disetujui', 'selesai'], true)
+                && $rapat->pesertas()->where('users.id', $this->id)->exists();
         }
 
         if ((int) $rapat->created_by === (int) $this->id) {
@@ -832,6 +862,7 @@ class User extends Authenticatable
 
         return $this->hasAnyRole([
             'pegawai',
+            'satker',
             'atasan_langsung',
             'admin_kepegawaian',
             'verifikator_dokumen',
@@ -870,6 +901,10 @@ class User extends Authenticatable
 
     public function canAccessLeaveApproval()
     {
+        if ($this->isSatker()) {
+            return false;
+        }
+
         return $this->canApproveLeave() || $this->hasLeaveApprovalAssignment();
     }
 
@@ -878,6 +913,11 @@ class User extends Authenticatable
         return $this->isSuperAdmin()
             || $this->canManageLeaveMasterData()
             || $this->canApproveLeave();
+    }
+
+    public function canAccessLeaveReports()
+    {
+        return $this->canAccessLeaveModule() && !$this->isSatker();
     }
 
     public function canApproveSuratKeluarTemplate()

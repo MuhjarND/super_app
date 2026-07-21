@@ -29,7 +29,7 @@ class WhatsAppMagicLinkService
             $url = rtrim($matches[0], '.,;:)');
             $suffix = substr($matches[0], strlen($url));
 
-            if (!$this->isApplicationUrl($url) || $this->isMagicLoginUrl($url)) {
+            if (!$this->isApplicationUrl($url) || $this->isMagicLoginUrl($url) || $this->isDirectDocumentUrl($url)) {
                 return $matches[0];
             }
 
@@ -68,6 +68,11 @@ class WhatsAppMagicLinkService
     protected function isMagicLoginUrl($url)
     {
         return strpos(parse_url($url, PHP_URL_PATH) ?: '', '/masuk/whatsapp/') === 0;
+    }
+
+    protected function isDirectDocumentUrl($url)
+    {
+        return preg_match('#^/surat-keluar/\d+/file$#', parse_url($url, PHP_URL_PATH) ?: '') === 1;
     }
 
     protected function defaultPort($scheme)

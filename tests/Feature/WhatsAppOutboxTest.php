@@ -172,7 +172,7 @@ class WhatsAppOutboxTest extends TestCase
         );
     }
 
-    public function testMessageUsesCompactSimantapFormat()
+    public function testMessageUsesCompactPapedaFormat()
     {
         Http::fake([
             'api.example.test/*' => Http::response(['status' => true], 200),
@@ -186,12 +186,12 @@ class WhatsAppOutboxTest extends TestCase
 
         $message = WhatsAppNotificationLog::first()->message;
 
-        $this->assertStringStartsWith('*SIMANTAP | PERSURATAN*', $message);
+        $this->assertStringStartsWith('*PAPEDA | PERSURATAN*', $message);
         $this->assertStringContainsString('*Nomor Surat:* 123/ABC', $message);
         $this->assertStringContainsString('*Buka tautan:*', $message);
         $this->assertStringNotContainsString('login otomatis', $message);
         $this->assertStringNotContainsString('Dengan hormat', $message);
-        $this->assertStringNotContainsString('PAPEDA', $message);
+        $this->assertSame(1, substr_count($message, 'PAPEDA'));
     }
 
     public function testUserNotificationContainsOneClickLoginLink()
@@ -210,7 +210,7 @@ class WhatsAppOutboxTest extends TestCase
         $message = WhatsAppNotificationLog::first()->message;
 
         $this->assertStringContainsString('/masuk/whatsapp/', $message);
-        $this->assertStringContainsString('*Buka di SIMANTAP (login otomatis):*', $message);
+        $this->assertStringContainsString('*Buka di PAPEDA (login otomatis):*', $message);
         $this->assertStringContainsString('hanya dapat digunakan satu kali', $message);
         $this->assertSame((int) $user->id, (int) WhatsAppMagicLoginToken::first()->user_id);
     }

@@ -57,10 +57,12 @@
     @endif
 
     <div class="attendance-info-grid mb-3">
+        @if(auth()->user()->canManageRapat() || auth()->user()->canManageMeetingMinutes())
         <div class="attendance-info-box">
             <div class="text-muted" style="font-size: 0.75rem;">Tanggal</div>
             <div class="font-weight-bold">{{ optional($rapat->tanggal)->translatedFormat('d F Y') }}</div>
         </div>
+        @endif
         <div class="attendance-info-box">
             <div class="text-muted" style="font-size: 0.75rem;">Waktu</div>
             <div class="font-weight-bold">{{ $rapat->waktu_mulai_formatted }} WIT</div>

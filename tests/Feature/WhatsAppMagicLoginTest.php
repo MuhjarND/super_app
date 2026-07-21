@@ -7,6 +7,7 @@ use App\User;
 use App\WhatsAppMagicLoginToken;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Str;
 use Tests\TestCase;
 
@@ -95,12 +96,32 @@ class WhatsAppMagicLoginTest extends TestCase
 
         $message = app(WhatsAppMagicLinkService::class)->replaceApplicationUrls(
             $user,
-            'SIMANTAP: ' . $internalUrl . "\nZoom: " . $externalUrl
+            'PAPEDA: ' . $internalUrl . "\nZoom: " . $externalUrl
         );
 
         $this->assertStringContainsString('/masuk/whatsapp/', $message);
         $this->assertStringNotContainsString($internalUrl, $message);
         $this->assertStringContainsString($externalUrl, $message);
         $this->assertSame(1, WhatsAppMagicLoginToken::count());
+    }
+
+    public function testSignedSuratKeluarFileUrlRemainsDirect()
+    {
+        $user = factory(User::class)->create();
+        $fileUrl = URL::temporarySignedRoute(
+            'surat-keluar.file',
+            now()->addMinutes(5),
+            ['suratKeluar' => 3259]
+        );
+
+        $message = app(WhatsAppMagicLinkService::class)->replaceApplicationUrls(
+            $user,
+            'File Surat Keluar: ' . $fileUrl
+        );
+
+        $this->assertSame('File Surat Keluar: ' . $fileUrl, $message);
+        $this->assertStringContainsString('/surat-keluar/3259/file?', $message);
+        $this->assertStringNotContainsString('/masuk/whatsapp/', $message);
+        $this->assertSame(0, WhatsAppMagicLoginToken::count());
     }
 }

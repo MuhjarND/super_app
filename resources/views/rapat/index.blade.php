@@ -746,6 +746,7 @@
                             data-detail-tambahan="{{ $rapat->detail_tambahan }}"
                             data-include-detail-tambahan="{{ $rapat->detail_tambahan ? 1 : 0 }}"
                             data-tujuan-surat="{{ $rapat->tujuan_surat }}"
+                            data-bersama-satker="{{ $rapat->bersama_satker ? 1 : 0 }}"
                             data-jenis-pakaian="{{ $rapat->jenis_pakaian }}"
                             data-include-pakaian="{{ $rapat->jenis_pakaian ? 1 : 0 }}"
                             data-is-virtual="{{ $rapat->is_virtual ? 1 : 0 }}"
@@ -810,6 +811,9 @@
                     @if($rapat->is_recurring)
                         <span class="rapat-chip recurring"><i class="fas fa-sync-alt"></i> {{ ucfirst($rapat->recurring_pattern) }}</span>
                     @endif
+                    @if($rapat->bersama_satker)
+                        <span class="rapat-chip"><i class="fas fa-building"></i> Bersama Satker</span>
+                    @endif
                     <span class="rapat-action-meta">Tindakan rapat</span>
                     @if($rapat->lampiran_tambahan_path)
                         <button type="button" class="action-chip-btn action-lampiran" onclick="previewLampiran('{{ route('rapat.lampiran', $rapat) }}')">
@@ -819,6 +823,11 @@
                     <button type="button" class="action-chip-btn action-lampiran" onclick="previewLampiran('{{ route('rapat.undangan.preview', $rapat) }}')">
                         <i class="fas fa-file-pdf"></i> Undangan
                     </button>
+                    @if($rapat->bersama_satker)
+                        <button type="button" class="action-chip-btn action-lampiran" onclick="previewLampiran('{{ route('rapat.undangan-satker.preview', $rapat) }}')">
+                            <i class="fas fa-building"></i> Undangan Satker
+                        </button>
+                    @endif
                     @if(auth()->user()->canManageRapat())
                         <button type="button" class="action-chip-btn action-edit" onclick="openEditModal({{ $rapat->id }})">
                             <i class="fas fa-pen"></i> Edit
@@ -1005,10 +1014,31 @@
             function toggleLampiranFields(prefix) {
                 const checked = $('#' + prefix + 'GunakanLampiran').is(':checked');
                 $('#' + prefix + 'LampiranGroup').toggle(checked);
-                $('#' + prefix + 'TujuanSurat').prop('required', checked);
-                $('#' + prefix + 'TujuanSuratRequired').toggle(checked);
                 if (!checked) {
                     $('#' + prefix + 'Lampiran').val('');
+                }
+            }
+
+            function toggleSatkerFields(prefix) {
+                const checked = $('#' + prefix + 'BersamaSatker').is(':checked');
+                const $participantSelect = $('#' + prefix + 'PesertaIds');
+                const $satkerOptions = $participantSelect.find('option[data-is-satker="1"]');
+
+                $('#' + prefix + 'SatkerGroup').toggle(checked);
+                $('#' + prefix + 'TujuanSurat').prop('required', checked);
+                $('#' + prefix + 'Approver1Id').prop('required', checked);
+                $('#' + prefix + 'SatkerApproverRequired').toggle(checked);
+                $satkerOptions.prop('disabled', !checked);
+
+                if (!checked) {
+                    $('#' + prefix + 'TujuanSurat').val('');
+                    const satkerValues = $satkerOptions.map(function () { return String(this.value); }).get();
+                    const selected = ($participantSelect.val() || []).map(String).filter(function (value) {
+                        return satkerValues.indexOf(value) === -1;
+                    });
+                    $participantSelect.val(selected).trigger('change');
+                } else {
+                    $participantSelect.trigger('change.select2');
                 }
             }
 
@@ -1020,6 +1050,7 @@
                 $('#' + prefix + 'IsVirtual').on('change', function () { toggleVirtualFields(prefix); });
                 $('#' + prefix + 'IsRecurring').on('change', function () { toggleRecurringFields(prefix); });
                 $('#' + prefix + 'GunakanLampiran').on('change', function () { toggleLampiranFields(prefix); });
+                $('#' + prefix + 'BersamaSatker').on('change', function () { toggleSatkerFields(prefix); });
                 $('#' + prefix + 'IncludeDetailTambahan').on('change', function () { toggleDetailTambahan(prefix); });
                 $('#' + prefix + 'IncludePakaian').on('change', function () { togglePakaianFields(prefix); });
                 $('#' + prefix + 'Tanggal, #' + prefix + 'NomenklaturJabatan').on('change', function () {
@@ -1031,6 +1062,7 @@
                 toggleVirtualFields(prefix);
                 toggleRecurringFields(prefix);
                 toggleLampiranFields(prefix);
+                toggleSatkerFields(prefix);
                 updateNomorPreview(prefix);
             }
 
@@ -1072,7 +1104,7 @@
                         const $select = $(this);
                         const id = $select.attr('id');
                         const $button = id ? $('.rapat-select-all-participants[data-target="#' + id + '"]') : $();
-                        const values = $select.find('option').map(function () {
+                        const values = $select.find('option:not(:disabled)').map(function () {
                             return String(this.value);
                         }).get();
                         const selectedValues = ($select.val() || []).map(String);
@@ -1087,7 +1119,7 @@
                         $('.rapat-select-unit-participants[data-target="#' + id + '"]').each(function () {
                             const $unitButton = $(this);
                             const unitId = String($unitButton.data('unit-id'));
-                            const unitValues = $select.find('option').filter(function () {
+                            const unitValues = $select.find('option:not(:disabled)').filter(function () {
                                 return String($(this).data('unit-id')) === unitId;
                             }).map(function () {
                                 return String(this.value);
@@ -1131,7 +1163,7 @@
                 $(document).on('click', '.rapat-select-all-participants', function () {
                     const $button = $(this);
                     const $select = $($button.data('target'));
-                    const values = $select.find('option').map(function () {
+                    const values = $select.find('option:not(:disabled)').map(function () {
                         return String(this.value);
                     }).get();
                     const selectedValues = ($select.val() || []).map(String);
@@ -1145,7 +1177,7 @@
                     const $button = $(this);
                     const $select = $($button.data('target'));
                     const unitId = String($button.data('unit-id'));
-                    const unitValues = $select.find('option').filter(function () {
+                    const unitValues = $select.find('option:not(:disabled)').filter(function () {
                         return String($(this).data('unit-id')) === unitId;
                     }).map(function () {
                         return String(this.value);
@@ -1230,6 +1262,7 @@
                     $('#editTanggal').val(row.data('tanggal'));
                     $('#editWaktuMulai').val(row.data('waktuMulai'));
                     $('#editTempat').val(row.data('tempat'));
+                    $('#editBersamaSatker').prop('checked', Number(row.data('bersamaSatker')) === 1).trigger('change');
                     $('#editPesertaIds').val(pesertaIds).trigger('change');
                     refreshRapatParticipantSelectAll($('#editPesertaIds'));
                     $('#editApprover1Id').val(row.data('approver1')).trigger('change');
