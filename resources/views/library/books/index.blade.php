@@ -4,6 +4,18 @@
 @section('page-subtitle', $canManageLibrary ? 'Manajemen koleksi buku perpustakaan' : 'Cari dan pinjam buku yang tersedia')
 
 @section('content')
+@if(session('success'))
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="bi bi-check-circle-fill me-2"></i>{{ session('success') }}
+        <button type="button" class="close" data-dismiss="alert" aria-label="Tutup"><span aria-hidden="true">&times;</span></button>
+    </div>
+@endif
+@if(session('error'))
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="bi bi-exclamation-circle-fill me-2"></i>{{ session('error') }}
+        <button type="button" class="close" data-dismiss="alert" aria-label="Tutup"><span aria-hidden="true">&times;</span></button>
+    </div>
+@endif
 <div class="page-header">
     <div>
         <h1>Data Buku</h1>
@@ -72,7 +84,7 @@
                 </thead>
                 <tbody>
                     @forelse($books as $book)
-                    <tr>
+                    <tr @if((int) request('highlight') === (int) $book->id) style="background:#eef2ff;" @endif>
                         <td>
                             <img src="{{ $book->cover_url }}" alt="{{ $book->title }}"
                                 style="width:40px;height:55px;object-fit:cover;border-radius:6px;box-shadow:0 2px 6px rgba(0,0,0,.15);">
@@ -128,7 +140,7 @@
                                         <i class="bi bi-upc-scan"></i>
                                     </button>
                                 @endif
-                                @if($canManageLibrary)<form method="POST" action="{{ route('library.books.destroy', $book) }}" class="d-inline"
+                                @if($canManageLibrary)<form method="POST" action="{{ route('library.books.destroy', $book) }}" class="d-inline" data-loading-text="Menghapus buku..."
                                     onsubmit="return confirm('Hapus buku ini?')">
                                     @csrf @method('DELETE')
                                     <button type="submit" class="btn btn-sm btn-icon btn-outline-danger" title="Hapus">

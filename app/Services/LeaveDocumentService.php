@@ -295,7 +295,7 @@ class LeaveDocumentService
                 'year' => $year,
                 'remaining' => $balance ? $balance->remaining_balance : 0,
                 'used' => $balance ? $balance->used_days : 0,
-                'note' => $this->buildAnnualLeaveNote($balance),
+                'note' => $this->buildAnnualLeaveNote($balance, $leaveRequest, $year),
             ];
         }
 
@@ -525,10 +525,26 @@ class LeaveDocumentService
         return 'Permintaan dan Pemberian ' . $leaveType . ' - ' . $pegawai;
     }
 
-    protected function buildAnnualLeaveNote($balance)
+    protected function buildAnnualLeaveNote($balance, LeaveRequest $leaveRequest = null, $year = null)
     {
         if (!$balance) {
             return '0';
+        }
+
+        $isCurrentAnnualRequest = $leaveRequest
+            && (int) $leaveRequest->leave_type_id === (int) $balance->leave_type_id
+            && (int) $year === (int) optional($leaveRequest->start_date)->year;
+
+        if ($isCurrentAnnualRequest) {
+            $takenDays = (int) ($leaveRequest->approved_days
+                ?: $leaveRequest->requested_days
+                ?: $leaveRequest->workday_count);
+
+            if ($takenDays > 0) {
+                $remainingAfterRequest = max(0, (int) $balance->remaining_balance - $takenDays);
+
+                return sprintf('Diambil %d hari sisa %d', $takenDays, $remainingAfterRequest);
+            }
         }
 
         if ((int) $balance->used_days > 0) {

@@ -4,9 +4,19 @@
 @section('page-subtitle', 'Input data buku koleksi perpustakaan')
 
 @section('content')
+@if($errors->any())
+    <div class="alert alert-danger" role="alert">
+        <div class="font-weight-bold mb-1">Buku belum dapat disimpan.</div>
+        <ul class="mb-0 pl-3">
+            @foreach($errors->all() as $error)
+                <li>{{ $error }}</li>
+            @endforeach
+        </ul>
+    </div>
+@endif
 <div class="row justify-content-center">
     <div class="col-lg-10">
-        <form method="POST" action="{{ route('library.books.store') }}" enctype="multipart/form-data">
+        <form method="POST" action="{{ route('library.books.store') }}" enctype="multipart/form-data" data-loading-text="Menyimpan buku...">
             @csrf
             <div class="row g-3">
                 <div class="col-lg-8">

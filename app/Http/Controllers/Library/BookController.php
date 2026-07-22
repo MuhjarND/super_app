@@ -8,7 +8,9 @@ use App\Library\Book;
 use App\Library\Category;
 use App\Library\Shelf;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Throwable;
 
 class BookController extends Controller
 {
@@ -34,7 +36,11 @@ class BookController extends Controller
         $categories = Category::orderBy('name')->get();
         $shelves    = Shelf::orderBy('name')->get();
 
-        return view('library.books.index', compact('books', 'categories', 'shelves'));
+        return response()
+            ->view('library.books.index', compact('books', 'categories', 'shelves'))
+            ->header('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0')
+            ->header('Pragma', 'no-cache')
+            ->header('Expires', '0');
     }
 
     public function create()
@@ -62,9 +68,13 @@ class BookController extends Controller
             $validated['cover'] = $request->file('cover')->store('library/books', 'public');
         }
 
-        Book::create($validated);
+        $book = DB::transaction(function () use ($validated) {
+            return Book::create($validated);
+        });
 
-        return redirect()->route('library.books.index')->with('success', 'Buku berhasil ditambahkan.');
+        return redirect()
+            ->route('library.books.index', ['book_refresh' => now()->timestamp, 'highlight' => $book->id])
+            ->with('success', 'Buku berhasil ditambahkan.');
     }
 
     public function show(Book $book)
@@ -112,12 +122,36 @@ class BookController extends Controller
             return back()->with('error', 'Tidak dapat menghapus buku yang sedang dipinjam.');
         }
 
-        if ($book->cover) {
-            Storage::disk('public')->delete($book->cover);
+        $cover = $book->cover;
+
+        try {
+            DB::transaction(function () use ($book) {
+                $lockedBook = Book::query()->lockForUpdate()->findOrFail($book->getKey());
+
+                if ($lockedBook->copies()->where('status', 'dipinjam')->exists()) {
+                    throw new \RuntimeException('Buku sedang dipinjam dan tidak dapat dihapus.');
+                }
+
+                $lockedBook->delete();
+            });
+        } catch (Throwable $exception) {
+            report($exception);
+
+            return back()->with('error', $exception->getMessage() === 'Buku sedang dipinjam dan tidak dapat dihapus.'
+                ? $exception->getMessage()
+                : 'Buku gagal dihapus. Silakan coba kembali.');
         }
 
-        $book->delete();
+        if ($cover) {
+            Storage::disk('public')->delete($cover);
+        }
 
-        return redirect()->route('library.books.index')->with('success', 'Buku berhasil dihapus.');
+        if (Book::query()->whereKey($book->getKey())->exists()) {
+            return back()->with('error', 'Buku belum terhapus. Silakan coba kembali.');
+        }
+
+        return redirect()
+            ->route('library.books.index', ['book_refresh' => now()->timestamp])
+            ->with('success', 'Buku berhasil dihapus.');
     }
 }
