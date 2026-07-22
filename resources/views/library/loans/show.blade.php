@@ -58,9 +58,11 @@
                         <div style="font-size:12.5px;color:#64748b;">{{ $loan->member->class_position ?? '' }}</div>
                     </div>
                 </div>
+                @if($canManageLibrary)
                 <a href="{{ route('library.members.show', $loan->member) }}" class="btn btn-outline-primary btn-sm w-100 mt-3">
                     <i class="bi bi-arrow-right me-1"></i> Lihat Profil Anggota
                 </a>
+                @endif
             </div>
         </div>
     </div>

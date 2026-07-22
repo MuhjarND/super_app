@@ -108,6 +108,15 @@ class BookCopyController extends Controller
             return response()->json(['found' => false, 'message' => 'Kode eksemplar tidak ditemukan.']);
         }
 
+        $loan = null;
+        if (auth()->user()->canManageLibraryModule() && $copy->activeLoanItem) {
+            $loan = [
+                'member_name' => $copy->activeLoanItem->loan->member->name,
+                'member_number' => $copy->activeLoanItem->loan->member->member_number,
+                'due_date' => $copy->activeLoanItem->loan->due_date->format('d/m/Y'),
+            ];
+        }
+
         return response()->json([
             'found'  => true,
             'copy'   => [
@@ -122,11 +131,7 @@ class BookCopyController extends Controller
                     'shelf'    => $copy->book->shelf->name ?? '-',
                     'cover_url' => $copy->book->cover_url,
                 ],
-                'loan' => $copy->activeLoanItem ? [
-                    'member_name'    => $copy->activeLoanItem->loan->member->name,
-                    'member_number'  => $copy->activeLoanItem->loan->member->member_number,
-                    'due_date'       => $copy->activeLoanItem->loan->due_date->format('d/m/Y'),
-                ] : null,
+                'loan' => $loan,
             ],
         ]);
     }

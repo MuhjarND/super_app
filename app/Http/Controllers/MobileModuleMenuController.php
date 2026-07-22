@@ -161,22 +161,29 @@ class MobileModuleMenuController extends Controller
             ],
             'perpustakaan' => [
                 'title' => 'Perpustakaan',
-                'subtitle' => 'Koleksi, anggota, sirkulasi, barcode, dan laporan.',
+                'subtitle' => ($isSuperAdmin || $user->canManageLibraryModule())
+                    ? 'Kelola koleksi dan sirkulasi perpustakaan.'
+                    : 'Lihat koleksi dan pinjam buku.',
                 'icon' => 'fas fa-book-reader',
                 'tone' => 'indigo',
-                'items' => ($isSuperAdmin || $user->canAccessLibraryModule()) ? array_values(array_filter([
-                    $this->item('Dashboard', route('library.index'), 'fas fa-chart-pie', 'indigo'),
-                    $this->item('Data Buku', route('library.books.index'), 'fas fa-book', 'blue'),
-                    $this->item('Eksemplar', route('library.book-copies.index'), 'fas fa-copy', 'slate'),
-                    $this->item('Anggota', route('library.members.index'), 'fas fa-users', 'teal'),
-                    $this->item('Peminjaman', route('library.loans.index'), 'fas fa-exchange-alt', 'orange'),
-                    $this->item('Pengembalian', route('library.returns.index'), 'fas fa-undo-alt', 'green'),
-                    $this->item('Denda', route('library.fines.index'), 'fas fa-coins', 'red'),
-                    $this->item('Barcode', route('library.barcode.index'), 'fas fa-barcode', 'slate'),
-                    $this->item('Scan Kamera', route('library.scan.index'), 'fas fa-camera', 'blue'),
-                    $this->item('Laporan', route('library.reports.index'), 'fas fa-file-alt', 'red'),
-                    ($isSuperAdmin || $user->canManageLibraryModule()) ? $this->item('Pengaturan', route('library.settings.index'), 'fas fa-cog', 'slate') : null,
-                ])) : [],
+                'items' => ($isSuperAdmin || $user->canAccessLibraryModule())
+                    ? (($isSuperAdmin || $user->canManageLibraryModule()) ? [
+                        $this->item('Dashboard', route('library.index'), 'fas fa-chart-pie', 'indigo'),
+                        $this->item('Data Buku', route('library.books.index'), 'fas fa-book', 'blue'),
+                        $this->item('Eksemplar', route('library.book-copies.index'), 'fas fa-copy', 'slate'),
+                        $this->item('Anggota', route('library.members.index'), 'fas fa-users', 'teal'),
+                        $this->item('Peminjaman', route('library.loans.index'), 'fas fa-exchange-alt', 'orange'),
+                        $this->item('Pengembalian', route('library.returns.index'), 'fas fa-undo-alt', 'green'),
+                        $this->item('Denda', route('library.fines.index'), 'fas fa-coins', 'red'),
+                        $this->item('Barcode', route('library.barcode.index'), 'fas fa-barcode', 'slate'),
+                        $this->item('Scan Kamera', route('library.scan.index'), 'fas fa-camera', 'blue'),
+                        $this->item('Laporan', route('library.reports.index'), 'fas fa-file-alt', 'red'),
+                        $this->item('Pengaturan', route('library.settings.index'), 'fas fa-cog', 'slate'),
+                    ] : [
+                        $this->item('Daftar Buku', route('library.books.index'), 'fas fa-book', 'blue'),
+                        $this->item('Peminjaman Saya', route('library.loans.index'), 'fas fa-exchange-alt', 'orange'),
+                    ])
+                    : [],
             ],
             'zi' => [
                 'title' => 'Progress ZI',

@@ -351,40 +351,12 @@ Route::middleware(['auth'])->group(function () {
 
         Route::get('/buku', 'Library\BookController@index')->name('books.index');
         Route::get('/buku/{book}', 'Library\BookController@show')->where('book', '[0-9]+')->name('books.show');
-        Route::get('/eksemplar', 'Library\BookCopyController@index')->name('book-copies.index');
         Route::get('/eksemplar/lookup/data', 'Library\BookCopyController@lookup')->name('book-copies.lookup');
 
-        Route::get('/barcode', 'Library\BarcodeController@index')->name('barcode.index');
-        Route::get('/barcode/print', 'Library\BarcodeController@print')->name('barcode.print');
-        Route::get('/barcode/{bookCopy}', 'Library\BarcodeController@show')->name('barcode.show');
-        Route::get('/barcode/{bookCopy}/svg', 'Library\BarcodeController@generateSvg')->name('barcode.svg');
-
-        Route::get('/scan', 'Library\ScanController@index')->name('scan.index');
-        Route::post('/scan/lookup', 'Library\ScanController@lookup')->name('scan.lookup');
-
-        Route::get('/anggota/search/api', 'Library\MemberController@search')->name('members.search');
-        Route::get('/anggota', 'Library\MemberController@index')->name('members.index');
-        Route::get('/anggota/{member}', 'Library\MemberController@show')->where('member', '[0-9]+')->name('members.show');
-
         Route::get('/peminjaman', 'Library\LoanController@index')->name('loans.index');
+        Route::get('/peminjaman/create', 'Library\LoanController@create')->name('loans.create');
+        Route::post('/peminjaman', 'Library\LoanController@store')->name('loans.store');
         Route::get('/peminjaman/{loan}', 'Library\LoanController@show')->where('loan', '[0-9]+')->name('loans.show');
-
-        Route::get('/pengembalian/search/loan', 'Library\ReturnController@searchLoan')->name('returns.search-loan');
-        Route::get('/pengembalian', 'Library\ReturnController@index')->name('returns.index');
-        Route::get('/pengembalian/{return}', 'Library\ReturnController@show')->where('return', '[0-9]+')->name('returns.show');
-
-        Route::get('/denda', 'Library\FineController@index')->name('fines.index');
-        Route::get('/denda/{fine}', 'Library\FineController@show')->where('fine', '[0-9]+')->name('fines.show');
-
-        Route::prefix('laporan')->name('reports.')->group(function () {
-            Route::get('/', 'Library\ReportController@index')->name('index');
-            Route::get('/buku', 'Library\ReportController@books')->name('books');
-            Route::get('/anggota', 'Library\ReportController@members')->name('members');
-            Route::get('/peminjaman', 'Library\ReportController@loans')->name('loans');
-            Route::get('/pengembalian', 'Library\ReportController@returns')->name('returns');
-            Route::get('/keterlambatan', 'Library\ReportController@lates')->name('lates');
-            Route::get('/denda', 'Library\ReportController@fines')->name('fines');
-        });
 
         Route::middleware('library.manage')->group(function () {
             Route::get('/buku/create', 'Library\BookController@create')->name('books.create');
@@ -393,27 +365,52 @@ Route::middleware(['auth'])->group(function () {
             Route::put('/buku/{book}', 'Library\BookController@update')->name('books.update');
             Route::delete('/buku/{book}', 'Library\BookController@destroy')->name('books.destroy');
 
+            Route::get('/eksemplar', 'Library\BookCopyController@index')->name('book-copies.index');
             Route::get('/eksemplar/create', 'Library\BookCopyController@create')->name('book-copies.create');
             Route::post('/eksemplar', 'Library\BookCopyController@store')->name('book-copies.store');
             Route::get('/eksemplar/{bookCopy}/edit', 'Library\BookCopyController@edit')->name('book-copies.edit');
             Route::put('/eksemplar/{bookCopy}', 'Library\BookCopyController@update')->name('book-copies.update');
             Route::delete('/eksemplar/{bookCopy}', 'Library\BookCopyController@destroy')->name('book-copies.destroy');
 
+            Route::get('/barcode', 'Library\BarcodeController@index')->name('barcode.index');
+            Route::get('/barcode/print', 'Library\BarcodeController@print')->name('barcode.print');
+            Route::get('/barcode/{bookCopy}', 'Library\BarcodeController@show')->name('barcode.show');
+            Route::get('/barcode/{bookCopy}/svg', 'Library\BarcodeController@generateSvg')->name('barcode.svg');
+
+            Route::get('/scan', 'Library\ScanController@index')->name('scan.index');
+            Route::post('/scan/lookup', 'Library\ScanController@lookup')->name('scan.lookup');
+
+            Route::get('/anggota/search/api', 'Library\MemberController@search')->name('members.search');
+            Route::get('/anggota', 'Library\MemberController@index')->name('members.index');
+            Route::get('/anggota/{member}', 'Library\MemberController@show')->where('member', '[0-9]+')->name('members.show');
             Route::get('/anggota/create', 'Library\MemberController@create')->name('members.create');
             Route::post('/anggota', 'Library\MemberController@store')->name('members.store');
             Route::get('/anggota/{member}/edit', 'Library\MemberController@edit')->name('members.edit');
             Route::put('/anggota/{member}', 'Library\MemberController@update')->name('members.update');
             Route::delete('/anggota/{member}', 'Library\MemberController@destroy')->name('members.destroy');
 
-            Route::get('/peminjaman/create', 'Library\LoanController@create')->name('loans.create');
-            Route::post('/peminjaman', 'Library\LoanController@store')->name('loans.store');
             Route::delete('/peminjaman/{loan}', 'Library\LoanController@destroy')->name('loans.destroy');
 
+            Route::get('/pengembalian/search/loan', 'Library\ReturnController@searchLoan')->name('returns.search-loan');
+            Route::get('/pengembalian', 'Library\ReturnController@index')->name('returns.index');
+            Route::get('/pengembalian/{return}', 'Library\ReturnController@show')->where('return', '[0-9]+')->name('returns.show');
             Route::get('/pengembalian/create', 'Library\ReturnController@create')->name('returns.create');
             Route::post('/pengembalian', 'Library\ReturnController@store')->name('returns.store');
 
+            Route::get('/denda', 'Library\FineController@index')->name('fines.index');
+            Route::get('/denda/{fine}', 'Library\FineController@show')->where('fine', '[0-9]+')->name('fines.show');
             Route::post('/denda/{fine}/pay', 'Library\FineController@pay')->name('fines.pay');
             Route::post('/denda/pay-all', 'Library\FineController@payAll')->name('fines.pay-all');
+
+            Route::prefix('laporan')->name('reports.')->group(function () {
+                Route::get('/', 'Library\ReportController@index')->name('index');
+                Route::get('/buku', 'Library\ReportController@books')->name('books');
+                Route::get('/anggota', 'Library\ReportController@members')->name('members');
+                Route::get('/peminjaman', 'Library\ReportController@loans')->name('loans');
+                Route::get('/pengembalian', 'Library\ReportController@returns')->name('returns');
+                Route::get('/keterlambatan', 'Library\ReportController@lates')->name('lates');
+                Route::get('/denda', 'Library\ReportController@fines')->name('fines');
+            });
 
             Route::get('/pengaturan', 'Library\SettingController@index')->name('settings.index');
             Route::post('/pengaturan', 'Library\SettingController@update')->name('settings.update');

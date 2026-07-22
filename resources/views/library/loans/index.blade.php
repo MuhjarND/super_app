@@ -1,24 +1,24 @@
 @extends('layouts.app')
-@section('title', 'Data Peminjaman')
+@section('title', $canManageLibrary ? 'Data Peminjaman' : 'Peminjaman Saya')
 @section('page-title', 'Peminjaman Buku')
-@section('page-subtitle', 'Kelola transaksi peminjaman')
+@section('page-subtitle', $canManageLibrary ? 'Kelola transaksi peminjaman' : 'Riwayat buku yang Anda pinjam')
 
 @section('content')
 <div class="page-header">
     <div>
-        <h1>Data Peminjaman</h1>
+        <h1>{{ $canManageLibrary ? 'Data Peminjaman' : 'Peminjaman Saya' }}</h1>
         <p>Total {{ $loans->total() }} transaksi</p>
     </div>
-    @if($canManageLibrary)<a href="{{ route('library.loans.create') }}" class="btn btn-primary">
+    <a href="{{ route('library.loans.create') }}" class="btn btn-primary">
         <i class="bi bi-plus-lg me-1"></i> Pinjam Buku
-    </a>@endif
+    </a>
 </div>
 
 <div class="card mb-3">
     <div class="card-body py-3">
         <form method="GET" class="row g-2 align-items-end">
             <div class="col-md-4">
-                <input type="text" name="search" class="form-control" placeholder="No. pinjam, nama anggota..."
+                <input type="text" name="search" class="form-control" placeholder="{{ $canManageLibrary ? 'No. pinjam, nama anggota...' : 'Cari nomor peminjaman...' }}"
                     value="{{ request('search') }}">
             </div>
             <div class="col-md-2">

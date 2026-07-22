@@ -84,4 +84,15 @@ class Loan extends Model
         ];
         return $badges[$this->status] ?? 'secondary';
     }
+
+    public function isVisibleTo(User $user)
+    {
+        if ($user->canManageLibraryModule()) {
+            return true;
+        }
+
+        $member = $this->relationLoaded('member') ? $this->member : $this->member()->first();
+
+        return $member && (int) $member->user_id === (int) $user->id;
+    }
 }

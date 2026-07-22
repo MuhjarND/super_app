@@ -1,7 +1,7 @@
 @extends('layouts.app')
 @section('title', 'Data Buku')
 @section('page-title', 'Data Buku')
-@section('page-subtitle', 'Manajemen koleksi buku perpustakaan')
+@section('page-subtitle', $canManageLibrary ? 'Manajemen koleksi buku perpustakaan' : 'Cari dan pinjam buku yang tersedia')
 
 @section('content')
 <div class="page-header">
@@ -103,7 +103,10 @@
                             </span>
                         </td>
                         <td>
-                            @php $firstCopy = $book->copies->first(); @endphp
+                            @php
+                                $firstCopy = $book->copies->first();
+                                $availableCopy = $book->copies->firstWhere('status', 'tersedia');
+                            @endphp
                             <div class="d-flex gap-1">
                                 <a href="{{ route('library.books.show', $book) }}" class="btn btn-sm btn-icon btn-outline-info" title="Detail">
                                     <i class="bi bi-eye"></i>
@@ -111,11 +114,16 @@
                                 @if($canManageLibrary)<a href="{{ route('library.books.edit', $book) }}" class="btn btn-sm btn-icon btn-outline-warning" title="Edit">
                                     <i class="bi bi-pencil"></i>
                                 </a>@endif
-                                @if($firstCopy)
+                                @if($availableCopy)
+                                    <a href="{{ route('library.loans.create', ['copy_code' => $availableCopy->copy_code]) }}" class="btn btn-sm btn-icon btn-primary" title="Pinjam buku">
+                                        <i class="bi bi-book"></i>
+                                    </a>
+                                @endif
+                                @if($canManageLibrary && $firstCopy)
                                     <a href="{{ route('library.barcode.show', $firstCopy) }}" class="btn btn-sm btn-icon btn-outline-secondary" title="Barcode">
                                         <i class="bi bi-upc-scan"></i>
                                     </a>
-                                @else
+                                @elseif($canManageLibrary)
                                     <button type="button" class="btn btn-sm btn-icon btn-outline-secondary" title="Tambahkan eksemplar untuk membuat barcode" disabled>
                                         <i class="bi bi-upc-scan"></i>
                                     </button>

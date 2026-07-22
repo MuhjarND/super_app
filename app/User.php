@@ -911,14 +911,7 @@ class User extends Authenticatable
 
     public function canAccessLibraryModule()
     {
-        if ($this->isSuperAdmin() || $this->hasRole('operator_perpustakaan')) {
-            return true;
-        }
-
-        return $this->hasAnyRole([
-            'sekretaris', 'panitera', 'kabag', 'kasubag', 'panmud',
-            'pegawai', 'peserta', 'operator', 'notulis', 'protokoler',
-        ]);
+        return true;
     }
 
     public function canManageLibraryModule()
@@ -1532,5 +1525,10 @@ class User extends Authenticatable
     public function supplyPickups()
     {
         return $this->hasMany(SupplyPickup::class, 'user_id');
+    }
+
+    public function libraryMember()
+    {
+        return $this->hasOne(\App\Library\Member::class, 'user_id');
     }
 }

@@ -3603,17 +3603,21 @@
                                     <i class="fas fa-chevron-down section-chevron"></i>
                                 </button>
                                 <ul class="nav nav-pills flex-column nav-section-menu">
-                                    <li class="nav-item nav-item-sub"><a href="{{ route('library.index') }}" class="nav-link {{ request()->routeIs('library.index') ? 'active' : '' }}"><i class="nav-icon fas fa-chart-pie"></i><p>Dashboard</p></a></li>
-                                    <li class="nav-item nav-item-sub"><a href="{{ route('library.books.index') }}" class="nav-link {{ request()->routeIs('library.books.*') ? 'active' : '' }}"><i class="nav-icon fas fa-book"></i><p>Data Buku</p></a></li>
-                                    <li class="nav-item nav-item-sub"><a href="{{ route('library.book-copies.index') }}" class="nav-link {{ request()->routeIs('library.book-copies.*') ? 'active' : '' }}"><i class="nav-icon fas fa-copy"></i><p>Eksemplar</p></a></li>
-                                    <li class="nav-item nav-item-sub"><a href="{{ route('library.members.index') }}" class="nav-link {{ request()->routeIs('library.members.*') ? 'active' : '' }}"><i class="nav-icon fas fa-users"></i><p>Anggota</p></a></li>
-                                    <li class="nav-item nav-item-sub"><a href="{{ route('library.loans.index') }}" class="nav-link {{ request()->routeIs('library.loans.*') ? 'active' : '' }}"><i class="nav-icon fas fa-exchange-alt"></i><p>Peminjaman</p></a></li>
-                                    <li class="nav-item nav-item-sub"><a href="{{ route('library.returns.index') }}" class="nav-link {{ request()->routeIs('library.returns.*') ? 'active' : '' }}"><i class="nav-icon fas fa-undo-alt"></i><p>Pengembalian</p></a></li>
-                                    <li class="nav-item nav-item-sub"><a href="{{ route('library.fines.index') }}" class="nav-link {{ request()->routeIs('library.fines.*') ? 'active' : '' }}"><i class="nav-icon fas fa-coins"></i><p>Denda</p></a></li>
-                                    <li class="nav-item nav-item-sub"><a href="{{ route('library.barcode.index') }}" class="nav-link {{ request()->routeIs('library.barcode.*') ? 'active' : '' }}"><i class="nav-icon fas fa-barcode"></i><p>Barcode</p></a></li>
-                                    <li class="nav-item nav-item-sub"><a href="{{ route('library.scan.index') }}" class="nav-link {{ request()->routeIs('library.scan.*') ? 'active' : '' }}"><i class="nav-icon fas fa-camera"></i><p>Scan Kamera</p></a></li>
-                                    <li class="nav-item nav-item-sub"><a href="{{ route('library.reports.index') }}" class="nav-link {{ request()->routeIs('library.reports.*') ? 'active' : '' }}"><i class="nav-icon fas fa-file-alt"></i><p>Laporan</p></a></li>
                                     @if($isSidebarSuperAdmin || $sidebarUser->canManageLibraryModule())
+                                        <li class="nav-item nav-item-sub"><a href="{{ route('library.index') }}" class="nav-link {{ request()->routeIs('library.index') ? 'active' : '' }}"><i class="nav-icon fas fa-chart-pie"></i><p>Dashboard</p></a></li>
+                                    @endif
+                                    <li class="nav-item nav-item-sub"><a href="{{ route('library.books.index') }}" class="nav-link {{ request()->routeIs('library.books.*') ? 'active' : '' }}"><i class="nav-icon fas fa-book"></i><p>Data Buku</p></a></li>
+                                    @if($isSidebarSuperAdmin || $sidebarUser->canManageLibraryModule())
+                                        <li class="nav-item nav-item-sub"><a href="{{ route('library.book-copies.index') }}" class="nav-link {{ request()->routeIs('library.book-copies.*') ? 'active' : '' }}"><i class="nav-icon fas fa-copy"></i><p>Eksemplar</p></a></li>
+                                        <li class="nav-item nav-item-sub"><a href="{{ route('library.members.index') }}" class="nav-link {{ request()->routeIs('library.members.*') ? 'active' : '' }}"><i class="nav-icon fas fa-users"></i><p>Anggota</p></a></li>
+                                    @endif
+                                    <li class="nav-item nav-item-sub"><a href="{{ route('library.loans.index') }}" class="nav-link {{ request()->routeIs('library.loans.*') ? 'active' : '' }}"><i class="nav-icon fas fa-exchange-alt"></i><p>{{ ($isSidebarSuperAdmin || $sidebarUser->canManageLibraryModule()) ? 'Peminjaman' : 'Peminjaman Saya' }}</p></a></li>
+                                    @if($isSidebarSuperAdmin || $sidebarUser->canManageLibraryModule())
+                                        <li class="nav-item nav-item-sub"><a href="{{ route('library.returns.index') }}" class="nav-link {{ request()->routeIs('library.returns.*') ? 'active' : '' }}"><i class="nav-icon fas fa-undo-alt"></i><p>Pengembalian</p></a></li>
+                                        <li class="nav-item nav-item-sub"><a href="{{ route('library.fines.index') }}" class="nav-link {{ request()->routeIs('library.fines.*') ? 'active' : '' }}"><i class="nav-icon fas fa-coins"></i><p>Denda</p></a></li>
+                                        <li class="nav-item nav-item-sub"><a href="{{ route('library.barcode.index') }}" class="nav-link {{ request()->routeIs('library.barcode.*') ? 'active' : '' }}"><i class="nav-icon fas fa-barcode"></i><p>Barcode</p></a></li>
+                                        <li class="nav-item nav-item-sub"><a href="{{ route('library.scan.index') }}" class="nav-link {{ request()->routeIs('library.scan.*') ? 'active' : '' }}"><i class="nav-icon fas fa-camera"></i><p>Scan Kamera</p></a></li>
+                                        <li class="nav-item nav-item-sub"><a href="{{ route('library.reports.index') }}" class="nav-link {{ request()->routeIs('library.reports.*') ? 'active' : '' }}"><i class="nav-icon fas fa-file-alt"></i><p>Laporan</p></a></li>
                                         <li class="nav-item nav-item-sub"><a href="{{ route('library.settings.index') }}" class="nav-link {{ request()->routeIs('library.settings.*') ? 'active' : '' }}"><i class="nav-icon fas fa-cog"></i><p>Pengaturan</p></a></li>
                                     @endif
                                 </ul>

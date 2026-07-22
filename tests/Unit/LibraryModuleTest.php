@@ -39,7 +39,7 @@ class LibraryModuleTest extends TestCase
         }
     }
 
-    public function test_operator_can_manage_and_employee_can_only_monitor()
+    public function test_operator_can_manage_and_other_users_can_only_borrow()
     {
         $operator = $this->userWithRole('operator_perpustakaan');
         $employee = $this->userWithRole('pegawai');
@@ -48,6 +48,40 @@ class LibraryModuleTest extends TestCase
         $this->assertTrue($operator->canManageLibraryModule());
         $this->assertTrue($employee->canAccessLibraryModule());
         $this->assertFalse($employee->canManageLibraryModule());
+    }
+
+    public function test_non_operator_can_only_use_catalog_and_loan_routes()
+    {
+        $routes = app('router')->getRoutes();
+
+        $this->assertNotContains('library.manage', $routes->getByName('library.books.index')->gatherMiddleware());
+        $this->assertNotContains('library.manage', $routes->getByName('library.books.show')->gatherMiddleware());
+        $this->assertNotContains('library.manage', $routes->getByName('library.loans.index')->gatherMiddleware());
+        $this->assertNotContains('library.manage', $routes->getByName('library.loans.store')->gatherMiddleware());
+
+        $this->assertContains('library.manage', $routes->getByName('library.members.index')->gatherMiddleware());
+        $this->assertContains('library.manage', $routes->getByName('library.returns.index')->gatherMiddleware());
+        $this->assertContains('library.manage', $routes->getByName('library.reports.index')->gatherMiddleware());
+    }
+
+    public function test_regular_user_can_only_view_their_own_loan()
+    {
+        $owner = $this->userWithRole('pegawai');
+        $owner->id = 10;
+        $other = $this->userWithRole('pegawai');
+        $other->id = 11;
+        $operator = $this->userWithRole('operator_perpustakaan');
+        $operator->id = 12;
+
+        $member = new Member();
+        $member->user_id = $owner->id;
+
+        $loan = new Loan();
+        $loan->setRelation('member', $member);
+
+        $this->assertTrue($loan->isVisibleTo($owner));
+        $this->assertFalse($loan->isVisibleTo($other));
+        $this->assertTrue($loan->isVisibleTo($operator));
     }
 
     public function test_barcode_generator_is_available()

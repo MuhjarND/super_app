@@ -1,7 +1,7 @@
 @extends('layouts.app')
 @section('title', 'Peminjaman Baru')
-@section('page-title', 'Transaksi Peminjaman Baru')
-@section('page-subtitle', 'Input data peminjaman buku')
+@section('page-title', $canManageLibrary ? 'Transaksi Peminjaman Baru' : 'Pinjam Buku')
+@section('page-subtitle', $canManageLibrary ? 'Input data peminjaman buku' : 'Pilih buku yang ingin dipinjam')
 
 @push('styles')
 <style>
@@ -37,8 +37,9 @@
                 <!-- Pilih Anggota -->
                 <div class="col-lg-5">
                     <div class="card">
-                        <div class="card-header"><i class="bi bi-person-fill me-2"></i>Pilih Anggota</div>
+                        <div class="card-header"><i class="bi bi-person-fill me-2"></i>{{ $canManageLibrary ? 'Pilih Anggota' : 'Peminjam' }}</div>
                         <div class="card-body">
+                            @if($canManageLibrary)
                             <div id="memberSearch" class="position-relative">
                                 <input type="text" id="memberSearchInput" class="form-control"
                                     placeholder="Cari nama atau nomor anggota...">
@@ -61,12 +62,27 @@
                                     </button>
                                 </div>
                             </div>
+                            @else
+                                <input type="hidden" name="member_id" id="selectedMemberId" value="{{ $member->id }}">
+                                <div class="member-card selected">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <div class="avatar-text-sm bg-primary bg-opacity-10 text-primary" style="font-weight:700;font-size:13px;">
+                                            {{ strtoupper(substr($member->name, 0, 1)) }}
+                                        </div>
+                                        <div>
+                                            <div style="font-weight:600;font-size:14px;">{{ $member->name }}</div>
+                                            <small class="text-muted">{{ $member->member_number }}</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            @endif
                         </div>
                     </div>
 
                     <div class="card mt-3">
                         <div class="card-header"><i class="bi bi-calendar-date me-2"></i>Tanggal</div>
                         <div class="card-body">
+                            @if($canManageLibrary)
                             <div class="mb-3">
                                 <label class="form-label">Tanggal Pinjam <span class="text-danger">*</span></label>
                                 <input type="date" name="loan_date" id="loanDate" class="form-control"
@@ -78,6 +94,18 @@
                                     value="{{ old('due_date', date('Y-m-d', strtotime('+' . $loanDays . ' days'))) }}" required>
                                 <small class="text-muted">Default {{ $loanDays }} hari dari tanggal pinjam</small>
                             </div>
+                            @else
+                                <div class="row g-2 mb-3">
+                                    <div class="col-6">
+                                        <small class="text-muted d-block">Tanggal Pinjam</small>
+                                        <strong>{{ now()->translatedFormat('d M Y') }}</strong>
+                                    </div>
+                                    <div class="col-6">
+                                        <small class="text-muted d-block">Jatuh Tempo</small>
+                                        <strong>{{ now()->addDays($loanDays)->translatedFormat('d M Y') }}</strong>
+                                    </div>
+                                </div>
+                            @endif
                             <div>
                                 <label class="form-label">Catatan</label>
                                 <textarea name="note" class="form-control" rows="2" placeholder="Catatan tambahan...">{{ old('note') }}</textarea>
@@ -102,15 +130,15 @@
                                 <button class="btn btn-primary" type="button" onclick="addBookByCode()">
                                     <i class="bi bi-plus-lg me-1"></i>Tambah
                                 </button>
-                                <a href="{{ route('library.scan.index') }}" class="btn btn-outline-secondary" target="_blank" title="Buka Scanner Kamera">
+                                @if($canManageLibrary)<a href="{{ route('library.scan.index') }}" class="btn btn-outline-secondary" target="_blank" title="Buka Scanner Kamera">
                                     <i class="bi bi-camera"></i>
-                                </a>
+                                </a>@endif
                             </div>
 
                             <div id="bookList">
                                 <div id="noBookPlaceholder" class="text-center py-4" style="color:#94a3b8;border:2px dashed #e2e8f0;border-radius:10px;">
                                     <i class="bi bi-book" style="font-size:32px;display:block;margin-bottom:8px;opacity:.4;"></i>
-                                    <small>Belum ada buku dipilih.<br>Scan barcode atau masukkan kode eksemplar.</small>
+                                    <small>Belum ada buku dipilih.<br>{{ $canManageLibrary ? 'Scan barcode atau masukkan kode eksemplar.' : 'Pilih dari daftar buku atau masukkan kode buku.' }}</small>
                                 </div>
                             </div>
 
@@ -132,7 +160,7 @@
                             @endif
                             <div class="d-flex gap-2">
                                 <button type="submit" class="btn btn-primary flex-fill" id="submitBtn" disabled>
-                                    <i class="bi bi-save me-1"></i> Simpan Peminjaman
+                                    <i class="bi bi-book me-1"></i> {{ $canManageLibrary ? 'Simpan Peminjaman' : 'Pinjam Sekarang' }}
                                 </button>
                                 <a href="{{ route('library.loans.index') }}" class="btn btn-outline-secondary">
                                     <i class="bi bi-arrow-left me-1"></i> Batal
@@ -153,6 +181,7 @@ const selectedBooks = {};
 const loanDays = {{ $loanDays }};
 const maxBooks = {{ $maxBooks }};
 
+@if($canManageLibrary)
 // ===== MEMBER SEARCH =====
 let memberSearchTimer;
 document.getElementById('memberSearchInput').addEventListener('input', function() {
@@ -207,6 +236,7 @@ function hideDropdown() {
 document.addEventListener('click', e => {
     if (!document.getElementById('memberSearch').contains(e.target)) hideDropdown();
 });
+@endif
 
 // ===== BOOK SEARCH =====
 function addBookByCode() {

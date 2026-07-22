@@ -13,6 +13,12 @@
                 <h5 class="fw-700" style="font-weight:700;">{{ $book->title }}</h5>
                 <p class="text-muted mb-3">{{ $book->author }}</p>
                 <div class="d-flex gap-2 justify-content-center flex-wrap">
+                    @php $availableCopy = $book->copies->firstWhere('status', 'tersedia'); @endphp
+                    @if($availableCopy)
+                    <a href="{{ route('library.loans.create', ['copy_code' => $availableCopy->copy_code]) }}" class="btn btn-primary btn-sm">
+                        <i class="bi bi-book me-1"></i> Pinjam Buku
+                    </a>
+                    @endif
                     @if($canManageLibrary)<a href="{{ route('library.books.edit', $book) }}" class="btn btn-warning btn-sm">
                         <i class="bi bi-pencil me-1"></i> Edit
                     </a>
@@ -77,8 +83,10 @@
                         <tr>
                             <th>Kode Eksemplar</th>
                             <th>Status</th>
-                            <th>Peminjam Saat Ini</th>
-                            <th>Barcode</th>
+                            @if($canManageLibrary)
+                                <th>Peminjam Saat Ini</th>
+                                <th>Barcode</th>
+                            @endif
                             <th>Aksi</th>
                         </tr>
                     </thead>
@@ -91,6 +99,7 @@
                                     {{ ucfirst($copy->status) }}
                                 </span>
                             </td>
+                            @if($canManageLibrary)
                             <td style="font-size:13px;">
                                 @if($copy->activeLoanItem)
                                     <div>{{ $copy->activeLoanItem->loan->member->name }}</div>
@@ -104,7 +113,13 @@
                                     <i class="bi bi-upc-scan"></i>
                                 </a>
                             </td>
+                            @endif
                             <td>
+                                @if(!$canManageLibrary && $copy->status === 'tersedia')
+                                    <a href="{{ route('library.loans.create', ['copy_code' => $copy->copy_code]) }}" class="btn btn-sm btn-primary">
+                                        <i class="bi bi-book me-1"></i> Pinjam
+                                    </a>
+                                @endif
                                 @if($canManageLibrary)<a href="{{ route('library.book-copies.edit', $copy) }}" class="btn btn-sm btn-icon btn-outline-warning">
                                     <i class="bi bi-pencil"></i>
                                 </a>
@@ -119,7 +134,7 @@
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="5" class="text-center py-4 text-muted">Belum ada eksemplar</td>
+                            <td colspan="{{ $canManageLibrary ? 5 : 3 }}" class="text-center py-4 text-muted">Belum ada eksemplar</td>
                         </tr>
                         @endforelse
                     </tbody>

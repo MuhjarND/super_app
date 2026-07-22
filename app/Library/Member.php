@@ -2,13 +2,14 @@
 
 namespace App\Library;
 
+use App\User;
 use Illuminate\Database\Eloquent\Model;
 
 class Member extends Model
 {
     protected $table = 'library_members';
     protected $fillable = [
-        'member_number', 'name', 'gender', 'class_position',
+        'user_id', 'member_number', 'name', 'gender', 'class_position',
         'address', 'phone', 'email', 'photo', 'status', 'valid_until'
     ];
 
@@ -19,6 +20,11 @@ class Member extends Model
     public function loans()
     {
         return $this->hasMany(Loan::class);
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
     }
 
     public function fines()

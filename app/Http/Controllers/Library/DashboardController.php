@@ -17,6 +17,10 @@ class DashboardController extends Controller
 {
     public function index()
     {
+        if (!auth()->user()->canManageLibraryModule()) {
+            return redirect()->route('library.books.index');
+        }
+
         $totalBooks   = Book::count();
         $totalCopies  = BookCopy::count();
         $totalMembers = Member::count();
