@@ -82,9 +82,10 @@ class UserManagementController extends Controller
     public function store(Request $request)
     {
         $data = $this->validateRequest($request);
+        $employmentPeriod = $this->buildEmploymentPeriodPayload($data);
 
-        DB::transaction(function () use ($data, $request) {
-            $user = User::create([
+        DB::transaction(function () use ($data, $request, $employmentPeriod) {
+            $user = User::create(array_merge([
                 'name' => $data['name'],
                 'email' => $data['email'],
                 'password' => Hash::make($data['password']),
@@ -94,12 +95,11 @@ class UserManagementController extends Controller
                 'hirarki' => $data['hirarki'] ?? 999,
                 'nip' => $data['nip'] ?? null,
                 'no_hp' => $data['no_hp'] ?? null,
-                'tmt_pns' => $data['tmt_pns'] ?? null,
                 'golongan_ruang' => $data['golongan_ruang'] ?? null,
                 'satuan_kerja' => $data['satuan_kerja'] ?? null,
                 'atasan_langsung_id' => $data['atasan_langsung_id'] ?? null,
                 'pejabat_berwenang_id' => $data['pejabat_berwenang_id'] ?? null,
-            ]);
+            ], $employmentPeriod));
 
             $this->syncProfilePhoto($request, $user);
             $user->roles()->sync($data['role_ids']);
@@ -117,8 +117,9 @@ class UserManagementController extends Controller
     public function update(Request $request, User $user)
     {
         $data = $this->validateRequest($request, $user->id);
+        $employmentPeriod = $this->buildEmploymentPeriodPayload($data, $user);
 
-        DB::transaction(function () use ($data, $user, $request) {
+        DB::transaction(function () use ($data, $user, $request, $employmentPeriod) {
             $payload = [
                 'name' => $data['name'],
                 'email' => $data['email'],
@@ -128,12 +129,12 @@ class UserManagementController extends Controller
                 'hirarki' => $data['hirarki'] ?? 999,
                 'nip' => $data['nip'] ?? null,
                 'no_hp' => $data['no_hp'] ?? null,
-                'tmt_pns' => $data['tmt_pns'] ?? null,
                 'golongan_ruang' => $data['golongan_ruang'] ?? null,
                 'satuan_kerja' => $data['satuan_kerja'] ?? null,
                 'atasan_langsung_id' => $data['atasan_langsung_id'] ?? null,
                 'pejabat_berwenang_id' => $data['pejabat_berwenang_id'] ?? null,
             ];
+            $payload = array_merge($payload, $employmentPeriod);
 
             if (!empty($data['password'])) {
                 $payload['password'] = Hash::make($data['password']);
@@ -232,7 +233,8 @@ class UserManagementController extends Controller
             'hirarki' => ['nullable', 'integer', 'min:1'],
             'nip' => ['nullable', 'string', 'max:50'],
             'no_hp' => ['nullable', 'string', 'max:50'],
-            'tmt_pns' => ['nullable', 'date', 'before_or_equal:today'],
+            'masa_kerja_tahun' => ['nullable', 'integer', 'min:0', 'max:80'],
+            'masa_kerja_bulan' => ['nullable', 'integer', 'min:0', 'max:11'],
             'golongan_ruang' => ['nullable', 'string', 'max:100'],
             'satuan_kerja' => ['nullable', 'string', 'max:255'],
             'atasan_langsung_id' => array_filter(['nullable', Rule::exists('users', 'id')->where('status_aktif_pegawai', true), $userId ? Rule::notIn([$userId]) : null]),
@@ -242,6 +244,38 @@ class UserManagementController extends Controller
             'profile_photo' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
             'remove_photo' => ['nullable', 'boolean'],
         ]);
+    }
+
+    protected function buildEmploymentPeriodPayload(array $data, User $user = null)
+    {
+        $hasYears = array_key_exists('masa_kerja_tahun', $data) && $data['masa_kerja_tahun'] !== null;
+        $hasMonths = array_key_exists('masa_kerja_bulan', $data) && $data['masa_kerja_bulan'] !== null;
+
+        if (!$hasYears && !$hasMonths) {
+            return [
+                'masa_kerja_tahun' => null,
+                'masa_kerja_bulan' => null,
+                'masa_kerja_acuan' => null,
+                'tmt_pns' => null,
+            ];
+        }
+
+        $years = max(0, (int) ($data['masa_kerja_tahun'] ?? 0));
+        $months = max(0, min(11, (int) ($data['masa_kerja_bulan'] ?? 0)));
+        $totalMonths = ($years * 12) + $months;
+        $hasStoredBaseline = $user
+            && ($user->masa_kerja_tahun !== null || $user->masa_kerja_bulan !== null);
+
+        if ($hasStoredBaseline && $user->masa_kerja_total_bulan === $totalMonths) {
+            return [];
+        }
+
+        return [
+            'masa_kerja_tahun' => $years,
+            'masa_kerja_bulan' => $months,
+            'masa_kerja_acuan' => now()->toDateString(),
+            'tmt_pns' => now()->startOfDay()->subYears($years)->subMonths($months)->toDateString(),
+        ];
     }
 
     protected function syncProfilePhoto(Request $request, User $user)

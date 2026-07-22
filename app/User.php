@@ -37,6 +37,9 @@ class User extends Authenticatable
         'no_hp',
         'status_asn',
         'tmt_pns',
+        'masa_kerja_tahun',
+        'masa_kerja_bulan',
+        'masa_kerja_acuan',
         'golongan_ruang',
         'satuan_kerja',
         'atasan_langsung_id',
@@ -55,6 +58,9 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
         'tmt_pns' => 'date',
+        'masa_kerja_tahun' => 'integer',
+        'masa_kerja_bulan' => 'integer',
+        'masa_kerja_acuan' => 'date',
         'jumlah_anak' => 'integer',
         'status_aktif_pegawai' => 'boolean',
         'two_factor_enabled' => 'boolean',
@@ -113,26 +119,22 @@ class User extends Authenticatable
 
     public function getMasaKerjaAttribute()
     {
-        if (!$this->tmt_pns) {
+        $totalMonths = $this->masa_kerja_total_bulan;
+
+        if ($totalMonths === null) {
             return null;
         }
 
-        $startDate = $this->tmt_pns->copy()->startOfDay();
-        $currentDate = now()->startOfDay();
-
-        if ($startDate->gt($currentDate)) {
-            return '0 hari';
-        }
-
-        $period = $startDate->diff($currentDate);
+        $years = intdiv($totalMonths, 12);
+        $months = $totalMonths % 12;
         $parts = [];
 
-        if ($period->y > 0) {
-            $parts[] = $period->y . ' tahun';
+        if ($years > 0) {
+            $parts[] = $years . ' tahun';
         }
 
-        if ($period->m > 0) {
-            $parts[] = $period->m . ' bulan';
+        if ($months > 0) {
+            $parts[] = $months . ' bulan';
         }
 
         if (empty($parts)) {
@@ -140,6 +142,52 @@ class User extends Authenticatable
         }
 
         return implode(' ', $parts);
+    }
+
+    public function getMasaKerjaTotalBulanAttribute()
+    {
+        if ($this->masa_kerja_tahun !== null || $this->masa_kerja_bulan !== null) {
+            $baseMonths = max(0, (int) $this->masa_kerja_tahun) * 12
+                + max(0, (int) $this->masa_kerja_bulan);
+            $referenceDate = $this->masa_kerja_acuan
+                ? $this->masa_kerja_acuan->copy()->startOfDay()
+                : now()->startOfDay();
+            $currentDate = now()->startOfDay();
+            $elapsedMonths = $referenceDate->lte($currentDate)
+                ? $referenceDate->diffInMonths($currentDate)
+                : 0;
+
+            return $baseMonths + $elapsedMonths;
+        }
+
+        if (!$this->tmt_pns) {
+            return null;
+        }
+
+        $startDate = $this->tmt_pns->copy()->startOfDay();
+        $currentDate = now()->startOfDay();
+        if ($startDate->gt($currentDate)) {
+            return 0;
+        }
+
+        $years = $startDate->diffInYears($currentDate);
+        $months = $startDate->copy()->addYears($years)->diffInMonths($currentDate);
+
+        return ($years * 12) + $months;
+    }
+
+    public function getMasaKerjaTahunBerjalanAttribute()
+    {
+        return $this->masa_kerja_total_bulan === null
+            ? null
+            : intdiv($this->masa_kerja_total_bulan, 12);
+    }
+
+    public function getMasaKerjaBulanBerjalanAttribute()
+    {
+        return $this->masa_kerja_total_bulan === null
+            ? null
+            : $this->masa_kerja_total_bulan % 12;
     }
 
     public function hasTwoFactorEnabled()

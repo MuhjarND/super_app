@@ -252,7 +252,9 @@ class LeaveDocumentService
             'employeeTitle' => optional($leaveRequest->user)->jabatan_keterangan ?: '-',
             'employeeUnit' => optional($leaveRequest->user)->satuan_kerja ?: '-',
             'employeeRank' => optional($leaveRequest->user)->golongan_ruang ?: '-',
-            'workPeriodText' => $this->buildWorkPeriodText(optional($leaveRequest->user)->tmt_pns, now()),
+            'workPeriodText' => optional($leaveRequest->user)->masa_kerja
+                ? ucwords(optional($leaveRequest->user)->masa_kerja)
+                : '-',
         ];
     }
 

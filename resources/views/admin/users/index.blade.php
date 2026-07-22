@@ -642,48 +642,6 @@
             });
         })();
     </script>
-    <script>
-        (function () {
-            const currentDate = '{{ now()->toDateString() }}'.split('-').map(Number);
-
-            function updateEmploymentDuration(input) {
-                const output = input.closest('.user-form-section').querySelector('[data-employment-duration]');
-                const parts = String(input.value || '').split('-').map(Number);
-
-                if (!output || parts.length !== 3 || parts.some(Number.isNaN)) {
-                    if (output) {
-                        output.value = '-';
-                    }
-                    return;
-                }
-
-                let totalMonths = (currentDate[0] - parts[0]) * 12 + (currentDate[1] - parts[1]);
-                if (currentDate[2] < parts[2]) {
-                    totalMonths--;
-                }
-                totalMonths = Math.max(0, totalMonths);
-
-                const years = Math.floor(totalMonths / 12);
-                const months = totalMonths % 12;
-                const labels = [];
-
-                if (years > 0) {
-                    labels.push(years + ' tahun');
-                }
-                if (months > 0) {
-                    labels.push(months + ' bulan');
-                }
-
-                output.value = labels.length ? labels.join(' ') : '0 bulan';
-            }
-
-            document.addEventListener('change', function (event) {
-                if (event.target.matches('[data-employment-start]')) {
-                    updateEmploymentDuration(event.target);
-                }
-            });
-        })();
-    </script>
 @endpush
 
 @section('content')

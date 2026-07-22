@@ -75,15 +75,24 @@
                 <label>Golongan / Ruang</label>
                 <input type="text" name="golongan_ruang" class="form-control" value="{{ old('golongan_ruang', $user->golongan_ruang) }}" placeholder="Contoh: III/a">
             </div>
-            <div class="col-md-3 form-group mb-md-0">
-                <label>Tanggal Mulai Kerja / TMT PNS</label>
-                <input type="date" name="tmt_pns" class="form-control" value="{{ old('tmt_pns', optional($user->tmt_pns)->format('Y-m-d')) }}" max="{{ now()->toDateString() }}" data-employment-start>
-            </div>
-            <div class="col-md-3 form-group mb-md-0">
+            <div class="col-md-5 form-group mb-md-0">
                 <label>Masa Kerja</label>
-                <input type="text" class="form-control" value="{{ $user->masa_kerja ?: '-' }}" readonly data-employment-duration>
+                <div class="row">
+                    <div class="col-6 pr-1">
+                        <div class="input-group">
+                            <input type="number" name="masa_kerja_tahun" class="form-control" value="{{ old('masa_kerja_tahun', $user->exists ? $user->masa_kerja_tahun_berjalan : '') }}" min="0" max="80" placeholder="0">
+                            <div class="input-group-append"><span class="input-group-text">Tahun</span></div>
+                        </div>
+                    </div>
+                    <div class="col-6 pl-1">
+                        <div class="input-group">
+                            <input type="number" name="masa_kerja_bulan" class="form-control" value="{{ old('masa_kerja_bulan', $user->exists ? $user->masa_kerja_bulan_berjalan : '') }}" min="0" max="11" placeholder="0">
+                            <div class="input-group-append"><span class="input-group-text">Bulan</span></div>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div class="col-md-3 form-group mb-0">
+            <div class="col-md-4 form-group mb-0">
                 <label>Satuan Kerja</label>
                 <input type="text" name="satuan_kerja" class="form-control" value="{{ old('satuan_kerja', $user->satuan_kerja) }}" placeholder="Nama satuan kerja">
             </div>
