@@ -17,7 +17,7 @@ class WhatsAppMagicLinkService
             'user_id' => $user->id,
             'token_hash' => hash('sha256', $plainToken),
             'destination_url' => $destinationUrl,
-            'expires_at' => now()->addMinutes($this->lifetimeMinutes()),
+            'expires_at' => now()->addDays($this->lifetimeDays()),
         ]);
 
         return route('whatsapp.magic-login.consume', ['token' => $plainToken]);
@@ -29,7 +29,7 @@ class WhatsAppMagicLinkService
             $url = rtrim($matches[0], '.,;:)');
             $suffix = substr($matches[0], strlen($url));
 
-            if (!$this->isApplicationUrl($url) || $this->isMagicLoginUrl($url) || $this->isDirectDocumentUrl($url)) {
+            if (!$this->isApplicationUrl($url) || $this->isMagicLoginUrl($url) || $this->isSignedDocumentUrl($url)) {
                 return $matches[0];
             }
 
@@ -70,9 +70,15 @@ class WhatsAppMagicLinkService
         return strpos(parse_url($url, PHP_URL_PATH) ?: '', '/masuk/whatsapp/') === 0;
     }
 
-    protected function isDirectDocumentUrl($url)
+    protected function isSignedDocumentUrl($url)
     {
-        return preg_match('#^/surat-keluar/\d+/file$#', parse_url($url, PHP_URL_PATH) ?: '') === 1;
+        if (preg_match('#^/surat-keluar/\d+/file$#', parse_url($url, PHP_URL_PATH) ?: '') !== 1) {
+            return false;
+        }
+
+        parse_str(parse_url($url, PHP_URL_QUERY) ?: '', $query);
+
+        return !empty($query['signature']) && !empty($query['expires']);
     }
 
     protected function defaultPort($scheme)
@@ -80,8 +86,8 @@ class WhatsAppMagicLinkService
         return strtolower((string) $scheme) === 'https' ? 443 : 80;
     }
 
-    protected function lifetimeMinutes()
+    protected function lifetimeDays()
     {
-        return max(1, (int) config('services.whatsapp.magic_link_ttl', 30));
+        return max(1, (int) config('services.whatsapp.magic_link_ttl_days', 14));
     }
 }

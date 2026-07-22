@@ -10,7 +10,7 @@ class SupplyPickupController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('auth');
+        $this->middleware('auth')->except('verify');
     }
 
     public function index(Request $request)
@@ -45,5 +45,12 @@ class SupplyPickupController extends Controller
         $pickups = $query->paginate(20);
 
         return view('persediaan.supplies.pickups.index', compact('pickups', 'canManage'));
+    }
+
+    public function verify(SupplyPickup $pickup)
+    {
+        $pickup->loadMissing(['user.jabatan', 'item', 'request', 'creator']);
+
+        return view('persediaan.supplies.pickups.verify', compact('pickup'));
     }
 }

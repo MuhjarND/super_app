@@ -10,6 +10,7 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Str;
 use setasign\Fpdi\Fpdi;
 
@@ -180,22 +181,44 @@ class RapatLaporanService
             return [
                 'user' => $participant,
                 'attendance' => $attendance,
-                'signature_data_uri' => $attendance ? $this->resolveStorageFileDataUri($attendance->signature_path) : null,
+                'signature_data_uri' => $attendance ? $this->attendanceQr($attendance) : null,
             ];
         });
 
         $guestAttendances = $rapat->guestAttendances->sortBy('attended_at')->values()->map(function ($attendance) {
-            $attendance->signature_data_uri = $this->resolveStorageFileDataUri($attendance->signature_path);
+            $attendance->signature_data_uri = $this->attendanceQr($attendance);
             return $attendance;
         });
+
+        $attendanceRows = $internalParticipants->map(function ($item) {
+            return [
+                'name' => $item['user']->name,
+                'description' => $item['user']->jabatan_keterangan ?: optional($item['user']->jabatan)->nama ?: '-',
+                'status' => $item['attendance'] ? 'Hadir' : 'Belum Hadir',
+                'signature_data_uri' => $item['signature_data_uri'],
+            ];
+        })->concat($guestAttendances->map(function ($attendance) {
+            return [
+                'name' => $attendance->participant_name_snapshot,
+                'description' => $attendance->guest_instansi ?: ($attendance->participant_jabatan_snapshot ?: '-'),
+                'status' => 'Hadir',
+                'signature_data_uri' => $attendance->signature_data_uri,
+            ];
+        }))->values();
+
+        $attendanceCompleted = $rapat->status === 'selesai';
+        $pimpinanSignature = app(RapatDocumentService::class)->buildApprovalSignatureData($rapat, $attendanceCompleted);
+        $pdfVerification = null;
 
         $kopImage = $this->resolvePublicImage(['kop_absen.jpg', 'kop_absen.jpeg', 'kop_absen.png']);
 
         return PDF::loadView('rapat.absensi.pdf', compact(
             'rapat',
-            'internalParticipants',
-            'guestAttendances',
-            'kopImage'
+            'attendanceRows',
+            'attendanceCompleted',
+            'pimpinanSignature',
+            'kopImage',
+            'pdfVerification'
         ))->setPaper('a4', 'portrait')->output();
     }
 
@@ -296,14 +319,11 @@ class RapatLaporanService
         return $dir . DIRECTORY_SEPARATOR . $prefix . '-' . Str::uuid() . '.pdf';
     }
 
-    protected function resolveStorageFileDataUri($relativePath)
+    protected function attendanceQr($attendance)
     {
-        if (!$relativePath || !Storage::disk('public')->exists($relativePath)) {
-            return null;
-        }
+        $url = URL::signedRoute('rapat.attendance.verify', ['attendance' => $attendance->id]);
 
-        $absolutePath = Storage::disk('public')->path($relativePath);
-        return app(\App\Services\SignaturePadService::class)->dataUriFromPublicPath($absolutePath);
+        return app(DocumentQrCodeService::class)->dataUri($url, 104);
     }
 
     protected function resolvePublicImage(array $filenames)

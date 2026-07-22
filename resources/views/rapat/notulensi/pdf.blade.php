@@ -122,6 +122,7 @@
             width: 100%;
             margin-top: 18px;
             border-collapse: collapse;
+            page-break-inside: avoid;
         }
 
         .signature-table td {
@@ -142,14 +143,18 @@
         }
 
         .signature-pad-image {
-            margin: 0 auto -16px;
-            width: 170px;
-            height: 88px;
+            margin: 4px auto 3px;
+            width: 68px;
+            height: 68px;
+            text-align: center;
+            page-break-inside: avoid;
         }
 
         .signature-pad-image img {
             width: 100%;
             height: 100%;
+            display: block;
+            margin: 0 auto;
             object-fit: contain;
         }
 
@@ -262,7 +267,7 @@
                 @endif
                 @if(!empty($notulisSignature['image']))
                     <div class="signature-pad-image">
-                        <img src="{{ $notulisSignature['image'] }}" alt="Tanda Tangan Notulis">
+                        <img src="{{ $notulisSignature['image'] }}" alt="QR tanda tangan notulis">
                     </div>
                 @endif
                 <div class="signature-meta">
@@ -277,7 +282,7 @@
                 @endif
                 @if(!empty($approvalSignature['image']))
                     <div class="signature-pad-image">
-                        <img src="{{ $approvalSignature['image'] }}" alt="Tanda Tangan Approval">
+                        <img src="{{ $approvalSignature['image'] }}" alt="QR tanda tangan approval">
                     </div>
                 @endif
                 <div class="signature-meta">

@@ -30,7 +30,6 @@ class StoreRapatNotulensiRequest extends FormRequest
             'dokumentasi_files.*' => ['file', 'image', 'max:5120'],
             'remove_dokumentasi_files' => ['nullable', 'array'],
             'remove_dokumentasi_files.*' => ['string'],
-            'signature_data' => ['nullable', 'string'],
         ];
     }
 

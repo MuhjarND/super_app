@@ -477,7 +477,7 @@ class SuratKeluarController extends Controller
         }
 
         if ($suratKeluar->rapat) {
-            if (auth()->user()->isSatker() && $suratKeluar->rapat->bersama_satker) {
+            if ($user && $user->isSatker() && $suratKeluar->rapat->bersama_satker) {
                 return app(RapatDocumentService::class)->streamUndanganSatkerPdf($suratKeluar->rapat);
             }
 
@@ -525,7 +525,8 @@ class SuratKeluarController extends Controller
             }
         }
 
-        $event = $suratKeluar->calendarEvent()->firstOrNew();
+        $event = $suratKeluar->calendarEvent()->first()
+            ?: $suratKeluar->calendarEvent()->make();
         $event->fill($data);
         $event->surat_keluar_id = $suratKeluar->id;
         $event->updated_by = $request->user()->id;

@@ -1104,17 +1104,6 @@
         @php($dashboardModules = app(\App\Services\ModuleSettingService::class)->statesFor($dashboardUser))
         @php($showMobileModule = function ($key) use ($dashboardModules) { return data_get($dashboardModules, $key . '.visible_mobile', true); })
         @php($mobileModuleLabel = function ($key, $fallback) use ($dashboardModules) { return data_get($dashboardModules, $key . '.label', $fallback); })
-        @if($dashboardUser && !$dashboardUser->hasProfileSignature())
-            <div class="alert alert-warning d-flex align-items-center justify-content-between flex-wrap" style="gap:10px;border-radius:12px;border:1px solid #fde68a;background:#fffbeb;color:#92400e;">
-                <div>
-                    <strong>Tanda tangan profil belum tersimpan.</strong>
-                    <span>Simpan tanda tangan agar approval dan PDF memakai tanda tangan otomatis.</span>
-                </div>
-                <a href="{{ route('profile.edit') }}" class="btn btn-sm btn-warning font-weight-bold">
-                    <i class="fas fa-signature mr-1"></i> Simpan TTD
-                </a>
-            </div>
-        @endif
         <section class="mobile-app-launcher">
             <div class="mobile-app-grid">
                 @if($showMobileModule('dashboard'))

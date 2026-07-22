@@ -79,8 +79,8 @@
         }
 
         .signature-image {
-            width: 82pt;
-            height: 34pt;
+            width: 38pt;
+            height: 38pt;
             object-fit: contain;
             display: block;
             margin: 0 auto;
@@ -96,6 +96,7 @@
             width: 100%;
             border-collapse: collapse;
             margin-top: 16pt;
+            page-break-inside: avoid;
         }
 
         .ttd-table td {
@@ -105,16 +106,22 @@
         .ttd-box {
             width: 240pt;
             margin-left: auto;
+            text-align: center;
+            page-break-inside: avoid;
         }
 
         .signature-pad-image {
-            margin: 0 0 -12pt 0;
+            width: 64pt;
+            height: 64pt;
+            margin: 4pt auto 3pt;
+            text-align: center;
         }
 
         .signature-pad-image img {
-            width: 138pt;
-            height: 70pt;
+            width: 64pt;
+            height: 64pt;
             display: block;
+            margin: 0 auto;
             object-fit: contain;
         }
 
@@ -165,7 +172,7 @@
                 <th>Nama</th>
                 <th>Jabatan / Keterangan</th>
                 <th style="width: 74pt;">Status</th>
-                <th style="width: 108pt;">Tanda Tangan</th>
+                <th style="width: 108pt;">QR Tanda Tangan</th>
             </tr>
         </thead>
         <tbody>
@@ -177,7 +184,7 @@
                     <td class="text-center">{{ $row['status'] }}</td>
                     <td class="text-center">
                         @if($row['signature_data_uri'])
-                            <img src="{{ $row['signature_data_uri'] }}" alt="Tanda Tangan" class="signature-image">
+                            <img src="{{ $row['signature_data_uri'] }}" alt="QR validasi kehadiran" class="signature-image">
                         @else
                             -
                         @endif
@@ -201,7 +208,7 @@
                         <div><strong>{{ $pimpinanSignature['line2'] ?? 'Pengadilan Tinggi Agama Papua Barat' }}</strong></div>
                         @if(!empty($pimpinanSignature['image']))
                             <div class="signature-pad-image">
-                                <img src="{{ $pimpinanSignature['image'] }}" alt="Tanda Tangan Pimpinan">
+                                <img src="{{ $pimpinanSignature['image'] }}" alt="QR tanda tangan pimpinan">
                             </div>
                         @else
                             <div style="height: 68pt;"></div>

@@ -211,7 +211,8 @@ class WhatsAppOutboxTest extends TestCase
 
         $this->assertStringContainsString('/masuk/whatsapp/', $message);
         $this->assertStringContainsString('*Buka di PAPEDA (login otomatis):*', $message);
-        $this->assertStringContainsString('hanya dapat digunakan satu kali', $message);
+        $this->assertStringContainsString('dapat digunakan berulang', $message);
+        $this->assertStringContainsString('berlaku selama 14 hari', $message);
         $this->assertSame((int) $user->id, (int) WhatsAppMagicLoginToken::first()->user_id);
     }
 }

@@ -30,6 +30,7 @@
     .schedule-list { display:grid; gap:12px; padding:18px; }
     .schedule-card { border:1px solid #dce5f1; border-radius:16px; padding:16px; background:#fff; box-shadow:0 6px 18px rgba(15,23,42,.035); }
     .schedule-card.is-due { border-color:#fecaca; background:linear-gradient(135deg,#fff,#fff7f7); }
+    .schedule-card.direct-target { border-color:#8b5cf6; box-shadow:0 0 0 3px rgba(139,92,246,.12), 0 6px 18px rgba(15,23,42,.035); }
     .schedule-card-main { display:grid; grid-template-columns:minmax(220px,1.2fr) minmax(180px,.8fr) minmax(170px,.7fr) auto; gap:18px; align-items:center; }
     .schedule-asset-code { color:#315da8; font-size:.74rem; font-weight:800; letter-spacing:.04em; }
     .schedule-asset-name { color:#10234b; font-size:.95rem; font-weight:750; margin-top:2px; }
@@ -90,7 +91,7 @@
                 $notificationSent = $schedule->notifications->where('status', 'sent')->count();
                 $notificationFailed = $schedule->notifications->where('status', 'failed')->count();
             @endphp
-            <article class="schedule-card {{ $isDue ? 'is-due' : '' }}">
+            <article id="maintenance-schedule-{{ $schedule->id }}" class="schedule-card {{ $isDue ? 'is-due' : '' }} {{ (int) request('focus') === (int) $schedule->id ? 'direct-target' : '' }}">
                 <div class="schedule-card-main">
                     <div>
                         <div class="schedule-asset-code">{{ optional($schedule->item)->code ?: 'BARANG' }}</div>
@@ -182,6 +183,18 @@
         'method' => 'PUT',
     ])
 @endif
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    var directScheduleId = Number(@json((int) request('focus')));
+    var directSchedule = directScheduleId ? document.getElementById('maintenance-schedule-' + directScheduleId) : null;
+    if (directSchedule) {
+        directSchedule.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+});
+</script>
+@endpush
 @endsection
 
 @if($canSchedule)

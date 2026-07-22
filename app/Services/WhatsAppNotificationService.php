@@ -22,7 +22,6 @@ use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\URL;
 
 class WhatsAppNotificationService
 {
@@ -436,7 +435,7 @@ class WhatsAppNotificationService
             'Uraian Tugas: ' . ($fieldValues['untuk_tugas'] ?? 'Sesuai Surat Tugas yang diterbitkan.'),
             '',
             'File Surat Tugas:',
-            $this->directSuratKeluarFileUrl($suratKeluar),
+            $this->suratKeluarFileUrl($suratKeluar),
         ]);
 
         return $this->sendToUser($targetUser, $message, [
@@ -509,7 +508,7 @@ class WhatsAppNotificationService
             'Dibuat Oleh: ' . (optional($suratKeluar->creator)->name ?: '-'),
             '',
             'File Surat Keluar:',
-            $this->directSuratKeluarFileUrl($suratKeluar),
+            $this->suratKeluarFileUrl($suratKeluar),
         ]);
 
         return $this->sendToUser($targetUser, $message, [
@@ -542,10 +541,13 @@ class WhatsAppNotificationService
         $lines[] = '';
         if ($approved && $suratKeluar) {
             $lines[] = 'File Surat Tugas:';
-            $lines[] = $this->directSuratKeluarFileUrl($suratKeluar);
+            $lines[] = $this->suratKeluarFileUrl($suratKeluar);
         } else {
-            $lines[] = 'Silakan membuka modul Surat Keluar untuk melakukan perbaikan:';
-            $lines[] = route('surat-keluar.index');
+            $lines[] = 'Silakan memperbaiki Surat Tugas melalui tautan berikut:';
+            $lines[] = route('surat-template.index', [
+                'focus_surat_tugas' => optional($suratKeluar)->id,
+                'action' => 'edit',
+            ]);
         }
 
         return $this->sendToUser($targetUser, $this->wrap($lines), [
@@ -682,7 +684,7 @@ class WhatsAppNotificationService
 
         $lines[] = '';
         $lines[] = 'Mohon melakukan perbaikan dokumen melalui tautan berikut:';
-        $lines[] = route('rapat.index');
+        $lines[] = route('rapat.index', ['focus' => $rapat->id, 'action' => 'edit']);
 
         return $this->sendToUser($rapat->creator, $this->wrap($lines), [
             'module' => 'rapat',
@@ -730,7 +732,7 @@ class WhatsAppNotificationService
         });
 
         $fileUrl = $rapat->suratKeluar
-            ? $this->directSuratKeluarFileUrl($rapat->suratKeluar)
+            ? $this->suratKeluarFileUrl($rapat->suratKeluar)
             : route('rapat.undangan.preview', $rapat);
         $lines[] = '';
         $lines[] = 'Mohon kehadiran tepat waktu sesuai jadwal yang telah ditetapkan.';
@@ -800,7 +802,7 @@ class WhatsAppNotificationService
 
         $message = $agenda->whatsapp_preview
             . "\n\nTinjau agenda melalui tautan berikut:\n"
-            . route('rapat.agenda.index');
+            . route('rapat.agenda.index', ['focus' => $agenda->id]);
         $result = $this->sendBulk($agenda->recipients->filter(function ($user) {
             return !empty($user->no_hp);
         }), $message, [
@@ -846,7 +848,7 @@ class WhatsAppNotificationService
 
         $lines[] = '';
         $lines[] = 'Mohon menginput daftar peserta kegiatan melalui tautan berikut:';
-        $lines[] = route('rapat.agenda.index');
+        $lines[] = route('rapat.agenda.index', ['focus' => $agenda->id, 'action' => 'participants']);
 
         return $this->sendToUser($targetUser, $this->wrap($lines), [
             'module' => 'agenda_pimpinan',
@@ -881,7 +883,7 @@ class WhatsAppNotificationService
         $lines[] = '';
         $lines[] = 'Mohon hadir tepat waktu dan memastikan perangkat serta koneksi internet telah siap sebelum kegiatan dimulai.';
         $lines[] = 'Informasi agenda dapat ditinjau melalui tautan berikut:';
-        $lines[] = route('rapat.virtual-meeting.index');
+        $lines[] = route('rapat.virtual-meeting.index', ['focus' => $meeting->id]);
 
         $result = $this->sendBulk($meeting->participants, $this->wrap($lines), [
             'module' => 'virtual_meeting',
@@ -984,7 +986,7 @@ class WhatsAppNotificationService
             '',
             'Mohon dilakukan monitoring dan koordinasi pelaksanaan perawatan sesuai jadwal tersebut.',
             'Detail jadwal dapat ditinjau melalui tautan berikut:',
-            route('perawatan-alat-mesin.schedules.index'),
+            route('perawatan-alat-mesin.schedules.index', ['focus' => $schedule->id]),
         ]);
 
         return $this->sendToUser($targetUser, $message, [
@@ -1289,8 +1291,9 @@ class WhatsAppNotificationService
         }
 
         if ($hasMagicLink) {
+            $validDays = max(1, (int) config('services.whatsapp.magic_link_ttl_days', 14));
             $result[] = '';
-            $result[] = '_Tautan khusus penerima dan hanya dapat digunakan satu kali._';
+            $result[] = '_Tautan khusus penerima, dapat digunakan berulang, dan berlaku selama ' . $validDays . ' hari._';
         }
 
         return implode("\n", $result);
@@ -1348,15 +1351,9 @@ class WhatsAppNotificationService
         return $header . "\n" . ltrim($message);
     }
 
-    protected function directSuratKeluarFileUrl(SuratKeluar $suratKeluar)
+    protected function suratKeluarFileUrl(SuratKeluar $suratKeluar)
     {
-        $ttlDays = max(1, (int) config('services.whatsapp.document_link_ttl_days', 30));
-
-        return URL::temporarySignedRoute(
-            'surat-keluar.file',
-            now()->addDays($ttlDays),
-            ['suratKeluar' => $suratKeluar->getKey()]
-        );
+        return route('surat-keluar.file', $suratKeluar);
     }
 
     protected function normalizePhoneNumber($phoneNumber)

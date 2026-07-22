@@ -18,12 +18,12 @@ use setasign\Fpdi\Fpdi;
 
 class RapatDocumentService
 {
-    protected $signaturePadService;
+    protected $qrCodeService;
     protected $pdfVerificationService;
 
-    public function __construct(SignaturePadService $signaturePadService, PdfVerificationService $pdfVerificationService)
+    public function __construct(DocumentQrCodeService $qrCodeService, PdfVerificationService $pdfVerificationService)
     {
-        $this->signaturePadService = $signaturePadService;
+        $this->qrCodeService = $qrCodeService;
         $this->pdfVerificationService = $pdfVerificationService;
     }
 
@@ -423,7 +423,7 @@ class RapatDocumentService
             'signatory' => $signatory,
             'signatureApprovedAt' => $approvalStep && $approvalStep->acted_at ? $approvalStep->acted_at->copy()->timezone('Asia/Jayapura') : null,
             'signatureImage' => $signed && $signatory && $approvalStep && $approvalStep->status === 'approved'
-                ? $this->signaturePadService->toDataUri($approvalStep->signature_path)
+                ? $this->qrCodeService->dataUri($this->signatureVerificationUrl($rapat, ['signature' => 'approval']), 120)
                 : null,
             'kopImage' => $this->resolveKopImage(),
             'lampiranLabel' => $this->resolveLampiranLabel($showLampiranPage, $rapat),
@@ -586,7 +586,7 @@ class RapatDocumentService
                 ? $approvalStep->acted_at->copy()->timezone('Asia/Jayapura')
                 : null,
             'image' => $signed && $signatory && $approvalStep && $approvalStep->status === 'approved'
-                ? $this->signaturePadService->toDataUri($approvalStep->signature_path)
+                ? $this->qrCodeService->dataUri($this->signatureVerificationUrl($rapat, ['signature' => 'approval']), 120)
                 : null,
         ];
     }
@@ -602,7 +602,12 @@ class RapatDocumentService
             'signed_at' => ($notulensi->submitted_at ?: $notulensi->updated_at)
                 ? ($notulensi->submitted_at ?: $notulensi->updated_at)->copy()->timezone('Asia/Jayapura')
                 : null,
-            'image' => $this->signaturePadService->toDataUri($notulensi->notulis_signature_path),
+            'image' => $notulensi->notulis_id && !$notulensi->tidak_membuat_notulen
+                ? $this->qrCodeService->dataUri($this->signatureVerificationUrl($notulensi->rapat, [
+                    'signature' => 'notulis',
+                    'notulensi' => $notulensi->id,
+                ]), 120)
+                : null,
         ];
     }
 
@@ -627,7 +632,10 @@ class RapatDocumentService
                 ? $approval->acted_at->copy()->timezone('Asia/Jayapura')
                 : null,
             'image' => $signed && $signatory && $approval && $approval->status === 'approved'
-                ? $this->signaturePadService->toDataUri($approval->signature_path)
+                ? $this->qrCodeService->dataUri($this->signatureVerificationUrl($notulensi->rapat, [
+                    'signature' => 'notulensi_approval',
+                    'notulensi' => $notulensi->id,
+                ]), 120)
                 : null,
         ];
     }

@@ -36,7 +36,7 @@
                         <th>Nama Barang</th>
                         <th>Jumlah</th>
                         <th>Pegawai</th>
-                        <th>Paraf</th>
+                        <th>Validasi QR</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -54,12 +54,14 @@
                             </td>
                             <td data-label="Jumlah">{{ $pickup->quantity_label }}</td>
                             <td data-label="Pegawai">{{ optional($pickup->user)->name ?: '-' }}</td>
-                            <td data-label="Paraf">
-                                @if($pickup->receiver_signature_path)
-                                    <img src="{{ asset('storage/' . $pickup->receiver_signature_path) }}" alt="Paraf penerima" class="supply-signature-thumb">
-                                @else
-                                    <span class="inventory-module-muted">-</span>
-                                @endif
+                            <td data-label="Validasi">
+                                @php
+                                    $pickupVerificationUrl = \Illuminate\Support\Facades\URL::signedRoute('persediaan.pickups.verify', ['pickup' => $pickup->id]);
+                                    $pickupQr = app(\App\Services\DocumentQrCodeService::class)->dataUri($pickupVerificationUrl, 96);
+                                @endphp
+                                <a href="{{ $pickupVerificationUrl }}" target="_blank" title="Buka validasi penerimaan">
+                                    <img src="{{ $pickupQr }}" alt="QR validasi penerimaan" class="supply-signature-thumb" style="width:54px;height:54px;padding:0;border:0;">
+                                </a>
                             </td>
                         </tr>
                     @empty

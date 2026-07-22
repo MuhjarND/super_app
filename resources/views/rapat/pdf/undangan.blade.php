@@ -127,16 +127,23 @@
         .ttd-box {
             width: 240pt;
             margin-left: auto;
+            text-align: center;
+            page-break-inside: avoid;
         }
 
         .signature-pad-image {
-            margin: 0 0 -12pt 0;
+            width: 64pt;
+            height: 64pt;
+            margin: 4pt auto 3pt;
+            text-align: center;
+            page-break-inside: avoid;
         }
 
         .signature-pad-image img {
-            width: 138pt;
-            height: 70pt;
+            width: 64pt;
+            height: 64pt;
             display: block;
+            margin: 0 auto;
             object-fit: contain;
         }
 
@@ -313,7 +320,7 @@
                     <div><strong>{{ $signatoryTitle['line2'] }}</strong></div>
                     @if(!empty($signatureImage) && $signatureApprovedAt)
                         <div class="signature-pad-image">
-                            <img src="{{ $signatureImage }}" alt="Tanda Tangan Digital">
+                            <img src="{{ $signatureImage }}" alt="QR tanda tangan elektronik">
                         </div>
                     @else
                         <div style="height: 68pt;"></div>
@@ -358,7 +365,7 @@
                         <div><strong>{{ $signatoryTitle['line2'] }}</strong></div>
                         @if(!empty($signatureImage) && $signatureApprovedAt)
                             <div class="signature-pad-image">
-                                <img src="{{ $signatureImage }}" alt="Tanda Tangan Digital">
+                                <img src="{{ $signatureImage }}" alt="QR tanda tangan elektronik">
                             </div>
                         @else
                             <div style="height: 68pt;"></div>

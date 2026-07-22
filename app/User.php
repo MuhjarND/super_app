@@ -37,6 +37,8 @@ class User extends Authenticatable
         'no_hp',
         'status_asn',
         'tmt_pns',
+        'golongan_ruang',
+        'satuan_kerja',
         'atasan_langsung_id',
         'pejabat_berwenang_id',
         'jumlah_anak',
@@ -107,6 +109,37 @@ class User extends Authenticatable
     public function getDisplayJabatanAttribute()
     {
         return $this->jabatan_keterangan ?: optional($this->jabatan)->nama ?: '-';
+    }
+
+    public function getMasaKerjaAttribute()
+    {
+        if (!$this->tmt_pns) {
+            return null;
+        }
+
+        $startDate = $this->tmt_pns->copy()->startOfDay();
+        $currentDate = now()->startOfDay();
+
+        if ($startDate->gt($currentDate)) {
+            return '0 hari';
+        }
+
+        $period = $startDate->diff($currentDate);
+        $parts = [];
+
+        if ($period->y > 0) {
+            $parts[] = $period->y . ' tahun';
+        }
+
+        if ($period->m > 0) {
+            $parts[] = $period->m . ' bulan';
+        }
+
+        if (empty($parts)) {
+            $parts[] = '0 bulan';
+        }
+
+        return implode(' ', $parts);
     }
 
     public function hasTwoFactorEnabled()

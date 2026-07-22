@@ -10,6 +10,7 @@
     $tanggalSelesai = !empty($fieldValues['tanggal_selesai']) ? Carbon::parse($fieldValues['tanggal_selesai'])->translatedFormat('d F Y') : '-';
     $lokasi = trim((string) ($fieldValues['lokasi'] ?? '')) ?: '-';
     $tanggalTugas = $tanggalMulai === $tanggalSelesai ? $tanggalMulai : $tanggalMulai . ' s/d ' . $tanggalSelesai;
+    $namaPenandaTangan = \App\Support\PersonNameFormatter::withoutTitles($penandaTangan['nama'] ?? 'Pejabat Penanda Tangan');
 @endphp
 
 <style>
@@ -105,7 +106,7 @@
     <div class="st-sign">
         {{ $fieldValues['kota_tanda_tangan'] ?? 'Manokwari' }}, {{ $tanggalSurat }}<br>
         {{ $penandaTangan['jabatan_ttd'] ?? 'Ketua' }},<br><br><br><br>
-        <strong>{{ $penandaTangan['nama'] ?? 'Pejabat Penanda Tangan' }}</strong><br>
+        <strong>{{ $namaPenandaTangan ?: 'Pejabat Penanda Tangan' }}</strong><br>
         NIP. {{ $penandaTangan['nip'] ?? '-' }}
     </div>
 </div>

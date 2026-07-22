@@ -13,6 +13,7 @@
         .virtual-meeting-actions { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 7px; }
         .virtual-meeting-participants { margin-top: 14px; padding-top: 12px; border-top: 1px solid #eef2f7; color: #475569; font-size: .8rem; }
         .virtual-meeting-source { display: inline-flex; align-items: center; gap: 5px; margin-top: 9px; color: #2563eb; font-size: .75rem; font-weight: 700; }
+        .virtual-meeting-card.direct-target { border-color: #8b5cf6; box-shadow: 0 0 0 3px rgba(139, 92, 246, .12), 0 10px 28px rgba(15, 23, 42, .05); }
         @media (max-width: 767.98px) {
             .virtual-meeting-card { padding: 14px; }
             .virtual-meeting-head { display: block; }
@@ -48,7 +49,7 @@
 
     <div class="virtual-meeting-shell">
         @forelse($meetings as $meeting)
-            <article class="virtual-meeting-card">
+            <article id="virtual-meeting-{{ $meeting->id }}" class="virtual-meeting-card {{ (int) request('focus') === (int) $meeting->id ? 'direct-target' : '' }}">
                 <div class="virtual-meeting-head">
                     <div>
                         <div class="virtual-meeting-title">{{ $meeting->judul }}</div>
@@ -171,5 +172,11 @@
                 $select.select2({ theme: 'bootstrap4', width: '100%', dropdownParent: $modal });
             });
         });
+
+        const directMeetingId = Number(@json((int) request('focus')));
+        const directMeetingCard = directMeetingId ? document.getElementById('virtual-meeting-' + directMeetingId) : null;
+        if (directMeetingCard) {
+            directMeetingCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
     </script>
 @endpush

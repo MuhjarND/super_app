@@ -9,20 +9,19 @@ use App\SuratKeluarApprovalHistory;
 use App\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\URL;
 
 class SuratKeluarApprovalService
 {
     protected $documentService;
     protected $auditService;
     protected $whatsAppService;
-    protected $signaturePadService;
 
-    public function __construct(SuratTemplateDocumentService $documentService, ActivityAuditService $auditService, WhatsAppNotificationService $whatsAppService, SignaturePadService $signaturePadService)
+    public function __construct(SuratTemplateDocumentService $documentService, ActivityAuditService $auditService, WhatsAppNotificationService $whatsAppService)
     {
         $this->documentService = $documentService;
         $this->auditService = $auditService;
         $this->whatsAppService = $whatsAppService;
-        $this->signaturePadService = $signaturePadService;
     }
 
     public function syncForTemplate(SuratKeluar $suratKeluar, array $payload, User $approver, User $requester)
@@ -154,18 +153,17 @@ class SuratKeluarApprovalService
     {
         $previousStatus = $approval->status;
 
-        DB::transaction(function () use ($approval, $actor, $note, $signatureData) {
+        DB::transaction(function () use ($approval, $actor, $note) {
             $approval->refresh();
             $this->guardDecision($approval, $actor);
-            $signature = $this->signaturePadService->resolveForUser($actor, 'surat-keluar/approval-signatures', $signatureData);
 
             $approval->update([
                 'status' => 'approved',
                 'note' => $note,
                 'acted_at' => now(),
-                'signature_path' => $signature['path'],
-                'signature_mime' => $signature['mime'],
-                'signature_size' => $signature['size'],
+                'signature_path' => null,
+                'signature_mime' => null,
+                'signature_size' => null,
             ]);
 
             SuratKeluarApprovalHistory::create([
@@ -344,7 +342,7 @@ class SuratKeluarApprovalService
                     $suratKeluar,
                     'Surat Tugas untuk Anda telah tersedia',
                     'Terdapat Surat Tugas yang menetapkan Bapak/Ibu sebagai petugas pelaksana.',
-                    route('surat-keluar.signature.verify', $approval),
+                    URL::signedRoute('surat-keluar.signature.verify', ['approval' => $approval->id]),
                     'recipient'
                 ));
             } catch (\Throwable $e) {

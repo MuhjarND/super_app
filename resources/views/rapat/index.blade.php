@@ -1312,6 +1312,15 @@
                         }
                     });
                 }
+
+                const directRapatId = Number(@json((int) request('focus')));
+                if (directRapatId && @json(request('action')) === 'edit') {
+                    const directRow = $('tr[data-rapat-id="' + directRapatId + '"]');
+                    if (directRow.length) {
+                        directRow.css({ backgroundColor: '#eef2ff', outline: '2px solid #8b5cf6' });
+                        setTimeout(function () { window.openEditModal(directRapatId); }, 250);
+                    }
+                }
             @endif
         });
     </script>

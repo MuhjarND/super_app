@@ -47,7 +47,7 @@ class WhatsAppMagicLoginTest extends TestCase
         parent::tearDown();
     }
 
-    public function testMagicLinkCanOnlyBeUsedOnce()
+    public function testMagicLinkCanBeUsedMoreThanOnceUntilItExpires()
     {
         $user = factory(User::class)->create(['no_hp' => '081234567890']);
         $destination = route('dashboard');
@@ -65,8 +65,9 @@ class WhatsAppMagicLoginTest extends TestCase
         auth()->logout();
         $response = $this->get($magicUrl);
 
-        $response->assertRedirect(route('login'));
-        $this->assertGuest();
+        $response->assertRedirect($destination);
+        $this->assertAuthenticatedAs($user);
+        $this->assertNotNull(WhatsAppMagicLoginToken::first()->fresh()->used_at);
     }
 
     public function testExpiredMagicLinkCannotLogIn()
@@ -123,5 +124,26 @@ class WhatsAppMagicLoginTest extends TestCase
         $this->assertStringContainsString('/surat-keluar/3259/file?', $message);
         $this->assertStringNotContainsString('/masuk/whatsapp/', $message);
         $this->assertSame(0, WhatsAppMagicLoginToken::count());
+    }
+
+    public function testPlainSuratKeluarFileUrlUsesAutomaticLogin()
+    {
+        $user = factory(User::class)->create();
+        $fileUrl = route('surat-keluar.file', ['suratKeluar' => 3258]);
+
+        $message = app(WhatsAppMagicLinkService::class)->replaceApplicationUrls(
+            $user,
+            'File Surat Keluar: ' . $fileUrl
+        );
+
+        $this->assertStringContainsString('/masuk/whatsapp/', $message);
+        $this->assertStringNotContainsString($fileUrl, $message);
+        $this->assertSame(1, WhatsAppMagicLoginToken::count());
+        $token = WhatsAppMagicLoginToken::first();
+        $this->assertSame($fileUrl, $token->destination_url);
+        $this->assertTrue($token->expires_at->between(
+            now()->addDays(14)->subMinute(),
+            now()->addDays(14)->addMinute()
+        ));
     }
 }

@@ -949,6 +949,13 @@
             $('#editSuratTugasModal' + suratId).modal('show');
         }, 250);
     }
+
+    $(function () {
+        const directSuratTugasId = Number(@json((int) request('focus_surat_tugas')));
+        if (directSuratTugasId && @json(request('action')) === 'edit' && $('#editSuratTugasModal' + directSuratTugasId).length) {
+            setTimeout(function () { openSuratTugasEdit(directSuratTugasId); }, 250);
+        }
+    });
 </script>
 @endpush
 

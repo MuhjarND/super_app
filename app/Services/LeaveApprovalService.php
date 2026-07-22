@@ -8,7 +8,6 @@ use App\LeaveRequest;
 use App\User;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
@@ -18,15 +17,13 @@ class LeaveApprovalService
     protected $numberService;
     protected $documentService;
     protected $auditService;
-    protected $signaturePadService;
 
-    public function __construct(LeaveBalanceService $balanceService, LeaveNumberService $numberService, LeaveDocumentService $documentService, ActivityAuditService $auditService, SignaturePadService $signaturePadService)
+    public function __construct(LeaveBalanceService $balanceService, LeaveNumberService $numberService, LeaveDocumentService $documentService, ActivityAuditService $auditService)
     {
         $this->balanceService = $balanceService;
         $this->numberService = $numberService;
         $this->documentService = $documentService;
         $this->auditService = $auditService;
-        $this->signaturePadService = $signaturePadService;
     }
 
     public function buildApprovalSteps(LeaveRequest $leaveRequest)
@@ -78,11 +75,7 @@ class LeaveApprovalService
 
     public function submit(LeaveRequest $leaveRequest, $applicantSignatureData = null)
     {
-        $oldSignaturePath = $leaveRequest->applicant_signature_path;
-        $newSignaturePath = null;
-
-        try {
-            DB::transaction(function () use ($leaveRequest, $applicantSignatureData, &$newSignaturePath) {
+        DB::transaction(function () use ($leaveRequest) {
                 $steps = $this->buildApprovalSteps($leaveRequest);
                 if (empty($steps)) {
                     throw ValidationException::withMessages(['status' => 'Rantai approval cuti belum terbentuk.']);
@@ -92,11 +85,9 @@ class LeaveApprovalService
                     $leaveRequest->request_number = $number['formatted'];
                 }
 
-                $signature = $this->signaturePadService->resolveForUser($leaveRequest->user, 'cuti/applicant-signatures', $applicantSignatureData);
-                $newSignaturePath = $signature['path'];
-                $leaveRequest->applicant_signature_path = $signature['path'];
-                $leaveRequest->applicant_signature_mime = $signature['mime'];
-                $leaveRequest->applicant_signature_size = $signature['size'];
+                $leaveRequest->applicant_signature_path = null;
+                $leaveRequest->applicant_signature_mime = null;
+                $leaveRequest->applicant_signature_size = null;
 
                 $leaveRequest->status = LeaveRequest::STATUS_SUBMITTED;
                 $leaveRequest->submitted_at = Carbon::now();
@@ -112,18 +103,7 @@ class LeaveApprovalService
                     ]);
                 }
                 $this->balanceService->reserve($leaveRequest);
-            });
-        } catch (\Throwable $exception) {
-            if ($newSignaturePath) {
-                Storage::disk('public')->delete($newSignaturePath);
-            }
-
-            throw $exception;
-        }
-
-        if ($newSignaturePath && $oldSignaturePath && $oldSignaturePath !== $newSignaturePath) {
-            Storage::disk('public')->delete($oldSignaturePath);
-        }
+        });
     }
 
     public function approve(LeaveApproval $approval, User $actor, $note = null, $signatureData = null)
@@ -140,14 +120,13 @@ class LeaveApprovalService
             }
         }
 
-        DB::transaction(function () use ($approval, $actor, $note, $signatureData) {
-            $signature = $this->signaturePadService->resolveForUser($actor, 'cuti/approval-signatures', $signatureData);
+        DB::transaction(function () use ($approval, $actor, $note) {
             $approval->status = 'approved';
             $approval->action = 'approved';
             $approval->acted_at = Carbon::now();
-            $approval->signature_path = $signature['path'];
-            $approval->signature_mime = $signature['mime'];
-            $approval->signature_size = $signature['size'];
+            $approval->signature_path = null;
+            $approval->signature_mime = null;
+            $approval->signature_size = null;
             $approval->note = $note;
             $approval->save();
             $leaveRequest = $approval->leaveRequest;
@@ -245,14 +224,13 @@ class LeaveApprovalService
         }
 
         $previousStatus = $approval->status;
-        DB::transaction(function () use ($approval, $actor, $note, $signatureData, $approvalStatus, $requestStatus) {
-            $signature = $this->signaturePadService->resolveForUser($actor, 'cuti/approval-signatures', $signatureData);
+        DB::transaction(function () use ($approval, $actor, $note, $approvalStatus, $requestStatus) {
             $approval->status = $approvalStatus;
             $approval->action = $approvalStatus;
             $approval->acted_at = Carbon::now();
-            $approval->signature_path = $signature['path'];
-            $approval->signature_mime = $signature['mime'];
-            $approval->signature_size = $signature['size'];
+            $approval->signature_path = null;
+            $approval->signature_mime = null;
+            $approval->signature_size = null;
             $approval->note = $note;
             $approval->save();
 

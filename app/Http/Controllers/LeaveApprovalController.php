@@ -34,11 +34,8 @@ class LeaveApprovalController extends Controller
     public function approve(ApprovalActionRequest $request, LeaveApproval $leaveApproval)
     {
         $this->abortUnlessCanAct($leaveApproval);
-        $request->validate([
-            'signature_data' => ['nullable', 'string'],
-        ]);
         $oldStatus = $leaveApproval->leaveRequest->status;
-        $this->approvalService->approve($leaveApproval, auth()->user(), $request->note, $request->signature_data);
+        $this->approvalService->approve($leaveApproval, auth()->user(), $request->note);
         event(new LeaveRequestStatusChanged($leaveApproval->leaveRequest->fresh(), auth()->user(), $oldStatus, $leaveApproval->leaveRequest->fresh()->status, 'approved'));
         return back()->with('success', 'Approval cuti berhasil diproses.');
     }
@@ -58,12 +55,11 @@ class LeaveApprovalController extends Controller
         $this->abortUnlessCanAct($leaveApproval);
         $request->validate([
             'note' => ['required', 'string', 'max:2000'],
-            'signature_data' => ['nullable', 'string'],
         ], [
             'note.required' => 'Catatan perubahan wajib diisi.',
         ]);
         $oldStatus = $leaveApproval->leaveRequest->status;
-        $this->approvalService->requestChange($leaveApproval, auth()->user(), $request->note, $request->signature_data);
+        $this->approvalService->requestChange($leaveApproval, auth()->user(), $request->note);
         event(new LeaveRequestStatusChanged($leaveApproval->leaveRequest->fresh(), auth()->user(), $oldStatus, $leaveApproval->leaveRequest->fresh()->status, 'changed'));
         return back()->with('success', 'Pengajuan cuti dikembalikan untuk perubahan.');
     }
@@ -73,12 +69,11 @@ class LeaveApprovalController extends Controller
         $this->abortUnlessCanAct($leaveApproval);
         $request->validate([
             'note' => ['required', 'string', 'max:2000'],
-            'signature_data' => ['nullable', 'string'],
         ], [
             'note.required' => 'Alasan penangguhan wajib diisi.',
         ]);
         $oldStatus = $leaveApproval->leaveRequest->status;
-        $this->approvalService->defer($leaveApproval, auth()->user(), $request->note, $request->signature_data);
+        $this->approvalService->defer($leaveApproval, auth()->user(), $request->note);
         event(new LeaveRequestStatusChanged($leaveApproval->leaveRequest->fresh(), auth()->user(), $oldStatus, $leaveApproval->leaveRequest->fresh()->status, 'deferred'));
         return back()->with('success', 'Pengajuan cuti ditangguhkan.');
     }

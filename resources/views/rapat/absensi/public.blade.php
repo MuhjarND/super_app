@@ -383,9 +383,8 @@
                     </div>
 
                     <div class="field">
-                        <label>Tanda Tangan Digital</label>
                         <div style="border:1px solid #dbe4ff;background:#eef2ff;border-radius:16px;padding:12px 14px;color:#334155;font-size:.86rem;font-weight:600;">
-                            Absensi peserta undangan memakai tanda tangan yang tersimpan pada Profil Saya.
+                            Kehadiran akan tercatat secara elektronik dan ditampilkan sebagai QR validasi pada rekap absensi.
                         </div>
                     </div>
 
@@ -406,13 +405,8 @@
                     </div>
 
                     <div class="field">
-                        <label>Tanda Tangan Digital</label>
-                        <div class="signature-wrap">
-                            <div class="signature-toolbar">
-                                <span class="hint" style="margin:0;">Gunakan tanda tangan yang jelas agar rekap mudah diverifikasi.</span>
-                                <button type="button" class="btn btn-secondary" onclick="clearSignature('guestCanvas')">Ulangi</button>
-                            </div>
-                            <canvas id="guestCanvas" class="signature-canvas"></canvas>
+                        <div style="border:1px solid #dbe4ff;background:#eef2ff;border-radius:16px;padding:12px 14px;color:#334155;font-size:.86rem;font-weight:600;">
+                            Kehadiran peserta eksternal akan dicatat secara elektronik menggunakan QR validasi.
                         </div>
                     </div>
 
@@ -582,16 +576,10 @@
 
             document.getElementById('guestAttendanceForm').addEventListener('submit', async function (event) {
                 event.preventDefault();
-                if (!canvases.guestCanvas.state.dirty) {
-                    showAlert('Tanda tangan external wajib diisi.', 'error');
-                    return;
-                }
-
                 try {
                     const result = await submitForm('{{ route('rapat.absensi.public.guest', $rapat->public_code) }}', {
                         guest_name: document.getElementById('guest_name').value,
-                        guest_instansi: document.getElementById('guest_instansi').value,
-                        signature_data: document.getElementById('guestCanvas').toDataURL('image/png')
+                        guest_instansi: document.getElementById('guest_instansi').value
                     }, 'Mohon tunggu, absensi external sedang diproses.');
                     showAlert(result.message, 'success');
                     setTimeout(function () { window.location.reload(); }, 800);
@@ -602,7 +590,6 @@
         }
 
         setupTabs();
-        initSignature('guestCanvas');
         bindForms();
 
         window.addEventListener('resize', function () {

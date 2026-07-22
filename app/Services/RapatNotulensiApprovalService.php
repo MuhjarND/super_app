@@ -12,12 +12,10 @@ use Illuminate\Support\Facades\DB;
 class RapatNotulensiApprovalService
 {
     protected $auditService;
-    protected $signaturePadService;
 
-    public function __construct(ActivityAuditService $auditService, SignaturePadService $signaturePadService)
+    public function __construct(ActivityAuditService $auditService)
     {
         $this->auditService = $auditService;
-        $this->signaturePadService = $signaturePadService;
     }
 
     public function syncWorkflow(RapatNotulensi $notulensi, $isResubmission = false)
@@ -81,18 +79,17 @@ class RapatNotulensiApprovalService
     {
         $previousStatus = $approval->status;
 
-        DB::transaction(function () use ($approval, $actor, $catatan, $signatureData) {
+        DB::transaction(function () use ($approval, $actor, $catatan) {
             $approval->refresh();
             $this->guardDecision($approval, $actor);
-            $signature = $this->signaturePadService->resolveForUser($actor, 'rapat/notulensi-approval-signatures', $signatureData);
 
             $approval->update([
                 'status' => 'approved',
                 'catatan' => $catatan,
                 'acted_at' => Carbon::now('Asia/Jayapura'),
-                'signature_path' => $signature['path'],
-                'signature_mime' => $signature['mime'],
-                'signature_size' => $signature['size'],
+                'signature_path' => null,
+                'signature_mime' => null,
+                'signature_size' => null,
             ]);
 
             $this->logHistory($approval, 'approved', $catatan);

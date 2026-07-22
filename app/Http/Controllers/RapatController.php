@@ -30,12 +30,12 @@ class RapatController extends Controller
         $this->documentService = $documentService;
     }
 
-    public function index()
+    public function index(\Illuminate\Http\Request $request)
     {
         abort_unless(auth()->user()->canAccessMeetingModule(), 403);
 
         $user = auth()->user();
-        $rapats = Rapat::visibleTo($user)
+        $rapatQuery = Rapat::visibleTo($user)
             ->with([
                 'kategoriRapat',
                 'kategoriSuratKode.parent.parent.parent',
@@ -46,7 +46,13 @@ class RapatController extends Controller
                 'suratKeluar',
                 'approvals.approver',
                 'approvalHistories.approver',
-            ])
+            ]);
+
+        if ($request->filled('focus')) {
+            $rapatQuery->orderByRaw('CASE WHEN rapats.id = ? THEN 0 ELSE 1 END', [(int) $request->focus]);
+        }
+
+        $rapats = $rapatQuery
             ->orderByDesc('tanggal')
             ->orderByDesc('waktu_mulai')
             ->get();

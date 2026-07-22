@@ -66,11 +66,7 @@ class SuratKeluarApprovalController extends Controller
         $user = auth()->user();
         abort_unless($user->canApproveSuratKeluarTemplate(), 403);
         abort_unless($user->isSuperAdmin() || $user->canActAsAssignedUser($suratKeluarApproval->approver_id), 403);
-        $request->validate([
-            'signature_data' => ['nullable', 'string'],
-        ]);
-
-        $this->approvalService->approve($suratKeluarApproval, $user, $request->note, $request->signature_data);
+        $this->approvalService->approve($suratKeluarApproval, $user, $request->note);
 
         return back()->with('success', 'Surat keluar berhasil di-approve.');
     }

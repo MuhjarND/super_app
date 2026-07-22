@@ -3,9 +3,9 @@
 namespace Tests\Unit;
 
 use App\Jabatan;
+use App\Services\DocumentQrCodeService;
 use App\Services\PdfVerificationService;
 use App\Services\RapatDocumentService;
-use App\Services\SignaturePadService;
 use App\User;
 use PHPUnit\Framework\TestCase;
 use ReflectionMethod;
@@ -24,7 +24,7 @@ class RapatDocumentSignatoryTest extends TestCase
         $approver->setRelation('jabatan', $jabatan);
 
         $service = new RapatDocumentService(
-            $this->createMock(SignaturePadService::class),
+            $this->createMock(DocumentQrCodeService::class),
             $this->createMock(PdfVerificationService::class)
         );
         $method = new ReflectionMethod($service, 'resolveSignatoryTitle');

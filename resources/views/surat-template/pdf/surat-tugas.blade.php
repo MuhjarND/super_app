@@ -10,6 +10,9 @@
     $kotaTtd = trim((string) ($fieldValues['kota_tanda_tangan'] ?? '')) ?: 'Manokwari';
     $lokasi = trim((string) ($fieldValues['lokasi'] ?? '')) ?: '-';
     $tanggalTugas = $tanggalMulai === $tanggalSelesai ? $tanggalMulai : $tanggalMulai . ' s/d ' . $tanggalSelesai;
+    $namaPenandaTangan = \App\Support\PersonNameFormatter::withoutTitles(
+        $penandaTangan['nama'] ?? (optional($suratKeluar->creator)->name ?: 'Pejabat Penandatangan')
+    );
 @endphp
 
 <style>
@@ -35,9 +38,9 @@
     .st-sign { width:245px; margin-left:auto; text-align:center; margin-top:14px; page-break-inside:avoid; }
     .st-sign-city { margin-bottom:2px; }
     .st-sign-role { display:block; margin-bottom:0; }
-    .st-sign-image-wrap { width:100%; text-align:center; margin:0 auto -16px; }
-    .st-sign-image { width:172px; height:88px; display:block; margin:0 auto; object-fit:contain; }
-    .st-sign-placeholder { display:block; height:72px; }
+    .st-sign-image-wrap { width:68px; height:68px; text-align:center; margin:4px auto 3px; page-break-inside:avoid; }
+    .st-sign-image { width:68px; height:68px; display:block; margin:0 auto; object-fit:contain; }
+    .st-sign-placeholder { display:block; height:68px; }
     .st-sign-name { display:block; font-weight:700; line-height:1.2; margin-top:0; position:relative; z-index:1; }
     .st-sign-nip { display:block; margin-top:2px; position:relative; z-index:1; }
 </style>
@@ -128,12 +131,12 @@
         <span class="st-sign-role">{{ $penandaTangan['jabatan_ttd'] ?? 'Ketua' }},</span>
         <div class="st-sign-image-wrap">
             @if(!empty($approvalSignature['image']))
-                <img class="st-sign-image" src="{{ $approvalSignature['image'] }}" alt="Tanda Tangan Digital">
+                <img class="st-sign-image" src="{{ $approvalSignature['image'] }}" alt="QR tanda tangan elektronik">
             @else
                 <span class="st-sign-placeholder"></span>
             @endif
         </div>
-        <span class="st-sign-name">{{ $penandaTangan['nama'] ?? (optional($suratKeluar->creator)->name ?: 'Pejabat Penandatangan') }}</span>
+        <span class="st-sign-name">{{ $namaPenandaTangan ?: 'Pejabat Penandatangan' }}</span>
         <span class="st-sign-nip">NIP. {{ $penandaTangan['nip'] ?? '-' }}</span>
     </div>
 </div>

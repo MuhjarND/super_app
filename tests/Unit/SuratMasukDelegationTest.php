@@ -72,6 +72,14 @@ class SuratMasukDelegationTest extends TestCase
         $this->assertFalse($delegate->canFollowUpDisposisi($disposisi));
     }
 
+    public function test_active_plt_position_is_available_as_an_approval_option_label()
+    {
+        $jabatan = $this->jabatan(3, 'SEK', 'Sekretaris');
+        $delegate = $this->delegatedUser(20, 'Pelaksana Tugas', $jabatan, 'plt', [20]);
+
+        $this->assertSame(['PLT Sekretaris'], $delegate->activeDelegationLabels()->all());
+    }
+
     protected function delegatedUser($id, $name, Jabatan $jabatan, $type, array $assignmentIds)
     {
         $user = new SuratMasukAssignmentTestUser();

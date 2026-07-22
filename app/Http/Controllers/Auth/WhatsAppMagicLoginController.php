@@ -15,7 +15,6 @@ class WhatsAppMagicLoginController extends Controller
         $magicToken = DB::transaction(function () use ($token) {
             $record = WhatsAppMagicLoginToken::with('user')
                 ->where('token_hash', hash('sha256', (string) $token))
-                ->whereNull('used_at')
                 ->lockForUpdate()
                 ->first();
 
@@ -23,6 +22,7 @@ class WhatsAppMagicLoginController extends Controller
                 return null;
             }
 
+            // Keep the last access time for audit without invalidating the reusable link.
             $record->forceFill(['used_at' => now()])->save();
 
             return $record;

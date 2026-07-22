@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Services\SignaturePadService;
 use App\Services\WhatsAppNotificationService;
 use App\SupplyItem;
 use App\SupplyPickup;
@@ -17,13 +16,11 @@ use Illuminate\Validation\ValidationException;
 class SupplyRequestController extends Controller
 {
     protected $whatsAppService;
-    protected $signaturePadService;
 
-    public function __construct(WhatsAppNotificationService $whatsAppService, SignaturePadService $signaturePadService)
+    public function __construct(WhatsAppNotificationService $whatsAppService)
     {
         $this->middleware('auth');
         $this->whatsAppService = $whatsAppService;
-        $this->signaturePadService = $signaturePadService;
     }
 
     public function index(Request $request)
@@ -116,16 +113,13 @@ class SupplyRequestController extends Controller
         abort_unless($supplyRequest->status === SupplyRequest::STATUS_PENDING, 422, 'Pengajuan ini sudah tidak dapat diproses.');
 
         $request->validate([
-            'signature_data' => ['nullable', 'string'],
             'operator_note' => ['nullable', 'string', 'max:1000'],
         ]);
 
         $supplyRequest->load(['requester', 'items.item']);
         $this->ensureStockAvailable($supplyRequest);
 
-        $signature = $this->signaturePadService->resolveForUser(auth()->user(), 'persediaan/paraf-penerima', $request->input('signature_data'));
-
-        DB::transaction(function () use ($supplyRequest, $request, $signature) {
+        DB::transaction(function () use ($supplyRequest, $request) {
             $freshRequest = SupplyRequest::whereKey($supplyRequest->id)->lockForUpdate()->firstOrFail();
             if ($freshRequest->status !== SupplyRequest::STATUS_PENDING) {
                 throw ValidationException::withMessages(['status' => 'Pengajuan ini sudah tidak dapat diproses.']);
@@ -160,9 +154,9 @@ class SupplyRequestController extends Controller
                     'quantity' => (int) $requestItem->quantity_requested,
                     'purpose' => $freshRequest->purpose,
                     'pickup_date' => Carbon::now('Asia/Jayapura')->toDateString(),
-                    'receiver_signature_path' => $signature['path'],
-                    'receiver_signature_mime' => $signature['mime'],
-                    'receiver_signature_size' => $signature['size'],
+                    'receiver_signature_path' => null,
+                    'receiver_signature_mime' => null,
+                    'receiver_signature_size' => null,
                     'created_by' => auth()->id(),
                 ]);
             }
@@ -184,7 +178,7 @@ class SupplyRequestController extends Controller
             'Barang persediaan telah diserahkan dan tercatat pada aplikasi.'
         );
 
-        return redirect()->route('persediaan.pickups.index')->with('success', 'Barang berhasil diserahkan dan paraf penerima tersimpan.');
+        return redirect()->route('persediaan.pickups.index')->with('success', 'Barang berhasil diserahkan dan bukti penerimaan QR tersimpan.');
     }
 
     public function reject(Request $request, SupplyRequest $supplyRequest)

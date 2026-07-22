@@ -142,12 +142,11 @@
                 <form method="POST" action="{{ route('persediaan.requests.fulfill', $supplyRequest) }}" class="mb-0">
                     @csrf
                     <div class="modal-body py-2 px-3">
-                        <div class="alert alert-info py-2 px-3 mb-2 supply-note-alert">Serah terima memakai tanda tangan profil user penerima.</div>
+                        <div class="alert alert-info py-2 px-3 mb-2 supply-note-alert">Serah terima akan dicatat dengan bukti QR yang dapat diverifikasi.</div>
                         <div class="form-group mb-2">
                             <label class="mb-1">Catatan</label>
                             <textarea name="operator_note" rows="2" class="form-control form-control-sm" placeholder="Opsional"></textarea>
                         </div>
-                        @include('partials.profile-signature-notice')
                     </div>
                     <div class="modal-footer py-2 px-3">
                         <button type="button" class="btn btn-sm btn-outline-secondary" data-dismiss="modal">Batal</button>

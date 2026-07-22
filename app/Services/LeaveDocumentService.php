@@ -20,12 +20,12 @@ use setasign\Fpdi\Fpdi;
 
 class LeaveDocumentService
 {
-    protected $signaturePadService;
+    protected $qrCodeService;
     protected $pdfVerificationService;
 
-    public function __construct(SignaturePadService $signaturePadService, PdfVerificationService $pdfVerificationService)
+    public function __construct(DocumentQrCodeService $qrCodeService, PdfVerificationService $pdfVerificationService)
     {
-        $this->signaturePadService = $signaturePadService;
+        $this->qrCodeService = $qrCodeService;
         $this->pdfVerificationService = $pdfVerificationService;
     }
 
@@ -158,14 +158,14 @@ class LeaveDocumentService
         $approval->loadMissing('approver.jabatan');
 
         return [
-            'valid' => $approval->status === 'approved',
+            'valid' => in_array($approval->status, ['approved', 'changed', 'deferred'], true),
             'document_number' => $leaveRequest->letter_number ?: $leaveRequest->request_number ?: '-',
             'document_type' => 'Formulir Permintaan dan Pemberian Cuti',
             'leave_type' => optional($leaveRequest->leaveType)->name ?: '-',
             'period' => $leaveRequest->period_label,
             'role_label' => $approval->role_label,
             'signer_name' => optional($approval->approver)->name ?: '-',
-            'signer_title' => optional(optional($approval->approver)->jabatan)->nama ?: (optional($approval->approver)->jabatan_keterangan ?: '-'),
+            'signer_title' => optional($approval->approver)->jabatan_keterangan ?: '-',
             'acted_at' => optional($approval->acted_at)->translatedFormat('d F Y H:i') . ' WIT',
             'status' => $approval->status_label,
             'verification_url' => $this->signatureVerificationUrl($leaveRequest, $approval),
@@ -176,17 +176,19 @@ class LeaveDocumentService
     {
         $leaveRequest->loadMissing(['user.jabatan', 'leaveType']);
 
+        $isSigned = (bool) $leaveRequest->submitted_at || !in_array($leaveRequest->status, ['draft'], true);
+
         return [
-            'valid' => !empty($leaveRequest->applicant_signature_path),
+            'valid' => $isSigned,
             'document_number' => $leaveRequest->letter_number ?: $leaveRequest->request_number ?: '-',
             'document_type' => 'Formulir Permintaan dan Pemberian Cuti',
             'leave_type' => optional($leaveRequest->leaveType)->name ?: '-',
             'period' => $leaveRequest->period_label,
             'role_label' => 'Pemohon Cuti',
             'signer_name' => optional($leaveRequest->user)->name ?: '-',
-            'signer_title' => optional(optional($leaveRequest->user)->jabatan)->nama ?: (optional($leaveRequest->user)->jabatan_keterangan ?: '-'),
+            'signer_title' => optional($leaveRequest->user)->jabatan_keterangan ?: '-',
             'acted_at' => optional($leaveRequest->submitted_at ?: $leaveRequest->created_at)->translatedFormat('d F Y H:i') . ' WIT',
-            'status' => !empty($leaveRequest->applicant_signature_path) ? 'Ditandatangani Pemohon' : 'Belum Ditandatangani',
+            'status' => $isSigned ? 'Ditandatangani Pemohon melalui QR' : 'Belum Ditandatangani',
             'verification_url' => $this->applicantSignatureVerificationUrl($leaveRequest),
         ];
     }
@@ -237,7 +239,7 @@ class LeaveDocumentService
             'verifier' => $verifier,
             'atasan' => $atasan,
             'ppk' => $ppk,
-            'pemohonSignature' => $this->signaturePadService->toDataUri($leaveRequest->applicant_signature_path),
+            'pemohonSignature' => $this->makeApplicantSignatureQr($leaveRequest),
             'verifierParaf' => $this->buildParaf($verifier),
             'atasanSignature' => $this->makeApprovalSignatureImage($atasan),
             'ppkSignature' => $this->makeApprovalSignatureImage($ppk),
@@ -247,7 +249,10 @@ class LeaveDocumentService
             })->values(),
             'annualLeaveRows' => $this->buildAnnualLeaveRows($leaveRequest),
             'attachmentNames' => $leaveRequest->documents->pluck('original_name')->filter()->values(),
-            'workPeriodText' => $this->buildWorkPeriodText(optional($leaveRequest->user)->tmt_pns, $leaveRequest->start_date),
+            'employeeTitle' => optional($leaveRequest->user)->jabatan_keterangan ?: '-',
+            'employeeUnit' => optional($leaveRequest->user)->satuan_kerja ?: '-',
+            'employeeRank' => optional($leaveRequest->user)->golongan_ruang ?: '-',
+            'workPeriodText' => $this->buildWorkPeriodText(optional($leaveRequest->user)->tmt_pns, now()),
         ];
     }
 
@@ -256,8 +261,7 @@ class LeaveDocumentService
         return $leaveRequest->approvals
             ->filter(function ($approval) {
                 return in_array($approval->status, ['approved', 'changed', 'deferred'], true)
-                    && $approval->role_name !== 'verifikator_dokumen'
-                    && !empty($approval->signature_path);
+                    && $approval->role_name !== 'verifikator_dokumen';
             })
             ->map(function ($approval) {
                 return [
@@ -266,7 +270,7 @@ class LeaveDocumentService
                     'signature' => $this->makeApprovalSignatureImage($approval),
                     'name' => optional($approval->approver)->name ?: '-',
                     'nip' => optional($approval->approver)->nip ?: '-',
-                    'title' => optional(optional($approval->approver)->jabatan)->nama ?: (optional($approval->approver)->jabatan_keterangan ?: '-'),
+                    'title' => optional($approval->approver)->jabatan_keterangan ?: '-',
                     'acted_at' => optional($approval->acted_at)->translatedFormat('d/m/Y'),
                 ];
             })
@@ -315,7 +319,20 @@ class LeaveDocumentService
             return null;
         }
 
-        return $this->signaturePadService->toDataUri($approval->signature_path);
+        return $this->qrCodeService->dataUri(
+            $this->signatureVerificationUrl($approval->leaveRequest, $approval),
+            120
+        );
+    }
+
+    protected function makeApplicantSignatureQr(LeaveRequest $leaveRequest)
+    {
+        $isSigned = (bool) $leaveRequest->submitted_at || !in_array($leaveRequest->status, ['draft'], true);
+        if (!$isSigned) {
+            return null;
+        }
+
+        return $this->qrCodeService->dataUri($this->applicantSignatureVerificationUrl($leaveRequest), 120);
     }
 
     protected function signatureVerificationUrl(LeaveRequest $leaveRequest, LeaveApproval $approval)
@@ -353,7 +370,7 @@ class LeaveDocumentService
         $shifted = $start->copy()->addYears($years);
         $months = $shifted->diffInMonths($end);
 
-        return sprintf('%d tahun %02d bulan', $years, $months);
+        return sprintf('%d Tahun %d Bulan', $years, $months);
     }
 
     protected function normalizeDate($value)
@@ -444,11 +461,11 @@ class LeaveDocumentService
     {
         $signers = collect();
 
-        if (!empty($leaveRequest->applicant_signature_path)) {
+        if ($leaveRequest->submitted_at || !in_array($leaveRequest->status, ['draft'], true)) {
             $signers->push([
                 'name' => optional($leaveRequest->user)->name ?: '-',
                 'role' => 'Pemohon Cuti',
-                'title' => optional(optional($leaveRequest->user)->jabatan)->nama ?: optional($leaveRequest->user)->jabatan_keterangan,
+                'title' => optional($leaveRequest->user)->jabatan_keterangan ?: '-',
                 'signed_at' => $leaveRequest->submitted_at ? $leaveRequest->submitted_at->copy()->timezone('Asia/Jayapura')->translatedFormat('d F Y H:i') . ' WIT' : '-',
             ]);
         }
@@ -461,7 +478,7 @@ class LeaveDocumentService
                 return [
                     'name' => optional($approval->approver)->name ?: '-',
                     'role' => $approval->role_label,
-                    'title' => optional(optional($approval->approver)->jabatan)->nama ?: optional($approval->approver)->jabatan_keterangan,
+                    'title' => optional($approval->approver)->jabatan_keterangan ?: '-',
                     'signed_at' => $approval->acted_at ? $approval->acted_at->copy()->timezone('Asia/Jayapura')->translatedFormat('d F Y H:i') . ' WIT' : '-',
                 ];
             })
@@ -517,7 +534,7 @@ class LeaveDocumentService
         }
 
         if ((int) $balance->reserved_days > 0) {
-            return sprintf('Reservasi %d hari', (int) $balance->reserved_days);
+            return sprintf('Diambil %d hari', (int) $balance->reserved_days);
         }
 
         return (string) (int) $balance->remaining_balance;

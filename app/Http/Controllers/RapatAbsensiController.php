@@ -4,27 +4,26 @@ namespace App\Http\Controllers;
 
 use App\Rapat;
 use App\RapatAttendance;
+use App\Services\DocumentQrCodeService;
 use App\Services\RapatDocumentService;
-use App\Services\SignaturePadService;
 use App\Services\WhatsAppNotificationService;
 use Barryvdh\DomPDF\Facade as PDF;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
+use Illuminate\Support\Facades\URL;
 
 class RapatAbsensiController extends Controller
 {
     protected $whatsAppService;
     protected $documentService;
-    protected $signaturePadService;
+    protected $qrCodeService;
 
-    public function __construct(WhatsAppNotificationService $whatsAppService, RapatDocumentService $documentService, SignaturePadService $signaturePadService)
+    public function __construct(WhatsAppNotificationService $whatsAppService, RapatDocumentService $documentService, DocumentQrCodeService $qrCodeService)
     {
-        $this->middleware('auth')->except(['publicShow', 'publicStore', 'publicStoreGuest']);
+        $this->middleware('auth')->except(['publicShow', 'publicStore', 'publicStoreGuest', 'verifyAttendance']);
         $this->whatsAppService = $whatsAppService;
         $this->documentService = $documentService;
-        $this->signaturePadService = $signaturePadService;
+        $this->qrCodeService = $qrCodeService;
     }
 
     public function index()
@@ -73,7 +72,14 @@ class RapatAbsensiController extends Controller
     {
         abort_unless(auth()->user()->canViewRapat($attendance->rapat), 403);
 
-        return response()->file(Storage::disk('public')->path($attendance->signature_path));
+        return redirect()->away($this->attendanceVerificationUrl($attendance));
+    }
+
+    public function verifyAttendance(RapatAttendance $attendance)
+    {
+        $attendance->loadMissing(['rapat', 'user.jabatan']);
+
+        return view('rapat.verification.attendance', compact('attendance'));
     }
 
     public function pdf(Rapat $rapat)
@@ -101,12 +107,14 @@ class RapatAbsensiController extends Controller
             return [
                 'user' => $participant,
                 'attendance' => $attendance,
-                'signature_data_uri' => $attendance ? $this->resolveStorageFileDataUri($attendance->signature_path) : null,
+                'signature_data_uri' => $attendance
+                    ? $this->qrCodeService->dataUri($this->attendanceVerificationUrl($attendance), 104)
+                    : null,
             ];
         });
 
         $guestAttendances = $rapat->guestAttendances->sortBy('attended_at')->values()->map(function ($attendance) {
-            $attendance->signature_data_uri = $this->resolveStorageFileDataUri($attendance->signature_path);
+            $attendance->signature_data_uri = $this->qrCodeService->dataUri($this->attendanceVerificationUrl($attendance), 104);
             return $attendance;
         });
 
@@ -219,8 +227,6 @@ class RapatAbsensiController extends Controller
             ], 422);
         }
 
-        $signature = $this->signaturePadService->resolveForUser($participant, 'rapat/absensi/internal');
-
         RapatAttendance::create([
             'rapat_id' => $rapat->id,
             'user_id' => $participant->id,
@@ -228,9 +234,9 @@ class RapatAbsensiController extends Controller
             'participant_name_snapshot' => $participant->name,
             'participant_jabatan_snapshot' => $participant->jabatan_keterangan ?: optional($participant->jabatan)->nama,
             'source' => 'public',
-            'signature_path' => $signature['path'],
-            'signature_mime' => $signature['mime'],
-            'signature_size' => $signature['size'],
+            'signature_path' => null,
+            'signature_mime' => null,
+            'signature_size' => null,
             'attended_at' => Carbon::now('Asia/Jayapura'),
             'created_ip' => $request->ip(),
         ]);
@@ -248,13 +254,9 @@ class RapatAbsensiController extends Controller
         $data = $request->validate([
             'guest_name' => ['required', 'string', 'max:255'],
             'guest_instansi' => ['nullable', 'string', 'max:255'],
-            'signature_data' => ['required', 'string'],
         ], [
             'guest_name.required' => 'Nama tamu wajib diisi.',
-            'signature_data.required' => 'Tanda tangan wajib diisi.',
         ]);
-
-        $signature = $this->storeSignature($data['signature_data'], 'guest');
 
         RapatAttendance::create([
             'rapat_id' => $rapat->id,
@@ -263,9 +265,9 @@ class RapatAbsensiController extends Controller
             'participant_jabatan_snapshot' => $data['guest_instansi'] ?? null,
             'guest_instansi' => $data['guest_instansi'] ?? null,
             'source' => 'guest',
-            'signature_path' => $signature['path'],
-            'signature_mime' => $signature['mime'],
-            'signature_size' => $signature['size'],
+            'signature_path' => null,
+            'signature_mime' => null,
+            'signature_size' => null,
             'attended_at' => Carbon::now('Asia/Jayapura'),
             'created_ip' => $request->ip(),
         ]);
@@ -279,27 +281,6 @@ class RapatAbsensiController extends Controller
     protected function findPublicRapat($publicCode)
     {
         return Rapat::where('public_code', $publicCode)->firstOrFail();
-    }
-
-    protected function storeSignature($dataUri, $prefix)
-    {
-        if (!preg_match('/^data:image\/png;base64,/', $dataUri)) {
-            abort(422, 'Format tanda tangan tidak valid.');
-        }
-
-        $binary = base64_decode(preg_replace('/^data:image\/png;base64,/', '', $dataUri), true);
-        if ($binary === false) {
-            abort(422, 'Data tanda tangan tidak valid.');
-        }
-
-        $path = 'rapat/signatures/' . $prefix . '-' . Str::uuid() . '.png';
-        Storage::disk('public')->put($path, $binary);
-
-        return [
-            'path' => $path,
-            'mime' => 'image/png',
-            'size' => strlen($binary),
-        ];
     }
 
     protected function resolveKopAbsenImage()
@@ -320,17 +301,8 @@ class RapatAbsensiController extends Controller
         return null;
     }
 
-    protected function resolveStorageFileDataUri($relativePath)
+    protected function attendanceVerificationUrl(RapatAttendance $attendance)
     {
-        if (!$relativePath) {
-            return null;
-        }
-
-        $absolutePath = Storage::disk('public')->path(ltrim($relativePath, '/'));
-        if (!file_exists($absolutePath)) {
-            return null;
-        }
-
-        return app(\App\Services\SignaturePadService::class)->dataUriFromPublicPath($absolutePath);
+        return URL::signedRoute('rapat.attendance.verify', ['attendance' => $attendance->id]);
     }
 }

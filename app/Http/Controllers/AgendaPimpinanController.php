@@ -18,13 +18,19 @@ class AgendaPimpinanController extends Controller
         $this->whatsAppService = $whatsAppService;
     }
 
-    public function index()
+    public function index(Request $request)
     {
         $user = auth()->user();
         abort_unless($user->canAccessAgendaPimpinan(), 403);
 
-        $agendas = AgendaPimpinan::visibleTo($user)
-            ->with(['creator', 'suratMasuk', 'recipients.jabatan'])
+        $agendaQuery = AgendaPimpinan::visibleTo($user)
+            ->with(['creator', 'suratMasuk', 'recipients.jabatan']);
+
+        if ($request->filled('focus')) {
+            $agendaQuery->orderByRaw('CASE WHEN agenda_pimpinans.id = ? THEN 0 ELSE 1 END', [(int) $request->focus]);
+        }
+
+        $agendas = $agendaQuery
             ->orderByDesc('tanggal_kegiatan')
             ->orderByDesc('waktu')
             ->get();

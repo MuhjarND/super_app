@@ -40,7 +40,9 @@ class UserManagementController extends Controller
                 $builder->where('name', 'like', "%{$search}%")
                     ->orWhere('email', 'like', "%{$search}%")
                     ->orWhere('nip', 'like', "%{$search}%")
-                    ->orWhere('no_hp', 'like', "%{$search}%");
+                    ->orWhere('no_hp', 'like', "%{$search}%")
+                    ->orWhere('golongan_ruang', 'like', "%{$search}%")
+                    ->orWhere('satuan_kerja', 'like', "%{$search}%");
             });
         }
 
@@ -62,7 +64,10 @@ class UserManagementController extends Controller
         $roles = Role::orderBy('display_name')->get();
         $jabatans = Jabatan::with('unit')->orderBy('nama')->get();
         $units = Unit::orderBy('nama')->get();
-        $supervisorOptions = User::with('jabatan')->active()->ordered()->get(['id', 'name', 'nip', 'jabatan_id', 'hirarki']);
+        $supervisorOptions = User::with(['jabatan', 'activeJabatanDelegations.jabatan'])
+            ->active()
+            ->ordered()
+            ->get(['id', 'name', 'nip', 'jabatan_id', 'hirarki']);
         $filters = $request->only(['search', 'role_id', 'jabatan_id', 'unit_id']);
         $whatsAppEnabled = $this->whatsAppService->isEnabled();
 
@@ -89,6 +94,9 @@ class UserManagementController extends Controller
                 'hirarki' => $data['hirarki'] ?? 999,
                 'nip' => $data['nip'] ?? null,
                 'no_hp' => $data['no_hp'] ?? null,
+                'tmt_pns' => $data['tmt_pns'] ?? null,
+                'golongan_ruang' => $data['golongan_ruang'] ?? null,
+                'satuan_kerja' => $data['satuan_kerja'] ?? null,
                 'atasan_langsung_id' => $data['atasan_langsung_id'] ?? null,
                 'pejabat_berwenang_id' => $data['pejabat_berwenang_id'] ?? null,
             ]);
@@ -120,6 +128,9 @@ class UserManagementController extends Controller
                 'hirarki' => $data['hirarki'] ?? 999,
                 'nip' => $data['nip'] ?? null,
                 'no_hp' => $data['no_hp'] ?? null,
+                'tmt_pns' => $data['tmt_pns'] ?? null,
+                'golongan_ruang' => $data['golongan_ruang'] ?? null,
+                'satuan_kerja' => $data['satuan_kerja'] ?? null,
                 'atasan_langsung_id' => $data['atasan_langsung_id'] ?? null,
                 'pejabat_berwenang_id' => $data['pejabat_berwenang_id'] ?? null,
             ];
@@ -221,6 +232,9 @@ class UserManagementController extends Controller
             'hirarki' => ['nullable', 'integer', 'min:1'],
             'nip' => ['nullable', 'string', 'max:50'],
             'no_hp' => ['nullable', 'string', 'max:50'],
+            'tmt_pns' => ['nullable', 'date', 'before_or_equal:today'],
+            'golongan_ruang' => ['nullable', 'string', 'max:100'],
+            'satuan_kerja' => ['nullable', 'string', 'max:255'],
             'atasan_langsung_id' => array_filter(['nullable', Rule::exists('users', 'id')->where('status_aktif_pegawai', true), $userId ? Rule::notIn([$userId]) : null]),
             'pejabat_berwenang_id' => array_filter(['nullable', Rule::exists('users', 'id')->where('status_aktif_pegawai', true), $userId ? Rule::notIn([$userId]) : null]),
             'delegasi_tipe' => ['nullable', 'required_with:delegasi_jabatan_id', 'in:plh,plt'],
@@ -270,7 +284,10 @@ class UserManagementController extends Controller
         $data['roles'] = Role::orderBy('display_name')->get();
         $data['jabatans'] = Jabatan::with('unit')->orderBy('nama')->get();
         $data['units'] = Unit::orderBy('nama')->get();
-        $data['supervisorOptions'] = User::with('jabatan')->active()->ordered()->get(['id', 'name', 'nip', 'jabatan_id', 'hirarki']);
+        $data['supervisorOptions'] = User::with(['jabatan', 'activeJabatanDelegations.jabatan'])
+            ->active()
+            ->ordered()
+            ->get(['id', 'name', 'nip', 'jabatan_id', 'hirarki']);
 
         return $data;
     }

@@ -6,16 +6,17 @@ use App\SuratKeluarApproval;
 use App\SuratKeluar;
 use Barryvdh\DomPDF\Facade as PDF;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Str;
 
 class SuratTemplateDocumentService
 {
-    protected $signaturePadService;
+    protected $qrCodeService;
     protected $pdfVerificationService;
 
-    public function __construct(SignaturePadService $signaturePadService, PdfVerificationService $pdfVerificationService)
+    public function __construct(DocumentQrCodeService $qrCodeService, PdfVerificationService $pdfVerificationService)
     {
-        $this->signaturePadService = $signaturePadService;
+        $this->qrCodeService = $qrCodeService;
         $this->pdfVerificationService = $pdfVerificationService;
     }
 
@@ -62,7 +63,7 @@ class SuratTemplateDocumentService
         }
 
         return [
-            'image' => $this->signaturePadService->toDataUri($approval->signature_path),
+            'image' => $this->qrCodeService->dataUri(URL::signedRoute('surat-keluar.signature.verify', ['approval' => $approval->id]), 120),
             'name' => $approval->signer_name_snapshot ?: optional($approval->approver)->name ?: '-',
             'title' => $approval->signer_title_snapshot ?: optional(optional($approval->approver)->jabatan)->nama ?: '-',
             'nip' => optional($approval->approver)->nip ?: '-',

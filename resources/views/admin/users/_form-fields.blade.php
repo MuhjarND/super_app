@@ -4,6 +4,12 @@
         ? $user->roles->pluck('id')->map(fn ($id) => (string) $id)->all()
         : [];
     $activeDelegation = $isEdit ? $user->activeJabatanDelegations->first() : null;
+    $approvalOptionLabel = function ($option) {
+        $delegationLabel = $option->activeDelegationLabels()->implode(' / ');
+        $positionLabel = $delegationLabel ?: optional($option->jabatan)->nama;
+
+        return $option->name . ($positionLabel ? ' - ' . $positionLabel : '');
+    };
 @endphp
 
 <div class="user-form-grid">
@@ -55,6 +61,31 @@
             <div class="col-md-6 form-group mb-0">
                 <label>Hirarki</label>
                 <input type="number" name="hirarki" class="form-control" value="{{ old('hirarki', $user->hirarki ?? 999) }}" min="1">
+            </div>
+        </div>
+    </section>
+
+    <section class="user-form-section">
+        <div class="user-form-section-title">
+            <i class="fas fa-briefcase"></i>
+            <span>Kepegawaian</span>
+        </div>
+        <div class="row">
+            <div class="col-md-3 form-group mb-md-0">
+                <label>Golongan / Ruang</label>
+                <input type="text" name="golongan_ruang" class="form-control" value="{{ old('golongan_ruang', $user->golongan_ruang) }}" placeholder="Contoh: III/a">
+            </div>
+            <div class="col-md-3 form-group mb-md-0">
+                <label>Tanggal Mulai Kerja / TMT PNS</label>
+                <input type="date" name="tmt_pns" class="form-control" value="{{ old('tmt_pns', optional($user->tmt_pns)->format('Y-m-d')) }}" max="{{ now()->toDateString() }}" data-employment-start>
+            </div>
+            <div class="col-md-3 form-group mb-md-0">
+                <label>Masa Kerja</label>
+                <input type="text" class="form-control" value="{{ $user->masa_kerja ?: '-' }}" readonly data-employment-duration>
+            </div>
+            <div class="col-md-3 form-group mb-0">
+                <label>Satuan Kerja</label>
+                <input type="text" name="satuan_kerja" class="form-control" value="{{ old('satuan_kerja', $user->satuan_kerja) }}" placeholder="Nama satuan kerja">
             </div>
         </div>
     </section>
@@ -145,7 +176,7 @@
                     @foreach($supervisorOptions as $option)
                         @if(!$isEdit || (int) $option->id !== (int) $user->id)
                             <option value="{{ $option->id }}" {{ (string) old('atasan_langsung_id', $user->atasan_langsung_id) === (string) $option->id ? 'selected' : '' }}>
-                                {{ $option->name }}{{ optional($option->jabatan)->nama ? ' - ' . optional($option->jabatan)->nama : '' }}
+                                {{ $approvalOptionLabel($option) }}
                             </option>
                         @endif
                     @endforeach
@@ -158,7 +189,7 @@
                     @foreach($supervisorOptions as $option)
                         @if(!$isEdit || (int) $option->id !== (int) $user->id)
                             <option value="{{ $option->id }}" {{ (string) old('pejabat_berwenang_id', $user->pejabat_berwenang_id) === (string) $option->id ? 'selected' : '' }}>
-                                {{ $option->name }}{{ optional($option->jabatan)->nama ? ' - ' . optional($option->jabatan)->nama : '' }}
+                                {{ $approvalOptionLabel($option) }}
                             </option>
                         @endif
                     @endforeach

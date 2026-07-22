@@ -13,6 +13,7 @@
         .agenda-action-cell form { margin: 0; }
         .agenda-source-badge { display: inline-flex; align-items: center; gap: 5px; border-radius: 999px; padding: 3px 8px; background: #ecfdf5; color: #047857; font-size: 0.68rem; font-weight: 800; margin-top: 6px; }
         .agenda-source-link { color: #2563eb; font-size: 0.76rem; font-weight: 700; }
+        .agenda-direct-target { background: #f5f3ff !important; box-shadow: inset 4px 0 #7c3aed; }
 
         @media (max-width: 767.98px) {
             .agenda-action-cell { width: auto; }
@@ -61,7 +62,7 @@
                 </thead>
                 <tbody>
                     @forelse($agendas as $agenda)
-                        <tr
+                        <tr id="agenda-{{ $agenda->id }}" class="{{ (int) request('focus') === (int) $agenda->id ? 'agenda-direct-target' : '' }}"
                             data-agenda-id="{{ $agenda->id }}"
                             data-action="{{ route('rapat.agenda.update', $agenda) }}"
                             data-participants-action="{{ route('rapat.agenda.participants', $agenda) }}"
@@ -279,6 +280,18 @@
                     });
                 });
             });
+
+            const directAgendaId = Number(@json((int) request('focus')));
+            const directAgendaAction = @json(request('action'));
+            const directAgendaRow = directAgendaId ? document.getElementById('agenda-' + directAgendaId) : null;
+            if (directAgendaRow) {
+                directAgendaRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                @if($canManageAgendaParticipants)
+                    if (directAgendaAction === 'participants') {
+                        setTimeout(function () { openParticipantsAgenda(directAgendaId); }, 250);
+                    }
+                @endif
+            }
 
         });
 

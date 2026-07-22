@@ -16,7 +16,8 @@
         .body p { margin: 0 0 10px; }
         .body ul, .body ol { margin: 0 0 10px 18px; }
         .footer { margin-top: 28px; width: 100%; }
-        .footer .sign { width: 42%; margin-left: auto; text-align: center; }
+        .footer .sign { width: 42%; margin-left: auto; text-align: center; page-break-inside: avoid; }
+        .footer .sign-qr { width: 68px; height: 68px; display: block; margin: 5px auto 3px; object-fit: contain; }
         .small-meta { margin-top: 26px; font-size: 10px; color: #4b5563; }
         table.info { width: 100%; border-collapse: collapse; margin-top: 18px; }
         table.info td { border: 1px solid #d1d5db; padding: 6px 8px; vertical-align: top; }
@@ -66,10 +67,18 @@
 
             <div class="footer">
                 <div class="sign">
-                    Manokwari, {{ optional($suratKeluar->tanggal_surat)->translatedFormat('d F Y') }}<br><br><br><br>
+                    Manokwari, {{ optional($suratKeluar->tanggal_surat)->translatedFormat('d F Y') }}<br>
                     {{ $signatoryTitle['line1'] ?? 'Pejabat Penandatangan,' }}<br>
-                    {{ $signatoryTitle['line2'] ?? 'Pengadilan Tinggi Agama Papua Barat' }}<br><br><br>
-                    <strong>{{ optional($suratKeluar->creator)->name ?: 'Pejabat Penandatangan' }}</strong>
+                    {{ $signatoryTitle['line2'] ?? 'Pengadilan Tinggi Agama Papua Barat' }}
+                    @if(!empty($approvalSignature['image']))
+                        <img class="sign-qr" src="{{ $approvalSignature['image'] }}" alt="QR tanda tangan elektronik">
+                    @else
+                        <div style="height:76px;"></div>
+                    @endif
+                    <strong>{{ $approvalSignature['name'] ?? (optional($suratKeluar->creator)->name ?: 'Pejabat Penandatangan') }}</strong><br>
+                    @if(!empty($approvalSignature['nip']))
+                        NIP. {{ $approvalSignature['nip'] }}
+                    @endif
                 </div>
             </div>
 

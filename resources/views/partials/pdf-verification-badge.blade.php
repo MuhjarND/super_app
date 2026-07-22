@@ -1,10 +1,14 @@
 @if(!empty($pdfVerification['qr']))
+    @php
+        $verificationQrSize = max(32, min(72, (int) ($pdfVerificationQrSize ?? 48)));
+        $verificationQrColumnSize = $verificationQrSize + 4;
+    @endphp
     <style>
         .pdf-verification-badge {
             position: fixed;
-            left: 0.55cm;
-            bottom: 0.45cm;
-            width: 205px;
+            left: 0.6cm;
+            right: 0.6cm;
+            bottom: 0.38cm;
             font-family: DejaVu Sans, sans-serif;
             color: #111827;
             z-index: 999;
@@ -19,12 +23,12 @@
             vertical-align: middle;
         }
         .pdf-verification-qr {
-            width: 48px;
+            width: {{ $verificationQrColumnSize }}px;
             text-align: center;
         }
         .pdf-verification-badge img {
-            width: 42px;
-            height: 42px;
+            width: {{ $verificationQrSize }}px;
+            height: {{ $verificationQrSize }}px;
             display: block;
             margin: 0 auto 1px;
         }
@@ -34,9 +38,9 @@
             text-align: center;
         }
         .pdf-verification-note {
-            padding-left: 6px !important;
-            font-size: 6.4px;
-            line-height: 1.22;
+            padding-left: 8px !important;
+            font-size: 6.8px;
+            line-height: 1.28;
             color: #1f2937;
         }
     </style>
@@ -48,8 +52,8 @@
                     <div class="pdf-verification-label">Validasi PDF</div>
                 </td>
                 <td class="pdf-verification-note">
-                    Dokumen ini telah ditandatangani secara elektronik melalui aplikasi PAPEDA.
-                    Pindai QR untuk verifikasi keaslian dokumen.
+                    <strong>Dokumen ini telah ditandatangani secara elektronik dan dinyatakan valid melalui aplikasi PAPEDA.</strong><br>
+                    Pindai QR berlogo PTA Papua Barat untuk melihat identitas penandatangan, waktu penandatanganan, dan dokumen asli.
                 </td>
             </tr>
         </table>

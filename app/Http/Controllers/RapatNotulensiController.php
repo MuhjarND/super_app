@@ -9,7 +9,6 @@ use App\RapatNotulensi;
 use App\RapatNotulensiTindakLanjut;
 use App\Services\RapatDocumentService;
 use App\Services\RapatNotulensiApprovalService;
-use App\Services\SignaturePadService;
 use Barryvdh\DomPDF\Facade as PDF;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -20,13 +19,11 @@ use Illuminate\Support\Str;
 class RapatNotulensiController extends Controller
 {
     protected $notulensiApprovalService;
-    protected $signaturePadService;
 
-    public function __construct(RapatNotulensiApprovalService $notulensiApprovalService, SignaturePadService $signaturePadService)
+    public function __construct(RapatNotulensiApprovalService $notulensiApprovalService)
     {
         $this->middleware('auth');
         $this->notulensiApprovalService = $notulensiApprovalService;
-        $this->signaturePadService = $signaturePadService;
     }
 
     public function index()
@@ -93,7 +90,6 @@ class RapatNotulensiController extends Controller
         $recommendationItems = $this->normalizeRecommendationItems($rapat, $data['rekomendasi_items'] ?? []);
 
         $notulensi = DB::transaction(function () use ($rapat, $data, $request, $recommendationItems) {
-            $signature = $this->signaturePadService->resolveForUser(auth()->user(), 'rapat/notulis-signatures', $data['signature_data'] ?? null);
             $notulensi = RapatNotulensi::create([
                 'rapat_id' => $rapat->id,
                 'notulis_id' => auth()->id(),
@@ -109,9 +105,9 @@ class RapatNotulensiController extends Controller
                 'rekomendasi' => $this->buildRecommendationHtml($recommendationItems),
                 'rekomendasi_items' => $recommendationItems,
                 'dokumentasi_rapat' => null,
-                'notulis_signature_path' => $signature['path'],
-                'notulis_signature_mime' => $signature['mime'],
-                'notulis_signature_size' => $signature['size'],
+                'notulis_signature_path' => null,
+                'notulis_signature_mime' => null,
+                'notulis_signature_size' => null,
                 'approval_ready' => false,
                 'submitted_at' => Carbon::now('Asia/Jayapura'),
             ]);
@@ -172,8 +168,6 @@ class RapatNotulensiController extends Controller
 
         DB::transaction(function () use ($notulensi, $data, $request, $recommendationItems) {
             $rapat = $notulensi->rapat;
-            $signature = $this->signaturePadService->resolveForUser(auth()->user(), 'rapat/notulis-signatures', $data['signature_data'] ?? null);
-
             $notulensi->update([
                 'notulis_id' => auth()->id(),
                 'updated_by' => auth()->id(),
@@ -187,9 +181,9 @@ class RapatNotulensiController extends Controller
                 'rekomendasi' => $this->buildRecommendationHtml($recommendationItems),
                 'rekomendasi_items' => $recommendationItems,
                 'dokumentasi_rapat' => null,
-                'notulis_signature_path' => $signature['path'],
-                'notulis_signature_mime' => $signature['mime'],
-                'notulis_signature_size' => $signature['size'],
+                'notulis_signature_path' => null,
+                'notulis_signature_mime' => null,
+                'notulis_signature_size' => null,
                 'approval_ready' => false,
                 'submitted_at' => Carbon::now('Asia/Jayapura'),
             ]);

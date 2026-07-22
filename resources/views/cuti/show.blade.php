@@ -341,7 +341,7 @@
             </div>
             @if($canEditSubmit)
                 <div class="leave-action-note">
-                    Submit pengajuan akan memakai tanda tangan yang tersimpan pada Profil Saya sebelum pengajuan masuk ke alur approval.
+                    Submit pengajuan akan mencatat tanda tangan elektronik pemohon dalam bentuk QR yang dapat diverifikasi pada PDF final.
                 </div>
             @endif
         </div>

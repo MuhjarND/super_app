@@ -23,8 +23,14 @@ class VirtualMeetingController extends Controller
     {
         abort_unless($request->user()->canAccessVirtualMeetings(), 403);
 
-        $meetings = VirtualMeeting::visibleTo($request->user())
-            ->with(['creator', 'suratMasuk', 'participants.jabatan'])
+        $meetingQuery = VirtualMeeting::visibleTo($request->user())
+            ->with(['creator', 'suratMasuk', 'participants.jabatan']);
+
+        if ($request->filled('focus')) {
+            $meetingQuery->orderByRaw('CASE WHEN virtual_meetings.id = ? THEN 0 ELSE 1 END', [(int) $request->focus]);
+        }
+
+        $meetings = $meetingQuery
             ->orderByDesc('tanggal_kegiatan')
             ->orderByDesc('waktu_mulai')
             ->get();

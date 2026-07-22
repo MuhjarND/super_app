@@ -8,6 +8,13 @@ use Illuminate\Support\Str;
 
 class PdfVerificationService
 {
+    protected $qrCodeService;
+
+    public function __construct(DocumentQrCodeService $qrCodeService)
+    {
+        $this->qrCodeService = $qrCodeService;
+    }
+
     public function begin($module, $documentType, $documentId, $title, array $signers = [], array $metadata = [])
     {
         return PdfVerification::create([
@@ -25,12 +32,12 @@ class PdfVerificationService
     public function viewData(PdfVerification $verification)
     {
         $url = route('pdf-verification.show', $verification->token);
-        $svg = app('qrcode')->format('svg')->size(92)->margin(1)->generate($url);
 
         return [
             'token' => $verification->token,
             'url' => $url,
-            'qr' => 'data:image/svg+xml;base64,' . base64_encode($svg),
+            'qr' => $this->qrCodeService->dataUri($url, 120),
+            'logo' => $this->qrCodeService->logoDataUri(),
         ];
     }
 

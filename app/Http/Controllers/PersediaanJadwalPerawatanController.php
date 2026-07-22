@@ -44,7 +44,11 @@ class PersediaanJadwalPerawatanController extends Controller
             });
         }
 
-        $schedules = $query->paginate(20)->appends($request->only('q', 'status'));
+        if ($request->filled('focus')) {
+            $query->orderByRaw('CASE WHEN inventory_maintenance_schedules.id = ? THEN 0 ELSE 1 END', [(int) $request->focus]);
+        }
+
+        $schedules = $query->paginate(20)->appends($request->only('q', 'status', 'focus'));
         $items = InventoryItem::with(['details' => function ($detailQuery) {
             $detailQuery->where('is_active', true)->orderBy('sub_code');
         }])->where('is_active', true)->orderBy('name')->get();

@@ -50,11 +50,7 @@ class RapatNotulensiApprovalController extends Controller
         $user = auth()->user();
         abort_unless($user->canAccessMeetingApproval(), 403);
         abort_unless($user->isMeetingAdmin() || $user->canActAsAssignedUser($notulensiApproval->approver_id), 403);
-        $request->validate([
-            'signature_data' => ['nullable', 'string'],
-        ]);
-
-        $this->approvalService->approve($notulensiApproval, $user, $request->input('catatan'), $request->input('signature_data'));
+        $this->approvalService->approve($notulensiApproval, $user, $request->input('catatan'));
 
         return response()->json([
             'success' => true,

@@ -25,9 +25,11 @@ Route::post('/voting/publik/{publicCode}', 'VotingPublicController@store')->name
 Route::get('/voting/publik/{publicCode}/hasil', 'VotingPublicController@results')->name('rapat.voting.public.results');
 Route::get('/voting/publik/{publicCode}/stats', 'VotingPublicController@stats')->name('rapat.voting.public.stats');
 Route::get('/verifikasi/ttd/{token}', 'RapatSignatureVerificationController@show')->name('rapat.signature.verify');
-Route::get('/verifikasi/cuti/{leaveRequest}/{approval}', 'LeaveSignatureVerificationController@show')->name('cuti.signature.verify');
 Route::get('/verifikasi/cuti/pemohon/{leaveRequest}', 'LeaveSignatureVerificationController@showApplicant')->name('cuti.signature.verify-applicant');
+Route::get('/verifikasi/cuti/{leaveRequest}/{approval}', 'LeaveSignatureVerificationController@show')->name('cuti.signature.verify');
 Route::get('/verifikasi/surat-keluar/{approval}', 'SuratKeluarSignatureVerificationController@show')->name('surat-keluar.signature.verify');
+Route::get('/verifikasi/absensi/{attendance}', 'RapatAbsensiController@verifyAttendance')->middleware('signed')->name('rapat.attendance.verify');
+Route::get('/verifikasi/persediaan/{pickup}', 'SupplyPickupController@verify')->middleware('signed')->name('persediaan.pickups.verify');
 Route::get('/verifikasi/pdf/{token}', 'PdfVerificationController@show')->name('pdf-verification.show');
 Route::get('/verifikasi/pdf/{token}/preview', 'PdfVerificationController@preview')->name('pdf-verification.preview');
 Route::get('/publik/tindak-lanjut/eviden/{token}', 'PublicFollowUpEvidenceController@show')->name('rapat.notulensi.follow-ups.eviden.public');

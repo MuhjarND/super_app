@@ -38,7 +38,10 @@ class LeaveRequestController extends Controller
         $this->abortIfUnauthorized();
         if (!$this->moduleReady()) { return $this->setupResponse('Modul Cuti Belum Diaktifkan'); }
         $leaveRequests = LeaveRequest::with(['leaveType', 'approvals.approver', 'audits.actor', 'documents'])->where('user_id', auth()->id())->latest('id')->paginate(15);
-        $leaveTypes = LeaveType::where('status', 'active')->orderBy('name')->get();
+        $leaveTypes = LeaveType::where('status', 'active')
+            ->where('code', '!=', LeaveType::CODE_BERSAMA)
+            ->orderBy('name')
+            ->get();
         $balanceYear = (int) request('balance_year', now()->year);
         $leaveBalanceSummaries = $leaveTypes
             ->where('requires_balance', true)
@@ -150,14 +153,11 @@ class LeaveRequestController extends Controller
         $this->abortIfUnauthorized();
         if (!$this->moduleReady()) { return $this->setupResponse('Modul Cuti Belum Diaktifkan'); }
         $this->authorize('submit', $leaveRequest);
-        $request->validate([
-            'signature_data' => ['nullable', 'string'],
-        ]);
         $leaveRequest->load(['user', 'leaveType', 'documents']);
         $this->validator->validateForSubmit($leaveRequest);
         $leaveRequest->approved_days = $leaveRequest->requested_days;
         $leaveRequest->save();
-        $this->approvalService->submit($leaveRequest, $request->input('signature_data'));
+        $this->approvalService->submit($leaveRequest);
         $this->documentService->syncSuratKeluar($leaveRequest->fresh(['leaveType', 'approvals', 'documents', 'user']), false);
         event(new LeaveRequestSubmitted($leaveRequest, auth()->user()));
         return redirect()->route('cuti.show', $leaveRequest)->with('success', 'Pengajuan cuti berhasil disubmit.');

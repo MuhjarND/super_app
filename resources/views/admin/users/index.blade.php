@@ -642,6 +642,48 @@
             });
         })();
     </script>
+    <script>
+        (function () {
+            const currentDate = '{{ now()->toDateString() }}'.split('-').map(Number);
+
+            function updateEmploymentDuration(input) {
+                const output = input.closest('.user-form-section').querySelector('[data-employment-duration]');
+                const parts = String(input.value || '').split('-').map(Number);
+
+                if (!output || parts.length !== 3 || parts.some(Number.isNaN)) {
+                    if (output) {
+                        output.value = '-';
+                    }
+                    return;
+                }
+
+                let totalMonths = (currentDate[0] - parts[0]) * 12 + (currentDate[1] - parts[1]);
+                if (currentDate[2] < parts[2]) {
+                    totalMonths--;
+                }
+                totalMonths = Math.max(0, totalMonths);
+
+                const years = Math.floor(totalMonths / 12);
+                const months = totalMonths % 12;
+                const labels = [];
+
+                if (years > 0) {
+                    labels.push(years + ' tahun');
+                }
+                if (months > 0) {
+                    labels.push(months + ' bulan');
+                }
+
+                output.value = labels.length ? labels.join(' ') : '0 bulan';
+            }
+
+            document.addEventListener('change', function (event) {
+                if (event.target.matches('[data-employment-start]')) {
+                    updateEmploymentDuration(event.target);
+                }
+            });
+        })();
+    </script>
 @endpush
 
 @section('content')
@@ -702,7 +744,7 @@
                             <th class="col-name">Nama / NIP</th>
                             <th class="col-wa">WhatsApp</th>
                             <th class="col-role">Role</th>
-                            <th class="col-jabatan">Jabatan</th>
+                            <th class="col-jabatan">Jabatan / Kepegawaian</th>
                             <th class="col-atasan">Atasan</th>
                             <th class="col-status">Status</th>
                             <th class="col-aksi text-right">Aksi</th>
@@ -767,6 +809,15 @@
                                     <div style="font-weight: 800; color: #1f2937;">{{ $jabatanText }}</div>
                                     @if($unitText)
                                         <div class="user-name-sub">{{ $unitText }}</div>
+                                    @endif
+                                    @if($user->golongan_ruang || $user->masa_kerja)
+                                        <div class="user-name-sub">
+                                            {{ $user->golongan_ruang ? 'Gol. ' . $user->golongan_ruang : 'Gol. -' }}
+                                            {{ $user->masa_kerja ? ' · ' . $user->masa_kerja : '' }}
+                                        </div>
+                                    @endif
+                                    @if($user->satuan_kerja)
+                                        <div class="user-name-sub">Satker: {{ $user->satuan_kerja }}</div>
                                     @endif
                                     @if($activeDelegation && $activeDelegation->jabatan)
                                         <div class="user-delegation-badge">

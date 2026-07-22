@@ -55,15 +55,10 @@ class RapatApprovalController extends Controller
         $user = auth()->user();
         abort_unless($user->canAccessMeetingApproval(), 403);
         abort_unless($user->isMeetingAdmin() || $user->canActAsAssignedUser($rapatApproval->approver_id), 403);
-        $request->validate([
-            'signature_data' => ['nullable', 'string'],
-        ]);
-
         $this->approvalService->approve(
             $rapatApproval->load('rapat'),
             $user,
-            $request->input('catatan'),
-            $request->input('signature_data')
+            $request->input('catatan')
         );
 
         return response()->json([

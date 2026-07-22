@@ -11,7 +11,7 @@ body { margin: 0; }
 .date-line { text-align: right; font-size: 8.9px; margin-bottom: 3.5px; }
 .to-line { text-align: center; font-size: 8.9px; line-height: 1.1; margin-bottom: 4.5px; }
 .title { text-align: center; font-size: 11px; font-weight: bold; text-transform: uppercase; margin-bottom: 0.3px; letter-spacing: .05px; }
-.number { text-align: center; font-size: 8.45px; margin-bottom: 4.2px; }
+.number { text-align: center; font-size: 10.5px; font-weight: bold; margin-bottom: 4.2px; }
 .section-table { width: 100%; border-collapse: collapse; margin-bottom: 5.8px; page-break-inside: avoid; }
 .section-table td, .section-table th { border: 0.8px solid #111; padding: 1.45px 3px; vertical-align: middle; }
 .section-head td { font-weight: bold; font-size: 9.55px; letter-spacing: .05px; padding-top: 1.55px; padding-bottom: 1.55px; }
@@ -25,14 +25,13 @@ body { margin: 0; }
 .paraf-check { font-family: DejaVu Sans, sans-serif; font-size: 18px; font-weight: bold; line-height: 1; margin-top: 3px; }
 .paraf-meta { font-size: 6.8px; line-height: 1.05; margin-top: 1px; }
 .address-cell { vertical-align: top; height: 88px; }
-.signature-cell { vertical-align: top; }
-.signature-inner { text-align: center; font-size: 8.05px; line-height: 1.055; }
-.signature-pad-img { height: 54px; max-width: 142px; margin: -2px auto -9px auto; display: block; object-fit: contain; }
+.signature-cell { vertical-align: top; text-align: center; }
+.signature-inner { text-align: center; font-size: 8.05px; line-height: 1.055; page-break-inside: avoid; }
+.signature-pad-img { width: 66px; height: 66px; margin: 2px auto; display: block; object-fit: contain; }
 .signature-name { font-weight: bold; position: relative; z-index: 1; }
 .blank-area { height: 88px; }
 .decision-label { text-align: center; font-size: 8px; text-transform: uppercase; }
 .decision-mark { height: 10px; text-align: center; vertical-align: middle; font-family: DejaVu Sans, sans-serif; font-size: 11px; font-weight: bold; }
-.note { font-size: 7.75px; margin-top: 2.5px; line-height: 1.08; }
 .section-table.tight-bottom { margin-bottom: 5.8px; }
 .type-label { width: 42%; padding-left: 6px !important; }
 .type-mark { width: 8%; text-align: center; }
@@ -40,13 +39,16 @@ body { margin: 0; }
 .extra-signature-table { margin-bottom: 3.2px; }
 .extra-signature-table td { text-align: center; vertical-align: top; }
 .extra-signature-role { font-weight: bold; font-size: 7px; text-transform: uppercase; }
-.extra-signature-img { height: 36px; max-width: 108px; display: block; margin: -2px auto -7px; object-fit: contain; }
+.extra-signature-img { width: 66px; height: 66px; display: block; margin: 2px auto; object-fit: contain; }
 .extra-signature-name { font-weight: bold; font-size: 7px; position: relative; z-index: 1; }
 .extra-signature-meta { font-size: 6.6px; line-height: 1.02; }
 </style>
 </head>
 <body>
-@include('partials.pdf-verification-badge', ['pdfVerification' => $pdfVerification ?? null])
+@include('partials.pdf-verification-badge', [
+    'pdfVerification' => $pdfVerification ?? null,
+    'pdfVerificationQrSize' => 50,
+])
 @php
     $statusAtasan = optional($formData['atasan'])->status;
     $statusPpk = optional($formData['ppk'])->status;
@@ -74,20 +76,20 @@ body { margin: 0; }
         </tr>
         <tr>
             <td class="label-cell">JABATAN</td>
-            <td>{{ optional(optional($leaveRequest->user)->jabatan)->nama ?: ($leaveRequest->jabatan_snapshot ?: '-') }}</td>
+            <td>{{ $formData['employeeTitle'] }}</td>
             <td class="label-cell">GOL. RUANG</td>
-            <td>{{ optional($leaveRequest->user)->jabatan_keterangan ?: '-' }}</td>
+            <td>{{ $formData['employeeRank'] }}</td>
         </tr>
         <tr>
             <td class="label-cell">UNIT KERJA</td>
-            <td>{{ optional(optional($leaveRequest->user)->unit)->nama ?: ($leaveRequest->unit_snapshot ?: '-') }}</td>
+            <td>{{ $formData['employeeUnit'] }}</td>
             <td class="label-cell">MASA KERJA</td>
             <td>{{ $formData['workPeriodText'] }}</td>
         </tr>
     </table>
 
     <table class="section-table tight-bottom">
-        <tr class="section-head"><td colspan="4">II. &nbsp; JENIS CUTI YANG DIAMBIL **</td></tr>
+        <tr class="section-head"><td colspan="4">II. &nbsp; JENIS CUTI YANG DIAMBIL</td></tr>
         <tr>
             <td class="type-label">1. CUTI TAHUNAN</td>
             <td class="type-mark"><span class="checkbox">{!! $formData['selectedTypeCode'] === 'CT' ? $checkMark : '' !!}</span></td>
@@ -132,7 +134,7 @@ body { margin: 0; }
     </table>
 
     <table class="section-table">
-        <tr class="section-head"><td colspan="4">V. &nbsp; CATATAN CUTI ***</td></tr>
+        <tr class="section-head"><td colspan="4">V. &nbsp; CATATAN CUTI</td></tr>
         <tr>
             <td colspan="2" style="padding:0; width:50%;">
                 <table class="inner-table" style="width:100%; margin:-1px;">
@@ -188,7 +190,7 @@ body { margin: 0; }
             <td colspan="2" class="signature-cell" style="height:66px;">
                 <div class="signature-inner">
                     <div style="font-size:7px; margin-bottom:1px;">Hormat Saya,</div>
-                    @if(!empty($formData['pemohonSignature']))<img class="signature-pad-img" src="{{ $formData['pemohonSignature'] }}">@endif
+                    @if(!empty($formData['pemohonSignature']))<img class="signature-pad-img" src="{{ $formData['pemohonSignature'] }}" alt="QR tanda tangan pemohon">@endif
                     <div class="signature-name">({{ optional($leaveRequest->user)->name ?: '-' }})</div>
                     <div>NIP. {{ optional($leaveRequest->user)->nip ?: '-' }}</div>
                 </div>
@@ -197,12 +199,12 @@ body { margin: 0; }
     </table>
 
     <table class="section-table">
-        <tr class="section-head"><td colspan="4">VII. &nbsp; PERTIMBANGAN ATASAN LANGSUNG **</td></tr>
+        <tr class="section-head"><td colspan="4">VII. &nbsp; PERTIMBANGAN ATASAN LANGSUNG</td></tr>
         <tr>
             <td class="decision-label" width="13%">DISETUJUI</td>
-            <td class="decision-label" width="23%">PERUBAHAN ****</td>
-            <td class="decision-label" width="23%">DITANGGUHKAN ****</td>
-            <td class="decision-label" width="41%">TIDAK DISETUJUI ****</td>
+            <td class="decision-label" width="23%">PERUBAHAN</td>
+            <td class="decision-label" width="23%">DITANGGUHKAN</td>
+            <td class="decision-label" width="41%">TIDAK DISETUJUI</td>
         </tr>
         <tr>
             <td class="decision-mark">{!! $statusAtasan === 'approved' ? $checkMark : '' !!}</td>
@@ -215,7 +217,7 @@ body { margin: 0; }
             <td class="signature-cell">
                 <div class="signature-inner">
                     @if(!empty($formData['atasanSignature']))<img class="signature-pad-img" src="{{ $formData['atasanSignature'] }}">@endif
-                    <div>{{ optional(optional(optional($formData['atasan'])->approver)->jabatan)->nama ?: optional(optional($leaveRequest->user)->atasanLangsung)->jabatan_keterangan ?: '-' }}</div>
+                    <div>{{ optional(optional($formData['atasan'])->approver)->jabatan_keterangan ?: optional(optional($leaveRequest->user)->atasanLangsung)->jabatan_keterangan ?: '-' }}</div>
                     <div class="signature-name">({{ optional(optional($formData['atasan'])->approver)->name ?: optional(optional($leaveRequest->user)->atasanLangsung)->name ?: '-' }})</div>
                     <div>NIP. {{ optional(optional($formData['atasan'])->approver)->nip ?: optional(optional($leaveRequest->user)->atasanLangsung)->nip ?: '-' }}</div>
                 </div>
@@ -224,12 +226,12 @@ body { margin: 0; }
     </table>
 
     <table class="section-table">
-        <tr class="section-head"><td colspan="4">VIII. &nbsp; KEPUTUSAN PEJABAT YANG BERWENANG MEMBERIKAN CUTI **</td></tr>
+        <tr class="section-head"><td colspan="4">VIII. &nbsp; KEPUTUSAN PEJABAT YANG BERWENANG MEMBERIKAN CUTI</td></tr>
         <tr>
             <td class="decision-label" width="13%">DISETUJUI</td>
-            <td class="decision-label" width="23%">PERUBAHAN ****</td>
-            <td class="decision-label" width="23%">DITANGGUHKAN ****</td>
-            <td class="decision-label" width="41%">TIDAK DISETUJUI ****</td>
+            <td class="decision-label" width="23%">PERUBAHAN</td>
+            <td class="decision-label" width="23%">DITANGGUHKAN</td>
+            <td class="decision-label" width="41%">TIDAK DISETUJUI</td>
         </tr>
         <tr>
             <td class="decision-mark">{!! $statusPpk === 'approved' ? $checkMark : '' !!}</td>
@@ -242,7 +244,7 @@ body { margin: 0; }
             <td class="signature-cell">
                 <div class="signature-inner">
                     @if(!empty($formData['ppkSignature']))<img class="signature-pad-img" src="{{ $formData['ppkSignature'] }}">@endif
-                    <div>{{ optional(optional(optional($formData['ppk'])->approver)->jabatan)->nama ?: (optional(optional($formData['ppk'])->approver)->jabatan_keterangan ?: '-') }}</div>
+                    <div>{{ optional(optional($formData['ppk'])->approver)->jabatan_keterangan ?: '-' }}</div>
                     <div class="signature-name">({{ optional(optional($formData['ppk'])->approver)->name ?: '-' }})</div>
                     <div>NIP. {{ optional(optional($formData['ppk'])->approver)->nip ?: '-' }}</div>
                 </div>
@@ -267,13 +269,6 @@ body { margin: 0; }
         </table>
     @endif
 
-    <div class="note">
-        <strong>Catatan :</strong><br>
-        * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Coret yang tidak perlu<br>
-        ** &nbsp;&nbsp;&nbsp;Pilih salah satu dengan memberikan tanda centang<br>
-        *** &nbsp;&nbsp;Diisi oleh pejabat yang menangani bidang kepegawaian sebelum PNS mengajukan cuti<br>
-        **** Diberi tanda centang dan alasannya
-    </div>
 </div>
 </body>
 </html>
