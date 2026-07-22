@@ -411,11 +411,15 @@ class UnifiedActionCenterService
         }
 
         $items = collect();
+        $notificationYear = now('Asia/Jayapura')->year;
 
         if ($canAccessPersuratan) {
         $disposisiQuery = Disposisi::with(['suratMasuk', 'dariUser', 'kepadaUser.unit'])
             ->whereIn('status', ['pending', 'dibaca', 'diproses'])
-            ->addressedToUser($user);
+            ->addressedToUser($user)
+            ->whereHas('suratMasuk', function ($suratQuery) use ($notificationYear) {
+                $suratQuery->forLetterYear($notificationYear);
+            });
 
         $items = $items->merge($disposisiQuery->latest()->take(10)->get()->map(function ($disposisi) {
             $targetAt = $disposisi->target_tindak_lanjut_at ?: $disposisi->created_at;
@@ -444,7 +448,8 @@ class UnifiedActionCenterService
 
         $draftQuery = SuratKeluar::with(['creator.unit', 'templateApproval'])
             ->where('status', 'draft')
-            ->where('created_by', $user->id);
+            ->where('created_by', $user->id)
+            ->forLetterYear($notificationYear);
 
         $items = $items->merge($draftQuery->latest()->take(10)->get()->map(function ($surat) {
             return $this->makeItem([
@@ -471,6 +476,7 @@ class UnifiedActionCenterService
 
         if (Schema::hasColumn('surat_keluar_penerima', 'read_at')) {
             $taggedSuratKeluarQuery = SuratKeluar::with(['creator.unit'])
+                ->forLetterYear($notificationYear)
                 ->whereHas('penerimaInternal', function ($penerimaQuery) use ($user) {
                     $penerimaQuery->whereIn('users.id', $user->effectiveAssignmentUserIds())
                         ->whereNull('surat_keluar_penerima.read_at');
@@ -504,7 +510,10 @@ class UnifiedActionCenterService
         if ($canAccessPersuratan || $user->hasPendingSuratTugasParaf()) {
             $assignmentUserIds = $user->effectiveAssignmentUserIds();
             $approvalQuery = SuratKeluarApproval::with(['suratKeluar.creator.unit', 'requester.unit', 'approver', 'parafUser'])
-                ->where('status', 'pending');
+                ->where('status', 'pending')
+                ->whereHas('suratKeluar', function ($suratQuery) use ($notificationYear) {
+                    $suratQuery->forLetterYear($notificationYear);
+                });
 
             if (!$user->isSuperAdmin()) {
                 $approvalQuery->where(function ($workflowQuery) use ($user, $assignmentUserIds) {

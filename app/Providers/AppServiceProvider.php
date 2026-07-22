@@ -89,8 +89,10 @@ class AppServiceProvider extends ServiceProvider
 
             $suratMasukVisible = SuratMasuk::visibleTo($user);
             $suratKeluarVisible = SuratKeluar::visibleTo($user);
+            $notificationYear = now('Asia/Jayapura')->year;
 
             $suratMasukBadgeQuery = SuratMasuk::visibleTo($user)
+                ->forLetterYear($notificationYear)
                 ->where(function ($query) use ($user) {
                     $query->whereHas('disposisis', function ($disposisiQuery) use ($user) {
                         $disposisiQuery->addressedToUser($user)
@@ -103,6 +105,7 @@ class AppServiceProvider extends ServiceProvider
                 });
 
             $suratKeluarBadgeQuery = SuratKeluar::visibleTo($user)
+                ->forLetterYear($notificationYear)
                 ->where(function ($query) use ($user) {
                     $query->where(function ($createdQuery) use ($user) {
                         $createdQuery->where('created_by', $user->id)
@@ -127,7 +130,10 @@ class AppServiceProvider extends ServiceProvider
 
             $pendingDisposisiQuery = Disposisi::with(['suratMasuk'])
                 ->addressedToUser($user)
-                ->where('status', 'pending');
+                ->where('status', 'pending')
+                ->whereHas('suratMasuk', function ($suratQuery) use ($notificationYear) {
+                    $suratQuery->forLetterYear($notificationYear);
+                });
 
             foreach ((clone $pendingDisposisiQuery)->latest()->take(5)->get() as $disposisi) {
                 $suratMasuk = $disposisi->suratMasuk;
@@ -148,6 +154,7 @@ class AppServiceProvider extends ServiceProvider
             if (Schema::hasColumn('surat_keluar_penerima', 'read_at')) {
                 $taggedSuratKeluarQuery = SuratKeluar::visibleTo($user)
                     ->with(['creator'])
+                    ->forLetterYear($notificationYear)
                     ->whereHas('penerimaInternal', function ($penerimaQuery) use ($user) {
                         $penerimaQuery->where('users.id', $user->id)
                             ->whereNull('surat_keluar_penerima.read_at');
@@ -270,7 +277,10 @@ class AppServiceProvider extends ServiceProvider
             if (Schema::hasTable('surat_keluar_approvals') && Schema::hasColumn('surat_keluar_approvals', 'paraf_user_id')) {
                 $assignmentUserIds = $user->effectiveAssignmentUserIds();
                 $pendingSuratKeluarApprovalQuery = SuratKeluarApproval::with(['suratKeluar', 'parafUser', 'approver'])
-                    ->where('status', 'pending');
+                    ->where('status', 'pending')
+                    ->whereHas('suratKeluar', function ($suratQuery) use ($notificationYear) {
+                        $suratQuery->forLetterYear($notificationYear);
+                    });
 
                 if (!$user->isSuperAdmin()) {
                     $pendingSuratKeluarApprovalQuery->where(function ($workflowQuery) use ($user, $assignmentUserIds) {

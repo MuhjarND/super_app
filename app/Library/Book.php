@@ -3,14 +3,28 @@
 namespace App\Library;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Book extends Model
 {
+    use SoftDeletes;
+
     protected $table = 'library_books';
     protected $fillable = [
         'title', 'author', 'publisher', 'year', 'isbn',
         'category_id', 'shelf_id', 'description', 'cover', 'stock'
     ];
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::deleting(function (Book $book) {
+            if (!$book->isForceDeleting()) {
+                $book->copies()->delete();
+            }
+        });
+    }
 
     public function category()
     {

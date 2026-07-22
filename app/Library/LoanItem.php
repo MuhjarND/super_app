@@ -20,7 +20,7 @@ class LoanItem extends Model
 
     public function bookCopy()
     {
-        return $this->belongsTo(BookCopy::class);
+        return $this->belongsTo(BookCopy::class)->withTrashed();
     }
 
     public function fine()

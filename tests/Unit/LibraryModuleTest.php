@@ -14,6 +14,7 @@ use App\Library\Setting;
 use App\Library\Shelf;
 use App\Role;
 use App\User;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Picqer\Barcode\BarcodeGeneratorSVG;
 use Tests\TestCase;
 
@@ -90,6 +91,12 @@ class LibraryModuleTest extends TestCase
         $svg = $generator->getBarcode('BK-2026-000001', BarcodeGeneratorSVG::TYPE_CODE_128);
 
         $this->assertStringContainsString('<svg', $svg);
+    }
+
+    public function test_library_catalog_uses_soft_deletes_to_preserve_loan_history()
+    {
+        $this->assertContains(SoftDeletes::class, class_uses_recursive(Book::class));
+        $this->assertContains(SoftDeletes::class, class_uses_recursive(BookCopy::class));
     }
 
     protected function userWithRole($name)

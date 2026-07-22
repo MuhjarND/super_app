@@ -3,15 +3,18 @@
 namespace App\Library;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class BookCopy extends Model
 {
+    use SoftDeletes;
+
     protected $table = 'library_book_copies';
     protected $fillable = ['copy_code', 'book_id', 'status', 'notes'];
 
     public function book()
     {
-        return $this->belongsTo(Book::class);
+        return $this->belongsTo(Book::class)->withTrashed();
     }
 
     public function loanItems()
@@ -38,7 +41,7 @@ class BookCopy extends Model
     public static function generateCode()
     {
         $year = date('Y');
-        $lastCopy = self::where('copy_code', 'like', "BK-{$year}-%")
+        $lastCopy = self::withTrashed()->where('copy_code', 'like', "BK-{$year}-%")
             ->orderBy('id', 'desc')
             ->first();
 

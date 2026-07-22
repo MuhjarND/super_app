@@ -7,6 +7,8 @@ use App\Http\Controllers\Controller;
 use App\Library\Book;
 use App\Library\BookCopy;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Throwable;
 
 class BookCopyController extends Controller
 {
@@ -89,13 +91,29 @@ class BookCopyController extends Controller
 
     public function destroy(BookCopy $bookCopy)
     {
-        if ($bookCopy->status === 'dipinjam') {
+        if ($bookCopy->status === 'dipinjam' || $bookCopy->activeLoanItem()->exists()) {
             return back()->with('error', 'Tidak dapat menghapus eksemplar yang sedang dipinjam.');
         }
 
-        $bookCopy->delete();
+        try {
+            DB::transaction(function () use ($bookCopy) {
+                $lockedCopy = BookCopy::query()->lockForUpdate()->findOrFail($bookCopy->getKey());
 
-        return redirect()->route('library.book-copies.index')->with('success', 'Eksemplar berhasil dihapus.');
+                if ($lockedCopy->status === 'dipinjam' || $lockedCopy->activeLoanItem()->exists()) {
+                    throw new \RuntimeException('Eksemplar sedang dipinjam dan tidak dapat dihapus.');
+                }
+
+                $lockedCopy->delete();
+            });
+        } catch (Throwable $exception) {
+            report($exception);
+
+            return back()->with('error', $exception->getMessage() === 'Eksemplar sedang dipinjam dan tidak dapat dihapus.'
+                ? $exception->getMessage()
+                : 'Eksemplar gagal dihapus. Silakan coba kembali.');
+        }
+
+        return redirect()->route('library.book-copies.index')->with('success', 'Eksemplar berhasil dihapus tanpa menghilangkan riwayat peminjaman.');
     }
 
     public function lookup(Request $request)

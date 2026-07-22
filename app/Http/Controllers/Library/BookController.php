@@ -122,8 +122,6 @@ class BookController extends Controller
             return back()->with('error', 'Tidak dapat menghapus buku yang sedang dipinjam.');
         }
 
-        $cover = $book->cover;
-
         try {
             DB::transaction(function () use ($book) {
                 $lockedBook = Book::query()->lockForUpdate()->findOrFail($book->getKey());
@@ -140,10 +138,6 @@ class BookController extends Controller
             return back()->with('error', $exception->getMessage() === 'Buku sedang dipinjam dan tidak dapat dihapus.'
                 ? $exception->getMessage()
                 : 'Buku gagal dihapus. Silakan coba kembali.');
-        }
-
-        if ($cover) {
-            Storage::disk('public')->delete($cover);
         }
 
         if (Book::query()->whereKey($book->getKey())->exists()) {

@@ -31,6 +31,13 @@ class SuratKeluar extends Model
 
     protected $dates = ['tanggal_surat'];
 
+    public function scopeForLetterYear($query, $year = null)
+    {
+        $year = $year ?: now('Asia/Jayapura')->year;
+
+        return $query->whereYear('tanggal_surat', $year);
+    }
+
     public function scopeVisibleTo($query, $user)
     {
         if (!$user) {

@@ -42,6 +42,7 @@ class SuratMasukController extends Controller
             : $defaultWorkflowFilter;
         $search = trim((string) $request->input('search', ''));
         $visibleQuery = SuratMasuk::visibleTo($user);
+        $notificationYear = now('Asia/Jayapura')->year;
 
         if ($hasDelegationFilter) {
             $workflowCounts = [
@@ -51,8 +52,14 @@ class SuratMasukController extends Controller
             ];
         } else {
             $workflowCounts = [
-                'disposition' => $this->applyNeedsDispositionFilter(clone $visibleQuery, $user)->count(),
-                'follow_up' => $this->applyNeedsFollowUpFilter(clone $visibleQuery, $user)->count(),
+                'disposition' => $this->applyNeedsDispositionFilter(
+                    (clone $visibleQuery)->forLetterYear($notificationYear),
+                    $user
+                )->count(),
+                'follow_up' => $this->applyNeedsFollowUpFilter(
+                    (clone $visibleQuery)->forLetterYear($notificationYear),
+                    $user
+                )->count(),
             ];
         }
 
@@ -60,9 +67,15 @@ class SuratMasukController extends Controller
         if ($hasDelegationFilter) {
             $suratQuery = $this->applyDelegationScopeFilter($suratQuery, $user, $workflowFilter);
         } elseif ($workflowFilter === 'disposition') {
-            $suratQuery = $this->applyNeedsDispositionFilter($suratQuery, $user);
+            $suratQuery = $this->applyNeedsDispositionFilter(
+                $suratQuery->forLetterYear($notificationYear),
+                $user
+            );
         } elseif ($workflowFilter === 'follow_up') {
-            $suratQuery = $this->applyNeedsFollowUpFilter($suratQuery, $user);
+            $suratQuery = $this->applyNeedsFollowUpFilter(
+                $suratQuery->forLetterYear($notificationYear),
+                $user
+            );
         }
 
         if ($search !== '') {
