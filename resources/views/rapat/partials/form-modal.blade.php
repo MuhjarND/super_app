@@ -18,6 +18,12 @@
             <form id="{{ $formId }}" data-action="{{ $action }}" enctype="multipart/form-data">
                 @csrf
                 <div class="modal-body">
+                    @if(!$isCreate)
+                        <div id="editApprovedNotice" class="alert alert-warning" style="display:none;">
+                            <i class="fas fa-info-circle mr-1"></i>
+                            Rapat tetap berstatus disetujui dan PDF final akan diperbarui. Approver tidak dapat diganti.
+                        </div>
+                    @endif
                     <div class="rapat-form-section">
                         <div class="rapat-form-section-title">Informasi Rapat</div>
                         <div class="row">

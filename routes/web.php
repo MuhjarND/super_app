@@ -11,7 +11,7 @@ Auth::routes(['register' => false]); // Disable registration - admin adds users
 Route::get('/autologin', 'AutoLoginController@show')->name('autologin');
 Route::post('/autologin', 'AutoLoginController@login')->name('autologin.login');
 Route::get('/masuk/whatsapp/{token}', 'Auth\WhatsAppMagicLoginController@consume')
-    ->where('token', '[A-Za-z0-9]{64}')
+    ->where('token', '(?:[A-Za-z0-9]{64}|v1\.[a-z0-9.]+)')
     ->middleware('throttle:10,1')
     ->name('whatsapp.magic-login.consume');
 Route::get('/login/2fa', 'Auth\TwoFactorChallengeController@show')->name('two-factor.challenge.show');

@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Services\WhatsAppMagicLinkService;
+use App\User;
 use App\WhatsAppMagicLoginToken;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -10,7 +12,7 @@ use Illuminate\Support\Facades\DB;
 
 class WhatsAppMagicLoginController extends Controller
 {
-    public function consume(Request $request, $token)
+    public function consume(Request $request, $token, WhatsAppMagicLinkService $magicLinkService)
     {
         $magicToken = DB::transaction(function () use ($token) {
             $record = WhatsAppMagicLoginToken::with('user')
@@ -28,7 +30,18 @@ class WhatsAppMagicLoginController extends Controller
             return $record;
         });
 
-        if (!$magicToken) {
+        $user = $magicToken ? $magicToken->user : null;
+        $destinationUrl = $magicToken ? $magicToken->destination_url : null;
+
+        if (!$user) {
+            $signedPayload = $magicLinkService->resolveSignedToken($token);
+            if ($signedPayload) {
+                $user = User::find($signedPayload['user_id']);
+                $destinationUrl = $signedPayload['destination_url'];
+            }
+        }
+
+        if (!$user) {
             return redirect()->route('login')
                 ->withErrors(['magic_link' => 'Tautan WhatsApp tidak valid atau telah kedaluwarsa.']);
         }
@@ -36,9 +49,9 @@ class WhatsAppMagicLoginController extends Controller
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
-        Auth::login($magicToken->user);
+        Auth::login($user);
         $request->session()->regenerate();
 
-        return redirect()->to($magicToken->destination_url);
+        return redirect()->to($destinationUrl ?: route('dashboard'));
     }
 }

@@ -1253,6 +1253,7 @@
                 window.openEditModal = function (rapatId) {
                     const row = $('tr[data-rapat-id="' + rapatId + '"]');
                     const pesertaIds = String(row.data('pesertaIds') || '').split(',').filter(Boolean);
+                    const isApproved = row.data('status') === 'disetujui';
 
                     $('#editRapatForm').data('action', row.data('updateUrl'));
                     $('#editJudul').val(row.data('judul'));
@@ -1268,6 +1269,7 @@
                     $('#editApprover1Id').val(row.data('approver1')).trigger('change');
                     $('#editApprover2Id').val(row.data('approver2')).trigger('change');
                     $('#editApproval1JabatanManual').val(row.data('approval1JabatanManual'));
+                    $('#editApprover1Id, #editApprover2Id, #editApproval1JabatanManual').prop('disabled', isApproved);
                     $('#editIncludeDetailTambahan').prop('checked', Number(row.data('includeDetailTambahan')) === 1).trigger('change');
                     $('#editDetailTambahan').val(row.data('detailTambahan'));
                     $('#editTujuanSurat').val(row.data('tujuanSurat'));
@@ -1282,12 +1284,16 @@
                     $('#editGunakanLampiran').prop('checked', Number(row.data('hasLampiran')) === 1).trigger('change');
                     $('#editHapusLampiranTambahan').prop('checked', false);
                     $('#editLampiranInfo').toggle(Number(row.data('hasLampiran')) === 1);
+                    $('#editApprovedNotice').toggle(isApproved);
 
                     $('#editRapatModal').modal('show');
                 };
 
                 function submitRapatForm($form, url, usePostOverride) {
+                    const $disabledFields = $form.find(':input:disabled');
+                    $disabledFields.prop('disabled', false);
                     const formData = new FormData($form[0]);
+                    $disabledFields.prop('disabled', true);
                     if (usePostOverride) {
                         formData.append('_method', 'PUT');
                     }

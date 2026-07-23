@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Services\WhatsAppMagicLinkService;
 use App\User;
 use App\WhatsAppMagicLoginToken;
+use Carbon\Carbon;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\URL;
@@ -68,6 +69,60 @@ class WhatsAppMagicLoginTest extends TestCase
         $response->assertRedirect($destination);
         $this->assertAuthenticatedAs($user);
         $this->assertNotNull(WhatsAppMagicLoginToken::first()->fresh()->used_at);
+    }
+
+    public function testSignedMagicLinkStillWorksWhenAuditRecordIsUnavailable()
+    {
+        $user = factory(User::class)->create(['no_hp' => '081234567890']);
+        $destination = route('dashboard');
+        $message = app(WhatsAppMagicLinkService::class)
+            ->replaceApplicationUrls($user, 'Buka: ' . $destination);
+        preg_match('/https?:\/\/\S+/', $message, $matches);
+
+        $magicUrl = $matches[0];
+        WhatsAppMagicLoginToken::query()->delete();
+
+        $response = $this->get($magicUrl);
+
+        $response->assertRedirect($destination);
+        $this->assertAuthenticatedAs($user);
+    }
+
+    public function testSignedMagicLinkRejectsAnAlteredToken()
+    {
+        $user = factory(User::class)->create(['no_hp' => '081234567890']);
+        $message = app(WhatsAppMagicLinkService::class)
+            ->replaceApplicationUrls($user, 'Buka: ' . route('dashboard'));
+        preg_match('/https?:\/\/\S+/', $message, $matches);
+        WhatsAppMagicLoginToken::query()->delete();
+
+        $magicUrl = $matches[0];
+        $alteredUrl = substr($magicUrl, 0, -1) . (substr($magicUrl, -1) === 'a' ? 'b' : 'a');
+        $response = $this->get($alteredUrl);
+
+        $response->assertRedirect(route('login'));
+        $this->assertGuest();
+    }
+
+    public function testSignedMagicLinkExpiresAfterFourteenDays()
+    {
+        Carbon::setTestNow(Carbon::parse('2026-07-23 10:00:00', 'Asia/Jayapura'));
+
+        try {
+            $user = factory(User::class)->create(['no_hp' => '081234567890']);
+            $message = app(WhatsAppMagicLinkService::class)
+                ->replaceApplicationUrls($user, 'Buka: ' . route('dashboard'));
+            preg_match('/https?:\/\/\S+/', $message, $matches);
+            WhatsAppMagicLoginToken::query()->delete();
+
+            Carbon::setTestNow(now()->addDays(15));
+            $response = $this->get($matches[0]);
+
+            $response->assertRedirect(route('login'));
+            $this->assertGuest();
+        } finally {
+            Carbon::setTestNow();
+        }
     }
 
     public function testExpiredMagicLinkCannotLogIn()

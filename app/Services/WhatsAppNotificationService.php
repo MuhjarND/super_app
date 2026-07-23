@@ -694,7 +694,7 @@ class WhatsAppNotificationService
         ]);
     }
 
-    public function notifyRapatParticipants(Rapat $rapat)
+    public function notifyRapatParticipants(Rapat $rapat, $isUpdate = false)
     {
         $rapat->loadMissing(['kategoriSuratKode', 'pesertas.jabatan', 'pesertas.roles', 'suratKeluar']);
 
@@ -704,7 +704,9 @@ class WhatsAppNotificationService
 
         $lines = [
             'Yth. Bapak/Ibu,',
-            'Dengan hormat, berikut disampaikan undangan rapat yang telah disetujui.',
+            $isUpdate
+                ? 'Dengan hormat, berikut disampaikan pembaruan undangan rapat yang telah disetujui.'
+                : 'Dengan hormat, berikut disampaikan undangan rapat yang telah disetujui.',
             '',
             'Judul: ' . $rapat->judul,
             'Nomor Undangan: ' . $rapat->nomor_undangan,
@@ -741,7 +743,7 @@ class WhatsAppNotificationService
 
         $result = $this->sendBulk($users, $this->wrap($lines), [
             'module' => 'rapat',
-            'event' => 'participant_invitation',
+            'event' => $isUpdate ? 'participant_invitation_updated' : 'participant_invitation',
             'notifiable_type' => get_class($rapat),
             'notifiable_id' => $rapat->id,
         ]);

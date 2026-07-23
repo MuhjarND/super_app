@@ -7,6 +7,7 @@ use App\Http\Requests\UpdateRapatRequest;
 use App\Rapat;
 use App\Services\RapatApprovalService;
 use App\Services\RapatDocumentService;
+use App\Services\WhatsAppNotificationService;
 use App\User;
 use App\ZiActivity;
 use App\ZiGuidelineSubPoint;
@@ -19,15 +20,18 @@ class RapatController extends Controller
 {
     protected $approvalService;
     protected $documentService;
+    protected $whatsAppService;
 
     public function __construct(
         RapatApprovalService $approvalService,
-        RapatDocumentService $documentService
+        RapatDocumentService $documentService,
+        WhatsAppNotificationService $whatsAppService
     )
     {
         $this->middleware('auth');
         $this->approvalService = $approvalService;
         $this->documentService = $documentService;
+        $this->whatsAppService = $whatsAppService;
     }
 
     public function index(\Illuminate\Http\Request $request)
@@ -121,7 +125,14 @@ class RapatController extends Controller
         $data = $request->validated();
         $wasApproved = $rapat->status === 'disetujui';
 
-        DB::transaction(function () use ($request, $rapat, $data) {
+        if ($wasApproved) {
+            $data['approver_1_id'] = $rapat->approver_1_id;
+            $data['approver_2_id'] = $rapat->approver_2_id;
+            $data['approval1_jabatan_manual'] = $rapat->approval1_jabatan_manual;
+            $data['status'] = 'disetujui';
+        }
+
+        DB::transaction(function () use ($request, $rapat, $data, $wasApproved) {
             $rapat->update($this->payloadFromRequest($request, $data, $rapat));
             $this->syncPeserta($rapat, $data['peserta_ids']);
             $this->approvalService->syncWorkflow(
@@ -129,17 +140,36 @@ class RapatController extends Controller
                 $rapat->status,
                 $rapat->approvals()->where('status', 'rejected')->exists()
             );
-            $this->documentService->syncSuratKeluar($rapat, false);
+
+            if ($wasApproved && $rapat->status !== 'disetujui') {
+                $rapat->forceFill(['status' => 'disetujui'])->save();
+            }
+
+            $this->documentService->syncSuratKeluar($rapat, $wasApproved);
         });
 
-        $this->dispatchCreateOrUpdateNotifications(
-            $rapat->fresh(['pesertas', 'approvals', 'kategoriSuratKode', 'creator']),
-            $wasApproved
-        );
+        $rapat = $rapat->fresh(['pesertas', 'approvals', 'kategoriSuratKode', 'creator', 'suratKeluar']);
+        if ($wasApproved) {
+            try {
+                $this->documentService->generateAndStoreUndangan($rapat, true);
+            } catch (\Throwable $exception) {
+                report($exception);
+            }
+
+            $rapat->forceFill(['participant_notified_at' => null])->save();
+            $this->whatsAppService->notifyRapatParticipants(
+                $rapat->fresh(['pesertas', 'kategoriSuratKode', 'suratKeluar']),
+                true
+            );
+        } else {
+            $this->dispatchCreateOrUpdateNotifications($rapat);
+        }
 
         return response()->json([
             'success' => true,
-            'message' => 'Rapat berhasil diperbarui.',
+            'message' => $wasApproved
+                ? 'Rapat berhasil diperbarui dan tetap berstatus disetujui.'
+                : 'Rapat berhasil diperbarui.',
         ]);
     }
 
