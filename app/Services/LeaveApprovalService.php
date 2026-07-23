@@ -88,6 +88,20 @@ class LeaveApprovalService
                     $leaveRequest->request_number = $number['formatted'];
                 }
 
+                if (!empty($steps) && optional($leaveRequest->leaveType)->requires_balance) {
+                    $balanceYear = (int) optional($leaveRequest->start_date)->year ?: (int) date('Y');
+                    $balanceSnapshot = $this->balanceService->getBalanceSnapshot(
+                        $leaveRequest->user,
+                        $leaveRequest->leaveType,
+                        $balanceYear
+                    );
+                    $steps[0]['leave_balance_snapshot'] = [
+                        'leave_type_id' => (int) $leaveRequest->leave_type_id,
+                        'year' => $balanceYear,
+                        'remaining_balance' => max(0, (int) ($balanceSnapshot['remaining_balance'] ?? 0)),
+                    ];
+                }
+
                 $leaveRequest->applicant_signature_path = null;
                 $leaveRequest->applicant_signature_mime = null;
                 $leaveRequest->applicant_signature_size = null;

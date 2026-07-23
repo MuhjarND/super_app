@@ -160,10 +160,12 @@
                         <span class="label">Penanda Tangan</span>
                         <div class="value">{{ $data['signer_name'] }}</div>
                     </div>
-                    <div class="item">
-                        <span class="label">Jabatan Penanda Tangan</span>
-                        <div class="value">{{ $data['signer_title'] }}</div>
-                    </div>
+                    @if(!empty($data['signer_title']))
+                        <div class="item">
+                            <span class="label">Jabatan Penanda Tangan</span>
+                            <div class="value">{{ $data['signer_title'] }}</div>
+                        </div>
+                    @endif
                     <div class="item">
                         <span class="label">Waktu Tanda Tangan</span>
                         <div class="value">{{ $data['acted_at'] }}</div>

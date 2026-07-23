@@ -186,7 +186,7 @@ class LeaveDocumentService
             'period' => $leaveRequest->period_label,
             'role_label' => 'Pemohon Cuti',
             'signer_name' => optional($leaveRequest->user)->name ?: '-',
-            'signer_title' => optional($leaveRequest->user)->jabatan_keterangan ?: '-',
+            'signer_title' => null,
             'acted_at' => optional($leaveRequest->submitted_at ?: $leaveRequest->created_at)->translatedFormat('d F Y H:i') . ' WIT',
             'status' => $isSigned ? 'Ditandatangani Pemohon melalui QR' : 'Belum Ditandatangani',
             'verification_url' => $this->applicantSignatureVerificationUrl($leaveRequest),
@@ -302,7 +302,11 @@ class LeaveDocumentService
             $balance = $tahunan
                 ? LeaveBalance::where('user_id', $leaveRequest->user_id)->where('leave_type_id', $tahunan->id)->where('year', $year)->first()
                 : null;
-            $remainingAtRequest = $balance ? max(0, (int) $balance->remaining_balance) : 0;
+            $remainingAtRequest = $this->resolveAnnualLeaveBalanceAtRequest(
+                $balance,
+                $leaveRequest,
+                $year
+            );
 
             $rows[] = [
                 'year' => $year,
@@ -313,6 +317,51 @@ class LeaveDocumentService
         }
 
         return $rows;
+    }
+
+    protected function resolveAnnualLeaveBalanceAtRequest($balance, LeaveRequest $leaveRequest, $year)
+    {
+        if (!$balance) {
+            return 0;
+        }
+
+        $currentRemaining = max(0, (int) $balance->remaining_balance);
+        $isCurrentAnnualRequest = (int) $leaveRequest->leave_type_id === (int) $balance->leave_type_id
+            && (int) $year === (int) optional($leaveRequest->start_date)->year;
+
+        if (!$isCurrentAnnualRequest) {
+            return $currentRemaining;
+        }
+
+        $snapshot = collect($leaveRequest->approver_chain_snapshot ?: [])
+            ->pluck('leave_balance_snapshot')
+            ->filter()
+            ->first(function ($item) use ($balance, $year) {
+                return (int) data_get($item, 'leave_type_id') === (int) $balance->leave_type_id
+                    && (int) data_get($item, 'year') === (int) $year;
+            });
+
+        if (!is_null(data_get($snapshot, 'remaining_balance'))) {
+            return max(0, (int) data_get($snapshot, 'remaining_balance'));
+        }
+
+        $balanceDeductedStatuses = [
+            LeaveRequest::STATUS_SUBMITTED,
+            LeaveRequest::STATUS_UNDER_REVIEW,
+            LeaveRequest::STATUS_VERIFIED,
+            LeaveRequest::STATUS_APPROVED,
+            LeaveRequest::STATUS_COMPLETED,
+        ];
+
+        if (!in_array($leaveRequest->status, $balanceDeductedStatuses, true)) {
+            return $currentRemaining;
+        }
+
+        $takenDays = (int) ($leaveRequest->approved_days
+            ?: $leaveRequest->requested_days
+            ?: $leaveRequest->workday_count);
+
+        return max(0, $currentRemaining + $takenDays);
     }
 
     protected function buildParaf($approval = null)

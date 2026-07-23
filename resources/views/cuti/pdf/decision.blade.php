@@ -193,7 +193,6 @@ body { margin: 0; }
             <td colspan="2" class="signature-cell" style="height:66px;">
                 <div class="signature-inner">
                     <div style="font-size:7px; margin-bottom:1px;">Hormat Saya,</div>
-                    <div class="signature-title">{{ $formData['employeeTitle'] }}</div>
                     @if(!empty($formData['pemohonSignature']))<img class="signature-pad-img" src="{{ $formData['pemohonSignature'] }}" alt="QR tanda tangan pemohon">@endif
                     <div class="signature-name">({{ optional($leaveRequest->user)->name ?: '-' }})</div>
                     <div>NIP. {{ optional($leaveRequest->user)->nip ?: '-' }}</div>

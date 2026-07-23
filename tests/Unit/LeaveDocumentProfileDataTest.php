@@ -126,4 +126,63 @@ class LeaveDocumentProfileDataTest extends TestCase
             $method->invoke($service, $balance, $request, 2026, 8)
         );
     }
+
+    public function test_annual_leave_balance_restores_current_request_days_for_legacy_requests()
+    {
+        $service = new LeaveDocumentService(
+            $this->createMock(DocumentQrCodeService::class),
+            $this->createMock(PdfVerificationService::class)
+        );
+        $method = new ReflectionMethod($service, 'resolveAnnualLeaveBalanceAtRequest');
+        $method->setAccessible(true);
+
+        $balance = new LeaveBalance();
+        $balance->setRawAttributes([
+            'leave_type_id' => 1,
+            'remaining_balance' => 8,
+        ]);
+        $request = new LeaveRequest();
+        $request->setRawAttributes([
+            'leave_type_id' => 1,
+            'start_date' => '2026-08-10',
+            'requested_days' => 4,
+            'approved_days' => 4,
+            'status' => LeaveRequest::STATUS_APPROVED,
+        ]);
+
+        $this->assertSame(12, $method->invoke($service, $balance, $request, 2026));
+    }
+
+    public function test_annual_leave_balance_uses_submission_snapshot_when_available()
+    {
+        $service = new LeaveDocumentService(
+            $this->createMock(DocumentQrCodeService::class),
+            $this->createMock(PdfVerificationService::class)
+        );
+        $method = new ReflectionMethod($service, 'resolveAnnualLeaveBalanceAtRequest');
+        $method->setAccessible(true);
+
+        $balance = new LeaveBalance();
+        $balance->setRawAttributes([
+            'leave_type_id' => 1,
+            'remaining_balance' => 4,
+        ]);
+        $request = new LeaveRequest();
+        $request->setRawAttributes([
+            'leave_type_id' => 1,
+            'start_date' => '2026-08-10',
+            'requested_days' => 4,
+            'approved_days' => 4,
+            'status' => LeaveRequest::STATUS_APPROVED,
+            'approver_chain_snapshot' => json_encode([[
+                'leave_balance_snapshot' => [
+                    'leave_type_id' => 1,
+                    'year' => 2026,
+                    'remaining_balance' => 12,
+                ],
+            ]]),
+        ]);
+
+        $this->assertSame(12, $method->invoke($service, $balance, $request, 2026));
+    }
 }
