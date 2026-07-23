@@ -559,6 +559,33 @@
             flex: 0 0 auto;
         }
 
+        #disposisiModal .modal-content {
+            display: flex;
+            flex-direction: column;
+            max-height: calc(100vh - 2rem);
+            overflow: hidden;
+        }
+
+        #disposisiModal #disposisiForm {
+            display: flex;
+            flex: 1 1 auto;
+            flex-direction: column;
+            min-height: 0;
+            overflow: hidden;
+        }
+
+        #disposisiModal .modal-body {
+            flex: 1 1 auto;
+            min-height: 0;
+            overflow-y: auto;
+            overscroll-behavior: contain;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        #disposisiModal .modal-footer {
+            flex: 0 0 auto;
+        }
+
         .agenda-option {
             margin-top: 12px;
             padding: 2px 0;
@@ -873,6 +900,40 @@
             .surat-preview-open-btn {
                 justify-content: center;
                 width: 100%;
+            }
+
+            #disposisiModal .modal-dialog {
+                height: calc(100vh - 16px);
+                height: calc(100dvh - 16px);
+                min-height: 0;
+            }
+
+            #disposisiModal .modal-content {
+                height: 100%;
+                max-height: 100%;
+            }
+
+            #disposisiModal .modal-body > .row > .col-lg-6:first-child {
+                border-right: 0 !important;
+                border-bottom: 1px solid #eef2f7;
+            }
+
+            #disposisiModal #disposisiFileViewer {
+                height: 190px !important;
+                min-height: 190px;
+                pointer-events: none;
+            }
+
+            #disposisiModal .modal-body > .row > .col-lg-6:last-child > div {
+                padding: 16px !important;
+            }
+
+            #disposisiModal .form-row {
+                display: block;
+            }
+
+            #disposisiModal .form-row > .form-group {
+                max-width: 100%;
             }
 
             .content-header .row.mb-2 {

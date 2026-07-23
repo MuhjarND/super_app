@@ -31,17 +31,21 @@ class LeaveApprovalService
         $steps = [];
         $leaveRequest->loadMissing(['user.atasanLangsung.atasanLangsung', 'user.unit', 'user.roles']);
 
-        $verifikator = User::active()->whereHas('roles', function ($q) {
-            $q->where('name', 'verifikator_dokumen');
+        $adminKepegawaian = User::active()->whereHas('roles', function ($q) {
+            $q->where('name', 'admin_kepegawaian');
         })->orderBy('id')->first();
 
-        if ($verifikator) {
-            $steps[] = [
-                'step_no' => count($steps) + 1,
-                'role_name' => 'verifikator_dokumen',
-                'approver_id' => $this->resolveApproverId($verifikator->id, 'document_verification', $leaveRequest->start_date),
-            ];
+        if (!$adminKepegawaian) {
+            throw ValidationException::withMessages([
+                'approval' => 'Admin Kepegawaian aktif belum ditentukan. Tetapkan role Admin Kepegawaian pada salah satu user sebelum pengajuan cuti disubmit.',
+            ]);
         }
+
+        $steps[] = [
+            'step_no' => count($steps) + 1,
+            'role_name' => 'verifikator_dokumen',
+            'approver_id' => $this->resolveApproverId($adminKepegawaian->id, 'document_verification', $leaveRequest->start_date),
+        ];
 
         $directSupervisorId = $this->resolveDirectSupervisorId($leaveRequest);
         if ($directSupervisorId) {
@@ -58,11 +62,10 @@ class LeaveApprovalService
             ->first();
         $sekma = $leaveRequest->is_abroad ? $this->firstRoleUser(['sekretaris_ma', 'sekretaris_mahkamah_agung']) : null;
         $finalApproverId = optional($sekma)->id ?: (optional($leaveRequest->user)->pejabat_berwenang_id ?: optional($chairman)->id);
-        $existingApproverIds = collect($steps)->pluck('approver_id')->filter()->map(function ($value) {
-            return (int) $value;
-        })->all();
 
-        if ($finalApproverId && !in_array((int) $finalApproverId, $existingApproverIds, true)) {
+        // The same official may act in two distinct capacities. Keep both steps so
+        // the supervisor and final-authority decisions each receive their own QR.
+        if ($finalApproverId) {
             $steps[] = [
                 'step_no' => count($steps) + 1,
                 'role_name' => $sekma ? 'sekretaris_ma' : 'ppk',
@@ -130,6 +133,7 @@ class LeaveApprovalService
             $approval->note = $note;
             $approval->save();
             $leaveRequest = $approval->leaveRequest;
+            $this->ensureLegacySamePersonFinalApproval($leaveRequest, $approval);
             $next = $leaveRequest->approvals()->where('step_no', '>', $approval->step_no)->orderBy('step_no')->first();
             if ($next) {
                 $next->status = 'pending';
@@ -257,6 +261,42 @@ class LeaveApprovalService
             'new_values_json' => ['status' => $approvalStatus],
             'note' => $note,
         ], $actor);
+    }
+
+    protected function ensureLegacySamePersonFinalApproval(LeaveRequest $leaveRequest, LeaveApproval $approval)
+    {
+        if ($approval->role_name !== 'atasan_langsung') {
+            return;
+        }
+
+        if ($leaveRequest->approvals()->whereIn('role_name', ['ppk', 'sekretaris_ma'])->exists()) {
+            return;
+        }
+
+        $user = $leaveRequest->user;
+        if (
+            !$user
+            || (int) $user->atasan_langsung_id <= 0
+            || (int) $user->atasan_langsung_id !== (int) $user->pejabat_berwenang_id
+        ) {
+            return;
+        }
+
+        $step = [
+            'step_no' => ((int) $leaveRequest->approvals()->max('step_no')) + 1,
+            'role_name' => 'ppk',
+            'approver_id' => $this->resolveApproverId(
+                $user->pejabat_berwenang_id,
+                'ppk_approval',
+                $leaveRequest->start_date
+            ),
+        ];
+
+        $leaveRequest->approvals()->create($step + ['status' => 'waiting']);
+        $leaveRequest->approver_chain_snapshot = collect($leaveRequest->approver_chain_snapshot ?: [])
+            ->push($step)
+            ->values()
+            ->all();
     }
 
     protected function resolveApproverId($approverId, $scope, $effectiveDate = null)

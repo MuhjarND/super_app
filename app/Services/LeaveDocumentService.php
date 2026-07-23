@@ -224,6 +224,18 @@ class LeaveDocumentService
         $verifier = $approvals->get('verifikator_dokumen');
         $atasan = $approvals->get('atasan_langsung');
         $ppk = $approvals->get('ppk');
+
+        // Requests submitted before separate same-person approval steps were
+        // supported have no PPK row. Preserve both QR positions for those PDFs.
+        if (
+            !$ppk
+            && $atasan
+            && (int) optional($leaveRequest->user)->atasan_langsung_id > 0
+            && (int) optional($leaveRequest->user)->atasan_langsung_id === (int) optional($leaveRequest->user)->pejabat_berwenang_id
+        ) {
+            $ppk = $atasan;
+        }
+
         $approvalSignatures = $this->buildApprovalSignatureRows($leaveRequest);
 
         return [

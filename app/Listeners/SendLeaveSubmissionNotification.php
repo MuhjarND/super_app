@@ -24,7 +24,7 @@ class SendLeaveSubmissionNotification
 
         if ($requester) {
             $title = 'Pengajuan cuti berhasil diajukan';
-            $message = 'Pengajuan cuti Bapak/Ibu telah diterima sistem dan sedang menunggu proses verifikasi atau persetujuan.';
+            $message = 'Pengajuan cuti Bapak/Ibu telah diterima sistem dan sedang menunggu verifikasi Admin Kepegawaian.';
 
             try {
                 $requester->notify(new LeaveWorkflowNotification(
@@ -47,11 +47,19 @@ class SendLeaveSubmissionNotification
         }
 
         if ($pendingApproval && $pendingApproval->approver) {
+            $isPersonnelVerification = $pendingApproval->role_name === 'verifikator_dokumen';
+            $approvalTitle = $isPersonnelVerification
+                ? 'Verifikasi pengajuan cuti menunggu tindakan Anda'
+                : 'Persetujuan cuti menunggu tindakan Anda';
+            $approvalMessage = $isPersonnelVerification
+                ? 'Terdapat pengajuan cuti pegawai yang wajib diverifikasi oleh Admin Kepegawaian sebelum diteruskan kepada pejabat berikutnya.'
+                : 'Terdapat pengajuan cuti yang memerlukan persetujuan Bapak/Ibu.';
+
             try {
                 $pendingApproval->approver->notify(new LeaveWorkflowNotification(
                     $leaveRequest,
-                    'Persetujuan cuti menunggu tindakan Anda',
-                    'Terdapat pengajuan cuti yang memerlukan verifikasi atau persetujuan Bapak/Ibu.',
+                    $approvalTitle,
+                    $approvalMessage,
                     route('cuti.approval.show', $pendingApproval),
                     'pending',
                     'approver'

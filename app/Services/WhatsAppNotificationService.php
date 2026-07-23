@@ -334,7 +334,7 @@ class WhatsAppNotificationService
 
         $message = $this->wrap([
             'Yth. Bapak/Ibu,',
-            'Dengan hormat, pengajuan cuti Bapak/Ibu telah berhasil diajukan dan saat ini menunggu proses verifikasi atau persetujuan.',
+            'Dengan hormat, pengajuan cuti Bapak/Ibu telah berhasil diajukan dan saat ini menunggu verifikasi Admin Kepegawaian.',
             '',
             'Nomor Pengajuan: ' . ($leaveRequest->request_number ?: $leaveRequest->display_number),
             'Jenis Cuti: ' . optional($leaveRequest->leaveType)->name,
@@ -363,9 +363,12 @@ class WhatsAppNotificationService
         }
 
         $leaveRequest = $approval->leaveRequest;
+        $isPersonnelVerification = $approval->role_name === 'verifikator_dokumen';
         $message = $this->wrap([
             'Yth. Bapak/Ibu,',
-            'Dengan hormat, terdapat pengajuan cuti yang memerlukan verifikasi atau persetujuan Bapak/Ibu.',
+            $isPersonnelVerification
+                ? 'Dengan hormat, terdapat pengajuan cuti pegawai yang wajib diverifikasi oleh Admin Kepegawaian.'
+                : 'Dengan hormat, terdapat pengajuan cuti yang memerlukan persetujuan Bapak/Ibu.',
             '',
             'Tahap: ' . $approval->role_label,
             'Pemohon: ' . optional($leaveRequest->user)->name,

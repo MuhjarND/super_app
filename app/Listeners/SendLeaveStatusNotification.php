@@ -78,8 +78,8 @@ class SendLeaveStatusNotification
     {
         if ($eventName === 'approved' && $leaveRequest->status === 'verified') {
             return [
-                'title' => 'Dokumen cuti telah diverifikasi',
-                'message' => 'Dokumen pengajuan cuti Bapak/Ibu telah diverifikasi dan pengajuan diteruskan ke tahap persetujuan berikutnya.',
+                'title' => 'Pengajuan cuti telah diverifikasi',
+                'message' => 'Pengajuan cuti Bapak/Ibu telah diverifikasi oleh Admin Kepegawaian dan diteruskan ke tahap persetujuan berikutnya.',
             ];
         }
 

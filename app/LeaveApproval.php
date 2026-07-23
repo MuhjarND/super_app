@@ -17,7 +17,7 @@ class LeaveApproval extends Model
         $map = [
             'atasan_langsung' => 'Atasan Langsung',
             'atasan_lanjutan' => 'Atasan dari Atasan Langsung',
-            'verifikator_dokumen' => 'Verifikator Dokumen',
+            'verifikator_dokumen' => 'Verifikasi Admin Kepegawaian',
             'ppk' => 'PPK / Pejabat Berwenang',
             'sekretaris_ma' => 'Sekretaris Mahkamah Agung RI',
         ];
