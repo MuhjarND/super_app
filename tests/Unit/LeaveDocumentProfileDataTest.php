@@ -99,4 +99,31 @@ class LeaveDocumentProfileDataTest extends TestCase
             $method->invoke($service, $balance, $request, 2025)
         );
     }
+
+    public function test_annual_leave_note_uses_the_same_balance_shown_in_remaining_column()
+    {
+        $service = new LeaveDocumentService(
+            $this->createMock(DocumentQrCodeService::class),
+            $this->createMock(PdfVerificationService::class)
+        );
+        $method = new ReflectionMethod($service, 'buildAnnualLeaveNote');
+        $method->setAccessible(true);
+
+        $balance = new LeaveBalance();
+        $balance->setRawAttributes([
+            'leave_type_id' => 1,
+            'remaining_balance' => 8,
+        ]);
+        $request = new LeaveRequest();
+        $request->setRawAttributes([
+            'leave_type_id' => 1,
+            'start_date' => '2026-08-10',
+            'requested_days' => 4,
+        ]);
+
+        $this->assertSame(
+            'Diambil 4 hari sisa 4',
+            $method->invoke($service, $balance, $request, 2026, 8)
+        );
+    }
 }

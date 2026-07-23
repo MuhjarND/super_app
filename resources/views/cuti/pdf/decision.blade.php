@@ -7,9 +7,9 @@
 body { font-family: 'Times New Roman', DejaVu Serif, serif; font-size: 8.85px; color: #111; line-height: 1.1; }
 body { margin: 0; }
 .wrapper { width: 88.5%; margin: 0 auto; padding-top: 1.2px; }
-.top-note { text-align: right; font-size: 7.9px; line-height: 1.14; margin-bottom: 1.8px; }
+.top-note { text-align: left; font-size: 7.9px; line-height: 1.14; margin-bottom: 1.8px; }
 .date-line { text-align: right; font-size: 8.9px; margin-bottom: 3.5px; }
-.to-line { text-align: center; font-size: 8.9px; line-height: 1.1; margin-bottom: 4.5px; }
+.to-line { text-align: right; font-size: 8.9px; line-height: 1.1; margin-bottom: 4.5px; }
 .title { text-align: center; font-size: 11px; font-weight: bold; text-transform: uppercase; margin-bottom: 0.3px; letter-spacing: .05px; }
 .number { text-align: center; font-size: 10.5px; font-weight: bold; margin-bottom: 4.2px; }
 .section-table { width: 100%; border-collapse: collapse; margin-bottom: 5.8px; page-break-inside: avoid; }
@@ -28,6 +28,7 @@ body { margin: 0; }
 .signature-cell { vertical-align: top; text-align: center; }
 .signature-inner { text-align: center; font-size: 8.05px; line-height: 1.055; page-break-inside: avoid; }
 .signature-pad-img { width: 66px; height: 66px; margin: 2px auto; display: block; object-fit: contain; }
+.signature-title { margin-bottom: 1px; }
 .signature-name { font-weight: bold; position: relative; z-index: 1; }
 .blank-area { height: 88px; }
 .decision-label { text-align: center; font-size: 8px; text-transform: uppercase; }
@@ -36,6 +37,8 @@ body { margin: 0; }
 .type-label { width: 42%; padding-left: 6px !important; }
 .type-mark { width: 8%; text-align: center; }
 .compact-text { line-height: 0.98; }
+.leave-period-date { white-space: nowrap; font-size: 8.3px; }
+.leave-period-separator { white-space: nowrap; padding-left: 1px !important; padding-right: 1px !important; }
 .extra-signature-table { margin-bottom: 3.2px; }
 .extra-signature-table td { text-align: center; vertical-align: top; }
 .extra-signature-role { font-weight: bold; font-size: 7px; text-transform: uppercase; }
@@ -119,14 +122,14 @@ body { margin: 0; }
         <tr class="section-head"><td colspan="4">IV. &nbsp; LAMANYA CUTI</td></tr>
         <tr>
             <td width="13%">Selama</td>
-            <td width="30%">{{ $leaveRequest->requested_days ?: 0 }} Hari Kerja</td>
+            <td width="25%">{{ $leaveRequest->requested_days ?: 0 }} Hari Kerja</td>
             <td width="18%" class="center">Mulai Tanggal</td>
-            <td width="39%" style="padding:0;">
+            <td width="44%" style="padding:0;">
                 <table class="inner-table" style="border:none; width:100%; margin:-1px;">
                     <tr>
-                        <td width="63%" style="border-left:none;border-top:none;border-bottom:none;">{{ optional($leaveRequest->start_date)->translatedFormat('d F Y') }}</td>
-                        <td width="11%" class="center" style="border-top:none;border-bottom:none;">s/d</td>
-                        <td width="26%" style="border-right:none;border-top:none;border-bottom:none;">{{ optional($leaveRequest->end_date)->translatedFormat('d F Y') }}</td>
+                        <td width="44%" class="leave-period-date" style="border-left:none;border-top:none;border-bottom:none;">{{ optional($leaveRequest->start_date)->translatedFormat('d F Y') }}</td>
+                        <td width="12%" class="center leave-period-separator" style="border-top:none;border-bottom:none;">s/d</td>
+                        <td width="44%" class="leave-period-date" style="border-right:none;border-top:none;border-bottom:none;">{{ optional($leaveRequest->end_date)->translatedFormat('d F Y') }}</td>
                     </tr>
                 </table>
             </td>
@@ -139,7 +142,7 @@ body { margin: 0; }
             <td colspan="2" style="padding:0; width:50%;">
                 <table class="inner-table" style="width:100%; margin:-1px;">
                     <tr>
-                        <td colspan="4" class="label-cell">H. CUTI TAHUNAN</td>
+                        <td colspan="4" class="label-cell">1. CUTI TAHUNAN</td>
                     </tr>
                     <tr>
                         <td width="25%" class="label-cell center">TAHUN</td>
@@ -164,11 +167,11 @@ body { margin: 0; }
             </td>
             <td style="padding:0; width:34%;">
                 <table class="inner-table" style="width:100%; margin:-1px;">
-                    <tr><td class="label-cell">I. CUTI BESAR</td></tr>
-                    <tr><td class="label-cell">J. CUTI SAKIT</td></tr>
-                    <tr><td class="label-cell">K. CUTI MELAHIRKAN</td></tr>
-                    <tr><td class="label-cell">L. CUTI KARENA ALASAN PENTING</td></tr>
-                    <tr><td class="label-cell">M. CUTI DI LUAR TANGGUNGAN NEGARA</td></tr>
+                    <tr><td class="label-cell">2. CUTI BESAR</td></tr>
+                    <tr><td class="label-cell">3. CUTI SAKIT</td></tr>
+                    <tr><td class="label-cell">4. CUTI MELAHIRKAN</td></tr>
+                    <tr><td class="label-cell">5. CUTI KARENA ALASAN PENTING</td></tr>
+                    <tr><td class="label-cell">6. CUTI DI LUAR TANGGUNGAN NEGARA</td></tr>
                 </table>
             </td>
         </tr>
@@ -190,6 +193,7 @@ body { margin: 0; }
             <td colspan="2" class="signature-cell" style="height:66px;">
                 <div class="signature-inner">
                     <div style="font-size:7px; margin-bottom:1px;">Hormat Saya,</div>
+                    <div class="signature-title">{{ $formData['employeeTitle'] }}</div>
                     @if(!empty($formData['pemohonSignature']))<img class="signature-pad-img" src="{{ $formData['pemohonSignature'] }}" alt="QR tanda tangan pemohon">@endif
                     <div class="signature-name">({{ optional($leaveRequest->user)->name ?: '-' }})</div>
                     <div>NIP. {{ optional($leaveRequest->user)->nip ?: '-' }}</div>
@@ -216,8 +220,8 @@ body { margin: 0; }
             <td colspan="3" class="blank-area"></td>
             <td class="signature-cell">
                 <div class="signature-inner">
+                    <div class="signature-title">{{ optional(optional($formData['atasan'])->approver)->jabatan_keterangan ?: optional(optional($leaveRequest->user)->atasanLangsung)->jabatan_keterangan ?: '-' }}</div>
                     @if(!empty($formData['atasanSignature']))<img class="signature-pad-img" src="{{ $formData['atasanSignature'] }}">@endif
-                    <div>{{ optional(optional($formData['atasan'])->approver)->jabatan_keterangan ?: optional(optional($leaveRequest->user)->atasanLangsung)->jabatan_keterangan ?: '-' }}</div>
                     <div class="signature-name">({{ optional(optional($formData['atasan'])->approver)->name ?: optional(optional($leaveRequest->user)->atasanLangsung)->name ?: '-' }})</div>
                     <div>NIP. {{ optional(optional($formData['atasan'])->approver)->nip ?: optional(optional($leaveRequest->user)->atasanLangsung)->nip ?: '-' }}</div>
                 </div>
@@ -243,8 +247,8 @@ body { margin: 0; }
             <td colspan="3" class="blank-area"></td>
             <td class="signature-cell">
                 <div class="signature-inner">
+                    <div class="signature-title">{{ optional(optional($formData['ppk'])->approver)->jabatan_keterangan ?: '-' }}</div>
                     @if(!empty($formData['ppkSignature']))<img class="signature-pad-img" src="{{ $formData['ppkSignature'] }}">@endif
-                    <div>{{ optional(optional($formData['ppk'])->approver)->jabatan_keterangan ?: '-' }}</div>
                     <div class="signature-name">({{ optional(optional($formData['ppk'])->approver)->name ?: '-' }})</div>
                     <div>NIP. {{ optional(optional($formData['ppk'])->approver)->nip ?: '-' }}</div>
                 </div>
@@ -259,8 +263,8 @@ body { margin: 0; }
                 @foreach($formData['additionalApprovalSignatures'] as $signature)
                     <td>
                         <div class="extra-signature-role">{{ $signature['role_label'] }}</div>
-                        @if(!empty($signature['signature']))<img class="extra-signature-img" src="{{ $signature['signature'] }}">@endif
                         <div class="extra-signature-meta">{{ $signature['title'] }}</div>
+                        @if(!empty($signature['signature']))<img class="extra-signature-img" src="{{ $signature['signature'] }}">@endif
                         <div class="extra-signature-name">({{ $signature['name'] }})</div>
                         <div class="extra-signature-meta">NIP. {{ $signature['nip'] }}<br>{{ $signature['acted_at'] }}</div>
                     </td>

@@ -302,12 +302,13 @@ class LeaveDocumentService
             $balance = $tahunan
                 ? LeaveBalance::where('user_id', $leaveRequest->user_id)->where('leave_type_id', $tahunan->id)->where('year', $year)->first()
                 : null;
+            $remainingAtRequest = $balance ? max(0, (int) $balance->remaining_balance) : 0;
 
             $rows[] = [
                 'year' => $year,
-                'remaining' => $balance ? $balance->remaining_balance : 0,
+                'remaining' => $remainingAtRequest,
                 'used' => $balance ? $balance->used_days : 0,
-                'note' => $this->buildAnnualLeaveNote($balance, $leaveRequest, $year),
+                'note' => $this->buildAnnualLeaveNote($balance, $leaveRequest, $year, $remainingAtRequest),
             ];
         }
 
@@ -537,12 +538,15 @@ class LeaveDocumentService
         return 'Permintaan dan Pemberian ' . $leaveType . ' - ' . $pegawai;
     }
 
-    protected function buildAnnualLeaveNote($balance, LeaveRequest $leaveRequest = null, $year = null)
+    protected function buildAnnualLeaveNote($balance, LeaveRequest $leaveRequest = null, $year = null, $remainingAtRequest = null)
     {
         if (!$balance) {
             return '0';
         }
 
+        $remainingAtRequest = is_null($remainingAtRequest)
+            ? max(0, (int) $balance->remaining_balance)
+            : max(0, (int) $remainingAtRequest);
         $isCurrentAnnualRequest = $leaveRequest
             && (int) $leaveRequest->leave_type_id === (int) $balance->leave_type_id
             && (int) $year === (int) optional($leaveRequest->start_date)->year;
@@ -553,21 +557,21 @@ class LeaveDocumentService
                 ?: $leaveRequest->workday_count);
 
             if ($takenDays > 0) {
-                $remainingAfterRequest = max(0, (int) $balance->remaining_balance - $takenDays);
+                $remainingAfterRequest = max(0, $remainingAtRequest - $takenDays);
 
                 return sprintf('Diambil %d hari sisa %d', $takenDays, $remainingAfterRequest);
             }
         }
 
         if ((int) $balance->used_days > 0) {
-            return sprintf('Diambil %d hari sisa %d', (int) $balance->used_days, (int) $balance->remaining_balance);
+            return sprintf('Diambil %d hari sisa %d', (int) $balance->used_days, $remainingAtRequest);
         }
 
         if ((int) $balance->reserved_days > 0) {
             return sprintf('Diambil %d hari', (int) $balance->reserved_days);
         }
 
-        return (string) (int) $balance->remaining_balance;
+        return (string) $remainingAtRequest;
     }
 
     protected function prepareLeaveAttachmentPdf($document)
