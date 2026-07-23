@@ -17,7 +17,7 @@ class CreateRapatAttendancesTable extends Migration
             $table->string('participant_jabatan_snapshot')->nullable();
             $table->string('guest_instansi')->nullable();
             $table->string('source')->default('public');
-            $table->string('signature_path');
+            $table->string('signature_path')->nullable();
             $table->string('signature_mime')->nullable();
             $table->unsignedBigInteger('signature_size')->nullable();
             $table->timestamp('attended_at');

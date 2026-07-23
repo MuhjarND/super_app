@@ -45,10 +45,11 @@ class SuratMasukController extends Controller
         $notificationYear = now('Asia/Jayapura')->year;
 
         if ($hasDelegationFilter) {
+            $currentYearVisibleQuery = (clone $visibleQuery)->forLetterYear($notificationYear);
             $workflowCounts = [
-                'all' => (clone $visibleQuery)->count(),
-                'direct' => $this->applyDelegationScopeFilter(clone $visibleQuery, $user, 'direct')->count(),
-                'delegated' => $this->applyDelegationScopeFilter(clone $visibleQuery, $user, 'delegated')->count(),
+                'all' => (clone $currentYearVisibleQuery)->count(),
+                'direct' => $this->applyDelegationScopeFilter(clone $currentYearVisibleQuery, $user, 'direct')->count(),
+                'delegated' => $this->applyDelegationScopeFilter(clone $currentYearVisibleQuery, $user, 'delegated')->count(),
             ];
         } else {
             $workflowCounts = [
@@ -155,6 +156,7 @@ class SuratMasukController extends Controller
             'workflowCounts',
             'hasDelegationFilter',
             'delegationFilterLabel',
+            'notificationYear',
             'search'
         ));
     }

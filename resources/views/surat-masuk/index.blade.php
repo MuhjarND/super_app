@@ -955,8 +955,8 @@
                 class="surat-workflow-filter {{ $workflowFilter === 'all' ? 'active' : '' }}" data-workflow="all">
                 Semua
                 <span class="surat-workflow-count {{ ($workflowCounts['all'] ?? 0) > 0 ? 'has-items' : '' }}"
-                    title="{{ $workflowCounts['all'] ?? 0 }} seluruh surat"
-                    aria-label="{{ $workflowCounts['all'] ?? 0 }} seluruh surat">
+                    title="{{ $workflowCounts['all'] ?? 0 }} surat tahun {{ $notificationYear }}"
+                    aria-label="{{ $workflowCounts['all'] ?? 0 }} surat tahun {{ $notificationYear }}">
                     {{ $workflowCounts['all'] ?? 0 }}
                 </span>
             </a>
@@ -964,8 +964,8 @@
                 class="surat-workflow-filter {{ $workflowFilter === 'direct' ? 'active' : '' }}" data-workflow="direct">
                 Untuk Saya
                 <span class="surat-workflow-count {{ ($workflowCounts['direct'] ?? 0) > 0 ? 'has-items' : '' }}"
-                    title="{{ $workflowCounts['direct'] ?? 0 }} surat untuk saya"
-                    aria-label="{{ $workflowCounts['direct'] ?? 0 }} surat untuk saya">
+                    title="{{ $workflowCounts['direct'] ?? 0 }} surat untuk saya tahun {{ $notificationYear }}"
+                    aria-label="{{ $workflowCounts['direct'] ?? 0 }} surat untuk saya tahun {{ $notificationYear }}">
                     {{ $workflowCounts['direct'] ?? 0 }}
                 </span>
             </a>
@@ -973,8 +973,8 @@
                 class="surat-workflow-filter {{ $workflowFilter === 'delegated' ? 'active' : '' }}" data-workflow="delegated">
                 {{ $delegationFilterLabel }}
                 <span class="surat-workflow-count {{ ($workflowCounts['delegated'] ?? 0) > 0 ? 'has-items' : '' }}"
-                    title="{{ $workflowCounts['delegated'] ?? 0 }} surat {{ strtolower($delegationFilterLabel) }}"
-                    aria-label="{{ $workflowCounts['delegated'] ?? 0 }} surat {{ strtolower($delegationFilterLabel) }}">
+                    title="{{ $workflowCounts['delegated'] ?? 0 }} surat {{ strtolower($delegationFilterLabel) }} tahun {{ $notificationYear }}"
+                    aria-label="{{ $workflowCounts['delegated'] ?? 0 }} surat {{ strtolower($delegationFilterLabel) }} tahun {{ $notificationYear }}">
                     {{ $workflowCounts['delegated'] ?? 0 }}
                 </span>
             </a>

@@ -200,32 +200,6 @@
             color: #334155;
         }
 
-        .stat-row {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
-            margin-top: 14px;
-        }
-
-        .stat-pill {
-            border-radius: 14px;
-            padding: 12px 14px;
-            border: 1px solid var(--line);
-            background: #fff;
-        }
-
-        .stat-pill__label {
-            font-size: 0.72rem;
-            color: var(--muted);
-            text-transform: uppercase;
-        }
-
-        .stat-pill__value {
-            font-size: 1rem;
-            font-weight: 800;
-            margin-top: 4px;
-        }
-
         .alert {
             border-radius: 14px;
             padding: 12px 14px;
@@ -293,7 +267,6 @@
         @media (max-width: 640px) {
             .hero h1 { font-size: 1.3rem; }
             .panel { padding: 16px; }
-            .stat-row { grid-template-columns: 1fr; }
             .signature-canvas { height: 200px; }
         }
     </style>
@@ -342,21 +315,6 @@
             </div>
         </div>
 
-        <div class="stat-row">
-            <div class="stat-pill">
-                <div class="stat-pill__label">Undangan</div>
-                <div class="stat-pill__value">{{ $rapat->pesertas->count() }}</div>
-            </div>
-            <div class="stat-pill">
-                <div class="stat-pill__label">Sudah Hadir</div>
-                <div class="stat-pill__value">{{ $rapat->internalAttendances->count() }}</div>
-            </div>
-            <div class="stat-pill">
-                <div class="stat-pill__label">External</div>
-                <div class="stat-pill__value">{{ $rapat->guestAttendances->count() }}</div>
-            </div>
-        </div>
-
         <div class="panel">
             <div id="attendanceAlert" class="alert"></div>
 
@@ -377,9 +335,9 @@
                                 </option>
                             @endforeach
                         </select>
-                        <div class="hint">
-                            {{ $availableParticipants->isEmpty() ? 'Semua peserta undangan sudah melakukan absensi.' : 'Cukup pilih nama. Nomor HP tidak diperlukan pada absensi publik.' }}
-                        </div>
+                        @if($availableParticipants->isEmpty())
+                            <div class="hint">Semua peserta undangan sudah melakukan absensi.</div>
+                        @endif
                     </div>
 
                     <div class="field">
