@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Rapat;
 use App\RapatAttendance;
-use App\Services\DocumentQrCodeService;
 use App\Services\RapatDocumentService;
 use App\Services\WhatsAppNotificationService;
 use Barryvdh\DomPDF\Facade as PDF;
@@ -16,14 +15,12 @@ class RapatAbsensiController extends Controller
 {
     protected $whatsAppService;
     protected $documentService;
-    protected $qrCodeService;
 
-    public function __construct(WhatsAppNotificationService $whatsAppService, RapatDocumentService $documentService, DocumentQrCodeService $qrCodeService)
+    public function __construct(WhatsAppNotificationService $whatsAppService, RapatDocumentService $documentService)
     {
         $this->middleware('auth')->except(['publicShow', 'publicStore', 'publicStoreGuest', 'verifyAttendance']);
         $this->whatsAppService = $whatsAppService;
         $this->documentService = $documentService;
-        $this->qrCodeService = $qrCodeService;
     }
 
     public function index()
@@ -107,16 +104,10 @@ class RapatAbsensiController extends Controller
             return [
                 'user' => $participant,
                 'attendance' => $attendance,
-                'signature_data_uri' => $attendance
-                    ? $this->qrCodeService->dataUri($this->attendanceVerificationUrl($attendance), 104)
-                    : null,
             ];
         });
 
-        $guestAttendances = $rapat->guestAttendances->sortBy('attended_at')->values()->map(function ($attendance) {
-            $attendance->signature_data_uri = $this->qrCodeService->dataUri($this->attendanceVerificationUrl($attendance), 104);
-            return $attendance;
-        });
+        $guestAttendances = $rapat->guestAttendances->sortBy('attended_at')->values();
 
         $attendanceRows = $internalParticipants->map(function ($item) {
             $attendance = $item['attendance'];
@@ -125,21 +116,23 @@ class RapatAbsensiController extends Controller
             return [
                 'name' => $user->name,
                 'description' => $user->jabatan_keterangan ?: optional($user->jabatan)->nama ?: '-',
-                'status' => $attendance ? 'Hadir' : 'Belum Hadir',
-                'signature_data_uri' => $item['signature_data_uri'],
+                'attended_at' => optional($attendance)->attended_at,
             ];
         })->concat($guestAttendances->map(function ($attendance) {
             return [
                 'name' => $attendance->participant_name_snapshot,
                 'description' => $attendance->guest_instansi ?: ($attendance->participant_jabatan_snapshot ?: '-'),
-                'status' => 'Hadir',
-                'signature_data_uri' => $attendance->signature_data_uri,
+                'attended_at' => $attendance->attended_at,
             ];
         }))->values();
 
-        $attendanceCompleted = $rapat->status === 'selesai';
-        $pimpinanSignature = $this->documentService->buildApprovalSignatureData($rapat, $attendanceCompleted);
-        $signers = $attendanceCompleted && !empty($pimpinanSignature['name'])
+        $attendanceApproved = $this->documentService->shouldUseSignedDocument($rapat);
+        $pimpinanSignature = $this->documentService->buildApprovalSignatureData($rapat, $attendanceApproved);
+        $hasApprovalSignature = $attendanceApproved
+            && !empty($pimpinanSignature['image'])
+            && !empty($pimpinanSignature['name'])
+            && $pimpinanSignature['name'] !== '-';
+        $signers = $hasApprovalSignature
             ? [[
                 'name' => $pimpinanSignature['name'],
                 'role' => 'Penanda Tangan Absensi',
@@ -161,7 +154,7 @@ class RapatAbsensiController extends Controller
         $pdf = PDF::loadView('rapat.absensi.pdf', compact(
             'rapat',
             'attendanceRows',
-            'attendanceCompleted',
+            'hasApprovalSignature',
             'pimpinanSignature',
             'kopImage',
             'pdfVerification'

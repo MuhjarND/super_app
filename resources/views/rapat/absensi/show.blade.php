@@ -22,13 +22,6 @@
             background: #fff;
         }
 
-        .attendance-signature {
-            width: 180px;
-            max-width: 100%;
-            border: 1px solid #e8eaed;
-            border-radius: 10px;
-            background: #fff;
-        }
     </style>
 @endpush
 
@@ -100,7 +93,6 @@
                         <th>Jabatan / Keterangan</th>
                         <th>Status</th>
                         <th>Waktu Absen</th>
-                        <th>Validasi QR</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -116,19 +108,6 @@
                                 @endif
                             </td>
                             <td>{{ $item['attendance'] ? $item['attendance']->attended_at->copy()->timezone('Asia/Jayapura')->format('d/m/Y H:i') . ' WIT' : '-' }}</td>
-                            <td>
-                                @if($item['attendance'])
-                                    @php
-                                        $attendanceVerificationUrl = \Illuminate\Support\Facades\URL::signedRoute('rapat.attendance.verify', ['attendance' => $item['attendance']->id]);
-                                        $attendanceQr = app(\App\Services\DocumentQrCodeService::class)->dataUri($attendanceVerificationUrl, 96);
-                                    @endphp
-                                    <a href="{{ $attendanceVerificationUrl }}" target="_blank">
-                                        <img src="{{ $attendanceQr }}" alt="QR validasi kehadiran" class="attendance-signature" style="width:54px;height:54px;object-fit:contain;">
-                                    </a>
-                                @else
-                                    <span class="text-muted">-</span>
-                                @endif
-                            </td>
                         </tr>
                     @endforeach
                 </tbody>
@@ -147,7 +126,6 @@
                         <th>Nama</th>
                         <th>Instansi / Jabatan</th>
                         <th>Waktu Absen</th>
-                        <th>Validasi QR</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -156,19 +134,10 @@
                             <td>{{ $attendance->participant_name_snapshot }}</td>
                             <td>{{ $attendance->guest_instansi ?: '-' }}</td>
                             <td>{{ $attendance->attended_at->copy()->timezone('Asia/Jayapura')->format('d/m/Y H:i') }} WIT</td>
-                            <td>
-                                @php
-                                    $guestVerificationUrl = \Illuminate\Support\Facades\URL::signedRoute('rapat.attendance.verify', ['attendance' => $attendance->id]);
-                                    $guestQr = app(\App\Services\DocumentQrCodeService::class)->dataUri($guestVerificationUrl, 96);
-                                @endphp
-                                <a href="{{ $guestVerificationUrl }}" target="_blank">
-                                    <img src="{{ $guestQr }}" alt="QR validasi kehadiran" class="attendance-signature" style="width:54px;height:54px;object-fit:contain;">
-                                </a>
-                            </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="4" class="text-center text-muted py-4">Belum ada peserta external yang mengisi absensi.</td>
+                            <td colspan="3" class="text-center text-muted py-4">Belum ada peserta external yang mengisi absensi.</td>
                         </tr>
                     @endforelse
                 </tbody>

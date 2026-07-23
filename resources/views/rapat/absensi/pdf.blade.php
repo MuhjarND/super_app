@@ -6,7 +6,7 @@
     <style>
         @page {
             size: A4 portrait;
-            margin: 1.7cm 1.5cm 1.5cm 1.5cm;
+            margin: 1.7cm 1.5cm {{ !empty($pdfVerification['qr']) ? '3.2cm' : '1.5cm' }} 1.5cm;
         }
 
         body {
@@ -78,14 +78,6 @@
             text-align: center;
         }
 
-        .signature-image {
-            width: 38pt;
-            height: 38pt;
-            object-fit: contain;
-            display: block;
-            margin: 0 auto;
-        }
-
         .empty {
             text-align: center;
             color: #64748b;
@@ -131,10 +123,15 @@
             position: relative;
             z-index: 1;
         }
+
+        .waktu-approval {
+            margin-top: 2pt;
+            color: #475569;
+            font-size: 8pt;
+        }
     </style>
 </head>
 <body>
-@include('partials.pdf-verification-badge', ['pdfVerification' => $pdfVerification ?? null])
     @if($kopImage)
         <div class="kop">
             <img src="{{ $kopImage }}" alt="Kop Absensi">
@@ -171,8 +168,7 @@
                 <th style="width: 28pt;">No</th>
                 <th>Nama</th>
                 <th>Jabatan / Keterangan</th>
-                <th style="width: 74pt;">Status</th>
-                <th style="width: 108pt;">QR Tanda Tangan</th>
+                <th style="width: 170pt;">Keterangan Kehadiran</th>
             </tr>
         </thead>
         <tbody>
@@ -181,24 +177,25 @@
                     <td class="text-center">{{ $index + 1 }}</td>
                     <td>{{ $row['name'] }}</td>
                     <td>{{ $row['description'] }}</td>
-                    <td class="text-center">{{ $row['status'] }}</td>
-                    <td class="text-center">
-                        @if($row['signature_data_uri'])
-                            <img src="{{ $row['signature_data_uri'] }}" alt="QR validasi kehadiran" class="signature-image">
+                    <td>
+                        @if($row['attended_at'])
+                            Telah melakukan absensi pada
+                            {{ $row['attended_at']->copy()->timezone('Asia/Jayapura')->translatedFormat('d F Y') }}
+                            pukul {{ $row['attended_at']->copy()->timezone('Asia/Jayapura')->format('H:i') }} WIT.
                         @else
-                            -
+                            Belum melakukan absensi.
                         @endif
                     </td>
                 </tr>
             @empty
                 <tr>
-                    <td colspan="5" class="empty">Belum ada data peserta absensi.</td>
+                    <td colspan="4" class="empty">Belum ada data peserta absensi.</td>
                 </tr>
             @endforelse
         </tbody>
     </table>
 
-    @if($attendanceCompleted)
+    @if($hasApprovalSignature)
         <table class="ttd-table">
             <tr>
                 <td style="width: 52%;"></td>
@@ -214,10 +211,16 @@
                             <div style="height: 68pt;"></div>
                         @endif
                         <div class="nama-ttd">{{ $pimpinanSignature['name'] ?? '-' }}</div>
+                        @if(!empty($pimpinanSignature['signed_at']))
+                            <div class="waktu-approval">
+                                Disetujui pada {{ $pimpinanSignature['signed_at']->translatedFormat('d F Y H:i') }} WIT
+                            </div>
+                        @endif
                     </div>
                 </td>
             </tr>
         </table>
     @endif
+    @include('partials.pdf-verification-badge', ['pdfVerification' => $pdfVerification ?? null])
 </body>
 </html>

@@ -337,12 +337,14 @@
                         </select>
                         @if($availableParticipants->isEmpty())
                             <div class="hint">Semua peserta undangan sudah melakukan absensi.</div>
+                        @else
+                            <div class="hint">Nama yang masih tersedia pada daftar berarti belum melakukan absensi.</div>
                         @endif
                     </div>
 
                     <div class="field">
                         <div style="border:1px solid #dbe4ff;background:#eef2ff;border-radius:16px;padding:12px 14px;color:#334155;font-size:.86rem;font-weight:600;">
-                            Kehadiran akan tercatat secara elektronik dan ditampilkan sebagai QR validasi pada rekap absensi.
+                            Kehadiran akan tercatat secara elektronik beserta tanggal dan waktu absensi.
                         </div>
                     </div>
 
@@ -364,7 +366,7 @@
 
                     <div class="field">
                         <div style="border:1px solid #dbe4ff;background:#eef2ff;border-radius:16px;padding:12px 14px;color:#334155;font-size:.86rem;font-weight:600;">
-                            Kehadiran peserta eksternal akan dicatat secara elektronik menggunakan QR validasi.
+                            Kehadiran peserta eksternal akan dicatat secara elektronik beserta tanggal dan waktu absensi.
                         </div>
                     </div>
 
