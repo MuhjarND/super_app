@@ -59,7 +59,9 @@ class ModuleSettingService
             if (in_array($routeName, $definition['routes'] ?? [], true)) {
                 return $key;
             }
+        }
 
+        foreach ($this->catalog() as $key => $definition) {
             foreach ($definition['prefixes'] ?? [] as $prefix) {
                 if (strpos($routeName, $prefix) === 0) {
                     return $key;

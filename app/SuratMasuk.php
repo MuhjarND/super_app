@@ -166,6 +166,37 @@ class SuratMasuk extends Model
         return $this->hasOne(Disposisi::class, 'surat_masuk_id')->latest();
     }
 
+    public function isAwaitingKasubagTurtFollowUp()
+    {
+        if ($this->status !== 'didisposisi') {
+            return false;
+        }
+
+        if ($this->relationLoaded('disposisis')) {
+            return $this->disposisis->contains(function ($disposisi) {
+                if ($disposisi->status !== 'pending') {
+                    return false;
+                }
+
+                $targetJabatan = $disposisi->kepadaJabatan
+                    ?: optional($disposisi->kepadaUser)->jabatan;
+
+                return optional($targetJabatan)->kode === 'KASUBAG_TURT';
+            });
+        }
+
+        return $this->disposisis()
+            ->where('status', 'pending')
+            ->where(function ($query) {
+                $query->whereHas('kepadaJabatan', function ($jabatanQuery) {
+                    $jabatanQuery->where('kode', 'KASUBAG_TURT');
+                })->orWhereHas('kepadaUser.jabatan', function ($jabatanQuery) {
+                    $jabatanQuery->where('kode', 'KASUBAG_TURT');
+                });
+            })
+            ->exists();
+    }
+
     public function agendaPimpinan()
     {
         return $this->hasOne(AgendaPimpinan::class, 'surat_masuk_id');

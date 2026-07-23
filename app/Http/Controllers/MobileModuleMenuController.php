@@ -122,10 +122,7 @@ class MobileModuleMenuController extends Controller
                     ($isSuperAdmin || $user->canAccessLeaveApproval()) ? $this->item('Approval', route('cuti.approval.index'), 'fas fa-user-check', 'teal') : null,
                     ($isSuperAdmin || $user->canAccessLeaveBalanceReport()) ? $this->item('Rekap Saldo', route('cuti.balances.index'), 'fas fa-wallet', 'blue') : null,
                     ($isSuperAdmin || $user->canAccessLeaveReports()) ? $this->item('Laporan', route('cuti.reports.index'), 'far fa-chart-bar', 'orange') : null,
-                    ($isSuperAdmin || $user->canManageLeaveMasterData()) ? $this->item('Jenis Cuti', route('cuti.master.types.index'), 'far fa-list-alt', 'indigo') : null,
-                    ($isSuperAdmin || $user->canManageLeaveMasterData()) ? $this->item('Kebijakan', route('cuti.master.policies.index'), 'fas fa-sliders-h', 'slate') : null,
                     ($isSuperAdmin || $user->canManageLeaveMasterData()) ? $this->item('Cuti Bersama', route('cuti.master.holidays.index'), 'far fa-calendar-check', 'green') : null,
-                    ($isSuperAdmin || $user->canManageLeaveMasterData()) ? $this->item('Delegasi', route('cuti.master.delegations.index'), 'fas fa-people-arrows', 'teal') : null,
                 ])) : [],
             ],
             'perawatan' => [
@@ -207,6 +204,23 @@ class MobileModuleMenuController extends Controller
                 'tone' => 'slate',
                 'items' => ($isSuperAdmin || $user->canAccessArchiveMenu()) ? [
                     $this->item('Arsip Terpadu', route('arsip.index'), 'far fa-folder-open', 'slate'),
+                ] : [],
+            ],
+            'master-data' => [
+                'title' => 'Master Data',
+                'subtitle' => 'Data pengguna dan referensi utama aplikasi.',
+                'icon' => 'fas fa-database',
+                'tone' => 'purple',
+                'items' => $isSuperAdmin ? [
+                    $this->item('User', route('admin.users.index'), 'far fa-user', 'indigo'),
+                    $this->item('Jabatan', route('admin.jabatans.index'), 'far fa-id-badge', 'blue'),
+                    $this->item('Unit Kerja', route('admin.units.index'), 'far fa-building', 'teal'),
+                    $this->item('Kategori Surat', route('admin.kategori-surats.index'), 'far fa-folder', 'orange'),
+                    $this->item('Kategori Rapat', route('admin.kategori-rapats.index'), 'far fa-comments', 'green'),
+                    $this->item('Dasar Hukum', route('admin.dasar-hukums.index'), 'fas fa-balance-scale', 'slate'),
+                    $this->item('Jenis Cuti', route('cuti.master.types.index'), 'far fa-list-alt', 'indigo'),
+                    $this->item('Kebijakan Cuti', route('cuti.master.policies.index'), 'fas fa-sliders-h', 'slate'),
+                    $this->item('Delegasi Approval', route('cuti.master.delegations.index'), 'fas fa-people-arrows', 'teal'),
                 ] : [],
             ],
         ];

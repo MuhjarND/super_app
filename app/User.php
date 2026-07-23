@@ -1397,7 +1397,7 @@ class User extends Authenticatable
 
     public function canForwardSuratMasuk($suratMasuk)
     {
-        if ($suratMasuk->status === 'selesai') {
+        if ($suratMasuk->status === 'selesai' || $suratMasuk->isAwaitingKasubagTurtFollowUp()) {
             return false;
         }
 

@@ -47,6 +47,13 @@ class DisposisiController extends Controller
         ]);
 
         $suratMasuk = SuratMasuk::findOrFail($request->surat_masuk_id);
+        if ($suratMasuk->isAwaitingKasubagTurtFollowUp()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Surat sudah dikembalikan kepada Kasubag Tata Usaha dan Rumah Tangga dan hanya dapat ditindaklanjuti.',
+            ], 422);
+        }
+
         if ($suratMasuk->status === 'selesai') {
             return response()->json([
                 'success' => false,

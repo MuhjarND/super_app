@@ -240,6 +240,7 @@
         .mobile-app-icon.supply { background: linear-gradient(135deg, #059669, #10b981); }
         .mobile-app-icon.zi { background: linear-gradient(135deg, #8b5cf6, #4f46e5); }
         .mobile-app-icon.archive { background: linear-gradient(135deg, #475569, #0f172a); }
+        .mobile-app-icon.master { background: linear-gradient(135deg, #7c3aed, #4f46e5); }
 
         .metric-grid {
             display: grid;
@@ -1196,6 +1197,13 @@
                     <a href="{{ route('mobile.menu.show', 'arsip') }}" class="mobile-app-tile">
                         <span class="mobile-app-icon archive"><i class="far fa-folder-open"></i></span>
                         <span class="mobile-app-title">{{ $mobileModuleLabel('archive', 'Arsip') }}</span>
+                    </a>
+                @endif
+
+                @if($showMobileModule('master_data') && $dashboardIsSuperAdmin)
+                    <a href="{{ route('mobile.menu.show', 'master-data') }}" class="mobile-app-tile">
+                        <span class="mobile-app-icon master"><i class="fas fa-database"></i></span>
+                        <span class="mobile-app-title">{{ $mobileModuleLabel('master_data', 'Master Data') }}</span>
                     </a>
                 @endif
             </div>

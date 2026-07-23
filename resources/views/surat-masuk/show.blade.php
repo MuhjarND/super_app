@@ -326,6 +326,16 @@
                         </form>
                     </div>
                 </div>
+            @elseif($requiresKasubagTurtFollowUp && auth()->user()->canOpenTindakLanjutSuratMasuk($suratMasuk))
+                <div class="card surat-masuk-disposisi-card" style="border-top: 4px solid var(--accent);">
+                    <div class="card-body d-flex align-items-start">
+                        <i class="fas fa-clipboard-check text-primary mr-3 mt-1"></i>
+                        <div>
+                            <strong>Surat menunggu tindak lanjut Anda.</strong>
+                            <div class="text-muted small mt-1">Surat yang telah dikembalikan kepada Kasubag Tata Usaha dan Rumah Tangga tidak dapat didisposisi atau dinaikkan lagi. Gunakan aksi tindak lanjut pada riwayat disposisi.</div>
+                        </div>
+                    </div>
+                </div>
             @elseif($suratMasuk->status !== 'selesai')
                 <div class="card surat-masuk-disposisi-card" style="border-top: 4px solid #d1d5db;">
                     <div class="card-body">

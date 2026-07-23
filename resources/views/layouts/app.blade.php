@@ -3473,31 +3473,10 @@
                                     @endif
                                     @if($isSidebarSuperAdmin || $sidebarUser->canManageLeaveMasterData())
                                         <li class="nav-item nav-item-sub">
-                                            <a href="{{ route('cuti.master.types.index') }}"
-                                                class="nav-link {{ request()->routeIs('cuti.master.types.*') ? 'active' : '' }}">
-                                                <i class="nav-icon far fa-list-alt"></i>
-                                                <p>Jenis Cuti</p>
-                                            </a>
-                                        </li>
-                                        <li class="nav-item nav-item-sub">
-                                            <a href="{{ route('cuti.master.policies.index') }}"
-                                                class="nav-link {{ request()->routeIs('cuti.master.policies.*') ? 'active' : '' }}">
-                                                <i class="nav-icon fas fa-sliders-h"></i>
-                                                <p>Kebijakan Cuti</p>
-                                            </a>
-                                        </li>
-                                        <li class="nav-item nav-item-sub">
                                             <a href="{{ route('cuti.master.holidays.index') }}"
                                                 class="nav-link {{ request()->routeIs('cuti.master.holidays.*') ? 'active' : '' }}">
                                                 <i class="nav-icon far fa-calendar-check"></i>
                                                 <p>Cuti Bersama</p>
-                                            </a>
-                                        </li>
-                                        <li class="nav-item nav-item-sub">
-                                            <a href="{{ route('cuti.master.delegations.index') }}"
-                                                class="nav-link {{ request()->routeIs('cuti.master.delegations.*') ? 'active' : '' }}">
-                                                <i class="nav-icon fas fa-people-arrows"></i>
-                                                <p>Delegasi Approval</p>
                                             </a>
                                         </li>
                                     @endif
@@ -3749,6 +3728,27 @@
                                             class="nav-link {{ request()->routeIs('admin.dasar-hukums.*') ? 'active' : '' }}">
                                             <i class="nav-icon fas fa-balance-scale"></i>
                                             <p>Dasar Hukum</p>
+                                        </a>
+                                    </li>
+                                    <li class="nav-item nav-item-sub">
+                                        <a href="{{ route('cuti.master.types.index') }}"
+                                            class="nav-link {{ request()->routeIs('cuti.master.types.*') ? 'active' : '' }}">
+                                            <i class="nav-icon far fa-list-alt"></i>
+                                            <p>Jenis Cuti</p>
+                                        </a>
+                                    </li>
+                                    <li class="nav-item nav-item-sub">
+                                        <a href="{{ route('cuti.master.policies.index') }}"
+                                            class="nav-link {{ request()->routeIs('cuti.master.policies.*') ? 'active' : '' }}">
+                                            <i class="nav-icon fas fa-sliders-h"></i>
+                                            <p>Kebijakan Cuti</p>
+                                        </a>
+                                    </li>
+                                    <li class="nav-item nav-item-sub">
+                                        <a href="{{ route('cuti.master.delegations.index') }}"
+                                            class="nav-link {{ request()->routeIs('cuti.master.delegations.*') ? 'active' : '' }}">
+                                            <i class="nav-icon fas fa-people-arrows"></i>
+                                            <p>Delegasi Approval</p>
                                         </a>
                                     </li>
                                     @if($isSidebarSuperAdmin || $sidebarUser->canManageProgressZiMasterData())

@@ -81,6 +81,10 @@ class ModuleSettingTest extends TestCase
         $this->assertSame('persuratan', $service->resolveRoute('surat-masuk.index'));
         $this->assertSame('rapat', $service->resolveRoute('rapat.notulensi.follow-ups'));
         $this->assertSame('library', $service->resolveRoute('library.books.index'));
+        $this->assertSame('master_data', $service->resolveRoute('cuti.master.types.index'));
+        $this->assertSame('master_data', $service->resolveRoute('cuti.master.policies.store'));
+        $this->assertSame('master_data', $service->resolveRoute('cuti.master.delegations.update'));
+        $this->assertSame('master_data', $service->resolveMobileModule('master-data'));
         $this->assertNull($service->resolveRoute('admin.module-settings.index'));
     }
 

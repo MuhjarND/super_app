@@ -112,7 +112,7 @@ class LeavePolicyManagementController extends Controller
 
     protected function abortIfUnauthorized()
     {
-        abort_unless(auth()->check() && auth()->user()->canManageLeaveMasterData(), 403);
+        abort_unless(auth()->check() && auth()->user()->isSuperAdmin(), 403);
     }
 
     protected function ensureReady()

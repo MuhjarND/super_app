@@ -352,14 +352,7 @@ class SuratMasukController extends Controller
             throw $e;
         }
 
-        // Send WA notification to admin surat
-        $adminSurat = User::whereHas('roles', function ($q) {
-            $q->where('name', 'admin_surat');
-        })->active()->get();
-
-        foreach ($adminSurat as $admin) {
-            $this->waService->notifySuratMasuk($suratMasuk, $admin);
-        }
+        $this->notifyIncomingLetterRecipients($suratMasuk);
 
         if ($agenda) {
             $this->notifyProtokolerAgendaPimpinan($agenda);
@@ -382,6 +375,26 @@ class SuratMasukController extends Controller
         ]);
     }
 
+    protected function notifyIncomingLetterRecipients(SuratMasuk $suratMasuk)
+    {
+        $recipients = User::active()
+            ->where(function ($query) {
+                $query->whereHas('roles', function ($roleQuery) {
+                    $roleQuery->where('name', 'admin_surat');
+                })->orWhereHas('jabatan', function ($jabatanQuery) {
+                    $jabatanQuery->where('kode', 'KASUBAG_TURT');
+                })->orWhereHas('activeJabatanDelegations.jabatan', function ($jabatanQuery) {
+                    $jabatanQuery->where('kode', 'KASUBAG_TURT');
+                });
+            })
+            ->get()
+            ->unique('id');
+
+        foreach ($recipients as $recipient) {
+            $this->waService->notifySuratMasuk($suratMasuk, $recipient);
+        }
+    }
+
     public function show(SuratMasuk $suratMasuk)
     {
         $suratMasuk->load('klasifikasiKode', 'kategoriSurat', 'creator', 'agendaPimpinan.recipients', 'virtualMeeting.participants', 'disposisis.dariUser', 'disposisis.kepadaUser.jabatan', 'disposisis.kepadaJabatan.users', 'disposisis.dokumentasis');
@@ -402,6 +415,7 @@ class SuratMasukController extends Controller
         $canEdit = $user->canEditSuratMasuk($suratMasuk);
         $canDelete = $user->canDeleteSuratMasuk($suratMasuk);
         $assignmentContext = $suratMasuk->assignmentContextFor($user);
+        $requiresKasubagTurtFollowUp = $suratMasuk->isAwaitingKasubagTurtFollowUp();
 
         if ($canDisposisi) {
             $targetIds = $user->targetDisposisiJabatanIds();
@@ -421,7 +435,8 @@ class SuratMasukController extends Controller
             'canNaikanSurat',
             'canEdit',
             'canDelete',
-            'assignmentContext'
+            'assignmentContext',
+            'requiresKasubagTurtFollowUp'
         ));
     }
 
