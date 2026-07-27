@@ -278,6 +278,7 @@ class IntegratedCalendarService
     protected function buildLeaveEvents(User $user, array $filters)
     {
         $query = LeaveRequest::with(['user.unit', 'leaveType'])
+            ->where('status', '!=', LeaveRequest::STATUS_CANCELLED)
             ->whereDate('start_date', '<=', $filters['end']->toDateString())
             ->whereDate('end_date', '>=', $filters['start']->toDateString());
 

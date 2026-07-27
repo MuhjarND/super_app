@@ -8,8 +8,13 @@
 
 <div class="modal fade" id="{{ $modalId }}" tabindex="-1" role="dialog" aria-labelledby="{{ $modalId }}Label" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-scrollable" role="document">
-        <div class="modal-content">
-            <form id="{{ $formId }}" action="{{ $isEdit ? '#' : route('cuti.store') }}" method="POST" enctype="multipart/form-data">
+        <form
+            id="{{ $formId }}"
+            class="modal-content"
+            action="{{ $isEdit ? '#' : route('cuti.store') }}"
+            method="POST"
+            enctype="multipart/form-data"
+        >
                 @csrf
                 @if($isEdit)
                     @method('PUT')
@@ -111,7 +116,6 @@
                     <button type="button" class="btn btn-outline-secondary btn-sm" data-dismiss="modal">Tutup</button>
                     <button type="submit" class="btn btn-primary btn-sm">Simpan Draft</button>
                 </div>
-            </form>
-        </div>
+        </form>
     </div>
 </div>

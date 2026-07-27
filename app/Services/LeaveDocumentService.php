@@ -131,6 +131,45 @@ class LeaveDocumentService
         return $suratKeluar->fresh(['creator', 'penerimaInternal', 'klasifikasiKode', 'kodeFungsi', 'kodeKegiatan', 'kodeTransaksi']);
     }
 
+    public function removeCancelledLetterArtifacts(LeaveRequest $leaveRequest)
+    {
+        $leaveRequest->loadMissing([
+            'user.roles',
+            'user.activeJabatanDelegations.jabatan',
+            'suratKeluar.calendarEvent',
+        ]);
+
+        if (empty($leaveRequest->letter_number)) {
+            return;
+        }
+
+        // Nomor Satker dikelola oleh aplikasi asal, sehingga PAPEDA hanya
+        // mengosongkan nomor pada pengajuan tanpa menghapus surat lain.
+        if (!$this->isSatkerRequest($leaveRequest)) {
+            $suratKeluar = $leaveRequest->suratKeluar;
+
+            if (!$suratKeluar) {
+                $suratKeluar = SuratKeluar::where('nomor_surat', $leaveRequest->letter_number)->first();
+            }
+
+            // Data impor tidak boleh terhapus jika pernah terjadi benturan nomor.
+            if ($suratKeluar && empty($suratKeluar->legacy_source_id)) {
+                if ($suratKeluar->file_path) {
+                    Storage::disk('public')->delete($suratKeluar->file_path);
+                }
+
+                $suratKeluar->calendarEvent()->delete();
+                $suratKeluar->pdfVerifications()->delete();
+                $suratKeluar->penerimaInternal()->detach();
+                $suratKeluar->delete();
+            }
+        }
+
+        $leaveRequest->letter_number = null;
+        $leaveRequest->save();
+        $leaveRequest->unsetRelation('suratKeluar');
+    }
+
     public function ensureLetterNumber(LeaveRequest $leaveRequest)
     {
         if (!empty($leaveRequest->letter_number)) {

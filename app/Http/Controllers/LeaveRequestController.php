@@ -14,6 +14,7 @@ use App\Services\LeaveBalanceService;
 use App\Services\LeaveDocumentService;
 use App\Services\LeaveValidationService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Schema;
 
@@ -183,14 +184,21 @@ class LeaveRequestController extends Controller
         if (!$this->moduleReady()) { return $this->setupResponse('Modul Cuti Belum Diaktifkan'); }
         $this->authorize('cancel', $leaveRequest);
         $oldStatus = $leaveRequest->status;
-        $leaveRequest->status = LeaveRequest::STATUS_CANCELLED;
-        $leaveRequest->cancelled_at = now();
-        $leaveRequest->updated_by = auth()->id();
-        $leaveRequest->save();
-        if (in_array($oldStatus, [LeaveRequest::STATUS_SUBMITTED, LeaveRequest::STATUS_UNDER_REVIEW, LeaveRequest::STATUS_VERIFIED], true)) {
-            $this->balanceService->restore($leaveRequest);
-        }
-        $this->documentService->syncSuratKeluar($leaveRequest->fresh(['leaveType', 'approvals', 'documents', 'user']), false);
+
+        DB::transaction(function () use ($leaveRequest, $oldStatus) {
+            $leaveRequest->status = LeaveRequest::STATUS_CANCELLED;
+            $leaveRequest->cancelled_at = now();
+            $leaveRequest->updated_by = auth()->id();
+            $leaveRequest->save();
+
+            if (in_array($oldStatus, [LeaveRequest::STATUS_SUBMITTED, LeaveRequest::STATUS_UNDER_REVIEW, LeaveRequest::STATUS_VERIFIED], true)) {
+                $this->balanceService->restore($leaveRequest);
+            }
+
+            $this->documentService->removeCancelledLetterArtifacts($leaveRequest);
+        });
+
+        $leaveRequest->refresh();
         event(new LeaveRequestStatusChanged($leaveRequest, auth()->user(), $oldStatus, $leaveRequest->status, 'cancelled'));
         return redirect()->route('cuti.show', $leaveRequest)->with('success', 'Pengajuan cuti dibatalkan.');
     }
