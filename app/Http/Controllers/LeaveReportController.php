@@ -291,6 +291,7 @@ class LeaveReportController extends Controller
                     'admin_kepegawaian',
                     'verifikator_dokumen',
                     'ppk',
+                    'satker',
                 ]);
             });
     }

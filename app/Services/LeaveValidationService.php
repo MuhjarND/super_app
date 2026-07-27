@@ -28,24 +28,50 @@ class LeaveValidationService
         if (!$user || !$leaveType) {
             throw ValidationException::withMessages(['leave_type_id' => 'Data pegawai atau jenis cuti belum lengkap.']);
         }
+        if ($user->isSatker() && trim((string) $leaveRequest->letter_number) === '') {
+            throw ValidationException::withMessages([
+                'letter_number' => 'Nomor surat satuan kerja wajib diisi sebelum pengajuan cuti dikirim.',
+            ]);
+        }
 
-        $workdayCount = $this->countWorkingDays($leaveRequest->start_date, $leaveRequest->end_date);
-        $leaveRequest->workday_count = $workdayCount;
-        $leaveRequest->requested_days = $workdayCount;
+        $requestedDays = $this->countLeaveDays($leaveRequest->start_date, $leaveRequest->end_date, $leaveType);
+        $leaveRequest->workday_count = $requestedDays;
+        $leaveRequest->requested_days = $requestedDays;
 
         $this->validateServiceYears($leaveRequest, $user, $leaveType, $leaveRequest->start_date);
-        $this->validateBalance($user, $leaveType, $workdayCount, $leaveRequest->start_date);
+        $this->validateBalance($user, $leaveType, $requestedDays, $leaveRequest->start_date);
         $childNumberContext = !is_null(optional($user)->jumlah_anak)
             ? ((int) $user->jumlah_anak + 1)
             : null;
 
         $this->validateChildCount($leaveType, $childNumberContext);
         $this->validateRequiredDocuments($leaveRequest, $leaveType);
-        $this->validateDoctorLetter($leaveRequest, $leaveType, $workdayCount);
+        $this->validateDoctorLetter($leaveRequest, $leaveType, $requestedDays);
         $this->validateDateOverlap($leaveRequest);
-        $this->validateSpecialLimits($leaveRequest, $leaveType, $workdayCount);
+        $this->validateSpecialLimits($leaveRequest, $leaveType, $requestedDays);
         $this->validateAbroadRequest($leaveRequest, $leaveType);
-        $this->validateAnnualAndLargeLeaveInteraction($leaveRequest, $leaveType, $workdayCount);
+        $this->validateAnnualAndLargeLeaveInteraction($leaveRequest, $leaveType, $requestedDays);
+    }
+
+    public function countLeaveDays($startDate, $endDate, LeaveType $leaveType)
+    {
+        if (in_array($leaveType->code, [LeaveType::CODE_SAKIT, LeaveType::CODE_ALASAN_PENTING], true)) {
+            return $this->countCalendarDays($startDate, $endDate);
+        }
+
+        return $this->countWorkingDays($startDate, $endDate);
+    }
+
+    public function countCalendarDays($startDate, $endDate)
+    {
+        $start = $this->normalizeDate($startDate);
+        $end = $this->normalizeDate($endDate);
+
+        if (!$start || !$end) {
+            throw ValidationException::withMessages(['start_date' => 'Tanggal mulai dan selesai cuti wajib diisi.']);
+        }
+
+        return $start->startOfDay()->diffInDays($end->startOfDay()) + 1;
     }
 
     public function countWorkingDays($startDate, $endDate)

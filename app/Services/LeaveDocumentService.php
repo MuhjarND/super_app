@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Optional;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 use setasign\Fpdi\Fpdi;
 
 class LeaveDocumentService
@@ -73,12 +74,17 @@ class LeaveDocumentService
         $leaveRequest->loadMissing([
             'user.unit',
             'user.jabatan',
+            'user.roles',
             'leaveType',
             'approvals.approver',
             'creator',
             'documents',
             'suratKeluar',
         ]);
+
+        if ($this->isSatkerRequest($leaveRequest)) {
+            return null;
+        }
 
         $this->ensureLetterNumber($leaveRequest);
         [$klasifikasi, $fungsi, $kegiatan] = $this->resolveLeaveClassification();
@@ -131,6 +137,12 @@ class LeaveDocumentService
             return $leaveRequest->letter_number;
         }
 
+        if ($this->isSatkerRequest($leaveRequest)) {
+            throw ValidationException::withMessages([
+                'letter_number' => 'Nomor surat satuan kerja wajib diisi dan tidak dibuat oleh penomoran PAPEDA.',
+            ]);
+        }
+
         $issueDate = $leaveRequest->created_at
             ? $leaveRequest->created_at->copy()->timezone('Asia/Jayapura')
             : now('Asia/Jayapura');
@@ -150,6 +162,13 @@ class LeaveDocumentService
         $leaveRequest->save();
 
         return $leaveRequest->letter_number;
+    }
+
+    protected function isSatkerRequest(LeaveRequest $leaveRequest)
+    {
+        $leaveRequest->loadMissing('user.roles');
+
+        return $leaveRequest->user && $leaveRequest->user->isSatker();
     }
 
     public function buildSignatureVerificationData(LeaveRequest $leaveRequest, LeaveApproval $approval)

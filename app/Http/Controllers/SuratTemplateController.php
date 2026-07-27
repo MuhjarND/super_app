@@ -93,13 +93,17 @@ class SuratTemplateController extends Controller
         }
 
         $suratTugasQuery = SuratKeluar::query()
-            ->with(['templateApproval.approver', 'penerimaInternal'])
+            ->with(['creator.jabatan', 'templateApproval.approver', 'penerimaInternal'])
             ->whereHas('templateApproval', function ($approvalQuery) {
                 $approvalQuery->where('template_slug', 'surat-tugas');
             });
 
         if (!auth()->user()->isSuperAdmin()) {
-            $suratTugasQuery->where('created_by', auth()->id());
+            $visibleCreatorIds = collect([auth()->id()])
+                ->merge(auth()->user()->directSubordinateIds())
+                ->unique()
+                ->values();
+            $suratTugasQuery->whereIn('created_by', $visibleCreatorIds);
         }
 
         $suratTugasDrafts = $suratTugasQuery->latest()->take(50)->get();

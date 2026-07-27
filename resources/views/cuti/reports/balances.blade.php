@@ -82,7 +82,7 @@
                             <option value="">Pilih pegawai</option>
                             @foreach($employees as $employee)
                                 <option value="{{ $employee->id }}" {{ (string) old('user_id') === (string) $employee->id ? 'selected' : '' }}>
-                                    {{ $employee->name }}{{ $employee->nip ? ' - ' . $employee->nip : '' }}
+                                    {{ $employee->name }}{{ $employee->nip ? ' - ' . $employee->nip : '' }}{{ $employee->isSatker() ? ' - Satuan Kerja' : '' }}
                                 </option>
                             @endforeach
                         </select>
@@ -200,6 +200,9 @@
                             <td>
                                 <strong>{{ optional($balance->user)->name }}</strong><br>
                                 <small class="text-muted">{{ optional($balance->user)->nip ?: '-' }}</small>
+                                @if(optional($balance->user)->isSatker())
+                                    <span class="badge badge-info ml-1">Satuan Kerja</span>
+                                @endif
                             </td>
                             <td>{{ optional(optional($balance->user)->unit)->nama ?: '-' }}</td>
                             <td>{{ optional($balance->leaveType)->name }}</td>

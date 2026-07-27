@@ -37,7 +37,14 @@ class LeaveRequestController extends Controller
     {
         $this->abortIfUnauthorized();
         if (!$this->moduleReady()) { return $this->setupResponse('Modul Cuti Belum Diaktifkan'); }
-        $leaveRequests = LeaveRequest::with(['leaveType', 'approvals.approver', 'audits.actor', 'documents'])->where('user_id', auth()->id())->latest('id')->paginate(15);
+        $visibleUserIds = collect([auth()->id()])
+            ->merge(auth()->user()->directSubordinateIds())
+            ->unique()
+            ->values();
+        $leaveRequests = LeaveRequest::with(['user.jabatan', 'leaveType', 'approvals.approver', 'audits.actor', 'documents'])
+            ->whereIn('user_id', $visibleUserIds)
+            ->latest('id')
+            ->paginate(15);
         $leaveTypes = LeaveType::where('status', 'active')
             ->where('code', '!=', LeaveType::CODE_BERSAMA)
             ->orderBy('name')
@@ -89,7 +96,9 @@ class LeaveRequestController extends Controller
     {
         $this->abortIfUnauthorized();
         if (!$this->moduleReady()) { return $this->setupResponse('Modul Cuti Belum Diaktifkan'); }
+        $isSatker = auth()->user()->isSatker();
         $leaveRequest = LeaveRequest::create([
+            'letter_number' => $isSatker ? trim((string) $request->letter_number) : null,
             'user_id' => auth()->id(),
             'leave_type_id' => $request->leave_type_id,
             'status' => LeaveRequest::STATUS_DRAFT,
@@ -106,8 +115,10 @@ class LeaveRequestController extends Controller
             'created_by' => auth()->id(),
             'updated_by' => auth()->id(),
         ]);
-        $this->documentService->ensureLetterNumber($leaveRequest);
-        $this->documentService->syncSuratKeluar($leaveRequest, false);
+        if (!$isSatker) {
+            $this->documentService->ensureLetterNumber($leaveRequest);
+            $this->documentService->syncSuratKeluar($leaveRequest, false);
+        }
         $leaveRequest->load('leaveType');
         $this->documentService->storeUploadedDocuments($leaveRequest, $request->file('documents', []));
         $this->documentService->syncSuratKeluar($leaveRequest->fresh(['leaveType', 'approvals', 'documents', 'user']), false);
@@ -137,6 +148,9 @@ class LeaveRequestController extends Controller
         if (!$this->moduleReady()) { return $this->setupResponse('Modul Cuti Belum Diaktifkan'); }
         $this->authorize('update', $leaveRequest);
         $leaveRequest->fill($request->only(['leave_type_id', 'start_date', 'end_date', 'purpose', 'leave_address', 'revision_note']));
+        if (auth()->user()->isSatker()) {
+            $leaveRequest->letter_number = trim((string) $request->letter_number);
+        }
         $leaveRequest->is_abroad = $request->boolean('is_abroad');
         $leaveRequest->abroad_country = $leaveRequest->is_abroad ? $request->abroad_country : null;
         $leaveRequest->contact_phone = auth()->user()->no_hp;

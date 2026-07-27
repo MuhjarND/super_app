@@ -8,7 +8,6 @@ use App\LeaveRequest;
 use App\User;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
 class LeaveApprovalService
@@ -31,47 +30,48 @@ class LeaveApprovalService
         $steps = [];
         $leaveRequest->loadMissing(['user.atasanLangsung.atasanLangsung', 'user.unit', 'user.roles']);
 
-        $adminKepegawaian = User::active()->whereHas('roles', function ($q) {
-            $q->where('name', 'admin_kepegawaian');
-        })->orderBy('id')->first();
-
-        if (!$adminKepegawaian) {
+        $personnelVerifierId = $this->resolvePersonnelVerifierId();
+        if (!$personnelVerifierId) {
             throw ValidationException::withMessages([
-                'approval' => 'Admin Kepegawaian aktif belum ditentukan. Tetapkan role Admin Kepegawaian pada salah satu user sebelum pengajuan cuti disubmit.',
+                'approval' => 'Kasubag Kepegawaian atau PLT Kasubag Kepegawaian aktif belum ditentukan.',
             ]);
         }
 
         $steps[] = [
             'step_no' => count($steps) + 1,
             'role_name' => 'verifikator_dokumen',
-            'approver_id' => $this->resolveApproverId($adminKepegawaian->id, 'document_verification', $leaveRequest->start_date),
+            'approver_id' => $personnelVerifierId,
         ];
 
         $directSupervisorId = $this->resolveDirectSupervisorId($leaveRequest);
-        if ($directSupervisorId) {
-            $steps[] = [
-                'step_no' => count($steps) + 1,
-                'role_name' => 'atasan_langsung',
-                'approver_id' => $this->resolveApproverId($directSupervisorId, 'leave_approval', $leaveRequest->start_date),
-            ];
+        if (!$directSupervisorId) {
+            throw ValidationException::withMessages([
+                'approval' => 'Atasan langsung pegawai belum ditentukan pada data user.',
+            ]);
         }
 
-        $chairman = User::active()
-            ->withRoleOrDelegatedJabatan(['ketua'])
-            ->orderBy('id')
-            ->first();
+        $steps[] = [
+            'step_no' => count($steps) + 1,
+            'role_name' => 'atasan_langsung',
+            'approver_id' => $this->resolveApproverId($directSupervisorId, 'leave_approval', $leaveRequest->start_date),
+        ];
+
         $sekma = $leaveRequest->is_abroad ? $this->firstRoleUser(['sekretaris_ma', 'sekretaris_mahkamah_agung']) : null;
-        $finalApproverId = optional($sekma)->id ?: (optional($leaveRequest->user)->pejabat_berwenang_id ?: optional($chairman)->id);
+        $finalApproverId = optional($sekma)->id ?: optional($leaveRequest->user)->pejabat_berwenang_id;
 
-        // The same official may act in two distinct capacities. Keep both steps so
-        // the supervisor and final-authority decisions each receive their own QR.
-        if ($finalApproverId) {
-            $steps[] = [
-                'step_no' => count($steps) + 1,
-                'role_name' => $sekma ? 'sekretaris_ma' : 'ppk',
-                'approver_id' => $this->resolveApproverId($finalApproverId, 'ppk_approval', $leaveRequest->start_date),
-            ];
+        if (!$finalApproverId) {
+            throw ValidationException::withMessages([
+                'approval' => 'Pejabat yang berwenang memberikan cuti belum ditentukan pada data user.',
+            ]);
         }
+
+        // Keep both records even when the official is the same. One action will
+        // approve both records later, while each record still produces its own QR.
+        $steps[] = [
+            'step_no' => count($steps) + 1,
+            'role_name' => $sekma ? 'sekretaris_ma' : 'ppk',
+            'approver_id' => $this->resolveApproverId($finalApproverId, 'ppk_approval', $leaveRequest->start_date),
+        ];
 
         return $steps;
     }
@@ -83,7 +83,8 @@ class LeaveApprovalService
                 if (empty($steps)) {
                     throw ValidationException::withMessages(['status' => 'Rantai approval cuti belum terbentuk.']);
                 }
-                if (empty($leaveRequest->request_number)) {
+                $isSatkerRequest = $leaveRequest->user && $leaveRequest->user->isSatker();
+                if (empty($leaveRequest->request_number) && !$isSatkerRequest) {
                     $number = $this->numberService->next('leave_request', optional($leaveRequest->start_date)->year ?: date('Y'), 'CUTI');
                     $leaveRequest->request_number = $number['formatted'];
                 }
@@ -137,10 +138,13 @@ class LeaveApprovalService
             }
         }
 
-        DB::transaction(function () use ($approval, $actor, $note) {
+        $linkedApproval = null;
+
+        DB::transaction(function () use ($approval, $actor, $note, &$linkedApproval) {
+            $actedAt = Carbon::now();
             $approval->status = 'approved';
             $approval->action = 'approved';
-            $approval->acted_at = Carbon::now();
+            $approval->acted_at = $actedAt;
             $approval->signature_path = null;
             $approval->signature_mime = null;
             $approval->signature_size = null;
@@ -148,7 +152,18 @@ class LeaveApprovalService
             $approval->save();
             $leaveRequest = $approval->leaveRequest;
             $this->ensureLegacySamePersonFinalApproval($leaveRequest, $approval);
-            $next = $leaveRequest->approvals()->where('step_no', '>', $approval->step_no)->orderBy('step_no')->first();
+            $linkedApproval = $this->approveMatchingFinalStage(
+                $leaveRequest,
+                $approval,
+                $actor,
+                $note,
+                $actedAt
+            );
+            $next = $leaveRequest->approvals()
+                ->where('step_no', '>', $approval->step_no)
+                ->whereIn('status', ['waiting', 'pending'])
+                ->orderBy('step_no')
+                ->first();
             if ($next) {
                 $next->status = 'pending';
                 $next->signature_path = null;
@@ -184,6 +199,23 @@ class LeaveApprovalService
             'new_values_json' => ['status' => 'approved'],
             'note' => $note,
         ], $actor);
+
+        if ($linkedApproval) {
+            $linkedApproval->loadMissing('leaveRequest.user', 'leaveRequest.leaveType', 'approver');
+            $this->auditService->log('cuti', 'leave_approval_approved_automatically', $linkedApproval, [
+                'subject_type' => 'leave_request',
+                'subject_id' => optional($linkedApproval->leaveRequest)->id,
+                'subject_title' => optional(optional($linkedApproval->leaveRequest)->user)->name . ' - ' . optional(optional($linkedApproval->leaveRequest)->leaveType)->name,
+                'target_user_id' => optional($linkedApproval->leaveRequest)->user_id,
+                'target_name' => optional(optional($linkedApproval->leaveRequest)->user)->name,
+                'old_values_json' => ['status' => 'waiting'],
+                'new_values_json' => [
+                    'status' => 'approved',
+                    'approved_with_step_id' => $approval->id,
+                ],
+                'note' => $note,
+            ], $actor);
+        }
     }
 
     public function reject(LeaveApproval $approval, User $actor, $note)
@@ -313,6 +345,49 @@ class LeaveApprovalService
             ->all();
     }
 
+    protected function approveMatchingFinalStage(
+        LeaveRequest $leaveRequest,
+        LeaveApproval $approval,
+        User $actor,
+        $note,
+        Carbon $actedAt
+    ) {
+        if ($approval->role_name !== 'atasan_langsung') {
+            return null;
+        }
+
+        $next = $leaveRequest->approvals()
+            ->where('step_no', '>', $approval->step_no)
+            ->orderBy('step_no')
+            ->lockForUpdate()
+            ->first();
+
+        if (
+            !$next
+            || $next->status !== 'waiting'
+            || !in_array($next->role_name, ['ppk', 'sekretaris_ma'], true)
+            || (int) $next->approver_id !== (int) $approval->approver_id
+        ) {
+            return null;
+        }
+
+        $next->status = 'approved';
+        $next->action = 'approved';
+        $next->acted_at = $actedAt->copy();
+        $next->signature_path = null;
+        $next->signature_mime = null;
+        $next->signature_size = null;
+        $next->note = $note;
+        $next->meta_json = array_merge($next->meta_json ?: [], [
+            'approved_automatically' => true,
+            'approved_with_step_id' => $approval->id,
+            'decision_actor_id' => $actor->id,
+        ]);
+        $next->save();
+
+        return $next;
+    }
+
     protected function resolveApproverId($approverId, $scope, $effectiveDate = null)
     {
         if (!$approverId) {
@@ -332,6 +407,33 @@ class LeaveApprovalService
         return $delegation ? $delegation->delegate_id : $approverId;
     }
 
+    protected function resolvePersonnelVerifierId()
+    {
+        $actingOfficial = User::active()
+            ->whereHas('activeJabatanDelegations', function ($delegationQuery) {
+                $delegationQuery
+                    ->where('delegation_type', 'plt')
+                    ->whereHas('jabatan', function ($positionQuery) {
+                        $positionQuery->where('kode', 'KASUBAG_KEPEG');
+                    });
+            })
+            ->ordered()
+            ->first();
+
+        if ($actingOfficial) {
+            return $actingOfficial->id;
+        }
+
+        return optional(
+            User::active()
+                ->whereHas('jabatan', function ($positionQuery) {
+                    $positionQuery->where('kode', 'KASUBAG_KEPEG');
+                })
+                ->ordered()
+                ->first()
+        )->id;
+    }
+
     protected function resolveDirectSupervisorId(LeaveRequest $leaveRequest)
     {
         $user = $leaveRequest->user;
@@ -343,40 +445,7 @@ class LeaveApprovalService
             return $user->atasan_langsung_id;
         }
 
-        $unitName = Str::lower((string) optional($user->unit)->nama);
-
-        if (Str::contains($unitName, 'kepaniteraan')) {
-            $panitera = $this->firstRoleUser(['panitera'], $user->id);
-            if ($panitera) {
-                return $panitera->id;
-            }
-        }
-
-        if (Str::contains($unitName, 'kesekretariatan')) {
-            $sekretaris = $this->firstRoleUser(['sekretaris'], $user->id);
-            if ($sekretaris) {
-                return $sekretaris->id;
-            }
-        }
-
-        $supervisor = User::active()
-            ->where('id', '<>', $user->id)
-            ->where(function ($query) {
-                $query
-                    ->withRoleOrDelegatedJabatan(['sekretaris', 'panitera', 'wakil_ketua', 'ketua'])
-                    ->orWhereHas('roles', function ($roleQuery) {
-                        $roleQuery->where('name', 'atasan_langsung');
-                    });
-            })
-            ->when($user->hirarki, function ($query) use ($user) {
-                $query->whereNotNull('hirarki')->where('hirarki', '<', $user->hirarki);
-            })
-            ->orderByRaw('CASE WHEN hirarki IS NULL THEN 1 ELSE 0 END')
-            ->orderByDesc('hirarki')
-            ->orderBy('name')
-            ->first();
-
-        return optional($supervisor)->id;
+        return null;
     }
 
     protected function firstRoleUser(array $roles, $excludeUserId = null)

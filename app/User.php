@@ -107,6 +107,27 @@ class User extends Authenticatable
         return $this->belongsTo(self::class, 'atasan_langsung_id');
     }
 
+    public function bawahanLangsung()
+    {
+        return $this->hasMany(self::class, 'atasan_langsung_id');
+    }
+
+    public function directSubordinateIds()
+    {
+        return $this->bawahanLangsung()
+            ->pluck('id')
+            ->map(function ($id) {
+                return (int) $id;
+            })
+            ->all();
+    }
+
+    public function isDirectSupervisorOf($user)
+    {
+        return $user
+            && (int) $user->atasan_langsung_id === (int) $this->id;
+    }
+
     public function pejabatBerwenang()
     {
         return $this->belongsTo(self::class, 'pejabat_berwenang_id');
@@ -679,7 +700,7 @@ class User extends Authenticatable
             'panmud',
             'peserta',
             'pegawai',
-        ]);
+        ]) || $this->bawahanLangsung()->exists();
     }
 
     public function canAccessSuratTemplateMenu()
@@ -941,7 +962,7 @@ class User extends Authenticatable
             'admin_kepegawaian',
             'verifikator_dokumen',
             'ppk',
-        ]);
+        ]) || $this->bawahanLangsung()->exists();
     }
 
     public function canApproveLeave()
@@ -1446,6 +1467,12 @@ class User extends Authenticatable
         }
 
         if ((int) $suratKeluar->created_by === (int) $this->id) {
+            return true;
+        }
+
+        $suratKeluar->loadMissing(['creator', 'templateApproval']);
+        if ($this->isDirectSupervisorOf($suratKeluar->creator)
+            && optional($suratKeluar->templateApproval)->template_slug === 'surat-tugas') {
             return true;
         }
 

@@ -3,6 +3,7 @@
     $modalId = $isEdit ? 'editLeaveRequestModal' : 'createLeaveRequestModal';
     $formId = $isEdit ? 'editLeaveRequestForm' : 'createLeaveRequestForm';
     $title = $isEdit ? 'Edit Pengajuan Cuti' : 'Buat Pengajuan Cuti';
+    $isSatkerApplicant = auth()->user()->isSatker();
 @endphp
 
 <div class="modal fade" id="{{ $modalId }}" tabindex="-1" role="dialog" aria-labelledby="{{ $modalId }}Label" aria-hidden="true">
@@ -24,6 +25,27 @@
                 </div>
 
                 <div class="modal-body">
+                    @if($isSatkerApplicant)
+                        <div class="form-group">
+                            <label>Nomor Surat Satuan Kerja <span class="text-danger">*</span></label>
+                            <input
+                                type="text"
+                                name="letter_number"
+                                class="form-control"
+                                value="{{ !$isEdit ? old('letter_number') : '' }}"
+                                placeholder="xxx/KPA/Wxx-xx/KP5.3/xx/xxxx"
+                                maxlength="150"
+                                autocomplete="off"
+                                data-satker-letter-number
+                                required
+                            >
+                            <div class="mt-2 px-3 py-2 border rounded bg-light">
+                                <small class="text-muted d-block">Pratinjau nomor surat</small>
+                                <strong class="text-primary" data-satker-letter-preview>xxx/KPA/Wxx-xx/KP5.3/xx/xxxx</strong>
+                            </div>
+                        </div>
+                    @endif
+
                     <div class="form-group">
                         <label>Jenis Cuti</label>
                         <select name="leave_type_id" class="form-control" required>

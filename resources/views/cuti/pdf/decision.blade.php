@@ -122,7 +122,10 @@ body { margin: 0; }
         <tr class="section-head"><td colspan="4">IV. &nbsp; LAMANYA CUTI</td></tr>
         <tr>
             <td width="13%">Selama</td>
-            <td width="25%">{{ $leaveRequest->requested_days ?: 0 }} Hari Kerja</td>
+            <td width="25%">
+                {{ $leaveRequest->requested_days ?: 0 }}
+                {{ in_array(optional($leaveRequest->leaveType)->code, [\App\LeaveType::CODE_SAKIT, \App\LeaveType::CODE_ALASAN_PENTING], true) ? 'Hari Kalender' : 'Hari Kerja' }}
+            </td>
             <td width="18%" class="center">Mulai Tanggal</td>
             <td width="44%" style="padding:0;">
                 <table class="inner-table" style="border:none; width:100%; margin:-1px;">

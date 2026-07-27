@@ -390,6 +390,7 @@
                 <thead>
                     <tr>
                         <th>Nomor</th>
+                        <th>Pegawai</th>
                         <th>Jenis</th>
                         <th>Periode</th>
                         <th>Keterangan Cuti</th>
@@ -402,7 +403,8 @@
                 <tbody>
                     @forelse($leaveRequests as $leaveRequest)
                         @php
-                            $canEdit = in_array($leaveRequest->status, [\App\LeaveRequest::STATUS_DRAFT, \App\LeaveRequest::STATUS_REJECTED, \App\LeaveRequest::STATUS_CHANGED, \App\LeaveRequest::STATUS_DEFERRED], true) && is_null($leaveRequest->locked_at);
+                            $isOwner = (int) $leaveRequest->user_id === (int) auth()->id();
+                            $canEdit = $isOwner && in_array($leaveRequest->status, [\App\LeaveRequest::STATUS_DRAFT, \App\LeaveRequest::STATUS_REJECTED, \App\LeaveRequest::STATUS_CHANGED, \App\LeaveRequest::STATUS_DEFERRED], true) && is_null($leaveRequest->locked_at);
                             $documents = $leaveRequest->documents->map(function ($document) use ($leaveRequest) {
                                 return [
                                     'name' => $document->original_name,
@@ -431,6 +433,7 @@
                             data-leave-type-id="{{ $leaveRequest->leave_type_id }}"
                             data-start-date="{{ optional($leaveRequest->start_date)->toDateString() }}"
                             data-end-date="{{ optional($leaveRequest->end_date)->toDateString() }}"
+                            data-letter-number="{{ e($leaveRequest->letter_number) }}"
                             data-purpose="{{ e($leaveRequest->purpose) }}"
                             data-leave-address="{{ e($leaveRequest->leave_address) }}"
                             data-is-abroad="{{ $leaveRequest->is_abroad ? 1 : 0 }}"
@@ -438,6 +441,12 @@
                             data-documents='@json($documents)'
                         >
                             <td data-label="Nomor">{{ $leaveRequest->display_number }}</td>
+                            <td data-label="Pegawai">
+                                <strong>{{ optional($leaveRequest->user)->name ?: '-' }}</strong>
+                                <div class="leave-table-note">
+                                    {{ $isOwner ? 'Milik saya' : optional(optional($leaveRequest->user)->jabatan)->nama }}
+                                </div>
+                            </td>
                             <td data-label="Jenis">{{ optional($leaveRequest->leaveType)->name }}</td>
                             <td data-label="Periode">{{ optional($leaveRequest->start_date)->translatedFormat('d M Y') }} - {{ optional($leaveRequest->end_date)->translatedFormat('d M Y') }}</td>
                             <td data-label="Keterangan Cuti">
@@ -483,7 +492,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="8" class="text-center text-muted py-4">Belum ada pengajuan cuti.</td>
+                            <td colspan="9" class="text-center text-muted py-4">Belum ada pengajuan cuti.</td>
                         </tr>
                     @endforelse
                 </tbody>
@@ -533,6 +542,7 @@
             leave_type_id: @json(old('leave_type_id')),
             start_date: @json(old('start_date')),
             end_date: @json(old('end_date')),
+            letter_number: @json(old('letter_number')),
             purpose: @json(old('purpose')),
             leave_address: @json(old('leave_address')),
             is_abroad: @json(old('is_abroad')),
@@ -585,11 +595,13 @@
             editForm.find('select[name="leave_type_id"]').val(data.leave_type_id || '');
             editForm.find('input[name="start_date"]').val(data.start_date || '');
             editForm.find('input[name="end_date"]').val(data.end_date || '');
+            editForm.find('input[name="letter_number"]').val(data.letter_number || '');
             editForm.find('input[name="purpose"]').val(data.purpose || '');
             editForm.find('input[name="leave_address"]').val(data.leave_address || '');
             editForm.find('input[name="is_abroad"]').prop('checked', Number(data.is_abroad || 0) === 1);
             editForm.find('input[name="abroad_country"]').val(data.abroad_country || '');
             toggleAbroadFields(editForm);
+            updateSatkerLetterPreview(editForm);
             var docs = Array.isArray(data.documents) ? data.documents : [];
             if (docs.length) {
                 editDocsList.html(docs.map(function (doc) {
@@ -614,6 +626,7 @@
                 leave_type_id: row.data('leave-type-id'),
                 start_date: row.data('start-date'),
                 end_date: row.data('end-date'),
+                letter_number: row.data('letter-number'),
                 purpose: row.data('purpose'),
                 leave_address: row.data('leave-address'),
                 is_abroad: row.data('is-abroad'),
@@ -636,6 +649,17 @@
             });
         }
 
+        function updateSatkerLetterPreview(scope) {
+            var form = $(scope).closest('form').length ? $(scope).closest('form') : $(scope);
+            var input = form.find('[data-satker-letter-number]');
+            var preview = form.find('[data-satker-letter-preview]');
+            if (!input.length || !preview.length) {
+                return;
+            }
+
+            preview.text($.trim(input.val()) || 'xxx/KPA/Wxx-xx/KP5.3/xx/xxxx');
+        }
+
         $(document).on('click', '[data-leave-edit-trigger]', function () {
             var targetId = $(this).data('target-id');
             var data = getRowDataById(targetId);
@@ -645,6 +669,10 @@
 
         $(document).on('change', '[data-leave-abroad-toggle]', function () {
             toggleAbroadFields($(this).closest('form'));
+        });
+
+        $(document).on('input', '[data-satker-letter-number]', function () {
+            updateSatkerLetterPreview($(this));
         });
 
         $(document).on('click', '[data-leave-approval-trigger]', function () {
@@ -661,6 +689,7 @@
                 leave_type_id: oldValues.leave_type_id,
                 start_date: oldValues.start_date,
                 end_date: oldValues.end_date,
+                letter_number: oldValues.letter_number,
                 purpose: oldValues.purpose,
                 leave_address: oldValues.leave_address,
                 is_abroad: oldValues.is_abroad,
@@ -670,6 +699,7 @@
             editModal.modal('show');
         } else if (oldMode === 'create' && {{ $errors->any() ? 'true' : 'false' }}) {
             toggleAbroadFields($('#createLeaveRequestForm'));
+            updateSatkerLetterPreview($('#createLeaveRequestForm'));
             $('#createLeaveRequestModal').modal('show');
         } else if (queryOpen === 'create') {
             toggleAbroadFields($('#createLeaveRequestForm'));
@@ -684,6 +714,8 @@
 
         toggleAbroadFields($('#createLeaveRequestForm'));
         toggleAbroadFields($('#editLeaveRequestForm'));
+        updateSatkerLetterPreview($('#createLeaveRequestForm'));
+        updateSatkerLetterPreview($('#editLeaveRequestForm'));
     })();
 </script>
 @endpush

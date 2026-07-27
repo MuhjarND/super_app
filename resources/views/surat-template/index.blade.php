@@ -521,8 +521,8 @@
         <div class="modal-content">
             <div class="modal-header">
                 <div>
-                    <h5 class="modal-title">Pilih Surat Tugas</h5>
-                    <small class="text-muted">Pilih draft yang akan diperbarui.</small>
+                    <h5 class="modal-title">Daftar Surat Tugas</h5>
+                    <small class="text-muted">Lihat dokumen atau edit surat tugas yang masih dapat diperbarui.</small>
                 </div>
                 <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
             </div>
@@ -531,12 +531,16 @@
                     @forelse($suratTugasDrafts as $suratTugas)
                         @php
                             $taskApproval = $suratTugas->templateApproval;
-                            $canEditTask = $taskApproval && $taskApproval->status !== 'approved';
+                            $isTaskOwner = (int) $suratTugas->created_by === (int) auth()->id();
+                            $canEditTask = (auth()->user()->isSuperAdmin() || $isTaskOwner)
+                                && $taskApproval
+                                && $taskApproval->status !== 'approved';
                         @endphp
                         <div class="list-group-item d-flex justify-content-between align-items-center" style="gap:14px;">
                             <div class="min-w-0">
                                 <strong class="d-block">{{ $suratTugas->nomor_surat_formatted }}</strong>
                                 <span class="text-muted small d-block">{{ Str::limit($suratTugas->perihal, 100) }}</span>
+                                <span class="text-muted small d-block">Dibuat oleh {{ optional($suratTugas->creator)->name ?: '-' }}</span>
                                 <span class="badge badge-{{ optional($taskApproval)->status_badge_class ?: 'secondary' }} mt-1">{{ optional($taskApproval)->status_label ?: ucfirst($suratTugas->status) }}</span>
                             </div>
                             @if($canEditTask)
@@ -544,7 +548,9 @@
                                     <i class="fas fa-edit mr-1"></i>Edit
                                 </button>
                             @else
-                                <span class="text-muted small flex-shrink-0">Sudah disetujui</span>
+                                <a href="{{ route('surat-keluar.file', $suratTugas) }}" target="_blank" class="btn btn-sm btn-outline-primary flex-shrink-0">
+                                    <i class="fas fa-eye mr-1"></i>Lihat
+                                </a>
                             @endif
                         </div>
                     @empty
@@ -563,8 +569,11 @@
     @php
         $taskApproval = $suratTugas->templateApproval;
         $taskFields = optional($taskApproval)->field_values ?: [];
+        $canEditTask = (auth()->user()->isSuperAdmin() || (int) $suratTugas->created_by === (int) auth()->id())
+            && $taskApproval
+            && $taskApproval->status !== 'approved';
     @endphp
-    @if($taskApproval && $taskApproval->status !== 'approved')
+    @if($canEditTask)
         <div class="modal fade surat-tugas-modal" id="editSuratTugasModal{{ $suratTugas->id }}" tabindex="-1">
             <div class="modal-dialog modal-xl modal-dialog-scrollable">
                 <div class="modal-content">

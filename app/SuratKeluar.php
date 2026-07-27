@@ -48,11 +48,22 @@ class SuratKeluar extends Model
             return $query;
         }
 
-        return $query->where(function ($builder) use ($user) {
+        $subordinateIds = $user->directSubordinateIds();
+
+        return $query->where(function ($builder) use ($user, $subordinateIds) {
             $builder->where('created_by', $user->id)
                 ->orWhereHas('penerimaInternal', function ($penerimaQuery) use ($user) {
                     $penerimaQuery->whereIn('users.id', $user->effectiveAssignmentUserIds());
                 });
+
+            if (!empty($subordinateIds)) {
+                $builder->orWhere(function ($taskQuery) use ($subordinateIds) {
+                    $taskQuery->whereIn('created_by', $subordinateIds)
+                        ->whereHas('templateApproval', function ($approvalQuery) {
+                            $approvalQuery->where('template_slug', 'surat-tugas');
+                        });
+                });
+            }
         });
     }
 

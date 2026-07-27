@@ -11,7 +11,15 @@ class StoreLeaveRequest extends FormRequest
     public function authorize() { return auth()->check() && auth()->user()->canAccessLeaveModule(); }
     public function rules()
     {
+        $isSatker = auth()->check() && auth()->user()->isSatker();
+
         return [
+            'letter_number' => [
+                $isSatker ? 'required' : 'nullable',
+                'string',
+                'max:150',
+                Rule::unique('leave_requests', 'letter_number'),
+            ],
             'leave_type_id' => [
                 'required',
                 'integer',
@@ -29,6 +37,14 @@ class StoreLeaveRequest extends FormRequest
             '_leave_form_mode' => 'nullable|string|in:create,edit',
             '_leave_request_id' => 'nullable|integer',
             'documents.*' => 'file|max:10240|mimes:pdf,jpg,jpeg,png,doc,docx',
+        ];
+    }
+
+    public function messages()
+    {
+        return [
+            'letter_number.required' => 'Nomor surat satuan kerja wajib diisi.',
+            'letter_number.unique' => 'Nomor surat satuan kerja tersebut sudah digunakan pada pengajuan cuti lain.',
         ];
     }
 }

@@ -53,10 +53,22 @@ class SuratKeluarController extends Controller
         if ($activeFilter === 'dibuat') {
             $suratKeluarQuery->where('created_by', $user->id);
         } elseif ($activeFilter === 'terkait') {
+            $subordinateIds = $user->directSubordinateIds();
             $suratKeluarQuery
                 ->where('created_by', '!=', $user->id)
-                ->whereHas('penerimaInternal', function ($recipientQuery) use ($user) {
-                    $recipientQuery->whereIn('users.id', $user->effectiveAssignmentUserIds());
+                ->where(function ($relatedQuery) use ($user, $subordinateIds) {
+                    $relatedQuery->whereHas('penerimaInternal', function ($recipientQuery) use ($user) {
+                        $recipientQuery->whereIn('users.id', $user->effectiveAssignmentUserIds());
+                    });
+
+                    if (!empty($subordinateIds)) {
+                        $relatedQuery->orWhere(function ($taskQuery) use ($subordinateIds) {
+                            $taskQuery->whereIn('created_by', $subordinateIds)
+                                ->whereHas('templateApproval', function ($approvalQuery) {
+                                    $approvalQuery->where('template_slug', 'surat-tugas');
+                                });
+                        });
+                    }
                 });
         }
 
