@@ -43,6 +43,7 @@
         }
 
         .mobile-menu-hero-icon {
+            position: relative;
             width: 54px;
             height: 54px;
             border-radius: 18px;
@@ -84,6 +85,7 @@
         }
 
         .mobile-menu-link {
+            position: relative;
             min-height: 104px;
             padding: 14px 9px 12px;
             border-radius: 22px;
@@ -125,6 +127,32 @@
             font-weight: 850;
             line-height: 1.18;
             text-align: center;
+        }
+
+        .mobile-menu-badge {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            z-index: 2;
+            min-width: 21px;
+            height: 21px;
+            padding: 0 6px;
+            border: 2px solid #ffffff;
+            border-radius: 999px;
+            background: #ef4444;
+            color: #ffffff;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.61rem;
+            font-weight: 900;
+            line-height: 1;
+            box-shadow: 0 5px 14px rgba(239, 68, 68, 0.34);
+        }
+
+        .mobile-menu-hero-icon .mobile-menu-badge {
+            top: -7px;
+            right: -9px;
         }
 
         .mobile-menu-link-icon.blue { background: linear-gradient(135deg, #2563eb, #06b6d4); }
@@ -177,6 +205,9 @@
         <div class="mobile-menu-hero">
             <div class="mobile-menu-hero-icon">
                 <i class="{{ $menu['icon'] }}"></i>
+                @if(($menu['badge'] ?? 0) > 0)
+                    <span class="mobile-menu-badge">{{ $menu['badge'] > 99 ? '99+' : $menu['badge'] }}</span>
+                @endif
             </div>
             <h1 class="mobile-menu-title">{{ $menu['title'] }}</h1>
             <p class="mobile-menu-subtitle">{{ $menu['subtitle'] }}</p>
@@ -185,6 +216,9 @@
         <div class="mobile-menu-grid">
             @foreach($menu['items'] as $item)
                 <a href="{{ $item['url'] }}" class="mobile-menu-link">
+                    @if(($item['badge'] ?? 0) > 0)
+                        <span class="mobile-menu-badge">{{ $item['badge'] > 99 ? '99+' : $item['badge'] }}</span>
+                    @endif
                     <span class="mobile-menu-link-icon {{ $item['tone'] }}">
                         <i class="{{ $item['icon'] }}"></i>
                     </span>

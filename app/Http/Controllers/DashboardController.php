@@ -22,6 +22,7 @@ use App\ZiEvidence;
 use App\ZiIndicator;
 use App\ZiPeriod;
 use App\Services\IntegratedCalendarService;
+use App\Services\MobileNotificationBadgeService;
 use App\Services\UnifiedActionCenterService;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
@@ -45,6 +46,7 @@ class DashboardController extends Controller
         $inventory = $this->buildInventorySection($user);
         $calendarOverview = $this->buildCalendarOverviewSection($user);
         $actionCenter = app(UnifiedActionCenterService::class)->build($user, ['tab' => 'all']);
+        $mobileNotificationBadges = app(MobileNotificationBadgeService::class)->build($user, $actionCenter);
         $actionItems = collect($actionCenter['items'] ?? [])->take(10)->map(function ($item) {
             $toneMap = [
                 'persuratan' => 'amber',
@@ -75,6 +77,7 @@ class DashboardController extends Controller
             'inventory' => $inventory,
             'calendarOverview' => $calendarOverview,
             'actionItems' => $actionItems,
+            'mobileNotificationBadges' => $mobileNotificationBadges,
             'dashboardSummary' => [
                 'today_masuk' => $persuratan['today_masuk'],
                 'today_keluar' => $persuratan['today_keluar'],

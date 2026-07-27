@@ -51,6 +51,9 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard', 'DashboardController@index')->name('dashboard');
     Route::get('/home', 'DashboardController@index')->name('home');
     Route::get('/mobile/menu/{module}', 'MobileModuleMenuController@show')->name('mobile.menu.show');
+    Route::get('/push/config', 'WebPushSubscriptionController@config')->name('push.config');
+    Route::post('/push/subscriptions', 'WebPushSubscriptionController@store')->name('push.subscriptions.store');
+    Route::delete('/push/subscriptions', 'WebPushSubscriptionController@destroy')->name('push.subscriptions.destroy');
     Route::get('/dashboard/pimpinan', 'LeadershipDashboardController@index')->name('dashboard.leadership');
     Route::get('/audit-trail', 'AuditTrailController@index')->name('audit-trail.index');
     Route::get('/tindak-lanjut-terpadu', 'UnifiedActionCenterController@index')->name('action-center.index');

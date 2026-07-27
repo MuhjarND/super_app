@@ -175,15 +175,14 @@ class LeaveApprovalService
                     : LeaveRequest::STATUS_UNDER_REVIEW;
                 $leaveRequest->updated_by = $actor->id;
                 $leaveRequest->save();
-                $this->documentService->syncSuratKeluar($leaveRequest->fresh(['leaveType', 'approvals', 'documents', 'user']), false);
             } else {
-                $this->documentService->ensureLetterNumber($leaveRequest);
                 $leaveRequest->status = LeaveRequest::STATUS_APPROVED;
                 $leaveRequest->approved_at = Carbon::now();
                 $leaveRequest->locked_at = Carbon::now();
                 $this->balanceService->consume($leaveRequest);
                 $leaveRequest->updated_by = $actor->id;
                 $leaveRequest->save();
+                $this->documentService->ensureLetterNumber($leaveRequest);
                 $this->documentService->syncSuratKeluar($leaveRequest->fresh(['leaveType', 'approvals', 'documents', 'user']), true);
             }
         });
@@ -234,14 +233,12 @@ class LeaveApprovalService
             $approval->note = $note;
             $approval->save();
             $leaveRequest = $approval->leaveRequest;
-            $this->documentService->ensureLetterNumber($leaveRequest);
             $leaveRequest->status = LeaveRequest::STATUS_REJECTED;
             $leaveRequest->rejected_at = Carbon::now();
             $leaveRequest->revision_note = $note;
             $leaveRequest->updated_by = $actor->id;
             $leaveRequest->save();
             $this->balanceService->restore($leaveRequest);
-            $this->documentService->syncSuratKeluar($leaveRequest->fresh(['leaveType', 'approvals', 'documents', 'user']), true);
         });
 
         $approval->loadMissing('leaveRequest.user', 'leaveRequest.leaveType', 'approver');
@@ -285,7 +282,6 @@ class LeaveApprovalService
             $approval->save();
 
             $leaveRequest = $approval->leaveRequest;
-            $this->documentService->ensureLetterNumber($leaveRequest);
             $leaveRequest->status = $requestStatus;
             $leaveRequest->is_deferred = $requestStatus === LeaveRequest::STATUS_DEFERRED;
             $leaveRequest->deferred_reason = $requestStatus === LeaveRequest::STATUS_DEFERRED ? $note : null;
@@ -293,7 +289,6 @@ class LeaveApprovalService
             $leaveRequest->updated_by = $actor->id;
             $leaveRequest->save();
             $this->balanceService->restore($leaveRequest);
-            $this->documentService->syncSuratKeluar($leaveRequest->fresh(['leaveType', 'approvals', 'documents', 'user']), true);
         });
 
         $approval->loadMissing('leaveRequest.user', 'leaveRequest.leaveType', 'approver');

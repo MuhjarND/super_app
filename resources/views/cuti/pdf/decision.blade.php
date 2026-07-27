@@ -67,7 +67,7 @@ body { margin: 0; }
         Manokwari
     </div>
     <div class="title">Formulir Permintaan dan Pemberian Cuti</div>
-    <div class="number">Nomor : {{ $leaveRequest->letter_number ?: ($leaveRequest->request_number ?: '-') }}</div>
+    <div class="number">Nomor : {{ $leaveRequest->letter_number ?: 'Belum terbit' }}</div>
 
     <table class="section-table">
         <tr class="section-head"><td colspan="4">I. &nbsp; DATA PEGAWAI</td></tr>

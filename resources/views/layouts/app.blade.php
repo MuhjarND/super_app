@@ -3136,6 +3136,20 @@
                         <i class="fas fa-shield-alt" style="color: {{ Auth::user()->hasTwoFactorEnabled() ? '#10b981' : '#64748b' }};"></i>
                     </a>
                 </li>
+                @if(!empty(config('services.webpush.public_key')))
+                    <li class="nav-item mr-2 d-flex align-items-center">
+                        <a id="webPushToggle"
+                            class="nav-link notification-toggle"
+                            href="#"
+                            title="Aktifkan notifikasi perangkat"
+                            aria-label="Aktifkan notifikasi perangkat"
+                            data-config-url="{{ route('push.config') }}"
+                            data-store-url="{{ route('push.subscriptions.store') }}"
+                            data-destroy-url="{{ route('push.subscriptions.destroy') }}">
+                            <i class="fas fa-mobile-alt" style="color: #64748b;"></i>
+                        </a>
+                    </li>
+                @endif
                 
                 @php
                     $topbarUser = Auth::user();
@@ -3855,12 +3869,19 @@
                     <a href="{{ route('mobile.menu.show', 'cuti') }}" class="mobile-bottom-nav-item {{ (request()->routeIs('mobile.menu.show') && $mobileMenuModule === 'cuti') || request()->routeIs('cuti.*') ? 'active' : '' }}">
                         <i class="fas fa-calendar-check"></i>
                         <span>Cuti</span>
+                        @php($mobileCutiBadge = (int) data_get($mobileNotificationBadges ?? [], 'modules.cuti', 0))
+                        @if($mobileCutiBadge > 0)
+                            <span class="mobile-bottom-nav-badge">{{ $mobileCutiBadge > 99 ? '99+' : $mobileCutiBadge }}</span>
+                        @endif
                     </a>
                 @endif
 
                 <a href="{{ route('dashboard') }}" class="mobile-bottom-nav-item" aria-label="Buka semua menu">
                     <i class="fas fa-th-large"></i>
                     <span>Menu</span>
+                    @if(($topbarActionCount ?? 0) > 0)
+                        <span class="mobile-bottom-nav-badge">{{ ($topbarActionCount ?? 0) > 99 ? '99+' : ($topbarActionCount ?? 0) }}</span>
+                    @endif
                 </a>
             </nav>
         @endif
@@ -4656,6 +4677,9 @@
 
     @if(request()->routeIs('library.*'))
         <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+    @endif
+    @if(Auth::check() && !empty(config('services.webpush.public_key')))
+        <script src="{{ asset('js/web-push.js') }}"></script>
     @endif
     @stack('scripts')
 </body>

@@ -16,6 +16,7 @@ use App\ZiEvidence;
 use App\ZiIndicator;
 use App\Services\UnifiedActionCenterService;
 use App\Services\ModuleSettingService;
+use App\Services\MobileNotificationBadgeService;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\ServiceProvider;
@@ -31,6 +32,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register()
     {
+        $this->app->singleton(MobileNotificationBadgeService::class);
+
         spl_autoload_register(function ($class) {
             $prefix = 'Picqer\\Barcode\\';
             if (strpos($class, $prefix) !== 0) {
@@ -78,6 +81,7 @@ class AppServiceProvider extends ServiceProvider
                 'sidebarActionCenterCount' => 0,
                 'topbarActionCount' => 0,
                 'topbarActionItems' => collect(),
+                'mobileNotificationBadges' => ['modules' => [], 'submodules' => []],
             ];
 
             $user = Auth::user();
@@ -437,6 +441,7 @@ class AppServiceProvider extends ServiceProvider
             $unifiedPayload = app(UnifiedActionCenterService::class)->build($user, ['tab' => 'all']);
             $counts['sidebarActionCenterCount'] = $unifiedPayload['summary']['active_count'] ?? 0;
             $counts['topbarActionCount'] = $counts['sidebarActionCenterCount'];
+            $counts['mobileNotificationBadges'] = app(MobileNotificationBadgeService::class)->build($user, $unifiedPayload);
             $counts['topbarActionItems'] = collect($unifiedPayload['items'] ?? [])->take(8)->map(function ($item) {
                 return [
                     'type' => $item['module_key'] ?? 'action-center',

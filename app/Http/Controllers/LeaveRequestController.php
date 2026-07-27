@@ -116,13 +116,8 @@ class LeaveRequestController extends Controller
             'created_by' => auth()->id(),
             'updated_by' => auth()->id(),
         ]);
-        if (!$isSatker) {
-            $this->documentService->ensureLetterNumber($leaveRequest);
-            $this->documentService->syncSuratKeluar($leaveRequest, false);
-        }
         $leaveRequest->load('leaveType');
         $this->documentService->storeUploadedDocuments($leaveRequest, $request->file('documents', []));
-        $this->documentService->syncSuratKeluar($leaveRequest->fresh(['leaveType', 'approvals', 'documents', 'user']), false);
         return redirect()->route('cuti.show', $leaveRequest)->with('success', 'Draft cuti berhasil dibuat.');
     }
 
@@ -159,7 +154,6 @@ class LeaveRequestController extends Controller
         $leaveRequest->save();
         $leaveRequest->load('leaveType');
         $this->documentService->storeUploadedDocuments($leaveRequest, $request->file('documents', []));
-        $this->documentService->syncSuratKeluar($leaveRequest->fresh(['leaveType', 'approvals', 'documents', 'user']), false);
         return redirect()->route('cuti.show', $leaveRequest)->with('success', 'Draft cuti diperbarui.');
     }
 
@@ -173,7 +167,6 @@ class LeaveRequestController extends Controller
         $leaveRequest->approved_days = $leaveRequest->requested_days;
         $leaveRequest->save();
         $this->approvalService->submit($leaveRequest);
-        $this->documentService->syncSuratKeluar($leaveRequest->fresh(['leaveType', 'approvals', 'documents', 'user']), false);
         event(new LeaveRequestSubmitted($leaveRequest, auth()->user()));
         return redirect()->route('cuti.show', $leaveRequest)->with('success', 'Pengajuan cuti berhasil disubmit.');
     }
@@ -213,7 +206,6 @@ class LeaveRequestController extends Controller
         $leaveRequest->revision_note = $request->input('revision_note');
         $leaveRequest->updated_by = auth()->id();
         $leaveRequest->save();
-        $this->documentService->syncSuratKeluar($leaveRequest->fresh(['leaveType', 'approvals', 'documents', 'user']), false);
         return redirect()->route('cuti.index', ['edit' => $leaveRequest->id])->with('success', 'Pengajuan dibuka untuk revisi.');
     }
 

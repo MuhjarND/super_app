@@ -1105,10 +1105,12 @@
         @php($dashboardModules = app(\App\Services\ModuleSettingService::class)->statesFor($dashboardUser))
         @php($showMobileModule = function ($key) use ($dashboardModules) { return data_get($dashboardModules, $key . '.visible_mobile', true); })
         @php($mobileModuleLabel = function ($key, $fallback) use ($dashboardModules) { return data_get($dashboardModules, $key . '.label', $fallback); })
+        @php($mobileBadge = function ($key) use ($mobileNotificationBadges) { return (int) data_get($mobileNotificationBadges, 'modules.' . $key, 0); })
         <section class="mobile-app-launcher">
             <div class="mobile-app-grid">
                 @if($showMobileModule('dashboard'))
                 <a href="{{ route('mobile.menu.show', 'dashboard') }}" class="mobile-app-tile">
+                    @if($mobileBadge('dashboard') > 0)<span class="mobile-app-badge">{{ $mobileBadge('dashboard') > 99 ? '99+' : $mobileBadge('dashboard') }}</span>@endif
                     <span class="mobile-app-icon dashboard"><i class="fas fa-th-large"></i></span>
                     <span class="mobile-app-title">{{ $mobileModuleLabel('dashboard', 'Dashboard') }}</span>
                 </a>
@@ -1116,8 +1118,8 @@
 
                 @if($showMobileModule('action_center') && $dashboardUser && $dashboardUser->canAccessUnifiedActionCenter())
                     <a href="{{ route('mobile.menu.show', 'action') }}" class="mobile-app-tile">
-                        @if(($dashboardSummary['action_count'] ?? 0) > 0)
-                            <span class="mobile-app-badge">{{ ($dashboardSummary['action_count'] ?? 0) > 99 ? '99+' : ($dashboardSummary['action_count'] ?? 0) }}</span>
+                        @if($mobileBadge('action') > 0)
+                            <span class="mobile-app-badge">{{ $mobileBadge('action') > 99 ? '99+' : $mobileBadge('action') }}</span>
                         @endif
                         <span class="mobile-app-icon action"><i class="fas fa-bell"></i></span>
                         <span class="mobile-app-title">{{ $mobileModuleLabel('action_center', 'Tindak Lanjut') }}</span>
@@ -1126,6 +1128,7 @@
 
                 @if($showMobileModule('calendar') && $dashboardUser && $dashboardUser->canAccessIntegratedCalendar())
                     <a href="{{ route('mobile.menu.show', 'calendar') }}" class="mobile-app-tile">
+                        @if($mobileBadge('calendar') > 0)<span class="mobile-app-badge">{{ $mobileBadge('calendar') > 99 ? '99+' : $mobileBadge('calendar') }}</span>@endif
                         <span class="mobile-app-icon calendar"><i class="far fa-calendar-alt"></i></span>
                         <span class="mobile-app-title">{{ $mobileModuleLabel('calendar', 'Kalender') }}</span>
                     </a>
@@ -1133,6 +1136,7 @@
 
                 @if($showMobileModule('approval') && ($dashboardIsSuperAdmin || ($dashboardUser && $dashboardUser->canAccessApprovalCenter())))
                     <a href="{{ route('mobile.menu.show', 'approval') }}" class="mobile-app-tile">
+                        @if($mobileBadge('approval') > 0)<span class="mobile-app-badge">{{ $mobileBadge('approval') > 99 ? '99+' : $mobileBadge('approval') }}</span>@endif
                         <span class="mobile-app-icon approval"><i class="fas fa-check-double"></i></span>
                         <span class="mobile-app-title">{{ $mobileModuleLabel('approval', 'Approval') }}</span>
                     </a>
@@ -1140,8 +1144,8 @@
 
                 @if($showMobileModule('persuratan') && $persuratan['enabled'])
                     <a href="{{ route('mobile.menu.show', 'persuratan') }}" class="mobile-app-tile">
-                        @if(($dashboardSummary['today_masuk'] ?? 0) > 0)
-                            <span class="mobile-app-badge">{{ ($dashboardSummary['today_masuk'] ?? 0) > 99 ? '99+' : ($dashboardSummary['today_masuk'] ?? 0) }}</span>
+                        @if($mobileBadge('persuratan') > 0)
+                            <span class="mobile-app-badge">{{ $mobileBadge('persuratan') > 99 ? '99+' : $mobileBadge('persuratan') }}</span>
                         @endif
                         <span class="mobile-app-icon mail"><i class="fas fa-envelope-open-text"></i></span>
                         <span class="mobile-app-title">{{ $mobileModuleLabel('persuratan', 'Persuratan') }}</span>
@@ -1150,6 +1154,7 @@
 
                 @if($showMobileModule('rapat') && ($meeting['enabled'] || ($dashboardUser && ($dashboardUser->canAccessMeetingFollowUps() || $dashboardUser->canAccessAgendaPimpinan() || $dashboardUser->canAccessVirtualMeetings() || $dashboardUser->canAccessVoting()))))
                     <a href="{{ route('mobile.menu.show', 'rapat') }}" class="mobile-app-tile">
+                        @if($mobileBadge('rapat') > 0)<span class="mobile-app-badge">{{ $mobileBadge('rapat') > 99 ? '99+' : $mobileBadge('rapat') }}</span>@endif
                         <span class="mobile-app-icon meeting"><i class="fas fa-users"></i></span>
                         <span class="mobile-app-title">{{ $mobileModuleLabel('rapat', 'Rapat') }}</span>
                     </a>
@@ -1157,8 +1162,8 @@
 
                 @if($showMobileModule('cuti') && $leave['enabled'])
                     <a href="{{ route('mobile.menu.show', 'cuti') }}" class="mobile-app-tile">
-                        @if(($dashboardSummary['pending_leave_approvals'] ?? 0) > 0)
-                            <span class="mobile-app-badge">{{ ($dashboardSummary['pending_leave_approvals'] ?? 0) > 99 ? '99+' : ($dashboardSummary['pending_leave_approvals'] ?? 0) }}</span>
+                        @if($mobileBadge('cuti') > 0)
+                            <span class="mobile-app-badge">{{ $mobileBadge('cuti') > 99 ? '99+' : $mobileBadge('cuti') }}</span>
                         @endif
                         <span class="mobile-app-icon leave"><i class="fas fa-calendar-check"></i></span>
                         <span class="mobile-app-title">{{ $mobileModuleLabel('cuti', 'Cuti') }}</span>
@@ -1167,6 +1172,7 @@
 
                 @if($showMobileModule('inventory') && $inventory['enabled'])
                     <a href="{{ route('mobile.menu.show', 'perawatan') }}" class="mobile-app-tile">
+                        @if($mobileBadge('perawatan') > 0)<span class="mobile-app-badge">{{ $mobileBadge('perawatan') > 99 ? '99+' : $mobileBadge('perawatan') }}</span>@endif
                         <span class="mobile-app-icon asset"><i class="fas fa-tools"></i></span>
                         <span class="mobile-app-title">{{ $mobileModuleLabel('inventory', 'Perawatan') }}</span>
                     </a>
@@ -1174,6 +1180,7 @@
 
                 @if($showMobileModule('supply') && ($dashboardIsSuperAdmin || ($dashboardUser && $dashboardUser->canAccessSupplyModule())))
                     <a href="{{ route('mobile.menu.show', 'persediaan') }}" class="mobile-app-tile">
+                        @if($mobileBadge('persediaan') > 0)<span class="mobile-app-badge">{{ $mobileBadge('persediaan') > 99 ? '99+' : $mobileBadge('persediaan') }}</span>@endif
                         <span class="mobile-app-icon supply"><i class="fas fa-warehouse"></i></span>
                         <span class="mobile-app-title">{{ $mobileModuleLabel('supply', 'Persediaan') }}</span>
                     </a>
@@ -1181,6 +1188,7 @@
 
                 @if($showMobileModule('library') && ($dashboardIsSuperAdmin || ($dashboardUser && $dashboardUser->canAccessLibraryModule())))
                     <a href="{{ route('mobile.menu.show', 'perpustakaan') }}" class="mobile-app-tile">
+                        @if($mobileBadge('perpustakaan') > 0)<span class="mobile-app-badge">{{ $mobileBadge('perpustakaan') > 99 ? '99+' : $mobileBadge('perpustakaan') }}</span>@endif
                         <span class="mobile-app-icon mail"><i class="fas fa-book-reader"></i></span>
                         <span class="mobile-app-title">{{ $mobileModuleLabel('library', 'Perpustakaan') }}</span>
                     </a>
@@ -1188,6 +1196,7 @@
 
                 @if($showMobileModule('progress_zi') && $progressZi['enabled'])
                     <a href="{{ route('mobile.menu.show', 'zi') }}" class="mobile-app-tile">
+                        @if($mobileBadge('zi') > 0)<span class="mobile-app-badge">{{ $mobileBadge('zi') > 99 ? '99+' : $mobileBadge('zi') }}</span>@endif
                         <span class="mobile-app-icon zi"><i class="fas fa-chart-line"></i></span>
                         <span class="mobile-app-title">{{ $mobileModuleLabel('progress_zi', 'Progress ZI') }}</span>
                     </a>
@@ -1195,6 +1204,7 @@
 
                 @if($showMobileModule('archive') && ($dashboardIsSuperAdmin || ($dashboardUser && $dashboardUser->canAccessArchiveMenu())))
                     <a href="{{ route('mobile.menu.show', 'arsip') }}" class="mobile-app-tile">
+                        @if($mobileBadge('arsip') > 0)<span class="mobile-app-badge">{{ $mobileBadge('arsip') > 99 ? '99+' : $mobileBadge('arsip') }}</span>@endif
                         <span class="mobile-app-icon archive"><i class="far fa-folder-open"></i></span>
                         <span class="mobile-app-title">{{ $mobileModuleLabel('archive', 'Arsip') }}</span>
                     </a>
@@ -1202,6 +1212,7 @@
 
                 @if($showMobileModule('master_data') && $dashboardIsSuperAdmin)
                     <a href="{{ route('mobile.menu.show', 'master-data') }}" class="mobile-app-tile">
+                        @if($mobileBadge('master-data') > 0)<span class="mobile-app-badge">{{ $mobileBadge('master-data') > 99 ? '99+' : $mobileBadge('master-data') }}</span>@endif
                         <span class="mobile-app-icon master"><i class="fas fa-database"></i></span>
                         <span class="mobile-app-title">{{ $mobileModuleLabel('master_data', 'Master Data') }}</span>
                     </a>

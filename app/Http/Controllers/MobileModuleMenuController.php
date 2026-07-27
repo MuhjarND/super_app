@@ -3,15 +3,19 @@
 namespace App\Http\Controllers;
 
 use App\Services\ModuleSettingService;
+use App\Services\MobileNotificationBadgeService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class MobileModuleMenuController extends Controller
 {
     protected $moduleSettings;
+    protected $badgeService;
 
-    public function __construct(ModuleSettingService $moduleSettings)
+    public function __construct(ModuleSettingService $moduleSettings, MobileNotificationBadgeService $badgeService)
     {
         $this->moduleSettings = $moduleSettings;
+        $this->badgeService = $badgeService;
         $this->middleware('auth');
     }
 
@@ -33,6 +37,18 @@ class MobileModuleMenuController extends Controller
         if ($moduleState) {
             $menu['title'] = $moduleState['label'];
         }
+
+        $badges = $this->badgeService->build($user);
+        $menu['badge'] = (int) data_get($badges, 'modules.' . $module, 0);
+        $menu['items'] = collect($menu['items'])->map(function ($item) use ($badges, $module) {
+            $item['badge'] = (int) data_get(
+                $badges,
+                'submodules.' . $module . '.' . Str::slug($item['label'], '_'),
+                0
+            );
+
+            return $item;
+        })->all();
 
         return view('mobile-menu.show', [
             'menu' => $menu,

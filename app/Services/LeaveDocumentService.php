@@ -86,6 +86,13 @@ class LeaveDocumentService
             return null;
         }
 
+        if (
+            !$markComplete
+            || !in_array($leaveRequest->status, [LeaveRequest::STATUS_APPROVED, LeaveRequest::STATUS_COMPLETED], true)
+        ) {
+            return null;
+        }
+
         $this->ensureLetterNumber($leaveRequest);
         [$klasifikasi, $fungsi, $kegiatan] = $this->resolveLeaveClassification();
 
@@ -94,9 +101,7 @@ class LeaveDocumentService
             $suratKeluar = SuratKeluar::where('nomor_surat', $leaveRequest->letter_number)->first();
         }
 
-        $issueDate = $leaveRequest->created_at
-            ? $leaveRequest->created_at->copy()->timezone('Asia/Jayapura')
-            : now('Asia/Jayapura');
+        $issueDate = $this->resolveLetterIssueDate($leaveRequest);
         $nomorUrut = $this->extractLetterSequence($leaveRequest->letter_number);
 
         $payload = [
@@ -182,9 +187,11 @@ class LeaveDocumentService
             ]);
         }
 
-        $issueDate = $leaveRequest->created_at
-            ? $leaveRequest->created_at->copy()->timezone('Asia/Jayapura')
-            : now('Asia/Jayapura');
+        if (!in_array($leaveRequest->status, [LeaveRequest::STATUS_APPROVED, LeaveRequest::STATUS_COMPLETED], true)) {
+            return null;
+        }
+
+        $issueDate = $this->resolveLetterIssueDate($leaveRequest);
 
         $number = SuratKeluar::generateNomorSurat(
             'ketua',
@@ -203,6 +210,15 @@ class LeaveDocumentService
         return $leaveRequest->letter_number;
     }
 
+    protected function resolveLetterIssueDate(LeaveRequest $leaveRequest)
+    {
+        $date = $leaveRequest->approved_at ?: $leaveRequest->created_at;
+
+        return $date
+            ? $date->copy()->timezone('Asia/Jayapura')
+            : now('Asia/Jayapura');
+    }
+
     protected function isSatkerRequest(LeaveRequest $leaveRequest)
     {
         $leaveRequest->loadMissing('user.roles');
@@ -217,7 +233,7 @@ class LeaveDocumentService
 
         return [
             'valid' => in_array($approval->status, ['approved', 'changed', 'deferred'], true),
-            'document_number' => $leaveRequest->letter_number ?: $leaveRequest->request_number ?: '-',
+            'document_number' => $leaveRequest->letter_number ?: 'Belum terbit',
             'document_type' => 'Formulir Permintaan dan Pemberian Cuti',
             'leave_type' => optional($leaveRequest->leaveType)->name ?: '-',
             'period' => $leaveRequest->period_label,
@@ -238,7 +254,7 @@ class LeaveDocumentService
 
         return [
             'valid' => $isSigned,
-            'document_number' => $leaveRequest->letter_number ?: $leaveRequest->request_number ?: '-',
+            'document_number' => $leaveRequest->letter_number ?: 'Belum terbit',
             'document_type' => 'Formulir Permintaan dan Pemberian Cuti',
             'leave_type' => optional($leaveRequest->leaveType)->name ?: '-',
             'period' => $leaveRequest->period_label,
@@ -531,7 +547,7 @@ class LeaveDocumentService
             'Formulir Permintaan dan Pemberian Cuti - ' . (optional($leaveRequest->user)->name ?: 'Pegawai'),
             $this->buildApprovalSigners($leaveRequest),
             [
-                'nomor' => $leaveRequest->letter_number ?: $leaveRequest->request_number,
+                'nomor' => $leaveRequest->letter_number ?: 'Belum terbit',
                 'periode' => $leaveRequest->period_label,
                 'jenis_cuti' => optional($leaveRequest->leaveType)->name,
             ]

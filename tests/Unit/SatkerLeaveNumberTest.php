@@ -55,6 +55,26 @@ class SatkerLeaveNumberTest extends TestCase
         $this->assertNull($this->service()->syncSuratKeluar($leaveRequest, true));
     }
 
+    public function test_internal_request_does_not_receive_a_letter_number_before_final_approval(): void
+    {
+        $user = Mockery::mock(User::class)->makePartial();
+        $user->forceFill(['id' => 11, 'name' => 'Pegawai Internal']);
+        $user->setRelation('roles', collect());
+        $user->shouldReceive('isSatker')->andReturn(false);
+
+        $leaveRequest = new LeaveRequest();
+        $leaveRequest->forceFill([
+            'id' => 21,
+            'user_id' => 11,
+            'status' => LeaveRequest::STATUS_SUBMITTED,
+            'letter_number' => null,
+        ]);
+        $leaveRequest->setRelation('user', $user);
+
+        $this->assertNull($this->service()->ensureLetterNumber($leaveRequest));
+        $this->assertNull($leaveRequest->letter_number);
+    }
+
     protected function satkerLeaveRequest($letterNumber = null)
     {
         $role = new Role();

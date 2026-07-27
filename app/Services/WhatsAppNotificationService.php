@@ -201,6 +201,23 @@ class WhatsAppNotificationService
             'target_name' => $targetUser->name,
         ]);
 
+        if (($context['event'] ?? null) !== 'login_info') {
+            try {
+                $webPush = app(WebPushNotificationService::class);
+                $webPush->sendToUser(
+                    $targetUser,
+                    $webPush->payloadFromWhatsAppMessage($message, $context)
+                );
+            } catch (\Throwable $exception) {
+                Log::warning('Notifikasi perangkat gagal diproses.', [
+                    'user_id' => $targetUser->id,
+                    'module' => $context['module'] ?? 'general',
+                    'event' => $context['event'] ?? 'notification',
+                    'message' => $exception->getMessage(),
+                ]);
+            }
+        }
+
         return $this->send($targetUser->no_hp, $message, $context);
     }
 
