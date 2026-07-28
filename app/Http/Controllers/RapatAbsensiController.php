@@ -5,22 +5,29 @@ namespace App\Http\Controllers;
 use App\Rapat;
 use App\RapatAttendance;
 use App\Services\RapatDocumentService;
+use App\Services\SignaturePadService;
 use App\Services\WhatsAppNotificationService;
 use Barryvdh\DomPDF\Facade as PDF;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\URL;
 
 class RapatAbsensiController extends Controller
 {
     protected $whatsAppService;
     protected $documentService;
+    protected $signaturePadService;
 
-    public function __construct(WhatsAppNotificationService $whatsAppService, RapatDocumentService $documentService)
-    {
+    public function __construct(
+        WhatsAppNotificationService $whatsAppService,
+        RapatDocumentService $documentService,
+        SignaturePadService $signaturePadService
+    ) {
         $this->middleware('auth')->except(['publicShow', 'publicStore', 'publicStoreGuest', 'verifyAttendance']);
         $this->whatsAppService = $whatsAppService;
         $this->documentService = $documentService;
+        $this->signaturePadService = $signaturePadService;
     }
 
     public function index()
@@ -117,12 +124,16 @@ class RapatAbsensiController extends Controller
                 'name' => $user->name,
                 'description' => $user->jabatan_keterangan ?: optional($user->jabatan)->nama ?: '-',
                 'attended_at' => optional($attendance)->attended_at,
+                'signature' => $attendance
+                    ? $this->signaturePadService->toDataUri($attendance->signature_path)
+                    : null,
             ];
         })->concat($guestAttendances->map(function ($attendance) {
             return [
                 'name' => $attendance->participant_name_snapshot,
                 'description' => $attendance->guest_instansi ?: ($attendance->participant_jabatan_snapshot ?: '-'),
                 'attended_at' => $attendance->attended_at,
+                'signature' => $this->signaturePadService->toDataUri($attendance->signature_path),
             ];
         }))->values();
 
@@ -203,8 +214,10 @@ class RapatAbsensiController extends Controller
 
         $data = $request->validate([
             'user_id' => ['required', 'integer'],
+            'signature_data' => ['required', 'string', 'max:3000000'],
         ], [
             'user_id.required' => 'Nama peserta wajib dipilih.',
+            'signature_data.required' => 'Tanda tangan peserta wajib diisi.',
         ]);
 
         $participant = $rapat->pesertas()->where('users.id', $data['user_id'])->first();
@@ -220,19 +233,29 @@ class RapatAbsensiController extends Controller
             ], 422);
         }
 
-        RapatAttendance::create([
-            'rapat_id' => $rapat->id,
-            'user_id' => $participant->id,
-            'attendance_type' => 'internal',
-            'participant_name_snapshot' => $participant->name,
-            'participant_jabatan_snapshot' => $participant->jabatan_keterangan ?: optional($participant->jabatan)->nama,
-            'source' => 'public',
-            'signature_path' => null,
-            'signature_mime' => null,
-            'signature_size' => null,
-            'attended_at' => Carbon::now('Asia/Jayapura'),
-            'created_ip' => $request->ip(),
-        ]);
+        $signature = $this->signaturePadService->storeDataUri(
+            $data['signature_data'],
+            'rapat/attendance'
+        );
+
+        try {
+            RapatAttendance::create([
+                'rapat_id' => $rapat->id,
+                'user_id' => $participant->id,
+                'attendance_type' => 'internal',
+                'participant_name_snapshot' => $participant->name,
+                'participant_jabatan_snapshot' => $participant->jabatan_keterangan ?: optional($participant->jabatan)->nama,
+                'source' => 'public',
+                'signature_path' => $signature['path'],
+                'signature_mime' => $signature['mime'],
+                'signature_size' => $signature['size'],
+                'attended_at' => Carbon::now('Asia/Jayapura'),
+                'created_ip' => $request->ip(),
+            ]);
+        } catch (\Throwable $exception) {
+            Storage::disk('public')->delete($signature['path']);
+            throw $exception;
+        }
 
         return response()->json([
             'success' => true,
@@ -247,23 +270,35 @@ class RapatAbsensiController extends Controller
         $data = $request->validate([
             'guest_name' => ['required', 'string', 'max:255'],
             'guest_instansi' => ['nullable', 'string', 'max:255'],
+            'signature_data' => ['required', 'string', 'max:3000000'],
         ], [
             'guest_name.required' => 'Nama tamu wajib diisi.',
+            'signature_data.required' => 'Tanda tangan peserta external wajib diisi.',
         ]);
 
-        RapatAttendance::create([
-            'rapat_id' => $rapat->id,
-            'attendance_type' => 'guest',
-            'participant_name_snapshot' => $data['guest_name'],
-            'participant_jabatan_snapshot' => $data['guest_instansi'] ?? null,
-            'guest_instansi' => $data['guest_instansi'] ?? null,
-            'source' => 'guest',
-            'signature_path' => null,
-            'signature_mime' => null,
-            'signature_size' => null,
-            'attended_at' => Carbon::now('Asia/Jayapura'),
-            'created_ip' => $request->ip(),
-        ]);
+        $signature = $this->signaturePadService->storeDataUri(
+            $data['signature_data'],
+            'rapat/attendance'
+        );
+
+        try {
+            RapatAttendance::create([
+                'rapat_id' => $rapat->id,
+                'attendance_type' => 'guest',
+                'participant_name_snapshot' => $data['guest_name'],
+                'participant_jabatan_snapshot' => $data['guest_instansi'] ?? null,
+                'guest_instansi' => $data['guest_instansi'] ?? null,
+                'source' => 'guest',
+                'signature_path' => $signature['path'],
+                'signature_mime' => $signature['mime'],
+                'signature_size' => $signature['size'],
+                'attended_at' => Carbon::now('Asia/Jayapura'),
+                'created_ip' => $request->ip(),
+            ]);
+        } catch (\Throwable $exception) {
+            Storage::disk('public')->delete($signature['path']);
+            throw $exception;
+        }
 
         return response()->json([
             'success' => true,

@@ -84,6 +84,14 @@
             font-style: italic;
         }
 
+        .participant-signature {
+            width: 70pt;
+            height: 34pt;
+            display: block;
+            margin: 0 auto;
+            object-fit: contain;
+        }
+
         .ttd-table {
             width: 100%;
             border-collapse: collapse;
@@ -168,7 +176,8 @@
                 <th style="width: 28pt;">No</th>
                 <th>Nama</th>
                 <th>Jabatan / Keterangan</th>
-                <th style="width: 170pt;">Keterangan Kehadiran</th>
+                <th style="width: 130pt;">Keterangan Kehadiran</th>
+                <th style="width: 76pt;">Tanda Tangan</th>
             </tr>
         </thead>
         <tbody>
@@ -186,10 +195,17 @@
                             Belum melakukan absensi.
                         @endif
                     </td>
+                    <td class="text-center">
+                        @if(!empty($row['signature']))
+                            <img src="{{ $row['signature'] }}" alt="Tanda tangan {{ $row['name'] }}" class="participant-signature">
+                        @else
+                            -
+                        @endif
+                    </td>
                 </tr>
             @empty
                 <tr>
-                    <td colspan="4" class="empty">Belum ada data peserta absensi.</td>
+                    <td colspan="5" class="empty">Belum ada data peserta absensi.</td>
                 </tr>
             @endforelse
         </tbody>

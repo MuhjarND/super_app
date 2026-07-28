@@ -2,10 +2,25 @@
     "name": "PAPEDA",
     "short_name": "PAPEDA",
     "description": "Pusat Aplikasi Pengelolaan Dokumen dan Administrasi",
+    "lang": "id-ID",
+    "dir": "ltr",
     "id": "/",
     "start_url": "/dashboard",
     "scope": "/",
     "display": "standalone",
+    "display_override": [
+        "window-controls-overlay",
+        "standalone",
+        "minimal-ui"
+    ],
+    "launch_handler": {
+        "client_mode": "navigate-existing"
+    },
+    "categories": [
+        "business",
+        "productivity"
+    ],
+    "prefer_related_applications": false,
     "background_color": "#ffffff",
     "theme_color": "#5b21b6",
     "icons": [

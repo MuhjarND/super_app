@@ -20,7 +20,9 @@ class WhatsAppMagicLinkService
             'expires_at' => $expiresAt,
         ]);
 
-        return route('whatsapp.magic-login.consume', ['token' => $plainToken]);
+        return $this->absoluteApplicationUrl(
+            route('whatsapp.magic-login.consume', ['token' => $plainToken], false)
+        );
     }
 
     public function resolveSignedToken($token)
@@ -65,7 +67,7 @@ class WhatsAppMagicLinkService
             $url = rtrim($matches[0], '.,;:)');
             $suffix = substr($matches[0], strlen($url));
 
-            if (!$this->isApplicationUrl($url) || $this->isMagicLoginUrl($url) || $this->isSignedDocumentUrl($url)) {
+            if (!$this->isApplicationUrl($url) || $this->isMagicLoginUrl($url)) {
                 return $matches[0];
             }
 
@@ -78,27 +80,34 @@ class WhatsAppMagicLinkService
         $destinationUrl = trim((string) $destinationUrl);
 
         if (!$this->isApplicationUrl($destinationUrl)) {
-            return route('dashboard');
+            return $this->absoluteApplicationUrl(route('dashboard', [], false));
         }
 
-        return $destinationUrl;
+        return $this->absoluteApplicationUrl($destinationUrl);
     }
 
     protected function isApplicationUrl($url)
     {
-        $application = parse_url(config('app.url'));
         $candidate = parse_url($url);
 
         if (empty($candidate['scheme']) || empty($candidate['host'])) {
             return false;
         }
 
-        $applicationPort = $application['port'] ?? $this->defaultPort($application['scheme'] ?? null);
         $candidatePort = $candidate['port'] ?? $this->defaultPort($candidate['scheme'] ?? null);
 
-        return strtolower($candidate['scheme']) === strtolower($application['scheme'] ?? '')
-            && strtolower($candidate['host']) === strtolower($application['host'] ?? '')
-            && $candidatePort === $applicationPort;
+        foreach ($this->recognizedApplicationUrls() as $applicationUrl) {
+            $application = parse_url($applicationUrl);
+            $applicationPort = $application['port'] ?? $this->defaultPort($application['scheme'] ?? null);
+
+            if (strtolower($candidate['scheme']) === strtolower($application['scheme'] ?? '')
+                && strtolower($candidate['host']) === strtolower($application['host'] ?? '')
+                && $candidatePort === $applicationPort) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     protected function isMagicLoginUrl($url)
@@ -106,15 +115,32 @@ class WhatsAppMagicLinkService
         return strpos(parse_url($url, PHP_URL_PATH) ?: '', '/masuk/whatsapp/') === 0;
     }
 
-    protected function isSignedDocumentUrl($url)
+    protected function recognizedApplicationUrls()
     {
-        if (preg_match('#^/surat-keluar/\d+/file$#', parse_url($url, PHP_URL_PATH) ?: '') !== 1) {
-            return false;
+        return array_values(array_unique(array_filter([
+            config('services.whatsapp.application_url'),
+            config('app.url'),
+        ])));
+    }
+
+    protected function absoluteApplicationUrl($url)
+    {
+        $baseUrl = rtrim((string) config('services.whatsapp.application_url', config('app.url')), '/');
+        $parts = parse_url((string) $url);
+
+        if (empty($parts['host'])) {
+            return $baseUrl . '/' . ltrim((string) $url, '/');
         }
 
-        parse_str(parse_url($url, PHP_URL_QUERY) ?: '', $query);
+        $result = $baseUrl . '/' . ltrim($parts['path'] ?? '/', '/');
+        if (!empty($parts['query'])) {
+            $result .= '?' . $parts['query'];
+        }
+        if (!empty($parts['fragment'])) {
+            $result .= '#' . $parts['fragment'];
+        }
 
-        return !empty($query['signature']) && !empty($query['expires']);
+        return $result;
     }
 
     protected function defaultPort($scheme)

@@ -25,10 +25,11 @@ class WebPushNotificationServiceTest extends TestCase
             'notifiable_id' => 25,
         ]);
 
-        $this->assertSame('Rapat dan Agenda', $payload['title']);
+        $this->assertSame('PAPEDA | Rapat dan Agenda', $payload['title']);
         $this->assertSame('https://papeda.pta-papuabarat.go.id/masuk/whatsapp/token', $payload['url']);
         $this->assertStringContainsString('Agenda: Monitoring Kinerja', $payload['body']);
         $this->assertStringNotContainsString('https://', $payload['body']);
         $this->assertSame('papeda-rapat-approved-25', $payload['tag']);
+        $this->assertIsInt($payload['timestamp']);
     }
 }

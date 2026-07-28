@@ -51,6 +51,7 @@ class WebPushNotificationService
             'body' => Str::limit((string) ($payload['body'] ?? 'Terdapat informasi baru untuk Anda.'), 180),
             'url' => $this->normalizeUrl($payload['url'] ?? route('action-center.index')),
             'module' => $payload['module'] ?? 'general',
+            'timestamp' => (int) ($payload['timestamp'] ?? now()->getTimestampMs()),
             'tag' => $payload['tag'] ?? null,
         ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 
@@ -100,6 +101,7 @@ class WebPushNotificationService
             'body' => $this->bodyFromMessage($message),
             'url' => $this->urlFromMessage($message) ?: route('action-center.index'),
             'module' => $module,
+            'timestamp' => now()->getTimestampMs(),
             'tag' => implode('-', array_filter([
                 'papeda',
                 $module,
@@ -112,16 +114,17 @@ class WebPushNotificationService
     protected function titleFor($module, $event)
     {
         $titles = [
-            'persuratan' => 'Persuratan PAPEDA',
-            'rapat' => 'Rapat dan Agenda',
-            'cuti' => 'Pengajuan Cuti',
-            'progress_zi' => 'Progress ZI',
-            'perawatan' => 'Perawatan Alat dan Mesin',
-            'persediaan' => 'Persediaan',
-            'agenda_pimpinan' => 'Agenda Pimpinan',
-            'virtual_meeting' => 'Virtual Meeting',
-            'voting' => 'E-Voting',
-            'security' => 'Keamanan Akun',
+            'persuratan' => 'PAPEDA | Persuratan',
+            'surat_tugas' => 'PAPEDA | Surat Tugas',
+            'rapat' => 'PAPEDA | Rapat dan Agenda',
+            'cuti' => 'PAPEDA | Pengajuan Cuti',
+            'progress_zi' => 'PAPEDA | Progress ZI',
+            'perawatan' => 'PAPEDA | Perawatan Alat dan Mesin',
+            'persediaan' => 'PAPEDA | Persediaan',
+            'agenda_pimpinan' => 'PAPEDA | Agenda Pimpinan',
+            'virtual_meeting' => 'PAPEDA | Virtual Meeting',
+            'voting' => 'PAPEDA | E-Voting',
+            'security' => 'PAPEDA | Keamanan Akun',
         ];
 
         return $titles[$module] ?? 'PAPEDA';

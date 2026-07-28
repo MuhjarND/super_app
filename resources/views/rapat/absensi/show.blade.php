@@ -22,6 +22,13 @@
             background: #fff;
         }
 
+        .attendance-signature {
+            width: 96px;
+            height: 44px;
+            object-fit: contain;
+            display: block;
+        }
+
     </style>
 @endpush
 
@@ -93,6 +100,7 @@
                         <th>Jabatan / Keterangan</th>
                         <th>Status</th>
                         <th>Waktu Absen</th>
+                        <th>Tanda Tangan</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -108,6 +116,19 @@
                                 @endif
                             </td>
                             <td>{{ $item['attendance'] ? $item['attendance']->attended_at->copy()->timezone('Asia/Jayapura')->format('d/m/Y H:i') . ' WIT' : '-' }}</td>
+                            <td>
+                                @if($item['attendance'] && $item['attendance']->signature_path)
+                                    <a href="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($item['attendance']->signature_path) }}" target="_blank">
+                                        <img
+                                            src="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($item['attendance']->signature_path) }}"
+                                            alt="Tanda tangan {{ $item['user']->name }}"
+                                            class="attendance-signature"
+                                        >
+                                    </a>
+                                @else
+                                    -
+                                @endif
+                            </td>
                         </tr>
                     @endforeach
                 </tbody>
@@ -126,6 +147,7 @@
                         <th>Nama</th>
                         <th>Instansi / Jabatan</th>
                         <th>Waktu Absen</th>
+                        <th>Tanda Tangan</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -134,10 +156,23 @@
                             <td>{{ $attendance->participant_name_snapshot }}</td>
                             <td>{{ $attendance->guest_instansi ?: '-' }}</td>
                             <td>{{ $attendance->attended_at->copy()->timezone('Asia/Jayapura')->format('d/m/Y H:i') }} WIT</td>
+                            <td>
+                                @if($attendance->signature_path)
+                                    <a href="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($attendance->signature_path) }}" target="_blank">
+                                        <img
+                                            src="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($attendance->signature_path) }}"
+                                            alt="Tanda tangan {{ $attendance->participant_name_snapshot }}"
+                                            class="attendance-signature"
+                                        >
+                                    </a>
+                                @else
+                                    -
+                                @endif
+                            </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="3" class="text-center text-muted py-4">Belum ada peserta external yang mengisi absensi.</td>
+                            <td colspan="4" class="text-center text-muted py-4">Belum ada peserta external yang mengisi absensi.</td>
                         </tr>
                     @endforelse
                 </tbody>

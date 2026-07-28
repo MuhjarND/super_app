@@ -161,7 +161,7 @@ class WhatsAppMagicLoginTest extends TestCase
         $this->assertSame(1, WhatsAppMagicLoginToken::count());
     }
 
-    public function testSignedSuratKeluarFileUrlRemainsDirect()
+    public function testSignedSuratKeluarFileUrlUsesAutomaticLogin()
     {
         $user = factory(User::class)->create();
         $fileUrl = URL::temporarySignedRoute(
@@ -175,10 +175,10 @@ class WhatsAppMagicLoginTest extends TestCase
             'File Surat Keluar: ' . $fileUrl
         );
 
-        $this->assertSame('File Surat Keluar: ' . $fileUrl, $message);
-        $this->assertStringContainsString('/surat-keluar/3259/file?', $message);
-        $this->assertStringNotContainsString('/masuk/whatsapp/', $message);
-        $this->assertSame(0, WhatsAppMagicLoginToken::count());
+        $this->assertStringContainsString('/masuk/whatsapp/', $message);
+        $this->assertStringNotContainsString($fileUrl, $message);
+        $this->assertSame(1, WhatsAppMagicLoginToken::count());
+        $this->assertSame($fileUrl, WhatsAppMagicLoginToken::first()->destination_url);
     }
 
     public function testPlainSuratKeluarFileUrlUsesAutomaticLogin()
@@ -200,5 +200,26 @@ class WhatsAppMagicLoginTest extends TestCase
             now()->addDays(14)->subMinute(),
             now()->addDays(14)->addMinute()
         ));
+    }
+
+    public function testLegacyApplicationHostIsRewrittenToPapedaForMagicLoginAndDestination()
+    {
+        config([
+            'app.url' => 'https://simisol.pta-papuabarat.go.id',
+            'services.whatsapp.application_url' => 'https://papeda.pta-papuabarat.go.id',
+        ]);
+
+        $user = factory(User::class)->create();
+        $legacyUrl = 'https://simisol.pta-papuabarat.go.id/cuti/123?mode=approval';
+        $message = app(WhatsAppMagicLinkService::class)->replaceApplicationUrls(
+            $user,
+            'Tindak lanjuti cuti: ' . $legacyUrl
+        );
+
+        $this->assertStringContainsString('https://papeda.pta-papuabarat.go.id/masuk/whatsapp/', $message);
+        $this->assertSame(
+            'https://papeda.pta-papuabarat.go.id/cuti/123?mode=approval',
+            WhatsAppMagicLoginToken::first()->destination_url
+        );
     }
 }

@@ -78,7 +78,13 @@
         }
 
         publicKey = config.public_key;
-        registration = await navigator.serviceWorker.register('/service-worker.js', { scope: '/' });
+        registration = await navigator.serviceWorker.register('/service-worker.js', {
+            scope: '/',
+            updateViaCache: 'none'
+        });
+        await registration.update().catch(function () {
+            return null;
+        });
         const subscription = await registration.pushManager.getSubscription();
         setState(Boolean(subscription));
 
@@ -124,6 +130,24 @@
             });
             await saveSubscription(subscription);
             setState(true);
+            await registration.showNotification('PAPEDA', {
+                body: 'Notifikasi PAPEDA berhasil diaktifkan pada perangkat ini.',
+                icon: '/icons/logo-app-192.png',
+                badge: '/icons/logo-app-192.png',
+                tag: 'papeda-notification-enabled',
+                timestamp: Date.now(),
+                vibrate: [180, 80, 180],
+                actions: [
+                    {
+                        action: 'open-papeda',
+                        title: 'Buka PAPEDA'
+                    }
+                ],
+                data: {
+                    url: '/dashboard',
+                    module: 'general'
+                }
+            });
             feedback('Notifikasi perangkat berhasil diaktifkan.', false);
         } catch (error) {
             feedback(error.message || 'Notifikasi perangkat tidak dapat diaktifkan.', true);

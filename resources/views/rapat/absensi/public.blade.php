@@ -319,8 +319,8 @@
             <div id="attendanceAlert" class="alert"></div>
 
             <div class="tabs">
-                <button type="button" class="tab-button active" data-tab="internal">Peserta Undangan</button>
-                <button type="button" class="tab-button" data-tab="guest">External</button>
+                <button type="button" class="tab-button active" data-tab="internal">PTA Papua Barat</button>
+                <button type="button" class="tab-button" data-tab="guest">Satker</button>
             </div>
 
             <div id="panel-internal" class="tab-panel active">
@@ -343,8 +343,20 @@
                     </div>
 
                     <div class="field">
+                        <label for="internalSignature">Tanda Tangan Peserta</label>
+                        <div class="signature-wrap">
+                            <div class="signature-toolbar">
+                                <span>Bubuhkan tanda tangan pada area berikut.</span>
+                                <button type="button" class="btn btn-secondary" onclick="clearSignature('internalSignature')">Hapus</button>
+                            </div>
+                            <canvas id="internalSignature" class="signature-canvas"></canvas>
+                        </div>
+                        <div class="hint">Tanda tangan wajib diisi sebagai bukti kehadiran peserta.</div>
+                    </div>
+
+                    <div class="field">
                         <div style="border:1px solid #dbe4ff;background:#eef2ff;border-radius:16px;padding:12px 14px;color:#334155;font-size:.86rem;font-weight:600;">
-                            Kehadiran akan tercatat secara elektronik beserta tanggal dan waktu absensi.
+                            Kehadiran akan tercatat beserta tanda tangan, tanggal, dan waktu absensi.
                         </div>
                     </div>
 
@@ -365,8 +377,20 @@
                     </div>
 
                     <div class="field">
+                        <label for="guestSignature">Tanda Tangan Peserta External</label>
+                        <div class="signature-wrap">
+                            <div class="signature-toolbar">
+                                <span>Bubuhkan tanda tangan pada area berikut.</span>
+                                <button type="button" class="btn btn-secondary" onclick="clearSignature('guestSignature')">Hapus</button>
+                            </div>
+                            <canvas id="guestSignature" class="signature-canvas"></canvas>
+                        </div>
+                        <div class="hint">Tanda tangan wajib diisi sebagai bukti kehadiran peserta external.</div>
+                    </div>
+
+                    <div class="field">
                         <div style="border:1px solid #dbe4ff;background:#eef2ff;border-radius:16px;padding:12px 14px;color:#334155;font-size:.86rem;font-weight:600;">
-                            Kehadiran peserta eksternal akan dicatat secara elektronik beserta tanggal dan waktu absensi.
+                            Kehadiran peserta external akan tercatat beserta tanda tangan, tanggal, dan waktu absensi.
                         </div>
                     </div>
 
@@ -397,12 +421,22 @@
                     document.querySelectorAll('.tab-panel').forEach(panel => panel.classList.remove('active'));
                     button.classList.add('active');
                     document.getElementById('panel-' + button.dataset.tab).classList.add('active');
+
+                    if (button.dataset.tab === 'guest' && !canvases.guestSignature) {
+                        window.requestAnimationFrame(function () {
+                            initSignature('guestSignature');
+                        });
+                    }
                 });
             });
         }
 
         function initSignature(canvasId) {
             const canvas = document.getElementById(canvasId);
+            if (!canvas || canvases[canvasId]) {
+                return;
+            }
+
             const ctx = canvas.getContext('2d');
             const state = { drawing: false, lastX: 0, lastY: 0, dirty: false, ctx: ctx, canvas: canvas };
 
@@ -437,6 +471,11 @@
                 state.drawing = true;
                 state.lastX = point.x;
                 state.lastY = point.y;
+                state.dirty = true;
+                ctx.beginPath();
+                ctx.arc(point.x, point.y, 1.5, 0, Math.PI * 2);
+                ctx.fillStyle = '#000000';
+                ctx.fill();
             }
 
             function moveDraw(event) {
@@ -479,6 +518,15 @@
             }
         }
 
+        function signaturePayload(canvasId) {
+            const signature = canvases[canvasId];
+            if (!signature || !signature.state.dirty) {
+                throw new Error('Tanda tangan wajib diisi.');
+            }
+
+            return signature.state.canvas.toDataURL('image/png');
+        }
+
         function setLoadingState(show, message) {
             if (publicLoaderMessage && message) {
                 publicLoaderMessage.textContent = message;
@@ -510,7 +558,11 @@
 
                 const data = await response.json().catch(() => ({}));
                 if (!response.ok) {
-                    throw new Error(data.message || 'Gagal mengirim absensi.');
+                    const validationErrors = data.errors ? Object.values(data.errors) : [];
+                    const validationMessage = validationErrors.length && validationErrors[0].length
+                        ? validationErrors[0][0]
+                        : null;
+                    throw new Error(validationMessage || data.message || 'Gagal mengirim absensi.');
                 }
 
                 return data;
@@ -525,7 +577,8 @@
 
                 try {
                     const result = await submitForm('{{ route('rapat.absensi.public.store', $rapat->public_code) }}', {
-                        user_id: document.getElementById('user_id').value
+                        user_id: document.getElementById('user_id').value,
+                        signature_data: signaturePayload('internalSignature')
                     }, 'Mohon tunggu, absensi peserta sedang diproses.');
                     showAlert(result.message, 'success');
                     setTimeout(function () { window.location.reload(); }, 800);
@@ -539,7 +592,8 @@
                 try {
                     const result = await submitForm('{{ route('rapat.absensi.public.guest', $rapat->public_code) }}', {
                         guest_name: document.getElementById('guest_name').value,
-                        guest_instansi: document.getElementById('guest_instansi').value
+                        guest_instansi: document.getElementById('guest_instansi').value,
+                        signature_data: signaturePayload('guestSignature')
                     }, 'Mohon tunggu, absensi external sedang diproses.');
                     showAlert(result.message, 'success');
                     setTimeout(function () { window.location.reload(); }, 800);
@@ -550,11 +604,14 @@
         }
 
         setupTabs();
+        initSignature('internalSignature');
         bindForms();
 
         window.addEventListener('resize', function () {
             Object.keys(canvases).forEach(function (id) {
-                canvases[id].resize();
+                if (!canvases[id].state.dirty) {
+                    canvases[id].resize();
+                }
             });
         });
     </script>
