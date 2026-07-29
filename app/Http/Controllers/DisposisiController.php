@@ -13,6 +13,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 
 class DisposisiController extends Controller
 {
@@ -32,13 +33,30 @@ class DisposisiController extends Controller
     public function store(Request $request)
     {
         $user = auth()->user();
+        $recipientIds = collect((array) $request->input('kepada_user_ids', []))
+            ->push($request->input('kepada_user_id'))
+            ->filter()
+            ->map(function ($id) {
+                return (int) $id;
+            })
+            ->unique()
+            ->values()
+            ->all();
+        $request->merge(['kepada_user_ids' => $recipientIds]);
+
         $petunjukRules = $user->requiresPetunjukDisposisi()
             ? ['required', 'string', Rule::in(Disposisi::getPetunjukOptions())]
             : ['nullable', 'string', Rule::in(Disposisi::getPetunjukOptions())];
 
         $request->validate([
             'surat_masuk_id' => 'required|exists:surat_masuks,id',
-            'kepada_user_id' => ['required', Rule::exists('users', 'id')->where('status_aktif_pegawai', true)],
+            'kepada_user_ids' => ['required', 'array', 'min:1', 'max:50'],
+            'kepada_user_ids.*' => [
+                'required',
+                'integer',
+                'distinct',
+                Rule::exists('users', 'id')->where('status_aktif_pegawai', true),
+            ],
             'tipe' => 'required|in:disposisi,naikan',
             'petunjuk' => $petunjukRules,
             'catatan' => 'nullable|string',
@@ -68,39 +86,55 @@ class DisposisiController extends Controller
             ], 403);
         }
 
-        $kepadaUser = User::with('jabatan', 'activeJabatanDelegations.jabatan')->find($request->kepada_user_id);
         $targetIds = $this->targetJabatanIdsFor($user, $request->tipe);
-        $kepadaJabatanId = $this->resolveTargetJabatanId($kepadaUser, $targetIds);
-        $kepadaJabatan = $kepadaJabatanId ? Jabatan::find($kepadaJabatanId) : null;
+        $usersById = User::with(['unit', 'jabatan', 'activeJabatanDelegations.jabatan'])
+            ->whereIn('id', $recipientIds)
+            ->get()
+            ->keyBy('id');
+        $targetData = collect($recipientIds)->map(function ($recipientId) use ($usersById, $user, $request, $targetIds) {
+            $targetUser = $usersById->get($recipientId);
+            $isHakimTinggi = $targetUser
+                && $this->canTargetHakimTinggi($user, $targetUser, $request->tipe);
+            $targetJabatanId = $isHakimTinggi
+                ? $targetUser->jabatan_id
+                : $this->resolveTargetJabatanId($targetUser, $targetIds);
+            $targetJabatan = $targetJabatanId ? Jabatan::find($targetJabatanId) : null;
 
-        if (!$kepadaUser || !$kepadaJabatanId || (!$user->isSuperAdmin() && !in_array($kepadaJabatanId, $targetIds))) {
+            if (!$targetUser
+                || (!$isHakimTinggi && (!$targetJabatanId || (!$user->isSuperAdmin() && !in_array($targetJabatanId, $targetIds))))) {
+                throw ValidationException::withMessages([
+                    'kepada_user_ids' => 'Salah satu tujuan disposisi tidak valid untuk jabatan Anda.',
+                ]);
+            }
+
+            if ($request->tipe === 'naikan'
+                && (!$targetJabatan || !in_array($targetJabatan->kode, ['KPTA', 'WKPTA'], true))) {
+                throw ValidationException::withMessages([
+                    'kepada_user_ids' => 'Tujuan naikkan surat harus Ketua atau Wakil Ketua.',
+                ]);
+            }
+
+            return [
+                'user' => $targetUser,
+                'jabatan_id' => $targetJabatanId,
+                'jabatan' => $targetJabatan,
+                'is_hakim_tinggi' => $isHakimTinggi,
+            ];
+        });
+
+        if ($request->tipe === 'naikan' && !$user->canNaikanSuratMasuk()) {
             return response()->json([
                 'success' => false,
-                'message' => 'Tujuan disposisi tidak valid untuk jabatan Anda.',
-            ], 422);
+                'message' => 'Opsi naikkan hanya tersedia untuk Panitera, Sekretaris, dan Kasubag TURT.',
+            ], 403);
         }
 
-        if ($request->tipe === 'naikan') {
-            if (!$user->canNaikanSuratMasuk()) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Opsi naikkan hanya tersedia untuk Panitera, Sekretaris, dan Kasubag TURT.',
-                ], 403);
-            }
-
-            if (!$kepadaJabatan || !in_array($kepadaJabatan->kode, ['KPTA', 'WKPTA'], true)) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Tujuan naikkan surat harus Ketua atau Wakil Ketua.',
-                ], 422);
-            }
-        }
-
-        if ($suratMasuk->status === 'didisposisi') {
-            $suratMasuk->disposisis()
-                ->addressedToUser($user)
-                ->where('status', 'pending')
-                ->update(['status' => 'ditindaklanjuti']);
+        if ($targetData->count() > 1 && $targetData->contains(function ($target) {
+            return !$target['is_hakim_tinggi'];
+        })) {
+            throw ValidationException::withMessages([
+                'kepada_user_ids' => 'Pemilihan beberapa penerima hanya dapat digunakan untuk Hakim Tinggi.',
+            ]);
         }
 
         $priorityLevel = $request->priority_level ?: 'normal';
@@ -108,61 +142,97 @@ class DisposisiController extends Controller
             ? now('Asia/Jayapura')->addDay()
             : ($priorityLevel === 'low' ? now('Asia/Jayapura')->addDays(5) : now('Asia/Jayapura')->addDays(3));
 
-        $sourceJabatanId = $user->sourceJabatanIdForTarget($kepadaJabatanId);
-        $actingDelegation = $user->activeDelegationForJabatan($sourceJabatanId);
+        $createdDisposisis = DB::transaction(function () use (
+            $suratMasuk,
+            $user,
+            $request,
+            $targetData,
+            $priorityLevel,
+            $defaultTarget
+        ) {
+            if ($suratMasuk->status === 'didisposisi') {
+                $suratMasuk->disposisis()
+                    ->addressedToUser($user)
+                    ->where('status', 'pending')
+                    ->update(['status' => 'ditindaklanjuti']);
+            }
 
-        $disposisi = Disposisi::create([
-            'surat_masuk_id' => $request->surat_masuk_id,
-            'dari_user_id' => $user->id,
-            'kepada_user_id' => $request->kepada_user_id,
-            'dari_jabatan_id' => $sourceJabatanId,
-            'kepada_jabatan_id' => $kepadaJabatanId,
-            'petunjuk' => $user->requiresPetunjukDisposisi() ? $request->petunjuk : null,
-            'catatan' => $request->catatan,
-            'tipe' => $request->tipe,
-            'status' => 'pending',
-            'priority_level' => $priorityLevel,
-            'target_tindak_lanjut_at' => $request->target_tindak_lanjut_at ?: $defaultTarget,
-        ]);
+            $created = $targetData->map(function ($target) use (
+                $suratMasuk,
+                $user,
+                $request,
+                $priorityLevel,
+                $defaultTarget
+            ) {
+                $sourceJabatanId = $target['is_hakim_tinggi']
+                    ? optional($user->effectiveJabatans()->first(function ($jabatan) {
+                        return optional($jabatan)->kode === 'WKPTA';
+                    }))->id
+                    : $user->sourceJabatanIdForTarget($target['jabatan_id']);
 
-        // Update surat masuk status
-        $suratMasuk->update(['status' => 'didisposisi']);
+                return Disposisi::create([
+                    'surat_masuk_id' => $suratMasuk->id,
+                    'dari_user_id' => $user->id,
+                    'kepada_user_id' => $target['user']->id,
+                    'dari_jabatan_id' => $sourceJabatanId ?: $user->jabatan_id,
+                    'kepada_jabatan_id' => $target['jabatan_id'],
+                    'petunjuk' => $user->requiresPetunjukDisposisi() ? $request->petunjuk : null,
+                    'catatan' => $request->catatan,
+                    'tipe' => $request->tipe,
+                    'status' => 'pending',
+                    'priority_level' => $priorityLevel,
+                    'target_tindak_lanjut_at' => $request->target_tindak_lanjut_at ?: $defaultTarget,
+                ]);
+            });
 
-        // Send WA notification to recipient
-        if ($this->waService->notifyDisposisi($disposisi, $kepadaUser)) {
-            $disposisi->forceFill([
-                'notification_sent_at' => now('Asia/Jayapura'),
-            ])->save();
-        }
+            $suratMasuk->update(['status' => 'didisposisi']);
 
-        $this->auditService->log('persuratan', 'disposisi_created', $disposisi, [
-            'subject_type' => 'surat_masuk',
-            'subject_id' => $suratMasuk->id,
-            'subject_title' => $suratMasuk->nomor_surat . ' - ' . $suratMasuk->perihal,
-            'target_user_id' => $kepadaUser->id,
-            'target_name' => $kepadaUser->name,
-            'new_values_json' => [
-                'tipe' => $disposisi->tipe,
-                'priority_level' => $disposisi->priority_level,
-                'status' => $disposisi->status,
-                'target_tindak_lanjut_at' => optional($disposisi->target_tindak_lanjut_at)->toDateTimeString(),
-            ],
-            'note' => $request->catatan,
-            'metadata_json' => [
-                'petunjuk' => $disposisi->petunjuk,
-                'acting_as_delegation' => $actingDelegation ? [
-                    'type' => strtoupper((string) $actingDelegation->delegation_type),
-                    'jabatan_id' => $actingDelegation->jabatan_id,
-                    'jabatan' => optional($actingDelegation->jabatan)->nama,
-                ] : null,
-            ],
-        ], $user);
+            return $created;
+        });
+
+        $createdDisposisis->each(function ($disposisi, $index) use ($targetData, $suratMasuk, $user, $request) {
+            $target = $targetData->values()->get($index);
+            $targetUser = $target['user'];
+            $actingDelegation = $user->activeDelegationForJabatan($disposisi->dari_jabatan_id);
+
+            if ($this->waService->notifyDisposisi($disposisi, $targetUser)) {
+                $disposisi->forceFill([
+                    'notification_sent_at' => now('Asia/Jayapura'),
+                ])->save();
+            }
+
+            $this->auditService->log('persuratan', 'disposisi_created', $disposisi, [
+                'subject_type' => 'surat_masuk',
+                'subject_id' => $suratMasuk->id,
+                'subject_title' => $suratMasuk->nomor_surat . ' - ' . $suratMasuk->perihal,
+                'target_user_id' => $targetUser->id,
+                'target_name' => $targetUser->name,
+                'new_values_json' => [
+                    'tipe' => $disposisi->tipe,
+                    'priority_level' => $disposisi->priority_level,
+                    'status' => $disposisi->status,
+                    'target_tindak_lanjut_at' => optional($disposisi->target_tindak_lanjut_at)->toDateTimeString(),
+                ],
+                'note' => $request->catatan,
+                'metadata_json' => [
+                    'petunjuk' => $disposisi->petunjuk,
+                    'multi_recipient' => $targetData->count() > 1,
+                    'is_hakim_tinggi' => $target['is_hakim_tinggi'],
+                    'acting_as_delegation' => $actingDelegation ? [
+                        'type' => strtoupper((string) $actingDelegation->delegation_type),
+                        'jabatan_id' => $actingDelegation->jabatan_id,
+                        'jabatan' => optional($actingDelegation->jabatan)->nama,
+                    ] : null,
+                ],
+            ], $user);
+        });
 
         $tipeLabel = $request->tipe == 'naikan' ? 'dinaikkan' : 'didisposisi';
+        $recipientNames = $targetData->pluck('user.name')->implode(', ');
 
         return response()->json([
             'success' => true,
-            'message' => "Surat berhasil {$tipeLabel} ke {$kepadaUser->name}.",
+            'message' => "Surat berhasil {$tipeLabel} kepada {$recipientNames}.",
         ]);
     }
 
@@ -402,11 +472,42 @@ class DisposisiController extends Controller
                     'is_delegated' => (bool) $targetDelegation,
                     'delegation_type' => $targetDelegation ? strtoupper((string) $targetDelegation->delegation_type) : null,
                     'is_naikan' => in_array($jabatan->kode, ['KPTA', 'WKPTA']),
+                    'is_hakim_tinggi' => false,
+                    'allows_multiple' => false,
                 ];
             }
         }
 
-        return response()->json($targets);
+        if ($this->canSelectHakimTinggi($user, $tipe)) {
+            $hakimTinggi = User::with(['unit', 'jabatan'])
+                ->active()
+                ->where('id', '!=', $user->id)
+                ->whereHas('unit', function ($unitQuery) {
+                    $unitQuery->where('kode', 'HAKIM_TINGGI');
+                })
+                ->ordered()
+                ->get();
+
+            foreach ($hakimTinggi as $hakim) {
+                $targets[] = [
+                    'id' => $hakim->id,
+                    'name' => $hakim->name,
+                    'user_id' => $hakim->id,
+                    'user_name' => $hakim->name,
+                    'jabatan' => $hakim->jabatan_keterangan ?: optional($hakim->jabatan)->nama ?: 'Hakim Tinggi',
+                    'jabatan_kode' => 'HAKIM_TINGGI',
+                    'is_delegated' => false,
+                    'delegation_type' => null,
+                    'is_naikan' => false,
+                    'is_hakim_tinggi' => true,
+                    'allows_multiple' => true,
+                ];
+            }
+        }
+
+        return response()->json(
+            collect($targets)->unique('id')->values()->all()
+        );
     }
 
     protected function targetJabatanIdsFor(User $user, $tipe = null)
@@ -482,5 +583,20 @@ class DisposisiController extends Controller
         }
 
         return null;
+    }
+
+    protected function canSelectHakimTinggi(User $user, $tipe)
+    {
+        return $tipe === 'disposisi'
+            && ($user->isSuperAdmin() || $user->hasJabatanKode('WKPTA'));
+    }
+
+    protected function canTargetHakimTinggi(User $user, User $targetUser, $tipe)
+    {
+        $targetUser->loadMissing('unit');
+
+        return $this->canSelectHakimTinggi($user, $tipe)
+            && (bool) $targetUser->status_aktif_pegawai
+            && optional($targetUser->unit)->kode === 'HAKIM_TINGGI';
     }
 }

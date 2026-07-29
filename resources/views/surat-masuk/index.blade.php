@@ -1473,6 +1473,9 @@
                                         <select class="form-control" name="kepada_user_id" id="disposisiTarget" required>
                                             <option value="">-- Memuat... --</option>
                                         </select>
+                                        <small class="form-text text-muted d-none" id="disposisiTargetHint">
+                                            Pilih satu tujuan struktural atau beberapa Hakim Tinggi.
+                                        </small>
                                     </div>
                                     <div class="form-group" id="disposisiPetunjukGroup">
                                         <label>Petunjuk <span class="text-danger">*</span></label>
@@ -2225,11 +2228,38 @@
                 surat_masuk_id: suratId,
                 tipe: $('#disposisiTipe').val()
             }, function (res) {
-                var options = '<option value="">-- Pilih Tujuan --</option>';
+                var allowMultiple = Array.isArray(res) && res.some(function (item) {
+                    return item.allows_multiple;
+                });
+                var structuralTargets = (res || []).filter(function (item) {
+                    return !item.is_hakim_tinggi;
+                });
+                var hakimTargets = (res || []).filter(function (item) {
+                    return item.is_hakim_tinggi;
+                });
+                var options = allowMultiple ? '' : '<option value="">-- Pilih Tujuan --</option>';
+
+                $('#disposisiTarget')
+                    .prop('multiple', allowMultiple)
+                    .attr('name', allowMultiple ? 'kepada_user_ids[]' : 'kepada_user_id')
+                    .attr('size', allowMultiple ? Math.min(Math.max((res || []).length, 4), 8) : 1);
+                $('#disposisiTargetHint').toggleClass('d-none', !allowMultiple);
+
                 if (res && res.length) {
-                    res.forEach(function (item) {
-                        options += '<option value="' + item.id + '">' + item.name + ' (' + (item.jabatan || '-') + ')</option>';
-                    });
+                    if (structuralTargets.length) {
+                        options += '<optgroup label="Tujuan Struktural">';
+                        structuralTargets.forEach(function (item) {
+                            options += '<option value="' + item.id + '" data-is-naikan="' + (item.is_naikan ? 1 : 0) + '">' + item.name + ' (' + (item.jabatan || '-') + ')</option>';
+                        });
+                        options += '</optgroup>';
+                    }
+                    if (hakimTargets.length) {
+                        options += '<optgroup label="Hakim Tinggi">';
+                        hakimTargets.forEach(function (item) {
+                            options += '<option value="' + item.id + '">' + item.name + ' (' + (item.jabatan || 'Hakim Tinggi') + ')</option>';
+                        });
+                        options += '</optgroup>';
+                    }
                 } else {
                     options = '<option value="">Tidak ada pegawai tujuan untuk akun ini</option>';
                 }

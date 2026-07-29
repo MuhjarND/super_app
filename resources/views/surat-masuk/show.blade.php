@@ -275,6 +275,9 @@
                                 <select class="form-control select2" name="kepada_user_id" id="disposisiTargetShow" required>
                                     <option value="">Memuat tujuan...</option>
                                 </select>
+                                <small class="form-text text-muted d-none" id="disposisiTargetShowHint">
+                                    Pilih satu tujuan struktural atau beberapa Hakim Tinggi.
+                                </small>
                             </div>
 
                             <div class="form-group">
@@ -519,15 +522,48 @@
                     surat_masuk_id: '{{ $suratMasuk->id }}',
                     tipe: tipe
                 }, function (res) {
-                    var options = '<option value="">-- Pilih Tujuan --</option>';
+                    var allowMultiple = Array.isArray(res) && res.some(function (item) {
+                        return item.allows_multiple;
+                    });
+                    var structuralTargets = (res || []).filter(function (item) {
+                        return !item.is_hakim_tinggi;
+                    });
+                    var hakimTargets = (res || []).filter(function (item) {
+                        return item.is_hakim_tinggi;
+                    });
+                    var options = allowMultiple ? '' : '<option value="">-- Pilih Tujuan --</option>';
+
+                    if ($target.hasClass('select2-hidden-accessible')) {
+                        $target.select2('destroy');
+                    }
+                    $target
+                        .prop('multiple', allowMultiple)
+                        .attr('name', allowMultiple ? 'kepada_user_ids[]' : 'kepada_user_id');
+                    $('#disposisiTargetShowHint').toggleClass('d-none', !allowMultiple);
+
                     if (res && res.length) {
-                        res.forEach(function (item) {
-                            options += '<option value="' + item.id + '">' + item.name + ' (' + (item.jabatan || '-') + ')</option>';
-                        });
+                        if (structuralTargets.length) {
+                            options += '<optgroup label="Tujuan Struktural">';
+                            structuralTargets.forEach(function (item) {
+                                options += '<option value="' + item.id + '" data-is-naikan="' + (item.is_naikan ? 1 : 0) + '">' + item.name + ' (' + (item.jabatan || '-') + ')</option>';
+                            });
+                            options += '</optgroup>';
+                        }
+                        if (hakimTargets.length) {
+                            options += '<optgroup label="Hakim Tinggi">';
+                            hakimTargets.forEach(function (item) {
+                                options += '<option value="' + item.id + '">' + item.name + ' (' + (item.jabatan || 'Hakim Tinggi') + ')</option>';
+                            });
+                            options += '</optgroup>';
+                        }
                     } else {
                         options = '<option value="">Tidak ada pegawai tujuan untuk tipe ini</option>';
                     }
-                    $target.html(options).trigger('change.select2');
+                    $target.html(options).select2({
+                        width: '100%',
+                        placeholder: allowMultiple ? 'Pilih satu atau beberapa tujuan' : '-- Pilih Tujuan --',
+                        closeOnSelect: !allowMultiple
+                    }).trigger('change');
                 }).fail(function () {
                     $target.html('<option value="">Gagal memuat tujuan</option>').trigger('change.select2');
                 });
@@ -536,7 +572,7 @@
             $('#tipeDisposisi').on('change', loadDisposisiTargetsShow);
             loadDisposisiTargetsShow();
 
-            $('select[name="kepada_user_id"]').on('change', function () {
+            $('#disposisiTargetShow').on('change', function () {
                 if ($('#tipeDisposisi').val() === 'naikan') {
                     return;
                 }
