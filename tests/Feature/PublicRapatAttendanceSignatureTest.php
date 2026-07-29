@@ -17,12 +17,20 @@ class PublicRapatAttendanceSignatureTest extends TestCase
 
         Storage::fake('public');
 
+        Schema::create('klasifikasi_kodes', function (Blueprint $table) {
+            $table->id();
+            $table->string('kode')->nullable();
+            $table->string('nama')->nullable();
+            $table->timestamps();
+        });
+
         Schema::create('users', function (Blueprint $table) {
             $table->id();
             $table->string('name');
             $table->string('email')->nullable();
             $table->string('password')->nullable();
             $table->string('jabatan_keterangan')->nullable();
+            $table->unsignedInteger('hirarki')->nullable();
             $table->rememberToken();
             $table->timestamps();
         });
@@ -67,6 +75,7 @@ class PublicRapatAttendanceSignatureTest extends TestCase
         Schema::dropIfExists('rapat_peserta');
         Schema::dropIfExists('rapats');
         Schema::dropIfExists('users');
+        Schema::dropIfExists('klasifikasi_kodes');
 
         parent::tearDown();
     }
@@ -114,6 +123,43 @@ class PublicRapatAttendanceSignatureTest extends TestCase
 
         $response->assertStatus(422)
             ->assertJsonValidationErrors('signature_data');
+    }
+
+    public function testPublicAttendanceParticipantsAreOrderedByEmployeeHierarchy()
+    {
+        $rapat = Rapat::create(['public_code' => 'public-hierarchy-order']);
+        $hakim = User::create([
+            'name' => 'Hakim Tinggi',
+            'email' => 'hakim@example.test',
+            'password' => bcrypt('password'),
+            'hirarki' => 3,
+        ]);
+        $ketua = User::create([
+            'name' => 'Ketua',
+            'email' => 'ketua@example.test',
+            'password' => bcrypt('password'),
+            'hirarki' => 1,
+        ]);
+        $tanpaHierarki = User::create([
+            'name' => 'Pegawai Tanpa Hierarki',
+            'email' => 'pegawai@example.test',
+            'password' => bcrypt('password'),
+            'hirarki' => null,
+        ]);
+
+        $rapat->pesertas()->attach($hakim->id, ['urutan' => 1]);
+        $rapat->pesertas()->attach($tanpaHierarki->id, ['urutan' => 2]);
+        $rapat->pesertas()->attach($ketua->id, ['urutan' => 3]);
+
+        $view = app(\App\Http\Controllers\RapatAbsensiController::class)
+            ->publicShow($rapat->public_code);
+        $names = $view->getData()['rapat']->pesertas->pluck('name')->all();
+
+        $this->assertSame([
+            'Ketua',
+            'Hakim Tinggi',
+            'Pegawai Tanpa Hierarki',
+        ], $names);
     }
 
     protected function createMeetingParticipant()

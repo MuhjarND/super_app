@@ -74,7 +74,7 @@ class DirectAttendanceServiceTest extends TestCase
             $table->string('token_qr')->nullable()->unique();
             $table->string('public_code')->nullable()->unique();
             $table->boolean('is_attendance_only')->default(false);
-            $table->unsignedBigInteger('attendance_surat_keluar_id')->nullable()->unique();
+            $table->unsignedBigInteger('attendance_surat_keluar_id')->nullable();
             $table->unsignedBigInteger('created_by');
             $table->timestamps();
         });
@@ -179,7 +179,7 @@ class DirectAttendanceServiceTest extends TestCase
         $this->assertSame(1, Rapat::attendanceVisibleTo($manager)->count());
     }
 
-    public function testOneOutgoingLetterCannotCreateDuplicateAttendance()
+    public function testOneOutgoingLetterCanCreateMultiplePublicAttendances()
     {
         $creator = $this->createUser('Operator', 'operator@example.test');
         $suratKeluar = SuratKeluar::create([
@@ -198,10 +198,15 @@ class DirectAttendanceServiceTest extends TestCase
         ];
 
         $service = app(DirectAttendanceService::class);
-        $service->createFromSuratKeluar($suratKeluar, $creator, $payload);
+        $first = $service->createFromSuratKeluar($suratKeluar, $creator, $payload);
+        $payload['judul'] = 'Absensi Evaluasi Kedua';
+        $payload['tanggal'] = '2026-07-31';
+        $second = $service->createFromSuratKeluar($suratKeluar, $creator, $payload);
 
-        $this->expectException(ValidationException::class);
-        $service->createFromSuratKeluar($suratKeluar, $creator, $payload);
+        $this->assertNotSame($first->id, $second->id);
+        $this->assertSame($suratKeluar->id, $first->attendance_surat_keluar_id);
+        $this->assertSame($suratKeluar->id, $second->attendance_surat_keluar_id);
+        $this->assertSame(2, Rapat::where('attendance_surat_keluar_id', $suratKeluar->id)->count());
     }
 
     public function testItDeletesDirectAttendanceAndItsSignatureFiles()

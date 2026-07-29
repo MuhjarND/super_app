@@ -57,7 +57,6 @@ class RapatAbsensiController extends Controller
         $availableSuratKeluar = collect();
         if ($canCreateDirectAttendance) {
             $availableSuratKeluar = SuratKeluar::query()
-                ->whereDoesntHave('attendanceRapat')
                 ->orderByDesc('tanggal_surat')
                 ->orderByDesc('id')
                 ->get([
@@ -278,7 +277,10 @@ class RapatAbsensiController extends Controller
         $rapat->load([
             'kategoriSuratKode',
             'pesertas' => function ($query) {
-                $query->orderBy('rapat_peserta.urutan');
+                $query->reorder()
+                    ->orderByRaw('CASE WHEN users.hirarki IS NULL THEN 1 ELSE 0 END')
+                    ->orderBy('users.hirarki')
+                    ->orderBy('users.name');
             },
             'internalAttendances',
             'guestAttendances',

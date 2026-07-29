@@ -301,7 +301,7 @@
                                 @endforeach
                             </select>
                             @if($availableSuratKeluar->isEmpty())
-                                <small class="form-text text-muted">Tidak ada Surat Keluar yang tersedia atau seluruhnya sudah digunakan.</small>
+                                <small class="form-text text-muted">Tidak ada Surat Keluar yang tersedia.</small>
                             @endif
                         </div>
 

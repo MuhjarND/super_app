@@ -23,16 +23,6 @@ class DirectAttendanceService
                 ->lockForUpdate()
                 ->findOrFail($suratKeluar->id);
 
-            $existing = Rapat::query()
-                ->where('attendance_surat_keluar_id', $suratKeluar->id)
-                ->first();
-
-            if ($existing) {
-                throw ValidationException::withMessages([
-                    'surat_keluar_id' => 'Surat Keluar tersebut sudah digunakan sebagai dasar absensi.',
-                ]);
-            }
-
             $rapat = Rapat::create([
                 'nomor_undangan' => $suratKeluar->nomor_surat_formatted,
                 'judul' => trim((string) ($data['judul'] ?? ''))
