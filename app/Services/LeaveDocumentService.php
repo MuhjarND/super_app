@@ -148,15 +148,21 @@ class LeaveDocumentService
             return;
         }
 
+        $suratKeluar = $leaveRequest->suratKeluar;
+
+        if (!$suratKeluar) {
+            $suratKeluar = SuratKeluar::where('nomor_surat', $leaveRequest->letter_number)->first();
+        }
+
+        // Event cuti harus hilang walaupun surat Satker atau data impor
+        // tetap dipertahankan untuk mencegah kehilangan arsip asal.
+        if ($suratKeluar && $suratKeluar->calendarEvent && $suratKeluar->calendarEvent->type === 'cuti') {
+            $suratKeluar->calendarEvent()->delete();
+        }
+
         // Nomor Satker dikelola oleh aplikasi asal, sehingga PAPEDA hanya
         // mengosongkan nomor pada pengajuan tanpa menghapus surat lain.
         if (!$this->isSatkerRequest($leaveRequest)) {
-            $suratKeluar = $leaveRequest->suratKeluar;
-
-            if (!$suratKeluar) {
-                $suratKeluar = SuratKeluar::where('nomor_surat', $leaveRequest->letter_number)->first();
-            }
-
             // Data impor tidak boleh terhapus jika pernah terjadi benturan nomor.
             if ($suratKeluar && empty($suratKeluar->legacy_source_id)) {
                 if ($suratKeluar->file_path) {

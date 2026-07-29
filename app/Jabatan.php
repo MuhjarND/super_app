@@ -49,6 +49,8 @@ class Jabatan extends Model
                 $targets = Jabatan::whereIn('kode', ['PANMUD_BANDING', 'PANMUD_HUKUM', 'KPTA', 'WKPTA'])->pluck('id')->toArray();
                 break;
             case 'KPTA':
+                $targets = Jabatan::whereIn('kode', ['WKPTA', 'SEK', 'PAN'])->pluck('id')->toArray();
+                break;
             case 'WKPTA':
                 $targets = Jabatan::whereIn('kode', ['SEK', 'PAN'])->pluck('id')->toArray();
                 break;

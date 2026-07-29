@@ -448,9 +448,15 @@ class DisposisiController extends Controller
             $pimpinanIds = Jabatan::whereIn('kode', ['KPTA', 'WKPTA'])->pluck('id')->map(function ($id) {
                 return (int) $id;
             })->all();
+            $allowedPimpinanIds = $user->hasJabatanKode('KPTA')
+                ? Jabatan::where('kode', 'WKPTA')->pluck('id')->map(function ($id) {
+                    return (int) $id;
+                })->all()
+                : [];
 
-            $targetIds = array_values(array_filter($targetIds, function ($id) use ($pimpinanIds) {
-                return !in_array((int) $id, $pimpinanIds, true);
+            $targetIds = array_values(array_filter($targetIds, function ($id) use ($pimpinanIds, $allowedPimpinanIds) {
+                return !in_array((int) $id, $pimpinanIds, true)
+                    || in_array((int) $id, $allowedPimpinanIds, true);
             }));
         }
 

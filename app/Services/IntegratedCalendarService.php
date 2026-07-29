@@ -278,7 +278,12 @@ class IntegratedCalendarService
     protected function buildLeaveEvents(User $user, array $filters)
     {
         $query = LeaveRequest::with(['user.unit', 'leaveType'])
-            ->where('status', '!=', LeaveRequest::STATUS_CANCELLED)
+            ->whereNull('cancelled_at')
+            ->whereNotIn('status', [
+                LeaveRequest::STATUS_CANCELLED,
+                'canceled',
+                'dibatalkan',
+            ])
             ->whereDate('start_date', '<=', $filters['end']->toDateString())
             ->whereDate('end_date', '>=', $filters['start']->toDateString());
 
@@ -502,6 +507,16 @@ class IntegratedCalendarService
             })
             ->whereHas('suratKeluar', function ($suratQuery) use ($user) {
                 $suratQuery->visibleTo($user);
+            })
+            ->whereDoesntHave('suratKeluar.leaveRequest', function ($leaveQuery) {
+                $leaveQuery->where(function ($cancelledQuery) {
+                    $cancelledQuery->whereNotNull('cancelled_at')
+                        ->orWhereIn('status', [
+                            LeaveRequest::STATUS_CANCELLED,
+                            'canceled',
+                            'dibatalkan',
+                        ]);
+                });
             });
 
         if ($filters['scope'] === 'mine') {

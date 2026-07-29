@@ -78,6 +78,7 @@ class LeaveCancellationCleanupTest extends TestCase
             $table->string('purpose')->nullable();
             $table->string('leave_address')->nullable();
             $table->string('unit_snapshot')->nullable();
+            $table->timestamp('cancelled_at')->nullable();
             $table->timestamps();
         });
         Schema::create('surat_keluars', function (Blueprint $table) {
@@ -155,11 +156,17 @@ class LeaveCancellationCleanupTest extends TestCase
         $number = '123/KPA/W25-A/KP5.3/07/2026';
         $leaveRequest = $this->leaveRequest($user, $leaveType, $number, LeaveRequest::STATUS_SUBMITTED);
         $suratKeluar = $this->suratKeluar($number);
+        $calendarEvent = SuratKeluarCalendarEvent::create([
+            'surat_keluar_id' => $suratKeluar->id,
+            'type' => 'cuti',
+            'start_date' => '2026-07-28',
+        ]);
 
         $this->documentService()->removeCancelledLetterArtifacts($leaveRequest);
 
         $this->assertNull($leaveRequest->fresh()->letter_number);
         $this->assertDatabaseHas('surat_keluars', ['id' => $suratKeluar->id, 'nomor_surat' => $number]);
+        $this->assertDatabaseMissing('surat_keluar_calendar_events', ['id' => $calendarEvent->id]);
     }
 
     public function test_cancelled_leave_is_not_returned_by_integrated_calendar(): void
@@ -179,6 +186,34 @@ class LeaveCancellationCleanupTest extends TestCase
 
         $this->assertTrue($eventIds->contains('cuti-' . $active->id));
         $this->assertFalse($eventIds->contains('cuti-' . $cancelled->id));
+    }
+
+    public function test_cancelled_leave_letter_calendar_event_is_not_returned(): void
+    {
+        [$user, $leaveType] = $this->baseData();
+        $role = Role::create(['name' => 'super_admin', 'display_name' => 'Super Admin']);
+        $user->roles()->attach($role->id);
+
+        $number = '903/KPTA.W31-A/KP5.3/VII/2026';
+        $cancelled = $this->leaveRequest($user, $leaveType, $number, LeaveRequest::STATUS_CANCELLED);
+        $cancelled->cancelled_at = now();
+        $cancelled->save();
+        $suratKeluar = $this->suratKeluar($number);
+        $calendarEvent = SuratKeluarCalendarEvent::create([
+            'surat_keluar_id' => $suratKeluar->id,
+            'type' => 'cuti',
+            'start_date' => '2026-07-28',
+        ]);
+
+        $result = (new IntegratedCalendarService())->build($user->fresh(), [
+            'start' => '2026-07-01',
+            'end' => '2026-07-31',
+            'modules' => ['cuti'],
+        ]);
+        $eventIds = collect($result['events'])->pluck('id');
+
+        $this->assertFalse($eventIds->contains('cuti-' . $cancelled->id));
+        $this->assertFalse($eventIds->contains('surat-keluar-calendar-' . $calendarEvent->id));
     }
 
     protected function baseData(): array
