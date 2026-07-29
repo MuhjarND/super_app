@@ -284,6 +284,7 @@
                                     <option
                                         value="{{ $suratKeluar->id }}"
                                         data-date="{{ optional($suratKeluar->tanggal_surat)->format('Y-m-d') }}"
+                                        data-title="{{ $suratKeluar->perihal }}"
                                         {{ (string) old('surat_keluar_id') === (string) $suratKeluar->id ? 'selected' : '' }}
                                     >
                                         {{ $suratKeluar->nomor_surat_formatted }} | {{ \Illuminate\Support\Str::limit($suratKeluar->perihal, 90) }}
@@ -293,6 +294,21 @@
                             @if($availableSuratKeluar->isEmpty())
                                 <small class="form-text text-muted">Tidak ada Surat Keluar yang tersedia atau seluruhnya sudah digunakan.</small>
                             @endif
+                        </div>
+
+                        <div class="form-group">
+                            <label for="directAttendanceTitle">Judul Absensi</label>
+                            <input
+                                type="text"
+                                name="judul"
+                                id="directAttendanceTitle"
+                                class="form-control"
+                                value="{{ old('judul') }}"
+                                maxlength="255"
+                                placeholder="Contoh: Pembinaan dan Evaluasi Kinerja"
+                                required
+                            >
+                            <small class="form-text text-muted">Judul ini ditampilkan pada halaman absensi publik.</small>
                         </div>
 
                         <div class="form-row">
@@ -377,8 +393,12 @@
             suratSelect.on('change', function () {
                 const selected = this.options[this.selectedIndex];
                 const dateInput = document.getElementById('directAttendanceDate');
+                const titleInput = document.getElementById('directAttendanceTitle');
                 if (selected && selected.dataset.date && !dateInput.value) {
                     dateInput.value = selected.dataset.date;
+                }
+                if (selected && selected.dataset.title && !titleInput.value) {
+                    titleInput.value = selected.dataset.title;
                 }
             });
 

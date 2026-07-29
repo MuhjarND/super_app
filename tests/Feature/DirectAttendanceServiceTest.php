@@ -115,6 +115,7 @@ class DirectAttendanceServiceTest extends TestCase
             $suratKeluar,
             $creator,
             [
+                'judul' => 'Absensi Pembinaan Internal',
                 'tanggal' => '2026-07-30',
                 'waktu_mulai' => '09:00',
                 'tempat' => 'Aula PTA Papua Barat',
@@ -123,7 +124,7 @@ class DirectAttendanceServiceTest extends TestCase
 
         $this->assertTrue($rapat->is_attendance_only);
         $this->assertSame($suratKeluar->id, $rapat->attendance_surat_keluar_id);
-        $this->assertSame('Kegiatan Pembinaan', $rapat->judul);
+        $this->assertSame('Absensi Pembinaan Internal', $rapat->judul);
         $this->assertSame('disetujui', $rapat->status);
         $this->assertSame(
             [(int) $participant->id],
@@ -150,6 +151,7 @@ class DirectAttendanceServiceTest extends TestCase
             'created_by' => $creator->id,
         ]);
         $payload = [
+            'judul' => 'Absensi Evaluasi',
             'tanggal' => '2026-07-30',
             'waktu_mulai' => '10:00',
             'tempat' => 'Ruang Rapat',

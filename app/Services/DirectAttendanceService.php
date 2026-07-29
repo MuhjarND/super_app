@@ -32,7 +32,8 @@ class DirectAttendanceService
 
             $rapat = Rapat::create([
                 'nomor_undangan' => $suratKeluar->nomor_surat_formatted,
-                'judul' => $suratKeluar->perihal ?: 'Absensi Surat Keluar',
+                'judul' => trim((string) ($data['judul'] ?? ''))
+                    ?: ($suratKeluar->perihal ?: 'Absensi Surat Keluar'),
                 'deskripsi' => 'Absensi dibuat langsung berdasarkan Surat Keluar.',
                 'kategori_rapat_id' => $this->resolveKategoriRapatId(),
                 'kategori_surat_kode_id' => $suratKeluar->klasifikasi_kode_id,

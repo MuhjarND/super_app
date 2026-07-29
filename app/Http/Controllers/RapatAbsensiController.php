@@ -84,11 +84,13 @@ class RapatAbsensiController extends Controller
 
         $data = $request->validate([
             'surat_keluar_id' => ['required', 'integer', 'exists:surat_keluars,id'],
+            'judul' => ['required', 'string', 'max:255'],
             'tanggal' => ['required', 'date'],
             'waktu_mulai' => ['required', 'date_format:H:i'],
             'tempat' => ['required', 'string', 'max:255'],
         ], [
             'surat_keluar_id.required' => 'Surat Keluar wajib dipilih.',
+            'judul.required' => 'Judul absensi wajib diisi.',
             'tanggal.required' => 'Tanggal kegiatan wajib diisi.',
             'waktu_mulai.required' => 'Waktu kegiatan wajib diisi.',
             'tempat.required' => 'Tempat kegiatan wajib diisi.',
