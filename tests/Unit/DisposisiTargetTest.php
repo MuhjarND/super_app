@@ -3,8 +3,11 @@
 namespace Tests\Unit;
 
 use App\Http\Controllers\DisposisiController;
+use App\Disposisi;
 use App\Jabatan;
+use App\SuratMasuk;
 use App\User;
+use Carbon\Carbon;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 use ReflectionClass;
@@ -59,6 +62,31 @@ class DisposisiTargetTest extends TestCase
         $this->assertNotContains($jabatans['WKPTA']->id, $targetIds);
         $this->assertContains($jabatans['SEK']->id, $targetIds);
         $this->assertContains($jabatans['PAN']->id, $targetIds);
+    }
+
+    public function test_wakil_ketua_can_follow_up_disposition_from_ketua(): void
+    {
+        $jabatans = $this->createStructuralJabatans();
+        $wakilKetua = $this->userWithJabatan($jabatans['WKPTA']);
+        $disposisi = new Disposisi([
+            'dari_user_id' => 999,
+            'kepada_user_id' => $wakilKetua->id,
+            'dari_jabatan_id' => $jabatans['KPTA']->id,
+            'kepada_jabatan_id' => $jabatans['WKPTA']->id,
+            'tipe' => 'disposisi',
+            'status' => 'pending',
+        ]);
+        $disposisi->forceFill([
+            'id' => 10,
+            'created_at' => Carbon::parse('2026-07-29 10:00:00'),
+        ]);
+
+        $suratMasuk = new SuratMasuk(['status' => 'didisposisi']);
+        $suratMasuk->forceFill(['id' => 20]);
+        $suratMasuk->setRelation('disposisis', collect([$disposisi]));
+
+        $this->assertTrue($wakilKetua->canFollowUpDisposisi($disposisi));
+        $this->assertTrue($wakilKetua->canOpenTindakLanjutSuratMasuk($suratMasuk));
     }
 
     protected function createStructuralJabatans(): array

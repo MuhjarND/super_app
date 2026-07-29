@@ -1501,7 +1501,10 @@ class User extends Authenticatable
             return true;
         }
 
-        return $this->isKabagAtauKasubag() && $this->hasPendingDisposisiForSurat($suratMasuk);
+        $pendingDisposisi = $this->activePendingDisposisiForSurat($suratMasuk);
+
+        return $pendingDisposisi
+            && $this->canFollowUpDisposisi($pendingDisposisi);
     }
 
     public function suratMasukCreated()
