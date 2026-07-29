@@ -20,6 +20,80 @@
             height: 100%;
         }
 
+        .surat-masuk-disposisi-card .select2-container {
+            width: 100% !important;
+        }
+
+        .surat-masuk-disposisi-card .select2-container--bootstrap4 .select2-selection {
+            min-height: 44px;
+            border: 1px solid #dbe4f0;
+            border-radius: 13px;
+            box-shadow: none;
+        }
+
+        .surat-masuk-disposisi-card .select2-container--bootstrap4.select2-container--focus .select2-selection {
+            border-color: #8b5cf6;
+            box-shadow: 0 0 0 3px rgba(139, 92, 246, .13);
+        }
+
+        .surat-masuk-disposisi-card .select2-container--bootstrap4 .select2-selection--multiple {
+            max-height: 148px;
+            overflow-y: auto;
+            padding: 7px 9px;
+        }
+
+        .surat-masuk-disposisi-card .select2-container--bootstrap4 .select2-selection--multiple .select2-selection__rendered {
+            display: flex;
+            align-items: flex-start;
+            flex-wrap: wrap;
+            gap: 7px;
+            width: 100%;
+            margin: 0;
+            padding: 0;
+        }
+
+        .surat-masuk-disposisi-card .select2-container--bootstrap4 .select2-selection--multiple .select2-selection__choice {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            max-width: 100%;
+            margin: 0;
+            padding: 5px 11px 5px 29px;
+            border: 0;
+            border-radius: 999px;
+            background: linear-gradient(135deg, #ede9fe, #e0e7ff);
+            color: #4f46e5;
+            font-size: .76rem;
+            font-weight: 800;
+            line-height: 1.25;
+            white-space: normal;
+            word-break: break-word;
+        }
+
+        .surat-masuk-disposisi-card .select2-container--bootstrap4 .select2-selection--multiple .select2-selection__choice__remove {
+            position: absolute;
+            left: 9px;
+            top: 50%;
+            transform: translateY(-50%);
+            margin: 0;
+            color: #6366f1;
+            font-size: .95rem;
+            font-weight: 800;
+        }
+
+        .surat-masuk-disposisi-card .select2-container--bootstrap4 .select2-selection--multiple .select2-search--inline {
+            flex: 1 1 150px;
+            min-width: 150px;
+        }
+
+        .surat-masuk-disposisi-card .select2-container--bootstrap4 .select2-selection--multiple .select2-search__field {
+            width: 100% !important;
+            min-width: 135px;
+            height: 27px;
+            margin: 0;
+            font-weight: 600;
+        }
+
         @media (max-width: 767.98px) {
             .content-header .breadcrumb {
                 display: none;
@@ -545,14 +619,14 @@
                         if (structuralTargets.length) {
                             options += '<optgroup label="Tujuan Struktural">';
                             structuralTargets.forEach(function (item) {
-                                options += '<option value="' + item.id + '" data-is-naikan="' + (item.is_naikan ? 1 : 0) + '">' + item.name + ' (' + (item.jabatan || '-') + ')</option>';
+                                options += '<option value="' + item.id + '" data-is-naikan="' + (item.is_naikan ? 1 : 0) + '" data-is-hakim-tinggi="0">' + item.name + ' (' + (item.jabatan || '-') + ')</option>';
                             });
                             options += '</optgroup>';
                         }
                         if (hakimTargets.length) {
                             options += '<optgroup label="Hakim Tinggi">';
                             hakimTargets.forEach(function (item) {
-                                options += '<option value="' + item.id + '">' + item.name + ' (' + (item.jabatan || 'Hakim Tinggi') + ')</option>';
+                                options += '<option value="' + item.id + '" data-is-hakim-tinggi="1">' + item.name + ' (' + (item.jabatan || 'Hakim Tinggi') + ')</option>';
                             });
                             options += '</optgroup>';
                         }
@@ -560,10 +634,32 @@
                         options = '<option value="">Tidak ada pegawai tujuan untuk tipe ini</option>';
                     }
                     $target.html(options).select2({
+                        theme: 'bootstrap4',
                         width: '100%',
                         placeholder: allowMultiple ? 'Pilih satu atau beberapa tujuan' : '-- Pilih Tujuan --',
                         closeOnSelect: !allowMultiple
-                    }).trigger('change');
+                    });
+
+                    $target.off('select2:select.disposisiChoice').on('select2:select.disposisiChoice', function (event) {
+                        if (!allowMultiple) {
+                            return;
+                        }
+
+                        var selectedId = String(event.params.data.id);
+                        var $selectedOption = $target.find('option[value="' + selectedId + '"]');
+                        var selectedIsHakim = String($selectedOption.attr('data-is-hakim-tinggi')) === '1';
+                        var values = ($target.val() || []).map(String);
+
+                        if (selectedIsHakim) {
+                            values = values.filter(function (value) {
+                                return String($target.find('option[value="' + value + '"]').attr('data-is-hakim-tinggi')) === '1';
+                            });
+                        } else {
+                            values = [selectedId];
+                        }
+
+                        $target.val(values).trigger('change');
+                    });
                 }).fail(function () {
                     $target.html('<option value="">Gagal memuat tujuan</option>').trigger('change.select2');
                 });
