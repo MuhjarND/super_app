@@ -43,8 +43,13 @@ class DirectAttendanceService
                 'created_by' => $creator->id,
             ]);
 
-            $participants = $suratKeluar->penerimaInternal
-                ->pluck('id')
+            $participants = collect(
+                $data['participant_ids'] ?? $suratKeluar->penerimaInternal->pluck('id')->all()
+            )
+                ->map(function ($participantId) {
+                    return (int) $participantId;
+                })
+                ->filter()
                 ->unique()
                 ->values();
             $syncData = [];

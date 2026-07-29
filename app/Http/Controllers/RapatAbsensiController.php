@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Rapat;
 use App\RapatAttendance;
 use App\SuratKeluar;
+use App\User;
 use App\Services\DirectAttendanceService;
 use App\Services\RapatDocumentService;
 use App\Services\SignaturePadService;
@@ -14,6 +15,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\URL;
+use Illuminate\Validation\Rule;
 
 class RapatAbsensiController extends Controller
 {
@@ -55,8 +57,10 @@ class RapatAbsensiController extends Controller
 
         $canCreateDirectAttendance = $user->canManageRapat() || $user->canManageMeetingMinutes();
         $availableSuratKeluar = collect();
+        $attendanceParticipants = collect();
         if ($canCreateDirectAttendance) {
             $availableSuratKeluar = SuratKeluar::query()
+                ->with('penerimaInternal:id')
                 ->orderByDesc('tanggal_surat')
                 ->orderByDesc('id')
                 ->get([
@@ -66,11 +70,21 @@ class RapatAbsensiController extends Controller
                     'tanggal_surat',
                     'status',
                 ]);
+            $attendanceParticipants = User::query()
+                ->active()
+                ->ordered()
+                ->get([
+                    'id',
+                    'name',
+                    'jabatan_keterangan',
+                    'hirarki',
+                ]);
         }
 
         return view('rapat.absensi.index', compact(
             'rapats',
             'availableSuratKeluar',
+            'attendanceParticipants',
             'canCreateDirectAttendance'
         ));
     }
@@ -83,12 +97,21 @@ class RapatAbsensiController extends Controller
         $data = $request->validate([
             'surat_keluar_id' => ['required', 'integer', 'exists:surat_keluars,id'],
             'judul' => ['required', 'string', 'max:255'],
+            'participant_ids' => ['required', 'array', 'min:1', 'max:500'],
+            'participant_ids.*' => [
+                'required',
+                'integer',
+                'distinct',
+                Rule::exists('users', 'id')->where('status_aktif_pegawai', true),
+            ],
             'tanggal' => ['required', 'date'],
             'waktu_mulai' => ['required', 'date_format:H:i'],
             'tempat' => ['required', 'string', 'max:255'],
         ], [
             'surat_keluar_id.required' => 'Surat Keluar wajib dipilih.',
             'judul.required' => 'Judul absensi wajib diisi.',
+            'participant_ids.required' => 'Peserta absensi wajib dipilih.',
+            'participant_ids.min' => 'Pilih minimal satu peserta absensi.',
             'tanggal.required' => 'Tanggal kegiatan wajib diisi.',
             'waktu_mulai.required' => 'Waktu kegiatan wajib diisi.',
             'tempat.required' => 'Tempat kegiatan wajib diisi.',

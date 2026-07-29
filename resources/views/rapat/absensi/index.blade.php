@@ -100,6 +100,78 @@
             overflow-y: auto;
         }
 
+        .direct-attendance-participant-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            margin-bottom: 7px;
+        }
+
+        .direct-attendance-participant-head label {
+            margin-bottom: 0;
+        }
+
+        .direct-attendance-select-all {
+            border: 1px solid #c7d2fe;
+            border-radius: 999px;
+            background: #eef2ff;
+            color: #4f46e5;
+            padding: 6px 11px;
+            font-size: .72rem;
+            font-weight: 800;
+        }
+
+        .direct-attendance-select-all:hover,
+        .direct-attendance-select-all:focus {
+            background: #e0e7ff;
+            color: #4338ca;
+        }
+
+        .direct-attendance-modal .select2-container--bootstrap4 .select2-selection--multiple {
+            min-height: 44px;
+            max-height: 145px;
+            overflow-y: auto;
+            padding: 7px 9px;
+            border-color: #dbe4f0;
+            border-radius: 13px;
+        }
+
+        .direct-attendance-modal .select2-container--bootstrap4 .select2-selection--multiple .select2-selection__rendered {
+            display: flex;
+            align-items: flex-start;
+            flex-wrap: wrap;
+            gap: 7px;
+            width: 100%;
+            margin: 0;
+            padding: 0;
+        }
+
+        .direct-attendance-modal .select2-container--bootstrap4 .select2-selection--multiple .select2-selection__choice {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            max-width: 100%;
+            margin: 0;
+            padding: 5px 11px 5px 29px;
+            border: 0;
+            border-radius: 999px;
+            background: linear-gradient(135deg, #ede9fe, #e0e7ff);
+            color: #4f46e5;
+            font-size: .75rem;
+            font-weight: 800;
+            white-space: normal;
+        }
+
+        .direct-attendance-modal .select2-container--bootstrap4 .select2-selection--multiple .select2-selection__choice__remove {
+            position: absolute;
+            left: 9px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #6366f1;
+            font-size: .95rem;
+        }
+
         .attendance-source-note {
             border: 1px solid #ddd6fe;
             border-radius: 12px;
@@ -294,6 +366,7 @@
                                         value="{{ $suratKeluar->id }}"
                                         data-date="{{ optional($suratKeluar->tanggal_surat)->format('Y-m-d') }}"
                                         data-title="{{ $suratKeluar->perihal }}"
+                                        data-participant-ids="{{ $suratKeluar->penerimaInternal->pluck('id')->implode(',') }}"
                                         {{ (string) old('surat_keluar_id') === (string) $suratKeluar->id ? 'selected' : '' }}
                                     >
                                         {{ $suratKeluar->nomor_surat_formatted }} | {{ \Illuminate\Support\Str::limit($suratKeluar->perihal, 90) }}
@@ -318,6 +391,42 @@
                                 required
                             >
                             <small class="form-text text-muted">Judul ini ditampilkan pada halaman absensi publik.</small>
+                        </div>
+
+                        @php
+                            $oldParticipantIds = collect(old('participant_ids', []))
+                                ->map(function ($id) {
+                                    return (string) $id;
+                                })
+                                ->all();
+                        @endphp
+                        <div class="form-group">
+                            <div class="direct-attendance-participant-head">
+                                <label for="directAttendanceParticipants">Peserta</label>
+                                <button type="button" class="direct-attendance-select-all" id="directAttendanceSelectAll">
+                                    Pilih semua
+                                </button>
+                            </div>
+                            <select
+                                name="participant_ids[]"
+                                id="directAttendanceParticipants"
+                                class="form-control"
+                                multiple
+                                required
+                            >
+                                @foreach($attendanceParticipants as $attendanceParticipant)
+                                    <option
+                                        value="{{ $attendanceParticipant->id }}"
+                                        {{ in_array((string) $attendanceParticipant->id, $oldParticipantIds, true) ? 'selected' : '' }}
+                                    >
+                                        {{ $attendanceParticipant->name }}
+                                        @if($attendanceParticipant->jabatan_keterangan)
+                                            - {{ $attendanceParticipant->jabatan_keterangan }}
+                                        @endif
+                                    </option>
+                                @endforeach
+                            </select>
+                            <small class="form-text text-muted">Penerima internal surat dipilih otomatis dan masih dapat disesuaikan.</small>
                         </div>
 
                         <div class="form-row">
@@ -358,7 +467,7 @@
                         </div>
 
                         <div class="attendance-source-note">
-                            Penerima internal Surat Keluar otomatis menjadi peserta PTA Papua Barat. Peserta Satker/External dapat mengisi melalui tautan absensi publik.
+                            Peserta terpilih masuk ke daftar PTA Papua Barat. Peserta Satker/External dapat mengisi melalui tautan absensi publik.
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -386,6 +495,9 @@
         $(function () {
             const modal = $('#directAttendanceModal');
             const suratSelect = $('#directAttendanceSuratKeluar');
+            const participantSelect = $('#directAttendanceParticipants');
+            const participantSelectAll = $('#directAttendanceSelectAll');
+            let preserveOldParticipants = {{ old('participant_ids') !== null ? 'true' : 'false' }};
 
             modal.on('shown.bs.modal', function () {
                 if ($.fn.select2 && !suratSelect.hasClass('select2-hidden-accessible')) {
@@ -396,8 +508,23 @@
                         placeholder: '-- Pilih Surat Keluar --'
                     });
                 }
+                if ($.fn.select2 && !participantSelect.hasClass('select2-hidden-accessible')) {
+                    participantSelect.select2({
+                        theme: 'bootstrap4',
+                        width: '100%',
+                        dropdownParent: modal,
+                        placeholder: 'Cari dan pilih peserta',
+                        closeOnSelect: false
+                    });
+                }
                 suratSelect.trigger('change');
             });
+
+            function refreshParticipantToggle() {
+                const selectedCount = (participantSelect.val() || []).length;
+                const optionCount = participantSelect.find('option:not(:disabled)').length;
+                participantSelectAll.text(optionCount > 0 && selectedCount === optionCount ? 'Kosongkan' : 'Pilih semua');
+            }
 
             suratSelect.on('change', function () {
                 const selected = this.options[this.selectedIndex];
@@ -409,7 +536,29 @@
                 if (selected && selected.dataset.title && !titleInput.value) {
                     titleInput.value = selected.dataset.title;
                 }
+                if (preserveOldParticipants) {
+                    preserveOldParticipants = false;
+                    refreshParticipantToggle();
+                    return;
+                }
+
+                const participantIds = selected && selected.dataset.participantIds
+                    ? selected.dataset.participantIds.split(',').filter(Boolean)
+                    : [];
+                participantSelect.val(participantIds).trigger('change');
             });
+
+            participantSelect.on('change', refreshParticipantToggle);
+            participantSelectAll.on('click', function () {
+                const allValues = participantSelect.find('option:not(:disabled)').map(function () {
+                    return String(this.value);
+                }).get();
+                const selectedValues = (participantSelect.val() || []).map(String);
+                participantSelect
+                    .val(allValues.length > 0 && selectedValues.length === allValues.length ? [] : allValues)
+                    .trigger('change');
+            });
+            refreshParticipantToggle();
 
             @if($errors->any())
                 modal.modal('show');

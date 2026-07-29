@@ -137,10 +137,11 @@ class DirectAttendanceServiceTest extends TestCase
         parent::tearDown();
     }
 
-    public function testItCreatesAttendanceOnlyRecordAndCopiesInternalRecipients()
+    public function testItCreatesAttendanceOnlyRecordAndSyncsSelectedParticipants()
     {
         $creator = $this->createUser('Operator', 'operator@example.test');
-        $participant = $this->createUser('Peserta', 'peserta@example.test');
+        $letterRecipient = $this->createUser('Penerima Surat', 'recipient@example.test');
+        $selectedParticipant = $this->createUser('Peserta Terpilih', 'selected@example.test');
         $suratKeluar = SuratKeluar::create([
             'nomor_surat' => '900/KPTA.W31-A/OT1/VII/2026',
             'perihal' => 'Kegiatan Pembinaan',
@@ -149,13 +150,14 @@ class DirectAttendanceServiceTest extends TestCase
             'status' => 'lengkap',
             'created_by' => $creator->id,
         ]);
-        $suratKeluar->penerimaInternal()->attach($participant->id);
+        $suratKeluar->penerimaInternal()->attach($letterRecipient->id);
 
         $rapat = app(DirectAttendanceService::class)->createFromSuratKeluar(
             $suratKeluar,
             $creator,
             [
                 'judul' => 'Absensi Pembinaan Internal',
+                'participant_ids' => [$selectedParticipant->id],
                 'tanggal' => '2026-07-30',
                 'waktu_mulai' => '09:00',
                 'tempat' => 'Aula PTA Papua Barat',
@@ -167,7 +169,7 @@ class DirectAttendanceServiceTest extends TestCase
         $this->assertSame('Absensi Pembinaan Internal', $rapat->judul);
         $this->assertSame('disetujui', $rapat->status);
         $this->assertSame(
-            [(int) $participant->id],
+            [(int) $selectedParticipant->id],
             $rapat->pesertas()->pluck('users.id')->map(function ($id) {
                 return (int) $id;
             })->all()
@@ -182,6 +184,7 @@ class DirectAttendanceServiceTest extends TestCase
     public function testOneOutgoingLetterCanCreateMultiplePublicAttendances()
     {
         $creator = $this->createUser('Operator', 'operator@example.test');
+        $participant = $this->createUser('Peserta Evaluasi', 'participant-evaluation@example.test');
         $suratKeluar = SuratKeluar::create([
             'nomor_surat' => '901/KPTA.W31-A/OT1/VII/2026',
             'perihal' => 'Kegiatan Evaluasi',
@@ -192,6 +195,7 @@ class DirectAttendanceServiceTest extends TestCase
         ]);
         $payload = [
             'judul' => 'Absensi Evaluasi',
+            'participant_ids' => [$participant->id],
             'tanggal' => '2026-07-30',
             'waktu_mulai' => '10:00',
             'tempat' => 'Ruang Rapat',
@@ -228,6 +232,7 @@ class DirectAttendanceServiceTest extends TestCase
         $service = app(DirectAttendanceService::class);
         $rapat = $service->createFromSuratKeluar($suratKeluar, $creator, [
             'judul' => 'Absensi yang Dihapus',
+            'participant_ids' => [$participant->id],
             'tanggal' => '2026-07-30',
             'waktu_mulai' => '11:00',
             'tempat' => 'Ruang Rapat',
@@ -273,6 +278,7 @@ class DirectAttendanceServiceTest extends TestCase
 
         $replacement = $service->createFromSuratKeluar($suratKeluar, $creator, [
             'judul' => 'Absensi Pengganti',
+            'participant_ids' => [$participant->id],
             'tanggal' => '2026-07-31',
             'waktu_mulai' => '09:00',
             'tempat' => 'Aula',
