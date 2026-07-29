@@ -56,11 +56,10 @@ class RapatAbsensiController extends Controller
         $canCreateDirectAttendance = $user->canManageRapat() || $user->canManageMeetingMinutes();
         $availableSuratKeluar = collect();
         if ($canCreateDirectAttendance) {
-            $availableSuratKeluar = SuratKeluar::visibleTo($user)
+            $availableSuratKeluar = SuratKeluar::query()
                 ->whereDoesntHave('attendanceRapat')
                 ->orderByDesc('tanggal_surat')
                 ->orderByDesc('id')
-                ->limit(750)
                 ->get([
                     'id',
                     'nomor_surat',
@@ -96,9 +95,7 @@ class RapatAbsensiController extends Controller
             'tempat.required' => 'Tempat kegiatan wajib diisi.',
         ]);
 
-        $suratKeluar = SuratKeluar::visibleTo($user)
-            ->whereKey($data['surat_keluar_id'])
-            ->firstOrFail();
+        $suratKeluar = SuratKeluar::query()->findOrFail($data['surat_keluar_id']);
         $rapat = $this->directAttendanceService->createFromSuratKeluar(
             $suratKeluar,
             $user,
