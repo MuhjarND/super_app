@@ -49,7 +49,7 @@
         }
 
         .attendance-action-cell {
-            width: 132px;
+            width: 172px;
             vertical-align: middle !important;
         }
 
@@ -236,6 +236,15 @@
                                         <button type="button" class="app-icon-btn link" data-mobile-label="Link" title="Salin link publik" onclick="copyPublicLink('{{ route('rapat.absensi.public.show', $rapat->public_code) }}')">
                                             <i class="fas fa-link"></i>
                                         </button>
+                                        @if($canCreateDirectAttendance && $rapat->is_attendance_only)
+                                            <form method="POST" action="{{ route('rapat.absensi.destroy-direct', $rapat) }}" class="d-inline" onsubmit="return confirm('Hapus absensi langsung ini beserta seluruh data kehadirannya?')">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="app-icon-btn delete" data-mobile-label="Hapus" title="Hapus absensi">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </form>
+                                        @endif
                                     </div>
                                 </td>
                             </tr>

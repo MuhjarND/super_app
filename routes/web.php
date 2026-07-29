@@ -325,6 +325,9 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/absensi/dari-surat-keluar', 'RapatAbsensiController@storeFromSuratKeluar')
             ->middleware('role:admin,operator,notulis,super_admin')
             ->name('absensi.store-from-surat-keluar');
+        Route::delete('/absensi/{rapat}', 'RapatAbsensiController@destroyDirectAttendance')
+            ->middleware('role:admin,operator,notulis,super_admin')
+            ->name('absensi.destroy-direct');
         Route::get('/absensi/{rapat}', 'RapatAbsensiController@show')->name('absensi.show');
         Route::get('/absensi/{rapat}/pdf', 'RapatAbsensiController@pdf')->name('absensi.pdf');
         Route::post('/absensi/{rapat}/remind', 'RapatAbsensiController@remindPending')->name('absensi.remind');

@@ -107,6 +107,19 @@ class RapatAbsensiController extends Controller
             ->with('success', 'Absensi berhasil dibuat berdasarkan Surat Keluar.');
     }
 
+    public function destroyDirectAttendance(Request $request, Rapat $rapat)
+    {
+        $user = $request->user();
+        abort_unless($user->canManageRapat() || $user->canManageMeetingMinutes(), 403);
+        abort_unless($rapat->is_attendance_only, 404);
+
+        $this->directAttendanceService->deleteDirectAttendance($rapat);
+
+        return redirect()
+            ->route('rapat.absensi.index')
+            ->with('success', 'Absensi langsung berhasil dihapus.');
+    }
+
     public function show(Rapat $rapat)
     {
         abort_unless(auth()->user()->canViewRapat($rapat), 403);

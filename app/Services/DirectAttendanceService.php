@@ -3,10 +3,13 @@
 namespace App\Services;
 
 use App\KategoriRapat;
+use App\PdfVerification;
 use App\Rapat;
 use App\SuratKeluar;
 use App\User;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
@@ -62,6 +65,56 @@ class DirectAttendanceService
 
             return $rapat;
         });
+    }
+
+    public function deleteDirectAttendance(Rapat $rapat)
+    {
+        if (!$rapat->is_attendance_only) {
+            throw ValidationException::withMessages([
+                'rapat' => 'Hanya absensi yang dibuat langsung yang dapat dihapus dari halaman ini.',
+            ]);
+        }
+
+        $signaturePaths = $rapat->attendances()
+            ->whereNotNull('signature_path')
+            ->pluck('signature_path')
+            ->filter()
+            ->unique()
+            ->values();
+
+        $hasPdfVerifications = Schema::hasTable('pdf_verifications');
+        $verificationPaths = $hasPdfVerifications
+            ? PdfVerification::query()
+                ->where('module', 'rapat')
+                ->where('document_type', 'laporan_absensi')
+                ->where('document_id', (string) $rapat->id)
+                ->whereNotNull('file_path')
+                ->pluck('file_path')
+                ->filter()
+                ->values()
+            : collect();
+
+        DB::transaction(function () use ($rapat, $hasPdfVerifications) {
+            $rapat->pesertas()->detach();
+            $rapat->attendances()->delete();
+            if ($hasPdfVerifications) {
+                PdfVerification::query()
+                    ->where('module', 'rapat')
+                    ->where('document_type', 'laporan_absensi')
+                    ->where('document_id', (string) $rapat->id)
+                    ->delete();
+            }
+            $rapat->delete();
+        });
+
+        $storedPaths = $signaturePaths
+            ->concat($verificationPaths)
+            ->filter()
+            ->unique()
+            ->values();
+        if ($storedPaths->isNotEmpty()) {
+            Storage::disk('public')->delete($storedPaths->all());
+        }
     }
 
     protected function resolveKategoriRapatId()

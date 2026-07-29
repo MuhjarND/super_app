@@ -3,11 +3,14 @@
 namespace Tests\Feature;
 
 use App\Rapat;
+use App\RapatAttendance;
+use App\PdfVerification;
 use App\Services\DirectAttendanceService;
 use App\SuratKeluar;
 use App\User;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
 use Tests\TestCase;
 
@@ -83,10 +86,47 @@ class DirectAttendanceServiceTest extends TestCase
             $table->unsignedInteger('urutan')->default(999);
             $table->timestamps();
         });
+
+        Schema::create('rapat_attendances', function (Blueprint $table) {
+            $table->id();
+            $table->unsignedBigInteger('rapat_id');
+            $table->unsignedBigInteger('user_id')->nullable();
+            $table->string('attendance_type')->default('internal');
+            $table->string('participant_name_snapshot');
+            $table->string('participant_jabatan_snapshot')->nullable();
+            $table->string('guest_instansi')->nullable();
+            $table->string('source')->default('public');
+            $table->string('signature_path')->nullable();
+            $table->string('signature_mime')->nullable();
+            $table->unsignedBigInteger('signature_size')->nullable();
+            $table->timestamp('attended_at');
+            $table->string('created_ip', 45)->nullable();
+            $table->timestamps();
+        });
+
+        Schema::create('pdf_verifications', function (Blueprint $table) {
+            $table->id();
+            $table->string('token')->unique();
+            $table->string('module');
+            $table->string('document_type');
+            $table->string('document_id')->nullable();
+            $table->string('title');
+            $table->string('file_path')->nullable();
+            $table->string('original_filename')->nullable();
+            $table->string('file_hash')->nullable();
+            $table->unsignedBigInteger('file_size')->nullable();
+            $table->text('signers')->nullable();
+            $table->text('metadata')->nullable();
+            $table->unsignedBigInteger('created_by')->nullable();
+            $table->timestamp('finalized_at')->nullable();
+            $table->timestamps();
+        });
     }
 
     protected function tearDown(): void
     {
+        Schema::dropIfExists('pdf_verifications');
+        Schema::dropIfExists('rapat_attendances');
         Schema::dropIfExists('rapat_peserta');
         Schema::dropIfExists('rapats');
         Schema::dropIfExists('surat_keluar_penerima');
@@ -162,6 +202,77 @@ class DirectAttendanceServiceTest extends TestCase
 
         $this->expectException(ValidationException::class);
         $service->createFromSuratKeluar($suratKeluar, $creator, $payload);
+    }
+
+    public function testItDeletesDirectAttendanceAndItsSignatureFiles()
+    {
+        Storage::fake('public');
+
+        $creator = $this->createUser('Operator', 'operator-delete@example.test');
+        $participant = $this->createUser('Peserta', 'participant-delete@example.test');
+        $suratKeluar = SuratKeluar::create([
+            'nomor_surat' => '902/KPTA.W31-A/OT1/VII/2026',
+            'perihal' => 'Kegiatan yang Dihapus',
+            'tanggal_surat' => '2026-07-29',
+            'opsi_penerima' => 'internal',
+            'status' => 'lengkap',
+            'created_by' => $creator->id,
+        ]);
+        $suratKeluar->penerimaInternal()->attach($participant->id);
+
+        $service = app(DirectAttendanceService::class);
+        $rapat = $service->createFromSuratKeluar($suratKeluar, $creator, [
+            'judul' => 'Absensi yang Dihapus',
+            'tanggal' => '2026-07-30',
+            'waktu_mulai' => '11:00',
+            'tempat' => 'Ruang Rapat',
+        ]);
+
+        $signaturePath = 'rapat/attendance-signatures/delete-test.png';
+        Storage::disk('public')->put($signaturePath, 'signature');
+        RapatAttendance::create([
+            'rapat_id' => $rapat->id,
+            'user_id' => $participant->id,
+            'attendance_type' => 'internal',
+            'participant_name_snapshot' => $participant->name,
+            'source' => 'public',
+            'signature_path' => $signaturePath,
+            'signature_mime' => 'image/png',
+            'signature_size' => 9,
+            'attended_at' => now(),
+        ]);
+        $verificationPath = 'pdf-verifications/2026/07/delete-test.pdf';
+        Storage::disk('public')->put($verificationPath, 'pdf');
+        PdfVerification::create([
+            'token' => 'delete-direct-attendance-token',
+            'module' => 'rapat',
+            'document_type' => 'laporan_absensi',
+            'document_id' => (string) $rapat->id,
+            'title' => 'Laporan Absensi',
+            'file_path' => $verificationPath,
+        ]);
+
+        $service->deleteDirectAttendance($rapat);
+
+        $this->assertDatabaseMissing('rapats', ['id' => $rapat->id]);
+        $this->assertDatabaseMissing('rapat_attendances', ['rapat_id' => $rapat->id]);
+        $this->assertDatabaseMissing('rapat_peserta', ['rapat_id' => $rapat->id]);
+        $this->assertDatabaseMissing('pdf_verifications', [
+            'module' => 'rapat',
+            'document_type' => 'laporan_absensi',
+            'document_id' => (string) $rapat->id,
+        ]);
+        $this->assertDatabaseHas('surat_keluars', ['id' => $suratKeluar->id]);
+        Storage::disk('public')->assertMissing($signaturePath);
+        Storage::disk('public')->assertMissing($verificationPath);
+
+        $replacement = $service->createFromSuratKeluar($suratKeluar, $creator, [
+            'judul' => 'Absensi Pengganti',
+            'tanggal' => '2026-07-31',
+            'waktu_mulai' => '09:00',
+            'tempat' => 'Aula',
+        ]);
+        $this->assertSame($suratKeluar->id, $replacement->attendance_surat_keluar_id);
     }
 
     protected function createUser($name, $email)
