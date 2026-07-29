@@ -322,6 +322,9 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/notulensi-approval/{notulensiApproval}/reject', 'RapatNotulensiApprovalController@reject')->middleware('role:admin,approval,super_admin')->name('notulensi-approval.reject');
 
         Route::get('/absensi', 'RapatAbsensiController@index')->name('absensi.index');
+        Route::post('/absensi/dari-surat-keluar', 'RapatAbsensiController@storeFromSuratKeluar')
+            ->middleware('role:admin,operator,notulis,super_admin')
+            ->name('absensi.store-from-surat-keluar');
         Route::get('/absensi/{rapat}', 'RapatAbsensiController@show')->name('absensi.show');
         Route::get('/absensi/{rapat}/pdf', 'RapatAbsensiController@pdf')->name('absensi.pdf');
         Route::post('/absensi/{rapat}/remind', 'RapatAbsensiController@remindPending')->name('absensi.remind');

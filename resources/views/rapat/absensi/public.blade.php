@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Absensi Rapat | PTA Papua Barat</title>
+    <title>Absensi Kegiatan | PTA Papua Barat</title>
     @include('partials.app-icons')
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
@@ -291,7 +291,7 @@
 
     <div class="container">
         <div class="hero">
-            <div class="hero__badge">Absensi Publik Rapat</div>
+            <div class="hero__badge">Absensi Publik Kegiatan</div>
             <h1>{{ $rapat->judul }}</h1>
             <p>{{ $rapat->nomor_undangan }}</p>
 
@@ -320,7 +320,7 @@
 
             <div class="tabs">
                 <button type="button" class="tab-button active" data-tab="internal">PTA Papua Barat</button>
-                <button type="button" class="tab-button" data-tab="guest">Satker</button>
+                <button type="button" class="tab-button" data-tab="guest">Satker/External</button>
             </div>
 
             <div id="panel-internal" class="tab-panel active">
@@ -367,7 +367,7 @@
             <div id="panel-guest" class="tab-panel">
                 <form id="guestAttendanceForm">
                     <div class="field">
-                        <label for="guest_name">Nama External</label>
+                        <label for="guest_name">Nama</label>
                         <input type="text" name="guest_name" id="guest_name" class="input" required>
                     </div>
 
@@ -377,7 +377,7 @@
                     </div>
 
                     <div class="field">
-                        <label for="guestSignature">Tanda Tangan Peserta External</label>
+                        <label for="guestSignature">Tanda Tangan Peserta</label>
                         <div class="signature-wrap">
                             <div class="signature-toolbar">
                                 <span>Bubuhkan tanda tangan pada area berikut.</span>

@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Rekap Absensi Rapat')
+@section('title', 'Rekap Absensi Kegiatan')
 
 @push('styles')
     <style>
@@ -38,6 +38,11 @@
             <div>
                 <h1 class="mb-1">Rekap Absensi</h1>
                 <div class="text-muted" style="font-size: 0.82rem;">{{ $rapat->judul }} | {{ $rapat->nomor_undangan }}</div>
+                @if($rapat->is_attendance_only)
+                    <span class="badge badge-light mt-2">
+                        <i class="fas fa-envelope-open-text mr-1"></i> Berdasarkan Surat Keluar
+                    </span>
+                @endif
             </div>
             <div class="text-right">
                 <a href="{{ route('rapat.absensi.pdf', $rapat) }}" target="_blank" class="btn btn-outline-danger btn-sm">PDF Absensi</a>
@@ -76,7 +81,7 @@
             <div class="font-weight-bold">{{ $rapat->internalAttendances->count() }} / {{ $rapat->pesertas->count() }}</div>
         </div>
         <div class="attendance-info-box">
-            <div class="text-muted" style="font-size: 0.75rem;">External</div>
+            <div class="text-muted" style="font-size: 0.75rem;">Satker/External</div>
             <div class="font-weight-bold">{{ $guestAttendances->count() }}</div>
         </div>
         <div class="attendance-info-box">
@@ -138,7 +143,7 @@
 
     <div class="card attendance-detail-card">
         <div class="card-header bg-white">
-            <strong>Peserta External</strong>
+            <strong>Peserta Satker/External</strong>
         </div>
         <div class="card-body p-0 table-responsive">
             <table class="table table-hover mb-0">

@@ -30,6 +30,8 @@ class PublicRapatAttendanceSignatureTest extends TestCase
         Schema::create('rapats', function (Blueprint $table) {
             $table->id();
             $table->string('public_code')->unique();
+            $table->boolean('is_attendance_only')->default(false);
+            $table->unsignedBigInteger('attendance_surat_keluar_id')->nullable();
             $table->timestamps();
         });
 

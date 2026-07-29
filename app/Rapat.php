@@ -34,6 +34,8 @@ class Rapat extends Model
         'status',
         'token_qr',
         'public_code',
+        'is_attendance_only',
+        'attendance_surat_keluar_id',
         'participant_notified_at',
         'last_attendance_reminder_at',
         'is_recurring',
@@ -47,6 +49,7 @@ class Rapat extends Model
         'recurring_until' => 'date',
         'is_virtual' => 'boolean',
         'bersama_satker' => 'boolean',
+        'is_attendance_only' => 'boolean',
         'is_recurring' => 'boolean',
         'lampiran_tambahan_size' => 'integer',
         'participant_notified_at' => 'datetime',
@@ -54,6 +57,12 @@ class Rapat extends Model
     ];
 
     public function scopeVisibleTo($query, $user)
+    {
+        $query->where('is_attendance_only', false);
+        return $this->scopeAttendanceVisibleTo($query, $user);
+    }
+
+    public function scopeAttendanceVisibleTo($query, $user)
     {
         if (!$user) {
             return $query->whereRaw('1 = 0');
@@ -156,6 +165,11 @@ class Rapat extends Model
     public function suratKeluar()
     {
         return $this->hasOne(SuratKeluar::class, 'rapat_id');
+    }
+
+    public function attendanceSourceSuratKeluar()
+    {
+        return $this->belongsTo(SuratKeluar::class, 'attendance_surat_keluar_id');
     }
 
     public function getWaktuMulaiFormattedAttribute()

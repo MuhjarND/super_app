@@ -102,6 +102,11 @@ class SuratKeluar extends Model
         return $this->belongsTo(Rapat::class, 'rapat_id');
     }
 
+    public function attendanceRapat()
+    {
+        return $this->hasOne(Rapat::class, 'attendance_surat_keluar_id');
+    }
+
     public function leaveRequest()
     {
         return $this->hasOne(LeaveRequest::class, 'letter_number', 'nomor_surat');

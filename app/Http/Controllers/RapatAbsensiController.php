@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Rapat;
 use App\RapatAttendance;
+use App\SuratKeluar;
+use App\Services\DirectAttendanceService;
 use App\Services\RapatDocumentService;
 use App\Services\SignaturePadService;
 use App\Services\WhatsAppNotificationService;
@@ -18,29 +20,92 @@ class RapatAbsensiController extends Controller
     protected $whatsAppService;
     protected $documentService;
     protected $signaturePadService;
+    protected $directAttendanceService;
 
     public function __construct(
         WhatsAppNotificationService $whatsAppService,
         RapatDocumentService $documentService,
-        SignaturePadService $signaturePadService
+        SignaturePadService $signaturePadService,
+        DirectAttendanceService $directAttendanceService
     ) {
         $this->middleware('auth')->except(['publicShow', 'publicStore', 'publicStoreGuest', 'verifyAttendance']);
         $this->whatsAppService = $whatsAppService;
         $this->documentService = $documentService;
         $this->signaturePadService = $signaturePadService;
+        $this->directAttendanceService = $directAttendanceService;
     }
 
     public function index()
     {
         abort_unless(auth()->user()->canAccessMeetingModule(), 403);
 
-        $rapats = Rapat::visibleTo(auth()->user())
-            ->with(['kategoriSuratKode', 'creator', 'pesertas', 'internalAttendances', 'guestAttendances'])
+        $user = auth()->user();
+        $rapats = Rapat::attendanceVisibleTo($user)
+            ->with([
+                'kategoriSuratKode',
+                'creator',
+                'pesertas',
+                'internalAttendances',
+                'guestAttendances',
+                'attendanceSourceSuratKeluar',
+            ])
             ->orderByDesc('tanggal')
             ->orderByDesc('waktu_mulai')
             ->get();
 
-        return view('rapat.absensi.index', compact('rapats'));
+        $canCreateDirectAttendance = $user->canManageRapat() || $user->canManageMeetingMinutes();
+        $availableSuratKeluar = collect();
+        if ($canCreateDirectAttendance) {
+            $availableSuratKeluar = SuratKeluar::visibleTo($user)
+                ->whereDoesntHave('attendanceRapat')
+                ->orderByDesc('tanggal_surat')
+                ->orderByDesc('id')
+                ->limit(750)
+                ->get([
+                    'id',
+                    'nomor_surat',
+                    'perihal',
+                    'tanggal_surat',
+                    'status',
+                ]);
+        }
+
+        return view('rapat.absensi.index', compact(
+            'rapats',
+            'availableSuratKeluar',
+            'canCreateDirectAttendance'
+        ));
+    }
+
+    public function storeFromSuratKeluar(Request $request)
+    {
+        $user = $request->user();
+        abort_unless($user->canManageRapat() || $user->canManageMeetingMinutes(), 403);
+
+        $data = $request->validate([
+            'surat_keluar_id' => ['required', 'integer', 'exists:surat_keluars,id'],
+            'tanggal' => ['required', 'date'],
+            'waktu_mulai' => ['required', 'date_format:H:i'],
+            'tempat' => ['required', 'string', 'max:255'],
+        ], [
+            'surat_keluar_id.required' => 'Surat Keluar wajib dipilih.',
+            'tanggal.required' => 'Tanggal kegiatan wajib diisi.',
+            'waktu_mulai.required' => 'Waktu kegiatan wajib diisi.',
+            'tempat.required' => 'Tempat kegiatan wajib diisi.',
+        ]);
+
+        $suratKeluar = SuratKeluar::visibleTo($user)
+            ->whereKey($data['surat_keluar_id'])
+            ->firstOrFail();
+        $rapat = $this->directAttendanceService->createFromSuratKeluar(
+            $suratKeluar,
+            $user,
+            $data
+        );
+
+        return redirect()
+            ->route('rapat.absensi.show', $rapat)
+            ->with('success', 'Absensi berhasil dibuat berdasarkan Surat Keluar.');
     }
 
     public function show(Rapat $rapat)
@@ -56,6 +121,7 @@ class RapatAbsensiController extends Controller
             'attendances.user',
             'internalAttendances',
             'guestAttendances',
+            'attendanceSourceSuratKeluar',
         ]);
 
         $attendanceByUser = $rapat->internalAttendances->keyBy('user_id');
@@ -102,6 +168,7 @@ class RapatAbsensiController extends Controller
             'pesertas.jabatan',
             'internalAttendances',
             'guestAttendances',
+            'attendanceSourceSuratKeluar',
         ]);
 
         $attendanceByUser = $rapat->internalAttendances->keyBy('user_id');
@@ -156,7 +223,7 @@ class RapatAbsensiController extends Controller
 
         $kopImage = $this->resolveKopAbsenImage();
         $verifier = app(\App\Services\PdfVerificationService::class);
-        $verification = $verifier->begin('rapat', 'laporan_absensi', $rapat->id, 'Laporan Absensi Rapat - ' . ($rapat->judul ?: $rapat->id), $signers, [
+        $verification = $verifier->begin('rapat', 'laporan_absensi', $rapat->id, 'Laporan Absensi Kegiatan - ' . ($rapat->judul ?: $rapat->id), $signers, [
             'tanggal' => optional($rapat->tanggal)->toDateString(),
             'status_rapat' => $rapat->status,
         ]);
@@ -171,7 +238,7 @@ class RapatAbsensiController extends Controller
             'pdfVerification'
         ))->setPaper('a4', 'portrait');
 
-        return $verifier->response($pdf->output(), $verification, 'laporan-absensi-rapat-' . $rapat->id . '.pdf');
+        return $verifier->response($pdf->output(), $verification, 'laporan-absensi-kegiatan-' . $rapat->id . '.pdf');
     }
 
     public function remindPending(Rapat $rapat)
@@ -223,7 +290,7 @@ class RapatAbsensiController extends Controller
         $participant = $rapat->pesertas()->where('users.id', $data['user_id'])->first();
         if (!$participant) {
             return response()->json([
-                'message' => 'Peserta yang dipilih tidak terdaftar pada rapat ini.',
+                'message' => 'Peserta yang dipilih tidak terdaftar pada kegiatan ini.',
             ], 422);
         }
 
