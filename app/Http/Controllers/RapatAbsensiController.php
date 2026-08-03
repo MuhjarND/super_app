@@ -224,7 +224,6 @@ class RapatAbsensiController extends Controller
             return [
                 'name' => $user->name,
                 'description' => $user->jabatan_keterangan ?: optional($user->jabatan)->nama ?: '-',
-                'attended_at' => optional($attendance)->attended_at,
                 'signature' => $attendance
                     ? $this->signaturePadService->toDataUri($attendance->signature_path)
                     : null,
@@ -233,7 +232,6 @@ class RapatAbsensiController extends Controller
             return [
                 'name' => $attendance->participant_name_snapshot,
                 'description' => $attendance->guest_instansi ?: ($attendance->participant_jabatan_snapshot ?: '-'),
-                'attended_at' => $attendance->attended_at,
                 'signature' => $this->signaturePadService->toDataUri($attendance->signature_path),
             ];
         }))->values();

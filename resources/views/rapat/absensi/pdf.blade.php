@@ -6,7 +6,7 @@
     <style>
         @page {
             size: A4 portrait;
-            margin: 1.7cm 1.5cm {{ !empty($pdfVerification['qr']) ? '3.2cm' : '1.5cm' }} 1.5cm;
+            margin: 1.7cm 1.5cm {{ !empty($pdfVerification['qr']) ? '3.8cm' : '1.5cm' }} 1.5cm;
         }
 
         body {
@@ -30,6 +30,14 @@
         .attendance-table {
             width: 100%;
             border-collapse: collapse;
+        }
+
+        .attendance-table {
+            table-layout: fixed;
+        }
+
+        .attendance-table tr {
+            page-break-inside: avoid;
         }
 
         .info-table {
@@ -174,10 +182,9 @@
         <thead>
             <tr>
                 <th style="width: 28pt;">No</th>
-                <th>Nama</th>
+                <th style="width: 34%;">Nama</th>
                 <th>Jabatan / Keterangan</th>
-                <th style="width: 130pt;">Keterangan Kehadiran</th>
-                <th style="width: 76pt;">Tanda Tangan</th>
+                <th style="width: 84pt;">Tanda Tangan</th>
             </tr>
         </thead>
         <tbody>
@@ -186,15 +193,6 @@
                     <td class="text-center">{{ $index + 1 }}</td>
                     <td>{{ $row['name'] }}</td>
                     <td>{{ $row['description'] }}</td>
-                    <td>
-                        @if($row['attended_at'])
-                            Telah melakukan absensi pada
-                            {{ $row['attended_at']->copy()->timezone('Asia/Jayapura')->translatedFormat('d F Y') }}
-                            pukul {{ $row['attended_at']->copy()->timezone('Asia/Jayapura')->format('H:i') }} WIT.
-                        @else
-                            Belum melakukan absensi.
-                        @endif
-                    </td>
                     <td class="text-center">
                         @if(!empty($row['signature']))
                             <img src="{{ $row['signature'] }}" alt="Tanda tangan {{ $row['name'] }}" class="participant-signature">
@@ -205,7 +203,7 @@
                 </tr>
             @empty
                 <tr>
-                    <td colspan="5" class="empty">Belum ada data peserta absensi.</td>
+                    <td colspan="4" class="empty">Belum ada data peserta absensi.</td>
                 </tr>
             @endforelse
         </tbody>
