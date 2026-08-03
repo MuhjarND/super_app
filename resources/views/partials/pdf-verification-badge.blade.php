@@ -2,13 +2,16 @@
     @php
         $verificationQrSize = max(32, min(72, (int) ($pdfVerificationQrSize ?? 48)));
         $verificationQrColumnSize = $verificationQrSize + 4;
+        $verificationInFlow = !empty($pdfVerificationInFlow);
     @endphp
     <style>
         .pdf-verification-badge {
-            position: fixed;
-            left: 0.6cm;
-            right: 0.6cm;
-            bottom: 0.38cm;
+            position: {{ $verificationInFlow ? 'static' : 'fixed' }};
+            left: {{ $verificationInFlow ? 'auto' : '0.6cm' }};
+            right: {{ $verificationInFlow ? 'auto' : '0.6cm' }};
+            bottom: {{ $verificationInFlow ? 'auto' : '0.38cm' }};
+            margin-top: {{ $verificationInFlow ? '18pt' : '0' }};
+            page-break-inside: avoid;
             font-family: DejaVu Sans, sans-serif;
             color: #111827;
             z-index: 999;

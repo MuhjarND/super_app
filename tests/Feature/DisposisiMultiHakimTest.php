@@ -114,14 +114,17 @@ class DisposisiMultiHakimTest extends TestCase
         parent::tearDown();
     }
 
-    public function test_wakil_ketua_can_dispose_to_multiple_high_judges_with_individual_notifications(): void
+    /**
+     * @dataProvider leaderDisposisiProvider
+     */
+    public function test_leader_can_dispose_to_multiple_high_judges_with_individual_notifications(string $leaderCode): void
     {
         $pimpinan = Unit::create(['kode' => 'PIMPINAN', 'nama' => 'Pimpinan']);
         $hakimUnit = Unit::create(['kode' => 'HAKIM_TINGGI', 'nama' => 'Hakim Tinggi']);
         $ketuaJabatan = Jabatan::create(['kode' => 'KPTA', 'nama' => 'Ketua PTA', 'level' => 1, 'unit_id' => $pimpinan->id]);
         $wakilJabatan = Jabatan::create(['kode' => 'WKPTA', 'nama' => 'Wakil Ketua PTA', 'level' => 1, 'unit_id' => $pimpinan->id]);
         Jabatan::create(['kode' => 'SEK', 'nama' => 'Sekretaris', 'level' => 2, 'unit_id' => $pimpinan->id]);
-        Jabatan::create(['kode' => 'PAN', 'nama' => 'Panitera', 'level' => 2, 'unit_id' => $pimpinan->id]);
+        $paniteraJabatan = Jabatan::create(['kode' => 'PAN', 'nama' => 'Panitera', 'level' => 2, 'unit_id' => $pimpinan->id]);
 
         $ketua = User::create([
             'name' => 'Ketua',
@@ -133,6 +136,12 @@ class DisposisiMultiHakimTest extends TestCase
             'name' => 'Wakil Ketua',
             'unit_id' => $pimpinan->id,
             'jabatan_id' => $wakilJabatan->id,
+            'status_aktif_pegawai' => true,
+        ]);
+        $panitera = User::create([
+            'name' => 'Panitera',
+            'unit_id' => $pimpinan->id,
+            'jabatan_id' => $paniteraJabatan->id,
             'status_aktif_pegawai' => true,
         ]);
         $hakimSatu = User::create([
@@ -148,28 +157,33 @@ class DisposisiMultiHakimTest extends TestCase
             'status_aktif_pegawai' => true,
         ]);
 
+        $leader = $leaderCode === 'KPTA' ? $ketua : $wakil;
+        $leaderJabatan = $leaderCode === 'KPTA' ? $ketuaJabatan : $wakilJabatan;
+        $sender = $leaderCode === 'KPTA' ? $panitera : $ketua;
+        $senderJabatan = $leaderCode === 'KPTA' ? $paniteraJabatan : $ketuaJabatan;
+
         $surat = SuratMasuk::create([
             'nomor_surat' => '100/UND/VII/2026',
             'perihal' => 'Undangan pembinaan',
             'status' => 'didisposisi',
-            'created_by' => $wakil->id,
+            'created_by' => $leader->id,
         ]);
         $incoming = Disposisi::create([
             'surat_masuk_id' => $surat->id,
-            'dari_user_id' => $ketua->id,
-            'kepada_user_id' => $wakil->id,
-            'dari_jabatan_id' => $ketuaJabatan->id,
-            'kepada_jabatan_id' => $wakilJabatan->id,
+            'dari_user_id' => $sender->id,
+            'kepada_user_id' => $leader->id,
+            'dari_jabatan_id' => $senderJabatan->id,
+            'kepada_jabatan_id' => $leaderJabatan->id,
             'petunjuk' => 'Untuk diketahui',
             'tipe' => 'disposisi',
             'status' => 'pending',
             'priority_level' => 'normal',
         ]);
 
-        $wakil->setRelation('roles', collect());
-        $wakil->setRelation('jabatan', $wakilJabatan);
-        $wakil->setRelation('activeJabatanDelegations', collect());
-        Auth::login($wakil);
+        $leader->setRelation('roles', collect());
+        $leader->setRelation('jabatan', $leaderJabatan);
+        $leader->setRelation('activeJabatanDelegations', collect());
+        Auth::login($leader);
 
         $whatsApp = Mockery::mock(WhatsAppNotificationService::class);
         $whatsApp->shouldReceive('notifyDisposisi')
@@ -180,6 +194,17 @@ class DisposisiMultiHakimTest extends TestCase
             ->twice()
             ->andReturnNull();
 
+        $controller = new DisposisiController($whatsApp, $audit);
+        $targetsResponse = $controller->getTargets(Request::create('/api/disposisi/targets', 'GET', [
+            'tipe' => 'disposisi',
+        ]));
+        $targetIds = collect($targetsResponse->getData(true))->pluck('id')->map(function ($id) {
+            return (int) $id;
+        });
+
+        $this->assertTrue($targetIds->contains($hakimSatu->id));
+        $this->assertTrue($targetIds->contains($hakimDua->id));
+
         $request = Request::create('/disposisi', 'POST', [
             'surat_masuk_id' => $surat->id,
             'kepada_user_ids' => [$hakimSatu->id, $hakimDua->id],
@@ -189,27 +214,37 @@ class DisposisiMultiHakimTest extends TestCase
             'priority_level' => 'normal',
         ]);
 
-        $response = (new DisposisiController($whatsApp, $audit))->store($request);
+        $response = $controller->store($request);
 
         $this->assertTrue($response->getData(true)['success']);
         $this->assertSame('ditindaklanjuti', $incoming->fresh()->status);
         $this->assertDatabaseHas('disposisis', [
             'surat_masuk_id' => $surat->id,
-            'dari_user_id' => $wakil->id,
+            'dari_user_id' => $leader->id,
             'kepada_user_id' => $hakimSatu->id,
+            'dari_jabatan_id' => $leaderJabatan->id,
             'status' => 'pending',
         ]);
         $this->assertDatabaseHas('disposisis', [
             'surat_masuk_id' => $surat->id,
-            'dari_user_id' => $wakil->id,
+            'dari_user_id' => $leader->id,
             'kepada_user_id' => $hakimDua->id,
+            'dari_jabatan_id' => $leaderJabatan->id,
             'status' => 'pending',
         ]);
         $this->assertSame(
             2,
             Disposisi::where('surat_masuk_id', $surat->id)
-                ->where('dari_user_id', $wakil->id)
+                ->where('dari_user_id', $leader->id)
                 ->count()
         );
+    }
+
+    public function leaderDisposisiProvider(): array
+    {
+        return [
+            'ketua' => ['KPTA'],
+            'wakil ketua' => ['WKPTA'],
+        ];
     }
 }

@@ -6,7 +6,7 @@
     <style>
         @page {
             size: A4 portrait;
-            margin: 1.7cm 1.5cm {{ !empty($pdfVerification['qr']) ? '3.8cm' : '1.5cm' }} 1.5cm;
+            margin: 1.7cm 1.5cm 1.5cm 1.5cm;
         }
 
         body {
@@ -235,6 +235,9 @@
             </tr>
         </table>
     @endif
-    @include('partials.pdf-verification-badge', ['pdfVerification' => $pdfVerification ?? null])
+    @include('partials.pdf-verification-badge', [
+        'pdfVerification' => $pdfVerification ?? null,
+        'pdfVerificationInFlow' => true,
+    ])
 </body>
 </html>

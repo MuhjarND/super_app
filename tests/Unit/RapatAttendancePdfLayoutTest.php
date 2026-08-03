@@ -28,7 +28,9 @@ class RapatAttendancePdfLayoutTest extends TestCase
             'hasApprovalSignature' => false,
             'pimpinanSignature' => [],
             'kopImage' => null,
-            'pdfVerification' => null,
+            'pdfVerification' => [
+                'qr' => 'data:image/png;base64,testing',
+            ],
         ])->render();
 
         $this->assertStringNotContainsString('Keterangan Kehadiran', $html);
@@ -36,5 +38,7 @@ class RapatAttendancePdfLayoutTest extends TestCase
         preg_match_all('/<th(?:\s|>)/', $html, $tableHeaders);
         $this->assertSame(4, count($tableHeaders[0]));
         $this->assertStringContainsString('page-break-inside: avoid', $html);
+        $this->assertStringContainsString('position: static', $html);
+        $this->assertStringContainsString('margin-top: 18pt', $html);
     }
 }

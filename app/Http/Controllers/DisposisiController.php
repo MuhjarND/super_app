@@ -166,7 +166,7 @@ class DisposisiController extends Controller
             ) {
                 $sourceJabatanId = $target['is_hakim_tinggi']
                     ? optional($user->effectiveJabatans()->first(function ($jabatan) {
-                        return optional($jabatan)->kode === 'WKPTA';
+                        return in_array(optional($jabatan)->kode, ['KPTA', 'WKPTA'], true);
                     }))->id
                     : $user->sourceJabatanIdForTarget($target['jabatan_id']);
 
@@ -588,7 +588,7 @@ class DisposisiController extends Controller
     protected function canSelectHakimTinggi(User $user, $tipe)
     {
         return $tipe === 'disposisi'
-            && ($user->isSuperAdmin() || $user->hasJabatanKode('WKPTA'));
+            && ($user->isSuperAdmin() || $user->hasJabatanKode(['KPTA', 'WKPTA']));
     }
 
     protected function canTargetHakimTinggi(User $user, User $targetUser, $tipe)
