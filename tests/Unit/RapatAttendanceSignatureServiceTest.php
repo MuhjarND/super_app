@@ -31,7 +31,10 @@ class RapatAttendanceSignatureServiceTest extends TestCase
             'attended_at' => Carbon::parse('2026-08-04 09:15:00', 'Asia/Jayapura'),
         ]);
 
-        $rapat = new Rapat(['attendance_signer_id' => 41]);
+        $rapat = new Rapat([
+            'attendance_signer_id' => 41,
+            'token_qr' => 'attendance-signature-test-token',
+        ]);
         $rapat->setRelation('attendanceSigner', $official);
         $rapat->setRelation('approver1', null);
         $rapat->setRelation('approver2', null);
@@ -43,8 +46,17 @@ class RapatAttendanceSignatureServiceTest extends TestCase
         $this->assertTrue($result['available']);
         $this->assertSame('Pejabat Absensi', $result['name']);
         $this->assertSame('Ketua Panitia,', $result['line1']);
-        $this->assertStringStartsWith('data:', $result['image']);
+        $this->assertStringStartsWith('data:image/svg+xml;base64,', $result['image']);
+        $this->assertStringContainsString('signature=attendance', $result['verification_url']);
         $this->assertSame('2026-08-04 09:15:00', $result['signed_at']->format('Y-m-d H:i:s'));
+
+        $rapat->setRelation('creator', null);
+        $rapat->setRelation('kategoriSuratKode', null);
+        $rapat->setRelation('suratKeluar', null);
+        $verification = app(RapatAttendanceSignatureService::class)->buildVerificationData($rapat);
+        $this->assertTrue($verification['valid']);
+        $this->assertSame('Laporan Absensi Kegiatan', $verification['document_type']);
+        $this->assertSame('Pejabat Absensi', $verification['signatory_name']);
     }
 
     public function testExistingMeetingFallsBackToInvitationSignatory()

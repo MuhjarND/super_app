@@ -48,8 +48,8 @@ class RapatAttendancePdfLayoutTest extends TestCase
         $this->assertStringContainsString('page-break-inside: avoid', $html);
         $this->assertStringContainsString('position: static', $html);
         $this->assertStringContainsString('margin-top: 18pt', $html);
-        $this->assertStringContainsString('Tanda tangan pejabat absensi', $html);
+        $this->assertStringContainsString('QR tanda tangan pejabat absensi', $html);
         $this->assertStringContainsString('Pejabat Pengujian', $html);
-        $this->assertStringContainsString('Tanda tangan kehadiran pada', $html);
+        $this->assertStringContainsString('Ditandatangani secara elektronik pada', $html);
     }
 }

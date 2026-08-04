@@ -4,18 +4,19 @@ namespace App\Services;
 
 use App\Rapat;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 class RapatAttendanceSignatureService
 {
     protected $documentService;
-    protected $signaturePadService;
+    protected $qrCodeService;
 
     public function __construct(
         RapatDocumentService $documentService,
-        SignaturePadService $signaturePadService
+        DocumentQrCodeService $qrCodeService
     ) {
         $this->documentService = $documentService;
-        $this->signaturePadService = $signaturePadService;
+        $this->qrCodeService = $qrCodeService;
     }
 
     public function resolve(Rapat $rapat)
@@ -35,8 +36,14 @@ class RapatAttendanceSignatureService
         $title = $signer
             ? trim((string) ($signer->jabatan_keterangan ?: optional($signer->jabatan)->nama))
             : '';
-        $signatureImage = $attendance
-            ? $this->signaturePadService->toDataUri($attendance->signature_path)
+        $signatureAvailable = $attendance
+            && $attendance->signature_path
+            && Storage::disk('public')->exists($attendance->signature_path);
+        $verificationUrl = $signatureAvailable
+            ? $this->documentService->signatureVerificationUrl($rapat, ['signature' => 'attendance'])
+            : null;
+        $signatureImage = $verificationUrl
+            ? $this->qrCodeService->dataUri($verificationUrl, 120)
             : null;
 
         return [
@@ -49,7 +56,34 @@ class RapatAttendanceSignatureService
             'nip' => optional($signer)->nip ?: null,
             'signed_at' => $attendance ? $attendance->attended_at : null,
             'image' => $signatureImage,
-            'available' => !empty($signatureImage),
+            'available' => (bool) $signatureAvailable,
+            'verification_url' => $verificationUrl,
+        ];
+    }
+
+    public function buildVerificationData(Rapat $rapat)
+    {
+        $rapat->loadMissing(['creator', 'kategoriSuratKode', 'suratKeluar']);
+        $signature = $this->resolve($rapat);
+        $signer = $signature['user'];
+
+        return [
+            'valid' => (bool) $signature['available'],
+            'nomor' => optional($rapat->suratKeluar)->nomor_surat ?: ($rapat->nomor_undangan ?: '-'),
+            'document_type' => 'Laporan Absensi Kegiatan',
+            'judul' => $rapat->judul ?: '-',
+            'status_label' => $signature['available'] ? 'Ditandatangani / Valid' : 'Belum ditandatangani',
+            'signatory_name' => $signature['name'],
+            'signatory_title' => optional($signer)->jabatan_keterangan ?: optional(optional($signer)->jabatan)->nama ?: '-',
+            'signed_at' => $signature['signed_at']
+                ? $signature['signed_at']->copy()->timezone('Asia/Jayapura')->translatedFormat('d F Y H:i') . ' WIT'
+                : '-',
+            'created_by' => optional($rapat->creator)->name ?: '-',
+            'kategori' => optional($rapat->kategoriSuratKode)->kode
+                ? ($rapat->kategoriSuratKode->kode . ' - ' . $rapat->kategoriSuratKode->nama)
+                : '-',
+            'token' => $rapat->token_qr ?: '-',
+            'verification_url' => $signature['verification_url'],
         ];
     }
 

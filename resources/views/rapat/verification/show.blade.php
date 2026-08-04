@@ -138,7 +138,7 @@
                     </div>
                     <div class="item">
                         <span class="label">Jenis Dokumen</span>
-                        <div class="value">Undangan Rapat</div>
+                        <div class="value">{{ $verification['document_type'] ?? 'Undangan Rapat' }}</div>
                     </div>
                     <div class="item">
                         <span class="label">Judul Rapat</span>

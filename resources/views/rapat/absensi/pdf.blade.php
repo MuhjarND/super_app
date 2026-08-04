@@ -118,16 +118,16 @@
             page-break-inside: avoid;
         }
 
-        .official-attendance-signature {
-            width: 112pt;
-            height: 50pt;
+        .official-attendance-qr {
+            width: 66pt;
+            height: 66pt;
             margin: 5pt auto 3pt;
             text-align: center;
         }
 
-        .official-attendance-signature img {
-            width: 112pt;
-            height: 50pt;
+        .official-attendance-qr img {
+            width: 66pt;
+            height: 66pt;
             display: block;
             margin: 0 auto;
             object-fit: contain;
@@ -226,8 +226,8 @@
                         <div>{{ $attendanceSignature['line1'] ?? 'Pejabat Penanda Tangan,' }}</div>
                         <div><strong>{{ $attendanceSignature['line2'] ?? 'Pengadilan Tinggi Agama Papua Barat' }}</strong></div>
                         @if($hasAttendanceSignature)
-                            <div class="official-attendance-signature">
-                                <img src="{{ $attendanceSignature['image'] }}" alt="Tanda tangan pejabat absensi">
+                            <div class="official-attendance-qr">
+                                <img src="{{ $attendanceSignature['image'] }}" alt="QR tanda tangan pejabat absensi">
                             </div>
                         @else
                             <div class="signature-pending">Belum melakukan absensi</div>
@@ -238,7 +238,7 @@
                         @endif
                         @if(!empty($attendanceSignature['signed_at']))
                             <div class="waktu-approval">
-                                Tanda tangan kehadiran pada
+                                Ditandatangani secara elektronik pada
                                 {{ $attendanceSignature['signed_at']->copy()->timezone('Asia/Jayapura')->translatedFormat('d F Y H:i') }} WIT
                             </div>
                         @endif
