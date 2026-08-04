@@ -42,7 +42,7 @@ class Voting extends Model
     {
         return $this->belongsToMany(User::class, 'voting_participants')
             ->withPivot('urutan', 'voted_at')
-            ->orderBy('pivot_urutan');
+            ->orderBy('voting_participants.urutan');
     }
 
     public function participantPivots()

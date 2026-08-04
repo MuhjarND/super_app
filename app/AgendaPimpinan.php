@@ -48,7 +48,7 @@ class AgendaPimpinan extends Model
     {
         return $this->belongsToMany(User::class, 'agenda_pimpinan_user')
             ->withPivot('urutan')
-            ->orderBy('pivot_urutan');
+            ->orderBy('agenda_pimpinan_user.urutan');
     }
 
     public function scopeVisibleTo($query, User $user)

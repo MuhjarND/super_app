@@ -123,7 +123,7 @@ class Rapat extends Model
     {
         return $this->belongsToMany(User::class, 'rapat_peserta')
             ->withPivot('urutan')
-            ->orderBy('pivot_urutan');
+            ->orderBy('rapat_peserta.urutan');
     }
 
     public function approvals()

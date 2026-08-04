@@ -45,7 +45,7 @@ class VirtualMeeting extends Model
         return $this->belongsToMany(User::class, 'virtual_meeting_user')
             ->withPivot('urutan')
             ->withTimestamps()
-            ->orderBy('pivot_urutan');
+            ->orderBy('virtual_meeting_user.urutan');
     }
 
     public function scopeVisibleTo($query, User $user)
