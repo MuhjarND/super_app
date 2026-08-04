@@ -271,6 +271,9 @@
                                             <i class="fas fa-envelope-open-text mr-1"></i> Surat Keluar
                                         </span>
                                     @endif
+                                    <div style="font-size: 0.75rem; color: #64748b; margin-top: 5px;">
+                                        Penanda tangan: {{ optional($rapat->attendanceSigner)->name ?: 'Mengikuti penanda tangan rapat' }}
+                                    </div>
                                 </td>
                                 <td>
                                     <div>{{ optional($rapat->tanggal)->translatedFormat('d M Y') }}</div>
@@ -308,6 +311,21 @@
                                         <button type="button" class="app-icon-btn link" data-mobile-label="Link" title="Salin link publik" onclick="copyPublicLink('{{ route('rapat.absensi.public.show', $rapat->public_code) }}')">
                                             <i class="fas fa-link"></i>
                                         </button>
+                                        @if($canCreateDirectAttendance)
+                                            <button
+                                                type="button"
+                                                class="app-icon-btn edit attendance-signer-edit"
+                                                data-mobile-label="Edit"
+                                                title="Atur penanda tangan absensi"
+                                                data-toggle="modal"
+                                                data-target="#attendanceSignerModal"
+                                                data-action="{{ route('rapat.absensi.update-signer', $rapat) }}"
+                                                data-signer-id="{{ $rapat->attendance_signer_id }}"
+                                                data-title="{{ $rapat->judul }}"
+                                            >
+                                                <i class="fas fa-user-edit"></i>
+                                            </button>
+                                        @endif
                                         @if($canCreateDirectAttendance && $rapat->is_attendance_only)
                                             <form method="POST" action="{{ route('rapat.absensi.destroy-direct', $rapat) }}" class="d-inline" onsubmit="return confirm('Hapus absensi langsung ini beserta seluruh data kehadirannya?')">
                                                 @csrf
@@ -429,6 +447,22 @@
                             <small class="form-text text-muted">Penerima internal surat dipilih otomatis dan masih dapat disesuaikan.</small>
                         </div>
 
+                        <div class="form-group">
+                            <label for="directAttendanceSigner">Pejabat Penanda Tangan Absensi</label>
+                            <select name="attendance_signer_id" id="directAttendanceSigner" class="form-control" required>
+                                <option value="">-- Pilih Pejabat --</option>
+                                @foreach($attendanceParticipants as $attendanceOfficial)
+                                    <option
+                                        value="{{ $attendanceOfficial->id }}"
+                                        {{ (string) old('attendance_signer_id') === (string) $attendanceOfficial->id ? 'selected' : '' }}
+                                    >
+                                        {{ $attendanceOfficial->name }}{{ $attendanceOfficial->jabatan_keterangan ? ' - ' . $attendanceOfficial->jabatan_keterangan : '' }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            <small class="form-text text-muted">Tanda tangan yang dipakai adalah tanda tangan pejabat saat mengisi absensi.</small>
+                        </div>
+
                         <div class="form-row">
                             <div class="form-group col-md-4">
                                 <label for="directAttendanceDate">Tanggal Kegiatan</label>
@@ -479,6 +513,46 @@
                 </form>
             </div>
         </div>
+
+        <div class="modal fade direct-attendance-modal" id="attendanceSignerModal" tabindex="-1" role="dialog" aria-labelledby="attendanceSignerModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <form action="#" method="POST" class="modal-content" id="attendanceSignerForm">
+                    @csrf
+                    @method('PUT')
+                    <div class="modal-header">
+                        <div>
+                            <h5 class="modal-title" id="attendanceSignerModalLabel">Penanda Tangan Absensi</h5>
+                            <div class="text-muted" id="attendanceSignerMeetingTitle" style="font-size: 0.78rem;"></div>
+                        </div>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Tutup">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-group mb-0">
+                            <label for="attendanceSignerSelect">Pejabat</label>
+                            <select name="attendance_signer_id" id="attendanceSignerSelect" class="form-control" required>
+                                <option value="">-- Pilih Pejabat --</option>
+                                @foreach($attendanceParticipants as $attendanceOfficial)
+                                    <option value="{{ $attendanceOfficial->id }}">
+                                        {{ $attendanceOfficial->name }}{{ $attendanceOfficial->jabatan_keterangan ? ' - ' . $attendanceOfficial->jabatan_keterangan : '' }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            <small class="form-text text-muted">
+                                Pejabat otomatis ditambahkan sebagai peserta. Tanda tangannya muncul di PDF setelah melakukan absensi.
+                            </small>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-light" data-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save mr-1"></i> Simpan
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
     @endif
 @endsection
 
@@ -497,6 +571,9 @@
             const suratSelect = $('#directAttendanceSuratKeluar');
             const participantSelect = $('#directAttendanceParticipants');
             const participantSelectAll = $('#directAttendanceSelectAll');
+            const directSignerSelect = $('#directAttendanceSigner');
+            const signerModal = $('#attendanceSignerModal');
+            const signerSelect = $('#attendanceSignerSelect');
             let preserveOldParticipants = {{ old('participant_ids') !== null ? 'true' : 'false' }};
 
             modal.on('shown.bs.modal', function () {
@@ -517,7 +594,33 @@
                         closeOnSelect: false
                     });
                 }
+                if ($.fn.select2 && !directSignerSelect.hasClass('select2-hidden-accessible')) {
+                    directSignerSelect.select2({
+                        theme: 'bootstrap4',
+                        width: '100%',
+                        dropdownParent: modal,
+                        placeholder: '-- Pilih Pejabat --'
+                    });
+                }
                 suratSelect.trigger('change');
+            });
+
+            signerModal.on('show.bs.modal', function (event) {
+                const button = $(event.relatedTarget);
+                $('#attendanceSignerForm').attr('action', button.data('action'));
+                $('#attendanceSignerMeetingTitle').text(button.data('title') || '');
+                signerSelect.val(String(button.data('signer-id') || '')).trigger('change');
+            });
+
+            signerModal.on('shown.bs.modal', function () {
+                if ($.fn.select2 && !signerSelect.hasClass('select2-hidden-accessible')) {
+                    signerSelect.select2({
+                        theme: 'bootstrap4',
+                        width: '100%',
+                        dropdownParent: signerModal,
+                        placeholder: '-- Pilih Pejabat --'
+                    });
+                }
             });
 
             function refreshParticipantToggle() {

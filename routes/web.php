@@ -83,6 +83,7 @@ Route::middleware(['auth'])->group(function () {
 
     // Surat Masuk
     Route::get('/surat-masuk', 'SuratMasukController@index')->name('surat-masuk.index');
+    Route::get('/surat-masuk/laporan/pdf', 'PersuratanReportController@incoming')->name('surat-masuk.report.pdf');
     Route::post('/surat-masuk', 'SuratMasukController@store')->name('surat-masuk.store');
     Route::get('/surat-masuk/{suratMasuk}', 'SuratMasukController@show')->name('surat-masuk.show');
     Route::put('/surat-masuk/{suratMasuk}', 'SuratMasukController@update')->name('surat-masuk.update');
@@ -93,6 +94,7 @@ Route::middleware(['auth'])->group(function () {
 
     // Surat Keluar
     Route::get('/surat-keluar', 'SuratKeluarController@index')->name('surat-keluar.index');
+    Route::get('/surat-keluar/laporan/pdf', 'PersuratanReportController@outgoing')->name('surat-keluar.report.pdf');
     Route::post('/surat-keluar', 'SuratKeluarController@store')->name('surat-keluar.store');
     Route::put('/surat-keluar/{suratKeluar}', 'SuratKeluarController@update')->name('surat-keluar.update');
     Route::delete('/surat-keluar/{suratKeluar}', 'SuratKeluarController@destroy')->name('surat-keluar.destroy');
@@ -328,6 +330,9 @@ Route::middleware(['auth'])->group(function () {
         Route::delete('/absensi/{rapat}', 'RapatAbsensiController@destroyDirectAttendance')
             ->middleware('role:admin,operator,notulis,super_admin')
             ->name('absensi.destroy-direct');
+        Route::put('/absensi/{rapat}/penanda-tangan', 'RapatAbsensiController@updateSigner')
+            ->middleware('role:admin,operator,notulis,super_admin')
+            ->name('absensi.update-signer');
         Route::get('/absensi/{rapat}', 'RapatAbsensiController@show')->name('absensi.show');
         Route::get('/absensi/{rapat}/pdf', 'RapatAbsensiController@pdf')->name('absensi.pdf');
         Route::post('/absensi/{rapat}/remind', 'RapatAbsensiController@remindPending')->name('absensi.remind');

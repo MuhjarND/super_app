@@ -40,6 +40,9 @@ class DirectAttendanceService
                 'public_code' => $this->newPublicCode(),
                 'is_attendance_only' => true,
                 'attendance_surat_keluar_id' => $suratKeluar->id,
+                'attendance_signer_id' => !empty($data['attendance_signer_id'])
+                    ? (int) $data['attendance_signer_id']
+                    : null,
                 'created_by' => $creator->id,
             ]);
 
@@ -52,6 +55,10 @@ class DirectAttendanceService
                 ->filter()
                 ->unique()
                 ->values();
+            if (!empty($data['attendance_signer_id'])) {
+                $participants->push((int) $data['attendance_signer_id']);
+                $participants = $participants->unique()->values();
+            }
             $syncData = [];
             foreach ($participants as $index => $participantId) {
                 $syncData[(int) $participantId] = ['urutan' => $index + 1];

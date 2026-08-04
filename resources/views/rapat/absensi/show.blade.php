@@ -45,6 +45,11 @@
                 @endif
             </div>
             <div class="text-right">
+                @if($canManageAttendance)
+                    <button type="button" class="btn btn-outline-secondary btn-sm" data-toggle="modal" data-target="#attendanceSignerModal">
+                        <i class="fas fa-user-edit mr-1"></i> Edit Penanda Tangan
+                    </button>
+                @endif
                 <a href="{{ route('rapat.absensi.pdf', $rapat) }}" target="_blank" class="btn btn-outline-danger btn-sm">PDF Absensi</a>
                 <a href="{{ route('rapat.absensi.public.show', $rapat->public_code) }}" target="_blank" class="btn btn-outline-primary btn-sm">Buka Link Publik</a>
                 <div class="text-muted mt-2" style="font-size: 0.75rem;">{{ $publicAttendanceUrl }}</div>
@@ -83,6 +88,17 @@
         <div class="attendance-info-box">
             <div class="text-muted" style="font-size: 0.75rem;">Satker/External</div>
             <div class="font-weight-bold">{{ $guestAttendances->count() }}</div>
+        </div>
+        <div class="attendance-info-box">
+            <div class="text-muted" style="font-size: 0.75rem;">Penanda Tangan Absensi</div>
+            <div class="font-weight-bold">{{ $attendanceSignature['name'] ?? '-' }}</div>
+            <div class="mt-1" style="font-size: 0.75rem;">
+                @if(!empty($attendanceSignature['available']))
+                    <span class="badge badge-success">Sudah tanda tangan</span>
+                @else
+                    <span class="badge badge-warning">Belum melakukan absensi</span>
+                @endif
+            </div>
         </div>
         <div class="attendance-info-box">
             <div class="text-muted" style="font-size: 0.75rem;">Reminder WA</div>
@@ -184,4 +200,69 @@
             </table>
         </div>
     </div>
+
+    @if($canManageAttendance)
+        <div class="modal fade" id="attendanceSignerModal" tabindex="-1" role="dialog" aria-labelledby="attendanceSignerModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <form action="{{ route('rapat.absensi.update-signer', $rapat) }}" method="POST" class="modal-content">
+                    @csrf
+                    @method('PUT')
+                    <div class="modal-header">
+                        <div>
+                            <h5 class="modal-title" id="attendanceSignerModalLabel">Penanda Tangan Absensi</h5>
+                            <div class="text-muted" style="font-size: 0.78rem;">{{ $rapat->judul }}</div>
+                        </div>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Tutup">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-group mb-0">
+                            <label for="attendanceSignerSelect">Pejabat</label>
+                            <select name="attendance_signer_id" id="attendanceSignerSelect" class="form-control" required>
+                                <option value="">-- Pilih Pejabat --</option>
+                                @foreach($attendanceOfficials as $attendanceOfficial)
+                                    <option
+                                        value="{{ $attendanceOfficial->id }}"
+                                        {{ (string) $rapat->attendance_signer_id === (string) $attendanceOfficial->id ? 'selected' : '' }}
+                                    >
+                                        {{ $attendanceOfficial->name }}{{ $attendanceOfficial->jabatan_keterangan ? ' - ' . $attendanceOfficial->jabatan_keterangan : '' }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            <small class="form-text text-muted">
+                                Pejabat otomatis menjadi peserta. PDF memakai tanda tangan yang dibuat saat pejabat melakukan absensi.
+                            </small>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-light" data-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save mr-1"></i> Simpan
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    @endif
 @endsection
+
+@push('scripts')
+    <script>
+        $(function () {
+            const modal = $('#attendanceSignerModal');
+            const signerSelect = $('#attendanceSignerSelect');
+
+            modal.on('shown.bs.modal', function () {
+                if ($.fn.select2 && !signerSelect.hasClass('select2-hidden-accessible')) {
+                    signerSelect.select2({
+                        theme: 'bootstrap4',
+                        width: '100%',
+                        dropdownParent: modal,
+                        placeholder: '-- Pilih Pejabat --'
+                    });
+                }
+            });
+        });
+    </script>
+@endpush

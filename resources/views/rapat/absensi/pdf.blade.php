@@ -118,19 +118,27 @@
             page-break-inside: avoid;
         }
 
-        .signature-pad-image {
-            width: 64pt;
-            height: 64pt;
-            margin: 4pt auto 3pt;
+        .official-attendance-signature {
+            width: 112pt;
+            height: 50pt;
+            margin: 5pt auto 3pt;
             text-align: center;
         }
 
-        .signature-pad-image img {
-            width: 64pt;
-            height: 64pt;
+        .official-attendance-signature img {
+            width: 112pt;
+            height: 50pt;
             display: block;
             margin: 0 auto;
             object-fit: contain;
+        }
+
+        .signature-pending {
+            height: 42pt;
+            padding-top: 16pt;
+            color: #64748b;
+            font-size: 8pt;
+            font-style: italic;
         }
 
         .nama-ttd {
@@ -209,25 +217,29 @@
         </tbody>
     </table>
 
-    @if($hasApprovalSignature)
+    @if($hasAttendanceSigner)
         <table class="ttd-table">
             <tr>
                 <td style="width: 52%;"></td>
                 <td>
                     <div class="ttd-box">
-                        <div>{{ $pimpinanSignature['line1'] ?? 'Pejabat Penanda Tangan,' }}</div>
-                        <div><strong>{{ $pimpinanSignature['line2'] ?? 'Pengadilan Tinggi Agama Papua Barat' }}</strong></div>
-                        @if(!empty($pimpinanSignature['image']))
-                            <div class="signature-pad-image">
-                                <img src="{{ $pimpinanSignature['image'] }}" alt="QR tanda tangan pimpinan">
+                        <div>{{ $attendanceSignature['line1'] ?? 'Pejabat Penanda Tangan,' }}</div>
+                        <div><strong>{{ $attendanceSignature['line2'] ?? 'Pengadilan Tinggi Agama Papua Barat' }}</strong></div>
+                        @if($hasAttendanceSignature)
+                            <div class="official-attendance-signature">
+                                <img src="{{ $attendanceSignature['image'] }}" alt="Tanda tangan pejabat absensi">
                             </div>
                         @else
-                            <div style="height: 68pt;"></div>
+                            <div class="signature-pending">Belum melakukan absensi</div>
                         @endif
-                        <div class="nama-ttd">{{ $pimpinanSignature['name'] ?? '-' }}</div>
-                        @if(!empty($pimpinanSignature['signed_at']))
+                        <div class="nama-ttd">{{ $attendanceSignature['name'] ?? '-' }}</div>
+                        @if(!empty($attendanceSignature['nip']))
+                            <div>NIP. {{ $attendanceSignature['nip'] }}</div>
+                        @endif
+                        @if(!empty($attendanceSignature['signed_at']))
                             <div class="waktu-approval">
-                                Disetujui pada {{ $pimpinanSignature['signed_at']->translatedFormat('d F Y H:i') }} WIT
+                                Tanda tangan kehadiran pada
+                                {{ $attendanceSignature['signed_at']->copy()->timezone('Asia/Jayapura')->translatedFormat('d F Y H:i') }} WIT
                             </div>
                         @endif
                     </div>

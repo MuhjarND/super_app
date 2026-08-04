@@ -7,6 +7,7 @@ use App\RapatAttendance;
 use App\SuratKeluar;
 use App\User;
 use App\Services\DirectAttendanceService;
+use App\Services\RapatAttendanceSignatureService;
 use App\Services\RapatDocumentService;
 use App\Services\SignaturePadService;
 use App\Services\WhatsAppNotificationService;
@@ -23,18 +24,21 @@ class RapatAbsensiController extends Controller
     protected $documentService;
     protected $signaturePadService;
     protected $directAttendanceService;
+    protected $attendanceSignatureService;
 
     public function __construct(
         WhatsAppNotificationService $whatsAppService,
         RapatDocumentService $documentService,
         SignaturePadService $signaturePadService,
-        DirectAttendanceService $directAttendanceService
+        DirectAttendanceService $directAttendanceService,
+        RapatAttendanceSignatureService $attendanceSignatureService
     ) {
         $this->middleware('auth')->except(['publicShow', 'publicStore', 'publicStoreGuest', 'verifyAttendance']);
         $this->whatsAppService = $whatsAppService;
         $this->documentService = $documentService;
         $this->signaturePadService = $signaturePadService;
         $this->directAttendanceService = $directAttendanceService;
+        $this->attendanceSignatureService = $attendanceSignatureService;
     }
 
     public function index()
@@ -50,6 +54,7 @@ class RapatAbsensiController extends Controller
                 'internalAttendances',
                 'guestAttendances',
                 'attendanceSourceSuratKeluar',
+                'attendanceSigner.jabatan',
             ])
             ->orderByDesc('tanggal')
             ->orderByDesc('waktu_mulai')
@@ -107,6 +112,11 @@ class RapatAbsensiController extends Controller
             'tanggal' => ['required', 'date'],
             'waktu_mulai' => ['required', 'date_format:H:i'],
             'tempat' => ['required', 'string', 'max:255'],
+            'attendance_signer_id' => [
+                'required',
+                'integer',
+                Rule::exists('users', 'id')->where('status_aktif_pegawai', true),
+            ],
         ], [
             'surat_keluar_id.required' => 'Surat Keluar wajib dipilih.',
             'judul.required' => 'Judul absensi wajib diisi.',
@@ -115,6 +125,7 @@ class RapatAbsensiController extends Controller
             'tanggal.required' => 'Tanggal kegiatan wajib diisi.',
             'waktu_mulai.required' => 'Waktu kegiatan wajib diisi.',
             'tempat.required' => 'Tempat kegiatan wajib diisi.',
+            'attendance_signer_id.required' => 'Pejabat penanda tangan absensi wajib dipilih.',
         ]);
 
         $suratKeluar = SuratKeluar::query()->findOrFail($data['surat_keluar_id']);
@@ -142,6 +153,29 @@ class RapatAbsensiController extends Controller
             ->with('success', 'Absensi langsung berhasil dihapus.');
     }
 
+    public function updateSigner(Request $request, Rapat $rapat)
+    {
+        $user = $request->user();
+        abort_unless($user->canManageRapat() || $user->canManageMeetingMinutes(), 403);
+
+        $data = $request->validate([
+            'attendance_signer_id' => [
+                'required',
+                'integer',
+                Rule::exists('users', 'id')->where('status_aktif_pegawai', true),
+            ],
+        ], [
+            'attendance_signer_id.required' => 'Pejabat penanda tangan absensi wajib dipilih.',
+        ]);
+
+        $this->attendanceSignatureService->assign($rapat, $data['attendance_signer_id']);
+
+        return back()->with(
+            'success',
+            'Pejabat penanda tangan absensi berhasil diperbarui. Tanda tangan akan muncul setelah pejabat melakukan absensi.'
+        );
+    }
+
     public function show(Rapat $rapat)
     {
         abort_unless(auth()->user()->canViewRapat($rapat), 403);
@@ -156,6 +190,7 @@ class RapatAbsensiController extends Controller
             'internalAttendances',
             'guestAttendances',
             'attendanceSourceSuratKeluar',
+            'attendanceSigner.jabatan',
         ]);
 
         $attendanceByUser = $rapat->internalAttendances->keyBy('user_id');
@@ -168,8 +203,21 @@ class RapatAbsensiController extends Controller
 
         $guestAttendances = $rapat->guestAttendances;
         $publicAttendanceUrl = route('rapat.absensi.public.show', $rapat->public_code);
+        $canManageAttendance = auth()->user()->canManageRapat() || auth()->user()->canManageMeetingMinutes();
+        $attendanceOfficials = $canManageAttendance
+            ? User::query()->active()->ordered()->get(['id', 'name', 'jabatan_keterangan', 'hirarki'])
+            : collect();
+        $attendanceSignature = $this->attendanceSignatureService->resolve($rapat);
 
-        return view('rapat.absensi.show', compact('rapat', 'internalParticipants', 'guestAttendances', 'publicAttendanceUrl'));
+        return view('rapat.absensi.show', compact(
+            'rapat',
+            'internalParticipants',
+            'guestAttendances',
+            'publicAttendanceUrl',
+            'canManageAttendance',
+            'attendanceOfficials',
+            'attendanceSignature'
+        ));
     }
 
     public function signature(RapatAttendance $attendance)
@@ -203,6 +251,7 @@ class RapatAbsensiController extends Controller
             'internalAttendances',
             'guestAttendances',
             'attendanceSourceSuratKeluar',
+            'attendanceSigner.jabatan',
         ]);
 
         $attendanceByUser = $rapat->internalAttendances->keyBy('user_id');
@@ -236,19 +285,16 @@ class RapatAbsensiController extends Controller
             ];
         }))->values();
 
-        $attendanceApproved = $this->documentService->shouldUseSignedDocument($rapat);
-        $pimpinanSignature = $this->documentService->buildApprovalSignatureData($rapat, $attendanceApproved);
-        $hasApprovalSignature = $attendanceApproved
-            && !empty($pimpinanSignature['image'])
-            && !empty($pimpinanSignature['name'])
-            && $pimpinanSignature['name'] !== '-';
-        $signers = $hasApprovalSignature
+        $attendanceSignature = $this->attendanceSignatureService->resolve($rapat);
+        $hasAttendanceSigner = !empty($attendanceSignature['user']);
+        $hasAttendanceSignature = $hasAttendanceSigner && !empty($attendanceSignature['available']);
+        $signers = $hasAttendanceSignature
             ? [[
-                'name' => $pimpinanSignature['name'],
+                'name' => $attendanceSignature['name'],
                 'role' => 'Penanda Tangan Absensi',
-                'title' => trim(($pimpinanSignature['line1'] ?? '') . ' ' . ($pimpinanSignature['line2'] ?? '')),
-                'signed_at' => !empty($pimpinanSignature['signed_at'])
-                    ? $pimpinanSignature['signed_at']->translatedFormat('d F Y H:i') . ' WIT'
+                'title' => rtrim((string) ($attendanceSignature['line1'] ?? ''), ','),
+                'signed_at' => !empty($attendanceSignature['signed_at'])
+                    ? $attendanceSignature['signed_at']->copy()->timezone('Asia/Jayapura')->translatedFormat('d F Y H:i') . ' WIT'
                     : '-',
             ]]
             : [];
@@ -264,8 +310,9 @@ class RapatAbsensiController extends Controller
         $pdf = PDF::loadView('rapat.absensi.pdf', compact(
             'rapat',
             'attendanceRows',
-            'hasApprovalSignature',
-            'pimpinanSignature',
+            'hasAttendanceSigner',
+            'hasAttendanceSignature',
+            'attendanceSignature',
             'kopImage',
             'pdfVerification'
         ))->setPaper('a4', 'portrait');

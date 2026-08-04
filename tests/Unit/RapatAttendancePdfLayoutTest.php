@@ -25,8 +25,16 @@ class RapatAttendancePdfLayoutTest extends TestCase
                     'signature' => null,
                 ],
             ]),
-            'hasApprovalSignature' => false,
-            'pimpinanSignature' => [],
+            'hasAttendanceSigner' => true,
+            'hasAttendanceSignature' => true,
+            'attendanceSignature' => [
+                'line1' => 'Ketua,',
+                'line2' => 'Pengadilan Tinggi Agama Papua Barat',
+                'name' => 'Pejabat Pengujian',
+                'nip' => '198001012006041001',
+                'signed_at' => \Carbon\Carbon::parse('2026-08-03 09:15:00', 'Asia/Jayapura'),
+                'image' => 'data:image/png;base64,testing-signature',
+            ],
             'kopImage' => null,
             'pdfVerification' => [
                 'qr' => 'data:image/png;base64,testing',
@@ -40,5 +48,8 @@ class RapatAttendancePdfLayoutTest extends TestCase
         $this->assertStringContainsString('page-break-inside: avoid', $html);
         $this->assertStringContainsString('position: static', $html);
         $this->assertStringContainsString('margin-top: 18pt', $html);
+        $this->assertStringContainsString('Tanda tangan pejabat absensi', $html);
+        $this->assertStringContainsString('Pejabat Pengujian', $html);
+        $this->assertStringContainsString('Tanda tangan kehadiran pada', $html);
     }
 }

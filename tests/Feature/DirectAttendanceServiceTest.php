@@ -6,6 +6,7 @@ use App\Rapat;
 use App\RapatAttendance;
 use App\PdfVerification;
 use App\Services\DirectAttendanceService;
+use App\Services\RapatAttendanceSignatureService;
 use App\SuratKeluar;
 use App\User;
 use Illuminate\Database\Schema\Blueprint;
@@ -75,6 +76,7 @@ class DirectAttendanceServiceTest extends TestCase
             $table->string('public_code')->nullable()->unique();
             $table->boolean('is_attendance_only')->default(false);
             $table->unsignedBigInteger('attendance_surat_keluar_id')->nullable();
+            $table->unsignedBigInteger('attendance_signer_id')->nullable();
             $table->unsignedBigInteger('created_by');
             $table->timestamps();
         });
@@ -158,6 +160,7 @@ class DirectAttendanceServiceTest extends TestCase
             [
                 'judul' => 'Absensi Pembinaan Internal',
                 'participant_ids' => [$selectedParticipant->id],
+                'attendance_signer_id' => $letterRecipient->id,
                 'tanggal' => '2026-07-30',
                 'waktu_mulai' => '09:00',
                 'tempat' => 'Aula PTA Papua Barat',
@@ -167,18 +170,30 @@ class DirectAttendanceServiceTest extends TestCase
         $this->assertTrue($rapat->is_attendance_only);
         $this->assertSame($suratKeluar->id, $rapat->attendance_surat_keluar_id);
         $this->assertSame('Absensi Pembinaan Internal', $rapat->judul);
+        $this->assertSame($letterRecipient->id, $rapat->attendance_signer_id);
         $this->assertSame('disetujui', $rapat->status);
         $this->assertSame(
-            [(int) $selectedParticipant->id],
+            [(int) $letterRecipient->id, (int) $selectedParticipant->id],
             $rapat->pesertas()->pluck('users.id')->map(function ($id) {
                 return (int) $id;
-            })->all()
+            })->sort()->values()->all()
         );
 
         $manager = \Mockery::mock(User::class)->makePartial();
         $manager->shouldReceive('canManageRapat')->andReturn(true);
         $this->assertSame(0, Rapat::visibleTo($manager)->count());
         $this->assertSame(1, Rapat::attendanceVisibleTo($manager)->count());
+
+        $replacementSigner = $this->createUser('Pejabat Pengganti', 'replacement-signer@example.test');
+        app(RapatAttendanceSignatureService::class)->assign($rapat, $replacementSigner->id);
+        $this->assertDatabaseHas('rapats', [
+            'id' => $rapat->id,
+            'attendance_signer_id' => $replacementSigner->id,
+        ]);
+        $this->assertDatabaseHas('rapat_peserta', [
+            'rapat_id' => $rapat->id,
+            'user_id' => $replacementSigner->id,
+        ]);
     }
 
     public function testOneOutgoingLetterCanCreateMultiplePublicAttendances()

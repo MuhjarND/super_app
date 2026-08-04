@@ -710,6 +710,11 @@
                 </div>
                 <div class="col-sm-6 text-right">
                     @include('persuratan._legacy-sync-button')
+                    @include('persuratan._report-control', [
+                        'modalId' => 'suratKeluarReportModal',
+                        'action' => route('surat-keluar.report.pdf'),
+                        'title' => 'Cetak Laporan Surat Keluar',
+                    ])
                     <?php if($canCreateSuratKeluar): ?>
                         <button class="btn btn-add-surat" data-toggle="modal" data-target="#createModal">
                             <i class="fas fa-plus mr-1"></i> Add Surat Keluar

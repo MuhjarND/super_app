@@ -109,7 +109,7 @@
                     <details class="rapat-advanced" {{ $isCreate ? '' : 'open' }}>
                         <summary>
                             <span>Pengaturan lanjutan</span>
-                            <small>Approval, pakaian, virtual, berkala, dan lampiran</small>
+                            <small>Approval, tujuan external, pakaian, virtual, berkala, dan lampiran</small>
                         </summary>
 
                         <div class="rapat-advanced-body">
@@ -181,12 +181,25 @@
                                         <small>Buat undangan khusus satuan kerja.</small>
                                     </span>
                                 </label>
+                                <label class="rapat-option-card" for="{{ $prefix }}IsExternal">
+                                    <input type="checkbox" name="is_external" value="1" id="{{ $prefix }}IsExternal">
+                                    <span>
+                                        <strong>External</strong>
+                                        <small>Gunakan tujuan surat di luar peserta internal.</small>
+                                    </span>
+                                </label>
                             </div>
 
                             <div id="{{ $prefix }}SatkerGroup" class="rapat-conditional-field" style="display:none;">
                                 <label>Tujuan Surat Satuan Kerja <span class="text-danger">*</span></label>
                                 <textarea class="form-control" name="tujuan_surat" id="{{ $prefix }}TujuanSurat" rows="2" placeholder="Contoh: Ketua Pengadilan Agama se-wilayah Pengadilan Tinggi Agama Papua Barat"></textarea>
                                 <small class="form-hint">Tujuan ini hanya digunakan pada PDF undangan satuan kerja.</small>
+                            </div>
+
+                            <div id="{{ $prefix }}ExternalGroup" class="rapat-conditional-field" style="display:none;">
+                                <label>Tujuan Surat External <span class="text-danger">*</span></label>
+                                <textarea class="form-control" name="tujuan_external" id="{{ $prefix }}TujuanExternal" rows="2" maxlength="255" placeholder="Contoh: Kepala Kantor Wilayah Kementerian Agama Provinsi Papua Barat"></textarea>
+                                <small class="form-hint">Tujuan ini akan ditampilkan pada PDF undangan utama.</small>
                             </div>
 
                             <div id="{{ $prefix }}PakaianGroup" class="rapat-conditional-field" style="display:none;">

@@ -136,8 +136,8 @@ class RapatDocumentService
             'kode_kegiatan_id' => $hierarchy['kegiatan'] ? $hierarchy['kegiatan']->id : null,
             'kode_transaksi_id' => $hierarchy['transaksi'] ? $hierarchy['transaksi']->id : null,
             'nomenklatur_jabatan' => $nomenklatur,
-            'opsi_penerima' => 'internal',
-            'penerima_external' => null,
+            'opsi_penerima' => $rapat->is_external ? 'external' : 'internal',
+            'penerima_external' => $rapat->is_external ? trim((string) $rapat->tujuan_external) : null,
             'perihal' => $rapat->judul,
             'tanggal_surat' => $issueDate->toDateString(),
             'has_lampiran' => true,
@@ -389,7 +389,9 @@ class RapatDocumentService
             return $isSatkerInvitation ? $user->hasRole('satker') : !$user->hasRole('satker');
         })->values();
 
-        $tujuanSurat = $isSatkerInvitation ? trim((string) $rapat->tujuan_surat) : '';
+        $tujuanSurat = $isSatkerInvitation
+            ? trim((string) $rapat->tujuan_surat)
+            : ($rapat->is_external ? trim((string) $rapat->tujuan_external) : '');
         $tujuanManual = $tujuanSurat !== '';
         $singleRecipient = $displayRecipients->count() === 1;
         $showLampiranDaftar = $displayRecipients->count() > 1;

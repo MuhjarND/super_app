@@ -33,6 +33,8 @@ class StoreRapatRequest extends FormRequest
             'detail_tambahan' => ['nullable', 'required_if:include_detail_tambahan,1', 'string'],
             'bersama_satker' => ['nullable', 'boolean'],
             'tujuan_surat' => ['nullable', 'required_if:bersama_satker,1', 'string'],
+            'is_external' => ['nullable', 'boolean'],
+            'tujuan_external' => ['nullable', 'required_if:is_external,1', 'string', 'max:255'],
             'include_pakaian' => ['nullable', 'boolean'],
             'jenis_pakaian' => ['nullable', 'required_if:include_pakaian,1', 'string', 'max:255'],
             'is_virtual' => ['nullable', 'boolean'],
@@ -91,6 +93,14 @@ class StoreRapatRequest extends FormRequest
                 if ($hasSatkerParticipant) {
                     $validator->errors()->add('peserta_ids', 'Peserta satuan kerja hanya dapat dipilih saat opsi Bersama Satker diaktifkan.');
                 }
+            }
+
+            if ($this->boolean('is_external') && trim((string) $this->input('tujuan_external')) === '') {
+                $validator->errors()->add('tujuan_external', 'Tujuan surat external wajib diisi.');
+            }
+
+            if (!$this->boolean('is_external')) {
+                $this->merge(['tujuan_external' => null]);
             }
         });
     }

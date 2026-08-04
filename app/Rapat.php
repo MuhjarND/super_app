@@ -23,6 +23,8 @@ class Rapat extends Model
         'detail_tambahan',
         'tujuan_surat',
         'bersama_satker',
+        'is_external',
+        'tujuan_external',
         'jenis_pakaian',
         'is_virtual',
         'meeting_id',
@@ -36,6 +38,7 @@ class Rapat extends Model
         'public_code',
         'is_attendance_only',
         'attendance_surat_keluar_id',
+        'attendance_signer_id',
         'participant_notified_at',
         'last_attendance_reminder_at',
         'is_recurring',
@@ -49,6 +52,7 @@ class Rapat extends Model
         'recurring_until' => 'date',
         'is_virtual' => 'boolean',
         'bersama_satker' => 'boolean',
+        'is_external' => 'boolean',
         'is_attendance_only' => 'boolean',
         'is_recurring' => 'boolean',
         'lampiran_tambahan_size' => 'integer',
@@ -170,6 +174,11 @@ class Rapat extends Model
     public function attendanceSourceSuratKeluar()
     {
         return $this->belongsTo(SuratKeluar::class, 'attendance_surat_keluar_id');
+    }
+
+    public function attendanceSigner()
+    {
+        return $this->belongsTo(User::class, 'attendance_signer_id');
     }
 
     public function getWaktuMulaiFormattedAttribute()

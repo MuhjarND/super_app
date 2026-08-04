@@ -1,5 +1,7 @@
 @php
-    $suratTujuan = trim((string) $rapat->tujuan_surat);
+    $suratTujuan = $rapat->is_external
+        ? trim((string) $rapat->tujuan_external)
+        : trim((string) $rapat->tujuan_surat);
     $tujuanLines = $suratTujuan !== '' ? preg_split('/\r\n|\r|\n/', $suratTujuan) : [];
     $defaultTujuan = $rapat->pesertas->count() === 1
         ? [$rapat->pesertas->first()->name]

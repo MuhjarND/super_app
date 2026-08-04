@@ -747,6 +747,8 @@
                             data-include-detail-tambahan="{{ $rapat->detail_tambahan ? 1 : 0 }}"
                             data-tujuan-surat="{{ $rapat->tujuan_surat }}"
                             data-bersama-satker="{{ $rapat->bersama_satker ? 1 : 0 }}"
+                            data-is-external="{{ $rapat->is_external ? 1 : 0 }}"
+                            data-tujuan-external="{{ $rapat->tujuan_external }}"
                             data-jenis-pakaian="{{ $rapat->jenis_pakaian }}"
                             data-include-pakaian="{{ $rapat->jenis_pakaian ? 1 : 0 }}"
                             data-is-virtual="{{ $rapat->is_virtual ? 1 : 0 }}"
@@ -813,6 +815,9 @@
                     @endif
                     @if($rapat->bersama_satker)
                         <span class="rapat-chip"><i class="fas fa-building"></i> Bersama Satker</span>
+                    @endif
+                    @if($rapat->is_external)
+                        <span class="rapat-chip"><i class="fas fa-external-link-alt"></i> External</span>
                     @endif
                     <span class="rapat-action-meta">Tindakan rapat</span>
                     @if($rapat->lampiran_tambahan_path)
@@ -1042,6 +1047,16 @@
                 }
             }
 
+            function toggleExternalFields(prefix) {
+                const checked = $('#' + prefix + 'IsExternal').is(':checked');
+                $('#' + prefix + 'ExternalGroup').toggle(checked);
+                $('#' + prefix + 'TujuanExternal').prop('required', checked);
+
+                if (!checked) {
+                    $('#' + prefix + 'TujuanExternal').val('');
+                }
+            }
+
             function bindFormBehavior(prefix) {
                 $('#' + prefix + 'KategoriSuratKode').on('change', function () {
                     toggleKategoriDependentFields(prefix);
@@ -1051,6 +1066,7 @@
                 $('#' + prefix + 'IsRecurring').on('change', function () { toggleRecurringFields(prefix); });
                 $('#' + prefix + 'GunakanLampiran').on('change', function () { toggleLampiranFields(prefix); });
                 $('#' + prefix + 'BersamaSatker').on('change', function () { toggleSatkerFields(prefix); });
+                $('#' + prefix + 'IsExternal').on('change', function () { toggleExternalFields(prefix); });
                 $('#' + prefix + 'IncludeDetailTambahan').on('change', function () { toggleDetailTambahan(prefix); });
                 $('#' + prefix + 'IncludePakaian').on('change', function () { togglePakaianFields(prefix); });
                 $('#' + prefix + 'Tanggal, #' + prefix + 'NomenklaturJabatan').on('change', function () {
@@ -1063,6 +1079,7 @@
                 toggleRecurringFields(prefix);
                 toggleLampiranFields(prefix);
                 toggleSatkerFields(prefix);
+                toggleExternalFields(prefix);
                 updateNomorPreview(prefix);
             }
 
@@ -1264,6 +1281,7 @@
                     $('#editWaktuMulai').val(row.data('waktuMulai'));
                     $('#editTempat').val(row.data('tempat'));
                     $('#editBersamaSatker').prop('checked', Number(row.data('bersamaSatker')) === 1).trigger('change');
+                    $('#editIsExternal').prop('checked', Number(row.data('isExternal')) === 1).trigger('change');
                     $('#editPesertaIds').val(pesertaIds).trigger('change');
                     refreshRapatParticipantSelectAll($('#editPesertaIds'));
                     $('#editApprover1Id').val(row.data('approver1')).trigger('change');
@@ -1273,6 +1291,7 @@
                     $('#editIncludeDetailTambahan').prop('checked', Number(row.data('includeDetailTambahan')) === 1).trigger('change');
                     $('#editDetailTambahan').val(row.data('detailTambahan'));
                     $('#editTujuanSurat').val(row.data('tujuanSurat'));
+                    $('#editTujuanExternal').val(row.data('tujuanExternal'));
                     $('#editIncludePakaian').prop('checked', Number(row.data('includePakaian')) === 1).trigger('change');
                     $('#editJenisPakaian').val(row.data('jenisPakaian'));
                     $('#editIsVirtual').prop('checked', Number(row.data('isVirtual')) === 1).trigger('change');
