@@ -46,14 +46,26 @@ class WebPushNotificationService
         ], 15);
         $webPush->setReuseVAPIDHeaders(true);
 
-        $json = json_encode([
+        $pushPayload = [
             'title' => Str::limit((string) ($payload['title'] ?? 'PAPEDA'), 80, ''),
             'body' => Str::limit((string) ($payload['body'] ?? 'Terdapat informasi baru untuk Anda.'), 180),
             'url' => $this->normalizeUrl($payload['url'] ?? route('action-center.index')),
             'module' => $payload['module'] ?? 'general',
             'timestamp' => (int) ($payload['timestamp'] ?? now()->getTimestampMs()),
             'tag' => $payload['tag'] ?? null,
-        ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        ];
+
+        try {
+            $badges = app(MobileNotificationBadgeService::class)->build($user);
+            $pushPayload['badge_count'] = max(0, (int) data_get($badges, 'modules.action', 0));
+        } catch (\Throwable $exception) {
+            Log::warning('Jumlah badge Web Push tidak dapat dihitung.', [
+                'user_id' => $user->id,
+                'message' => $exception->getMessage(),
+            ]);
+        }
+
+        $json = json_encode($pushPayload, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 
         $sent = 0;
         foreach ($subscriptions as $storedSubscription) {

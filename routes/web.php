@@ -52,6 +52,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/home', 'DashboardController@index')->name('home');
     Route::get('/mobile/menu/{module}', 'MobileModuleMenuController@show')->name('mobile.menu.show');
     Route::get('/push/config', 'WebPushSubscriptionController@config')->name('push.config');
+    Route::get('/push/badge', 'WebPushSubscriptionController@badge')->name('push.badge');
     Route::post('/push/subscriptions', 'WebPushSubscriptionController@store')->name('push.subscriptions.store');
     Route::delete('/push/subscriptions', 'WebPushSubscriptionController@destroy')->name('push.subscriptions.destroy');
     Route::get('/dashboard/pimpinan', 'LeadershipDashboardController@index')->name('dashboard.leadership');

@@ -1,6 +1,6 @@
 'use strict';
 
-const CACHE_NAME = 'papeda-shell-v2';
+const CACHE_NAME = 'papeda-shell-v3';
 const SHELL_ASSETS = [
     '/site.webmanifest',
     '/icons/logo-app-192.png',
@@ -57,7 +57,25 @@ self.addEventListener('push', event => {
         }
     };
 
-    event.waitUntil(self.registration.showNotification(title, options));
+    const tasks = [self.registration.showNotification(title, options)];
+    const badgeCount = normalizeBadgeCount(data.badge_count);
+
+    if (badgeCount !== null) {
+        tasks.push(setTaskbarBadge(badgeCount));
+    }
+
+    event.waitUntil(Promise.all(tasks));
+});
+
+self.addEventListener('message', event => {
+    if (!event.data || event.data.type !== 'PAPEDA_SET_BADGE') {
+        return;
+    }
+
+    const badgeCount = normalizeBadgeCount(event.data.count);
+    if (badgeCount !== null) {
+        event.waitUntil(setTaskbarBadge(badgeCount));
+    }
 });
 
 self.addEventListener('notificationclick', event => {
@@ -93,3 +111,24 @@ self.addEventListener('notificationclick', event => {
         })
     );
 });
+
+function normalizeBadgeCount(value) {
+    if (value === null || value === undefined || value === '') {
+        return null;
+    }
+
+    const count = Number(value);
+    return Number.isFinite(count) ? Math.max(0, Math.floor(count)) : null;
+}
+
+function setTaskbarBadge(count) {
+    if (count > 0 && typeof self.navigator.setAppBadge === 'function') {
+        return self.navigator.setAppBadge(count).catch(() => null);
+    }
+
+    if (count === 0 && typeof self.navigator.clearAppBadge === 'function') {
+        return self.navigator.clearAppBadge().catch(() => null);
+    }
+
+    return Promise.resolve();
+}

@@ -4678,6 +4678,12 @@
     @if(request()->routeIs('library.*'))
         <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
     @endif
+    @if(Auth::check())
+        <script id="papedaAppBadge"
+            src="{{ asset('js/app-badge.js') }}"
+            data-count="{{ max(0, (int) ($topbarActionCount ?? 0)) }}"
+            data-endpoint="{{ route('push.badge') }}"></script>
+    @endif
     @if(Auth::check() && !empty(config('services.webpush.public_key')))
         <script src="{{ asset('js/web-push.js') }}"></script>
     @endif

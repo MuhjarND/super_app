@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\MobileNotificationBadgeService;
 use App\WebPushSubscription;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Schema;
@@ -25,6 +26,15 @@ class WebPushSubscriptionController extends Controller
             'subscribed' => $enabled && WebPushSubscription::where('user_id', $request->user()->id)
                 ->whereNull('failed_at')
                 ->exists(),
+        ]);
+    }
+
+    public function badge(Request $request, MobileNotificationBadgeService $badgeService)
+    {
+        $badges = $badgeService->build($request->user());
+
+        return response()->json([
+            'count' => max(0, (int) data_get($badges, 'modules.action', 0)),
         ]);
     }
 
