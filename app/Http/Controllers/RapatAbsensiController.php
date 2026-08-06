@@ -153,6 +153,44 @@ class RapatAbsensiController extends Controller
             ->with('success', 'Absensi langsung berhasil dihapus.');
     }
 
+    public function updateDirectAttendance(Request $request, Rapat $rapat)
+    {
+        $user = $request->user();
+        abort_unless($user->canManageRapat() || $user->canManageMeetingMinutes(), 403);
+        abort_unless($rapat->is_attendance_only, 404);
+
+        $data = $request->validate([
+            'judul' => ['required', 'string', 'max:255'],
+            'participant_ids' => ['required', 'array', 'min:1', 'max:500'],
+            'participant_ids.*' => [
+                'required',
+                'integer',
+                'distinct',
+                Rule::exists('users', 'id')->where('status_aktif_pegawai', true),
+            ],
+            'tanggal' => ['required', 'date'],
+            'waktu_mulai' => ['required', 'date_format:H:i'],
+            'tempat' => ['required', 'string', 'max:255'],
+            'attendance_signer_id' => [
+                'required',
+                'integer',
+                Rule::exists('users', 'id')->where('status_aktif_pegawai', true),
+            ],
+        ], [
+            'judul.required' => 'Judul absensi wajib diisi.',
+            'participant_ids.required' => 'Peserta absensi wajib dipilih.',
+            'participant_ids.min' => 'Pilih minimal satu peserta absensi.',
+            'tanggal.required' => 'Tanggal kegiatan wajib diisi.',
+            'waktu_mulai.required' => 'Waktu kegiatan wajib diisi.',
+            'tempat.required' => 'Tempat kegiatan wajib diisi.',
+            'attendance_signer_id.required' => 'Pejabat penanda tangan absensi wajib dipilih.',
+        ]);
+
+        $this->directAttendanceService->updateDirectAttendance($rapat, $data);
+
+        return back()->with('success', 'Absensi manual berhasil diperbarui.');
+    }
+
     public function updateSigner(Request $request, Rapat $rapat)
     {
         $user = $request->user();

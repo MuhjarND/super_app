@@ -330,6 +330,9 @@ Route::middleware(['auth'])->group(function () {
         Route::delete('/absensi/{rapat}', 'RapatAbsensiController@destroyDirectAttendance')
             ->middleware('role:admin,operator,notulis,super_admin')
             ->name('absensi.destroy-direct');
+        Route::put('/absensi/{rapat}/manual', 'RapatAbsensiController@updateDirectAttendance')
+            ->middleware('role:admin,operator,notulis,super_admin')
+            ->name('absensi.update-direct');
         Route::put('/absensi/{rapat}/penanda-tangan', 'RapatAbsensiController@updateSigner')
             ->middleware('role:admin,operator,notulis,super_admin')
             ->name('absensi.update-signer');

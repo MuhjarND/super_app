@@ -1318,6 +1318,12 @@ class User extends Authenticatable
             return true;
         }
 
+        // Kabag Umum/Keuangan dan pejabat Sekretaris, termasuk PLT aktif,
+        // dapat mengambil nomor dan membuat surat keluar.
+        if ($this->hasJabatanKode(['KABAG_UMUM', 'SEK'])) {
+            return true;
+        }
+
         return $this->effectiveJabatans()->contains(function ($jabatan) {
             return $jabatan && (bool) preg_match('/^(KASUBAG|PANMUD)_/', (string) $jabatan->kode);
         });

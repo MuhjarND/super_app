@@ -194,6 +194,35 @@ class DirectAttendanceServiceTest extends TestCase
             'rapat_id' => $rapat->id,
             'user_id' => $replacementSigner->id,
         ]);
+
+        RapatAttendance::create([
+            'rapat_id' => $rapat->id,
+            'user_id' => $letterRecipient->id,
+            'attendance_type' => 'internal',
+            'participant_name_snapshot' => $letterRecipient->name,
+            'source' => 'public',
+            'signature_path' => null,
+            'attended_at' => now(),
+        ]);
+        app(DirectAttendanceService::class)->updateDirectAttendance($rapat, [
+            'judul' => 'Absensi Pembinaan Diperbarui',
+            'participant_ids' => [$selectedParticipant->id],
+            'attendance_signer_id' => $replacementSigner->id,
+            'tanggal' => '2026-08-01',
+            'waktu_mulai' => '13:30',
+            'tempat' => 'Ruang Rapat Utama',
+        ]);
+
+        $this->assertDatabaseHas('rapats', [
+            'id' => $rapat->id,
+            'judul' => 'Absensi Pembinaan Diperbarui',
+            'attendance_signer_id' => $replacementSigner->id,
+            'tempat' => 'Ruang Rapat Utama',
+        ]);
+        $this->assertDatabaseHas('rapat_peserta', [
+            'rapat_id' => $rapat->id,
+            'user_id' => $letterRecipient->id,
+        ]);
     }
 
     public function testOneOutgoingLetterCanCreateMultiplePublicAttendances()

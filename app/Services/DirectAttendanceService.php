@@ -69,6 +69,54 @@ class DirectAttendanceService
         });
     }
 
+    public function updateDirectAttendance(Rapat $rapat, array $data)
+    {
+        if (!$rapat->is_attendance_only) {
+            throw ValidationException::withMessages([
+                'rapat' => 'Hanya absensi manual yang dapat diedit melalui halaman absensi.',
+            ]);
+        }
+
+        return DB::transaction(function () use ($rapat, $data) {
+            $rapat = Rapat::query()->lockForUpdate()->findOrFail($rapat->id);
+
+            $participants = collect($data['participant_ids'] ?? [])
+                ->map(function ($participantId) {
+                    return (int) $participantId;
+                })
+                ->filter();
+            if (!empty($data['attendance_signer_id'])) {
+                $participants->push((int) $data['attendance_signer_id']);
+            }
+
+            // Attendance records are historical evidence and must never be orphaned by an edit.
+            $participants = $participants
+                ->concat($rapat->internalAttendances()->whereNotNull('user_id')->pluck('user_id'))
+                ->map(function ($participantId) {
+                    return (int) $participantId;
+                })
+                ->filter()
+                ->unique()
+                ->values();
+
+            $rapat->update([
+                'judul' => trim((string) $data['judul']),
+                'tanggal' => $data['tanggal'],
+                'waktu_mulai' => $data['waktu_mulai'],
+                'tempat' => trim((string) $data['tempat']),
+                'attendance_signer_id' => (int) $data['attendance_signer_id'],
+            ]);
+
+            $syncData = [];
+            foreach ($participants as $index => $participantId) {
+                $syncData[$participantId] = ['urutan' => $index + 1];
+            }
+            $rapat->pesertas()->sync($syncData);
+
+            return $rapat->fresh(['pesertas', 'attendanceSigner']);
+        });
+    }
+
     public function deleteDirectAttendance(Rapat $rapat)
     {
         if (!$rapat->is_attendance_only) {

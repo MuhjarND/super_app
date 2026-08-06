@@ -311,7 +311,26 @@
                                         <button type="button" class="app-icon-btn link" data-mobile-label="Link" title="Salin link publik" onclick="copyPublicLink('{{ route('rapat.absensi.public.show', $rapat->public_code) }}')">
                                             <i class="fas fa-link"></i>
                                         </button>
-                                        @if($canCreateDirectAttendance)
+                                        @if($canCreateDirectAttendance && $rapat->is_attendance_only)
+                                            <button
+                                                type="button"
+                                                class="app-icon-btn edit manual-attendance-edit"
+                                                data-mobile-label="Edit"
+                                                title="Edit absensi manual"
+                                                data-toggle="modal"
+                                                data-target="#manualAttendanceEditModal"
+                                                data-rapat-id="{{ $rapat->id }}"
+                                                data-action="{{ route('rapat.absensi.update-direct', $rapat) }}"
+                                                data-title="{{ $rapat->judul }}"
+                                                data-participant-ids='@json($rapat->pesertas->pluck('id')->map(function ($id) { return (string) $id; })->values())'
+                                                data-date="{{ optional($rapat->tanggal)->format('Y-m-d') }}"
+                                                data-time="{{ substr((string) $rapat->waktu_mulai, 0, 5) }}"
+                                                data-place="{{ $rapat->tempat }}"
+                                                data-signer-id="{{ $rapat->attendance_signer_id }}"
+                                            >
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                        @elseif($canCreateDirectAttendance)
                                             <button
                                                 type="button"
                                                 class="app-icon-btn edit attendance-signer-edit"
@@ -354,6 +373,7 @@
             <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
                 <form action="{{ route('rapat.absensi.store-from-surat-keluar') }}" method="POST" class="modal-content">
                     @csrf
+                    <input type="hidden" name="attendance_form" value="create">
                     <div class="modal-header">
                         <div>
                             <h5 class="modal-title" id="directAttendanceModalLabel">Buat Absensi</h5>
@@ -364,7 +384,7 @@
                         </button>
                     </div>
                     <div class="modal-body">
-                        @if($errors->any())
+                        @if($errors->any() && old('attendance_form') === 'create')
                             <div class="alert alert-danger">
                                 {{ $errors->first() }}
                             </div>
@@ -514,11 +534,90 @@
             </div>
         </div>
 
+        <div class="modal fade direct-attendance-modal" id="manualAttendanceEditModal" tabindex="-1" role="dialog" aria-labelledby="manualAttendanceEditModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+                <form action="#" method="POST" class="modal-content" id="manualAttendanceEditForm">
+                    @csrf
+                    @method('PUT')
+                    <input type="hidden" name="attendance_form" value="manual">
+                    <input type="hidden" name="rapat_id" id="manualAttendanceRapatId" value="">
+                    <div class="modal-header">
+                        <div>
+                            <h5 class="modal-title" id="manualAttendanceEditModalLabel">Edit Absensi Manual</h5>
+                            <div class="text-muted" style="font-size: 0.78rem;">Perbarui kegiatan, peserta, dan penanda tangan.</div>
+                        </div>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Tutup">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        @if($errors->any() && old('attendance_form') === 'manual')
+                            <div class="alert alert-danger">{{ $errors->first() }}</div>
+                        @endif
+
+                        <div class="form-group">
+                            <label for="manualAttendanceTitle">Judul Absensi</label>
+                            <input type="text" name="judul" id="manualAttendanceTitle" class="form-control" maxlength="255" required>
+                        </div>
+
+                        <div class="form-group">
+                            <div class="direct-attendance-participant-head">
+                                <label for="manualAttendanceParticipants">Peserta</label>
+                                <button type="button" class="direct-attendance-select-all" id="manualAttendanceSelectAll">Pilih semua</button>
+                            </div>
+                            <select name="participant_ids[]" id="manualAttendanceParticipants" class="form-control" multiple required>
+                                @foreach($attendanceParticipants as $attendanceParticipant)
+                                    <option value="{{ $attendanceParticipant->id }}">
+                                        {{ $attendanceParticipant->name }}{{ $attendanceParticipant->jabatan_keterangan ? ' - ' . $attendanceParticipant->jabatan_keterangan : '' }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            <small class="form-text text-muted">Peserta yang sudah melakukan absensi tetap dipertahankan otomatis.</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="manualAttendanceSigner">Pejabat Penanda Tangan</label>
+                            <select name="attendance_signer_id" id="manualAttendanceSigner" class="form-control" required>
+                                <option value="">-- Pilih Pejabat --</option>
+                                @foreach($attendanceParticipants as $attendanceOfficial)
+                                    <option value="{{ $attendanceOfficial->id }}">
+                                        {{ $attendanceOfficial->name }}{{ $attendanceOfficial->jabatan_keterangan ? ' - ' . $attendanceOfficial->jabatan_keterangan : '' }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group col-md-4">
+                                <label for="manualAttendanceDate">Tanggal</label>
+                                <input type="date" name="tanggal" id="manualAttendanceDate" class="form-control" required>
+                            </div>
+                            <div class="form-group col-md-4">
+                                <label for="manualAttendanceTime">Waktu</label>
+                                <input type="time" name="waktu_mulai" id="manualAttendanceTime" class="form-control" required>
+                            </div>
+                            <div class="form-group col-md-4">
+                                <label for="manualAttendancePlace">Tempat</label>
+                                <input type="text" name="tempat" id="manualAttendancePlace" class="form-control" maxlength="255" required>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-light" data-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save mr-1"></i> Simpan Perubahan
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
         <div class="modal fade direct-attendance-modal" id="attendanceSignerModal" tabindex="-1" role="dialog" aria-labelledby="attendanceSignerModalLabel" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered" role="document">
                 <form action="#" method="POST" class="modal-content" id="attendanceSignerForm">
                     @csrf
                     @method('PUT')
+                    <input type="hidden" name="attendance_form" value="signer">
                     <div class="modal-header">
                         <div>
                             <h5 class="modal-title" id="attendanceSignerModalLabel">Penanda Tangan Absensi</h5>
@@ -572,6 +671,10 @@
             const participantSelect = $('#directAttendanceParticipants');
             const participantSelectAll = $('#directAttendanceSelectAll');
             const directSignerSelect = $('#directAttendanceSigner');
+            const manualModal = $('#manualAttendanceEditModal');
+            const manualParticipants = $('#manualAttendanceParticipants');
+            const manualSigner = $('#manualAttendanceSigner');
+            const manualSelectAll = $('#manualAttendanceSelectAll');
             const signerModal = $('#attendanceSignerModal');
             const signerSelect = $('#attendanceSignerSelect');
             let preserveOldParticipants = {{ old('participant_ids') !== null ? 'true' : 'false' }};
@@ -623,6 +726,76 @@
                 }
             });
 
+            function manualParticipantIds(button) {
+                const raw = button.attr('data-participant-ids') || '[]';
+                try {
+                    return JSON.parse(raw).map(String);
+                } catch (error) {
+                    return [];
+                }
+            }
+
+            function refreshManualParticipantToggle() {
+                const selectedCount = (manualParticipants.val() || []).length;
+                const optionCount = manualParticipants.find('option:not(:disabled)').length;
+                manualSelectAll.text(optionCount > 0 && selectedCount === optionCount ? 'Kosongkan' : 'Pilih semua');
+            }
+
+            manualModal.on('show.bs.modal', function (event) {
+                const button = $(event.relatedTarget);
+                $('#manualAttendanceEditForm').attr('action', button.data('action'));
+                $('#manualAttendanceRapatId').val(button.data('rapat-id'));
+                $('#manualAttendanceTitle').val(button.data('title') || '');
+                $('#manualAttendanceDate').val(button.data('date') || '');
+                $('#manualAttendanceTime').val(button.data('time') || '');
+                $('#manualAttendancePlace').val(button.data('place') || '');
+                manualParticipants.val(manualParticipantIds(button)).trigger('change');
+                manualSigner.val(String(button.data('signer-id') || '')).trigger('change');
+            });
+
+            manualModal.on('shown.bs.modal', function () {
+                if ($.fn.select2 && !manualParticipants.hasClass('select2-hidden-accessible')) {
+                    manualParticipants.select2({
+                        theme: 'bootstrap4',
+                        width: '100%',
+                        dropdownParent: manualModal,
+                        placeholder: 'Cari dan pilih peserta',
+                        closeOnSelect: false
+                    });
+                }
+                if ($.fn.select2 && !manualSigner.hasClass('select2-hidden-accessible')) {
+                    manualSigner.select2({
+                        theme: 'bootstrap4',
+                        width: '100%',
+                        dropdownParent: manualModal,
+                        placeholder: '-- Pilih Pejabat --'
+                    });
+                }
+                refreshManualParticipantToggle();
+            });
+
+            manualParticipants.on('change', refreshManualParticipantToggle);
+            manualSelectAll.on('click', function () {
+                const allValues = manualParticipants.find('option:not(:disabled)').map(function () {
+                    return String(this.value);
+                }).get();
+                const selectedValues = (manualParticipants.val() || []).map(String);
+                manualParticipants
+                    .val(allValues.length > 0 && selectedValues.length === allValues.length ? [] : allValues)
+                    .trigger('change');
+            });
+            manualSigner.on('change', function () {
+                const signerId = String($(this).val() || '');
+                if (!signerId) {
+                    return;
+                }
+                const participantIds = (manualParticipants.val() || []).map(String);
+                if (!participantIds.includes(signerId)) {
+                    participantIds.push(signerId);
+                    manualParticipants.val(participantIds).trigger('change');
+                }
+            });
+
             function refreshParticipantToggle() {
                 const selectedCount = (participantSelect.val() || []).length;
                 const optionCount = participantSelect.find('option:not(:disabled)').length;
@@ -663,8 +836,23 @@
             });
             refreshParticipantToggle();
 
-            @if($errors->any())
+            @if($errors->any() && old('attendance_form') === 'create')
                 modal.modal('show');
+            @endif
+
+            @if($errors->any() && old('attendance_form') === 'manual' && old('rapat_id'))
+                const failedManualButton = $('.manual-attendance-edit[data-rapat-id="{{ old('rapat_id') }}"]').first();
+                if (failedManualButton.length) {
+                    manualModal.one('shown.bs.modal', function () {
+                        $('#manualAttendanceTitle').val(@json(old('judul')));
+                        $('#manualAttendanceDate').val(@json(old('tanggal')));
+                        $('#manualAttendanceTime').val(@json(old('waktu_mulai')));
+                        $('#manualAttendancePlace').val(@json(old('tempat')));
+                        manualParticipants.val(@json(collect(old('participant_ids', []))->map(function ($id) { return (string) $id; })->values())).trigger('change');
+                        manualSigner.val(String(@json(old('attendance_signer_id')) || '')).trigger('change');
+                    });
+                    failedManualButton.trigger('click');
+                }
             @endif
         });
     </script>
