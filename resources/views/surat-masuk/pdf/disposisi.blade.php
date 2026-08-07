@@ -4,144 +4,148 @@
     <meta charset="UTF-8">
     <title>Lembar Disposisi</title>
     <style>
-        @page { size: A4 portrait; margin: 4mm 5mm 4mm; }
+        @page { size: A4 portrait; margin: 5mm 5mm 17mm; }
         * { box-sizing: border-box; }
         body {
             margin: 0;
             color: #111;
             font-family: DejaVu Sans, sans-serif;
-            font-size: 7.7pt;
-            line-height: 1.2;
+            font-size: 7pt;
+            line-height: 1.16;
         }
         table { width: 100%; border-collapse: collapse; table-layout: fixed; }
         td, th { vertical-align: top; }
-        .sheet { border: 1pt solid #111; }
+        .sheet { border: .85pt solid #111; }
         .official-letterhead {
-            width: 100%;
+            width: auto;
+            height: 27mm;
+            padding: 1.1mm 2mm;
             overflow: hidden;
-            border-bottom: .9pt solid #111;
+            border-bottom: .75pt solid #111;
+            text-align: center;
         }
         .official-letterhead img {
             display: block;
-            width: 100%;
+            width: 67%;
             height: auto;
+            margin: 0 auto;
         }
         .letterhead-fallback {
-            height: 102pt;
-            padding: 16pt 12pt 8pt;
+            height: 24mm;
+            padding: 2mm 8mm 0;
             text-align: center;
             font-family: DejaVu Serif, serif;
             font-weight: bold;
-            line-height: 1.2;
+            line-height: 1.1;
         }
-        .letterhead-fallback .line-1 { font-size: 11pt; }
-        .letterhead-fallback .line-2 { font-size: 11pt; }
-        .letterhead-fallback .line-3 { font-size: 13pt; }
-        .letterhead-fallback .address { margin-top: 4pt; font-size: 7.2pt; font-weight: normal; }
+        .letterhead-fallback .line-1 { font-size: 8.5pt; }
+        .letterhead-fallback .line-2 { font-size: 8.5pt; }
+        .letterhead-fallback .line-3 { font-size: 10pt; }
+        .letterhead-fallback .address { margin-top: 1mm; font-size: 6.4pt; font-weight: normal; }
         .title {
-            height: 22pt;
-            padding: 2.5pt 4pt;
-            border-bottom: .9pt solid #111;
+            height: 6mm;
+            padding: .8mm 2mm .4mm;
+            border-bottom: .75pt solid #111;
             text-align: center;
             font-family: DejaVu Serif, serif;
-            font-size: 14.5pt;
+            font-size: 11.5pt;
+            font-weight: bold;
             line-height: 1;
         }
         .notice {
-            height: 17pt;
-            padding: 3pt 5pt;
-            border-bottom: .9pt solid #111;
+            height: 5.5mm;
+            padding: 1.2mm 2mm .7mm;
+            border-bottom: .75pt solid #111;
             text-align: center;
-            font-size: 7.7pt;
+            font-size: 6.6pt;
             font-weight: bold;
         }
         .meta > tbody > tr > td {
-            height: 54pt;
-            padding: 7pt 7pt 4pt;
-            border-right: .9pt solid #111;
-            border-bottom: .9pt solid #111;
+            height: 20mm;
+            padding: 2.4mm 2mm 1.5mm;
+            border-right: .75pt solid #111;
+            border-bottom: .75pt solid #111;
         }
         .meta > tbody > tr > td:last-child { border-right: 0; }
         .detail-lines { border: 0; table-layout: auto; }
         .detail-lines td {
             height: auto;
-            padding: 0 0 2.7pt;
+            padding: 0 0 1.2mm;
             border: 0;
             vertical-align: top;
         }
         .detail-label { white-space: nowrap; }
-        .detail-colon { width: 9pt; text-align: center; }
-        .detail-value { padding-left: 2pt !important; }
-        .letter-number { font-size: 6.5pt; line-height: 1.25; word-break: break-all; }
+        .detail-colon { width: 3.5mm; text-align: center; }
+        .detail-value { padding-left: .5mm !important; }
+        .letter-number { font-size: 6.4pt; line-height: 1.2; word-break: break-all; }
         .sender-cell {
-            height: 44pt;
-            padding: 7pt;
-            border-bottom: .9pt solid #111;
+            height: 13mm;
+            padding: 2mm;
+            border-bottom: .75pt solid #111;
         }
-        .sender-label { width: 46pt; }
-        .sender-value { font-size: 7.6pt; }
+        .sender-label { width: 17mm; }
+        .sender-value { font-size: 7pt; }
         .priority td {
-            height: 25pt;
-            padding: 6pt 4pt 4pt;
-            border-right: .9pt solid #111;
-            border-bottom: .9pt solid #111;
+            height: 8mm;
+            padding: 2.2mm 1mm 1mm;
+            border-right: .75pt solid #111;
+            border-bottom: .75pt solid #111;
             text-align: center;
-            font-size: 9pt;
+            font-size: 8pt;
         }
         .priority td:last-child { border-right: 0; }
         .checkbox {
             display: inline-block;
-            width: 9pt;
-            height: 9pt;
-            margin-right: 5pt;
-            border: .8pt solid #111;
+            width: 3.2mm;
+            height: 3.2mm;
+            margin-right: 1.7mm;
+            border: .7pt solid #111;
             text-align: center;
-            font-size: 7pt;
+            font-size: 6.7pt;
             font-weight: bold;
-            line-height: 8pt;
-            vertical-align: -1pt;
+            line-height: 2.8mm;
+            vertical-align: -.4mm;
         }
         .work > tbody > tr > td {
-            height: 250pt;
-            padding: 10pt 8pt 6pt;
-            border-right: .9pt solid #111;
-            border-bottom: .9pt solid #111;
+            height: 122mm;
+            padding: 3mm 2.5mm 2mm;
+            border-right: .75pt solid #111;
+            border-bottom: .75pt solid #111;
         }
         .work > tbody > tr > td:last-child { border-right: 0; }
         .section-title {
             display: inline-block;
-            margin-bottom: 8pt;
-            font-size: 8.5pt;
+            margin-bottom: 2.5mm;
+            font-size: 7.5pt;
             font-weight: bold;
             text-decoration: underline;
         }
-        .recipient-entry { margin: 0 0 7pt 6pt; }
-        .recipient-position { font-weight: bold; }
-        .recipient-name { margin: 3pt 0 0 16pt; color: #333; font-size: 7.2pt; }
-        .note-title { margin-top: 28pt; }
+        .recipient-list { min-height: 43mm; }
+        .recipient-entry { margin: 0 0 2.2mm 1.5mm; }
+        .recipient-position { font-weight: normal; }
+        .note-title { margin-top: 0; }
         .note {
-            min-height: 56pt;
-            margin-top: 2pt;
-            padding: 3pt 4pt;
+            min-height: 41mm;
+            margin-top: .5mm;
+            padding: 1mm;
             white-space: pre-wrap;
-            line-height: 1.35;
-        }
-        .source-info { margin: 11pt 4pt 0; color: #333; font-size: 7.1pt; line-height: 1.4; }
-        .instruction { border: 0; table-layout: auto; }
-        .instruction td { height: 13.5pt; padding: .8pt 0; border: 0; vertical-align: top; }
-        .instruction .check-cell { width: 17pt; }
-        .instruction .instruction-label { padding-top: 1pt; }
-        .process td {
-            height: 35pt;
-            padding: 4.5pt 7pt;
-            border-right: .9pt solid #111;
-            border-bottom: .9pt solid #111;
-            font-size: 7.2pt;
             line-height: 1.3;
+        }
+        .instruction { border: 0; table-layout: auto; }
+        .instruction td { height: 5.4mm; padding: .4mm 0; border: 0; vertical-align: top; }
+        .instruction .check-cell { width: 6mm; }
+        .instruction .instruction-label { padding-top: .7mm; }
+        .process td {
+            height: 12mm;
+            padding: 1.6mm 2mm;
+            border-right: .75pt solid #111;
+            border-bottom: .75pt solid #111;
+            font-size: 6.8pt;
+            line-height: 1.25;
         }
         .process tr:last-child td { border-bottom: 0; }
         .process td:last-child { border-right: 0; }
-        .process-line { margin-top: 7pt; }
+        .process-line { margin-top: 2.2mm; }
         .verification-wrap { margin-top: 0; }
     </style>
 </head>
@@ -160,9 +164,6 @@
         ];
         $targetJabatan = optional($disposisi->kepadaJabatan)->nama
             ?: optional(optional($disposisi->kepadaUser)->jabatan)->nama
-            ?: '-';
-        $sourceJabatan = optional($disposisi->dariJabatan)->nama
-            ?: optional(optional($disposisi->dariUser)->jabatan)->nama
             ?: '-';
         $jenis = optional($suratMasuk->kategoriSurat)->nama
             ?: optional($suratMasuk->klasifikasiKode)->nama
@@ -227,11 +228,11 @@
         </div>
 
         <div class="title">LEMBAR DISPOSISI</div>
-        <div class="notice">PERHATIAN: Dilarang memisahkan sehelai Naskah Dinas yang tergabung dalam berkas ini.</div>
+        <div class="notice">PERHATIAN: Dilarang memisahkan sehelai Naskah Dinas pun yang tergabung dalam berkas ini.</div>
 
         <table class="meta">
             <tr>
-                <td style="width: 40%;">
+                <td style="width: 38%;">
                     <table class="detail-lines">
                         <colgroup>
                             <col style="width: 44%;">
@@ -243,7 +244,7 @@
                         <tr><td class="detail-label">Lampiran</td><td class="detail-colon">:</td><td class="detail-value">{{ $suratMasuk->file_path ? '1 berkas' : '-' }}</td></tr>
                     </table>
                 </td>
-                <td style="width: 24%;">
+                <td style="width: 25%;">
                     <table class="detail-lines">
                         <colgroup>
                             <col style="width: 35%;">
@@ -255,14 +256,14 @@
                         <tr><td class="detail-label">Jenis</td><td class="detail-colon">:</td><td class="detail-value">{{ $jenis }}</td></tr>
                     </table>
                 </td>
-                <td style="width: 36%;">
+                <td style="width: 37%;">
                     <table class="detail-lines">
                         <colgroup>
                             <col style="width: 48%;">
                             <col style="width: 9pt;">
                             <col>
                         </colgroup>
-                        <tr><td class="detail-label">Diterima Tanggal</td><td class="detail-colon">:</td><td class="detail-value">{{ optional($suratMasuk->created_at)->format('d-m-Y H:i') ?: '-' }}</td></tr>
+                        <tr><td class="detail-label">Diterima Tanggal</td><td class="detail-colon">:</td><td class="detail-value">{{ optional($suratMasuk->created_at)->format('d-m-Y') ?: '-' }}</td></tr>
                         <tr><td class="detail-label">Nomor Agenda</td><td class="detail-colon">:</td><td class="detail-value">{{ $suratMasuk->id ?: '-' }}</td></tr>
                     </table>
                 </td>
@@ -279,7 +280,7 @@
                             <col style="width: 90%;">
                         </colgroup>
                         <tr><td class="sender-label">Dari</td><td class="detail-colon">:</td><td class="detail-value sender-value">{{ $suratMasuk->pengirim ?: '-' }}</td></tr>
-                        <tr><td class="sender-label">Hal</td><td class="detail-colon">:</td><td class="detail-value sender-value">{{ $suratMasuk->perihal ?: '-' }}</td></tr>
+                        <tr><td class="sender-label">Perihal</td><td class="detail-colon">:</td><td class="detail-value sender-value">{{ $suratMasuk->perihal ?: '-' }}</td></tr>
                     </table>
                 </td>
             </tr>
@@ -302,18 +303,15 @@
             <tr>
                 <td style="width: 51%;">
                     <div class="section-title">DISPOSISI KEPADA:</div>
-                    <div class="recipient-entry">
-                        <span class="checkbox">&#10003;</span>
-                        <span class="recipient-position">{{ $targetJabatan }}</span>
-                        <div class="recipient-name">{{ optional($disposisi->kepadaUser)->name ?: '-' }}</div>
+                    <div class="recipient-list">
+                        <div class="recipient-entry">
+                            <span class="checkbox">&#10003;</span>
+                            <span class="recipient-position">{{ $targetJabatan }}</span>
+                        </div>
                     </div>
 
                     <div class="section-title note-title">CATATAN:</div>
                     <div class="note">{{ $disposisi->catatan ?: '-' }}</div>
-                    <div class="source-info">
-                        Disposisi oleh: {{ optional($disposisi->dariUser)->name ?: '-' }}<br>
-                        Jabatan: {{ $sourceJabatan }}
-                    </div>
                 </td>
                 <td style="width: 49%;">
                     <div class="section-title">PETUNJUK:</div>

@@ -52,10 +52,15 @@ class DisposisiPdfLayoutTest extends TestCase
         $normalizedHtml = str_replace('&#8203;', '', $html);
 
         $this->assertStringContainsString('LEMBAR DISPOSISI', $normalizedHtml);
+        $this->assertStringContainsString('Naskah Dinas pun yang tergabung dalam berkas ini', $normalizedHtml);
         $this->assertStringContainsString('100/KP/VIII/2026', $normalizedHtml);
         $this->assertStringContainsString('Pejabat Tujuan', $html);
         $this->assertStringContainsString('Untuk diketahui', $html);
         $this->assertStringContainsString('Mohon ditindaklanjuti.', $html);
+        $this->assertStringContainsString('Tanggal Kirim untuk Proses', $html);
+        $this->assertStringContainsString('Diajukan Kembali Tanggal', $html);
+        $this->assertStringContainsString('Tanggal Kembali untuk Proses', $html);
+        $this->assertStringContainsString('Tanggal selesai dari Pejabat yang memberi disposisi', $html);
         $this->assertStringContainsString('class="official-letterhead"', $html);
         $this->assertStringContainsString('MAHKAMAH AGUNG REPUBLIK INDONESIA', $html);
         $this->assertStringContainsString('Validasi PDF', $html);
