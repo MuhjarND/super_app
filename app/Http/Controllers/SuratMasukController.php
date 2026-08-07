@@ -11,7 +11,6 @@ use App\User;
 use App\Disposisi;
 use App\Services\WhatsAppNotificationService;
 use App\Services\DocumentPreviewService;
-use Barryvdh\DomPDF\Facade as PDF;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -166,76 +165,16 @@ class SuratMasukController extends Controller
     {
         abort_unless(auth()->user()->canViewSuratMasuk($suratMasuk), 403);
 
-        $suratMasuk->loadMissing([
-            'klasifikasiKode',
-            'kategoriSurat',
-            'creator',
-            'disposisis.dariUser.jabatan',
-            'disposisis.kepadaUser.jabatan',
-            'disposisis.dariJabatan',
-            'disposisis.kepadaJabatan',
-        ]);
+        $latestDisposisi = $suratMasuk->disposisis()
+            ->latest('created_at')
+            ->latest('id')
+            ->first();
 
-        $disposisis = $suratMasuk->disposisis->sortBy('created_at')->values();
-        abort_if($disposisis->isEmpty(), 422, 'Surat belum memiliki riwayat disposisi.');
+        abort_if(!$latestDisposisi, 422, 'Surat belum memiliki disposisi.');
 
-        $signers = $disposisis
-            ->map(function ($disposisi) {
-                return [
-                    'user_id' => optional($disposisi->dariUser)->id,
-                    'name' => optional($disposisi->dariUser)->name,
-                    'jabatan' => optional($disposisi->dariJabatan)->nama
-                        ?: optional(optional($disposisi->dariUser)->jabatan)->nama,
-                    'role' => 'Pemberi disposisi',
-                    'signed_at' => optional($disposisi->created_at)->toDateTimeString(),
-                ];
-            })
-            ->filter(function ($signer) {
-                return !empty($signer['user_id']);
-            })
-            ->unique(function ($signer) {
-                return $signer['user_id'] . '|' . $signer['signed_at'];
-            })
-            ->values()
-            ->all();
-
-        $verifier = app(\App\Services\PdfVerificationService::class);
-        $verification = $verifier->begin(
-            'persuratan',
-            'riwayat_disposisi',
-            $suratMasuk->id,
-            'Riwayat Disposisi ' . $suratMasuk->nomor_surat,
-            $signers,
-            [
-                'surat_masuk_id' => $suratMasuk->id,
-                'nomor_surat' => $suratMasuk->nomor_surat,
-                'jumlah_disposisi' => $disposisis->count(),
-            ]
-        );
-
-        $logoPath = public_path('logo_app.png');
-        $logoData = is_file($logoPath)
-            ? 'data:image/png;base64,' . base64_encode(file_get_contents($logoPath))
-            : null;
-        $pdfVerification = $verifier->viewData($verification);
-        $pdfVerificationInFlow = true;
-        $pdfVerificationQrSize = 44;
-
-        $content = PDF::loadView('surat-masuk.pdf.disposition-history', compact(
-            'suratMasuk',
-            'disposisis',
-            'logoData',
-            'pdfVerification',
-            'pdfVerificationInFlow',
-            'pdfVerificationQrSize'
-        ))->setPaper('a3', 'landscape')->output();
-
-        return $verifier->response(
-            $content,
-            $verification,
-            'riwayat-disposisi-surat-' . $suratMasuk->id . '.pdf',
-            'inline'
-        );
+        // URL cetak riwayat lama tetap diarahkan ke lembar disposisi A4 agar
+        // bookmark dan halaman yang masih tersimpan di cache tidak mencetak format lama.
+        return redirect()->route('disposisi.print', $latestDisposisi);
     }
 
     protected function applyDelegationScopeFilter($query, User $user, $scope)

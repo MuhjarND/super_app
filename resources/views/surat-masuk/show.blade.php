@@ -432,15 +432,8 @@
         <!-- Disposition History -->
         <div class="col-lg-5">
             <div class="card surat-masuk-history-card">
-                <div class="card-header d-flex align-items-center justify-content-between">
+                <div class="card-header">
                     <h3 class="card-title"><i class="fas fa-history mr-2"></i>Riwayat Disposisi</h3>
-                    @if($suratMasuk->disposisis->isNotEmpty())
-                        <a href="{{ route('surat-masuk.disposition-history.print', $suratMasuk) }}"
-                            target="_blank" rel="noopener" class="btn btn-xs btn-outline-secondary ml-auto"
-                            title="Cetak seluruh riwayat disposisi dalam format A3">
-                            <i class="fas fa-print mr-1"></i>Riwayat A3
-                        </a>
-                    @endif
                 </div>
                 <div class="card-body p-0">
                     @forelse($suratMasuk->disposisis->sortByDesc('created_at') as $disposisi)

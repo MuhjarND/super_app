@@ -35,7 +35,6 @@
                             data-show-url="{{ route('surat-masuk.show', $surat) }}"
                             data-download-url="{{ route('surat-masuk.download', $surat) }}"
                             data-print-url="{{ $latestDisposisi ? route('disposisi.print', $latestDisposisi) : '' }}"
-                            data-print-history-url="{{ route('surat-masuk.disposition-history.print', $surat) }}"
                             data-has-disposition-history="{{ $surat->disposisis->isNotEmpty() ? 1 : 0 }}"
                             data-preview-url="{{ route('surat-masuk.preview', $surat) }}"
                             data-update-url="{{ route('surat-masuk.update', $surat) }}"

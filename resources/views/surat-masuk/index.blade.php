@@ -1492,12 +1492,8 @@
                                     </a>
                                 </div>
                                 <div class="history-panel">
-                                <div class="history-panel-title d-flex align-items-center justify-content-between">
-                                    <span><i class="fas fa-history mr-1 text-primary"></i> Riwayat Surat</span>
-                                    <a href="#" id="detailPrintHistoryBtn" target="_blank" rel="noopener"
-                                        class="btn btn-xs btn-outline-secondary" title="Cetak seluruh riwayat disposisi dalam format A3">
-                                        <i class="fas fa-print mr-1"></i>Riwayat A3
-                                    </a>
+                                <div class="history-panel-title">
+                                    <i class="fas fa-history mr-1 text-primary"></i> Riwayat Surat
                                     </div>
                                     <div id="detailHistory" class="history-list"></div>
                                 </div>
@@ -2301,16 +2297,8 @@
                     .attr('href', d.printUrl)
                     .removeClass('disabled')
                     .attr('aria-disabled', 'false');
-                $('#detailPrintHistoryBtn')
-                    .attr('href', d.printHistoryUrl)
-                    .removeClass('disabled')
-                    .attr('aria-disabled', 'false');
             } else {
                 $('#detailPrintBtn')
-                    .attr('href', '#')
-                    .addClass('disabled')
-                    .attr('aria-disabled', 'true');
-                $('#detailPrintHistoryBtn')
                     .attr('href', '#')
                     .addClass('disabled')
                     .attr('aria-disabled', 'true');
