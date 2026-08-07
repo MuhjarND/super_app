@@ -86,6 +86,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/surat-masuk', 'SuratMasukController@index')->name('surat-masuk.index');
     Route::get('/surat-masuk/laporan/pdf', 'PersuratanReportController@incoming')->name('surat-masuk.report.pdf');
     Route::post('/surat-masuk', 'SuratMasukController@store')->name('surat-masuk.store');
+    Route::get('/surat-masuk/{suratMasuk}/riwayat-disposisi/cetak', 'SuratMasukController@printDispositionHistory')->name('surat-masuk.disposition-history.print');
     Route::get('/surat-masuk/{suratMasuk}', 'SuratMasukController@show')->name('surat-masuk.show');
     Route::put('/surat-masuk/{suratMasuk}', 'SuratMasukController@update')->name('surat-masuk.update');
     Route::delete('/surat-masuk/{suratMasuk}', 'SuratMasukController@destroy')->name('surat-masuk.destroy');
@@ -98,6 +99,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/surat-keluar/laporan/pdf', 'PersuratanReportController@outgoing')->name('surat-keluar.report.pdf');
     Route::post('/surat-keluar', 'SuratKeluarController@store')->name('surat-keluar.store');
     Route::put('/surat-keluar/{suratKeluar}', 'SuratKeluarController@update')->name('surat-keluar.update');
+    Route::patch('/surat-keluar/{suratKeluar}/nomor', 'SuratKeluarController@updateNomor')->name('surat-keluar.nomor.update');
     Route::delete('/surat-keluar/{suratKeluar}', 'SuratKeluarController@destroy')->name('surat-keluar.destroy');
     Route::post('/surat-keluar/{suratKeluar}/upload', 'SuratKeluarController@uploadLampiran')->name('surat-keluar.upload');
     Route::put('/surat-keluar/{suratKeluar}/kalender', 'SuratKeluarController@upsertCalendarEvent')->name('surat-keluar.calendar.upsert');

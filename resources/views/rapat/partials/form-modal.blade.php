@@ -47,8 +47,8 @@
                                 <select class="form-control" name="nomenklatur_jabatan" id="{{ $prefix }}NomenklaturJabatan" required>
                                     <option value="ketua">Ketua (KPTA)</option>
                                     <option value="wakil_ketua">Wakil Ketua (WKPTA)</option>
-                                    <option value="sekretaris" selected>Sekretaris (SEK)</option>
-                                    <option value="panitera">Panitera (PAN)</option>
+                                    <option value="sekretaris" selected>Sekretaris (SEK.PTA)</option>
+                                    <option value="panitera">Panitera (PAN.PTA)</option>
                                 </select>
                             </div>
                             <div class="col-md-4 form-group">

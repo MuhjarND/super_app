@@ -34,6 +34,8 @@
                         <tr class="main-row {{ $needsDisposition ? 'surat-needs-disposition' : '' }}" data-surat-id="{{ $surat->id }}" data-creator="{{ optional($surat->creator)->name ?: '-' }}"
                             data-show-url="{{ route('surat-masuk.show', $surat) }}"
                             data-download-url="{{ route('surat-masuk.download', $surat) }}"
+                            data-print-history-url="{{ route('surat-masuk.disposition-history.print', $surat) }}"
+                            data-has-disposition-history="{{ $surat->disposisis->isNotEmpty() ? 1 : 0 }}"
                             data-preview-url="{{ route('surat-masuk.preview', $surat) }}"
                             data-update-url="{{ route('surat-masuk.update', $surat) }}"
                             data-delete-url="{{ route('surat-masuk.destroy', $surat) }}" data-nomor="{{ $surat->nomor_surat }}"

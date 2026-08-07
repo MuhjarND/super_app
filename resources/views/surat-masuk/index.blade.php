@@ -420,6 +420,47 @@
             font-weight: 700;
         }
 
+        #detailModal .surat-detail-dialog {
+            width: calc(100vw - 32px);
+            max-width: 1720px;
+            margin: 16px auto;
+        }
+
+        #detailModal .modal-content {
+            height: calc(100vh - 32px);
+            max-height: calc(100vh - 32px);
+        }
+
+        #detailModal .modal-body,
+        #detailModal .detail-modal-grid,
+        #detailModal .detail-preview-pane,
+        #detailModal .detail-info-pane {
+            min-height: 0;
+        }
+
+        #detailModal .modal-body {
+            overflow: hidden;
+        }
+
+        #detailModal .detail-modal-grid {
+            height: 100%;
+        }
+
+        #detailModal .detail-preview-pane,
+        #detailModal .detail-info-pane {
+            height: 100%;
+            overflow-y: auto;
+        }
+
+        #detailModal #detailFileViewer {
+            width: 100%;
+            height: calc(100vh - 148px);
+            min-height: 620px;
+            border: 1px solid #e8eaed;
+            border-radius: 10px;
+            background: #f9fafb;
+        }
+
         .surat-mobile-action-bar {
             display: none;
         }
@@ -749,6 +790,24 @@
             min-width: 1120px;
         }
 
+        @media (min-width: 768px) and (max-width: 991.98px) {
+            #detailModal .modal-body {
+                overflow-y: auto;
+            }
+
+            #detailModal .detail-modal-grid,
+            #detailModal .detail-preview-pane,
+            #detailModal .detail-info-pane {
+                height: auto;
+                overflow: visible;
+            }
+
+            #detailModal #detailFileViewer {
+                height: 62vh;
+                min-height: 480px;
+            }
+        }
+
         @media (max-width: 767.98px) {
             .surat-masuk-card {
                 border-radius: 14px;
@@ -974,6 +1033,33 @@
             .surat-preview-open-btn {
                 justify-content: center;
                 width: 100%;
+            }
+
+            #detailModal .surat-detail-dialog {
+                width: calc(100vw - 16px);
+                height: calc(100vh - 16px);
+                margin: 8px auto;
+            }
+
+            #detailModal .modal-content {
+                height: 100%;
+                max-height: 100%;
+            }
+
+            #detailModal .modal-body {
+                overflow-y: auto;
+            }
+
+            #detailModal .detail-modal-grid,
+            #detailModal .detail-preview-pane,
+            #detailModal .detail-info-pane {
+                height: auto;
+                overflow: visible;
+            }
+
+            #detailModal #detailFileViewer {
+                height: 58vh;
+                min-height: 360px;
             }
 
             #disposisiModal .modal-dialog {
@@ -1317,16 +1403,16 @@
 
     <!-- Detail / Preview Modal -->
     <div class="modal fade" id="detailModal" tabindex="-1">
-        <div class="modal-dialog modal-xl">
+        <div class="modal-dialog surat-detail-dialog">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title"><i class="fas fa-envelope-open-text mr-2"></i>Detail Surat Masuk</h5>
                     <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
                 </div>
                 <div class="modal-body p-0">
-                    <div class="row no-gutters">
+                    <div class="row no-gutters detail-modal-grid">
                         <!-- File Preview -->
-                        <div class="col-lg-7" style="border-right: 1px solid #f3f4f6;">
+                        <div class="col-lg-8 detail-preview-pane" style="border-right: 1px solid #f3f4f6;">
                             <div style="padding: 16px;">
                                 <div class="surat-preview-toolbar">
                                     <h6 style="font-weight: 700; color: #374151; margin-bottom: 12px;">
@@ -1336,12 +1422,11 @@
                                         <i class="fas fa-external-link-alt"></i> Buka Surat
                                     </a>
                                 </div>
-                                <iframe id="detailFileViewer"
-                                    style="width: 100%; height: 500px; border: 1px solid #e8eaed; border-radius: 10px; background: #f9fafb;"></iframe>
+                                <iframe id="detailFileViewer" title="Preview lampiran surat masuk"></iframe>
                             </div>
                         </div>
                         <!-- Info -->
-                        <div class="col-lg-5">
+                        <div class="col-lg-4 detail-info-pane">
                             <div style="padding: 20px;">
                                 <h6 style="font-weight: 700; color: #374151; margin-bottom: 16px;">
                                     <i class="fas fa-info-circle mr-1 text-primary"></i> Informasi Surat
@@ -1397,6 +1482,9 @@
                                 <div class="mt-3 d-flex" style="gap: 8px;">
                                     <a href="#" id="detailDownloadBtn" class="btn btn-sm btn-primary">
                                         <i class="fas fa-download mr-1"></i> Download
+                                    </a>
+                                    <a href="#" id="detailPrintBtn" target="_blank" rel="noopener" class="btn btn-sm btn-outline-primary">
+                                        <i class="fas fa-print mr-1"></i> Cetak
                                     </a>
                                     <a href="#" id="detailShowBtn" class="btn btn-sm btn-outline-secondary">
                                         <i class="fas fa-external-link-alt mr-1"></i> Halaman Detail
@@ -2203,6 +2291,17 @@
                 $('#detailAgendaRow').hide();
             }
             $('#detailDownloadBtn').attr('href', d.downloadUrl);
+            if (Number(d.hasDispositionHistory) === 1) {
+                $('#detailPrintBtn')
+                    .attr('href', d.printHistoryUrl)
+                    .removeClass('disabled')
+                    .attr('aria-disabled', 'false');
+            } else {
+                $('#detailPrintBtn')
+                    .attr('href', '#')
+                    .addClass('disabled')
+                    .attr('aria-disabled', 'true');
+            }
             $('#detailShowBtn').attr('href', d.showUrl);
             window.renderSuratHistory(String(suratId), '#detailHistory');
 

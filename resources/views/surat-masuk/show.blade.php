@@ -295,6 +295,12 @@
                                     class="btn btn-sm btn-outline-primary">
                                     <i class="fas fa-download mr-1"></i> Download
                                 </a>
+                                @if($suratMasuk->disposisis->isNotEmpty())
+                                    <a href="{{ route('surat-masuk.disposition-history.print', $suratMasuk) }}"
+                                        target="_blank" rel="noopener" class="btn btn-sm btn-outline-primary ml-1">
+                                        <i class="fas fa-print mr-1"></i> Cetak
+                                    </a>
+                                @endif
                             </td>
                         </tr>
                         @if($suratMasuk->agendaPimpinan)

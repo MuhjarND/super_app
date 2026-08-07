@@ -399,6 +399,37 @@ class SuratKeluarController extends Controller
         ]);
     }
 
+    public function updateNomor(Request $request, SuratKeluar $suratKeluar)
+    {
+        abort_unless(auth()->user()->canModifySuratKeluar($suratKeluar), 403);
+
+        $request->merge([
+            'nomor_surat' => trim((string) $request->input('nomor_surat')),
+        ]);
+
+        $data = $request->validate([
+            'nomor_surat' => [
+                'required',
+                'string',
+                'max:255',
+                Rule::unique('surat_keluars', 'nomor_surat')->ignore($suratKeluar->id),
+            ],
+        ]);
+
+        $payload = ['nomor_surat' => $data['nomor_surat']];
+        if (preg_match('/^(\d+)\//', $data['nomor_surat'], $match) && (int) $match[1] > 0) {
+            $payload['nomor_urut'] = (int) $match[1];
+        }
+
+        $suratKeluar->update($payload);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Nomor surat berhasil diperbarui tanpa mengambil nomor baru.',
+            'nomor_surat' => $suratKeluar->fresh()->nomor_surat_formatted,
+        ]);
+    }
+
     public function destroy(SuratKeluar $suratKeluar)
     {
         abort_unless(auth()->user()->canModifySuratKeluar($suratKeluar), 403);
