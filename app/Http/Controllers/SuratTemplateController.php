@@ -778,42 +778,51 @@ class SuratTemplateController extends Controller
 
     protected function createSuratKeluarFromTemplate(array $prefill)
     {
-        $suratKeluar = SuratKeluar::create([
-            'nomor_surat' => $prefill['field_values']['nomor_surat'],
-            'nomor_urut' => (int) explode('/', (string) $prefill['field_values']['nomor_surat'])[0],
-            'tahun_surat' => $prefill['tahun_surat'],
-            'klasifikasi_kode_id' => $prefill['klasifikasi_kode_id'],
-            'kategori_surat_id' => $prefill['kategori_surat_id'],
-            'kode_fungsi_id' => $prefill['kode_fungsi_id'],
-            'kode_kegiatan_id' => $prefill['kode_kegiatan_id'],
-            'kode_transaksi_id' => null,
-            'nomenklatur_jabatan' => $prefill['nomenklatur_jabatan'],
-            'opsi_penerima' => $prefill['opsi_penerima'],
-            'penerima_external' => null,
-            'perihal' => $prefill['perihal'],
-            'tanggal_surat' => $prefill['tanggal_surat'],
-            'has_lampiran' => false,
-            'status' => 'draft',
-            'created_by' => auth()->id(),
-        ]);
+        return SuratKeluar::withNomorUrutLock($prefill['tahun_surat'], function () use ($prefill) {
+            $previewNomor = (string) $prefill['field_values']['nomor_surat'];
+            $nomorUrut = SuratKeluar::nextNomorUrut($prefill['tahun_surat']);
+            $nomorSurat = preg_replace('/^\d+\//', $nomorUrut . '/', $previewNomor, 1);
 
-        if (!empty($prefill['penerima_internal_ids'])) {
-            $suratKeluar->penerimaInternal()->sync($prefill['penerima_internal_ids']);
-        }
+            $prefill['field_values']['nomor_surat'] = $nomorSurat;
+            $prefill['rendered_body'] = str_replace($previewNomor, $nomorSurat, $prefill['rendered_body']);
 
-        app(SuratKeluarApprovalService::class)->syncForTemplate(
-            $suratKeluar,
-            [
-                'template_name' => $prefill['template_name'],
-                'template_slug' => $prefill['template_slug'],
-                'rendered_body' => $prefill['rendered_body'],
-                'field_values' => $prefill['field_values'],
-            ],
-            User::findOrFail($prefill['field_values']['penanda_tangan']['id']),
-            auth()->user()
-        );
+            $suratKeluar = SuratKeluar::create([
+                'nomor_surat' => $nomorSurat,
+                'nomor_urut' => $nomorUrut,
+                'tahun_surat' => $prefill['tahun_surat'],
+                'klasifikasi_kode_id' => $prefill['klasifikasi_kode_id'],
+                'kategori_surat_id' => $prefill['kategori_surat_id'],
+                'kode_fungsi_id' => $prefill['kode_fungsi_id'],
+                'kode_kegiatan_id' => $prefill['kode_kegiatan_id'],
+                'kode_transaksi_id' => null,
+                'nomenklatur_jabatan' => $prefill['nomenklatur_jabatan'],
+                'opsi_penerima' => $prefill['opsi_penerima'],
+                'penerima_external' => null,
+                'perihal' => $prefill['perihal'],
+                'tanggal_surat' => $prefill['tanggal_surat'],
+                'has_lampiran' => false,
+                'status' => 'draft',
+                'created_by' => auth()->id(),
+            ]);
 
-        return $suratKeluar;
+            if (!empty($prefill['penerima_internal_ids'])) {
+                $suratKeluar->penerimaInternal()->sync($prefill['penerima_internal_ids']);
+            }
+
+            app(SuratKeluarApprovalService::class)->syncForTemplate(
+                $suratKeluar,
+                [
+                    'template_name' => $prefill['template_name'],
+                    'template_slug' => $prefill['template_slug'],
+                    'rendered_body' => $prefill['rendered_body'],
+                    'field_values' => $prefill['field_values'],
+                ],
+                User::findOrFail($prefill['field_values']['penanda_tangan']['id']),
+                auth()->user()
+            );
+
+            return $suratKeluar;
+        });
     }
 
     protected function resolveHierarchyForTemplateDefaults(array $defaults)

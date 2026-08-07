@@ -415,19 +415,26 @@ class DisposisiController extends Controller
             ]
         );
 
-        $logoPath = public_path('logo_app.png');
-        $logoData = is_file($logoPath)
-            ? 'data:image/png;base64,' . base64_encode(file_get_contents($logoPath))
-            : null;
+        $kopImage = null;
+        foreach (['kop_undangan.png', 'kop_undangan.jpg', 'kop_undangan.jpeg'] as $kopFilename) {
+            $kopPath = public_path($kopFilename);
+            if (!is_file($kopPath)) {
+                continue;
+            }
+
+            $kopMime = mime_content_type($kopPath) ?: 'image/png';
+            $kopImage = 'data:' . $kopMime . ';base64,' . base64_encode(file_get_contents($kopPath));
+            break;
+        }
         $petunjukOptions = Disposisi::getPetunjukOptions();
         $pdfVerification = $verifier->viewData($verification);
-        $pdfVerificationInFlow = true;
-        $pdfVerificationQrSize = 40;
+        $pdfVerificationInFlow = false;
+        $pdfVerificationQrSize = 34;
 
         $content = PDF::loadView('surat-masuk.pdf.disposisi', compact(
             'disposisi',
             'suratMasuk',
-            'logoData',
+            'kopImage',
             'petunjukOptions',
             'pdfVerification',
             'pdfVerificationInFlow',

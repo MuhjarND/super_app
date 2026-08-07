@@ -573,11 +573,6 @@
             color: #166534;
         }
 
-        .action-btn.number {
-            background: #fff7ed;
-            color: #c2410c;
-        }
-
         .action-btn.calendar {
             background: #eef2ff;
             color: #4338ca;
@@ -1034,37 +1029,6 @@
         </div>
     </div>
 
-    <!-- Edit Nomor Surat Modal -->
-    <div class="modal fade" id="editNomorModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title"><i class="fas fa-hashtag mr-2 text-primary"></i>Edit Nomor Surat</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Tutup"><span>&times;</span></button>
-                </div>
-                <form id="editNomorForm">
-                    @csrf
-                    <input type="hidden" name="_method" value="PATCH">
-                    <input type="hidden" id="editNomorSuratId">
-                    <div class="modal-body">
-                        <div class="form-group mb-0">
-                            <label for="editNomorSurat">Nomor Surat <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" name="nomor_surat" id="editNomorSurat"
-                                maxlength="255" autocomplete="off" required>
-                            <small class="form-text text-muted">Hanya nomor surat yang akan berubah. Data surat lainnya tetap.</small>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Batal</button>
-                        <button type="submit" class="btn btn-primary" id="btnEditNomorSubmit">
-                            <i class="fas fa-save mr-1"></i>Simpan Nomor
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
     <!-- Upload Modal -->
     <div class="modal fade" id="uploadModal" tabindex="-1">
         <div class="modal-dialog">
@@ -1394,7 +1358,6 @@
                 }
                 if (canManageRow) {
                     actions += '<button type="button" class="action-btn detail" onclick="openEdit(' + data.suratId + ')"><i class="fas fa-edit"></i> Edit</button>';
-                    actions += '<button type="button" class="action-btn number" onclick="openEditNomor(' + data.suratId + ')"><i class="fas fa-hashtag"></i> Edit Nomor</button>';
                     actions += '<button type="button" class="action-btn upload" onclick="openUpload(' + data.suratId + ')"><i class="fas fa-upload"></i> Upload</button>';
                     actions += '<button type="button" class="action-btn delete" onclick="deleteSurat(' + data.suratId + ', \'' + data.deleteUrl + '\')"><i class="fas fa-trash"></i> Hapus</button>';
                 }
@@ -1694,42 +1657,6 @@
                 });
             });
 
-            $('#editNomorForm').on('submit', function (e) {
-                e.preventDefault();
-                const suratId = $('#editNomorSuratId').val();
-                const row = $('tr[data-surat-id="' + suratId + '"]');
-                const updateUrl = row.attr('data-update-number-url');
-
-                if (!row.length || Number(row.attr('data-can-manage')) !== 1 || !updateUrl) {
-                    showToast('Anda tidak memiliki akses untuk mengubah nomor surat.', 'warning');
-                    return;
-                }
-
-                const btn = $('#btnEditNomorSubmit');
-                btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin mr-1"></i>Menyimpan...');
-
-                $.ajax({
-                    url: updateUrl,
-                    method: 'POST',
-                    data: $(this).serialize(),
-                    success: function (res) {
-                        showToast(res.message, 'success');
-                        $('#editNomorModal').modal('hide');
-                        location.reload();
-                    },
-                    error: function (xhr) {
-                        const errors = xhr.responseJSON?.errors;
-                        const message = errors
-                            ? Object.values(errors).flat().join('<br>')
-                            : (xhr.responseJSON?.message || 'Nomor surat gagal diperbarui.');
-                        showToast(message, 'error');
-                    },
-                    complete: function () {
-                        btn.prop('disabled', false).html('<i class="fas fa-save mr-1"></i>Simpan Nomor');
-                    }
-                });
-            });
-
             window.openEdit = function (suratId) {
                 const row = $('tr[data-surat-id="' + suratId + '"]');
                 if (Number(row.data('canManage')) !== 1) {
@@ -1769,18 +1696,6 @@
                 $('#editPenerimaInternal').val(penerimaInternal).trigger('change');
                 togglePenerimaFields('edit');
                 $('#editModal').modal('show');
-            };
-
-            window.openEditNomor = function (suratId) {
-                const row = $('tr[data-surat-id="' + suratId + '"]');
-                if (!row.length || Number(row.attr('data-can-manage')) !== 1) {
-                    showToast('Anda tidak memiliki akses untuk mengubah nomor surat.', 'warning');
-                    return;
-                }
-
-                $('#editNomorSuratId').val(suratId);
-                $('#editNomorSurat').val(row.attr('data-nomor-surat') || '');
-                $('#editNomorModal').modal('show');
             };
 
             // Upload form

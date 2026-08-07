@@ -2,7 +2,9 @@
 
 namespace App;
 
+use Closure;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 class SuratKeluar extends Model
@@ -341,6 +343,23 @@ class SuratKeluar extends Model
     public static function nextNomorUrut($tahun = null)
     {
         return static::currentNomorUrutBase($tahun) + 1;
+    }
+
+    public static function withNomorUrutLock($tahun, Closure $callback)
+    {
+        $tahun = (int) ($tahun ?: now('Asia/Jayapura')->year);
+
+        return DB::transaction(function () use ($tahun, $callback) {
+            // Semua penerbit nomor mengunci rentang tahun yang sama agar dua
+            // transaksi bersamaan tidak membaca nomor terakhir yang identik.
+            static::query()
+                ->where('tahun_surat', $tahun)
+                ->orderBy('id')
+                ->lockForUpdate()
+                ->get(['id']);
+
+            return $callback();
+        }, 5);
     }
 
     public static function currentNomorUrutBase($tahun = null)

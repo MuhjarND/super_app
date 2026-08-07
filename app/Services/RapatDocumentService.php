@@ -108,54 +108,61 @@ class RapatDocumentService
             ? $rapat->created_at->copy()->timezone('Asia/Jayapura')
             : Carbon::now('Asia/Jayapura');
 
-        $nomenklatur = $this->resolveRapatNomenklatur($rapat);
-        $suratKeluar = $rapat->suratKeluar;
+        return SuratKeluar::withNomorUrutLock($issueDate->year, function () use (
+            $rapat,
+            $markComplete,
+            $hierarchy,
+            $issueDate
+        ) {
+            $nomenklatur = $this->resolveRapatNomenklatur($rapat);
+            $suratKeluar = $rapat->suratKeluar;
 
-        $result = SuratKeluar::generateNomorSurat(
-            $nomenklatur,
-            $hierarchy['klasifikasi']->kode,
-            $hierarchy['fungsi'] ? $hierarchy['fungsi']->kode : null,
-            $hierarchy['kegiatan'] ? $hierarchy['kegiatan']->kode : null,
-            $hierarchy['transaksi'] ? $hierarchy['transaksi']->kode : null,
-            $issueDate->year,
-            $issueDate->month,
-            $suratKeluar
-                && (int) $suratKeluar->tahun_surat === (int) $issueDate->year
-                && (string) $suratKeluar->nomenklatur_jabatan === (string) $nomenklatur
-                ? $suratKeluar->nomor_urut
-                : null
-        );
+            $result = SuratKeluar::generateNomorSurat(
+                $nomenklatur,
+                $hierarchy['klasifikasi']->kode,
+                $hierarchy['fungsi'] ? $hierarchy['fungsi']->kode : null,
+                $hierarchy['kegiatan'] ? $hierarchy['kegiatan']->kode : null,
+                $hierarchy['transaksi'] ? $hierarchy['transaksi']->kode : null,
+                $issueDate->year,
+                $issueDate->month,
+                $suratKeluar
+                    && (int) $suratKeluar->tahun_surat === (int) $issueDate->year
+                    && (string) $suratKeluar->nomenklatur_jabatan === (string) $nomenklatur
+                    ? $suratKeluar->nomor_urut
+                    : null
+            );
 
-        $payload = [
-            'nomor_surat' => $result['nomor'],
-            'nomor_urut' => $result['urut'],
-            'tahun_surat' => $issueDate->year,
-            'klasifikasi_kode_id' => $hierarchy['klasifikasi']->id,
-            'kategori_surat_id' => optional($this->findKategoriSuratByHierarchy($hierarchy))->id,
-            'kode_fungsi_id' => $hierarchy['fungsi'] ? $hierarchy['fungsi']->id : null,
-            'kode_kegiatan_id' => $hierarchy['kegiatan'] ? $hierarchy['kegiatan']->id : null,
-            'kode_transaksi_id' => $hierarchy['transaksi'] ? $hierarchy['transaksi']->id : null,
-            'nomenklatur_jabatan' => $nomenklatur,
-            'opsi_penerima' => $rapat->is_external ? 'external' : 'internal',
-            'penerima_external' => $rapat->is_external ? trim((string) $rapat->tujuan_external) : null,
-            'perihal' => $rapat->judul,
-            'tanggal_surat' => $issueDate->toDateString(),
-            'has_lampiran' => true,
-            'status' => $markComplete ? 'lengkap' : 'draft',
-            'created_by' => $rapat->created_by,
-            'rapat_id' => $rapat->id,
-        ];
+            $payload = [
+                'nomor_surat' => $result['nomor'],
+                'nomor_urut' => $result['urut'],
+                'tahun_surat' => $issueDate->year,
+                'klasifikasi_kode_id' => $hierarchy['klasifikasi']->id,
+                'kategori_surat_id' => optional($this->findKategoriSuratByHierarchy($hierarchy))->id,
+                'kode_fungsi_id' => $hierarchy['fungsi'] ? $hierarchy['fungsi']->id : null,
+                'kode_kegiatan_id' => $hierarchy['kegiatan'] ? $hierarchy['kegiatan']->id : null,
+                'kode_transaksi_id' => $hierarchy['transaksi'] ? $hierarchy['transaksi']->id : null,
+                'nomenklatur_jabatan' => $nomenklatur,
+                'opsi_penerima' => $rapat->is_external ? 'external' : 'internal',
+                'penerima_external' => $rapat->is_external ? trim((string) $rapat->tujuan_external) : null,
+                'perihal' => $rapat->judul,
+                'tanggal_surat' => $issueDate->toDateString(),
+                'has_lampiran' => true,
+                'status' => $markComplete ? 'lengkap' : 'draft',
+                'created_by' => $rapat->created_by,
+                'rapat_id' => $rapat->id,
+            ];
 
-        if ($suratKeluar) {
-            $suratKeluar->update($payload);
-        } else {
-            $suratKeluar = SuratKeluar::create($payload);
-        }
+            if ($suratKeluar) {
+                $suratKeluar->update($payload);
+            } else {
+                $suratKeluar = SuratKeluar::create($payload);
+            }
 
-        $suratKeluar->penerimaInternal()->sync($rapat->pesertas->pluck('id')->all());
-        $rapat->forceFill(['nomor_undangan' => $suratKeluar->nomor_surat])->save();
+            $suratKeluar->penerimaInternal()->sync($rapat->pesertas->pluck('id')->all());
+            $rapat->forceFill(['nomor_undangan' => $suratKeluar->nomor_surat])->save();
 
-        return $suratKeluar->fresh(['creator', 'penerimaInternal', 'klasifikasiKode', 'kodeFungsi', 'kodeKegiatan', 'kodeTransaksi']);
+            return $suratKeluar->fresh(['creator', 'penerimaInternal', 'klasifikasiKode', 'kodeFungsi', 'kodeKegiatan', 'kodeTransaksi']);
+        });
     }
 
     public function generateAndStoreUndangan(Rapat $rapat, $signed = false)

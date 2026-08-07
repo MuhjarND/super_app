@@ -239,34 +239,47 @@ class SuratKeluarController extends Controller
         $kegiatan = $kode['kegiatan'];
         $transaksi = $kode['transaksi'];
 
-        $result = SuratKeluar::generateNomorSurat(
-            $request->nomenklatur_jabatan,
-            $klasifikasi->kode,
-            $fungsi ? $fungsi->kode : null,
-            $kegiatan ? $kegiatan->kode : null,
-            $transaksi ? $transaksi->kode : null,
-            $request->tahun_surat,
-            date('n', strtotime($request->tanggal_surat))
-        );
+        $created = SuratKeluar::withNomorUrutLock($request->tahun_surat, function () use (
+            $request,
+            $klasifikasi,
+            $fungsi,
+            $kegiatan,
+            $transaksi
+        ) {
+            $result = SuratKeluar::generateNomorSurat(
+                $request->nomenklatur_jabatan,
+                $klasifikasi->kode,
+                $fungsi ? $fungsi->kode : null,
+                $kegiatan ? $kegiatan->kode : null,
+                $transaksi ? $transaksi->kode : null,
+                $request->tahun_surat,
+                date('n', strtotime($request->tanggal_surat))
+            );
 
-        $suratKeluar = SuratKeluar::create([
-            'nomor_surat' => $result['nomor'],
-            'nomor_urut' => $result['urut'],
-            'tahun_surat' => $request->tahun_surat,
-            'klasifikasi_kode_id' => $request->klasifikasi_kode_id,
-            'kategori_surat_id' => $request->kategori_surat_id,
-            'kode_fungsi_id' => $request->kode_fungsi_id,
-            'kode_kegiatan_id' => $request->kode_kegiatan_id,
-            'kode_transaksi_id' => $request->kode_transaksi_id,
-            'nomenklatur_jabatan' => $request->nomenklatur_jabatan,
-            'opsi_penerima' => $request->opsi_penerima,
-            'penerima_external' => $request->opsi_penerima == 'external' ? $request->penerima_external : null,
-            'perihal' => $request->perihal,
-            'tanggal_surat' => $request->tanggal_surat,
-            'has_lampiran' => $request->input('has_lampiran', 'tidak') == 'ya',
-            'status' => 'draft',
-            'created_by' => auth()->id(),
-        ]);
+            $suratKeluar = SuratKeluar::create([
+                'nomor_surat' => $result['nomor'],
+                'nomor_urut' => $result['urut'],
+                'tahun_surat' => $request->tahun_surat,
+                'klasifikasi_kode_id' => $request->klasifikasi_kode_id,
+                'kategori_surat_id' => $request->kategori_surat_id,
+                'kode_fungsi_id' => $request->kode_fungsi_id,
+                'kode_kegiatan_id' => $request->kode_kegiatan_id,
+                'kode_transaksi_id' => $request->kode_transaksi_id,
+                'nomenklatur_jabatan' => $request->nomenklatur_jabatan,
+                'opsi_penerima' => $request->opsi_penerima,
+                'penerima_external' => $request->opsi_penerima == 'external' ? $request->penerima_external : null,
+                'perihal' => $request->perihal,
+                'tanggal_surat' => $request->tanggal_surat,
+                'has_lampiran' => $request->input('has_lampiran', 'tidak') == 'ya',
+                'status' => 'draft',
+                'created_by' => auth()->id(),
+            ]);
+
+            return compact('suratKeluar', 'result');
+        });
+
+        $suratKeluar = $created['suratKeluar'];
+        $result = $created['result'];
 
         if ($request->opsi_penerima == 'internal' && $request->penerima_internal) {
             $this->attachDraftRecipients($suratKeluar, $request->penerima_internal);
@@ -396,37 +409,6 @@ class SuratKeluarController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Surat keluar berhasil diperbarui.',
-        ]);
-    }
-
-    public function updateNomor(Request $request, SuratKeluar $suratKeluar)
-    {
-        abort_unless(auth()->user()->canModifySuratKeluar($suratKeluar), 403);
-
-        $request->merge([
-            'nomor_surat' => trim((string) $request->input('nomor_surat')),
-        ]);
-
-        $data = $request->validate([
-            'nomor_surat' => [
-                'required',
-                'string',
-                'max:255',
-                Rule::unique('surat_keluars', 'nomor_surat')->ignore($suratKeluar->id),
-            ],
-        ]);
-
-        $payload = ['nomor_surat' => $data['nomor_surat']];
-        if (preg_match('/^(\d+)\//', $data['nomor_surat'], $match) && (int) $match[1] > 0) {
-            $payload['nomor_urut'] = (int) $match[1];
-        }
-
-        $suratKeluar->update($payload);
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Nomor surat berhasil diperbarui tanpa mengambil nomor baru.',
-            'nomor_surat' => $suratKeluar->fresh()->nomor_surat_formatted,
         ]);
     }
 

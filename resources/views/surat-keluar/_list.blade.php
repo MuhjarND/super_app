@@ -19,11 +19,9 @@
                     @foreach($suratKeluar as $surat)
                         <tr class="main-row" data-surat-id="{{ $surat->id }}"
                             data-update-url="{{ route('surat-keluar.update', $surat) }}"
-                            data-update-number-url="{{ route('surat-keluar.nomor.update', $surat) }}"
                             data-delete-url="{{ route('surat-keluar.destroy', $surat) }}"
                             data-file-url="{{ ($surat->file_path || $surat->templateApproval || $surat->rapat || $surat->leaveRequest || ($surat->pdf_verifications_count ?? 0) > 0) ? route('surat-keluar.file', $surat) : '' }}"
                             data-creator="{{ optional($surat->creator)->name ?: '-' }}"
-                            data-nomor-surat="{{ $surat->nomor_surat }}"
                             data-tahun-surat="{{ $surat->tahun_surat }}"
                             data-nomenklatur-jabatan="{{ $surat->nomenklatur_jabatan }}"
                             data-klasifikasi-kode="{{ $surat->klasifikasi_kode_id }}"

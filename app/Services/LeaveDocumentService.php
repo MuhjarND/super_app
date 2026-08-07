@@ -199,21 +199,28 @@ class LeaveDocumentService
 
         $issueDate = $this->resolveLetterIssueDate($leaveRequest);
 
-        $number = SuratKeluar::generateNomorSurat(
-            'ketua',
-            'KP',
-            '5',
-            '3',
-            null,
-            $issueDate->year,
-            $issueDate->month,
-            $this->nextLetterSequence($issueDate->year)
-        );
+        return SuratKeluar::withNomorUrutLock($issueDate->year, function () use ($leaveRequest, $issueDate) {
+            $leaveRequest->refresh();
+            if (!empty($leaveRequest->letter_number)) {
+                return $leaveRequest->letter_number;
+            }
 
-        $leaveRequest->letter_number = $number['nomor'];
-        $leaveRequest->save();
+            $number = SuratKeluar::generateNomorSurat(
+                'ketua',
+                'KP',
+                '5',
+                '3',
+                null,
+                $issueDate->year,
+                $issueDate->month,
+                $this->nextLetterSequence($issueDate->year)
+            );
 
-        return $leaveRequest->letter_number;
+            $leaveRequest->letter_number = $number['nomor'];
+            $leaveRequest->save();
+
+            return $leaveRequest->letter_number;
+        });
     }
 
     protected function resolveLetterIssueDate(LeaveRequest $leaveRequest)

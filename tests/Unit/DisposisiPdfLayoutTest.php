@@ -42,10 +42,10 @@ class DisposisiPdfLayoutTest extends TestCase
         $html = view('surat-masuk.pdf.disposisi', [
             'disposisi' => $disposition,
             'suratMasuk' => $letter,
-            'logoData' => null,
+            'kopImage' => 'data:image/png;base64,testing',
             'petunjukOptions' => Disposisi::getPetunjukOptions(),
             'pdfVerification' => ['qr' => 'data:image/png;base64,testing'],
-            'pdfVerificationInFlow' => true,
+            'pdfVerificationInFlow' => false,
             'pdfVerificationQrSize' => 40,
         ])->render();
 
@@ -56,6 +56,8 @@ class DisposisiPdfLayoutTest extends TestCase
         $this->assertStringContainsString('Pejabat Tujuan', $html);
         $this->assertStringContainsString('Untuk diketahui', $html);
         $this->assertStringContainsString('Mohon ditindaklanjuti.', $html);
+        $this->assertStringContainsString('class="official-letterhead"', $html);
+        $this->assertStringContainsString('MAHKAMAH AGUNG REPUBLIK INDONESIA', $html);
         $this->assertStringContainsString('Validasi PDF', $html);
     }
 
