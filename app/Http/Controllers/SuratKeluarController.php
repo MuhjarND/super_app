@@ -356,22 +356,25 @@ class SuratKeluarController extends Controller
         ];
 
         if ($shouldRegenerateNomor) {
-            $result = SuratKeluar::generateNomorSurat(
-                $request->nomenklatur_jabatan,
-                $kode['klasifikasi']->kode,
-                $kode['fungsi'] ? $kode['fungsi']->kode : null,
-                $kode['kegiatan'] ? $kode['kegiatan']->kode : null,
-                $kode['transaksi'] ? $kode['transaksi']->kode : null,
-                $request->tahun_surat,
-                date('n', strtotime($request->tanggal_surat)),
-                $suratKeluar->nomenklatur_jabatan === $request->nomenklatur_jabatan
-                    && (int) $suratKeluar->tahun_surat === (int) $request->tahun_surat
-                    ? $suratKeluar->nomor_urut
-                    : null
-            );
+            $existingNomorUrut = $suratKeluar->reusableNomorUrut();
 
-            $payload['nomor_surat'] = $result['nomor'];
-            $payload['nomor_urut'] = $result['urut'];
+            // Edit hanya menyusun ulang nomor yang sama; tidak boleh mengambil
+            // nomor urut baru dari antrean penomoran surat keluar.
+            if ($existingNomorUrut) {
+                $result = SuratKeluar::generateNomorSurat(
+                    $request->nomenklatur_jabatan,
+                    $kode['klasifikasi']->kode,
+                    $kode['fungsi'] ? $kode['fungsi']->kode : null,
+                    $kode['kegiatan'] ? $kode['kegiatan']->kode : null,
+                    $kode['transaksi'] ? $kode['transaksi']->kode : null,
+                    $request->tahun_surat,
+                    date('n', strtotime($request->tanggal_surat)),
+                    $existingNomorUrut
+                );
+
+                $payload['nomor_surat'] = $result['nomor'];
+                $payload['nomor_urut'] = $existingNomorUrut;
+            }
         }
 
         $oldRecipientIds = $suratKeluar->penerimaInternal()->pluck('users.id')->map(function ($id) {

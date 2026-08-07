@@ -195,8 +195,8 @@ class SuratKeluar extends Model
         $map = [
             'ketua' => 'KPTA',
             'wakil_ketua' => 'WKPTA',
-            'sekretaris' => 'SEK',
-            'panitera' => 'PAN',
+            'sekretaris' => 'SEK.PTA',
+            'panitera' => 'PAN.PTA',
         ];
         return $map[$this->nomenklatur_jabatan] ?? '';
     }
@@ -262,8 +262,8 @@ class SuratKeluar extends Model
             $prefixMap = [
                 'KPTA' => 'KPTA.W31-A',
                 'WKPTA' => 'WKPTA.W31-A',
-                'SEK' => 'SEK.W31-A',
-                'PAN' => 'PAN.W31-A',
+                'SEK' => 'SEK.PTA.W31-A',
+                'PAN' => 'PAN.PTA.W31-A',
             ];
 
             $prefix = $prefixMap[$match[2]] ?? ($match[2] . '.W31-A');
@@ -271,10 +271,21 @@ class SuratKeluar extends Model
         }
 
         return str_replace(
-            ['/SEK.PTA.W31-A/', '/PAN.PTA.W31-A/'],
-            ['/SEK.W31-A/', '/PAN.W31-A/'],
+            ['/SEK.W31-A/', '/PAN.W31-A/', '/SEK/', '/PAN/'],
+            ['/SEK.PTA.W31-A/', '/PAN.PTA.W31-A/', '/SEK.PTA/', '/PAN.PTA/'],
             $nomor
         );
+    }
+
+    public function reusableNomorUrut()
+    {
+        if ((int) $this->nomor_urut > 0) {
+            return (int) $this->nomor_urut;
+        }
+
+        return preg_match('/^(\d+)\//', trim((string) $this->nomor_surat), $match)
+            ? (int) $match[1]
+            : null;
     }
 
     /**
@@ -285,8 +296,8 @@ class SuratKeluar extends Model
         $prefixMap = [
             'ketua' => 'KPTA.W31-A',
             'wakil_ketua' => 'WKPTA.W31-A',
-            'sekretaris' => 'SEK.W31-A',
-            'panitera' => 'PAN.W31-A',
+            'sekretaris' => 'SEK.PTA.W31-A',
+            'panitera' => 'PAN.PTA.W31-A',
         ];
 
         $nomorPrefix = $prefixMap[$nomenklatur] ?? 'W31-A';
@@ -321,7 +332,7 @@ class SuratKeluar extends Model
 
         // Format:
         // {nomor}/{prefix}/{kode_path}/{bulan}/{tahun}
-        // Contoh: 326/SEK.W31-A/KU1.1.1/III/2026
+        // Contoh: 326/SEK.PTA.W31-A/KU1.1.1/III/2026
         $nomor = "{$nextNumber}/{$nomorPrefix}/{$kodePath}/{$bulan}/{$tahun}";
 
         return ['nomor' => $nomor, 'urut' => $nextNumber];

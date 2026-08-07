@@ -9,6 +9,7 @@ use App\Jabatan;
 use App\User;
 use App\Services\ActivityAuditService;
 use App\Services\WhatsAppNotificationService;
+use Barryvdh\DomPDF\Facade as PDF;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -378,6 +379,67 @@ class DisposisiController extends Controller
         abort_unless(Storage::disk('local')->exists($dokumentasi->file_path), 404, 'Dokumentasi tidak ditemukan.');
 
         return Storage::disk('local')->download($dokumentasi->file_path, $dokumentasi->original_name);
+    }
+
+    public function printPdf(Disposisi $disposisi)
+    {
+        $disposisi->loadMissing([
+            'suratMasuk.klasifikasiKode',
+            'suratMasuk.kategoriSurat',
+            'dariUser.jabatan',
+            'kepadaUser.jabatan',
+            'dariJabatan',
+            'kepadaJabatan',
+        ]);
+
+        $suratMasuk = $disposisi->suratMasuk;
+        abort_unless($suratMasuk && auth()->user()->canViewSuratMasuk($suratMasuk), 403);
+
+        $verifier = app(\App\Services\PdfVerificationService::class);
+        $verification = $verifier->begin(
+            'persuratan',
+            'lembar_disposisi',
+            $disposisi->id,
+            'Lembar Disposisi ' . $suratMasuk->nomor_surat,
+            [[
+                'user_id' => optional($disposisi->dariUser)->id,
+                'name' => optional($disposisi->dariUser)->name,
+                'jabatan' => optional($disposisi->dariJabatan)->nama ?: optional(optional($disposisi->dariUser)->jabatan)->nama,
+                'role' => 'Pemberi disposisi',
+                'signed_at' => optional($disposisi->created_at)->toDateTimeString(),
+            ]],
+            [
+                'surat_masuk_id' => $suratMasuk->id,
+                'nomor_surat' => $suratMasuk->nomor_surat,
+                'disposisi_status' => $disposisi->status,
+            ]
+        );
+
+        $logoPath = public_path('logo_app.png');
+        $logoData = is_file($logoPath)
+            ? 'data:image/png;base64,' . base64_encode(file_get_contents($logoPath))
+            : null;
+        $petunjukOptions = Disposisi::getPetunjukOptions();
+        $pdfVerification = $verifier->viewData($verification);
+        $pdfVerificationInFlow = true;
+        $pdfVerificationQrSize = 40;
+
+        $content = PDF::loadView('surat-masuk.pdf.disposisi', compact(
+            'disposisi',
+            'suratMasuk',
+            'logoData',
+            'petunjukOptions',
+            'pdfVerification',
+            'pdfVerificationInFlow',
+            'pdfVerificationQrSize'
+        ))->setPaper('a4', 'portrait')->output();
+
+        return $verifier->response(
+            $content,
+            $verification,
+            'lembar-disposisi-' . $disposisi->id . '.pdf',
+            'inline'
+        );
     }
 
     protected function authorizeDokumentasi(DisposisiDokumentasi $dokumentasi)

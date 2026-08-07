@@ -432,9 +432,15 @@
                     @forelse($suratMasuk->disposisis->sortByDesc('created_at') as $disposisi)
                         <div class="p-3 border-bottom surat-masuk-history-entry"
                             style="border-left: 3px solid {{ $disposisi->tipe == 'naikan' ? 'var(--primary)' : 'var(--accent)' }};">
-                            <div class="d-flex justify-content-between mb-1">
+                            <div class="d-flex justify-content-between align-items-start mb-1">
                                 {!! $disposisi->tipe_badge !!}
-                                {!! $disposisi->status_badge !!}
+                                <div class="d-flex align-items-center flex-wrap justify-content-end" style="gap: 6px;">
+                                    {!! $disposisi->status_badge !!}
+                                    <a href="{{ route('disposisi.print', $disposisi) }}" target="_blank" rel="noopener"
+                                        class="btn btn-xs btn-outline-primary" title="Cetak lembar disposisi">
+                                        <i class="fas fa-print mr-1"></i>Cetak
+                                    </a>
+                                </div>
                             </div>
                             <div class="mb-2">
                                 {!! $disposisi->priority_badge !!}

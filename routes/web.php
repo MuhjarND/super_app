@@ -124,6 +124,7 @@ Route::middleware(['auth'])->group(function () {
 
     // Disposisi
     Route::post('/disposisi', 'DisposisiController@store')->name('disposisi.store');
+    Route::get('/disposisi/{disposisi}/cetak', 'DisposisiController@printPdf')->name('disposisi.print');
     Route::patch('/disposisi/{disposisi}/status', 'DisposisiController@updateStatus')->name('disposisi.update-status');
     Route::post('/disposisi/{disposisi}/remind', 'DisposisiController@remind')->name('disposisi.remind');
     Route::get('/disposisi/dokumentasi/{dokumentasi}/preview', 'DisposisiController@previewDokumentasi')->name('disposisi.dokumentasi.preview');
