@@ -395,26 +395,6 @@ class DisposisiController extends Controller
         $suratMasuk = $disposisi->suratMasuk;
         abort_unless($suratMasuk && auth()->user()->canViewSuratMasuk($suratMasuk), 403);
 
-        $verifier = app(\App\Services\PdfVerificationService::class);
-        $verification = $verifier->begin(
-            'persuratan',
-            'lembar_disposisi',
-            $disposisi->id,
-            'Lembar Disposisi ' . $suratMasuk->nomor_surat,
-            [[
-                'user_id' => optional($disposisi->dariUser)->id,
-                'name' => optional($disposisi->dariUser)->name,
-                'jabatan' => optional($disposisi->dariJabatan)->nama ?: optional(optional($disposisi->dariUser)->jabatan)->nama,
-                'role' => 'Pemberi disposisi',
-                'signed_at' => optional($disposisi->created_at)->toDateTimeString(),
-            ]],
-            [
-                'surat_masuk_id' => $suratMasuk->id,
-                'nomor_surat' => $suratMasuk->nomor_surat,
-                'disposisi_status' => $disposisi->status,
-            ]
-        );
-
         $kopImage = null;
         foreach (['kop_undangan.png', 'kop_undangan.jpg', 'kop_undangan.jpeg'] as $kopFilename) {
             $kopPath = public_path($kopFilename);
@@ -427,26 +407,15 @@ class DisposisiController extends Controller
             break;
         }
         $petunjukOptions = Disposisi::getPetunjukOptions();
-        $pdfVerification = $verifier->viewData($verification);
-        $pdfVerificationInFlow = false;
-        $pdfVerificationQrSize = 34;
 
-        $content = PDF::loadView('surat-masuk.pdf.disposisi', compact(
+        $pdf = PDF::loadView('surat-masuk.pdf.disposisi', compact(
             'disposisi',
             'suratMasuk',
             'kopImage',
-            'petunjukOptions',
-            'pdfVerification',
-            'pdfVerificationInFlow',
-            'pdfVerificationQrSize'
-        ))->setPaper('a4', 'portrait')->output();
+            'petunjukOptions'
+        ))->setPaper('a4', 'portrait');
 
-        return $verifier->response(
-            $content,
-            $verification,
-            'lembar-disposisi-' . $disposisi->id . '.pdf',
-            'inline'
-        );
+        return $pdf->stream('lembar-disposisi-' . $disposisi->id . '.pdf');
     }
 
     protected function authorizeDokumentasi(DisposisiDokumentasi $dokumentasi)

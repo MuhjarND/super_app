@@ -44,9 +44,6 @@ class DisposisiPdfLayoutTest extends TestCase
             'suratMasuk' => $letter,
             'kopImage' => 'data:image/png;base64,testing',
             'petunjukOptions' => Disposisi::getPetunjukOptions(),
-            'pdfVerification' => ['qr' => 'data:image/png;base64,testing'],
-            'pdfVerificationInFlow' => false,
-            'pdfVerificationQrSize' => 40,
         ])->render();
 
         $normalizedHtml = str_replace('&#8203;', '', $html);
@@ -63,7 +60,7 @@ class DisposisiPdfLayoutTest extends TestCase
         $this->assertStringContainsString('Tanggal selesai dari Pejabat yang memberi disposisi', $html);
         $this->assertStringContainsString('class="official-letterhead"', $html);
         $this->assertStringContainsString('MAHKAMAH AGUNG REPUBLIK INDONESIA', $html);
-        $this->assertStringContainsString('Validasi PDF', $html);
+        $this->assertStringNotContainsString('pdf-verification-badge', $html);
         $this->assertSame(1, preg_match('/@page\s*\{\s*size:\s*A4 portrait;/', $html));
     }
 }

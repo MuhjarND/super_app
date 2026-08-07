@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <title>Lembar Disposisi</title>
     <style>
-        @page { size: A4 portrait; margin: 5mm 5mm 17mm; }
+        @page { size: A4 portrait; margin: 5mm; }
         * { box-sizing: border-box; }
         body {
             margin: 0;
@@ -146,7 +146,6 @@
         .process tr:last-child td { border-bottom: 0; }
         .process td:last-child { border-right: 0; }
         .process-line { margin-top: 2.2mm; }
-        .verification-wrap { margin-top: 0; }
     </style>
 </head>
 <body>
@@ -357,8 +356,5 @@
         </table>
     </div>
 
-    <div class="verification-wrap">
-        @include('partials.pdf-verification-badge')
-    </div>
 </body>
 </html>
