@@ -403,9 +403,11 @@ class RapatDocumentService
         $singleRecipient = $displayRecipients->count() === 1;
         $showLampiranDaftar = $displayRecipients->count() > 1;
         $hasSignatoryContext = $signatory || trim((string) $rapat->approval1_jabatan_manual) !== '';
+        $usesManualSignatoryTitle = trim((string) $rapat->approval1_jabatan_manual) !== '';
         $showTembusan = $hasSignatoryContext
-            && !$this->isKetuaOrWakilKetua($signatory)
-            && !$this->isKetuaOrWakilTitle($rapat->approval1_jabatan_manual);
+            && !($usesManualSignatoryTitle
+                ? $this->isKetuaOrWakilTitle($rapat->approval1_jabatan_manual)
+                : $this->isKetuaOrWakilKetua($signatory));
         $issueDate = $rapat->created_at
             ? $rapat->created_at->copy()->timezone('Asia/Jayapura')
             : Carbon::now('Asia/Jayapura');
@@ -821,7 +823,7 @@ class RapatDocumentService
     {
         $manualTitle = trim((string) $manualTitle);
 
-        if (!$signatory && $manualTitle !== '') {
+        if ($manualTitle !== '') {
             return [
                 'line1' => rtrim($manualTitle, ',') . ',',
                 'line2' => 'Pengadilan Tinggi Agama Papua Barat',

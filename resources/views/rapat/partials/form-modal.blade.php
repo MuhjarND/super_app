@@ -135,6 +135,7 @@
                                 <div class="col-md-6 form-group">
                                     <label>Jabatan Manual Approver 1</label>
                                     <input type="text" class="form-control" name="approval1_jabatan_manual" id="{{ $prefix }}Approval1JabatanManual" placeholder="Opsional">
+                                    <small class="form-hint">Jika diisi, jabatan ini menggantikan jabatan pengguna pada PDF undangan.</small>
                                 </div>
                             </div>
 
