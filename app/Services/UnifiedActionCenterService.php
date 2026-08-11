@@ -666,6 +666,7 @@ class UnifiedActionCenterService
 
         if ($user->canAccessLeaveApproval() || $user->isSuperAdmin()) {
             $approvalQuery = LeaveApproval::with(['leaveRequest.user.unit', 'leaveRequest.leaveType'])
+                ->whereHas('leaveRequest')
                 ->whereIn('status', ['waiting', 'pending'])
                 ->whereIn('approver_id', $user->effectiveAssignmentUserIds());
 
@@ -1037,6 +1038,7 @@ class UnifiedActionCenterService
         }
 
         $query = LeaveApproval::with(['leaveRequest.user.unit', 'leaveRequest.leaveType'])
+            ->whereHas('leaveRequest')
             ->whereIn('status', ['approved', 'rejected'])
             ->where(function ($builder) use ($user) {
                 $builder->whereIn('approver_id', $user->effectiveAssignmentUserIds())
