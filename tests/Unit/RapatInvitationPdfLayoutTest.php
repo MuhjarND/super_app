@@ -26,6 +26,15 @@ class RapatInvitationPdfLayoutTest extends TestCase
         $this->assertStringContainsString('margin-bottom: 2cm;', $html);
     }
 
+    public function test_signatory_block_and_signature_are_left_aligned(): void
+    {
+        $html = view('rapat.pdf.undangan', $this->viewData())->render();
+
+        $this->assertRegExp('/\.ttd-box\s*\{[^}]*text-align:\s*left;/s', $html);
+        $this->assertRegExp('/\.signature-pad-image\s*\{[^}]*margin:\s*4pt 0 3pt;[^}]*text-align:\s*left;/s', $html);
+        $this->assertRegExp('/\.signature-pad-image img\s*\{[^}]*margin:\s*0;/s', $html);
+    }
+
     protected function viewData(array $pdfVerification = null)
     {
         $rapat = new Rapat([

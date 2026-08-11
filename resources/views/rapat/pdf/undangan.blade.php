@@ -127,15 +127,15 @@
         .ttd-box {
             width: 240pt;
             margin-left: auto;
-            text-align: center;
+            text-align: left;
             page-break-inside: avoid;
         }
 
         .signature-pad-image {
             width: 64pt;
             height: 64pt;
-            margin: 4pt auto 3pt;
-            text-align: center;
+            margin: 4pt 0 3pt;
+            text-align: left;
             page-break-inside: avoid;
         }
 
@@ -143,7 +143,7 @@
             width: 64pt;
             height: 64pt;
             display: block;
-            margin: 0 auto;
+            margin: 0;
             object-fit: contain;
         }
 
