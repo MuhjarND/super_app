@@ -22,7 +22,7 @@ class RapatApprovalService
         $this->auditService = $auditService;
     }
 
-    public function syncWorkflow(Rapat $rapat, $fallbackStatus = 'draft', $isResubmission = false)
+    public function syncWorkflow(Rapat $rapat, $fallbackStatus = 'draft', $isResubmission = false, $resetWorkflow = false)
     {
         $approverSteps = $this->buildApproverSteps($rapat);
 
@@ -41,7 +41,7 @@ class RapatApprovalService
             $approval = $existingApprovals->get($stepData['step_order']);
             $hasChangedApprover = !$approval || (int) $approval->approver_id !== (int) $stepData['approver_id'];
 
-            if ($approval && $hasChangedApprover) {
+            if ($approval && ($hasChangedApprover || $resetWorkflow)) {
                 $approval->update([
                     'approver_id' => $stepData['approver_id'],
                     'approver_name_snapshot' => $stepData['approver_name_snapshot'],

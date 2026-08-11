@@ -124,32 +124,32 @@ class RapatController extends Controller
 
         $data = $request->validated();
         $wasApproved = $rapat->status === 'disetujui';
+        $approvalAssignmentChanged = $this->approvalAssignmentChanged($rapat, $data);
+        $keepApproved = $wasApproved && !$approvalAssignmentChanged;
 
-        if ($wasApproved) {
-            $data['approver_1_id'] = $rapat->approver_1_id;
-            $data['approver_2_id'] = $rapat->approver_2_id;
-            $data['approval1_jabatan_manual'] = $rapat->approval1_jabatan_manual;
+        if ($keepApproved) {
             $data['status'] = 'disetujui';
         }
 
-        DB::transaction(function () use ($request, $rapat, $data, $wasApproved) {
+        DB::transaction(function () use ($request, $rapat, $data, $keepApproved, $approvalAssignmentChanged) {
             $rapat->update($this->payloadFromRequest($request, $data, $rapat));
             $this->syncPeserta($rapat, $data['peserta_ids']);
             $this->approvalService->syncWorkflow(
                 $rapat,
                 $rapat->status,
-                $rapat->approvals()->where('status', 'rejected')->exists()
+                $rapat->approvals()->where('status', 'rejected')->exists(),
+                $approvalAssignmentChanged
             );
 
-            if ($wasApproved && $rapat->status !== 'disetujui') {
+            if ($keepApproved && $rapat->status !== 'disetujui') {
                 $rapat->forceFill(['status' => 'disetujui'])->save();
             }
 
-            $this->documentService->syncSuratKeluar($rapat, $wasApproved);
+            $this->documentService->syncSuratKeluar($rapat, $keepApproved);
         });
 
         $rapat = $rapat->fresh(['pesertas', 'approvals', 'kategoriSuratKode', 'creator', 'suratKeluar']);
-        if ($wasApproved) {
+        if ($keepApproved) {
             try {
                 $this->documentService->generateAndStoreUndangan($rapat, true);
             } catch (\Throwable $exception) {
@@ -167,10 +167,18 @@ class RapatController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => $wasApproved
+            'message' => $keepApproved
                 ? 'Rapat berhasil diperbarui dan tetap berstatus disetujui.'
-                : 'Rapat berhasil diperbarui.',
+                : ($wasApproved && $approvalAssignmentChanged
+                    ? 'Approver rapat berhasil diperbarui dan rapat diajukan kembali untuk approval.'
+                    : 'Rapat berhasil diperbarui.'),
         ]);
+    }
+
+    protected function approvalAssignmentChanged(Rapat $rapat, array $data)
+    {
+        return (int) ($data['approver_1_id'] ?? 0) !== (int) ($rapat->approver_1_id ?? 0)
+            || (int) ($data['approver_2_id'] ?? 0) !== (int) ($rapat->approver_2_id ?? 0);
     }
 
     public function destroy(Rapat $rapat)

@@ -21,7 +21,7 @@
                     @if(!$isCreate)
                         <div id="editApprovedNotice" class="alert alert-warning" style="display:none;">
                             <i class="fas fa-info-circle mr-1"></i>
-                            Rapat tetap berstatus disetujui dan PDF final akan diperbarui. Approver tidak dapat diganti.
+                            Jika approver diubah, rapat akan diajukan kembali untuk approval dan PDF final diperbarui setelah approval selesai.
                         </div>
                     @endif
                     <div class="rapat-form-section">

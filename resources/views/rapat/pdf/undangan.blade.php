@@ -157,6 +157,7 @@
         .tembusan {
             margin-top: 14pt;
             font-size: 11pt;
+            page-break-inside: avoid;
         }
 
         .lampiran-page {
@@ -194,7 +195,10 @@
     </style>
 </head>
 <body>
-@include('partials.pdf-verification-badge', ['pdfVerification' => $pdfVerification ?? null])
+@include('partials.pdf-verification-badge', [
+    'pdfVerification' => $pdfVerification ?? null,
+    'pdfVerificationBottom' => '-1.4cm',
+])
     @php
         $recipientSummary = $displayRecipients->map(function ($recipient) {
             return $recipient->jabatan_keterangan ?: optional($recipient->jabatan)->nama;

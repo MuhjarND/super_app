@@ -1287,7 +1287,7 @@
                     $('#editApprover1Id').val(row.data('approver1')).trigger('change');
                     $('#editApprover2Id').val(row.data('approver2')).trigger('change');
                     $('#editApproval1JabatanManual').val(row.data('approval1JabatanManual'));
-                    $('#editApprover1Id, #editApprover2Id, #editApproval1JabatanManual').prop('disabled', isApproved);
+                    $('#editApprover1Id, #editApprover2Id, #editApproval1JabatanManual').prop('disabled', false);
                     $('#editIncludeDetailTambahan').prop('checked', Number(row.data('includeDetailTambahan')) === 1).trigger('change');
                     $('#editDetailTambahan').val(row.data('detailTambahan'));
                     $('#editTujuanSurat').val(row.data('tujuanSurat'));
