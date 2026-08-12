@@ -262,10 +262,7 @@
 
     <p class="salam">Assalamu'alaikum Wr.Wb.</p>
 
-    <p class="paragraf">
-        Dalam rangka pelaksanaan <strong>{{ $rapat->judul }}</strong> di lingkungan Pengadilan Tinggi Agama Papua Barat,
-        dengan ini kami mengharapkan kehadiran Saudara pada kegiatan dimaksud yang akan dilaksanakan pada:
-    </p>
+    <p class="paragraf">{!! nl2br(e($openingParagraph)) !!}</p>
 
     <div class="detail-wrap">
         <table class="detail-table">

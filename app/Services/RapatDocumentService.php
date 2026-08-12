@@ -86,6 +86,7 @@ class RapatDocumentService
             $issueDate->year,
             $issueDate->month
         );
+        $result['nomor'] = $this->withInvitationClassificationPrefix($result['nomor']);
 
         return $result['nomor'];
     }
@@ -131,6 +132,7 @@ class RapatDocumentService
                     ? $suratKeluar->nomor_urut
                     : null
             );
+            $result['nomor'] = $this->withInvitationClassificationPrefix($result['nomor']);
 
             $payload = [
                 'nomor_surat' => $result['nomor'],
@@ -761,11 +763,15 @@ class RapatDocumentService
 
     protected function buildOpeningParagraph(Rapat $rapat)
     {
-        if ($rapat->detail_tambahan) {
-            return 'Memohon kehadiran Bapak/Ibu/Saudara dalam ' . trim($rapat->detail_tambahan) . ', yang akan dilaksanakan pada:';
+        $customOpening = trim((string) $rapat->detail_tambahan);
+
+        if ($customOpening !== '') {
+            return $customOpening;
         }
 
-        return 'Memohon kehadiran Bapak/Ibu/Saudara dalam ' . $rapat->judul . ', yang akan dilaksanakan pada:';
+        return 'Dalam rangka pelaksanaan ' . $rapat->judul
+            . ' di lingkungan Pengadilan Tinggi Agama Papua Barat, dengan ini kami mengharapkan '
+            . 'kehadiran Saudara pada kegiatan dimaksud yang akan dilaksanakan pada:';
     }
 
     protected function isKetuaOrWakilKetua($user)
@@ -859,6 +865,23 @@ class RapatDocumentService
             'line1' => ($signatory->jabatan_keterangan ?: optional($signatory->jabatan)->nama ?: 'Pejabat Penanda Tangan') . ',',
             'line2' => 'Pengadilan Tinggi Agama Papua Barat',
         ];
+    }
+
+    protected function withInvitationClassificationPrefix($number)
+    {
+        $segments = explode('/', (string) $number);
+
+        if (count($segments) < 3 || trim($segments[2]) === '') {
+            return $number;
+        }
+
+        if (stripos($segments[2], 'UND.') === 0) {
+            return implode('/', $segments);
+        }
+
+        $segments[2] = 'UND.' . $segments[2];
+
+        return implode('/', $segments);
     }
 
     protected function prepareLampiranTambahanPdf(Rapat $rapat)

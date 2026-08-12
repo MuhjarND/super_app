@@ -151,7 +151,7 @@
                                     <input type="checkbox" name="include_detail_tambahan" value="1" id="{{ $prefix }}IncludeDetailTambahan">
                                     <span>
                                         <strong>Detail pembuka</strong>
-                                        <small>Tambahan kalimat pembuka surat.</small>
+                                        <small>Ganti seluruh isi pokok pembuka surat.</small>
                                     </span>
                                 </label>
                                 <label class="rapat-option-card" for="{{ $prefix }}IsVirtual">
@@ -209,8 +209,9 @@
                             </div>
 
                             <div id="{{ $prefix }}DetailTambahanGroup" class="rapat-conditional-field" style="display:none;">
-                                <label>Detail Tambahan</label>
-                                <textarea class="form-control" name="detail_tambahan" id="{{ $prefix }}DetailTambahan" rows="2" placeholder="Contoh: pelaksanaan rapat koordinasi internal menjelang evaluasi triwulan."></textarea>
+                                <label>Isi Pokok Pembuka Undangan</label>
+                                <textarea class="form-control" name="detail_tambahan" id="{{ $prefix }}DetailTambahan" rows="4" placeholder="Isi paragraf pembuka lengkap yang akan menggantikan kalimat standar undangan."></textarea>
+                                <small class="form-hint">Teks ini akan ditampilkan apa adanya sebelum rincian hari, tanggal, waktu, dan tempat.</small>
                             </div>
 
                             <div id="{{ $prefix }}VirtualGroup" class="rapat-conditional-field" style="display:none;">

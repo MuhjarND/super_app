@@ -61,6 +61,7 @@ class RapatInvitationPdfLayoutTest extends TestCase
             'signatureImage' => null,
             'kopImage' => null,
             'lampiranLabel' => '-',
+            'openingParagraph' => 'Dalam rangka pelaksanaan Rapat Pengujian Tata Letak di lingkungan Pengadilan Tinggi Agama Papua Barat, dengan ini kami mengharapkan kehadiran Saudara pada kegiatan dimaksud yang akan dilaksanakan pada:',
             'signatoryTitle' => ['line1' => 'Sekretaris,', 'line2' => 'Pengadilan Tinggi Agama Papua Barat'],
             'pdfVerification' => $pdfVerification,
         ];
