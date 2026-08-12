@@ -21,6 +21,7 @@ class StoreRapatRequest extends FormRequest
             'deskripsi' => ['nullable', 'string'],
             'kategori_surat_kode_id' => ['required', 'exists:klasifikasi_kodes,id'],
             'nomenklatur_jabatan' => ['required', 'in:ketua,wakil_ketua,sekretaris,panitera'],
+            'sifat_surat' => ['nullable', 'in:biasa,penting,segera,sangat_segera,rahasia'],
             'tanggal' => ['required', 'date'],
             'waktu_mulai' => ['required', 'date_format:H:i'],
             'tempat' => ['required', 'string', 'max:255'],

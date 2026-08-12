@@ -44,13 +44,14 @@
         }
 
         .meta-left {
-            width: 65%;
+            width: 72%;
         }
 
         .meta-right {
-            width: 35%;
+            width: 28%;
             text-align: right;
             white-space: nowrap;
+            font-size: 11pt;
         }
 
         .meta-table,
@@ -66,7 +67,7 @@
         }
 
         .meta-table td:first-child {
-            width: 80pt;
+            width: 62pt;
         }
 
         .detail-table td:first-child {
@@ -75,7 +76,25 @@
 
         .meta-table td:nth-child(2),
         .detail-table td:nth-child(2) {
-            width: 14pt;
+            width: 12pt;
+        }
+
+        .nomor-undangan-value {
+            white-space: nowrap;
+            font-size: 10.5pt;
+            letter-spacing: -0.1pt;
+        }
+
+        .hal-value {
+            line-height: 1.2;
+        }
+
+        .hal-title {
+            margin-top: 1pt;
+        }
+
+        .institution-name {
+            white-space: nowrap;
         }
 
         .tujuan {
@@ -212,6 +231,15 @@
         $signatoryLampiranTitle = trim(rtrim($signatoryTitle['line1'], ',')) . ' ' . trim($signatoryTitle['line2']);
         $signatoryName = \App\Support\PersonNameFormatter::withoutTitles(optional($signatory)->name)
             ?: '(menunggu approval 1)';
+        $institutionName = 'Pengadilan Tinggi Agama Papua Barat';
+        $keepInstitutionTogether = function ($value) use ($institutionName) {
+            return str_replace(
+                e($institutionName),
+                str_replace(' ', '&nbsp;', e($institutionName)),
+                e((string) $value)
+            );
+        };
+        $useMultilineSubject = mb_strlen(trim((string) $rapat->judul)) > 36;
     @endphp
 
     @if($kopImage)
@@ -227,7 +255,12 @@
                     <tr>
                         <td>Nomor</td>
                         <td>:</td>
-                        <td>{{ $rapat->nomor_undangan }}</td>
+                        <td class="nomor-undangan-value">{{ $rapat->nomor_undangan }}</td>
+                    </tr>
+                    <tr>
+                        <td>Sifat</td>
+                        <td>:</td>
+                        <td>{{ $rapat->sifat_surat_label ?: 'Biasa' }}</td>
                     </tr>
                     <tr>
                         <td>Lampiran</td>
@@ -237,7 +270,14 @@
                     <tr>
                         <td>Hal</td>
                         <td>:</td>
-                        <td>Undangan</td>
+                        <td class="hal-value">
+                            @if($useMultilineSubject)
+                                <div>Undangan</div>
+                                <div class="hal-title">{!! $keepInstitutionTogether($rapat->judul) !!}</div>
+                            @else
+                                Undangan {!! $keepInstitutionTogether($rapat->judul) !!}
+                            @endif
+                        </td>
                     </tr>
                 </table>
             </td>
@@ -248,14 +288,14 @@
     <div class="tujuan">
         <div>Kepada Yth.</div>
         @if($tujuanManual)
-            <div>{!! nl2br(e($tujuanSurat)) !!}</div>
+            <div>{!! nl2br($keepInstitutionTogether($tujuanSurat)) !!}</div>
         @elseif($singleRecipient)
             @php $recipient = $displayRecipients->first(); @endphp
-            <div>{{ $recipient->name }}{{ $recipient->jabatan_keterangan ? ', ' . $recipient->jabatan_keterangan : '' }}</div>
+            <div>{!! $keepInstitutionTogether($recipient->name . ($recipient->jabatan_keterangan ? ', ' . $recipient->jabatan_keterangan : '')) !!}</div>
         @else
             <div>Para Pejabat dan Pegawai (terlampir)</div>
             @if($showRecipientListInLetter && $recipientSummary)
-                <div class="recipient-inline">{{ $recipientSummary }}</div>
+                <div class="recipient-inline">{!! $keepInstitutionTogether($recipientSummary) !!}</div>
             @endif
         @endif
         <div>di</div>
@@ -264,7 +304,7 @@
 
     <p class="salam">Assalamu'alaikum warahmatullahi wabarakatuh.</p>
 
-    <p class="paragraf">{!! nl2br(e($openingParagraph)) !!}</p>
+    <p class="paragraf">{!! nl2br($keepInstitutionTogether($openingParagraph)) !!}</p>
 
     <div class="detail-wrap">
         <table class="detail-table">
@@ -281,7 +321,7 @@
             <tr>
                 <td>Tempat</td>
                 <td>:</td>
-                <td>{{ $rapat->tempat }}</td>
+                <td>{!! $keepInstitutionTogether($rapat->tempat) !!}</td>
             </tr>
             @if($rapat->jenis_pakaian)
                 <tr>
@@ -320,7 +360,7 @@
             <td>
                 <div class="ttd-box">
                     <div>{{ $signatoryTitle['line1'] }}</div>
-                    <div><strong>{{ $signatoryTitle['line2'] }}</strong></div>
+                    <div><strong>{!! $keepInstitutionTogether($signatoryTitle['line2']) !!}</strong></div>
                     @if(!empty($signatureImage) && $signatureApprovedAt)
                         <div class="signature-pad-image">
                             <img src="{{ $signatureImage }}" alt="QR tanda tangan elektronik">
@@ -337,7 +377,7 @@
     @if($showTembusan)
         <div class="tembusan">
             <div>Tembusan:</div>
-            <div>Yth. Ketua Pengadilan Tinggi Agama Papua Barat (sebagai laporan)</div>
+            <div>Yth. Ketua <span class="institution-name">Pengadilan Tinggi Agama Papua Barat</span> (sebagai laporan)</div>
         </div>
     @endif
 
@@ -346,7 +386,7 @@
 
         <div class="lampiran-header">
             <div class="lampiran-heading">LAMPIRAN</div>
-            <p class="lampiran-meta-line">Surat Undangan {{ $signatoryLampiranTitle }}</p>
+            <p class="lampiran-meta-line">Surat Undangan {!! $keepInstitutionTogether($signatoryLampiranTitle) !!}</p>
             <p class="lampiran-meta-line">Nomor : {{ $rapat->nomor_undangan }}</p>
             <p class="lampiran-meta-line">Tanggal : {{ $tanggalSuratIndonesia }}</p>
         </div>
@@ -365,7 +405,7 @@
                 <td>
                     <div class="ttd-box">
                         <div>{{ $signatoryTitle['line1'] }}</div>
-                        <div><strong>{{ $signatoryTitle['line2'] }}</strong></div>
+                        <div><strong>{!! $keepInstitutionTogether($signatoryTitle['line2']) !!}</strong></div>
                         @if(!empty($signatureImage) && $signatureApprovedAt)
                             <div class="signature-pad-image">
                                 <img src="{{ $signatureImage }}" alt="QR tanda tangan elektronik">

@@ -52,6 +52,16 @@
                                 </select>
                             </div>
                             <div class="col-md-4 form-group">
+                                <label>Sifat Surat</label>
+                                <select class="form-control" name="sifat_surat" id="{{ $prefix }}SifatSurat">
+                                    <option value="biasa" selected>Biasa</option>
+                                    <option value="penting">Penting</option>
+                                    <option value="segera">Segera</option>
+                                    <option value="sangat_segera">Sangat Segera</option>
+                                    <option value="rahasia">Rahasia</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4 form-group">
                                 <label>Tanggal <span class="text-danger">*</span></label>
                                 <input type="date" class="form-control" name="tanggal" id="{{ $prefix }}Tanggal" required value="{{ $isCreate ? now()->format('Y-m-d') : '' }}">
                             </div>

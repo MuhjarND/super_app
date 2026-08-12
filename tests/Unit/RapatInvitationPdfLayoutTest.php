@@ -49,12 +49,40 @@ class RapatInvitationPdfLayoutTest extends TestCase
         $this->assertStringNotContainsString('S.H., M.H.', $html);
     }
 
+    public function test_metadata_contains_nature_single_line_number_and_wrapped_long_subject(): void
+    {
+        $data = $this->viewData();
+        $data['rapat']->forceFill([
+            'judul' => 'Rapat Monitoring dan Evaluasi Kinerja Kesekretariatan Pengadilan Agama Sewilayah Hukum',
+            'sifat_surat' => 'penting',
+        ]);
+        $html = view('rapat.pdf.undangan', $data)->render();
+
+        $this->assertStringContainsString('<td>Sifat</td>', $html);
+        $this->assertStringContainsString('<td>Penting</td>', $html);
+        $this->assertRegExp('/\.nomor-undangan-value\s*\{[^}]*white-space:\s*nowrap;/s', $html);
+        $this->assertStringContainsString('<div>Undangan</div>', $html);
+        $this->assertStringContainsString('class="hal-title"', $html);
+    }
+
+    public function test_institution_name_is_kept_together(): void
+    {
+        $html = view('rapat.pdf.undangan', $this->viewData())->render();
+
+        $this->assertRegExp('/\.institution-name\s*\{[^}]*white-space:\s*nowrap;/s', $html);
+        $this->assertStringContainsString(
+            'Pengadilan&nbsp;Tinggi&nbsp;Agama&nbsp;Papua&nbsp;Barat',
+            $html
+        );
+    }
+
     protected function viewData(array $pdfVerification = null)
     {
         $rapat = new Rapat([
             'nomor_undangan' => '001/UND/VIII/2026',
             'judul' => 'Rapat Pengujian Tata Letak',
             'deskripsi' => 'Pembahasan tata letak dokumen undangan rapat.',
+            'sifat_surat' => 'penting',
             'tanggal' => '2026-08-11',
             'waktu_mulai' => '09:00:00',
             'tempat' => 'Ruang Rapat',

@@ -264,6 +264,7 @@ class RapatController extends Controller
             'kategori_rapat_id' => $this->resolveFallbackKategoriRapatId($rapat),
             'kategori_surat_kode_id' => $data['kategori_surat_kode_id'],
             'nomenklatur_jabatan' => $data['nomenklatur_jabatan'],
+            'sifat_surat' => $data['sifat_surat'] ?? ($rapat ? ($rapat->sifat_surat ?: 'biasa') : 'biasa'),
             'tanggal' => $data['tanggal'],
             'waktu_mulai' => $data['waktu_mulai'],
             'tempat' => $data['tempat'],

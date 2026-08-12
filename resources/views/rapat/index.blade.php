@@ -736,6 +736,7 @@
                             data-deskripsi="{{ $rapat->deskripsi }}"
                             data-kategori-surat-kode="{{ $rapat->kategori_surat_kode_id }}"
                             data-nomenklatur-jabatan="{{ $rapat->nomenklatur_jabatan }}"
+                            data-sifat-surat="{{ $rapat->sifat_surat ?: 'biasa' }}"
                             data-tanggal="{{ optional($rapat->tanggal)->format('Y-m-d') }}"
                             data-waktu-mulai="{{ $rapat->waktu_mulai_formatted }}"
                             data-tempat="{{ $rapat->tempat }}"
@@ -1277,6 +1278,7 @@
                     $('#editDeskripsi').val(row.data('deskripsi'));
                     $('#editKategoriSuratKode').val(row.data('kategoriSuratKode')).trigger('change');
                     $('#editNomenklaturJabatan').val(row.data('nomenklaturJabatan'));
+                    $('#editSifatSurat').val(row.data('sifatSurat') || 'biasa');
                     $('#editTanggal').val(row.data('tanggal'));
                     $('#editWaktuMulai').val(row.data('waktuMulai'));
                     $('#editTempat').val(row.data('tempat'));

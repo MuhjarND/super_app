@@ -14,6 +14,7 @@ class Rapat extends Model
         'kategori_rapat_id',
         'kategori_surat_kode_id',
         'nomenklatur_jabatan',
+        'sifat_surat',
         'tanggal',
         'waktu_mulai',
         'tempat',
@@ -272,5 +273,18 @@ class Rapat extends Model
         }
 
         return optional($this->kategoriRapat)->kode ?: '-';
+    }
+
+    public function getSifatSuratLabelAttribute()
+    {
+        $labels = [
+            'biasa' => 'Biasa',
+            'penting' => 'Penting',
+            'segera' => 'Segera',
+            'sangat_segera' => 'Sangat Segera',
+            'rahasia' => 'Rahasia',
+        ];
+
+        return $labels[$this->sifat_surat] ?? ucfirst(str_replace('_', ' ', (string) $this->sifat_surat));
     }
 }
