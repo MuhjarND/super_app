@@ -673,6 +673,7 @@ class RapatDocumentService
             'displayRecipients' => $displayRecipients,
             'tujuanManual' => $tujuanManual,
             'tujuanSurat' => $tujuanSurat,
+            'penerimaSatker' => $isSatkerInvitation ? trim((string) $rapat->penerima_satker) : '',
             'isSatkerInvitation' => $isSatkerInvitation,
             'singleRecipient' => $singleRecipient,
             'showLampiranDaftar' => $showLampiranDaftar,

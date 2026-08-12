@@ -285,6 +285,7 @@ class RapatController extends Controller
             'detail_tambahan' => !empty($data['include_detail_tambahan']) ? ($data['detail_tambahan'] ?? null) : null,
             'bersama_satker' => (bool) ($data['bersama_satker'] ?? false),
             'tujuan_surat' => !empty($data['bersama_satker']) ? $this->resolveSatkerDestination($data['satker_ids'] ?? []) : null,
+            'penerima_satker' => !empty($data['bersama_satker']) ? trim((string) ($data['penerima_satker'] ?? '')) : null,
             'is_external' => empty($data['bersama_satker']) && (bool) ($data['is_external'] ?? false),
             'tujuan_external' => empty($data['bersama_satker']) && !empty($data['is_external']) ? trim((string) ($data['tujuan_external'] ?? '')) : null,
             'jenis_pakaian' => !empty($data['include_pakaian']) ? ($data['jenis_pakaian'] ?? null) : null,

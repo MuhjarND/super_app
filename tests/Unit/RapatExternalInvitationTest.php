@@ -81,6 +81,14 @@ class RapatExternalInvitationTest extends TestCase
         $this->assertContains('max:255', $rules['tujuan_external']);
     }
 
+    public function test_satker_recipient_option_is_required_for_joint_satker_invitation(): void
+    {
+        $rules = (new StoreRapatRequest())->rules();
+
+        $this->assertContains('required_if:bersama_satker,1', $rules['penerima_satker']);
+        $this->assertContains('max:150', $rules['penerima_satker']);
+    }
+
     public function test_pdf_uses_separate_external_and_satker_destinations(): void
     {
         $rapat = new Rapat([

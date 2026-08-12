@@ -742,6 +742,7 @@
                             data-tempat="{{ $rapat->tempat }}"
                             data-peserta-ids="{{ $rapat->pesertas->reject(function ($peserta) { return $peserta->hasRole('satker'); })->pluck('id')->implode(',') }}"
                             data-satker-ids="{{ $rapat->satkers->pluck('id')->implode(',') }}"
+                            data-penerima-satker="{{ $rapat->penerima_satker }}"
                             data-approver-1="{{ $rapat->approver_1_id }}"
                             data-approver-2="{{ $rapat->approver_2_id }}"
                             data-approval1-jabatan-manual="{{ $rapat->approval1_jabatan_manual }}"
@@ -1045,12 +1046,14 @@
 
                 $('#' + prefix + 'SatkerGroup').toggle(checked);
                 $satkerSelect.prop('required', checked);
+                $('#' + prefix + 'PenerimaSatker').prop('required', checked);
                 $('#' + prefix + 'Approver1Id').prop('required', checked);
                 $('#' + prefix + 'SatkerApproverRequired').toggle(checked);
                 $('#' + prefix + 'IsExternal').prop('disabled', checked);
 
                 if (!checked) {
                     $satkerSelect.val([]).trigger('change');
+                    $('#' + prefix + 'PenerimaSatker').val('');
                 } else {
                     $('#' + prefix + 'IsExternal').prop('checked', false).trigger('change');
                     $satkerSelect.trigger('change.select2');
@@ -1306,6 +1309,7 @@
                     $('#editIsExternal').prop('checked', Number(row.data('isExternal')) === 1).trigger('change');
                     $('#editPesertaIds').val(pesertaIds).trigger('change');
                     $('#editSatkerIds').val(satkerIds).trigger('change');
+                    $('#editPenerimaSatker').val(row.data('penerimaSatker'));
                     refreshRapatParticipantSelectAll($('#editPesertaIds'));
                     $('#editApprover1Id').val(row.data('approver1')).trigger('change');
                     $('#editApprover2Id').val(row.data('approver2')).trigger('change');

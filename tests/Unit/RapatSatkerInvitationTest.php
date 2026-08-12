@@ -40,6 +40,8 @@ class RapatSatkerInvitationTest extends TestCase
         ])->render();
 
         $this->assertStringContainsString('name="satker_ids[]"', $html);
+        $this->assertStringContainsString('name="penerima_satker"', $html);
+        $this->assertStringContainsString('Opsi Penerima Satker', $html);
         $this->assertStringContainsString('Pilih Semua Satker', $html);
         $this->assertStringContainsString('Pengadilan Agama Manokwari', $html);
     }
@@ -83,6 +85,7 @@ class RapatSatkerInvitationTest extends TestCase
             'waktu_mulai' => '09:00:00',
             'tempat' => 'Ruang Rapat',
             'bersama_satker' => true,
+            'penerima_satker' => 'Ketua',
         ]);
         $rapat->forceFill(['created_at' => Carbon::parse('2026-08-12 08:00:00')]);
         $rapat->setRelation('pesertas', collect());
@@ -104,7 +107,13 @@ class RapatSatkerInvitationTest extends TestCase
 
         $this->assertSame($letter->nomor_surat, $data['nomorUndangan']);
         $this->assertSame('Pengadilan Agama Sorong', $data['tujuanSurat']);
+        $this->assertSame('Ketua', $data['penerimaSatker']);
         $this->assertTrue($data['tujuanManual']);
+
+        $html = view('rapat.pdf.undangan', $data)->render();
+        $this->assertStringContainsString('class="recipient-destination">Yth. Ketua Pengadilan Agama Sorong</div>', $html);
+        $this->assertRegExp('/\.recipient-destination\s*\{[^}]*font-weight:\s*bold;/s', $html);
+        $this->assertStringNotContainsString('Kepada Yth.', $html);
     }
 
     protected function targets(array $satkers, $allSatkerCount)

@@ -104,6 +104,10 @@
             padding: 0;
         }
 
+        .recipient-destination {
+            font-weight: bold;
+        }
+
         .recipient-inline {
             margin-left: 22pt;
         }
@@ -241,6 +245,19 @@
         $invitationSubjectFontSize = $invitationSubjectLength > 145
             ? max(7.5, round(11 * 145 / $invitationSubjectLength, 1))
             : 11;
+        $isSatkerInvitation = $isSatkerInvitation ?? false;
+        $penerimaSatker = $penerimaSatker ?? '';
+        if ($tujuanManual) {
+            $recipientDestination = trim(
+                ($isSatkerInvitation && !empty($penerimaSatker) ? $penerimaSatker . ' ' : '') . $tujuanSurat
+            );
+        } elseif ($singleRecipient) {
+            $recipient = $displayRecipients->first();
+            $recipientDestination = $recipient->name
+                . ($recipient->jabatan_keterangan ? ', ' . $recipient->jabatan_keterangan : '');
+        } else {
+            $recipientDestination = 'Para Pejabat dan Pegawai (terlampir)';
+        }
     @endphp
 
     @if($kopImage)
@@ -286,17 +303,9 @@
     </table>
 
     <div class="tujuan">
-        <div>Kepada Yth.</div>
-        @if($tujuanManual)
-            <div>{!! nl2br($keepInstitutionTogether($tujuanSurat)) !!}</div>
-        @elseif($singleRecipient)
-            @php $recipient = $displayRecipients->first(); @endphp
-            <div>{!! $keepInstitutionTogether($recipient->name . ($recipient->jabatan_keterangan ? ', ' . $recipient->jabatan_keterangan : '')) !!}</div>
-        @else
-            <div>Para Pejabat dan Pegawai (terlampir)</div>
-            @if($showRecipientListInLetter && $recipientSummary)
-                <div class="recipient-inline">{!! $keepInstitutionTogether($recipientSummary) !!}</div>
-            @endif
+        <div class="recipient-destination">Yth. {!! nl2br($keepInstitutionTogether($recipientDestination)) !!}</div>
+        @if(!$tujuanManual && !$singleRecipient && $showRecipientListInLetter && $recipientSummary)
+            <div class="recipient-inline">{!! $keepInstitutionTogether($recipientSummary) !!}</div>
         @endif
         <div>di</div>
         <div>Tempat</div>

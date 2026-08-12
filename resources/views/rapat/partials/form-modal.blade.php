@@ -203,6 +203,11 @@
                             </div>
 
                             <div id="{{ $prefix }}SatkerGroup" class="rapat-conditional-field" style="display:none;">
+                                <div class="form-group">
+                                    <label>Opsi Penerima Satker <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" name="penerima_satker" id="{{ $prefix }}PenerimaSatker" maxlength="150" placeholder="Contoh: Ketua">
+                                    <small class="form-hint">Teks ini akan ditulis setelah “Yth.” dan sebelum nama satker pada PDF.</small>
+                                </div>
                                 <div class="d-flex justify-content-between align-items-center mb-1">
                                     <label class="mb-0">Satker Tujuan <span class="text-danger">*</span></label>
                                     <button type="button" class="btn btn-sm btn-outline-primary rapat-select-all-satkers" data-target="#{{ $prefix }}SatkerIds">

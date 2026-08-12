@@ -45,6 +45,7 @@ class StoreRapatRequest extends FormRequest
             'bersama_satker' => ['nullable', 'boolean'],
             'satker_ids' => ['nullable', 'required_if:bersama_satker,1', 'array', 'min:1'],
             'satker_ids.*' => [Rule::exists('users', 'id')->where('status_aktif_pegawai', true)],
+            'penerima_satker' => ['nullable', 'required_if:bersama_satker,1', 'string', 'max:150'],
             'tujuan_surat' => ['nullable', 'string'],
             'is_external' => ['nullable', 'boolean'],
             'tujuan_external' => ['nullable', 'required_if:is_external,1', 'string', 'max:255'],
@@ -104,7 +105,7 @@ class StoreRapatRequest extends FormRequest
             }
 
             if (!$this->boolean('bersama_satker')) {
-                $this->merge(['tujuan_surat' => null, 'satker_ids' => []]);
+                $this->merge(['tujuan_surat' => null, 'penerima_satker' => null, 'satker_ids' => []]);
 
                 $hasSatkerParticipant = User::whereIn('id', (array) $this->input('peserta_ids', []))
                     ->whereHas('roles', function ($query) {
