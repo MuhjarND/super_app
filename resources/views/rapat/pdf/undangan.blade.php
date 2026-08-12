@@ -256,7 +256,7 @@
                     <tr>
                         <td>Nomor</td>
                         <td>:</td>
-                        <td class="nomor-undangan-value">{{ $rapat->nomor_undangan }}</td>
+                        <td class="nomor-undangan-value">{{ $nomorUndangan ?? $rapat->nomor_undangan }}</td>
                     </tr>
                     <tr>
                         <td>Sifat</td>
@@ -387,7 +387,7 @@
         <div class="lampiran-header">
             <div class="lampiran-heading">LAMPIRAN</div>
             <p class="lampiran-meta-line">Surat Undangan {!! $keepInstitutionTogether($signatoryLampiranTitle) !!}</p>
-            <p class="lampiran-meta-line">Nomor : {{ $rapat->nomor_undangan }}</p>
+            <p class="lampiran-meta-line">Nomor : {{ $nomorUndangan ?? $rapat->nomor_undangan }}</p>
             <p class="lampiran-meta-line">Tanggal : {{ $tanggalSuratIndonesia }}</p>
         </div>
 

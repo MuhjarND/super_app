@@ -80,8 +80,12 @@ class Rapat extends Model
         if ($user->hasRole('satker')) {
             return $query->where('bersama_satker', true)
                 ->whereIn('status', ['disetujui', 'selesai'])
-                ->whereHas('pesertas', function ($pesertaQuery) use ($user) {
-                    $pesertaQuery->where('users.id', $user->id);
+                ->where(function ($satkerQuery) use ($user) {
+                    $satkerQuery->whereHas('satkers', function ($targetQuery) use ($user) {
+                        $targetQuery->where('users.id', $user->id);
+                    })->orWhereHas('pesertas', function ($pesertaQuery) use ($user) {
+                        $pesertaQuery->where('users.id', $user->id);
+                    });
                 });
         }
 
@@ -127,6 +131,13 @@ class Rapat extends Model
             ->orderBy('rapat_peserta.urutan');
     }
 
+    public function satkers()
+    {
+        return $this->belongsToMany(User::class, 'rapat_satker', 'rapat_id', 'user_id')
+            ->withTimestamps()
+            ->orderBy('users.name');
+    }
+
     public function approvals()
     {
         return $this->hasMany(RapatApproval::class)->orderBy('step_order');
@@ -169,7 +180,12 @@ class Rapat extends Model
 
     public function suratKeluar()
     {
-        return $this->hasOne(SuratKeluar::class, 'rapat_id');
+        return $this->hasOne(SuratKeluar::class, 'rapat_id')->orderBy('nomor_urut');
+    }
+
+    public function suratKeluars()
+    {
+        return $this->hasMany(SuratKeluar::class, 'rapat_id')->orderBy('nomor_urut');
     }
 
     public function attendanceSourceSuratKeluar()

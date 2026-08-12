@@ -1,6 +1,7 @@
 @php
     $prefix = \Illuminate\Support\Str::contains($formId, 'edit') ? 'edit' : 'create';
     $isCreate = $prefix === 'create';
+    $satkers = $satkers ?? collect();
 @endphp
 
 <div class="modal fade rapat-form-modal" id="{{ $modalId }}" tabindex="-1">
@@ -202,9 +203,18 @@
                             </div>
 
                             <div id="{{ $prefix }}SatkerGroup" class="rapat-conditional-field" style="display:none;">
-                                <label>Tujuan Surat Satuan Kerja <span class="text-danger">*</span></label>
-                                <textarea class="form-control" name="tujuan_surat" id="{{ $prefix }}TujuanSurat" rows="2" placeholder="Contoh: Ketua Pengadilan Agama se-wilayah Pengadilan Tinggi Agama Papua Barat"></textarea>
-                                <small class="form-hint">Tujuan ini hanya digunakan pada PDF undangan satuan kerja.</small>
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <label class="mb-0">Satker Tujuan <span class="text-danger">*</span></label>
+                                    <button type="button" class="btn btn-sm btn-outline-primary rapat-select-all-satkers" data-target="#{{ $prefix }}SatkerIds">
+                                        <i class="fas fa-check-double mr-1"></i> Pilih Semua Satker
+                                    </button>
+                                </div>
+                                <select class="form-control select2" name="satker_ids[]" id="{{ $prefix }}SatkerIds" multiple data-satker-select="1">
+                                    @foreach($satkers as $satker)
+                                        <option value="{{ $satker->id }}">{{ $satker->satuan_kerja ?: $satker->name }}</option>
+                                    @endforeach
+                                </select>
+                                <small class="form-hint">Semua satker menghasilkan satu undangan kolektif. Jika hanya beberapa satker dipilih, setiap satker memperoleh undangan dan nomor surat yang berbeda.</small>
                             </div>
 
                             <div id="{{ $prefix }}ExternalGroup" class="rapat-conditional-field" style="display:none;">

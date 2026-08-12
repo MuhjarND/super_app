@@ -93,7 +93,7 @@ class RapatDocumentService
 
     public function syncSuratKeluar(Rapat $rapat, $markComplete = false)
     {
-        $rapat->loadMissing(['pesertas', 'kategoriSuratKode.parent.parent.parent', 'creator', 'approver1.jabatan', 'approver2.jabatan']);
+        $rapat->loadMissing(['pesertas.roles', 'satkers', 'kategoriSuratKode.parent.parent.parent', 'creator', 'approver1.jabatan', 'approver2.jabatan']);
 
         $selectedCategory = $rapat->kategoriSuratKode;
         if (!$selectedCategory) {
@@ -116,55 +116,179 @@ class RapatDocumentService
             $issueDate
         ) {
             $nomenklatur = $this->resolveRapatNomenklatur($rapat);
-            $suratKeluar = $rapat->suratKeluar;
+            $existingLetters = $rapat->suratKeluars()->orderBy('id')->get();
 
-            $result = SuratKeluar::generateNomorSurat(
-                $nomenklatur,
-                $hierarchy['klasifikasi']->kode,
-                $hierarchy['fungsi'] ? $hierarchy['fungsi']->kode : null,
-                $hierarchy['kegiatan'] ? $hierarchy['kegiatan']->kode : null,
-                $hierarchy['transaksi'] ? $hierarchy['transaksi']->kode : null,
-                $issueDate->year,
-                $issueDate->month,
-                $suratKeluar
-                    && (int) $suratKeluar->tahun_surat === (int) $issueDate->year
-                    && (string) $suratKeluar->nomenklatur_jabatan === (string) $nomenklatur
-                    ? $suratKeluar->nomor_urut
-                    : null
-            );
-            $result['nomor'] = $this->withInvitationClassificationPrefix($result['nomor']);
+            if ($rapat->bersama_satker) {
+                $selectedSatkers = $rapat->satkers;
+                if ($selectedSatkers->isEmpty()) {
+                    $selectedSatkers = $rapat->pesertas->filter(function ($user) {
+                        return $user->hasRole('satker');
+                    })->values();
+                }
 
-            $payload = [
-                'nomor_surat' => $result['nomor'],
-                'nomor_urut' => $result['urut'],
-                'tahun_surat' => $issueDate->year,
-                'klasifikasi_kode_id' => $hierarchy['klasifikasi']->id,
-                'kategori_surat_id' => optional($this->findKategoriSuratByHierarchy($hierarchy))->id,
-                'kode_fungsi_id' => $hierarchy['fungsi'] ? $hierarchy['fungsi']->id : null,
-                'kode_kegiatan_id' => $hierarchy['kegiatan'] ? $hierarchy['kegiatan']->id : null,
-                'kode_transaksi_id' => $hierarchy['transaksi'] ? $hierarchy['transaksi']->id : null,
-                'nomenklatur_jabatan' => $nomenklatur,
-                'opsi_penerima' => $rapat->is_external ? 'external' : 'internal',
-                'penerima_external' => $rapat->is_external ? trim((string) $rapat->tujuan_external) : null,
-                'perihal' => $rapat->judul,
-                'tanggal_surat' => $issueDate->toDateString(),
-                'has_lampiran' => true,
-                'status' => $markComplete ? 'lengkap' : 'draft',
-                'created_by' => $rapat->created_by,
-                'rapat_id' => $rapat->id,
-            ];
+                if ($selectedSatkers->isEmpty()) {
+                    throw new \RuntimeException('Pilih minimal satu satuan kerja tujuan.');
+                }
 
-            if ($suratKeluar) {
-                $suratKeluar->update($payload);
-            } else {
-                $suratKeluar = SuratKeluar::create($payload);
+                $allSatkerCount = User::active()->whereHas('roles', function ($query) {
+                    $query->where('name', 'satker');
+                })->count();
+                $targets = $this->buildSatkerInvitationTargets($selectedSatkers, $allSatkerCount);
+                $firstTarget = $targets->first();
+                $isCollective = !empty($firstTarget['collective']);
+
+                $usedLetterIds = [];
+                $letters = collect();
+                foreach ($targets as $target) {
+                    $suratKeluar = $target['collective']
+                        ? $existingLetters->firstWhere('is_satker_collective', true)
+                        : $existingLetters->firstWhere('satker_id', $target['satker']->id);
+
+                    if (!$suratKeluar) {
+                        $suratKeluar = $existingLetters->first(function ($letter) use ($usedLetterIds) {
+                            return !in_array((int) $letter->id, $usedLetterIds, true);
+                        });
+                    }
+
+                    $suratKeluar = $this->persistRapatSuratKeluar(
+                        $rapat,
+                        $suratKeluar,
+                        $nomenklatur,
+                        $hierarchy,
+                        $issueDate,
+                        $markComplete,
+                        'external',
+                        $target['destination'],
+                        $target['satker'] ? $target['satker']->id : null,
+                        $target['collective']
+                    );
+                    $suratKeluar->penerimaInternal()->detach();
+                    $usedLetterIds[] = (int) $suratKeluar->id;
+                    $letters->push($suratKeluar);
+                }
+
+                $rapat->suratKeluars()->whereNotIn('id', $usedLetterIds)->get()->each(function ($obsoleteLetter) {
+                    $obsoleteLetter->penerimaInternal()->detach();
+                    $obsoleteLetter->delete();
+                });
+
+                $primaryLetter = $letters->first();
+                $rapat->forceFill([
+                    'nomor_undangan' => $primaryLetter->nomor_surat,
+                    'tujuan_surat' => $isCollective
+                        ? 'Seluruh Satker Sewilayah Hukum PTA Papua Barat'
+                        : $selectedSatkers->map(function ($satker) {
+                            return $this->satkerDestinationName($satker);
+                        })->implode(', '),
+                ])->save();
+
+                return $primaryLetter->fresh(['creator', 'penerimaInternal', 'satker', 'klasifikasiKode', 'kodeFungsi', 'kodeKegiatan', 'kodeTransaksi']);
             }
 
-            $suratKeluar->penerimaInternal()->sync($rapat->pesertas->pluck('id')->all());
+            $suratKeluar = $existingLetters->first();
+            $suratKeluar = $this->persistRapatSuratKeluar(
+                $rapat,
+                $suratKeluar,
+                $nomenklatur,
+                $hierarchy,
+                $issueDate,
+                $markComplete,
+                $rapat->is_external ? 'external' : 'internal',
+                $rapat->is_external ? trim((string) $rapat->tujuan_external) : null
+            );
+            $rapat->suratKeluars()->where('id', '!=', $suratKeluar->id)->get()->each(function ($obsoleteLetter) {
+                $obsoleteLetter->penerimaInternal()->detach();
+                $obsoleteLetter->delete();
+            });
+            $suratKeluar->penerimaInternal()->sync(
+                $rapat->is_external ? [] : $rapat->pesertas->pluck('id')->all()
+            );
             $rapat->forceFill(['nomor_undangan' => $suratKeluar->nomor_surat])->save();
 
-            return $suratKeluar->fresh(['creator', 'penerimaInternal', 'klasifikasiKode', 'kodeFungsi', 'kodeKegiatan', 'kodeTransaksi']);
+            return $suratKeluar->fresh(['creator', 'penerimaInternal', 'satker', 'klasifikasiKode', 'kodeFungsi', 'kodeKegiatan', 'kodeTransaksi']);
         });
+    }
+
+    protected function buildSatkerInvitationTargets($selectedSatkers, $allSatkerCount)
+    {
+        $selectedSatkers = collect($selectedSatkers)->values();
+        if ($allSatkerCount > 0 && $selectedSatkers->count() === (int) $allSatkerCount) {
+            return collect([[
+                'satker' => null,
+                'destination' => 'Seluruh Satker Sewilayah Hukum PTA Papua Barat',
+                'collective' => true,
+            ]]);
+        }
+
+        return $selectedSatkers->map(function ($satker) {
+            return [
+                'satker' => $satker,
+                'destination' => $this->satkerDestinationName($satker),
+                'collective' => false,
+            ];
+        })->values();
+    }
+
+    protected function satkerDestinationName(User $satker)
+    {
+        return trim((string) ($satker->satuan_kerja ?: $satker->name));
+    }
+
+    protected function persistRapatSuratKeluar(
+        Rapat $rapat,
+        $suratKeluar,
+        $nomenklatur,
+        array $hierarchy,
+        Carbon $issueDate,
+        $markComplete,
+        $recipientType,
+        $externalDestination = null,
+        $satkerId = null,
+        $isCollective = false
+    ) {
+        $result = SuratKeluar::generateNomorSurat(
+            $nomenklatur,
+            $hierarchy['klasifikasi']->kode,
+            $hierarchy['fungsi'] ? $hierarchy['fungsi']->kode : null,
+            $hierarchy['kegiatan'] ? $hierarchy['kegiatan']->kode : null,
+            $hierarchy['transaksi'] ? $hierarchy['transaksi']->kode : null,
+            $issueDate->year,
+            $issueDate->month,
+            $suratKeluar
+                && (int) $suratKeluar->tahun_surat === (int) $issueDate->year
+                && (string) $suratKeluar->nomenklatur_jabatan === (string) $nomenklatur
+                ? $suratKeluar->nomor_urut
+                : null
+        );
+        $result['nomor'] = $this->withInvitationClassificationPrefix($result['nomor']);
+        $payload = [
+            'nomor_surat' => $result['nomor'],
+            'nomor_urut' => $result['urut'],
+            'tahun_surat' => $issueDate->year,
+            'klasifikasi_kode_id' => $hierarchy['klasifikasi']->id,
+            'kategori_surat_id' => optional($this->findKategoriSuratByHierarchy($hierarchy))->id,
+            'kode_fungsi_id' => $hierarchy['fungsi'] ? $hierarchy['fungsi']->id : null,
+            'kode_kegiatan_id' => $hierarchy['kegiatan'] ? $hierarchy['kegiatan']->id : null,
+            'kode_transaksi_id' => $hierarchy['transaksi'] ? $hierarchy['transaksi']->id : null,
+            'nomenklatur_jabatan' => $nomenklatur,
+            'opsi_penerima' => $recipientType,
+            'penerima_external' => $recipientType === 'external' ? $externalDestination : null,
+            'perihal' => $rapat->judul,
+            'tanggal_surat' => $issueDate->toDateString(),
+            'has_lampiran' => true,
+            'status' => $markComplete ? 'lengkap' : 'draft',
+            'created_by' => $rapat->created_by,
+            'rapat_id' => $rapat->id,
+            'satker_id' => $satkerId,
+            'is_satker_collective' => (bool) $isCollective,
+        ];
+
+        if ($suratKeluar) {
+            $suratKeluar->update($payload);
+            return $suratKeluar->fresh();
+        }
+
+        return SuratKeluar::create($payload);
     }
 
     public function generateAndStoreUndangan(Rapat $rapat, $signed = false)
@@ -178,10 +302,28 @@ class RapatDocumentService
             'approver2.jabatan',
             'creator',
             'kategoriSuratKode.parent.parent.parent',
-            'suratKeluar',
+            'satkers',
+            'suratKeluars.satker',
         ]);
 
         $suratKeluar = $this->syncSuratKeluar($rapat, $signed);
+        $rapat->unsetRelation('suratKeluars');
+        $rapat->load('suratKeluars.satker');
+
+        if ($rapat->bersama_satker) {
+            foreach ($rapat->suratKeluars as $satkerLetter) {
+                $document = $this->prepareSatkerInvitationDocument($rapat, $satkerLetter, $signed);
+                $this->pdfVerificationService->finalize(
+                    $document['verification'],
+                    $document['content'],
+                    $document['filename']
+                );
+                $satkerLetter->update(['status' => $signed ? 'lengkap' : 'draft']);
+            }
+
+            return $suratKeluar->fresh();
+        }
+
         $verification = $this->pdfVerificationService->begin(
             'rapat',
             'undangan_rapat',
@@ -194,19 +336,6 @@ class RapatDocumentService
         $content = $this->buildUndanganPdfContent($rapat, $signed, $verification);
         $this->pdfVerificationService->finalize($verification, $content, 'undangan-rapat-' . $rapat->id . '.pdf');
 
-        if ($rapat->bersama_satker) {
-            $satkerVerification = $this->pdfVerificationService->begin(
-                'rapat',
-                'undangan_rapat_satker',
-                $rapat->id,
-                'Undangan Rapat Satuan Kerja - ' . ($rapat->judul ?: 'Rapat'),
-                $this->buildRapatSigners($rapat),
-                ['nomor' => $suratKeluar->nomor_surat ?: $rapat->nomor_undangan]
-            );
-            $satkerContent = $this->buildUndanganPdfContent($rapat, $signed, $satkerVerification, 'satker');
-            $this->pdfVerificationService->finalize($satkerVerification, $satkerContent, 'undangan-rapat-satker-' . $rapat->id . '.pdf');
-        }
-
         $suratKeluar->update([
             'status' => $signed ? 'lengkap' : 'draft',
         ]);
@@ -216,6 +345,10 @@ class RapatDocumentService
 
     public function streamUndanganPdf(Rapat $rapat)
     {
+        if ($rapat->bersama_satker) {
+            return $this->streamUndanganSatkerPdf($rapat);
+        }
+
         $rapat->loadMissing([
             'pesertas.jabatan',
             'pesertas.unit',
@@ -244,7 +377,7 @@ class RapatDocumentService
         return $this->pdfVerificationService->response($content, $verification, $filename);
     }
 
-    public function streamUndanganSatkerPdf(Rapat $rapat)
+    public function streamUndanganSatkerPdf(Rapat $rapat, SuratKeluar $targetLetter = null, User $satker = null)
     {
         if (!$rapat->bersama_satker) {
             abort(404);
@@ -259,23 +392,54 @@ class RapatDocumentService
             'approver2.jabatan',
             'creator',
             'kategoriSuratKode.parent.parent.parent',
-            'suratKeluar',
+            'satkers',
+            'suratKeluars.satker',
         ]);
 
         $signed = $this->shouldUseSignedDocument($rapat);
-        $suratKeluar = $this->syncSuratKeluar($rapat, $signed);
-        $verification = $this->pdfVerificationService->begin(
-            'rapat',
-            'undangan_rapat_satker',
-            $rapat->id,
-            'Undangan Rapat Satuan Kerja - ' . ($rapat->judul ?: 'Rapat'),
-            $this->buildRapatSigners($rapat),
-            ['nomor' => $suratKeluar->nomor_surat ?: $rapat->nomor_undangan]
-        );
-        $filename = 'undangan-rapat-satker-' . $rapat->id . '.pdf';
-        $content = $this->buildUndanganPdfContent($rapat, $signed, $verification, 'satker');
+        $this->syncSuratKeluar($rapat, $signed);
+        $rapat->unsetRelation('suratKeluars');
+        $rapat->load('suratKeluars.satker');
+        $letters = $this->resolveSatkerInvitationLetters($rapat, $targetLetter, $satker);
 
-        return $this->pdfVerificationService->response($content, $verification, $filename);
+        if ($letters->count() === 1) {
+            $document = $this->prepareSatkerInvitationDocument($rapat, $letters->first(), $signed);
+            return $this->pdfVerificationService->response(
+                $document['content'],
+                $document['verification'],
+                $document['filename']
+            );
+        }
+
+        $tempFiles = [];
+        try {
+            foreach ($letters as $letter) {
+                $document = $this->prepareSatkerInvitationDocument($rapat, $letter, $signed);
+                $this->pdfVerificationService->finalize(
+                    $document['verification'],
+                    $document['content'],
+                    $document['filename']
+                );
+                $path = $this->makeTempPdfPath('undangan-satker-' . $rapat->id . '-' . $letter->id);
+                File::put($path, $document['content']);
+                $tempFiles[] = $path;
+            }
+
+            $mergedPath = $this->makeTempPdfPath('undangan-satker-gabungan-' . $rapat->id);
+            $this->mergePdfFiles($tempFiles, $mergedPath);
+            $tempFiles[] = $mergedPath;
+
+            return response(File::get($mergedPath), 200, [
+                'Content-Type' => 'application/pdf',
+                'Content-Disposition' => 'inline; filename="undangan-rapat-satker-' . $rapat->id . '.pdf"',
+            ]);
+        } finally {
+            foreach ($tempFiles as $tempFile) {
+                if ($tempFile && file_exists($tempFile)) {
+                    @unlink($tempFile);
+                }
+            }
+        }
     }
 
     public function createUndanganTempFile(Rapat $rapat, $prefix = 'undangan-rapat')
@@ -289,11 +453,43 @@ class RapatDocumentService
             'approver2.jabatan',
             'creator',
             'kategoriSuratKode.parent.parent.parent',
-            'suratKeluar',
+            'satkers',
+            'suratKeluars.satker',
         ]);
 
         $signed = $this->shouldUseSignedDocument($rapat);
         $suratKeluar = $this->syncSuratKeluar($rapat, $signed);
+
+        if ($rapat->bersama_satker) {
+            $rapat->unsetRelation('suratKeluars');
+            $rapat->load('suratKeluars.satker');
+            $sourceFiles = [];
+            try {
+                foreach ($rapat->suratKeluars as $letter) {
+                    $document = $this->prepareSatkerInvitationDocument($rapat, $letter, $signed);
+                    $this->pdfVerificationService->finalize($document['verification'], $document['content'], $document['filename']);
+                    $sourcePath = $this->makeTempPdfPath($prefix . '-' . $rapat->id . '-' . $letter->id);
+                    File::put($sourcePath, $document['content']);
+                    $sourceFiles[] = $sourcePath;
+                }
+
+                $path = $this->makeTempPdfPath($prefix . '-' . $rapat->id);
+                if (count($sourceFiles) === 1) {
+                    File::copy($sourceFiles[0], $path);
+                } else {
+                    $this->mergePdfFiles($sourceFiles, $path);
+                }
+
+                return ['path' => $path, 'temporary' => true];
+            } finally {
+                foreach ($sourceFiles as $sourceFile) {
+                    if ($sourceFile && file_exists($sourceFile)) {
+                        @unlink($sourceFile);
+                    }
+                }
+            }
+        }
+
         $verification = $this->pdfVerificationService->begin(
             'rapat',
             'undangan_rapat',
@@ -313,15 +509,16 @@ class RapatDocumentService
         ];
     }
 
-    protected function buildUndanganPdfContent(Rapat $rapat, $signed, $verification, $variant = 'internal')
+    protected function buildUndanganPdfContent(Rapat $rapat, $signed, $verification, $variant = 'internal', SuratKeluar $targetLetter = null)
     {
         $tempFiles = [];
 
         try {
-            $basePdf = PDF::loadView('rapat.pdf.undangan', $this->buildPdfViewData($rapat, $signed, $this->pdfVerificationService->viewData($verification), $variant))
+            $basePdf = PDF::loadView('rapat.pdf.undangan', $this->buildPdfViewData($rapat, $signed, $this->pdfVerificationService->viewData($verification), $variant, $targetLetter))
                 ->setPaper('a4', 'portrait');
 
-            $baseTempPath = $this->makeTempPdfPath('undangan-base-' . $rapat->id);
+            $targetSuffix = $targetLetter ? '-' . $targetLetter->id : '';
+            $baseTempPath = $this->makeTempPdfPath('undangan-base-' . $rapat->id . $targetSuffix);
             File::put($baseTempPath, $basePdf->output());
             $tempFiles[] = $baseTempPath;
 
@@ -334,7 +531,7 @@ class RapatDocumentService
                     $tempFiles[] = $lampiranPdfPath;
                 }
 
-                $mergedTempPath = $this->makeTempPdfPath('undangan-merged-' . $rapat->id);
+                $mergedTempPath = $this->makeTempPdfPath('undangan-merged-' . $rapat->id . $targetSuffix);
                 $this->mergePdfFiles([$baseTempPath, $lampiranPdfPath], $mergedTempPath);
                 $tempFiles[] = $mergedTempPath;
                 $finalPdfContent = File::get($mergedTempPath);
@@ -371,7 +568,53 @@ class RapatDocumentService
         return in_array($rapat->status, ['disetujui', 'selesai'], true);
     }
 
-    public function buildPdfViewData(Rapat $rapat, $signed = false, array $pdfVerification = null, $variant = 'internal')
+    protected function resolveSatkerInvitationLetters(Rapat $rapat, SuratKeluar $targetLetter = null, User $satker = null)
+    {
+        $letters = $rapat->suratKeluars;
+
+        if ($targetLetter) {
+            abort_unless((int) $targetLetter->rapat_id === (int) $rapat->id, 404);
+            $letters = $letters->where('id', $targetLetter->id);
+        } else {
+            $satker = $satker ?: (auth()->check() && auth()->user()->isSatker() ? auth()->user() : null);
+            if ($satker) {
+                abort_unless($rapat->satkers->contains('id', $satker->id), 403);
+                $letters = $letters->filter(function ($letter) use ($satker) {
+                    return $letter->is_satker_collective || (int) $letter->satker_id === (int) $satker->id;
+                });
+            }
+        }
+
+        abort_if($letters->isEmpty(), 404);
+
+        return $letters->values();
+    }
+
+    protected function prepareSatkerInvitationDocument(Rapat $rapat, SuratKeluar $letter, $signed)
+    {
+        $destination = trim((string) $letter->penerima_external);
+        $verification = $this->pdfVerificationService->begin(
+            'rapat',
+            'undangan_rapat_satker',
+            $rapat->id,
+            'Undangan Rapat Satuan Kerja - ' . ($destination ?: ($rapat->judul ?: 'Rapat')),
+            $this->buildRapatSigners($rapat),
+            [
+                'nomor' => $letter->nomor_surat,
+                'surat_keluar_id' => $letter->id,
+                'tujuan' => $destination,
+            ]
+        );
+        $filename = 'undangan-rapat-satker-' . $rapat->id . '-' . $letter->id . '.pdf';
+
+        return [
+            'verification' => $verification,
+            'filename' => $filename,
+            'content' => $this->buildUndanganPdfContent($rapat, $signed, $verification, 'satker', $letter),
+        ];
+    }
+
+    public function buildPdfViewData(Rapat $rapat, $signed = false, array $pdfVerification = null, $variant = 'internal', SuratKeluar $targetLetter = null)
     {
         $rapat->loadMissing([
             'pesertas.jabatan',
@@ -390,16 +633,20 @@ class RapatDocumentService
         $hierarchy = $selectedCategory ? $this->resolveHierarchy($selectedCategory) : null;
 
         $isSatkerInvitation = $variant === 'satker';
-        $displayRecipients = $rapat->pesertas->filter(function ($user) use ($signatory, $isSatkerInvitation) {
+        $displayRecipients = $rapat->pesertas->filter(function ($user) use ($signatory, $isSatkerInvitation, $targetLetter) {
             if ($signatory && (int) $user->id === (int) $signatory->id) {
                 return false;
+            }
+
+            if ($isSatkerInvitation && $targetLetter && !$targetLetter->is_satker_collective) {
+                return (int) $user->id === (int) $targetLetter->satker_id;
             }
 
             return $isSatkerInvitation ? $user->hasRole('satker') : !$user->hasRole('satker');
         })->values();
 
         $tujuanSurat = $isSatkerInvitation
-            ? trim((string) $rapat->tujuan_surat)
+            ? trim((string) ($targetLetter ? $targetLetter->penerima_external : $rapat->tujuan_surat))
             : ($rapat->is_external ? trim((string) $rapat->tujuan_external) : '');
         $tujuanManual = $tujuanSurat !== '';
         $singleRecipient = $displayRecipients->count() === 1;
@@ -419,7 +666,8 @@ class RapatDocumentService
 
         return [
             'rapat' => $rapat,
-            'suratKeluar' => $rapat->suratKeluar,
+            'suratKeluar' => $targetLetter ?: $rapat->suratKeluar,
+            'nomorUndangan' => $targetLetter ? $targetLetter->nomor_surat : $rapat->nomor_undangan,
             'selectedCategory' => $selectedCategory,
             'hierarchy' => $hierarchy,
             'displayRecipients' => $displayRecipients,

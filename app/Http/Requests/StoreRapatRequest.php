@@ -9,6 +9,16 @@ use Illuminate\Validation\Rule;
 
 class StoreRapatRequest extends FormRequest
 {
+    protected function prepareForValidation()
+    {
+        if ($this->boolean('bersama_satker')) {
+            $this->merge([
+                'is_external' => false,
+                'tujuan_external' => null,
+            ]);
+        }
+    }
+
     public function authorize()
     {
         return auth()->check() && auth()->user()->canManageRapat();
@@ -33,7 +43,9 @@ class StoreRapatRequest extends FormRequest
             'include_detail_tambahan' => ['nullable', 'boolean'],
             'detail_tambahan' => ['nullable', 'required_if:include_detail_tambahan,1', 'string'],
             'bersama_satker' => ['nullable', 'boolean'],
-            'tujuan_surat' => ['nullable', 'required_if:bersama_satker,1', 'string'],
+            'satker_ids' => ['nullable', 'required_if:bersama_satker,1', 'array', 'min:1'],
+            'satker_ids.*' => [Rule::exists('users', 'id')->where('status_aktif_pegawai', true)],
+            'tujuan_surat' => ['nullable', 'string'],
             'is_external' => ['nullable', 'boolean'],
             'tujuan_external' => ['nullable', 'required_if:is_external,1', 'string', 'max:255'],
             'include_pakaian' => ['nullable', 'boolean'],
@@ -78,12 +90,21 @@ class StoreRapatRequest extends FormRequest
                 $this->merge(['jenis_pakaian' => null]);
             }
 
-            if ($this->boolean('bersama_satker') && trim((string) $this->input('tujuan_surat')) === '') {
-                $validator->errors()->add('tujuan_surat', 'Tujuan surat satuan kerja wajib diisi.');
+            if ($this->boolean('bersama_satker')) {
+                $satkerIds = array_values(array_unique(array_map('intval', (array) $this->input('satker_ids', []))));
+                $validSatkerCount = User::whereIn('id', $satkerIds)
+                    ->whereHas('roles', function ($query) {
+                        $query->where('name', 'satker');
+                    })
+                    ->count();
+
+                if ($validSatkerCount !== count($satkerIds)) {
+                    $validator->errors()->add('satker_ids', 'Pilihan tujuan harus merupakan akun satuan kerja yang aktif.');
+                }
             }
 
             if (!$this->boolean('bersama_satker')) {
-                $this->merge(['tujuan_surat' => null]);
+                $this->merge(['tujuan_surat' => null, 'satker_ids' => []]);
 
                 $hasSatkerParticipant = User::whereIn('id', (array) $this->input('peserta_ids', []))
                     ->whereHas('roles', function ($query) {

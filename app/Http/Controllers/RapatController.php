@@ -47,7 +47,9 @@ class RapatController extends Controller
                 'approver1.jabatan',
                 'approver2.jabatan',
                 'pesertas',
+                'satkers',
                 'suratKeluar',
+                'suratKeluars.satker',
                 'approvals.approver',
                 'approvalHistories.approver',
             ]);
@@ -62,10 +64,16 @@ class RapatController extends Controller
             ->get();
 
         $kategoriSuratOptions = $this->documentService->getKategoriSuratLeafOptions();
-        $participants = User::with(['unit', 'jabatan', 'roles'])
+        $allParticipants = User::with(['unit', 'jabatan', 'roles'])
             ->active()
             ->ordered()
             ->get();
+        $satkers = $allParticipants->filter(function ($participant) {
+            return $participant->hasRole('satker');
+        })->values();
+        $participants = $allParticipants->reject(function ($participant) {
+            return $participant->hasRole('satker');
+        })->values();
         $participantUnits = $participants
             ->filter(function ($participant) {
                 return $participant->unit_id && $participant->unit;
@@ -88,7 +96,7 @@ class RapatController extends Controller
             ->ordered()
             ->get();
 
-        return view('rapat.index', compact('rapats', 'kategoriSuratOptions', 'participants', 'participantUnits', 'approvers'));
+        return view('rapat.index', compact('rapats', 'kategoriSuratOptions', 'participants', 'participantUnits', 'satkers', 'approvers'));
     }
 
     public function store(StoreRapatRequest $request)
@@ -104,7 +112,8 @@ class RapatController extends Controller
                 'created_by' => auth()->id(),
             ]));
 
-            $this->syncPeserta($rapat, $data['peserta_ids']);
+            $this->syncSatkers($rapat, $data['satker_ids'] ?? []);
+            $this->syncPeserta($rapat, $data['peserta_ids'], $data['satker_ids'] ?? []);
             $this->approvalService->syncWorkflow($rapat, $rapat->status);
             $this->documentService->syncSuratKeluar($rapat, false);
             $this->syncProgressZiContext($rapat, $request);
@@ -133,7 +142,8 @@ class RapatController extends Controller
 
         DB::transaction(function () use ($request, $rapat, $data, $keepApproved, $approvalAssignmentChanged) {
             $rapat->update($this->payloadFromRequest($request, $data, $rapat));
-            $this->syncPeserta($rapat, $data['peserta_ids']);
+            $this->syncSatkers($rapat, $data['satker_ids'] ?? []);
+            $this->syncPeserta($rapat, $data['peserta_ids'], $data['satker_ids'] ?? []);
             $this->approvalService->syncWorkflow(
                 $rapat,
                 $rapat->status,
@@ -148,7 +158,7 @@ class RapatController extends Controller
             $this->documentService->syncSuratKeluar($rapat, $keepApproved);
         });
 
-        $rapat = $rapat->fresh(['pesertas', 'approvals', 'kategoriSuratKode', 'creator', 'suratKeluar']);
+        $rapat = $rapat->fresh(['pesertas', 'satkers', 'approvals', 'kategoriSuratKode', 'creator', 'suratKeluar', 'suratKeluars']);
         if ($keepApproved) {
             try {
                 $this->documentService->generateAndStoreUndangan($rapat, true);
@@ -185,20 +195,21 @@ class RapatController extends Controller
     {
         abort_unless(auth()->user()->canManageRapat(), 403);
 
-        $rapat->load('suratKeluar');
+        $rapat->load('suratKeluars');
 
         if ($rapat->lampiran_tambahan_path) {
             Storage::disk('public')->delete($rapat->lampiran_tambahan_path);
         }
 
-        if ($rapat->suratKeluar) {
-            if ($rapat->suratKeluar->file_path) {
-                Storage::disk('public')->delete($rapat->suratKeluar->file_path);
+        foreach ($rapat->suratKeluars as $suratKeluar) {
+            if ($suratKeluar->file_path) {
+                Storage::disk('public')->delete($suratKeluar->file_path);
             }
-            $rapat->suratKeluar->penerimaInternal()->detach();
-            $rapat->suratKeluar->delete();
+            $suratKeluar->penerimaInternal()->detach();
+            $suratKeluar->delete();
         }
 
+        $rapat->satkers()->detach();
         $rapat->pesertas()->detach();
         $rapat->delete();
 
@@ -273,9 +284,9 @@ class RapatController extends Controller
             'approval1_jabatan_manual' => $data['approval1_jabatan_manual'] ?? null,
             'detail_tambahan' => !empty($data['include_detail_tambahan']) ? ($data['detail_tambahan'] ?? null) : null,
             'bersama_satker' => (bool) ($data['bersama_satker'] ?? false),
-            'tujuan_surat' => !empty($data['bersama_satker']) ? ($data['tujuan_surat'] ?? null) : null,
-            'is_external' => (bool) ($data['is_external'] ?? false),
-            'tujuan_external' => !empty($data['is_external']) ? trim((string) ($data['tujuan_external'] ?? '')) : null,
+            'tujuan_surat' => !empty($data['bersama_satker']) ? $this->resolveSatkerDestination($data['satker_ids'] ?? []) : null,
+            'is_external' => empty($data['bersama_satker']) && (bool) ($data['is_external'] ?? false),
+            'tujuan_external' => empty($data['bersama_satker']) && !empty($data['is_external']) ? trim((string) ($data['tujuan_external'] ?? '')) : null,
             'jenis_pakaian' => !empty($data['include_pakaian']) ? ($data['jenis_pakaian'] ?? null) : null,
             'is_virtual' => (bool) ($data['is_virtual'] ?? false),
             'meeting_id' => $data['meeting_id'] ?? null,
@@ -346,8 +357,9 @@ class RapatController extends Controller
         return $created->id;
     }
 
-    protected function syncPeserta(Rapat $rapat, array $participantIds)
+    protected function syncPeserta(Rapat $rapat, array $participantIds, array $satkerIds = [])
     {
+        $participantIds = array_values(array_unique(array_merge($participantIds, $satkerIds)));
         $orderedUsers = User::whereIn('id', $participantIds)
             ->active()
             ->ordered()
@@ -359,6 +371,32 @@ class RapatController extends Controller
         }
 
         $rapat->pesertas()->sync($syncData);
+    }
+
+    protected function syncSatkers(Rapat $rapat, array $satkerIds)
+    {
+        $rapat->satkers()->sync(array_values(array_unique(array_map('intval', $satkerIds))));
+    }
+
+    protected function resolveSatkerDestination(array $satkerIds)
+    {
+        $selectedSatkers = User::whereIn('id', array_values(array_unique(array_map('intval', $satkerIds))))
+            ->whereHas('roles', function ($query) {
+                $query->where('name', 'satker');
+            })
+            ->orderBy('name')
+            ->get();
+        $allSatkerCount = User::active()->whereHas('roles', function ($query) {
+            $query->where('name', 'satker');
+        })->count();
+
+        if ($allSatkerCount > 0 && $selectedSatkers->count() === $allSatkerCount) {
+            return 'Seluruh Satker Sewilayah Hukum PTA Papua Barat';
+        }
+
+        return $selectedSatkers->map(function ($satker) {
+            return trim((string) ($satker->satuan_kerja ?: $satker->name));
+        })->implode(', ');
     }
 
     protected function dispatchCreateOrUpdateNotifications(Rapat $rapat, $skipApprovalAndParticipantNotification = false)

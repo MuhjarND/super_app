@@ -28,10 +28,16 @@ class SuratKeluar extends Model
         'file_path',
         'status',
         'created_by',
-        'rapat_id'
+        'rapat_id',
+        'satker_id',
+        'is_satker_collective'
     ];
 
     protected $dates = ['tanggal_surat'];
+
+    protected $casts = [
+        'is_satker_collective' => 'boolean',
+    ];
 
     public function scopeForLetterYear($query, $year = null)
     {
@@ -102,6 +108,11 @@ class SuratKeluar extends Model
     public function rapat()
     {
         return $this->belongsTo(Rapat::class, 'rapat_id');
+    }
+
+    public function satker()
+    {
+        return $this->belongsTo(User::class, 'satker_id');
     }
 
     public function attendanceRapat()

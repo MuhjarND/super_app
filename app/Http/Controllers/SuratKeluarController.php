@@ -505,8 +505,11 @@ class SuratKeluarController extends Controller
         }
 
         if ($suratKeluar->rapat) {
-            if ($user && $user->isSatker() && $suratKeluar->rapat->bersama_satker) {
-                return app(RapatDocumentService::class)->streamUndanganSatkerPdf($suratKeluar->rapat);
+            if ($suratKeluar->rapat->bersama_satker) {
+                return app(RapatDocumentService::class)->streamUndanganSatkerPdf(
+                    $suratKeluar->rapat,
+                    $suratKeluar
+                );
             }
 
             return app(RapatDocumentService::class)->streamUndanganPdf($suratKeluar->rapat);

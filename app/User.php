@@ -637,7 +637,8 @@ class User extends Authenticatable
         if ($this->isSatker()) {
             return (bool) $rapat->bersama_satker
                 && in_array($rapat->status, ['disetujui', 'selesai'], true)
-                && $rapat->pesertas()->where('users.id', $this->id)->exists();
+                && ($rapat->satkers()->where('users.id', $this->id)->exists()
+                    || $rapat->pesertas()->where('users.id', $this->id)->exists());
         }
 
         if ((int) $rapat->created_by === (int) $this->id) {

@@ -740,7 +740,8 @@
                             data-tanggal="{{ optional($rapat->tanggal)->format('Y-m-d') }}"
                             data-waktu-mulai="{{ $rapat->waktu_mulai_formatted }}"
                             data-tempat="{{ $rapat->tempat }}"
-                            data-peserta-ids="{{ $rapat->pesertas->pluck('id')->implode(',') }}"
+                            data-peserta-ids="{{ $rapat->pesertas->reject(function ($peserta) { return $peserta->hasRole('satker'); })->pluck('id')->implode(',') }}"
+                            data-satker-ids="{{ $rapat->satkers->pluck('id')->implode(',') }}"
                             data-approver-1="{{ $rapat->approver_1_id }}"
                             data-approver-2="{{ $rapat->approver_2_id }}"
                             data-approval1-jabatan-manual="{{ $rapat->approval1_jabatan_manual }}"
@@ -766,7 +767,11 @@
                             </td>
                             <td>
                                 <div class="rapat-title">{{ $rapat->judul }}</div>
-                                <div class="rapat-meta">{{ $rapat->nomor_undangan }}</div>
+                                @if($rapat->bersama_satker && $rapat->suratKeluars->count() > 1)
+                                    <div class="rapat-meta">{{ $rapat->suratKeluars->count() }} nomor undangan satker</div>
+                                @else
+                                    <div class="rapat-meta">{{ $rapat->nomor_undangan }}</div>
+                                @endif
                                 @if($rapat->deskripsi)
                                     <div class="rapat-meta mt-1">{{ \Illuminate\Support\Str::limit($rapat->deskripsi, 80) }}</div>
                                 @endif
@@ -826,12 +831,21 @@
                             <i class="fas fa-paperclip"></i> Lampiran
                         </button>
                     @endif
-                    <button type="button" class="action-chip-btn action-lampiran" onclick="previewLampiran('{{ route('rapat.undangan.preview', $rapat) }}')">
-                        <i class="fas fa-file-pdf"></i> Undangan
-                    </button>
                     @if($rapat->bersama_satker)
-                        <button type="button" class="action-chip-btn action-lampiran" onclick="previewLampiran('{{ route('rapat.undangan-satker.preview', $rapat) }}')">
-                            <i class="fas fa-building"></i> Undangan Satker
+                        @foreach($rapat->suratKeluars as $suratSatker)
+                            <button type="button" class="action-chip-btn action-lampiran" onclick="previewLampiran('{{ route('surat-keluar.file', $suratSatker) }}')">
+                                <i class="fas fa-building"></i>
+                                {{ $suratSatker->is_satker_collective ? 'Undangan Semua Satker' : \Illuminate\Support\Str::limit($suratSatker->penerima_external, 28) }}
+                            </button>
+                        @endforeach
+                        @if($rapat->suratKeluars->count() > 1)
+                            <button type="button" class="action-chip-btn action-lampiran" onclick="previewLampiran('{{ route('rapat.undangan-satker.preview', $rapat) }}')">
+                                <i class="fas fa-file-pdf"></i> Gabungkan Semua Undangan
+                            </button>
+                        @endif
+                    @else
+                        <button type="button" class="action-chip-btn action-lampiran" onclick="previewLampiran('{{ route('rapat.undangan.preview', $rapat) }}')">
+                            <i class="fas fa-file-pdf"></i> Undangan
                         </button>
                     @endif
                     @if(auth()->user()->canManageRapat())
@@ -1027,24 +1041,19 @@
 
             function toggleSatkerFields(prefix) {
                 const checked = $('#' + prefix + 'BersamaSatker').is(':checked');
-                const $participantSelect = $('#' + prefix + 'PesertaIds');
-                const $satkerOptions = $participantSelect.find('option[data-is-satker="1"]');
+                const $satkerSelect = $('#' + prefix + 'SatkerIds');
 
                 $('#' + prefix + 'SatkerGroup').toggle(checked);
-                $('#' + prefix + 'TujuanSurat').prop('required', checked);
+                $satkerSelect.prop('required', checked);
                 $('#' + prefix + 'Approver1Id').prop('required', checked);
                 $('#' + prefix + 'SatkerApproverRequired').toggle(checked);
-                $satkerOptions.prop('disabled', !checked);
+                $('#' + prefix + 'IsExternal').prop('disabled', checked);
 
                 if (!checked) {
-                    $('#' + prefix + 'TujuanSurat').val('');
-                    const satkerValues = $satkerOptions.map(function () { return String(this.value); }).get();
-                    const selected = ($participantSelect.val() || []).map(String).filter(function (value) {
-                        return satkerValues.indexOf(value) === -1;
-                    });
-                    $participantSelect.val(selected).trigger('change');
+                    $satkerSelect.val([]).trigger('change');
                 } else {
-                    $participantSelect.trigger('change.select2');
+                    $('#' + prefix + 'IsExternal').prop('checked', false).trigger('change');
+                    $satkerSelect.trigger('change.select2');
                 }
             }
 
@@ -1083,6 +1092,16 @@
                 toggleExternalFields(prefix);
                 updateNomorPreview(prefix);
             }
+
+            $(document).on('click', '.rapat-select-all-satkers', function () {
+                const $select = $($(this).data('target'));
+                const allValues = $select.find('option').map(function () { return String(this.value); }).get();
+                const allSelected = ($select.val() || []).length === allValues.length;
+                $select.val(allSelected ? [] : allValues).trigger('change');
+                $(this).html(allSelected
+                    ? '<i class="fas fa-check-double mr-1"></i> Pilih Semua Satker'
+                    : '<i class="fas fa-times mr-1"></i> Hapus Pilihan Satker');
+            });
 
             function updateNomorPreview(prefix) {
                 if (!$('#' + prefix + 'NomorUndangan').length) {
@@ -1271,6 +1290,7 @@
                 window.openEditModal = function (rapatId) {
                     const row = $('tr[data-rapat-id="' + rapatId + '"]');
                     const pesertaIds = String(row.data('pesertaIds') || '').split(',').filter(Boolean);
+                    const satkerIds = String(row.data('satkerIds') || '').split(',').filter(Boolean);
                     const isApproved = row.data('status') === 'disetujui';
 
                     $('#editRapatForm').data('action', row.data('updateUrl'));
@@ -1285,6 +1305,7 @@
                     $('#editBersamaSatker').prop('checked', Number(row.data('bersamaSatker')) === 1).trigger('change');
                     $('#editIsExternal').prop('checked', Number(row.data('isExternal')) === 1).trigger('change');
                     $('#editPesertaIds').val(pesertaIds).trigger('change');
+                    $('#editSatkerIds').val(satkerIds).trigger('change');
                     refreshRapatParticipantSelectAll($('#editPesertaIds'));
                     $('#editApprover1Id').val(row.data('approver1')).trigger('change');
                     $('#editApprover2Id').val(row.data('approver2')).trigger('change');
@@ -1292,7 +1313,6 @@
                     $('#editApprover1Id, #editApprover2Id, #editApproval1JabatanManual').prop('disabled', false);
                     $('#editIncludeDetailTambahan').prop('checked', Number(row.data('includeDetailTambahan')) === 1).trigger('change');
                     $('#editDetailTambahan').val(row.data('detailTambahan'));
-                    $('#editTujuanSurat').val(row.data('tujuanSurat'));
                     $('#editTujuanExternal').val(row.data('tujuanExternal'));
                     $('#editIncludePakaian').prop('checked', Number(row.data('includePakaian')) === 1).trigger('change');
                     $('#editJenisPakaian').val(row.data('jenisPakaian'));
