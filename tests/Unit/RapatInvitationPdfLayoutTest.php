@@ -53,7 +53,7 @@ class RapatInvitationPdfLayoutTest extends TestCase
     {
         $data = $this->viewData();
         $data['rapat']->forceFill([
-            'judul' => 'Rapat Monitoring dan Evaluasi Kinerja Kesekretariatan Pengadilan Agama Sewilayah Hukum',
+            'judul' => "Rapat Monitoring dan Evaluasi Kinerja Kesekretariatan\nPengadilan Agama Sewilayah Hukum Pengadilan Tinggi Agama Papua Barat",
             'sifat_surat' => 'penting',
         ]);
         $html = view('rapat.pdf.undangan', $data)->render();
@@ -61,8 +61,10 @@ class RapatInvitationPdfLayoutTest extends TestCase
         $this->assertStringContainsString('<td>Sifat</td>', $html);
         $this->assertStringContainsString('<td>Penting</td>', $html);
         $this->assertRegExp('/\.nomor-undangan-value\s*\{[^}]*white-space:\s*nowrap;/s', $html);
-        $this->assertStringContainsString('<div>Undangan</div>', $html);
-        $this->assertStringContainsString('class="hal-title"', $html);
+        $this->assertStringContainsString('<td colspan="2" class="hal-value">', $html);
+        $this->assertStringContainsString('>Undangan Rapat Monitoring dan Evaluasi', $html);
+        $this->assertStringNotContainsString('<div>Undangan</div>', $html);
+        $this->assertStringNotContainsString("Kesekretariatan\nPengadilan", $html);
     }
 
     public function test_institution_name_is_kept_together(): void

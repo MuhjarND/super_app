@@ -87,10 +87,7 @@
 
         .hal-value {
             line-height: 1.2;
-        }
-
-        .hal-title {
-            margin-top: 1pt;
+            padding: 0;
         }
 
         .institution-name {
@@ -239,7 +236,11 @@
                 e((string) $value)
             );
         };
-        $useMultilineSubject = mb_strlen(trim((string) $rapat->judul)) > 36;
+        $invitationSubject = preg_replace('/\s+/u', ' ', trim((string) $rapat->judul));
+        $invitationSubjectLength = mb_strlen('Undangan ' . $invitationSubject);
+        $invitationSubjectFontSize = $invitationSubjectLength > 145
+            ? max(7.5, round(11 * 145 / $invitationSubjectLength, 1))
+            : 11;
     @endphp
 
     @if($kopImage)
@@ -267,21 +268,20 @@
                         <td>:</td>
                         <td>{{ $lampiranLabel }}</td>
                     </tr>
-                    <tr>
-                        <td>Hal</td>
-                        <td>:</td>
-                        <td class="hal-value">
-                            @if($useMultilineSubject)
-                                <div>Undangan</div>
-                                <div class="hal-title">{!! $keepInstitutionTogether($rapat->judul) !!}</div>
-                            @else
-                                Undangan {!! $keepInstitutionTogether($rapat->judul) !!}
-                            @endif
-                        </td>
-                    </tr>
                 </table>
             </td>
             <td class="meta-right">Manokwari, {{ $tanggalSuratIndonesia }}</td>
+        </tr>
+        <tr>
+            <td colspan="2" class="hal-value">
+                <table class="meta-table">
+                    <tr>
+                        <td>Hal</td>
+                        <td>:</td>
+                        <td style="font-size: {{ $invitationSubjectFontSize }}pt;">Undangan {!! $keepInstitutionTogether($invitationSubject) !!}</td>
+                    </tr>
+                </table>
+            </td>
         </tr>
     </table>
 
