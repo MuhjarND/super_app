@@ -521,7 +521,7 @@
                         </div>
 
                         <div class="attendance-source-note">
-                            Peserta terpilih masuk ke daftar PTA Papua Barat. Peserta Satker/External dapat mengisi melalui tautan absensi publik.
+                            Peserta terpilih masuk ke daftar PTA Papua Barat/Ketua PA. Peserta Satker/External dapat mengisi melalui tautan absensi publik.
                         </div>
                     </div>
                     <div class="modal-footer">

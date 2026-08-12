@@ -319,7 +319,7 @@
             <div id="attendanceAlert" class="alert"></div>
 
             <div class="tabs">
-                <button type="button" class="tab-button active" data-tab="internal">PTA Papua Barat</button>
+                <button type="button" class="tab-button active" data-tab="internal">PTA Papua Barat/Ketua PA</button>
                 <button type="button" class="tab-button" data-tab="guest">Satker/External</button>
             </div>
 
