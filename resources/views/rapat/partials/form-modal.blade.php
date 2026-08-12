@@ -165,6 +165,13 @@
                                         <small>Ganti seluruh isi pokok pembuka surat.</small>
                                     </span>
                                 </label>
+                                <label class="rapat-option-card" for="{{ $prefix }}IncludePenutupUndangan">
+                                    <input type="checkbox" name="include_penutup_undangan" value="1" id="{{ $prefix }}IncludePenutupUndangan">
+                                    <span>
+                                        <strong>Penutup undangan</strong>
+                                        <small>Ganti kalimat penutup sebelum ucapan terima kasih.</small>
+                                    </span>
+                                </label>
                                 <label class="rapat-option-card" for="{{ $prefix }}IsVirtual">
                                     <input type="checkbox" name="is_virtual" value="1" id="{{ $prefix }}IsVirtual">
                                     <span>
@@ -237,6 +244,12 @@
                                 <label>Isi Pokok Pembuka Undangan</label>
                                 <textarea class="form-control" name="detail_tambahan" id="{{ $prefix }}DetailTambahan" rows="4" placeholder="Isi paragraf pembuka lengkap yang akan menggantikan kalimat standar undangan."></textarea>
                                 <small class="form-hint">Teks ini akan ditampilkan apa adanya sebelum rincian hari, tanggal, waktu, dan tempat.</small>
+                            </div>
+
+                            <div id="{{ $prefix }}PenutupUndanganGroup" class="rapat-conditional-field" style="display:none;">
+                                <label>Isi Penutup Undangan <span class="text-danger">*</span></label>
+                                <textarea class="form-control" name="penutup_undangan" id="{{ $prefix }}PenutupUndangan" rows="3" placeholder="Contoh: Sehubungan dengan hal tersebut, dimohon kehadiran Saudara tepat pada waktunya."></textarea>
+                                <small class="form-hint">Teks ini menggantikan kalimat penutup pertama pada PDF undangan.</small>
                             </div>
 
                             <div id="{{ $prefix }}VirtualGroup" class="rapat-conditional-field" style="display:none;">

@@ -22,6 +22,7 @@ class Rapat extends Model
         'approver_2_id',
         'approval1_jabatan_manual',
         'detail_tambahan',
+        'penutup_undangan',
         'tujuan_surat',
         'penerima_satker',
         'bersama_satker',

@@ -748,6 +748,8 @@
                             data-approval1-jabatan-manual="{{ $rapat->approval1_jabatan_manual }}"
                             data-detail-tambahan="{{ $rapat->detail_tambahan }}"
                             data-include-detail-tambahan="{{ $rapat->detail_tambahan ? 1 : 0 }}"
+                            data-penutup-undangan="{{ $rapat->penutup_undangan }}"
+                            data-include-penutup-undangan="{{ $rapat->penutup_undangan ? 1 : 0 }}"
                             data-tujuan-surat="{{ $rapat->tujuan_surat }}"
                             data-bersama-satker="{{ $rapat->bersama_satker ? 1 : 0 }}"
                             data-is-external="{{ $rapat->is_external ? 1 : 0 }}"
@@ -1014,6 +1016,15 @@
                 }
             }
 
+            function togglePenutupUndangan(prefix) {
+                const checked = $('#' + prefix + 'IncludePenutupUndangan').is(':checked');
+                $('#' + prefix + 'PenutupUndanganGroup').toggle(checked);
+                $('#' + prefix + 'PenutupUndangan').prop('required', checked);
+                if (!checked) {
+                    $('#' + prefix + 'PenutupUndangan').val('');
+                }
+            }
+
             function toggleVirtualFields(prefix) {
                 const checked = $('#' + prefix + 'IsVirtual').is(':checked');
                 $('#' + prefix + 'VirtualGroup').toggle(checked);
@@ -1081,6 +1092,7 @@
                 $('#' + prefix + 'BersamaSatker').on('change', function () { toggleSatkerFields(prefix); });
                 $('#' + prefix + 'IsExternal').on('change', function () { toggleExternalFields(prefix); });
                 $('#' + prefix + 'IncludeDetailTambahan').on('change', function () { toggleDetailTambahan(prefix); });
+                $('#' + prefix + 'IncludePenutupUndangan').on('change', function () { togglePenutupUndangan(prefix); });
                 $('#' + prefix + 'IncludePakaian').on('change', function () { togglePakaianFields(prefix); });
                 $('#' + prefix + 'Tanggal, #' + prefix + 'NomenklaturJabatan').on('change', function () {
                     updateNomorPreview(prefix);
@@ -1088,6 +1100,7 @@
                 toggleKategoriDependentFields(prefix);
                 togglePakaianFields(prefix);
                 toggleDetailTambahan(prefix);
+                togglePenutupUndangan(prefix);
                 toggleVirtualFields(prefix);
                 toggleRecurringFields(prefix);
                 toggleLampiranFields(prefix);
@@ -1317,6 +1330,8 @@
                     $('#editApprover1Id, #editApprover2Id, #editApproval1JabatanManual').prop('disabled', false);
                     $('#editIncludeDetailTambahan').prop('checked', Number(row.data('includeDetailTambahan')) === 1).trigger('change');
                     $('#editDetailTambahan').val(row.data('detailTambahan'));
+                    $('#editIncludePenutupUndangan').prop('checked', Number(row.data('includePenutupUndangan')) === 1).trigger('change');
+                    $('#editPenutupUndangan').val(row.data('penutupUndangan'));
                     $('#editTujuanExternal').val(row.data('tujuanExternal'));
                     $('#editIncludePakaian').prop('checked', Number(row.data('includePakaian')) === 1).trigger('change');
                     $('#editJenisPakaian').val(row.data('jenisPakaian'));

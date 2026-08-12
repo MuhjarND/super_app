@@ -111,8 +111,9 @@ class RapatSatkerInvitationTest extends TestCase
         $this->assertTrue($data['tujuanManual']);
 
         $html = view('rapat.pdf.undangan', $data)->render();
-        $this->assertStringContainsString('class="recipient-destination">Yth. Ketua Pengadilan Agama Sorong</div>', $html);
-        $this->assertRegExp('/\.recipient-destination\s*\{[^}]*font-weight:\s*bold;/s', $html);
+        $this->assertStringContainsString('class="recipient-destination">Yth. <span class="recipient-name">Ketua Pengadilan Agama Sorong</span></div>', $html);
+        $this->assertRegExp('/\.recipient-destination\s*\{[^}]*font-weight:\s*normal;/s', $html);
+        $this->assertRegExp('/\.recipient-name\s*\{[^}]*font-weight:\s*bold;/s', $html);
         $this->assertStringNotContainsString('Kepada Yth.', $html);
     }
 

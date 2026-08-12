@@ -105,6 +105,10 @@
         }
 
         .recipient-destination {
+            font-weight: normal;
+        }
+
+        .recipient-name {
             font-weight: bold;
         }
 
@@ -303,7 +307,7 @@
     </table>
 
     <div class="tujuan">
-        <div class="recipient-destination">Yth. {!! nl2br($keepInstitutionTogether($recipientDestination)) !!}</div>
+        <div class="recipient-destination">Yth. <span class="recipient-name">{!! nl2br($keepInstitutionTogether($recipientDestination)) !!}</span></div>
         @if(!$tujuanManual && !$singleRecipient && $showRecipientListInLetter && $recipientSummary)
             <div class="recipient-inline">{!! $keepInstitutionTogether($recipientSummary) !!}</div>
         @endif
@@ -359,7 +363,7 @@
         </table>
     </div>
 
-    <p class="penutup">Sehubungan dengan hal tersebut, dimohon kehadiran Saudara tepat pada waktunya.</p>
+    <p class="penutup">{!! nl2br($keepInstitutionTogether($rapat->penutup_undangan ?: 'Sehubungan dengan hal tersebut, dimohon kehadiran Saudara tepat pada waktunya.')) !!}</p>
     <p class="penutup">Demikian undangan ini disampaikan, atas perhatian dan kehadiran Saudara diucapkan terima kasih.</p>
     <p class="salam">Wassalamu'alaikum warahmatullahi wabarakatuh.</p>
 

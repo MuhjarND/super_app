@@ -78,6 +78,25 @@ class RapatInvitationPdfLayoutTest extends TestCase
         );
     }
 
+    public function test_custom_invitation_closing_replaces_default_first_closing_paragraph(): void
+    {
+        $data = $this->viewData();
+        $data['rapat']->forceFill([
+            'penutup_undangan' => 'Mohon hadir 15 menit sebelum kegiatan dimulai.',
+        ]);
+        $html = view('rapat.pdf.undangan', $data)->render();
+
+        $this->assertStringContainsString('Mohon hadir 15 menit sebelum kegiatan dimulai.', $html);
+        $this->assertStringNotContainsString(
+            'Sehubungan dengan hal tersebut, dimohon kehadiran Saudara tepat pada waktunya.',
+            $html
+        );
+        $this->assertStringContainsString(
+            'Demikian undangan ini disampaikan, atas perhatian dan kehadiran Saudara diucapkan terima kasih.',
+            $html
+        );
+    }
+
     protected function viewData(array $pdfVerification = null)
     {
         $rapat = new Rapat([

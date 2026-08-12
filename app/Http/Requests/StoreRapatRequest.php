@@ -42,6 +42,8 @@ class StoreRapatRequest extends FormRequest
             'approval1_jabatan_manual' => ['nullable', 'string', 'max:255'],
             'include_detail_tambahan' => ['nullable', 'boolean'],
             'detail_tambahan' => ['nullable', 'required_if:include_detail_tambahan,1', 'string'],
+            'include_penutup_undangan' => ['nullable', 'boolean'],
+            'penutup_undangan' => ['nullable', 'required_if:include_penutup_undangan,1', 'string'],
             'bersama_satker' => ['nullable', 'boolean'],
             'satker_ids' => ['nullable', 'required_if:bersama_satker,1', 'array', 'min:1'],
             'satker_ids.*' => [Rule::exists('users', 'id')->where('status_aktif_pegawai', true)],
@@ -89,6 +91,10 @@ class StoreRapatRequest extends FormRequest
 
             if (!$this->boolean('include_pakaian')) {
                 $this->merge(['jenis_pakaian' => null]);
+            }
+
+            if (!$this->boolean('include_penutup_undangan')) {
+                $this->merge(['penutup_undangan' => null]);
             }
 
             if ($this->boolean('bersama_satker')) {
