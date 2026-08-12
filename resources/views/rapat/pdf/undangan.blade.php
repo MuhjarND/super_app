@@ -93,7 +93,7 @@
         }
 
         .salam {
-            font-style: italic;
+            font-style: normal;
             margin-bottom: 12pt;
         }
 
@@ -210,6 +210,8 @@
             return $recipient->jabatan_keterangan ?: optional($recipient->jabatan)->nama ?: $recipient->name;
         })->filter()->unique()->values();
         $signatoryLampiranTitle = trim(rtrim($signatoryTitle['line1'], ',')) . ' ' . trim($signatoryTitle['line2']);
+        $signatoryName = \App\Support\PersonNameFormatter::withoutTitles(optional($signatory)->name)
+            ?: '(menunggu approval 1)';
     @endphp
 
     @if($kopImage)
@@ -260,7 +262,7 @@
         <div>Tempat</div>
     </div>
 
-    <p class="salam">Assalamu'alaikum Wr.Wb.</p>
+    <p class="salam">Assalamu'alaikum warahmatullahi wabarakatuh.</p>
 
     <p class="paragraf">{!! nl2br(e($openingParagraph)) !!}</p>
 
@@ -310,7 +312,7 @@
 
     <p class="penutup">Sehubungan dengan hal tersebut, dimohon kehadiran Saudara tepat pada waktunya.</p>
     <p class="penutup">Demikian undangan ini disampaikan, atas perhatian dan kehadiran Saudara diucapkan terima kasih.</p>
-    <p class="salam">Wassalamu'alaikum Wr.Wb.</p>
+    <p class="salam">Wassalamu'alaikum warahmatullahi wabarakatuh.</p>
 
     <table class="ttd-table">
         <tr>
@@ -326,7 +328,7 @@
                     @else
                         <div style="height: 68pt;"></div>
                     @endif
-                    <div class="nama-ttd">{{ optional($signatory)->name ?? '(menunggu approval 1)' }}</div>
+                    <div class="nama-ttd">{{ $signatoryName }}</div>
                 </div>
             </td>
         </tr>
@@ -371,7 +373,7 @@
                         @else
                             <div style="height: 68pt;"></div>
                         @endif
-                        <div class="nama-ttd">{{ optional($signatory)->name ?? '(menunggu approval 1)' }}</div>
+                        <div class="nama-ttd">{{ $signatoryName }}</div>
                     </div>
                 </td>
             </tr>

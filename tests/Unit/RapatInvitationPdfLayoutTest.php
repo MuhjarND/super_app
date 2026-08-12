@@ -35,6 +35,20 @@ class RapatInvitationPdfLayoutTest extends TestCase
         $this->assertRegExp('/\.signature-pad-image img\s*\{[^}]*margin:\s*0;/s', $html);
     }
 
+    public function test_greetings_are_complete_upright_and_signatory_name_has_no_titles(): void
+    {
+        $data = $this->viewData();
+        $data['signatory'] = (object) ['name' => 'Dr. Nama Sekretaris, S.H., M.H.'];
+        $html = view('rapat.pdf.undangan', $data)->render();
+
+        $this->assertStringContainsString("Assalamu'alaikum warahmatullahi wabarakatuh.", $html);
+        $this->assertStringContainsString("Wassalamu'alaikum warahmatullahi wabarakatuh.", $html);
+        $this->assertRegExp('/\.salam\s*\{[^}]*font-style:\s*normal;/s', $html);
+        $this->assertStringContainsString('Nama Sekretaris', $html);
+        $this->assertStringNotContainsString('Dr. Nama Sekretaris', $html);
+        $this->assertStringNotContainsString('S.H., M.H.', $html);
+    }
+
     protected function viewData(array $pdfVerification = null)
     {
         $rapat = new Rapat([
