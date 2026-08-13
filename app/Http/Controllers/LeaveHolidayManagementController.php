@@ -4,14 +4,19 @@ namespace App\Http\Controllers;
 
 use App\LeaveHoliday;
 use App\LeaveType;
+use App\Services\LeaveExistingRequestSyncService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 class LeaveHolidayManagementController extends Controller
 {
-    public function __construct()
+    protected $existingRequestSync;
+
+    public function __construct(LeaveExistingRequestSyncService $existingRequestSync)
     {
         $this->middleware('auth');
+        $this->existingRequestSync = $existingRequestSync;
     }
 
     public function index(Request $request)
@@ -46,9 +51,13 @@ class LeaveHolidayManagementController extends Controller
         $this->abortIfUnauthorized();
         $this->ensureReady();
 
-        LeaveHoliday::create($this->validatedData($request));
+        $updatedRequests = DB::transaction(function () use ($request) {
+            $holiday = LeaveHoliday::create($this->validatedData($request));
 
-        return redirect()->route('cuti.master.holidays.index')->with('success', 'Data cuti bersama/libur berhasil ditambahkan.');
+            return $this->existingRequestSync->syncOverlappingDates([$holiday->holiday_date]);
+        });
+
+        return redirect()->route('cuti.master.holidays.index')->with('success', $this->successMessage('ditambahkan', $updatedRequests));
     }
 
     public function update(Request $request, LeaveHoliday $leaveHoliday)
@@ -56,9 +65,14 @@ class LeaveHolidayManagementController extends Controller
         $this->abortIfUnauthorized();
         $this->ensureReady();
 
-        $leaveHoliday->update($this->validatedData($request));
+        $updatedRequests = DB::transaction(function () use ($request, $leaveHoliday) {
+            $oldDate = optional($leaveHoliday->holiday_date)->toDateString();
+            $leaveHoliday->update($this->validatedData($request));
 
-        return redirect()->route('cuti.master.holidays.index')->with('success', 'Data cuti bersama/libur berhasil diperbarui.');
+            return $this->existingRequestSync->syncOverlappingDates([$oldDate, $leaveHoliday->holiday_date]);
+        });
+
+        return redirect()->route('cuti.master.holidays.index')->with('success', $this->successMessage('diperbarui', $updatedRequests));
     }
 
     public function destroy(LeaveHoliday $leaveHoliday)
@@ -66,9 +80,14 @@ class LeaveHolidayManagementController extends Controller
         $this->abortIfUnauthorized();
         $this->ensureReady();
 
-        $leaveHoliday->delete();
+        $updatedRequests = DB::transaction(function () use ($leaveHoliday) {
+            $oldDate = optional($leaveHoliday->holiday_date)->toDateString();
+            $leaveHoliday->delete();
 
-        return redirect()->route('cuti.master.holidays.index')->with('success', 'Data cuti bersama/libur berhasil dihapus.');
+            return $this->existingRequestSync->syncOverlappingDates([$oldDate]);
+        });
+
+        return redirect()->route('cuti.master.holidays.index')->with('success', $this->successMessage('dihapus', $updatedRequests));
     }
 
     protected function validatedData(Request $request)
@@ -106,5 +125,16 @@ class LeaveHolidayManagementController extends Controller
     protected function ensureReady()
     {
         abort_unless(Schema::hasTable('leave_holidays'), 404);
+    }
+
+    protected function successMessage($action, $updatedRequests)
+    {
+        $message = 'Data cuti bersama/libur berhasil ' . $action . '.';
+
+        if ($updatedRequests > 0) {
+            $message .= ' ' . $updatedRequests . ' pengajuan cuti lama telah disinkronkan.';
+        }
+
+        return $message;
     }
 }
