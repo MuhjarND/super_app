@@ -77,9 +77,9 @@ class LeaveExistingRequestSyncServiceTest extends TestCase
         parent::tearDown();
     }
 
-    public function test_submitted_request_and_reserved_balance_are_corrected(): void
+    public function test_verified_request_and_reserved_balance_are_corrected(): void
     {
-        [$leaveType, $leaveRequest] = $this->createAnnualRequest(LeaveRequest::STATUS_SUBMITTED, 4);
+        [$leaveType, $leaveRequest] = $this->createAnnualRequest(LeaveRequest::STATUS_VERIFIED, 4);
         $balance = $this->createBalance($leaveType, 0, 4);
         $this->createCollectiveLeave();
 

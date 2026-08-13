@@ -8,12 +8,20 @@ use App\Http\Requests\VerifyLeaveDocumentRequest;
 use App\LeaveApproval;
 use App\LeaveRequestDocument;
 use App\Services\LeaveApprovalService;
+use App\Services\LeaveExistingRequestSyncService;
 use Illuminate\Support\Facades\Schema;
 
 class LeaveApprovalController extends Controller
 {
     protected $approvalService;
-    public function __construct(LeaveApprovalService $approvalService) { $this->middleware('auth'); $this->approvalService = $approvalService; }
+    protected $existingRequestSync;
+
+    public function __construct(LeaveApprovalService $approvalService, LeaveExistingRequestSyncService $existingRequestSync)
+    {
+        $this->middleware('auth');
+        $this->approvalService = $approvalService;
+        $this->existingRequestSync = $existingRequestSync;
+    }
 
     public function index()
     {
@@ -96,6 +104,11 @@ class LeaveApprovalController extends Controller
 
         abort_unless($user->canAccessLeaveApproval(), 403);
         abort_unless($user->isSuperAdmin() || $user->canActAsAssignedUser($leaveApproval->approver_id), 403);
+
+        if ($leaveApproval->leaveRequest) {
+            $this->existingRequestSync->syncRequest($leaveApproval->leaveRequest);
+            $leaveApproval->unsetRelation('leaveRequest');
+        }
     }
 
     protected function moduleReady() { return Schema::hasTable('leave_requests') && Schema::hasTable('leave_approvals'); }

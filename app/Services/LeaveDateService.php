@@ -112,7 +112,13 @@ class LeaveDateService
             ->where('is_active', true)
             ->whereBetween('holiday_date', [$start->toDateString(), $end->toDateString()])
             ->where(function ($query) use ($leaveType) {
-                $query->whereNull('leave_type_id');
+                // Cuti bersama berlaku untuk seluruh jenis pengajuan. Kolom
+                // leave_type_id pada data lama kadang diisi dengan jenis CBS,
+                // sehingga tidak boleh membuat tanggal tersebut hanya berlaku
+                // untuk satu jenis cuti.
+                $query->whereNull('leave_type_id')
+                    ->orWhere('is_collective_leave', true)
+                    ->orWhere('category', 'cuti_bersama');
 
                 if ($leaveType && $leaveType->getKey()) {
                     $query->orWhere('leave_type_id', $leaveType->getKey());

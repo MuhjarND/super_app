@@ -71,6 +71,25 @@ class LeaveEffectiveDateTest extends TestCase
         );
     }
 
+    public function test_collective_leave_is_global_even_when_old_data_has_a_leave_type_id(): void
+    {
+        LeaveHoliday::create([
+            'holiday_date' => '2026-08-25',
+            'name' => 'Cuti Bersama',
+            'category' => 'cuti_bersama',
+            'leave_type_id' => 999,
+            'is_collective_leave' => true,
+            'is_active' => true,
+        ]);
+
+        $leaveType = new LeaveType(['code' => LeaveType::CODE_TAHUNAN]);
+
+        $this->assertSame(
+            '24, 26-27 Agustus 2026',
+            app(LeaveDateService::class)->formatEffectiveDates('2026-08-24', '2026-08-27', $leaveType)
+        );
+    }
+
     public function test_inactive_collective_leave_does_not_change_the_period(): void
     {
         LeaveHoliday::create([

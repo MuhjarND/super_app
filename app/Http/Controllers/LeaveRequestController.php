@@ -12,6 +12,7 @@ use App\LeaveType;
 use App\Services\LeaveApprovalService;
 use App\Services\LeaveBalanceService;
 use App\Services\LeaveDocumentService;
+use App\Services\LeaveExistingRequestSyncService;
 use App\Services\LeaveValidationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -24,14 +25,16 @@ class LeaveRequestController extends Controller
     protected $approvalService;
     protected $balanceService;
     protected $documentService;
+    protected $existingRequestSync;
 
-    public function __construct(LeaveValidationService $validator, LeaveApprovalService $approvalService, LeaveBalanceService $balanceService, LeaveDocumentService $documentService)
+    public function __construct(LeaveValidationService $validator, LeaveApprovalService $approvalService, LeaveBalanceService $balanceService, LeaveDocumentService $documentService, LeaveExistingRequestSyncService $existingRequestSync)
     {
         $this->middleware('auth');
         $this->validator = $validator;
         $this->approvalService = $approvalService;
         $this->balanceService = $balanceService;
         $this->documentService = $documentService;
+        $this->existingRequestSync = $existingRequestSync;
     }
 
     public function index()
@@ -126,6 +129,8 @@ class LeaveRequestController extends Controller
         $this->abortIfUnauthorized();
         if (!$this->moduleReady()) { return $this->setupResponse('Modul Cuti Belum Diaktifkan'); }
         $this->authorize('view', $leaveRequest);
+        $this->existingRequestSync->syncRequest($leaveRequest);
+        $leaveRequest = $leaveRequest->fresh();
         $leaveRequest->load(['leaveType', 'documents.verifier', 'approvals.approver', 'audits.actor']);
         return view('cuti.show', compact('leaveRequest'));
     }
