@@ -37,7 +37,7 @@ body { margin: 0; }
 .type-label { width: 42%; padding-left: 6px !important; }
 .type-mark { width: 8%; text-align: center; }
 .compact-text { line-height: 0.98; }
-.leave-period-date { white-space: nowrap; font-size: 8.3px; }
+.leave-period-date { font-size: 8.3px; line-height: 1.15; }
 .leave-period-separator { white-space: nowrap; padding-left: 1px !important; padding-right: 1px !important; }
 .extra-signature-table { margin-bottom: 3.2px; }
 .extra-signature-table td { text-align: center; vertical-align: top; }
@@ -126,16 +126,8 @@ body { margin: 0; }
                 {{ $leaveRequest->requested_days ?: 0 }}
                 {{ in_array(optional($leaveRequest->leaveType)->code, [\App\LeaveType::CODE_SAKIT, \App\LeaveType::CODE_ALASAN_PENTING], true) ? 'Hari Kalender' : 'Hari Kerja' }}
             </td>
-            <td width="18%" class="center">Mulai Tanggal</td>
-            <td width="44%" style="padding:0;">
-                <table class="inner-table" style="border:none; width:100%; margin:-1px;">
-                    <tr>
-                        <td width="44%" class="leave-period-date" style="border-left:none;border-top:none;border-bottom:none;">{{ optional($leaveRequest->start_date)->translatedFormat('d F Y') }}</td>
-                        <td width="12%" class="center leave-period-separator" style="border-top:none;border-bottom:none;">s/d</td>
-                        <td width="44%" class="leave-period-date" style="border-right:none;border-top:none;border-bottom:none;">{{ optional($leaveRequest->end_date)->translatedFormat('d F Y') }}</td>
-                    </tr>
-                </table>
-            </td>
+            <td width="18%" class="center">Tanggal Cuti</td>
+            <td width="44%" class="leave-period-date">{{ $leaveRequest->period_label }}</td>
         </tr>
     </table>
 

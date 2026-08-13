@@ -2,7 +2,6 @@
 
 namespace App\Services;
 
-use App\LeaveHoliday;
 use App\LeavePolicy;
 use App\LeaveRequest;
 use App\LeaveType;
@@ -15,10 +14,12 @@ use Illuminate\Validation\ValidationException;
 class LeaveValidationService
 {
     protected $balanceService;
+    protected $dateService;
 
-    public function __construct(LeaveBalanceService $balanceService)
+    public function __construct(LeaveBalanceService $balanceService, LeaveDateService $dateService = null)
     {
         $this->balanceService = $balanceService;
+        $this->dateService = $dateService ?: new LeaveDateService();
     }
 
     public function validateForSubmit(LeaveRequest $leaveRequest)
@@ -35,6 +36,11 @@ class LeaveValidationService
         }
 
         $requestedDays = $this->countLeaveDays($leaveRequest->start_date, $leaveRequest->end_date, $leaveType);
+        if ($requestedDays < 1) {
+            throw ValidationException::withMessages([
+                'end_date' => 'Rentang tanggal yang dipilih tidak memiliki hari cuti efektif setelah hari libur dan cuti bersama dikeluarkan.',
+            ]);
+        }
         $leaveRequest->workday_count = $requestedDays;
         $leaveRequest->requested_days = $requestedDays;
 
@@ -55,11 +61,7 @@ class LeaveValidationService
 
     public function countLeaveDays($startDate, $endDate, LeaveType $leaveType)
     {
-        if (in_array($leaveType->code, [LeaveType::CODE_SAKIT, LeaveType::CODE_ALASAN_PENTING], true)) {
-            return $this->countCalendarDays($startDate, $endDate);
-        }
-
-        return $this->countWorkingDays($startDate, $endDate);
+        return $this->dateService->countEffectiveDates($startDate, $endDate, $leaveType);
     }
 
     public function countCalendarDays($startDate, $endDate)
@@ -74,7 +76,7 @@ class LeaveValidationService
         return $start->startOfDay()->diffInDays($end->startOfDay()) + 1;
     }
 
-    public function countWorkingDays($startDate, $endDate)
+    public function countWorkingDays($startDate, $endDate, LeaveType $leaveType = null)
     {
         $start = $this->normalizeDate($startDate);
         $end = $this->normalizeDate($endDate);
@@ -83,16 +85,7 @@ class LeaveValidationService
             throw ValidationException::withMessages(['start_date' => 'Tanggal mulai dan selesai cuti wajib diisi.']);
         }
 
-        $start = $start->startOfDay();
-        $end = $end->startOfDay();
-        $days = 0;
-        while ($start->lte($end)) {
-            if (!$start->isWeekend() && !$this->isHoliday($start)) {
-                $days++;
-            }
-            $start->addDay();
-        }
-        return $days;
+        return $this->dateService->countEffectiveDates($start, $end, $leaveType);
     }
 
     protected function validateServiceYears(LeaveRequest $leaveRequest, User $user, LeaveType $leaveType, $startDate)
@@ -277,7 +270,7 @@ class LeaveValidationService
         if ($leaveType->code === LeaveType::CODE_BESAR) {
             $annualUsedDays = $this->usedDaysForLeaveType($leaveRequest, $annualType->id, $year);
             $latestEnd = $start->copy()->startOfDay()->addMonthsNoOverflow((int) ($leaveType->max_months ?: 3))->subDay();
-            $largeLeaveWorkdayLimit = $this->countWorkingDays($leaveRequest->start_date, $latestEnd);
+            $largeLeaveWorkdayLimit = $this->countWorkingDays($leaveRequest->start_date, $latestEnd, $leaveType);
             if ($annualUsedDays > 0 && ($requestedDays + $annualUsedDays) > $largeLeaveWorkdayLimit) {
                 throw ValidationException::withMessages(['end_date' => 'Cuti besar wajib mempertimbangkan cuti tahunan yang sudah digunakan pada tahun berjalan.']);
             }
@@ -317,11 +310,6 @@ class LeaveValidationService
             ->sum(function (LeaveRequest $request) {
                 return (int) ($request->approved_days ?: $request->requested_days ?: $request->workday_count);
             });
-    }
-
-    protected function isHoliday(Carbon $date)
-    {
-        return class_exists(LeaveHoliday::class) && LeaveHoliday::whereDate('holiday_date', $date->toDateString())->where('is_active', true)->exists();
     }
 
     protected function getPolicyValue(LeaveType $leaveType, $key, $default = null)

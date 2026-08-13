@@ -89,7 +89,7 @@
                     <div>
                         <div class="leave-approval-title">{{ optional($approval->leaveRequest)->display_number ?: 'Pengajuan cuti' }}</div>
                         <div class="leave-approval-meta">{{ optional(optional($approval->leaveRequest)->user)->name ?: '-' }} | {{ optional(optional($approval->leaveRequest)->leaveType)->name ?: '-' }}</div>
-                        <div class="leave-approval-meta">{{ optional(optional($approval->leaveRequest)->start_date)->translatedFormat('d M Y') }} - {{ optional(optional($approval->leaveRequest)->end_date)->translatedFormat('d M Y') }}</div>
+                        <div class="leave-approval-meta">{{ optional($approval->leaveRequest)->period_label ?: '-' }}</div>
                         <div class="leave-approval-tags">
                             <span class="leave-approval-tag">Step {{ $approval->step_no }}</span>
                             <span class="leave-approval-tag">{{ $approval->role_label }}</span>

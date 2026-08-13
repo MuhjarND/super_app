@@ -448,7 +448,7 @@
                                 </div>
                             </td>
                             <td data-label="Jenis">{{ optional($leaveRequest->leaveType)->name }}</td>
-                            <td data-label="Periode">{{ optional($leaveRequest->start_date)->translatedFormat('d M Y') }} - {{ optional($leaveRequest->end_date)->translatedFormat('d M Y') }}</td>
+                            <td data-label="Tanggal Cuti">{{ $leaveRequest->period_label }}</td>
                             <td data-label="Keterangan Cuti">
                                 <div class="leave-table-note">{{ $leaveRequest->purpose ?: '-' }}</div>
                             </td>

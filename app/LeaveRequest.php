@@ -2,6 +2,7 @@
 
 namespace App;
 
+use App\Services\LeaveDateService;
 use Illuminate\Database\Eloquent\Model;
 
 class LeaveRequest extends Model
@@ -36,6 +37,14 @@ class LeaveRequest extends Model
 
     public function getPeriodLabelAttribute()
     {
-        return optional($this->start_date)->translatedFormat('d F Y') . ' s.d. ' . optional($this->end_date)->translatedFormat('d F Y');
+        $leaveType = $this->relationLoaded('leaveType')
+            ? $this->getRelation('leaveType')
+            : $this->leaveType()->first();
+
+        return app(LeaveDateService::class)->formatEffectiveDates(
+            $this->start_date,
+            $this->end_date,
+            $leaveType
+        );
     }
 }
