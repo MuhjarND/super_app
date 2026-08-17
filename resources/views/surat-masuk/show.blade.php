@@ -295,6 +295,14 @@
                                     class="btn btn-sm btn-outline-primary">
                                     <i class="fas fa-download mr-1"></i> Download
                                 </a>
+                                <button type="button" class="btn btn-sm btn-outline-success ml-1 js-share-surat-masuk"
+                                    data-share-url="{{ route('surat-masuk.show', $suratMasuk) }}"
+                                    data-share-number="{{ $suratMasuk->nomor_surat }}"
+                                    data-share-sender="{{ $suratMasuk->pengirim }}"
+                                    data-share-subject="{{ $suratMasuk->perihal }}"
+                                    data-share-date="{{ optional($suratMasuk->tanggal_surat)->translatedFormat('d F Y') }}">
+                                    <i class="fas fa-paper-plane mr-1"></i> Kirim / Bagikan
+                                </button>
                                 @if($latestDisposisi = $suratMasuk->disposisis->sortByDesc('created_at')->first())
                                     <a href="{{ route('disposisi.print', $latestDisposisi) }}"
                                         target="_blank" rel="noopener" class="btn btn-sm btn-outline-primary ml-1"
@@ -597,6 +605,7 @@
 @endsection
 
 @push('scripts')
+    <script src="{{ asset('js/surat-masuk-share.js') }}"></script>
     <script>
         $(document).ready(function () {
             function loadDisposisiTargetsShow() {

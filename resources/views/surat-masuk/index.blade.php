@@ -1490,6 +1490,9 @@
                                     <a href="#" id="detailShowBtn" class="btn btn-sm btn-outline-secondary">
                                         <i class="fas fa-external-link-alt mr-1"></i> Halaman Detail
                                     </a>
+                                    <button type="button" id="detailShareBtn" class="btn btn-sm btn-outline-success js-share-surat-masuk">
+                                        <i class="fas fa-paper-plane mr-1"></i> Kirim
+                                    </button>
                                 </div>
                                 <div class="history-panel">
                                 <div class="history-panel-title">
@@ -1770,6 +1773,7 @@
 @endsection
 
 @push('scripts')
+    <script src="{{ asset('js/surat-masuk-share.js') }}"></script>
     <!-- DataTables JS -->
     <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap4.min.js"></script>
@@ -2304,6 +2308,12 @@
                     .attr('aria-disabled', 'true');
             }
             $('#detailShowBtn').attr('href', d.showUrl);
+            $('#detailShareBtn')
+                .attr('data-share-url', d.showUrl)
+                .attr('data-share-number', d.nomor || '')
+                .attr('data-share-sender', d.pengirim || '')
+                .attr('data-share-subject', d.perihal || '')
+                .attr('data-share-date', d.shareDate || d.tanggal || '');
             window.renderSuratHistory(String(suratId), '#detailHistory');
 
             if (d.filePath) {

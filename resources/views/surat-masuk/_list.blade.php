@@ -44,6 +44,7 @@
                             data-kategori-surat-label="{{ optional($surat->kategoriSurat)->kode ? optional($surat->kategoriSurat)->kode . ' - ' . optional($surat->kategoriSurat)->nama : '' }}"
                             data-klasifikasi="{{ $surat->klasifikasi_kode_id }}" data-pengirim="{{ $surat->pengirim }}"
                             data-perihal="{{ $surat->perihal }}" data-tanggal="{{ $surat->tanggal_surat->format('Y-m-d') }}"
+                            data-share-date="{{ optional($surat->tanggal_surat)->translatedFormat('d F Y') }}"
                             data-sifat="{{ $surat->sifat }}" data-status="{{ $surat->status }}"
                             data-file-path="{{ $surat->file_path }}"
                             data-agenda-title="{{ optional($surat->agendaPimpinan)->judul_agenda }}"
@@ -166,6 +167,15 @@
 
                                         <button type="button" class="dropdown-item" onclick="openDetail({{ $surat->id }})">
                                             <i class="fas fa-eye"></i> Detail
+                                        </button>
+
+                                        <button type="button" class="dropdown-item js-share-surat-masuk"
+                                            data-share-url="{{ route('surat-masuk.show', $surat) }}"
+                                            data-share-number="{{ $surat->nomor_surat }}"
+                                            data-share-sender="{{ $surat->pengirim }}"
+                                            data-share-subject="{{ $surat->perihal }}"
+                                            data-share-date="{{ optional($surat->tanggal_surat)->translatedFormat('d F Y') }}">
+                                            <i class="fas fa-paper-plane"></i> Kirim / Bagikan
                                         </button>
 
                                         @if(auth()->user()->canEditSuratMasuk($surat))
