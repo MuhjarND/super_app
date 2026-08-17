@@ -7,5 +7,5 @@ use Illuminate\Foundation\Http\FormRequest;
 class ApprovalActionRequest extends FormRequest
 {
     public function authorize() { return auth()->check(); }
-    public function rules() { return ['note' => 'nullable|string|max:2000']; }
+    public function rules() { return ['note' => 'nullable|string|max:2000', 'grant_travel_leave' => 'nullable|boolean']; }
 }

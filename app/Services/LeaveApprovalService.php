@@ -124,7 +124,7 @@ class LeaveApprovalService
         });
     }
 
-    public function approve(LeaveApproval $approval, User $actor, $note = null, $signatureData = null)
+    public function approve(LeaveApproval $approval, User $actor, $note = null, $signatureData = null, $grantTravelLeave = false)
     {
         if ($approval->status !== 'pending') {
             throw ValidationException::withMessages(['status' => 'Approval cuti ini tidak berada pada status pending.']);
@@ -140,7 +140,7 @@ class LeaveApprovalService
 
         $linkedApproval = null;
 
-        DB::transaction(function () use ($approval, $actor, $note, &$linkedApproval) {
+        DB::transaction(function () use ($approval, $actor, $note, $grantTravelLeave, &$linkedApproval) {
             $actedAt = Carbon::now();
             $approval->status = 'approved';
             $approval->action = 'approved';
@@ -176,6 +176,17 @@ class LeaveApprovalService
                 $leaveRequest->updated_by = $actor->id;
                 $leaveRequest->save();
             } else {
+                $travelLeaveGranted = $leaveRequest->travel_leave_requested && (bool) $grantTravelLeave;
+                $leaveRequest->travel_leave_granted = $travelLeaveGranted;
+                $leaveRequest->approved_days = $leaveRequest->regularLeaveDays() + ($travelLeaveGranted ? 1 : 0);
+
+                $decisionApproval = $linkedApproval ?: $approval;
+                $decisionApproval->meta_json = array_merge($decisionApproval->meta_json ?: [], [
+                    'travel_leave_requested' => (bool) $leaveRequest->travel_leave_requested,
+                    'travel_leave_granted' => $travelLeaveGranted,
+                ]);
+                $decisionApproval->save();
+
                 $leaveRequest->status = LeaveRequest::STATUS_APPROVED;
                 $leaveRequest->approved_at = Carbon::now();
                 $leaveRequest->locked_at = Carbon::now();

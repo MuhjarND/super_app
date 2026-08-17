@@ -161,7 +161,7 @@ class LeaveBalanceService
         DB::transaction(function () use ($leaveRequest) {
             $year = $this->yearFromLeaveRequest($leaveRequest);
             $balance = $this->ensureBalance($leaveRequest->user, $leaveRequest->leaveType, $year);
-            $days = (int) ($leaveRequest->approved_days ?: $leaveRequest->requested_days);
+            $days = $leaveRequest->requestedBalanceDays();
             $balance->reserved_days += $days;
             $this->recalculateRemaining($balance);
         });
@@ -176,9 +176,10 @@ class LeaveBalanceService
                 ->where('year', $this->yearFromLeaveRequest($leaveRequest))
                 ->first();
             if (!$balance) { return; }
-            $days = (int) ($leaveRequest->approved_days ?: $leaveRequest->requested_days);
-            $balance->reserved_days = max(0, (int) $balance->reserved_days - $days);
-            $balance->used_days += $days;
+            $reservedDays = $leaveRequest->requestedBalanceDays();
+            $approvedDays = $leaveRequest->approvedBalanceDays();
+            $balance->reserved_days = max(0, (int) $balance->reserved_days - $reservedDays);
+            $balance->used_days += $approvedDays;
             $this->recalculateRemaining($balance);
         });
     }
@@ -192,7 +193,7 @@ class LeaveBalanceService
                 ->where('year', $this->yearFromLeaveRequest($leaveRequest))
                 ->first();
             if (!$balance) { return; }
-            $days = (int) ($leaveRequest->approved_days ?: $leaveRequest->requested_days);
+            $days = $leaveRequest->requestedBalanceDays();
             $balance->reserved_days = max(0, (int) $balance->reserved_days - $days);
             $this->recalculateRemaining($balance);
         });
@@ -334,7 +335,7 @@ class LeaveBalanceService
             ])
             ->get()
             ->sum(function (LeaveRequest $request) {
-                return (int) ($request->approved_days ?: $request->requested_days ?: $request->workday_count);
+                return $request->balanceDaysForCurrentStatus();
             });
     }
 

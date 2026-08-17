@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\LeavePolicy;
 use App\LeaveRequest;
+use App\LeaveRequestDocument;
 use App\LeaveType;
 use App\User;
 use Carbon\Carbon;
@@ -45,13 +46,15 @@ class LeaveValidationService
         $leaveRequest->requested_days = $requestedDays;
 
         $this->validateServiceYears($leaveRequest, $user, $leaveType, $leaveRequest->start_date);
-        $this->validateBalance($user, $leaveType, $requestedDays, $leaveRequest->start_date);
+        $balanceDays = $requestedDays + ($leaveRequest->travel_leave_requested ? 1 : 0);
+        $this->validateBalance($user, $leaveType, $balanceDays, $leaveRequest->start_date);
         $childNumberContext = !is_null(optional($user)->jumlah_anak)
             ? ((int) $user->jumlah_anak + 1)
             : null;
 
         $this->validateChildCount($leaveType, $childNumberContext);
         $this->validateRequiredDocuments($leaveRequest, $leaveType);
+        $this->validateTravelLeaveProof($leaveRequest);
         $this->validateDoctorLetter($leaveRequest, $leaveType, $requestedDays);
         $this->validateDateOverlap($leaveRequest);
         $this->validateSpecialLimits($leaveRequest, $leaveType, $requestedDays);
@@ -156,6 +159,23 @@ class LeaveValidationService
 
         if (!$leaveRequest->documents()->exists()) {
             throw ValidationException::withMessages(['documents' => 'Jenis cuti ini wajib melampirkan dokumen pendukung.']);
+        }
+    }
+
+    protected function validateTravelLeaveProof(LeaveRequest $leaveRequest)
+    {
+        if (!$leaveRequest->travel_leave_requested) {
+            return;
+        }
+
+        $hasProof = $leaveRequest->documents()
+            ->where('document_type', LeaveRequestDocument::TYPE_TRAVEL_LEAVE_PROOF)
+            ->exists();
+
+        if (!$hasProof) {
+            throw ValidationException::withMessages([
+                'travel_leave_proof' => 'Bukti cuti perjalanan wajib dilampirkan sebelum pengajuan disubmit.',
+            ]);
         }
     }
 
@@ -308,7 +328,7 @@ class LeaveValidationService
             ])
             ->get()
             ->sum(function (LeaveRequest $request) {
-                return (int) ($request->approved_days ?: $request->requested_days ?: $request->workday_count);
+                return $request->balanceDaysForCurrentStatus();
             });
     }
 

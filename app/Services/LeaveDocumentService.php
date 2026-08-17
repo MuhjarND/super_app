@@ -5,6 +5,7 @@ namespace App\Services;
 use App\LeaveApproval;
 use App\LeaveBalance;
 use App\LeaveRequest;
+use App\LeaveRequestDocument;
 use App\LeaveType;
 use App\KlasifikasiKode;
 use App\SuratKeluar;
@@ -48,6 +49,23 @@ class LeaveDocumentService
                 'file_size' => (int) $file->getSize(),
             ]);
         }
+    }
+
+    public function storeTravelLeaveProof(LeaveRequest $leaveRequest, $file = null)
+    {
+        if (!$file) {
+            return null;
+        }
+
+        $storedPath = $file->store('cuti/documents/' . $leaveRequest->id, 'public');
+
+        return $leaveRequest->documents()->create([
+            'document_type' => LeaveRequestDocument::TYPE_TRAVEL_LEAVE_PROOF,
+            'original_name' => $file->getClientOriginalName(),
+            'file_path' => $storedPath,
+            'mime_type' => $file->getClientMimeType(),
+            'file_size' => (int) $file->getSize(),
+        ]);
     }
 
     public function streamDecisionLetter(LeaveRequest $leaveRequest)
@@ -444,9 +462,7 @@ class LeaveDocumentService
             return $currentRemaining;
         }
 
-        $takenDays = (int) ($leaveRequest->approved_days
-            ?: $leaveRequest->requested_days
-            ?: $leaveRequest->workday_count);
+        $takenDays = $leaveRequest->balanceDaysForCurrentStatus();
 
         return max(0, $currentRemaining + $takenDays);
     }
@@ -688,9 +704,7 @@ class LeaveDocumentService
             && (int) $year === (int) optional($leaveRequest->start_date)->year;
 
         if ($isCurrentAnnualRequest) {
-            $takenDays = (int) ($leaveRequest->approved_days
-                ?: $leaveRequest->requested_days
-                ?: $leaveRequest->workday_count);
+            $takenDays = $leaveRequest->balanceDaysForCurrentStatus();
 
             if ($takenDays > 0) {
                 $remainingAfterRequest = max(0, $remainingAtRequest - $takenDays);

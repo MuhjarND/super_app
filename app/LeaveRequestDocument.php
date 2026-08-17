@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class LeaveRequestDocument extends Model
 {
+    public const TYPE_TRAVEL_LEAVE_PROOF = 'bukti_cuti_perjalanan';
+
     protected $fillable = ['leave_request_id','document_type','original_name','file_path','mime_type','file_size','is_verified','verified_by','verified_at','verification_note'];
     protected $casts = ['is_verified' => 'boolean','file_size' => 'integer','verified_at' => 'datetime'];
     public function leaveRequest() { return $this->belongsTo(LeaveRequest::class); }
@@ -17,6 +19,7 @@ class LeaveRequestDocument extends Model
             'surat_dokter' => 'Surat Dokter',
             'dokumen_pendukung' => 'Dokumen Pendukung',
             'dokumen_alasan_penting' => 'Dokumen Alasan Penting',
+            self::TYPE_TRAVEL_LEAVE_PROOF => 'Bukti Cuti Perjalanan',
         ];
 
         return $map[$this->document_type] ?? ucfirst(str_replace('_', ' ', (string) $this->document_type));

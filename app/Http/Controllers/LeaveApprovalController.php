@@ -43,7 +43,13 @@ class LeaveApprovalController extends Controller
     {
         $this->abortUnlessCanAct($leaveApproval);
         $oldStatus = $leaveApproval->leaveRequest->status;
-        $this->approvalService->approve($leaveApproval, auth()->user(), $request->note);
+        $this->approvalService->approve(
+            $leaveApproval,
+            auth()->user(),
+            $request->note,
+            null,
+            $request->boolean('grant_travel_leave')
+        );
         event(new LeaveRequestStatusChanged($leaveApproval->leaveRequest->fresh(), auth()->user(), $oldStatus, $leaveApproval->leaveRequest->fresh()->status, 'approved'));
         return back()->with('success', 'Approval cuti berhasil diproses.');
     }

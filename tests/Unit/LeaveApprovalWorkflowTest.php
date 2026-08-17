@@ -96,6 +96,8 @@ class LeaveApprovalWorkflowTest extends TestCase
             $table->unsignedInteger('requested_days')->default(0);
             $table->unsignedInteger('approved_days')->default(0);
             $table->unsignedInteger('workday_count')->default(0);
+            $table->boolean('travel_leave_requested')->default(false);
+            $table->boolean('travel_leave_granted')->default(false);
             $table->string('purpose')->default('Cuti');
             $table->string('status')->default('draft');
             $table->timestamp('submitted_at')->nullable();
@@ -301,6 +303,11 @@ class LeaveApprovalWorkflowTest extends TestCase
         $this->assertOneActionApprovesBothOfficialRoles(true);
     }
 
+    public function test_travel_leave_can_be_granted_by_the_shared_final_approver(): void
+    {
+        $this->assertOneActionApprovesBothOfficialRoles(false, true);
+    }
+
     public function test_satker_submission_does_not_consume_internal_leave_number_sequence(): void
     {
         $kasubagPositionId = DB::table('jabatans')->insertGetId([
@@ -363,7 +370,7 @@ class LeaveApprovalWorkflowTest extends TestCase
         $this->assertCount(3, $leaveRequest->approvals);
     }
 
-    protected function assertOneActionApprovesBothOfficialRoles($isSatker): void
+    protected function assertOneActionApprovesBothOfficialRoles($isSatker, $grantTravelLeave = false): void
     {
         $officialId = $this->createUser('Pejabat Bersama');
         $employeeId = $this->createUser($isSatker ? 'Pegawai Satuan Kerja' : 'Pegawai Internal', [
@@ -399,6 +406,10 @@ class LeaveApprovalWorkflowTest extends TestCase
             'leave_type_id' => $leaveTypeId,
             'start_date' => now()->addWeek()->toDateString(),
             'end_date' => now()->addWeek()->toDateString(),
+            'requested_days' => 3,
+            'approved_days' => 3,
+            'workday_count' => 3,
+            'travel_leave_requested' => $grantTravelLeave,
             'status' => LeaveRequest::STATUS_VERIFIED,
             'created_at' => now(),
             'updated_at' => now(),
@@ -439,7 +450,9 @@ class LeaveApprovalWorkflowTest extends TestCase
         $service->approve(
             \App\LeaveApproval::findOrFail($supervisorApprovalId),
             User::findOrFail($officialId),
-            'Disetujui'
+            'Disetujui',
+            null,
+            $grantTravelLeave
         );
 
         $approvals = \App\LeaveApproval::where('leave_request_id', $leaveRequestId)
@@ -452,7 +465,10 @@ class LeaveApprovalWorkflowTest extends TestCase
         $this->assertSame($approvals[0]->acted_at->timestamp, $approvals[1]->acted_at->timestamp);
         $this->assertTrue((bool) data_get($approvals[1]->meta_json, 'approved_automatically'));
         $this->assertSame($approvals[0]->id, (int) data_get($approvals[1]->meta_json, 'approved_with_step_id'));
-        $this->assertSame(LeaveRequest::STATUS_APPROVED, LeaveRequest::findOrFail($leaveRequestId)->status);
+        $finalRequest = LeaveRequest::findOrFail($leaveRequestId);
+        $this->assertSame(LeaveRequest::STATUS_APPROVED, $finalRequest->status);
+        $this->assertSame($grantTravelLeave, (bool) $finalRequest->travel_leave_granted);
+        $this->assertSame($grantTravelLeave ? 4 : 3, (int) $finalRequest->approved_days);
     }
 
     protected function createUser($name, array $attributes = [])

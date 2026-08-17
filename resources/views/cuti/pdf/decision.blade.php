@@ -125,6 +125,9 @@ body { margin: 0; }
             <td width="25%">
                 {{ $leaveRequest->requested_days ?: 0 }}
                 {{ in_array(optional($leaveRequest->leaveType)->code, [\App\LeaveType::CODE_SAKIT, \App\LeaveType::CODE_ALASAN_PENTING], true) ? 'Hari Kalender' : 'Hari Kerja' }}
+                @if($leaveRequest->travel_leave_granted)
+                    <br>+ 1 hari cuti perjalanan
+                @endif
             </td>
             <td width="18%" class="center">Tanggal Cuti</td>
             <td width="44%" class="leave-period-date">{{ $leaveRequest->period_label }}</td>

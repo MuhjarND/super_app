@@ -438,6 +438,8 @@
                             data-leave-address="{{ e($leaveRequest->leave_address) }}"
                             data-is-abroad="{{ $leaveRequest->is_abroad ? 1 : 0 }}"
                             data-abroad-country="{{ e($leaveRequest->abroad_country) }}"
+                            data-travel-leave-requested="{{ $leaveRequest->travel_leave_requested ? 1 : 0 }}"
+                            data-has-travel-leave-proof="{{ $leaveRequest->documents->where('document_type', \App\LeaveRequestDocument::TYPE_TRAVEL_LEAVE_PROOF)->isNotEmpty() ? 1 : 0 }}"
                             data-documents='@json($documents)'
                         >
                             <td data-label="Nomor">{{ $leaveRequest->display_number }}</td>
@@ -448,7 +450,12 @@
                                 </div>
                             </td>
                             <td data-label="Jenis">{{ optional($leaveRequest->leaveType)->name }}</td>
-                            <td data-label="Tanggal Cuti">{{ $leaveRequest->period_label }}</td>
+                            <td data-label="Tanggal Cuti">
+                                {{ $leaveRequest->period_label }}
+                                @if($leaveRequest->travel_leave_requested)
+                                    <div class="leave-table-note mt-1"><i class="fas fa-plane mr-1"></i>Cuti perjalanan {{ $leaveRequest->travel_leave_granted ? 'diberikan' : 'diajukan' }}</div>
+                                @endif
+                            </td>
                             <td data-label="Keterangan Cuti">
                                 <div class="leave-table-note">{{ $leaveRequest->purpose ?: '-' }}</div>
                             </td>
@@ -547,6 +554,7 @@
             leave_address: @json(old('leave_address')),
             is_abroad: @json(old('is_abroad')),
             abroad_country: @json(old('abroad_country')),
+            travel_leave_requested: @json(old('travel_leave_requested')),
         };
         var queryOpen = @json(request('open'));
         var queryEdit = @json(request('edit'));
@@ -600,7 +608,10 @@
             editForm.find('input[name="leave_address"]').val(data.leave_address || '');
             editForm.find('input[name="is_abroad"]').prop('checked', Number(data.is_abroad || 0) === 1);
             editForm.find('input[name="abroad_country"]').val(data.abroad_country || '');
+            editForm.find('input[name="travel_leave_requested"]').prop('checked', Number(data.travel_leave_requested || 0) === 1);
+            editForm.find('input[name="travel_leave_proof"]').attr('data-has-existing-proof', Number(data.has_travel_leave_proof || 0) === 1 ? '1' : '0');
             toggleAbroadFields(editForm);
+            toggleTravelLeaveFields(editForm);
             updateSatkerLetterPreview(editForm);
             var docs = Array.isArray(data.documents) ? data.documents : [];
             if (docs.length) {
@@ -631,6 +642,8 @@
                 leave_address: row.data('leave-address'),
                 is_abroad: row.data('is-abroad'),
                 abroad_country: row.data('abroad-country'),
+                travel_leave_requested: row.data('travel-leave-requested'),
+                has_travel_leave_proof: row.data('has-travel-leave-proof'),
                 documents: row.data('documents')
             };
         }
@@ -645,6 +658,22 @@
                 countryField.find('input[name="abroad_country"]').prop('required', checkbox.is(':checked'));
                 if (!checkbox.is(':checked')) {
                     countryField.find('input[name="abroad_country"]').val('');
+                }
+            });
+        }
+
+        function toggleTravelLeaveFields(scope) {
+            var root = scope ? $(scope) : $(document);
+            root.find('[data-leave-travel-toggle]').each(function () {
+                var checkbox = $(this);
+                var form = checkbox.closest('form');
+                var proofWrapper = form.find('[data-leave-travel-proof]');
+                var proofInput = proofWrapper.find('input[name="travel_leave_proof"]');
+                var hasExistingProof = Number(proofInput.attr('data-has-existing-proof') || 0) === 1;
+                proofWrapper.toggleClass('d-none', !checkbox.is(':checked'));
+                proofInput.prop('required', checkbox.is(':checked') && !hasExistingProof);
+                if (!checkbox.is(':checked')) {
+                    proofInput.val('');
                 }
             });
         }
@@ -671,6 +700,10 @@
             toggleAbroadFields($(this).closest('form'));
         });
 
+        $(document).on('change', '[data-leave-travel-toggle]', function () {
+            toggleTravelLeaveFields($(this).closest('form'));
+        });
+
         $(document).on('input', '[data-satker-letter-number]', function () {
             updateSatkerLetterPreview($(this));
         });
@@ -694,15 +727,19 @@
                 leave_address: oldValues.leave_address,
                 is_abroad: oldValues.is_abroad,
                 abroad_country: oldValues.abroad_country,
+                travel_leave_requested: oldValues.travel_leave_requested,
+                has_travel_leave_proof: (getRowDataById(oldLeaveId) || {}).has_travel_leave_proof || 0,
                 documents: (getRowDataById(oldLeaveId) || {}).documents || []
             });
             editModal.modal('show');
         } else if (oldMode === 'create' && {{ $errors->any() ? 'true' : 'false' }}) {
             toggleAbroadFields($('#createLeaveRequestForm'));
+            toggleTravelLeaveFields($('#createLeaveRequestForm'));
             updateSatkerLetterPreview($('#createLeaveRequestForm'));
             $('#createLeaveRequestModal').modal('show');
         } else if (queryOpen === 'create') {
             toggleAbroadFields($('#createLeaveRequestForm'));
+            toggleTravelLeaveFields($('#createLeaveRequestForm'));
             $('#createLeaveRequestModal').modal('show');
         } else if (queryEdit) {
             var queryData = getRowDataById(queryEdit);
@@ -714,6 +751,8 @@
 
         toggleAbroadFields($('#createLeaveRequestForm'));
         toggleAbroadFields($('#editLeaveRequestForm'));
+        toggleTravelLeaveFields($('#createLeaveRequestForm'));
+        toggleTravelLeaveFields($('#editLeaveRequestForm'));
         updateSatkerLetterPreview($('#createLeaveRequestForm'));
         updateSatkerLetterPreview($('#editLeaveRequestForm'));
     })();

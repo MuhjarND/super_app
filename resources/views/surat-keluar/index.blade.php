@@ -1153,6 +1153,10 @@
                             class="btn btn-sm btn-outline-primary mr-2">
                             <i class="fas fa-external-link-alt mr-1"></i>Buka / Unduh
                         </a>
+                        <button type="button" id="shareSuratKeluarFile"
+                            class="btn btn-sm btn-outline-success mr-2 js-share-surat d-none">
+                            <i class="fas fa-paper-plane mr-1"></i>Kirim
+                        </button>
                         <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
                     </div>
                 </div>
@@ -1187,6 +1191,7 @@
 <?php $__env->stopSection(); ?>
 
 <?php $__env->startPush('scripts'); ?>
+    <script src="{{ asset('js/surat-masuk-share.js') }}"></script>
     <!-- DataTables JS -->
     <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap4.min.js"></script>
@@ -1354,8 +1359,16 @@
                 const canCalendarRow = Number(data.canCalendar) === 1;
                 let actions = '';
                 if (data.fileUrl) {
-                    actions += '<button type="button" class="action-btn detail" onclick="viewFile(\'' + data.fileUrl + '\')"><i class="fas fa-eye"></i> Preview</button>';
+                    actions += '<button type="button" class="action-btn detail" onclick="viewFile(\'' + data.fileUrl + '\', ' + data.suratId + ')"><i class="fas fa-eye"></i> Preview</button>';
                 }
+                actions += '<button type="button" class="action-btn detail js-share-surat"' +
+                    ' data-share-url="' + escapeHtml(data.shareUrl) + '"' +
+                    ' data-share-label="' + escapeHtml(data.shareLabel) + '"' +
+                    ' data-share-number="' + escapeHtml(data.shareNumber) + '"' +
+                    ' data-share-recipient="' + escapeHtml(data.shareRecipient) + '"' +
+                    ' data-share-subject="' + escapeHtml(data.shareSubject) + '"' +
+                    ' data-share-date="' + escapeHtml(data.shareDate) + '"' +
+                    ' data-share-access-note="' + escapeHtml(data.shareAccessNote) + '"><i class="fas fa-paper-plane"></i> Kirim / Bagikan</button>';
                 if (canManageRow) {
                     actions += '<button type="button" class="action-btn detail" onclick="openEdit(' + data.suratId + ')"><i class="fas fa-edit"></i> Edit</button>';
                     actions += '<button type="button" class="action-btn upload" onclick="openUpload(' + data.suratId + ')"><i class="fas fa-upload"></i> Upload</button>';
@@ -1832,13 +1845,29 @@
             $('#uploadModal').modal('show');
         }
 
-        function viewFile(url) {
+        function viewFile(url, suratId) {
             if (!url) {
                 showToast('Berkas belum tersedia.', 'warning');
                 return;
             }
             $('#fileViewer').attr('src', url);
             $('#openSuratKeluarFile').attr('href', url);
+
+            const row = suratId ? $('tr[data-surat-id="' + suratId + '"]') : $();
+            const shareButton = $('#shareSuratKeluarFile');
+            if (row.length) {
+                shareButton
+                    .attr('data-share-url', row.data('shareUrl') || '')
+                    .attr('data-share-label', row.data('shareLabel') || 'Surat Keluar')
+                    .attr('data-share-number', row.data('shareNumber') || '')
+                    .attr('data-share-recipient', row.data('shareRecipient') || '')
+                    .attr('data-share-subject', row.data('shareSubject') || '')
+                    .attr('data-share-date', row.data('shareDate') || '')
+                    .attr('data-share-access-note', row.data('shareAccessNote') || '')
+                    .removeClass('d-none');
+            } else {
+                shareButton.addClass('d-none');
+            }
             $('#viewFileModal').modal('show');
         }
 

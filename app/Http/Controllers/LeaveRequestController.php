@@ -112,6 +112,8 @@ class LeaveRequestController extends Controller
             'leave_address' => $request->leave_address,
             'is_abroad' => $request->boolean('is_abroad'),
             'abroad_country' => $request->boolean('is_abroad') ? $request->abroad_country : null,
+            'travel_leave_requested' => $request->boolean('travel_leave_requested'),
+            'travel_leave_granted' => false,
             'contact_phone' => auth()->user()->no_hp,
             'status_asn_snapshot' => auth()->user()->status_asn ?? 'PNS',
             'unit_snapshot' => optional(auth()->user()->unit)->nama,
@@ -121,6 +123,7 @@ class LeaveRequestController extends Controller
         ]);
         $leaveRequest->load('leaveType');
         $this->documentService->storeUploadedDocuments($leaveRequest, $request->file('documents', []));
+        $this->documentService->storeTravelLeaveProof($leaveRequest, $request->file('travel_leave_proof'));
         return redirect()->route('cuti.show', $leaveRequest)->with('success', 'Draft cuti berhasil dibuat.');
     }
 
@@ -154,11 +157,14 @@ class LeaveRequestController extends Controller
         }
         $leaveRequest->is_abroad = $request->boolean('is_abroad');
         $leaveRequest->abroad_country = $leaveRequest->is_abroad ? $request->abroad_country : null;
+        $leaveRequest->travel_leave_requested = $request->boolean('travel_leave_requested');
+        $leaveRequest->travel_leave_granted = false;
         $leaveRequest->contact_phone = auth()->user()->no_hp;
         $leaveRequest->updated_by = auth()->id();
         $leaveRequest->save();
         $leaveRequest->load('leaveType');
         $this->documentService->storeUploadedDocuments($leaveRequest, $request->file('documents', []));
+        $this->documentService->storeTravelLeaveProof($leaveRequest, $request->file('travel_leave_proof'));
         return redirect()->route('cuti.show', $leaveRequest)->with('success', 'Draft cuti diperbarui.');
     }
 

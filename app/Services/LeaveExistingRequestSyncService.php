@@ -67,18 +67,25 @@ class LeaveExistingRequestSyncService
                 return false;
             }
 
-            $oldAccountedDays = (int) ($request->approved_days
-                ?: $request->requested_days
-                ?: $request->workday_count);
+            $oldAccountedDays = $request->balanceDaysForCurrentStatus();
             $newDays = $this->dateService->countEffectiveDates(
                 $request->start_date,
                 $request->end_date,
                 $request->leaveType
             );
 
+            $newApprovedDays = $newDays + (
+                in_array($request->status, $this->usedStatuses(), true) && $request->travel_leave_granted ? 1 : 0
+            );
+            $newAccountedDays = $newDays + (
+                in_array($request->status, $this->reservedStatuses(), true) && $request->travel_leave_requested ? 1 : 0
+            ) + (
+                in_array($request->status, $this->usedStatuses(), true) && $request->travel_leave_granted ? 1 : 0
+            );
+
             $requestChanged = (int) $request->requested_days !== $newDays
                 || (int) $request->workday_count !== $newDays
-                || ($this->shouldStoreApprovedDays($request) && (int) $request->approved_days !== $newDays);
+                || ($this->shouldStoreApprovedDays($request) && (int) $request->approved_days !== $newApprovedDays);
 
             if (!$requestChanged) {
                 return false;
@@ -87,11 +94,11 @@ class LeaveExistingRequestSyncService
             $request->requested_days = $newDays;
             $request->workday_count = $newDays;
             if ($this->shouldStoreApprovedDays($request)) {
-                $request->approved_days = $newDays;
+                $request->approved_days = $newApprovedDays;
             }
             $request->save();
 
-            $this->adjustBalance($request, $newDays - $oldAccountedDays);
+            $this->adjustBalance($request, $newAccountedDays - $oldAccountedDays);
 
             return true;
         });

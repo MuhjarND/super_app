@@ -170,6 +170,21 @@
     $canOpenPdf = in_array($leaveRequest->status, [\App\LeaveRequest::STATUS_APPROVED, \App\LeaveRequest::STATUS_REJECTED, \App\LeaveRequest::STATUS_CHANGED, \App\LeaveRequest::STATUS_DEFERRED, \App\LeaveRequest::STATUS_COMPLETED], true) || $isApprovalMode;
     $canEditSubmit = in_array($leaveRequest->status, [\App\LeaveRequest::STATUS_DRAFT, \App\LeaveRequest::STATUS_REJECTED, \App\LeaveRequest::STATUS_CHANGED, \App\LeaveRequest::STATUS_DEFERRED], true);
     $canCancelRequest = in_array($leaveRequest->status, [\App\LeaveRequest::STATUS_DRAFT, \App\LeaveRequest::STATUS_SUBMITTED, \App\LeaveRequest::STATUS_UNDER_REVIEW, \App\LeaveRequest::STATUS_VERIFIED], true);
+    $nextFinalApproval = $isApprovalMode
+        ? $leaveRequest->approvals->first(function ($approval) use ($leaveApproval) {
+            return $approval->step_no > $leaveApproval->step_no
+                && in_array($approval->role_name, ['ppk', 'sekretaris_ma'], true);
+        })
+        : null;
+    $canDecideTravelLeave = $isApprovalMode && $leaveRequest->travel_leave_requested && (
+        in_array($leaveApproval->role_name, ['ppk', 'sekretaris_ma'], true)
+        || ($leaveApproval->role_name === 'atasan_langsung'
+            && (($nextFinalApproval
+                    && (int) $nextFinalApproval->approver_id === (int) $leaveApproval->approver_id)
+                || (!$nextFinalApproval
+                    && (int) optional($leaveRequest->user)->atasan_langsung_id > 0
+                    && (int) optional($leaveRequest->user)->atasan_langsung_id === (int) optional($leaveRequest->user)->pejabat_berwenang_id)))
+    );
 @endphp
 
 <div class="leave-simple-header">
@@ -256,6 +271,20 @@
             <div class="leave-summary-item">
                 <span class="leave-summary-label">Cuti Luar Negeri</span>
                 <div class="leave-summary-value">{{ $leaveRequest->is_abroad ? ($leaveRequest->abroad_country ?: 'Ya') : 'Tidak' }}</div>
+            </div>
+            <div class="leave-summary-item">
+                <span class="leave-summary-label">Cuti Perjalanan</span>
+                <div class="leave-summary-value">
+                    @if(!$leaveRequest->travel_leave_requested)
+                        Tidak diajukan
+                    @elseif($leaveRequest->travel_leave_granted)
+                        Diberikan (+1 hari)
+                    @elseif(in_array($leaveRequest->status, [\App\LeaveRequest::STATUS_APPROVED, \App\LeaveRequest::STATUS_COMPLETED], true))
+                        Tidak diberikan
+                    @else
+                        Diajukan (+1 hari dicadangkan)
+                    @endif
+                </div>
             </div>
             <div class="leave-summary-item">
                 <span class="leave-summary-label">Nomor</span>
@@ -416,6 +445,15 @@
                             <label>Catatan Approval</label>
                             <textarea name="note" class="form-control" rows="3" placeholder="Catatan approval"></textarea>
                         </div>
+                        @if($canDecideTravelLeave)
+                            <div class="form-group border rounded p-3 bg-light">
+                                <div class="form-check">
+                                    <input type="checkbox" name="grant_travel_leave" value="1" class="form-check-input" id="grantTravelLeave">
+                                    <label class="form-check-label font-weight-bold" for="grantTravelLeave">Berikan 1 hari cuti perjalanan</label>
+                                </div>
+                                <small class="text-muted d-block mt-1">Jika tidak dicentang, tambahan satu hari tidak diberikan dan cadangan saldo akan dikembalikan.</small>
+                            </div>
+                        @endif
                         @include('partials.profile-signature-notice')
                     </div>
                     <div class="modal-footer">

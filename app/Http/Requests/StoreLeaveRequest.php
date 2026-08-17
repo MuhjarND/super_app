@@ -34,6 +34,8 @@ class StoreLeaveRequest extends FormRequest
             'leave_address' => 'required|string|max:255',
             'is_abroad' => 'nullable|boolean',
             'abroad_country' => 'nullable|required_if:is_abroad,1|string|max:100',
+            'travel_leave_requested' => 'nullable|boolean',
+            'travel_leave_proof' => 'nullable|required_if:travel_leave_requested,1|file|max:10240|mimes:pdf,jpg,jpeg,png,doc,docx',
             '_leave_form_mode' => 'nullable|string|in:create,edit',
             '_leave_request_id' => 'nullable|integer',
             'documents.*' => 'file|max:10240|mimes:pdf,jpg,jpeg,png,doc,docx',
@@ -45,6 +47,7 @@ class StoreLeaveRequest extends FormRequest
         return [
             'letter_number.required' => 'Nomor surat satuan kerja wajib diisi.',
             'letter_number.unique' => 'Nomor surat satuan kerja tersebut sudah digunakan pada pengajuan cuti lain.',
+            'travel_leave_proof.required_if' => 'Bukti cuti perjalanan wajib dilampirkan.',
         ];
     }
 }

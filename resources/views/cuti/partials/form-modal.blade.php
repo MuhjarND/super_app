@@ -98,6 +98,25 @@
                         </div>
                     </div>
 
+                    <div class="form-group">
+                        <div class="form-check">
+                            <input type="checkbox" name="travel_leave_requested" value="1"
+                                class="form-check-input" id="{{ $modalId }}TravelLeave"
+                                {{ !$isEdit && old('travel_leave_requested') ? 'checked' : '' }}
+                                data-leave-travel-toggle>
+                            <label class="form-check-label" for="{{ $modalId }}TravelLeave">Ajukan cuti perjalanan (+1 hari)</label>
+                        </div>
+                        <small class="text-muted d-block">Hanya berlaku bagi pegawai yang menempuh perjalanan selama 2 hari.</small>
+                        <small class="text-muted d-block">Satu hari akan ikut dicadangkan dari saldo cuti dan diputuskan oleh pejabat pada approval terakhir.</small>
+                    </div>
+
+                    <div class="form-group" data-leave-travel-proof>
+                        <label>Bukti Cuti Perjalanan <span class="text-danger">*</span></label>
+                        <input type="file" name="travel_leave_proof" class="form-control-file"
+                            accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" data-has-existing-proof="0">
+                        <small class="text-muted">Wajib jika cuti perjalanan diajukan. PDF/JPG/JPEG/PNG/DOC/DOCX, maksimal 10MB.</small>
+                    </div>
+
                     <div class="form-group mb-0">
                         <label>Dokumen Pendukung</label>
                         <input type="file" name="documents[]" class="form-control-file" multiple>

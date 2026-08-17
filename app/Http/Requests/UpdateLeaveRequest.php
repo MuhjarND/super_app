@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use App\LeaveType;
+use App\LeaveRequestDocument;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -16,6 +17,15 @@ class UpdateLeaveRequest extends FormRequest
         $uniqueLetterNumber = Rule::unique('leave_requests', 'letter_number');
         if ($leaveRequest) {
             $uniqueLetterNumber->ignore(is_object($leaveRequest) ? $leaveRequest->id : $leaveRequest);
+        }
+
+        $travelProofRules = ['nullable', 'file', 'max:10240', 'mimes:pdf,jpg,jpeg,png,doc,docx'];
+        $travelLeaveRequested = filter_var($this->input('travel_leave_requested'), FILTER_VALIDATE_BOOLEAN);
+        $hasTravelProof = $leaveRequest && is_object($leaveRequest)
+            ? $leaveRequest->documents()->where('document_type', LeaveRequestDocument::TYPE_TRAVEL_LEAVE_PROOF)->exists()
+            : false;
+        if ($travelLeaveRequested && !$hasTravelProof) {
+            array_unshift($travelProofRules, 'required');
         }
 
         return [
@@ -39,6 +49,8 @@ class UpdateLeaveRequest extends FormRequest
             'leave_address' => 'required|string|max:255',
             'is_abroad' => 'nullable|boolean',
             'abroad_country' => 'nullable|required_if:is_abroad,1|string|max:100',
+            'travel_leave_requested' => 'nullable|boolean',
+            'travel_leave_proof' => $travelProofRules,
             '_leave_form_mode' => 'nullable|string|in:create,edit',
             '_leave_request_id' => 'nullable|integer',
             'revision_note' => 'nullable|string|max:1000',
@@ -51,6 +63,7 @@ class UpdateLeaveRequest extends FormRequest
         return [
             'letter_number.required' => 'Nomor surat satuan kerja wajib diisi.',
             'letter_number.unique' => 'Nomor surat satuan kerja tersebut sudah digunakan pada pengajuan cuti lain.',
+            'travel_leave_proof.required' => 'Bukti cuti perjalanan wajib dilampirkan.',
         ];
     }
 }

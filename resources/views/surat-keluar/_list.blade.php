@@ -17,10 +17,26 @@
                 </thead>
                 <tbody>
                     @foreach($suratKeluar as $surat)
+                        @php
+                            $hasShareableFile = $surat->file_path || $surat->templateApproval || $surat->rapat || $surat->leaveRequest || ($surat->pdf_verifications_count ?? 0) > 0;
+                            $shareUrl = $hasShareableFile
+                                ? \Illuminate\Support\Facades\URL::temporarySignedRoute('surat-keluar.file', now()->addDays(7), ['suratKeluar' => $surat->id])
+                                : route('surat-keluar.index', ['search' => $surat->nomor_surat]);
+                            $shareRecipient = $surat->opsi_penerima === 'internal'
+                                ? $surat->penerimaInternal->pluck('name')->implode(', ')
+                                : ($surat->penerima_external ?: '-');
+                        @endphp
                         <tr class="main-row" data-surat-id="{{ $surat->id }}"
                             data-update-url="{{ route('surat-keluar.update', $surat) }}"
                             data-delete-url="{{ route('surat-keluar.destroy', $surat) }}"
                             data-file-url="{{ ($surat->file_path || $surat->templateApproval || $surat->rapat || $surat->leaveRequest || ($surat->pdf_verifications_count ?? 0) > 0) ? route('surat-keluar.file', $surat) : '' }}"
+                            data-share-url="{{ $shareUrl }}"
+                            data-share-label="Surat Keluar"
+                            data-share-number="{{ $surat->nomor_surat_formatted }}"
+                            data-share-recipient="{{ $shareRecipient }}"
+                            data-share-subject="{{ $surat->perihal }}"
+                            data-share-date="{{ optional($surat->tanggal_surat)->translatedFormat('d F Y') }}"
+                            data-share-access-note="{{ $hasShareableFile ? 'Tautan berkas dapat dibuka tanpa login dan berlaku selama 7 hari.' : 'Surat belum memiliki berkas. Penerima harus login dan memiliki hak akses untuk membuka datanya.' }}"
                             data-creator="{{ optional($surat->creator)->name ?: '-' }}"
                             data-tahun-surat="{{ $surat->tahun_surat }}"
                             data-nomenklatur-jabatan="{{ $surat->nomenklatur_jabatan }}"
@@ -78,7 +94,7 @@
                             <td>
                                 @if($surat->file_path || $surat->templateApproval || $surat->rapat || $surat->leaveRequest || ($surat->pdf_verifications_count ?? 0) > 0)
                                     <a href="javascript:void(0)" class="lampiran-badge exists"
-                                        onclick="viewFile('{{ route('surat-keluar.file', $surat) }}')">Berkas</a>
+                                        onclick="viewFile('{{ route('surat-keluar.file', $surat) }}', {{ $surat->id }})">Berkas</a>
                                 @else
                                     <span class="lampiran-badge empty">Kosong</span>
                                 @endif

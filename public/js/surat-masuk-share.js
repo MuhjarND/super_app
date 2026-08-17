@@ -12,21 +12,26 @@
     function payloadFromElement(element) {
         return {
             url: value(element.dataset, 'shareUrl'),
+            label: value(element.dataset, 'shareLabel') || 'Surat Masuk',
             number: value(element.dataset, 'shareNumber'),
             sender: value(element.dataset, 'shareSender'),
+            recipient: value(element.dataset, 'shareRecipient'),
             subject: value(element.dataset, 'shareSubject'),
-            date: value(element.dataset, 'shareDate')
+            date: value(element.dataset, 'shareDate'),
+            accessNote: value(element.dataset, 'shareAccessNote')
         };
     }
 
     function shareTitle(payload) {
-        return payload.number ? 'Surat Masuk ' + payload.number : 'Surat Masuk';
+        var label = payload.label || 'Surat';
+        return payload.number ? label + ' ' + payload.number : label;
     }
 
     function shareText(payload, includeUrl) {
-        var lines = ['Surat Masuk'];
+        var lines = [payload.label || 'Surat'];
         if (payload.number) lines.push('Nomor: ' + payload.number);
         if (payload.sender) lines.push('Pengirim: ' + payload.sender);
+        if (payload.recipient) lines.push('Tujuan: ' + payload.recipient);
         if (payload.subject) lines.push('Perihal: ' + payload.subject);
         if (payload.date) lines.push('Tanggal: ' + payload.date);
         if (includeUrl && payload.url) lines.push('', 'Buka surat: ' + payload.url);
@@ -43,7 +48,7 @@
             '  <div class="modal-dialog modal-dialog-centered" role="document">',
             '    <div class="modal-content" style="border:0;border-radius:16px;overflow:hidden;box-shadow:0 24px 60px rgba(15,23,42,.2);">',
             '      <div class="modal-header" style="border-bottom:1px solid #eef2f7;">',
-            '        <div><h5 class="modal-title font-weight-bold" id="suratMasukShareModalLabel"><i class="fas fa-paper-plane mr-2 text-primary"></i>Kirim Surat Masuk</h5><small class="text-muted">Pilih aplikasi tujuan atau salin tautannya.</small></div>',
+            '        <div><h5 class="modal-title font-weight-bold" id="suratMasukShareModalLabel"><i class="fas fa-paper-plane mr-2 text-primary"></i>Kirim / Bagikan Surat</h5><small class="text-muted">Pilih aplikasi tujuan atau salin tautannya.</small></div>',
             '        <button type="button" class="close" data-dismiss="modal" aria-label="Tutup"><span aria-hidden="true">&times;</span></button>',
             '      </div>',
             '      <div class="modal-body">',
@@ -58,7 +63,7 @@
             '          <div class="col-6 mb-2"><a id="suratMasukShareEmail" class="btn btn-block btn-outline-secondary" style="border-radius:11px;"><i class="fas fa-envelope mr-2"></i>Email</a></div>',
             '          <div class="col-6 mb-2"><button type="button" id="suratMasukCopyLink" class="btn btn-block btn-outline-primary" style="border-radius:11px;"><i class="fas fa-link mr-2"></i>Salin Link</button></div>',
             '        </div>',
-            '        <div class="small text-muted mt-2"><i class="fas fa-lock mr-1"></i>Penerima harus login dan memiliki hak akses untuk membuka surat.</div>',
+            '        <div id="suratShareAccessNote" class="small text-muted mt-2"><i class="fas fa-lock mr-1"></i><span>Penerima harus login dan memiliki hak akses untuk membuka surat.</span></div>',
             '      </div>',
             '    </div>',
             '  </div>',
@@ -79,6 +84,7 @@
         document.getElementById('suratMasukShareWhatsapp').href = 'https://wa.me/?text=' + encodeURIComponent(textWithUrl);
         document.getElementById('suratMasukShareTelegram').href = 'https://t.me/share/url?url=' + encodeURIComponent(payload.url) + '&text=' + encodeURIComponent(shareText(payload, false));
         document.getElementById('suratMasukShareEmail').href = 'mailto:?subject=' + encodeURIComponent(shareTitle(payload)) + '&body=' + encodeURIComponent(textWithUrl);
+        document.querySelector('#suratShareAccessNote span').textContent = payload.accessNote || 'Penerima harus login dan memiliki hak akses untuk membuka surat.';
     }
 
     function feedback(message, success) {
@@ -149,11 +155,12 @@
     }
 
     document.addEventListener('click', function (event) {
-        var trigger = event.target.closest('.js-share-surat-masuk');
+        var trigger = event.target.closest('.js-share-surat-masuk, .js-share-surat');
         if (!trigger) return;
         event.preventDefault();
         share(payloadFromElement(trigger));
     });
 
-    window.SuratMasukShare = { share: share, payloadFromElement: payloadFromElement };
+    window.SuratShare = { share: share, payloadFromElement: payloadFromElement };
+    window.SuratMasukShare = window.SuratShare;
 })(window, document);
