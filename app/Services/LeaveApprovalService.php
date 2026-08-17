@@ -235,17 +235,36 @@ class LeaveApprovalService
         }
         $previousStatus = $approval->status;
         DB::transaction(function () use ($approval, $actor, $note) {
+            $actedAt = Carbon::now();
             $approval->status = 'rejected';
             $approval->action = 'rejected';
-            $approval->acted_at = Carbon::now();
+            $approval->acted_at = $actedAt;
             $approval->signature_path = null;
             $approval->signature_mime = null;
             $approval->signature_size = null;
             $approval->note = $note;
             $approval->save();
             $leaveRequest = $approval->leaveRequest;
+
+            $leaveRequest->approvals()
+                ->where('step_no', '>', $approval->step_no)
+                ->whereIn('status', ['waiting', 'pending'])
+                ->get()
+                ->each(function (LeaveApproval $nextApproval) use ($approval, $actedAt) {
+                    $nextApproval->status = 'cancelled';
+                    $nextApproval->action = 'stopped_after_rejection';
+                    $nextApproval->acted_at = $actedAt->copy();
+                    $nextApproval->note = 'Alur dihentikan karena pengajuan ditolak pada tahap ' . $approval->role_label . '.';
+                    $nextApproval->meta_json = array_merge($nextApproval->meta_json ?: [], [
+                        'stopped_by_approval_id' => $approval->id,
+                    ]);
+                    $nextApproval->save();
+                });
+
             $leaveRequest->status = LeaveRequest::STATUS_REJECTED;
-            $leaveRequest->rejected_at = Carbon::now();
+            $leaveRequest->rejected_at = $actedAt;
+            $leaveRequest->locked_at = $actedAt;
+            $leaveRequest->travel_leave_granted = false;
             $leaveRequest->revision_note = $note;
             $leaveRequest->updated_by = $actor->id;
             $leaveRequest->save();

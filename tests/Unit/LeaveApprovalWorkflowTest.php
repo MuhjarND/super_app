@@ -105,6 +105,8 @@ class LeaveApprovalWorkflowTest extends TestCase
             $table->string('applicant_signature_mime')->nullable();
             $table->unsignedBigInteger('applicant_signature_size')->nullable();
             $table->timestamp('approved_at')->nullable();
+            $table->timestamp('rejected_at')->nullable();
+            $table->text('revision_note')->nullable();
             $table->timestamp('locked_at')->nullable();
             $table->unsignedBigInteger('updated_by')->nullable();
             $table->timestamps();
@@ -306,6 +308,77 @@ class LeaveApprovalWorkflowTest extends TestCase
     public function test_travel_leave_can_be_granted_by_the_shared_final_approver(): void
     {
         $this->assertOneActionApprovesBothOfficialRoles(false, true);
+    }
+
+    public function test_rejection_stops_remaining_approvals_and_locks_the_request(): void
+    {
+        $rejectorId = $this->createUser('Pejabat Penolak');
+        $nextApproverId = $this->createUser('Pejabat Berikutnya');
+        $employeeId = $this->createUser('Pegawai Ditolak');
+        $leaveTypeId = DB::table('leave_types')->insertGetId([
+            'code' => 'CT',
+            'name' => 'Cuti Tahunan',
+            'requires_balance' => true,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+        $leaveRequestId = DB::table('leave_requests')->insertGetId([
+            'user_id' => $employeeId,
+            'leave_type_id' => $leaveTypeId,
+            'start_date' => now()->addWeek()->toDateString(),
+            'end_date' => now()->addWeek()->toDateString(),
+            'requested_days' => 2,
+            'approved_days' => 2,
+            'workday_count' => 2,
+            'travel_leave_requested' => true,
+            'status' => LeaveRequest::STATUS_VERIFIED,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+        $rejectingApprovalId = DB::table('leave_approvals')->insertGetId([
+            'leave_request_id' => $leaveRequestId,
+            'step_no' => 2,
+            'role_name' => 'atasan_langsung',
+            'approver_id' => $rejectorId,
+            'status' => 'pending',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+        DB::table('leave_approvals')->insert([
+            'leave_request_id' => $leaveRequestId,
+            'step_no' => 3,
+            'role_name' => 'ppk',
+            'approver_id' => $nextApproverId,
+            'status' => 'waiting',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        $balanceService = Mockery::mock(LeaveBalanceService::class);
+        $balanceService->shouldReceive('restore')->once();
+        $auditService = Mockery::mock(ActivityAuditService::class);
+        $auditService->shouldReceive('log')->once();
+        $service = new LeaveApprovalService(
+            $balanceService,
+            Mockery::mock(LeaveNumberService::class),
+            Mockery::mock(LeaveDocumentService::class),
+            $auditService
+        );
+
+        $service->reject(
+            \App\LeaveApproval::findOrFail($rejectingApprovalId),
+            User::findOrFail($rejectorId),
+            'Bukti belum sesuai ketentuan.'
+        );
+
+        $request = LeaveRequest::findOrFail($leaveRequestId);
+        $approvals = \App\LeaveApproval::where('leave_request_id', $leaveRequestId)->orderBy('step_no')->get();
+
+        $this->assertSame(LeaveRequest::STATUS_REJECTED, $request->status);
+        $this->assertNotNull($request->locked_at);
+        $this->assertSame('Bukti belum sesuai ketentuan.', $request->revision_note);
+        $this->assertSame(['rejected', 'cancelled'], $approvals->pluck('status')->all());
+        $this->assertSame('stopped_after_rejection', $approvals->last()->action);
     }
 
     public function test_satker_submission_does_not_consume_internal_leave_number_sequence(): void

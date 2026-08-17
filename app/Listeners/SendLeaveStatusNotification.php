@@ -99,8 +99,8 @@ class SendLeaveStatusNotification
 
         if ($eventName === 'rejected' || $leaveRequest->status === 'rejected') {
             return [
-                'title' => 'Pengajuan cuti ditolak',
-                'message' => 'Pengajuan cuti Bapak/Ibu belum dapat disetujui. Mohon meninjau catatan penolakan pada aplikasi.',
+                'title' => 'Pengajuan cuti ditolak - ajukan ulang',
+                'message' => 'Pengajuan cuti Bapak/Ibu ditolak dan alur approval telah dihentikan. Silakan meninjau catatan penolakan, lalu membuat pengajuan cuti baru sesuai dengan ketentuan.',
             ];
         }
 

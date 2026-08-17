@@ -404,7 +404,7 @@
                     @forelse($leaveRequests as $leaveRequest)
                         @php
                             $isOwner = (int) $leaveRequest->user_id === (int) auth()->id();
-                            $canEdit = $isOwner && in_array($leaveRequest->status, [\App\LeaveRequest::STATUS_DRAFT, \App\LeaveRequest::STATUS_REJECTED, \App\LeaveRequest::STATUS_CHANGED, \App\LeaveRequest::STATUS_DEFERRED], true) && is_null($leaveRequest->locked_at);
+                            $canEdit = $isOwner && in_array($leaveRequest->status, [\App\LeaveRequest::STATUS_DRAFT, \App\LeaveRequest::STATUS_CHANGED, \App\LeaveRequest::STATUS_DEFERRED], true) && is_null($leaveRequest->locked_at);
                             $documents = $leaveRequest->documents->map(function ($document) use ($leaveRequest) {
                                 return [
                                     'name' => $document->original_name,

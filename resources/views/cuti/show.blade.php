@@ -168,7 +168,7 @@
 @php
     $isApprovalMode = isset($leaveApproval);
     $canOpenPdf = in_array($leaveRequest->status, [\App\LeaveRequest::STATUS_APPROVED, \App\LeaveRequest::STATUS_REJECTED, \App\LeaveRequest::STATUS_CHANGED, \App\LeaveRequest::STATUS_DEFERRED, \App\LeaveRequest::STATUS_COMPLETED], true) || $isApprovalMode;
-    $canEditSubmit = in_array($leaveRequest->status, [\App\LeaveRequest::STATUS_DRAFT, \App\LeaveRequest::STATUS_REJECTED, \App\LeaveRequest::STATUS_CHANGED, \App\LeaveRequest::STATUS_DEFERRED], true);
+    $canEditSubmit = in_array($leaveRequest->status, [\App\LeaveRequest::STATUS_DRAFT, \App\LeaveRequest::STATUS_CHANGED, \App\LeaveRequest::STATUS_DEFERRED], true);
     $canCancelRequest = in_array($leaveRequest->status, [\App\LeaveRequest::STATUS_DRAFT, \App\LeaveRequest::STATUS_SUBMITTED, \App\LeaveRequest::STATUS_UNDER_REVIEW, \App\LeaveRequest::STATUS_VERIFIED], true);
     $nextFinalApproval = $isApprovalMode
         ? $leaveRequest->approvals->first(function ($approval) use ($leaveApproval) {
@@ -193,6 +193,11 @@
         <p class="leave-simple-subtitle">{{ $leaveRequest->display_number }} | {{ optional($leaveRequest->leaveType)->name ?: '-' }}</p>
     </div>
     <div class="app-action-group">
+        @if(!$isApprovalMode && $leaveRequest->status === \App\LeaveRequest::STATUS_REJECTED)
+            <a href="{{ route('cuti.index', ['open' => 'create']) }}" class="btn btn-success btn-sm">
+                <i class="fas fa-plus mr-1"></i> Buat Pengajuan Baru
+            </a>
+        @endif
         @if($canOpenPdf)
             <a href="{{ route('cuti.surat', $leaveRequest) }}" target="_blank" class="btn btn-primary btn-sm">
                 <i class="fas fa-file-pdf mr-1"></i> Buka PDF A4
@@ -300,6 +305,12 @@
                 <div class="leave-summary-item" style="grid-column: 1 / -1;">
                     <span class="leave-summary-label">Alasan Penangguhan</span>
                     <div class="leave-summary-value">{{ $leaveRequest->deferred_reason }}</div>
+                </div>
+            @endif
+            @if($leaveRequest->status === \App\LeaveRequest::STATUS_REJECTED)
+                <div class="leave-summary-item" style="grid-column: 1 / -1; border-color: #fecaca; background: #fff7f7;">
+                    <span class="leave-summary-label">Tindak Lanjut Penolakan</span>
+                    <div class="leave-summary-value">Alur approval telah dihentikan. Silakan buat pengajuan cuti baru sesuai catatan penolakan dan ketentuan yang berlaku.</div>
                 </div>
             @endif
             <div class="leave-summary-item" style="grid-column: 1 / -1;">

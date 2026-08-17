@@ -34,6 +34,7 @@ class LeaveApproval extends Model
             'rejected' => 'Ditolak',
             'changed' => 'Perubahan',
             'deferred' => 'Ditangguhkan',
+            'cancelled' => 'Dihentikan',
         ];
 
         return $map[$this->status] ?? ucfirst((string) $this->status);
@@ -48,6 +49,7 @@ class LeaveApproval extends Model
             'rejected' => ['danger', 'Ditolak'],
             'changed' => ['info', 'Perubahan'],
             'deferred' => ['warning', 'Ditangguhkan'],
+            'cancelled' => ['dark', 'Dihentikan'],
         ];
 
         $status = $map[$this->status] ?? ['secondary', ucfirst((string) $this->status)];
