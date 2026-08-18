@@ -33,6 +33,8 @@ class LeaveExistingRequestSyncServiceTest extends TestCase
             $table->unsignedInteger('requested_days')->default(0);
             $table->unsignedInteger('approved_days')->default(0);
             $table->unsignedInteger('workday_count')->default(0);
+            $table->boolean('travel_leave_requested')->default(false);
+            $table->boolean('travel_leave_granted')->default(false);
             $table->string('purpose')->default('Keperluan');
             $table->string('status', 30)->default('draft');
             $table->timestamps();
@@ -122,6 +124,25 @@ class LeaveExistingRequestSyncServiceTest extends TestCase
         $this->assertSame(4, $leaveRequest->fresh()->requested_days);
         $this->assertSame(4, $balance->fresh()->reserved_days);
         $this->assertSame(8, $balance->fresh()->remaining_balance);
+    }
+
+    public function test_submitted_travel_leave_keeps_extra_day_in_approved_and_reserved_totals(): void
+    {
+        [$leaveType, $leaveRequest] = $this->createAnnualRequest(LeaveRequest::STATUS_VERIFIED, 4);
+        $leaveRequest->travel_leave_requested = true;
+        $leaveRequest->approved_days = 5;
+        $leaveRequest->save();
+        $balance = $this->createBalance($leaveType, 0, 5);
+        $this->createCollectiveLeave();
+
+        $this->assertSame(1, app(LeaveExistingRequestSyncService::class)->syncAll());
+
+        $leaveRequest->refresh();
+        $balance->refresh();
+        $this->assertSame(3, $leaveRequest->requested_days);
+        $this->assertSame(4, $leaveRequest->approved_days);
+        $this->assertSame(4, $balance->reserved_days);
+        $this->assertSame(8, $balance->remaining_balance);
     }
 
     protected function createAnnualRequest($status, $days)

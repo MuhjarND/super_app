@@ -109,6 +109,7 @@ class LeaveApprovalService
 
                 $leaveRequest->status = LeaveRequest::STATUS_SUBMITTED;
                 $leaveRequest->submitted_at = Carbon::now();
+                $leaveRequest->approved_days = $leaveRequest->requestedBalanceDays();
                 $leaveRequest->approver_chain_snapshot = $steps;
                 $leaveRequest->save();
                 $leaveRequest->approvals()->delete();
