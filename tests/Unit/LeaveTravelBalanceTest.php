@@ -57,14 +57,14 @@ class LeaveTravelBalanceTest extends TestCase
         parent::tearDown();
     }
 
-    public function test_requested_travel_day_does_not_add_to_reserved_balance(): void
+    public function test_requested_travel_day_reserves_total_days_minus_one(): void
     {
         [$request, $balance] = $this->makeRequestAndBalance();
         $service = app(LeaveBalanceService::class);
 
         $service->reserve($request);
-        $this->assertSame(3, (int) $balance->fresh()->reserved_days);
-        $this->assertSame(9, (int) $balance->fresh()->remaining_balance);
+        $this->assertSame(2, (int) $balance->fresh()->reserved_days);
+        $this->assertSame(10, (int) $balance->fresh()->remaining_balance);
 
         $request->travel_leave_granted = false;
         $service->consume($request);
@@ -74,7 +74,7 @@ class LeaveTravelBalanceTest extends TestCase
         $this->assertSame(9, (int) $balance->fresh()->remaining_balance);
     }
 
-    public function test_granted_travel_day_does_not_require_an_extra_balance_day(): void
+    public function test_granted_travel_day_consumes_total_days_minus_one(): void
     {
         [$request, $balance] = $this->makeRequestAndBalance();
         $service = app(LeaveBalanceService::class);
@@ -84,11 +84,32 @@ class LeaveTravelBalanceTest extends TestCase
         $service->consume($request);
 
         $this->assertSame(0, (int) $balance->fresh()->reserved_days);
-        $this->assertSame(3, (int) $balance->fresh()->used_days);
-        $this->assertSame(9, (int) $balance->fresh()->remaining_balance);
+        $this->assertSame(2, (int) $balance->fresh()->used_days);
+        $this->assertSame(10, (int) $balance->fresh()->remaining_balance);
     }
 
-    protected function makeRequestAndBalance()
+    public function test_eight_day_request_can_reserve_seven_day_balance_plus_one_travel_day(): void
+    {
+        [$request, $balance] = $this->makeRequestAndBalance(8, 7);
+        $service = app(LeaveBalanceService::class);
+
+        $this->assertSame(8, $request->requestedTotalDays());
+        $this->assertSame(7, $request->requestedBalanceDays());
+
+        $service->reserve($request);
+
+        $this->assertSame(7, (int) $balance->fresh()->reserved_days);
+        $this->assertSame(0, (int) $balance->fresh()->remaining_balance);
+
+        $request->travel_leave_granted = true;
+        $service->validateFinalBalance($request);
+        $service->consume($request);
+
+        $this->assertSame(12, (int) $balance->fresh()->used_days);
+        $this->assertSame(0, (int) $balance->fresh()->remaining_balance);
+    }
+
+    protected function makeRequestAndBalance($requestedDays = 3, $availableBalance = 12)
     {
         $user = User::create(['name' => 'Pegawai']);
         $leaveType = LeaveType::create([
@@ -101,7 +122,8 @@ class LeaveTravelBalanceTest extends TestCase
             'leave_type_id' => $leaveType->id,
             'year' => 2026,
             'entitlement' => 12,
-            'remaining_balance' => 12,
+            'used_days' => 12 - $availableBalance,
+            'remaining_balance' => $availableBalance,
             'meta_json' => ['annual_recap' => ['manual_carry_forward' => true]],
         ]);
         $request = new LeaveRequest([
@@ -109,8 +131,8 @@ class LeaveTravelBalanceTest extends TestCase
             'leave_type_id' => $leaveType->id,
             'start_date' => '2026-09-01',
             'end_date' => '2026-09-03',
-            'requested_days' => 3,
-            'workday_count' => 3,
+            'requested_days' => $requestedDays,
+            'workday_count' => $requestedDays,
             'travel_leave_requested' => true,
         ]);
         $request->setRelation('user', $user);

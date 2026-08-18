@@ -107,7 +107,7 @@
                             <label class="form-check-label" for="{{ $modalId }}TravelLeave">Ajukan cuti perjalanan (+1 hari)</label>
                         </div>
                         <small class="text-muted d-block">Hanya berlaku bagi pegawai yang menempuh perjalanan selama 2 hari.</small>
-                        <small class="text-muted d-block">Saldo divalidasi berdasarkan jumlah hari kerja yang diajukan; tambahan 1 hari perjalanan diputuskan oleh pejabat pada approval terakhir.</small>
+                        <small class="text-muted d-block">Satu hari perjalanan termasuk dalam total tanggal cuti. Contoh: pengajuan 8 hari akan memotong saldo 7 hari + 1 hari perjalanan, lalu diputuskan oleh pejabat pada approval terakhir.</small>
                     </div>
 
                     <div class="form-group" data-leave-travel-proof>

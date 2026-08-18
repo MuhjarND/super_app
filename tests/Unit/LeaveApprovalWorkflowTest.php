@@ -507,6 +507,7 @@ class LeaveApprovalWorkflowTest extends TestCase
         ]);
 
         $balanceService = Mockery::mock(LeaveBalanceService::class);
+        $balanceService->shouldReceive('validateFinalBalance')->once();
         $balanceService->shouldReceive('consume')->once();
         $documentService = Mockery::mock(LeaveDocumentService::class);
         $documentService->shouldReceive('ensureLetterNumber')->once();
@@ -541,7 +542,7 @@ class LeaveApprovalWorkflowTest extends TestCase
         $finalRequest = LeaveRequest::findOrFail($leaveRequestId);
         $this->assertSame(LeaveRequest::STATUS_APPROVED, $finalRequest->status);
         $this->assertSame($grantTravelLeave, (bool) $finalRequest->travel_leave_granted);
-        $this->assertSame($grantTravelLeave ? 4 : 3, (int) $finalRequest->approved_days);
+        $this->assertSame(3, (int) $finalRequest->approved_days);
     }
 
     protected function createUser($name, array $attributes = [])

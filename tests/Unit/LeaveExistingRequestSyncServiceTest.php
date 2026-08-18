@@ -126,13 +126,13 @@ class LeaveExistingRequestSyncServiceTest extends TestCase
         $this->assertSame(8, $balance->fresh()->remaining_balance);
     }
 
-    public function test_submitted_travel_leave_keeps_extra_day_only_in_approved_total(): void
+    public function test_submitted_travel_leave_counts_travel_inside_total_and_outside_reserved_balance(): void
     {
         [$leaveType, $leaveRequest] = $this->createAnnualRequest(LeaveRequest::STATUS_VERIFIED, 4);
         $leaveRequest->travel_leave_requested = true;
-        $leaveRequest->approved_days = 5;
+        $leaveRequest->approved_days = 4;
         $leaveRequest->save();
-        $balance = $this->createBalance($leaveType, 0, 4);
+        $balance = $this->createBalance($leaveType, 0, 3);
         $this->createCollectiveLeave();
 
         $this->assertSame(1, app(LeaveExistingRequestSyncService::class)->syncAll());
@@ -140,9 +140,9 @@ class LeaveExistingRequestSyncServiceTest extends TestCase
         $leaveRequest->refresh();
         $balance->refresh();
         $this->assertSame(3, $leaveRequest->requested_days);
-        $this->assertSame(4, $leaveRequest->approved_days);
-        $this->assertSame(3, $balance->reserved_days);
-        $this->assertSame(9, $balance->remaining_balance);
+        $this->assertSame(3, $leaveRequest->approved_days);
+        $this->assertSame(2, $balance->reserved_days);
+        $this->assertSame(10, $balance->remaining_balance);
     }
 
     protected function createAnnualRequest($status, $days)

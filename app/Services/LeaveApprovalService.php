@@ -180,6 +180,7 @@ class LeaveApprovalService
                 $travelLeaveGranted = $leaveRequest->travel_leave_requested && (bool) $grantTravelLeave;
                 $leaveRequest->travel_leave_granted = $travelLeaveGranted;
                 $leaveRequest->approved_days = $leaveRequest->approvedTotalDays();
+                $this->balanceService->validateFinalBalance($leaveRequest);
 
                 $decisionApproval = $linkedApproval ?: $approval;
                 $decisionApproval->meta_json = array_merge($decisionApproval->meta_json ?: [], [

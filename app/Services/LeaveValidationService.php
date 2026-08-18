@@ -46,7 +46,14 @@ class LeaveValidationService
         $leaveRequest->requested_days = $requestedDays;
 
         $this->validateServiceYears($leaveRequest, $user, $leaveType, $leaveRequest->start_date);
-        $this->validateBalance($user, $leaveType, $requestedDays, $leaveRequest->start_date);
+        $this->validateBalance(
+            $user,
+            $leaveType,
+            $leaveRequest->requestedBalanceDays(),
+            $leaveRequest->start_date,
+            $leaveRequest->travel_leave_requested,
+            $requestedDays
+        );
         $childNumberContext = !is_null(optional($user)->jumlah_anak)
             ? ((int) $user->jumlah_anak + 1)
             : null;
@@ -123,7 +130,7 @@ class LeaveValidationService
             || str_contains($purpose, 'kelahiran anak ke-4');
     }
 
-    protected function validateBalance(User $user, LeaveType $leaveType, $requestedDays, $startDate)
+    protected function validateBalance(User $user, LeaveType $leaveType, $requestedDays, $startDate, $includesTravelLeave = false, $totalDays = null)
     {
         if (!$leaveType->requires_balance) {
             return;
@@ -135,13 +142,19 @@ class LeaveValidationService
 
         $balance = $this->balanceService->getBalanceSnapshot($user, $leaveType, $start->year);
         if (($balance['remaining_balance'] ?? 0) < $requestedDays) {
-            throw ValidationException::withMessages([
-                'start_date' => sprintf(
+            $message = $includesTravelLeave
+                ? sprintf(
+                    'Saldo cuti tidak mencukupi. Total pengajuan %d hari terdiri dari %d hari pemotongan saldo + 1 hari cuti perjalanan, sedangkan saldo tersedia %d hari.',
+                    (int) $totalDays,
+                    $requestedDays,
+                    (int) ($balance['remaining_balance'] ?? 0)
+                )
+                : sprintf(
                     'Saldo cuti tidak mencukupi. Pengajuan membutuhkan %d hari kerja, sedangkan saldo tersedia %d hari.',
                     $requestedDays,
                     (int) ($balance['remaining_balance'] ?? 0)
-                ),
-            ]);
+                );
+            throw ValidationException::withMessages(['start_date' => $message]);
         }
     }
 

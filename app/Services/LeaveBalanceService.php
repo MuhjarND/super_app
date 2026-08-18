@@ -184,6 +184,32 @@ class LeaveBalanceService
         });
     }
 
+    public function validateFinalBalance(LeaveRequest $leaveRequest)
+    {
+        if (!$leaveRequest->leaveType || !$leaveRequest->leaveType->requires_balance) {
+            return;
+        }
+
+        $balance = $this->getBalanceSnapshot(
+            $leaveRequest->user,
+            $leaveRequest->leaveType,
+            $this->yearFromLeaveRequest($leaveRequest)
+        );
+        $availableForThisRequest = (int) ($balance['remaining_balance'] ?? 0)
+            + $leaveRequest->requestedBalanceDays();
+        $approvedBalanceDays = $leaveRequest->approvedBalanceDays();
+
+        if ($availableForThisRequest < $approvedBalanceDays) {
+            throw ValidationException::withMessages([
+                'grant_travel_leave' => sprintf(
+                    'Cuti perjalanan harus diberikan agar pengajuan ini dapat disetujui. Saldo tersedia untuk pengajuan ini %d hari, sedangkan tanpa cuti perjalanan dibutuhkan %d hari.',
+                    $availableForThisRequest,
+                    $approvedBalanceDays
+                ),
+            ]);
+        }
+    }
+
     public function restore(LeaveRequest $leaveRequest)
     {
         if (!$leaveRequest->leaveType || !$leaveRequest->leaveType->requires_balance) { return; }

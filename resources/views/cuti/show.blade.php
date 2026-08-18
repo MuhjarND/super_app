@@ -227,6 +227,15 @@
                     <div class="leave-summary-value">{!! $leaveApproval->status_badge !!}</div>
                 </div>
             </div>
+            @if($leaveRequest->travel_leave_requested)
+                <div class="alert alert-info mb-3">
+                    <strong>Perhitungan cuti perjalanan:</strong>
+                    total pengajuan {{ $leaveRequest->requested_days ?: 0 }} hari terdiri dari
+                    {{ $leaveRequest->requestedBalanceDays() }} hari yang memotong saldo
+                    + 1 hari cuti perjalanan. Saldo yang dicadangkan hanya
+                    {{ $leaveRequest->requestedBalanceDays() }} hari. Keputusan pemberian 1 hari perjalanan dilakukan pada approval terakhir.
+                </div>
+            @endif
             <div class="leave-approval-actions">
                 <button type="button" class="btn btn-success" data-toggle="modal" data-target="#leaveApprovalSignatureModal">
                     <i class="fas fa-check mr-1"></i> Setujui
@@ -263,8 +272,14 @@
             </div>
             <div class="leave-summary-item">
                 <span class="leave-summary-label">Hari Kerja</span>
-                <div class="leave-summary-value">{{ $leaveRequest->requested_days ?: 0 }} hari</div>
+                <div class="leave-summary-value">{{ $leaveRequest->requested_days ?: 0 }} hari total</div>
             </div>
+            @if($leaveRequest->travel_leave_requested)
+            <div class="leave-summary-item">
+                <span class="leave-summary-label">Pemotongan Saldo</span>
+                <div class="leave-summary-value">{{ $leaveRequest->requestedBalanceDays() }} hari</div>
+            </div>
+            @endif
             <div class="leave-summary-item">
                 <span class="leave-summary-label">Status</span>
                 <div class="leave-summary-value">{!! $leaveRequest->status_badge !!}</div>
@@ -283,11 +298,11 @@
                     @if(!$leaveRequest->travel_leave_requested)
                         Tidak diajukan
                     @elseif($leaveRequest->travel_leave_granted)
-                        Diberikan (+1 hari)
+                        Diberikan ({{ $leaveRequest->approvedBalanceDays() }} hari saldo + 1 hari perjalanan)
                     @elseif(in_array($leaveRequest->status, [\App\LeaveRequest::STATUS_APPROVED, \App\LeaveRequest::STATUS_COMPLETED], true))
                         Tidak diberikan
                     @else
-                        Diajukan (+1 hari menunggu persetujuan)
+                        Diajukan ({{ $leaveRequest->requestedBalanceDays() }} hari saldo + 1 hari perjalanan)
                     @endif
                 </div>
             </div>
@@ -459,10 +474,10 @@
                         @if($canDecideTravelLeave)
                             <div class="form-group border rounded p-3 bg-light">
                                 <div class="form-check">
-                                    <input type="checkbox" name="grant_travel_leave" value="1" class="form-check-input" id="grantTravelLeave">
+                                    <input type="checkbox" name="grant_travel_leave" value="1" class="form-check-input" id="grantTravelLeave" checked>
                                     <label class="form-check-label font-weight-bold" for="grantTravelLeave">Berikan 1 hari cuti perjalanan</label>
                                 </div>
-                                <small class="text-muted d-block mt-1">Jika tidak dicentang, tambahan satu hari tidak diberikan dan cadangan saldo akan dikembalikan.</small>
+                                <small class="text-muted d-block mt-1">Total {{ $leaveRequest->requested_days ?: 0 }} hari terdiri dari {{ $leaveRequest->requestedBalanceDays() }} hari pemotongan saldo + 1 hari perjalanan. Jika tidak diberikan, seluruh {{ $leaveRequest->requested_days ?: 0 }} hari akan dihitung sebagai cuti biasa dan harus didukung saldo yang cukup.</small>
                             </div>
                         @endif
                         @include('partials.profile-signature-notice')

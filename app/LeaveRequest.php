@@ -42,22 +42,22 @@ class LeaveRequest extends Model
 
     public function requestedBalanceDays()
     {
-        return $this->regularLeaveDays();
+        return max(0, $this->regularLeaveDays() - ($this->travel_leave_requested ? 1 : 0));
     }
 
     public function approvedBalanceDays()
     {
-        return $this->regularLeaveDays();
+        return max(0, $this->regularLeaveDays() - ($this->travel_leave_granted ? 1 : 0));
     }
 
     public function requestedTotalDays()
     {
-        return $this->regularLeaveDays() + ($this->travel_leave_requested ? 1 : 0);
+        return $this->regularLeaveDays();
     }
 
     public function approvedTotalDays()
     {
-        return $this->regularLeaveDays() + ($this->travel_leave_granted ? 1 : 0);
+        return $this->regularLeaveDays();
     }
 
     public function balanceDaysForCurrentStatus()

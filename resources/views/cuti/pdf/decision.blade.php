@@ -123,7 +123,7 @@ body { margin: 0; }
         <tr>
             <td width="13%">Selama</td>
             <td width="25%">
-                {{ $leaveRequest->requested_days ?: 0 }}
+                {{ $leaveRequest->travel_leave_granted ? $leaveRequest->approvedBalanceDays() : ($leaveRequest->requested_days ?: 0) }}
                 {{ in_array(optional($leaveRequest->leaveType)->code, [\App\LeaveType::CODE_SAKIT, \App\LeaveType::CODE_ALASAN_PENTING], true) ? 'Hari Kalender' : 'Hari Kerja' }}
                 @if($leaveRequest->travel_leave_granted)
                     <br>+ 1 hari cuti perjalanan
