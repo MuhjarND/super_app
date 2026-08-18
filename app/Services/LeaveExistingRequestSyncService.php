@@ -77,11 +77,7 @@ class LeaveExistingRequestSyncService
             $newApprovedDays = $newDays
                 + (in_array($request->status, $this->reservedStatuses(), true) && $request->travel_leave_requested ? 1 : 0)
                 + (in_array($request->status, $this->usedStatuses(), true) && $request->travel_leave_granted ? 1 : 0);
-            $newAccountedDays = $newDays + (
-                in_array($request->status, $this->reservedStatuses(), true) && $request->travel_leave_requested ? 1 : 0
-            ) + (
-                in_array($request->status, $this->usedStatuses(), true) && $request->travel_leave_granted ? 1 : 0
-            );
+            $newAccountedDays = $newDays;
 
             $requestChanged = (int) $request->requested_days !== $newDays
                 || (int) $request->workday_count !== $newDays

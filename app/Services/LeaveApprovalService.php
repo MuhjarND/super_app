@@ -109,7 +109,7 @@ class LeaveApprovalService
 
                 $leaveRequest->status = LeaveRequest::STATUS_SUBMITTED;
                 $leaveRequest->submitted_at = Carbon::now();
-                $leaveRequest->approved_days = $leaveRequest->requestedBalanceDays();
+                $leaveRequest->approved_days = $leaveRequest->requestedTotalDays();
                 $leaveRequest->approver_chain_snapshot = $steps;
                 $leaveRequest->save();
                 $leaveRequest->approvals()->delete();
@@ -179,7 +179,7 @@ class LeaveApprovalService
             } else {
                 $travelLeaveGranted = $leaveRequest->travel_leave_requested && (bool) $grantTravelLeave;
                 $leaveRequest->travel_leave_granted = $travelLeaveGranted;
-                $leaveRequest->approved_days = $leaveRequest->regularLeaveDays() + ($travelLeaveGranted ? 1 : 0);
+                $leaveRequest->approved_days = $leaveRequest->approvedTotalDays();
 
                 $decisionApproval = $linkedApproval ?: $approval;
                 $decisionApproval->meta_json = array_merge($decisionApproval->meta_json ?: [], [

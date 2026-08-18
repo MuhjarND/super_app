@@ -287,7 +287,7 @@
                     @elseif(in_array($leaveRequest->status, [\App\LeaveRequest::STATUS_APPROVED, \App\LeaveRequest::STATUS_COMPLETED], true))
                         Tidak diberikan
                     @else
-                        Diajukan (+1 hari dicadangkan)
+                        Diajukan (+1 hari menunggu persetujuan)
                     @endif
                 </div>
             </div>

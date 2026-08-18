@@ -42,10 +42,20 @@ class LeaveRequest extends Model
 
     public function requestedBalanceDays()
     {
-        return $this->regularLeaveDays() + ($this->travel_leave_requested ? 1 : 0);
+        return $this->regularLeaveDays();
     }
 
     public function approvedBalanceDays()
+    {
+        return $this->regularLeaveDays();
+    }
+
+    public function requestedTotalDays()
+    {
+        return $this->regularLeaveDays() + ($this->travel_leave_requested ? 1 : 0);
+    }
+
+    public function approvedTotalDays()
     {
         return $this->regularLeaveDays() + ($this->travel_leave_granted ? 1 : 0);
     }
@@ -60,7 +70,7 @@ class LeaveRequest extends Model
             return $this->requestedBalanceDays();
         }
 
-        return (int) ($this->approved_days ?: $this->requested_days ?: $this->workday_count ?: 0);
+        return $this->regularLeaveDays();
     }
 
     public function getPeriodLabelAttribute()

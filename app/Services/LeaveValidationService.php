@@ -46,15 +46,7 @@ class LeaveValidationService
         $leaveRequest->requested_days = $requestedDays;
 
         $this->validateServiceYears($leaveRequest, $user, $leaveType, $leaveRequest->start_date);
-        $balanceDays = $requestedDays + ($leaveRequest->travel_leave_requested ? 1 : 0);
-        $this->validateBalance(
-            $user,
-            $leaveType,
-            $balanceDays,
-            $leaveRequest->start_date,
-            $leaveRequest->travel_leave_requested,
-            $requestedDays
-        );
+        $this->validateBalance($user, $leaveType, $requestedDays, $leaveRequest->start_date);
         $childNumberContext = !is_null(optional($user)->jumlah_anak)
             ? ((int) $user->jumlah_anak + 1)
             : null;
@@ -131,7 +123,7 @@ class LeaveValidationService
             || str_contains($purpose, 'kelahiran anak ke-4');
     }
 
-    protected function validateBalance(User $user, LeaveType $leaveType, $requestedDays, $startDate, $includesTravelLeave = false, $regularDays = null)
+    protected function validateBalance(User $user, LeaveType $leaveType, $requestedDays, $startDate)
     {
         if (!$leaveType->requires_balance) {
             return;
@@ -143,15 +135,13 @@ class LeaveValidationService
 
         $balance = $this->balanceService->getBalanceSnapshot($user, $leaveType, $start->year);
         if (($balance['remaining_balance'] ?? 0) < $requestedDays) {
-            $message = $includesTravelLeave
-                ? sprintf(
-                    'Saldo cuti tidak mencukupi. Pengajuan membutuhkan %d hari (%d hari cuti + 1 hari cuti perjalanan), sedangkan saldo tersedia %d hari.',
+            throw ValidationException::withMessages([
+                'start_date' => sprintf(
+                    'Saldo cuti tidak mencukupi. Pengajuan membutuhkan %d hari kerja, sedangkan saldo tersedia %d hari.',
                     $requestedDays,
-                    (int) $regularDays,
                     (int) ($balance['remaining_balance'] ?? 0)
-                )
-                : 'Saldo cuti tidak mencukupi.';
-            throw ValidationException::withMessages(['start_date' => $message]);
+                ),
+            ]);
         }
     }
 

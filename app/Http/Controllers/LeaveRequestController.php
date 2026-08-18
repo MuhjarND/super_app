@@ -175,7 +175,7 @@ class LeaveRequestController extends Controller
         $this->authorize('submit', $leaveRequest);
         $leaveRequest->load(['user', 'leaveType', 'documents']);
         $this->validator->validateForSubmit($leaveRequest);
-        $leaveRequest->approved_days = $leaveRequest->requestedBalanceDays();
+        $leaveRequest->approved_days = $leaveRequest->requestedTotalDays();
         $leaveRequest->save();
         $this->approvalService->submit($leaveRequest);
         event(new LeaveRequestSubmitted($leaveRequest, auth()->user()));
