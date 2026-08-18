@@ -155,7 +155,7 @@
     }
 
     document.addEventListener('click', function (event) {
-        var trigger = event.target.closest('.js-share-surat-masuk, .js-share-surat');
+        var trigger = event.target.closest('.js-share-surat-masuk');
         if (!trigger) return;
         event.preventDefault();
         share(payloadFromElement(trigger));

@@ -1191,7 +1191,8 @@
 <?php $__env->stopSection(); ?>
 
 <?php $__env->startPush('scripts'); ?>
-    <script src="{{ asset('js/surat-masuk-share.js') }}"></script>
+    <script src="{{ asset('js/surat-masuk-share.js') }}?v={{ filemtime(public_path('js/surat-masuk-share.js')) }}"></script>
+    <script src="{{ asset('js/surat-keluar-share.js') }}?v={{ filemtime(public_path('js/surat-keluar-share.js')) }}"></script>
     <!-- DataTables JS -->
     <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap4.min.js"></script>

@@ -605,7 +605,7 @@
 @endsection
 
 @push('scripts')
-    <script src="{{ asset('js/surat-masuk-share.js') }}"></script>
+    <script src="{{ asset('js/surat-masuk-share.js') }}?v={{ filemtime(public_path('js/surat-masuk-share.js')) }}"></script>
     <script>
         $(document).ready(function () {
             function loadDisposisiTargetsShow() {
