@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\SuratKeluarApproval;
 use App\SuratKeluar;
+use App\Support\DocumentFilename;
 use Barryvdh\DomPDF\Facade as PDF;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\URL;
@@ -96,7 +97,11 @@ class SuratTemplateDocumentService
             'pdfVerification' => $this->pdfVerificationService->viewData($verification),
         ])->setPaper('a4', 'portrait')->output();
 
-        return $this->pdfVerificationService->response($content, $verification, 'surat-keluar-' . $suratKeluar->id . '.pdf');
+        return $this->pdfVerificationService->response(
+            $content,
+            $verification,
+            DocumentFilename::fromLetter($suratKeluar->nomor_surat_formatted, $suratKeluar->perihal)
+        );
     }
 
     public function createGeneratedTempFile(SuratKeluar $suratKeluar, $prefix = 'surat-keluar')
@@ -129,7 +134,11 @@ class SuratTemplateDocumentService
             'pdfVerification' => $this->pdfVerificationService->viewData($verification),
         ])->setPaper('a4', 'portrait')->output();
 
-        $this->pdfVerificationService->finalize($verification, $content, 'surat-keluar-' . $suratKeluar->id . '.pdf');
+        $this->pdfVerificationService->finalize(
+            $verification,
+            $content,
+            DocumentFilename::fromLetter($suratKeluar->nomor_surat_formatted, $suratKeluar->perihal)
+        );
 
         $dir = storage_path('app/temp/surat-keluar');
         if (!is_dir($dir)) {

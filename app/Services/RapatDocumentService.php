@@ -8,6 +8,7 @@ use App\Rapat;
 use App\RapatNotulensi;
 use App\RapatNotulensiApproval;
 use App\SuratKeluar;
+use App\Support\DocumentFilename;
 use App\User;
 use Barryvdh\DomPDF\Facade as PDF;
 use Carbon\Carbon;
@@ -334,7 +335,11 @@ class RapatDocumentService
         );
 
         $content = $this->buildUndanganPdfContent($rapat, $signed, $verification);
-        $this->pdfVerificationService->finalize($verification, $content, 'undangan-rapat-' . $rapat->id . '.pdf');
+        $this->pdfVerificationService->finalize(
+            $verification,
+            $content,
+            DocumentFilename::fromLetter($suratKeluar->nomor_surat_formatted, $suratKeluar->perihal ?: $rapat->judul)
+        );
 
         $suratKeluar->update([
             'status' => $signed ? 'lengkap' : 'draft',
@@ -371,7 +376,10 @@ class RapatDocumentService
             $this->buildRapatSigners($rapat),
             ['nomor' => $suratKeluar->nomor_surat ?: $rapat->nomor_undangan]
         );
-        $filename = 'undangan-rapat-' . $rapat->id . '.pdf';
+        $filename = DocumentFilename::fromLetter(
+            $suratKeluar->nomor_surat_formatted,
+            $suratKeluar->perihal ?: $rapat->judul
+        );
         $content = $this->buildUndanganPdfContent($rapat, $signed, $verification);
 
         return $this->pdfVerificationService->response($content, $verification, $filename);
@@ -429,9 +437,15 @@ class RapatDocumentService
             $this->mergePdfFiles($tempFiles, $mergedPath);
             $tempFiles[] = $mergedPath;
 
+            $firstLetter = $letters->first();
+            $filename = DocumentFilename::fromLetter(
+                optional($firstLetter)->nomor_surat_formatted,
+                optional($firstLetter)->perihal ?: $rapat->judul
+            );
+
             return response(File::get($mergedPath), 200, [
                 'Content-Type' => 'application/pdf',
-                'Content-Disposition' => 'inline; filename="undangan-rapat-satker-' . $rapat->id . '.pdf"',
+                'Content-Disposition' => 'inline; filename="' . $filename . '"',
             ]);
         } finally {
             foreach ($tempFiles as $tempFile) {
@@ -499,7 +513,11 @@ class RapatDocumentService
             ['nomor' => $suratKeluar->nomor_surat ?: $rapat->nomor_undangan]
         );
         $content = $this->buildUndanganPdfContent($rapat, $signed, $verification);
-        $this->pdfVerificationService->finalize($verification, $content, 'undangan-rapat-' . $rapat->id . '.pdf');
+        $this->pdfVerificationService->finalize(
+            $verification,
+            $content,
+            DocumentFilename::fromLetter($suratKeluar->nomor_surat_formatted, $suratKeluar->perihal ?: $rapat->judul)
+        );
         $path = $this->makeTempPdfPath($prefix . '-' . $rapat->id);
         File::put($path, $content);
 
@@ -605,7 +623,10 @@ class RapatDocumentService
                 'tujuan' => $destination,
             ]
         );
-        $filename = 'undangan-rapat-satker-' . $rapat->id . '-' . $letter->id . '.pdf';
+        $filename = DocumentFilename::fromLetter(
+            $letter->nomor_surat_formatted,
+            $letter->perihal ?: $rapat->judul
+        );
 
         return [
             'verification' => $verification,
@@ -655,8 +676,8 @@ class RapatDocumentService
         $usesManualSignatoryTitle = trim((string) $rapat->approval1_jabatan_manual) !== '';
         $showTembusan = $hasSignatoryContext
             && !($usesManualSignatoryTitle
-                ? $this->isKetuaOrWakilTitle($rapat->approval1_jabatan_manual)
-                : $this->isKetuaOrWakilKetua($signatory));
+                ? $this->isKetuaTitle($rapat->approval1_jabatan_manual)
+                : $this->isKetua($signatory));
         $issueDate = $rapat->created_at
             ? $rapat->created_at->copy()->timezone('Asia/Jayapura')
             : Carbon::now('Asia/Jayapura');
@@ -1023,7 +1044,7 @@ class RapatDocumentService
             . 'kehadiran Saudara pada kegiatan dimaksud yang akan dilaksanakan pada:';
     }
 
-    protected function isKetuaOrWakilKetua($user)
+    protected function isKetua($user)
     {
         if (!$user) {
             return false;
@@ -1031,10 +1052,10 @@ class RapatDocumentService
 
         $code = strtoupper((string) optional($user->jabatan)->kode);
 
-        return in_array($code, ['KPTA', 'WKPTA'], true);
+        return $code === 'KPTA';
     }
 
-    protected function isKetuaOrWakilTitle($title)
+    protected function isKetuaTitle($title)
     {
         $normalized = strtoupper(trim((string) $title));
 
@@ -1042,7 +1063,14 @@ class RapatDocumentService
             return false;
         }
 
-        return strpos($normalized, 'KETUA') !== false || strpos($normalized, 'WAKIL KETUA') !== false;
+        if (strpos($normalized, 'WAKIL') !== false) {
+            return false;
+        }
+
+        return $normalized === 'KPTA'
+            || $normalized === 'KETUA'
+            || strpos($normalized, 'KETUA PTA') !== false
+            || strpos($normalized, 'KETUA PENGADILAN TINGGI AGAMA') !== false;
     }
 
     protected function fileToDataUri($path)

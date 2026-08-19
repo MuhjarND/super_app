@@ -11,6 +11,7 @@ use App\Services\LeaveDocumentService;
 use App\Services\RapatDocumentService;
 use App\Services\DocumentPreviewService;
 use App\Services\WhatsAppNotificationService;
+use App\Support\DocumentFilename;
 use App\User;
 use App\WhatsAppNotificationLog;
 use Illuminate\Http\Request;
@@ -525,7 +526,12 @@ class SuratKeluarController extends Controller
             ->first();
 
         if ($verification && $verification->file_path) {
-            return response()->file(Storage::disk('public')->path($verification->file_path));
+            return response()->file(Storage::disk('public')->path($verification->file_path), [
+                'Content-Disposition' => 'inline; filename="' . DocumentFilename::fromLetter(
+                    $suratKeluar->nomor_surat_formatted,
+                    $suratKeluar->perihal
+                ) . '"',
+            ]);
         }
 
         abort(404, 'File tidak ditemukan.');

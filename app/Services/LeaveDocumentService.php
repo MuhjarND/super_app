@@ -9,6 +9,7 @@ use App\LeaveRequestDocument;
 use App\LeaveType;
 use App\KlasifikasiKode;
 use App\SuratKeluar;
+use App\Support\DocumentFilename;
 use Barryvdh\DomPDF\Facade as PDF;
 use Carbon\Carbon;
 use DateTimeInterface;
@@ -78,6 +79,7 @@ class LeaveDocumentService
             'documents',
             'approvals.approver.jabatan',
             'creator',
+            'suratKeluar',
         ]);
         $content = $this->buildDecisionPdfContent($leaveRequest);
 
@@ -315,7 +317,13 @@ class LeaveDocumentService
 
     protected function buildFilename(LeaveRequest $leaveRequest)
     {
-        return 'form-cuti-final-' . Str::slug(optional($leaveRequest->user)->name ?: 'pegawai') . '.pdf';
+        $subject = optional($leaveRequest->suratKeluar)->perihal
+            ?: $this->buildSuratKeluarPerihal($leaveRequest);
+
+        return DocumentFilename::fromLetter(
+            $leaveRequest->letter_number ?: $leaveRequest->request_number,
+            $subject
+        );
     }
 
     protected function buildStorageFilename(LeaveRequest $leaveRequest)

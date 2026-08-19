@@ -9,6 +9,7 @@ use App\Jabatan;
 use App\User;
 use App\Services\ActivityAuditService;
 use App\Services\WhatsAppNotificationService;
+use App\Support\DocumentFilename;
 use Barryvdh\DomPDF\Facade as PDF;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -415,7 +416,10 @@ class DisposisiController extends Controller
             'petunjukOptions'
         ))->setPaper('a4', 'portrait');
 
-        return $pdf->stream('lembar-disposisi-' . $disposisi->id . '.pdf');
+        return $pdf->stream(DocumentFilename::fromLetter(
+            optional($suratMasuk)->nomor_surat,
+            'Lembar Disposisi - ' . (optional($suratMasuk)->perihal ?: 'Tanpa Perihal')
+        ));
     }
 
     protected function authorizeDokumentasi(DisposisiDokumentasi $dokumentasi)

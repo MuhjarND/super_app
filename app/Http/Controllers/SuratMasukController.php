@@ -11,6 +11,7 @@ use App\User;
 use App\Disposisi;
 use App\Services\WhatsAppNotificationService;
 use App\Services\DocumentPreviewService;
+use App\Support\DocumentFilename;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -647,7 +648,12 @@ class SuratMasukController extends Controller
     {
         abort_unless(auth()->user()->canViewSuratMasuk($suratMasuk), 403);
 
-        return Storage::disk('public')->download($suratMasuk->file_path);
+        $extension = pathinfo((string) $suratMasuk->file_path, PATHINFO_EXTENSION);
+
+        return Storage::disk('public')->download(
+            $suratMasuk->file_path,
+            DocumentFilename::fromLetter($suratMasuk->nomor_surat, $suratMasuk->perihal, $extension)
+        );
     }
 
     protected function syncKategoriDanKlasifikasi($opsiPengirim, $klasifikasiId, $kategoriId)

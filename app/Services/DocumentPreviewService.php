@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Support\DocumentFilename;
 use Illuminate\Support\Facades\Storage;
 
 class DocumentPreviewService
@@ -12,16 +13,19 @@ class DocumentPreviewService
 
         $path = Storage::disk('public')->path($relativePath);
         $extension = strtolower(pathinfo($path, PATHINFO_EXTENSION));
+        $filename = DocumentFilename::fromTitle($title, $extension);
 
         if (in_array($extension, ['doc', 'docx'], true)) {
             return response()->file($path, [
                 'Content-Type' => $this->wordMimeType($extension),
-                'Content-Disposition' => 'inline; filename="' . addslashes(basename($path)) . '"',
+                'Content-Disposition' => 'inline; filename="' . addslashes($filename) . '"',
                 'X-Content-Type-Options' => 'nosniff',
             ]);
         }
 
-        return response()->file($path);
+        return response()->file($path, [
+            'Content-Disposition' => 'inline; filename="' . addslashes($filename) . '"',
+        ]);
     }
 
     protected function wordMimeType($extension)
