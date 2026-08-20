@@ -415,11 +415,7 @@ class LeaveDocumentService
             $balance = $tahunan
                 ? LeaveBalance::where('user_id', $leaveRequest->user_id)->where('leave_type_id', $tahunan->id)->where('year', $year)->first()
                 : null;
-            $remainingAtRequest = $this->resolveAnnualLeaveBalanceAtRequest(
-                $balance,
-                $leaveRequest,
-                $year
-            );
+            $remainingAtRequest = $this->resolveCurrentAnnualLeaveBalance($balance, $leaveRequest);
 
             $rows[] = [
                 'year' => $year,
@@ -432,47 +428,18 @@ class LeaveDocumentService
         return $rows;
     }
 
-    protected function resolveAnnualLeaveBalanceAtRequest($balance, LeaveRequest $leaveRequest, $year)
+    protected function resolveCurrentAnnualLeaveBalance($balance, LeaveRequest $leaveRequest = null)
     {
         if (!$balance) {
             return 0;
         }
 
-        $currentRemaining = max(0, (int) $balance->remaining_balance);
-        $isCurrentAnnualRequest = (int) $leaveRequest->leave_type_id === (int) $balance->leave_type_id
-            && (int) $year === (int) optional($leaveRequest->start_date)->year;
-
-        if (!$isCurrentAnnualRequest) {
-            return $currentRemaining;
-        }
-
-        $snapshot = collect($leaveRequest->approver_chain_snapshot ?: [])
-            ->pluck('leave_balance_snapshot')
-            ->filter()
-            ->first(function ($item) use ($balance, $year) {
-                return (int) data_get($item, 'leave_type_id') === (int) $balance->leave_type_id
-                    && (int) data_get($item, 'year') === (int) $year;
-            });
-
-        if (!is_null(data_get($snapshot, 'remaining_balance'))) {
-            return max(0, (int) data_get($snapshot, 'remaining_balance'));
-        }
-
-        $balanceDeductedStatuses = [
-            LeaveRequest::STATUS_SUBMITTED,
-            LeaveRequest::STATUS_UNDER_REVIEW,
-            LeaveRequest::STATUS_VERIFIED,
-            LeaveRequest::STATUS_APPROVED,
-            LeaveRequest::STATUS_COMPLETED,
-        ];
-
-        if (!in_array($leaveRequest->status, $balanceDeductedStatuses, true)) {
-            return $currentRemaining;
-        }
-
-        $takenDays = $leaveRequest->balanceDaysForCurrentStatus();
-
-        return max(0, $currentRemaining + $takenDays);
+        // $leaveRequest tetap diterima agar perilaku ini dapat diuji terhadap
+        // data lama yang masih menyimpan snapshot saldo. Saldo pada PDF harus
+        // selalu mengikuti rekap terbaru. Snapshot ketika
+        // pengajuan pertama kali dikirim dapat menjadi usang setelah tanggal,
+        // cuti bersama, atau rekap saldo diperbarui.
+        return max(0, (int) $balance->remaining_balance);
     }
 
     protected function buildParaf($approval = null)
@@ -715,9 +682,7 @@ class LeaveDocumentService
             $takenDays = $leaveRequest->balanceDaysForCurrentStatus();
 
             if ($takenDays > 0) {
-                $remainingAfterRequest = max(0, $remainingAtRequest - $takenDays);
-
-                return sprintf('Diambil %d hari sisa %d', $takenDays, $remainingAfterRequest);
+                return sprintf('Diambil %d hari sisa %d', $takenDays, $remainingAtRequest);
             }
         }
 

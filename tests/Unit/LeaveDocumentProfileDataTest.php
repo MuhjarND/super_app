@@ -67,7 +67,7 @@ class LeaveDocumentProfileDataTest extends TestCase
         ]);
 
         $this->assertSame(
-            'Diambil 3 hari sisa 10',
+            'Diambil 3 hari sisa 13',
             $method->invoke($service, $balance, $request, 2026)
         );
     }
@@ -122,18 +122,18 @@ class LeaveDocumentProfileDataTest extends TestCase
         ]);
 
         $this->assertSame(
-            'Diambil 4 hari sisa 4',
+            'Diambil 4 hari sisa 8',
             $method->invoke($service, $balance, $request, 2026, 8)
         );
     }
 
-    public function test_annual_leave_balance_restores_current_request_days_for_legacy_requests()
+    public function test_annual_leave_balance_uses_latest_remaining_balance()
     {
         $service = new LeaveDocumentService(
             $this->createMock(DocumentQrCodeService::class),
             $this->createMock(PdfVerificationService::class)
         );
-        $method = new ReflectionMethod($service, 'resolveAnnualLeaveBalanceAtRequest');
+        $method = new ReflectionMethod($service, 'resolveCurrentAnnualLeaveBalance');
         $method->setAccessible(true);
 
         $balance = new LeaveBalance();
@@ -150,16 +150,16 @@ class LeaveDocumentProfileDataTest extends TestCase
             'status' => LeaveRequest::STATUS_APPROVED,
         ]);
 
-        $this->assertSame(12, $method->invoke($service, $balance, $request, 2026));
+        $this->assertSame(8, $method->invoke($service, $balance, $request));
     }
 
-    public function test_annual_leave_balance_uses_submission_snapshot_when_available()
+    public function test_annual_leave_balance_ignores_stale_submission_snapshot()
     {
         $service = new LeaveDocumentService(
             $this->createMock(DocumentQrCodeService::class),
             $this->createMock(PdfVerificationService::class)
         );
-        $method = new ReflectionMethod($service, 'resolveAnnualLeaveBalanceAtRequest');
+        $method = new ReflectionMethod($service, 'resolveCurrentAnnualLeaveBalance');
         $method->setAccessible(true);
 
         $balance = new LeaveBalance();
@@ -183,6 +183,6 @@ class LeaveDocumentProfileDataTest extends TestCase
             ]]),
         ]);
 
-        $this->assertSame(12, $method->invoke($service, $balance, $request, 2026));
+        $this->assertSame(4, $method->invoke($service, $balance, $request));
     }
 }
