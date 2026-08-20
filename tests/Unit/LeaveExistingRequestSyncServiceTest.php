@@ -6,6 +6,7 @@ use App\LeaveBalance;
 use App\LeaveHoliday;
 use App\LeaveRequest;
 use App\LeaveType;
+use App\User;
 use App\Services\LeaveExistingRequestSyncService;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -37,6 +38,7 @@ class LeaveExistingRequestSyncServiceTest extends TestCase
             $table->boolean('travel_leave_granted')->default(false);
             $table->string('purpose')->default('Keperluan');
             $table->string('status', 30)->default('draft');
+            $table->unsignedBigInteger('updated_by')->nullable();
             $table->timestamps();
         });
         Schema::create('leave_holidays', function (Blueprint $table) {
@@ -143,6 +145,36 @@ class LeaveExistingRequestSyncServiceTest extends TestCase
         $this->assertSame(3, $leaveRequest->approved_days);
         $this->assertSame(2, $balance->reserved_days);
         $this->assertSame(10, $balance->remaining_balance);
+    }
+
+    public function test_superadmin_can_change_request_dates_and_reserved_balance_is_recalculated(): void
+    {
+        [$leaveType, $leaveRequest] = $this->createAnnualRequest(LeaveRequest::STATUS_VERIFIED, 3);
+        $leaveRequest->travel_leave_requested = true;
+        $leaveRequest->approved_days = 3;
+        $leaveRequest->save();
+        $balance = $this->createBalance($leaveType, 0, 2);
+        $this->createCollectiveLeave();
+        $actor = (new User())->forceFill(['id' => 99, 'name' => 'Superadmin']);
+
+        app(LeaveExistingRequestSyncService::class)->updateRequestDates(
+            $leaveRequest,
+            '2026-08-24',
+            '2026-08-28',
+            $actor,
+            'Penyesuaian tanggal sesuai dokumen pegawai.'
+        );
+
+        $leaveRequest->refresh();
+        $balance->refresh();
+        $this->assertSame('2026-08-24', $leaveRequest->start_date->toDateString());
+        $this->assertSame('2026-08-28', $leaveRequest->end_date->toDateString());
+        $this->assertSame(4, $leaveRequest->requested_days);
+        $this->assertSame(4, $leaveRequest->approved_days);
+        $this->assertSame(4, $leaveRequest->workday_count);
+        $this->assertSame(99, (int) $leaveRequest->updated_by);
+        $this->assertSame(3, $balance->reserved_days);
+        $this->assertSame(9, $balance->remaining_balance);
     }
 
     protected function createAnnualRequest($status, $days)

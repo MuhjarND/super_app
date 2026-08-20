@@ -3,10 +3,14 @@
 namespace App\Services;
 
 use App\LeaveBalance;
+use App\LeaveAuditTrail;
 use App\LeaveRequest;
+use App\User;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Validation\ValidationException;
 
 class LeaveExistingRequestSyncService
 {
@@ -100,6 +104,113 @@ class LeaveExistingRequestSyncService
 
             return true;
         });
+    }
+
+    public function updateRequestDates(LeaveRequest $leaveRequest, $startDate, $endDate, User $actor, $note)
+    {
+        return DB::transaction(function () use ($leaveRequest, $startDate, $endDate, $actor, $note) {
+            $request = LeaveRequest::with('leaveType')->lockForUpdate()->findOrFail($leaveRequest->id);
+            $start = Carbon::parse($startDate)->startOfDay();
+            $end = Carbon::parse($endDate)->startOfDay();
+            $oldStart = optional($request->start_date)->toDateString();
+            $oldEnd = optional($request->end_date)->toDateString();
+            $oldYear = optional($request->start_date)->year;
+            $oldDays = $request->regularLeaveDays();
+
+            if ($oldYear && (int) $oldYear !== (int) $start->year) {
+                throw ValidationException::withMessages([
+                    'start_date' => 'Tanggal mulai baru harus berada pada tahun yang sama dengan pengajuan semula agar saldo tahunan tidak berpindah tahun.',
+                ]);
+            }
+
+            $newDays = $this->dateService->countEffectiveDates($start, $end, $request->leaveType);
+            if ($newDays < 1) {
+                throw ValidationException::withMessages([
+                    'end_date' => 'Rentang tanggal baru tidak memiliki hari cuti efektif setelah hari libur dan cuti bersama dikeluarkan.',
+                ]);
+            }
+
+            $overlaps = LeaveRequest::where('user_id', $request->user_id)
+                ->where('id', '!=', $request->id)
+                ->whereIn('status', array_merge($this->reservedStatuses(), $this->usedStatuses()))
+                ->where(function ($query) use ($start, $end) {
+                    $query->whereBetween('start_date', [$start->toDateString(), $end->toDateString()])
+                        ->orWhereBetween('end_date', [$start->toDateString(), $end->toDateString()])
+                        ->orWhere(function ($nested) use ($start, $end) {
+                            $nested->whereDate('start_date', '<=', $start->toDateString())
+                                ->whereDate('end_date', '>=', $end->toDateString());
+                        });
+                })
+                ->exists();
+
+            if ($overlaps) {
+                throw ValidationException::withMessages(['start_date' => 'Tanggal cuti baru bentrok dengan pengajuan lain milik pegawai tersebut.']);
+            }
+
+            $oldAccountedDays = $this->accountedDays($request, $request->regularLeaveDays());
+            $newAccountedDays = $this->accountedDays($request, $newDays);
+            $difference = $newAccountedDays - $oldAccountedDays;
+
+            if ($difference > 0 && $request->leaveType && $request->leaveType->requires_balance) {
+                $balance = LeaveBalance::where('user_id', $request->user_id)
+                    ->where('leave_type_id', $request->leave_type_id)
+                    ->where('year', $start->year)
+                    ->lockForUpdate()
+                    ->first();
+                $availableForRequest = (int) optional($balance)->remaining_balance + $oldAccountedDays;
+
+                if (!$balance || $newAccountedDays > $availableForRequest) {
+                    throw ValidationException::withMessages([
+                        'end_date' => sprintf(
+                            'Saldo cuti tidak mencukupi untuk perubahan tanggal. Dibutuhkan %d hari, sedangkan saldo yang tersedia untuk pengajuan ini %d hari.',
+                            $newAccountedDays,
+                            max(0, $availableForRequest)
+                        ),
+                    ]);
+                }
+            }
+
+            $request->start_date = $start;
+            $request->end_date = $end;
+            $request->requested_days = $newDays;
+            $request->workday_count = $newDays;
+            if ($this->shouldStoreApprovedDays($request)) {
+                $request->approved_days = $newDays;
+            }
+            $request->updated_by = $actor->id;
+            $request->save();
+
+            $this->adjustBalance($request, $difference);
+
+            if (Schema::hasTable('leave_audit_trails')) {
+                LeaveAuditTrail::create([
+                    'leave_request_id' => $request->id,
+                    'actor_id' => $actor->id,
+                    'event' => 'dates_updated_by_superadmin',
+                    'old_values_json' => ['start_date' => $oldStart, 'end_date' => $oldEnd, 'days' => $oldDays],
+                    'new_values_json' => ['start_date' => $start->toDateString(), 'end_date' => $end->toDateString(), 'days' => $newDays],
+                    'note' => trim((string) $note),
+                    'ip_address' => request() ? request()->ip() : null,
+                    'user_agent' => request() ? request()->userAgent() : null,
+                    'created_at' => now('Asia/Jayapura'),
+                ]);
+            }
+
+            return $request->fresh('leaveType');
+        });
+    }
+
+    protected function accountedDays(LeaveRequest $request, $effectiveDays)
+    {
+        if (in_array($request->status, $this->reservedStatuses(), true)) {
+            return max(0, (int) $effectiveDays - ($request->travel_leave_requested ? 1 : 0));
+        }
+
+        if (in_array($request->status, $this->usedStatuses(), true)) {
+            return max(0, (int) $effectiveDays - ($request->travel_leave_granted ? 1 : 0));
+        }
+
+        return 0;
     }
 
     protected function syncQuery(Builder $query)

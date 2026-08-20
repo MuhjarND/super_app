@@ -8,6 +8,7 @@ use App\LeaveType;
 use App\Unit;
 use App\User;
 use App\Services\LeaveBalanceService;
+use App\Services\LeaveExistingRequestSyncService;
 use Barryvdh\DomPDF\Facade as PDF;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -131,8 +132,40 @@ class LeaveReportController extends Controller
         }
 
         [$leaveRequests, $filters, $leaveTypes, $units] = $this->buildRequestReport($request);
+        $canEditLeaveDates = auth()->user()->isSuperAdmin();
 
-        return view('cuti.reports.index', compact('leaveRequests', 'filters', 'leaveTypes', 'units'));
+        return view('cuti.reports.index', compact('leaveRequests', 'filters', 'leaveTypes', 'units', 'canEditLeaveDates'));
+    }
+
+    public function updateReportedDates(Request $request, LeaveRequest $leaveRequest, LeaveExistingRequestSyncService $syncService)
+    {
+        abort_unless(auth()->check() && auth()->user()->isSuperAdmin(), 403);
+        abort_unless($this->moduleReady(), 503);
+
+        $validated = $request->validate([
+            'start_date' => 'required|date',
+            'end_date' => 'required|date|after_or_equal:start_date',
+            'change_note' => 'required|string|max:500',
+        ], [], [
+            'start_date' => 'tanggal mulai',
+            'end_date' => 'tanggal selesai',
+            'change_note' => 'alasan perubahan',
+        ]);
+
+        $syncService->updateRequestDates(
+            $leaveRequest,
+            $validated['start_date'],
+            $validated['end_date'],
+            auth()->user(),
+            $validated['change_note']
+        );
+
+        return back()->with('success', sprintf(
+            'Tanggal cuti %s berhasil diubah menjadi %s sampai %s.',
+            optional($leaveRequest->user)->name ?: 'pegawai',
+            date('d-m-Y', strtotime($validated['start_date'])),
+            date('d-m-Y', strtotime($validated['end_date']))
+        ));
     }
 
     public function pdf(Request $request)

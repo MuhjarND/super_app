@@ -187,6 +187,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/saldo/pdf', 'LeaveReportController@balancesPdf')->name('balances.pdf');
         Route::get('/saldo/excel', 'LeaveReportController@balancesExcel')->name('balances.excel');
         Route::get('/laporan', 'LeaveReportController@index')->name('reports.index');
+        Route::put('/laporan/{leaveRequest}/tanggal', 'LeaveReportController@updateReportedDates')->name('reports.dates.update');
         Route::get('/laporan/pdf', 'LeaveReportController@pdf')->name('reports.pdf');
         Route::get('/laporan/excel', 'LeaveReportController@excel')->name('reports.excel');
 

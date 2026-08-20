@@ -109,6 +109,24 @@ class LeaveTravelBalanceTest extends TestCase
         $this->assertSame(0, (int) $balance->fresh()->remaining_balance);
     }
 
+    public function test_travel_leave_description_is_shown_in_pdf_context_before_and_after_approval(): void
+    {
+        [$request] = $this->makeRequestAndBalance();
+        $request->status = LeaveRequest::STATUS_SUBMITTED;
+
+        $this->assertTrue($request->showsTravelLeaveInDocument());
+        $this->assertSame(2, $request->documentLeaveBalanceDays());
+
+        $request->status = LeaveRequest::STATUS_APPROVED;
+        $request->travel_leave_granted = true;
+        $this->assertTrue($request->showsTravelLeaveInDocument());
+        $this->assertSame(2, $request->documentLeaveBalanceDays());
+
+        $request->travel_leave_granted = false;
+        $this->assertFalse($request->showsTravelLeaveInDocument());
+        $this->assertSame(3, $request->documentLeaveBalanceDays());
+    }
+
     protected function makeRequestAndBalance($requestedDays = 3, $availableBalance = 12)
     {
         $user = User::create(['name' => 'Pegawai']);

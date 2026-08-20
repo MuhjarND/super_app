@@ -60,6 +60,30 @@ class LeaveRequest extends Model
         return $this->regularLeaveDays();
     }
 
+    public function showsTravelLeaveInDocument()
+    {
+        if (in_array($this->status, [self::STATUS_APPROVED, self::STATUS_COMPLETED], true)) {
+            return (bool) $this->travel_leave_granted;
+        }
+
+        if (in_array($this->status, [self::STATUS_REJECTED, self::STATUS_CANCELLED], true)) {
+            return false;
+        }
+
+        return (bool) $this->travel_leave_requested;
+    }
+
+    public function documentLeaveBalanceDays()
+    {
+        if (!$this->showsTravelLeaveInDocument()) {
+            return $this->regularLeaveDays();
+        }
+
+        return in_array($this->status, [self::STATUS_APPROVED, self::STATUS_COMPLETED], true)
+            ? $this->approvedBalanceDays()
+            : $this->requestedBalanceDays();
+    }
+
     public function balanceDaysForCurrentStatus()
     {
         if (in_array($this->status, [self::STATUS_APPROVED, self::STATUS_COMPLETED], true)) {

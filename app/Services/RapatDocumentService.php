@@ -676,8 +676,8 @@ class RapatDocumentService
         $usesManualSignatoryTitle = trim((string) $rapat->approval1_jabatan_manual) !== '';
         $showTembusan = $hasSignatoryContext
             && !($usesManualSignatoryTitle
-                ? $this->isKetuaTitle($rapat->approval1_jabatan_manual)
-                : $this->isKetua($signatory));
+                ? $this->isKetuaOrWakilTitle($rapat->approval1_jabatan_manual)
+                : $this->isKetuaOrWakil($signatory));
         $issueDate = $rapat->created_at
             ? $rapat->created_at->copy()->timezone('Asia/Jayapura')
             : Carbon::now('Asia/Jayapura');
@@ -1044,7 +1044,7 @@ class RapatDocumentService
             . 'kehadiran Saudara pada kegiatan dimaksud yang akan dilaksanakan pada:';
     }
 
-    protected function isKetua($user)
+    protected function isKetuaOrWakil($user)
     {
         if (!$user) {
             return false;
@@ -1052,10 +1052,10 @@ class RapatDocumentService
 
         $code = strtoupper((string) optional($user->jabatan)->kode);
 
-        return $code === 'KPTA';
+        return in_array($code, ['KPTA', 'WKPTA'], true);
     }
 
-    protected function isKetuaTitle($title)
+    protected function isKetuaOrWakilTitle($title)
     {
         $normalized = strtoupper(trim((string) $title));
 
@@ -1063,12 +1063,12 @@ class RapatDocumentService
             return false;
         }
 
-        if (strpos($normalized, 'WAKIL') !== false) {
-            return false;
-        }
-
         return $normalized === 'KPTA'
+            || $normalized === 'WKPTA'
             || $normalized === 'KETUA'
+            || $normalized === 'WAKIL KETUA'
+            || strpos($normalized, 'WAKIL KETUA PTA') !== false
+            || strpos($normalized, 'WAKIL KETUA PENGADILAN TINGGI AGAMA') !== false
             || strpos($normalized, 'KETUA PTA') !== false
             || strpos($normalized, 'KETUA PENGADILAN TINGGI AGAMA') !== false;
     }

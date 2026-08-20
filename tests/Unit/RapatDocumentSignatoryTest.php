@@ -60,33 +60,33 @@ class RapatDocumentSignatoryTest extends TestCase
         $this->assertSame('Pengadilan Tinggi Agama Papua Barat', $title['line2']);
     }
 
-    public function test_only_kpta_is_excluded_from_tembusan(): void
+    public function test_kpta_and_wkpta_are_excluded_from_tembusan(): void
     {
         $service = new RapatDocumentService(
             $this->createMock(DocumentQrCodeService::class),
             $this->createMock(PdfVerificationService::class)
         );
-        $method = new ReflectionMethod($service, 'isKetua');
+        $method = new ReflectionMethod($service, 'isKetuaOrWakil');
         $method->setAccessible(true);
 
         $ketua = $this->approverWithPosition('KPTA', 'Ketua Pengadilan Tinggi Agama Papua Barat');
         $wakil = $this->approverWithPosition('WKPTA', 'Wakil Ketua Pengadilan Tinggi Agama Papua Barat');
 
         $this->assertTrue($method->invoke($service, $ketua));
-        $this->assertFalse($method->invoke($service, $wakil));
+        $this->assertTrue($method->invoke($service, $wakil));
     }
 
-    public function test_manual_wakil_title_still_gets_tembusan(): void
+    public function test_manual_ketua_and_wakil_titles_are_excluded_from_tembusan(): void
     {
         $service = new RapatDocumentService(
             $this->createMock(DocumentQrCodeService::class),
             $this->createMock(PdfVerificationService::class)
         );
-        $method = new ReflectionMethod($service, 'isKetuaTitle');
+        $method = new ReflectionMethod($service, 'isKetuaOrWakilTitle');
         $method->setAccessible(true);
 
         $this->assertTrue($method->invoke($service, 'Ketua Pengadilan Tinggi Agama Papua Barat'));
-        $this->assertFalse($method->invoke($service, 'Wakil Ketua Pengadilan Tinggi Agama Papua Barat'));
+        $this->assertTrue($method->invoke($service, 'Wakil Ketua Pengadilan Tinggi Agama Papua Barat'));
         $this->assertFalse($method->invoke($service, 'Sekretaris'));
     }
 
