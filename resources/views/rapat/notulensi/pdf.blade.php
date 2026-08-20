@@ -6,7 +6,7 @@
     <style>
         @page {
             size: A4;
-            margin: 1.4cm 1.2cm 1.5cm 1.2cm;
+            margin: 1.4cm 1.2cm 2.8cm 1.2cm;
         }
 
         body {
@@ -40,11 +40,33 @@
             margin-bottom: 12px;
         }
 
-        .section-table td,
-        .section-table th {
+        .section-table > tbody > tr > td,
+        .section-table > tbody > tr > th {
             border: 1px solid #666;
             padding: 6px 8px;
             vertical-align: top;
+        }
+
+        .section-block {
+            width: 100%;
+            margin-bottom: 12px;
+        }
+
+        .section-block-header {
+            border: 1px solid #666;
+            padding: 6px 8px;
+            font-size: 12pt;
+            font-weight: bold;
+        }
+
+        .section-block-body {
+            border: 1px solid #666;
+            border-top: 0;
+            padding: 9px 8px;
+        }
+
+        .recommendation-section {
+            page-break-inside: avoid;
         }
 
         .section-header {
@@ -98,21 +120,102 @@
             line-height: 1.35;
         }
 
-        .documentation-grid {
-            margin-top: 8px;
+        .minutes-rich-content {
+            line-height: 1.3;
         }
 
-        .documentation-item {
-            width: 48%;
-            display: inline-block;
-            vertical-align: top;
-            margin: 0 1% 12px;
+        .minutes-rich-content p {
+            margin: 0 0 7px;
+            text-align: justify;
+        }
+
+        .minutes-rich-content table {
+            width: 100% !important;
+            border-collapse: collapse !important;
+            table-layout: fixed !important;
+            margin: 7px 0 4px !important;
+            font-size: 9.3pt;
+            line-height: 1.22;
+        }
+
+        .minutes-rich-content table thead {
+            display: table-header-group;
+        }
+
+        .minutes-rich-content table tbody {
+            display: table-row-group;
+        }
+
+        .minutes-rich-content table tr {
+            page-break-inside: avoid;
+        }
+
+        .minutes-rich-content table th,
+        .minutes-rich-content table td {
+            border: 1px solid #666 !important;
+            padding: 5px 6px !important;
+            vertical-align: top !important;
+            text-align: left;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+        }
+
+        .minutes-rich-content table th {
+            background: #eef2f5;
+            font-weight: bold;
+            text-align: center;
+            vertical-align: middle !important;
+        }
+
+        .minutes-rich-content table th:nth-child(1),
+        .minutes-rich-content table td:nth-child(1) {
+            width: 6% !important;
             text-align: center;
         }
 
-        .documentation-item img {
+        .minutes-rich-content table th:nth-child(2),
+        .minutes-rich-content table td:nth-child(2) {
+            width: 18% !important;
+        }
+
+        .minutes-rich-content table th:nth-child(3),
+        .minutes-rich-content table td:nth-child(3) {
+            width: 32% !important;
+        }
+
+        .minutes-rich-content table th:nth-child(4),
+        .minutes-rich-content table td:nth-child(4) {
+            width: 21% !important;
+        }
+
+        .minutes-rich-content table th:nth-child(5),
+        .minutes-rich-content table td:nth-child(5) {
+            width: 23% !important;
+        }
+
+        .documentation-section {
+            page-break-before: always;
+        }
+
+        .documentation-table {
             width: 100%;
-            max-height: 260px;
+            border-collapse: separate;
+            border-spacing: 8px;
+            margin: 0;
+        }
+
+        .documentation-table td {
+            width: 50%;
+            border: 0;
+            padding: 0;
+            vertical-align: middle;
+            text-align: center;
+            page-break-inside: avoid;
+        }
+
+        .documentation-table img {
+            max-width: 100%;
+            max-height: 225px;
             object-fit: contain;
             border: 1px solid #888;
             padding: 3px;
@@ -174,7 +277,11 @@
     </style>
 </head>
 <body>
-@include('partials.pdf-verification-badge', ['pdfVerification' => $pdfVerification ?? null])
+@include('partials.pdf-verification-badge', [
+    'pdfVerification' => $pdfVerification ?? null,
+    'pdfVerificationQrSize' => 44,
+    'pdfVerificationBottom' => '-2cm',
+])
     @if($kopImage)
         <div class="kop">
             <img src="{{ $kopImage }}" alt="Kop Notulen">
@@ -219,43 +326,36 @@
         </tr>
     </table>
 
-    <table class="section-table">
-        <tr>
-            <td class="section-header">D.&nbsp;&nbsp; HASIL AGENDA</td>
-        </tr>
-        <tr>
-            <td class="section-body justify-body">{!! $notulensi->hasil_rapat !!}</td>
-        </tr>
-    </table>
+    <div class="section-block">
+        <div class="section-block-header">D.&nbsp;&nbsp; HASIL AGENDA</div>
+        <div class="section-block-body minutes-rich-content">{!! $notulensi->hasil_rapat !!}</div>
+    </div>
 
-    <table class="section-table">
-        <tr>
-            <td class="section-header">E.&nbsp;&nbsp; REKOMENDASI</td>
-        </tr>
-        <tr>
-            <td class="section-body justify-body">
-                {!! $notulensi->rekomendasi ?: '<p>-</p>' !!}
-            </td>
-        </tr>
-    </table>
+    <div class="section-block recommendation-section">
+        <div class="section-block-header">E.&nbsp;&nbsp; REKOMENDASI</div>
+        <div class="section-block-body minutes-rich-content">
+            {!! $notulensi->rekomendasi ?: '<p>-</p>' !!}
+        </div>
+    </div>
 
     @if($dokumentasiImages->count() > 0)
-        <table class="section-table">
-            <tr>
-                <td class="section-header">DOKUMENTASI AGENDA</td>
-            </tr>
-            <tr>
-                <td class="section-body">
-                    <div class="documentation-grid" style="text-align:center;">
-                        @foreach($dokumentasiImages as $image)
-                            <div class="documentation-item">
-                                <img src="{{ $image['data_uri'] }}" alt="{{ $image['nama'] }}">
-                            </div>
-                        @endforeach
-                    </div>
-                </td>
-            </tr>
-        </table>
+        <div class="section-block documentation-section">
+            <div class="section-block-header">DOKUMENTASI AGENDA</div>
+            <div class="section-block-body">
+                <table class="documentation-table">
+                    @foreach($dokumentasiImages->chunk(2) as $imageRow)
+                        <tr>
+                            @foreach($imageRow as $image)
+                                <td><img src="{{ $image['data_uri'] }}" alt="{{ $image['nama'] }}"></td>
+                            @endforeach
+                            @if($imageRow->count() === 1)
+                                <td></td>
+                            @endif
+                        </tr>
+                    @endforeach
+                </table>
+            </div>
+        </div>
     @endif
 
     <table class="signature-table">
