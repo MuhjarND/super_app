@@ -292,6 +292,33 @@
             transition: all 0.15s ease;
         }
 
+        .sidebar .nav-section-toggle > span:first-child {
+            min-width: 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .sidebar .nav-section-badge {
+            flex: 0 0 auto;
+            min-width: 17px;
+            height: 17px;
+            margin-left: auto;
+            margin-right: 8px;
+            padding: 0 5px;
+            border-radius: 999px;
+            background: #ef4444;
+            color: #fff;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.55rem;
+            font-weight: 900;
+            line-height: 1;
+            letter-spacing: 0;
+            box-shadow: 0 3px 8px rgba(239, 68, 68, 0.24);
+        }
+
         .sidebar .nav-section-toggle:hover {
             background: #f8fafc;
             color: #64748b;
@@ -678,11 +705,11 @@
 
         body.sidebar-collapse .main-sidebar .brand-text,
         body.sidebar-collapse .sidebar-user > .sidebar-user-inner > div:last-child,
-        body.sidebar-collapse .sidebar .nav-section-toggle span,
+        body.sidebar-collapse .sidebar .nav-section-toggle > span:first-child,
         body.sidebar-collapse .sidebar .nav-link > p,
         body.sidebar-closed .main-sidebar .brand-text,
         body.sidebar-closed .sidebar-user > .sidebar-user-inner > div:last-child,
-        body.sidebar-closed .sidebar .nav-section-toggle span,
+        body.sidebar-closed .sidebar .nav-section-toggle > span:first-child,
         body.sidebar-closed .sidebar .nav-link > p {
             display: none !important;
         }
@@ -726,6 +753,24 @@
             padding-right: 0;
         }
 
+        body.sidebar-collapse .sidebar .nav-section-toggle,
+        body.sidebar-closed .sidebar .nav-section-toggle {
+            position: relative;
+        }
+
+        body.sidebar-collapse .sidebar .nav-section-toggle .section-chevron,
+        body.sidebar-closed .sidebar .nav-section-toggle .section-chevron {
+            display: none;
+        }
+
+        body.sidebar-collapse .sidebar .nav-section-toggle .nav-section-badge,
+        body.sidebar-closed .sidebar .nav-section-toggle .nav-section-badge {
+            position: absolute;
+            top: -3px;
+            right: 0;
+            margin: 0;
+        }
+
         body.sidebar-collapse .sidebar .nav-item-sub .nav-link,
         body.sidebar-closed .sidebar .nav-item-sub .nav-link {
             margin-left: 10px;
@@ -748,11 +793,11 @@
 
             body.sidebar-mini.sidebar-collapse .main-sidebar:hover .brand-text,
             body.sidebar-mini.sidebar-collapse .main-sidebar:hover .sidebar-user > .sidebar-user-inner > div:last-child,
-            body.sidebar-mini.sidebar-collapse .main-sidebar:hover .sidebar .nav-section-toggle span,
+            body.sidebar-mini.sidebar-collapse .main-sidebar:hover .sidebar .nav-section-toggle > span,
             body.sidebar-mini.sidebar-collapse .main-sidebar:hover .sidebar .nav-link > p,
             body.sidebar-mini.sidebar-closed .main-sidebar:hover .brand-text,
             body.sidebar-mini.sidebar-closed .main-sidebar:hover .sidebar-user > .sidebar-user-inner > div:last-child,
-            body.sidebar-mini.sidebar-closed .main-sidebar:hover .sidebar .nav-section-toggle span,
+            body.sidebar-mini.sidebar-closed .main-sidebar:hover .sidebar .nav-section-toggle > span,
             body.sidebar-mini.sidebar-closed .main-sidebar:hover .sidebar .nav-link > p {
                 display: flex !important;
             }
@@ -793,6 +838,13 @@
                 margin-right: 12px;
                 padding-left: 10px;
                 padding-right: 10px;
+            }
+
+            body.sidebar-mini.sidebar-collapse .main-sidebar:hover .sidebar .nav-section-toggle .nav-section-badge,
+            body.sidebar-mini.sidebar-closed .main-sidebar:hover .sidebar .nav-section-toggle .nav-section-badge {
+                position: static;
+                margin-left: auto;
+                margin-right: 8px;
             }
 
             body.sidebar-mini.sidebar-collapse .main-sidebar:hover .sidebar .nav-item-sub .nav-link,
@@ -3224,6 +3276,32 @@
                     @php($showDesktopModule = function ($key) use ($moduleControls) { return data_get($moduleControls, $key . '.visible_desktop', true); })
                     @php($showMobileLayoutModule = function ($key) use ($moduleControls) { return data_get($moduleControls, $key . '.visible_mobile', true); })
                     @php($moduleMenuLabel = function ($key, $fallback) use ($moduleControls) { return data_get($moduleControls, $key . '.label', $fallback); })
+                    @php($sidebarModuleBadge = function ($key) use ($mobileNotificationBadges, $sidebarSuratMasukOpenCount, $sidebarSuratKeluarDraftCount) {
+                        $aliases = [
+                            'action_center' => 'action',
+                            'inventory' => 'perawatan',
+                            'supply' => 'persediaan',
+                            'library' => 'perpustakaan',
+                            'progress_zi' => 'zi',
+                            'archive' => 'arsip',
+                            'master_data' => 'master-data',
+                        ];
+                        $count = (int) data_get($mobileNotificationBadges, 'modules.' . ($aliases[$key] ?? $key), 0);
+                        if ($key === 'persuratan') {
+                            $count = max($count, (int) $sidebarSuratMasukOpenCount + (int) $sidebarSuratKeluarDraftCount);
+                        }
+                        return $count;
+                    })
+                    @php($sidebarSubmoduleBadge = function ($module, $key) use ($mobileNotificationBadges, $sidebarSuratMasukOpenCount, $sidebarSuratKeluarDraftCount) {
+                        $count = (int) data_get($mobileNotificationBadges, 'submodules.' . $module . '.' . $key, 0);
+                        if ($module === 'persuratan' && $key === 'surat_masuk') {
+                            $count = max($count, (int) $sidebarSuratMasukOpenCount);
+                        } elseif ($module === 'persuratan' && $key === 'surat_keluar') {
+                            $count = max($count, (int) $sidebarSuratKeluarDraftCount);
+                        }
+                        return $count;
+                    })
+                    @php($sidebarBadgeText = function ($count) { return $count > 99 ? '99+' : $count; })
                     <ul class="nav nav-pills nav-sidebar flex-column" role="menu">
 
                         @if($showDesktopModule('dashboard'))
@@ -3282,8 +3360,11 @@
 
                         @if($showDesktopModule('approval') && ($isSidebarSuperAdmin || $sidebarUser->canAccessApprovalCenter()))
                             <li class="nav-section " data-section="approval">
-                                <button type="button" class="nav-section-toggle {{ ($sidebarApprovalTotalCount ?? 0) > 0 ? 'has-alert' : '' }}">
+                                <button type="button" class="nav-section-toggle {{ $sidebarModuleBadge('approval') > 0 ? 'has-alert' : '' }}">
                                     <span>{{ $moduleMenuLabel('approval', 'Approval') }}</span>
+                                    @if($sidebarModuleBadge('approval') > 0)
+                                        <span class="nav-section-badge">{{ $sidebarBadgeText($sidebarModuleBadge('approval')) }}</span>
+                                    @endif
                                     <i class="fas fa-chevron-down section-chevron"></i>
                                 </button>
                                 <ul class="nav nav-pills flex-column nav-section-menu">
@@ -3293,8 +3374,8 @@
                                             <i class="nav-icon fas fa-tasks"></i>
                                             <p>
                                                 Tindaklanjuti
-                                                @if(($sidebarApprovalTotalCount ?? 0) > 0)
-                                                    <span class="right badge badge-danger">{{ $sidebarApprovalTotalCount }}</span>
+                                                @if($sidebarSubmoduleBadge('approval', 'tindaklanjuti') > 0)
+                                                    <span class="right badge badge-danger">{{ $sidebarBadgeText($sidebarSubmoduleBadge('approval', 'tindaklanjuti')) }}</span>
                                                 @endif
                                             </p>
                                         </a>
@@ -3312,8 +3393,11 @@
 
                         @if($showDesktopModule('persuratan') && ($isSidebarSuperAdmin || $sidebarUser->canAccessPersuratanMenu()))
                             <li class="nav-section " data-section="persuratan">
-                                <button type="button" class="nav-section-toggle {{ (($sidebarSuratMasukOpenCount ?? 0) > 0 || ($sidebarSuratKeluarDraftCount ?? 0) > 0) ? 'has-alert' : '' }}">
+                                <button type="button" class="nav-section-toggle {{ $sidebarModuleBadge('persuratan') > 0 ? 'has-alert' : '' }}">
                                     <span>{{ $moduleMenuLabel('persuratan', 'Persuratan') }}</span>
+                                    @if($sidebarModuleBadge('persuratan') > 0)
+                                        <span class="nav-section-badge">{{ $sidebarBadgeText($sidebarModuleBadge('persuratan')) }}</span>
+                                    @endif
                                     <i class="fas fa-chevron-down section-chevron"></i>
                                 </button>
                                 <ul class="nav nav-pills flex-column nav-section-menu">
@@ -3324,8 +3408,8 @@
                                                 <i class="nav-icon far fa-envelope"></i>
                                                 <p>
                                                     Surat Masuk
-                                                    @if(($sidebarSuratMasukOpenCount ?? 0) > 0)
-                                                        <span class="right badge badge-danger">{{ $sidebarSuratMasukOpenCount }}</span>
+                                                    @if($sidebarSubmoduleBadge('persuratan', 'surat_masuk') > 0)
+                                                        <span class="right badge badge-danger">{{ $sidebarBadgeText($sidebarSubmoduleBadge('persuratan', 'surat_masuk')) }}</span>
                                                     @endif
                                                 </p>
                                             </a>
@@ -3338,8 +3422,8 @@
                                                 <i class="nav-icon far fa-paper-plane"></i>
                                                 <p>
                                                     Surat Keluar
-                                                    @if(($sidebarSuratKeluarDraftCount ?? 0) > 0)
-                                                        <span class="right badge badge-danger">{{ $sidebarSuratKeluarDraftCount }}</span>
+                                                    @if($sidebarSubmoduleBadge('persuratan', 'surat_keluar') > 0)
+                                                        <span class="right badge badge-danger">{{ $sidebarBadgeText($sidebarSubmoduleBadge('persuratan', 'surat_keluar')) }}</span>
                                                     @endif
                                                 </p>
                                             </a>
@@ -3350,7 +3434,12 @@
                                             <a href="{{ route('surat-template.index') }}"
                                                 class="nav-link {{ request()->routeIs('surat-template.*') ? 'active' : '' }}">
                                                 <i class="nav-icon far fa-file-word"></i>
-                                                <p>Template Surat</p>
+                                                <p>
+                                                    Template Surat
+                                                    @if($sidebarSubmoduleBadge('persuratan', 'template_surat') > 0)
+                                                        <span class="right badge badge-danger">{{ $sidebarBadgeText($sidebarSubmoduleBadge('persuratan', 'template_surat')) }}</span>
+                                                    @endif
+                                                </p>
                                             </a>
                                         </li>
                                     @endif
@@ -3360,8 +3449,11 @@
 
                         @if($showDesktopModule('rapat') && ($isSidebarSuperAdmin || $sidebarUser->canAccessMeetingModule() || $sidebarUser->canAccessMeetingFollowUps() || $sidebarUser->canAccessAgendaPimpinan() || $sidebarUser->canAccessVirtualMeetings() || $sidebarUser->canAccessVoting()))
                             <li class="nav-section " data-section="rapat">
-                                <button type="button" class="nav-section-toggle {{ ($sidebarNotulensiFollowUpCount ?? 0) > 0 ? 'has-alert' : '' }}">
+                                <button type="button" class="nav-section-toggle {{ $sidebarModuleBadge('rapat') > 0 ? 'has-alert' : '' }}">
                                     <span>{{ $moduleMenuLabel('rapat', 'Rapat / Agenda') }}</span>
+                                    @if($sidebarModuleBadge('rapat') > 0)
+                                        <span class="nav-section-badge">{{ $sidebarBadgeText($sidebarModuleBadge('rapat')) }}</span>
+                                    @endif
                                     <i class="fas fa-chevron-down section-chevron"></i>
                                 </button>
                                 <ul class="nav nav-pills flex-column nav-section-menu">
@@ -3370,7 +3462,12 @@
                                         <a href="{{ route('rapat.index') }}"
                                             class="nav-link {{ request()->routeIs('rapat.index') ? 'active' : '' }}">
                                             <i class="nav-icon far fa-calendar-alt"></i>
-                                            <p>Rapat/Agenda</p>
+                                            <p>
+                                                Rapat/Agenda
+                                                @if($sidebarSubmoduleBadge('rapat', 'rapat') > 0)
+                                                    <span class="right badge badge-danger">{{ $sidebarBadgeText($sidebarSubmoduleBadge('rapat', 'rapat')) }}</span>
+                                                @endif
+                                            </p>
                                         </a>
                                     </li>
                                     @if($isSidebarSuperAdmin || $sidebarUser->canAccessMeetingMinutes())
@@ -3378,7 +3475,12 @@
                                             <a href="{{ route('rapat.notulensi.index') }}"
                                                 class="nav-link {{ request()->routeIs('rapat.notulensi.*') && !request()->routeIs('rapat.notulensi.follow-ups*') ? 'active' : '' }}">
                                                 <i class="nav-icon far fa-file-alt"></i>
-                                                <p>Notulensi</p>
+                                                <p>
+                                                    Notulensi
+                                                    @if($sidebarSubmoduleBadge('rapat', 'notulensi') > 0)
+                                                        <span class="right badge badge-danger">{{ $sidebarBadgeText($sidebarSubmoduleBadge('rapat', 'notulensi')) }}</span>
+                                                    @endif
+                                                </p>
                                             </a>
                                         </li>
                                     @endif
@@ -3433,8 +3535,8 @@
                                                 <i class="nav-icon fas fa-tasks"></i>
                                                 <p>
                                                     Tindak Lanjut
-                                                    @if(($sidebarNotulensiFollowUpCount ?? 0) > 0)
-                                                        <span class="right badge badge-danger">{{ $sidebarNotulensiFollowUpCount }}</span>
+                                                    @if($sidebarSubmoduleBadge('rapat', 'tindak_lanjut') > 0)
+                                                        <span class="right badge badge-danger">{{ $sidebarBadgeText($sidebarSubmoduleBadge('rapat', 'tindak_lanjut')) }}</span>
                                                     @endif
                                                 </p>
                                             </a>
@@ -3446,8 +3548,11 @@
 
                         @if($showDesktopModule('cuti') && ($isSidebarSuperAdmin || $sidebarUser->canAccessLeaveModule()))
                             <li class="nav-section " data-section="cuti">
-                                <button type="button" class="nav-section-toggle">
+                                <button type="button" class="nav-section-toggle {{ $sidebarModuleBadge('cuti') > 0 ? 'has-alert' : '' }}">
                                     <span>{{ $moduleMenuLabel('cuti', 'Cuti') }}</span>
+                                    @if($sidebarModuleBadge('cuti') > 0)
+                                        <span class="nav-section-badge">{{ $sidebarBadgeText($sidebarModuleBadge('cuti')) }}</span>
+                                    @endif
                                     <i class="fas fa-chevron-down section-chevron"></i>
                                 </button>
                                 <ul class="nav nav-pills flex-column nav-section-menu">
@@ -3455,7 +3560,12 @@
                                         <a href="{{ route('cuti.index') }}"
                                             class="nav-link {{ request()->routeIs('cuti.index') || request()->routeIs('cuti.create') || request()->routeIs('cuti.show') || request()->routeIs('cuti.edit') ? 'active' : '' }}">
                                             <i class="nav-icon fas fa-calendar-alt"></i>
-                                            <p>Pengajuan Cuti</p>
+                                            <p>
+                                                Pengajuan Cuti
+                                                @if($sidebarSubmoduleBadge('cuti', 'pengajuan') > 0)
+                                                    <span class="right badge badge-danger">{{ $sidebarBadgeText($sidebarSubmoduleBadge('cuti', 'pengajuan')) }}</span>
+                                                @endif
+                                            </p>
                                         </a>
                                     </li>
                                     @if($isSidebarSuperAdmin || $sidebarUser->canAccessLeaveApproval())
@@ -3463,7 +3573,12 @@
                                             <a href="{{ route('cuti.approval.index') }}"
                                                 class="nav-link {{ request()->routeIs('cuti.approval.*') ? 'active' : '' }}">
                                                 <i class="nav-icon fas fa-user-check"></i>
-                                                <p>Approval Cuti</p>
+                                                <p>
+                                                    Approval Cuti
+                                                    @if($sidebarSubmoduleBadge('cuti', 'approval') > 0)
+                                                        <span class="right badge badge-danger">{{ $sidebarBadgeText($sidebarSubmoduleBadge('cuti', 'approval')) }}</span>
+                                                    @endif
+                                                </p>
                                             </a>
                                         </li>
                                     @endif
@@ -3500,8 +3615,11 @@
 
                         @if($showDesktopModule('inventory') && ($isSidebarSuperAdmin || $sidebarUser->canAccessInventoryModule()))
                             <li class="nav-section " data-section="perawatan-alat-mesin">
-                                <button type="button" class="nav-section-toggle">
+                                <button type="button" class="nav-section-toggle {{ $sidebarModuleBadge('inventory') > 0 ? 'has-alert' : '' }}">
                                     <span>{{ $moduleMenuLabel('inventory', 'Perawatan Alat dan Mesin') }}</span>
+                                    @if($sidebarModuleBadge('inventory') > 0)
+                                        <span class="nav-section-badge">{{ $sidebarBadgeText($sidebarModuleBadge('inventory')) }}</span>
+                                    @endif
                                     <i class="fas fa-chevron-down section-chevron"></i>
                                 </button>
                                 <ul class="nav nav-pills flex-column nav-section-menu">
@@ -3523,7 +3641,12 @@
                                         <a href="{{ route('perawatan-alat-mesin.maintenance.index') }}"
                                             class="nav-link {{ request()->routeIs('perawatan-alat-mesin.maintenance.*') ? 'active' : '' }}">
                                             <i class="nav-icon fas fa-tools"></i>
-                                            <p>Transaksi Perawatan</p>
+                                            <p>
+                                                Transaksi Perawatan
+                                                @if($sidebarSubmoduleBadge('perawatan', 'transaksi') > 0)
+                                                    <span class="right badge badge-danger">{{ $sidebarBadgeText($sidebarSubmoduleBadge('perawatan', 'transaksi')) }}</span>
+                                                @endif
+                                            </p>
                                         </a>
                                     </li>
                                     <li class="nav-item nav-item-sub">
@@ -3591,8 +3714,11 @@
 
                         @if($showDesktopModule('library') && ($isSidebarSuperAdmin || $sidebarUser->canAccessLibraryModule()))
                             <li class="nav-section" data-section="perpustakaan">
-                                <button type="button" class="nav-section-toggle">
+                                <button type="button" class="nav-section-toggle {{ $sidebarModuleBadge('library') > 0 ? 'has-alert' : '' }}">
                                     <span>{{ $moduleMenuLabel('library', 'Perpustakaan') }}</span>
+                                    @if($sidebarModuleBadge('library') > 0)
+                                        <span class="nav-section-badge">{{ $sidebarBadgeText($sidebarModuleBadge('library')) }}</span>
+                                    @endif
                                     <i class="fas fa-chevron-down section-chevron"></i>
                                 </button>
                                 <ul class="nav nav-pills flex-column nav-section-menu">
@@ -3604,10 +3730,10 @@
                                         <li class="nav-item nav-item-sub"><a href="{{ route('library.book-copies.index') }}" class="nav-link {{ request()->routeIs('library.book-copies.*') ? 'active' : '' }}"><i class="nav-icon fas fa-copy"></i><p>Eksemplar</p></a></li>
                                         <li class="nav-item nav-item-sub"><a href="{{ route('library.members.index') }}" class="nav-link {{ request()->routeIs('library.members.*') ? 'active' : '' }}"><i class="nav-icon fas fa-users"></i><p>Anggota</p></a></li>
                                     @endif
-                                    <li class="nav-item nav-item-sub"><a href="{{ route('library.loans.index') }}" class="nav-link {{ request()->routeIs('library.loans.*') ? 'active' : '' }}"><i class="nav-icon fas fa-exchange-alt"></i><p>{{ ($isSidebarSuperAdmin || $sidebarUser->canManageLibraryModule()) ? 'Peminjaman' : 'Peminjaman Saya' }}</p></a></li>
+                                    <li class="nav-item nav-item-sub"><a href="{{ route('library.loans.index') }}" class="nav-link {{ request()->routeIs('library.loans.*') ? 'active' : '' }}"><i class="nav-icon fas fa-exchange-alt"></i><p>{{ ($isSidebarSuperAdmin || $sidebarUser->canManageLibraryModule()) ? 'Peminjaman' : 'Peminjaman Saya' }}@if($sidebarSubmoduleBadge('perpustakaan', ($isSidebarSuperAdmin || $sidebarUser->canManageLibraryModule()) ? 'peminjaman' : 'peminjaman_saya') > 0)<span class="right badge badge-danger">{{ $sidebarBadgeText($sidebarSubmoduleBadge('perpustakaan', ($isSidebarSuperAdmin || $sidebarUser->canManageLibraryModule()) ? 'peminjaman' : 'peminjaman_saya')) }}</span>@endif</p></a></li>
                                     @if($isSidebarSuperAdmin || $sidebarUser->canManageLibraryModule())
                                         <li class="nav-item nav-item-sub"><a href="{{ route('library.returns.index') }}" class="nav-link {{ request()->routeIs('library.returns.*') ? 'active' : '' }}"><i class="nav-icon fas fa-undo-alt"></i><p>Pengembalian</p></a></li>
-                                        <li class="nav-item nav-item-sub"><a href="{{ route('library.fines.index') }}" class="nav-link {{ request()->routeIs('library.fines.*') ? 'active' : '' }}"><i class="nav-icon fas fa-coins"></i><p>Denda</p></a></li>
+                                        <li class="nav-item nav-item-sub"><a href="{{ route('library.fines.index') }}" class="nav-link {{ request()->routeIs('library.fines.*') ? 'active' : '' }}"><i class="nav-icon fas fa-coins"></i><p>Denda@if($sidebarSubmoduleBadge('perpustakaan', 'denda') > 0)<span class="right badge badge-danger">{{ $sidebarBadgeText($sidebarSubmoduleBadge('perpustakaan', 'denda')) }}</span>@endif</p></a></li>
                                         <li class="nav-item nav-item-sub"><a href="{{ route('library.barcode.index') }}" class="nav-link {{ request()->routeIs('library.barcode.*') ? 'active' : '' }}"><i class="nav-icon fas fa-barcode"></i><p>Barcode</p></a></li>
                                         <li class="nav-item nav-item-sub"><a href="{{ route('library.scan.index') }}" class="nav-link {{ request()->routeIs('library.scan.*') ? 'active' : '' }}"><i class="nav-icon fas fa-camera"></i><p>Scan Kamera</p></a></li>
                                         <li class="nav-item nav-item-sub"><a href="{{ route('library.reports.index') }}" class="nav-link {{ request()->routeIs('library.reports.*') ? 'active' : '' }}"><i class="nav-icon fas fa-file-alt"></i><p>Laporan</p></a></li>
@@ -3619,8 +3745,11 @@
 
                         @if($showDesktopModule('supply') && ($isSidebarSuperAdmin || $sidebarUser->canAccessSupplyModule()))
                             <li class="nav-section " data-section="persediaan">
-                                <button type="button" class="nav-section-toggle">
+                                <button type="button" class="nav-section-toggle {{ $sidebarModuleBadge('supply') > 0 ? 'has-alert' : '' }}">
                                     <span>{{ $moduleMenuLabel('supply', 'Persediaan') }}</span>
+                                    @if($sidebarModuleBadge('supply') > 0)
+                                        <span class="nav-section-badge">{{ $sidebarBadgeText($sidebarModuleBadge('supply')) }}</span>
+                                    @endif
                                     <i class="fas fa-chevron-down section-chevron"></i>
                                 </button>
                                 <ul class="nav nav-pills flex-column nav-section-menu">
@@ -3635,7 +3764,12 @@
                                         <a href="{{ route('persediaan.requests.index') }}"
                                             class="nav-link {{ request()->routeIs('persediaan.requests.index') || request()->routeIs('persediaan.requests.show') ? 'active' : '' }}">
                                             <i class="nav-icon fas fa-clipboard-list"></i>
-                                            <p>Daftar Pengajuan</p>
+                                            <p>
+                                                Daftar Pengajuan
+                                                @if($sidebarSubmoduleBadge('persediaan', 'pengajuan') > 0)
+                                                    <span class="right badge badge-danger">{{ $sidebarBadgeText($sidebarSubmoduleBadge('persediaan', 'pengajuan')) }}</span>
+                                                @endif
+                                            </p>
                                         </a>
                                     </li>
                                     <li class="nav-item nav-item-sub">
@@ -3660,8 +3794,11 @@
 
                         @if($showDesktopModule('progress_zi') && ($isSidebarSuperAdmin || $sidebarUser->canAccessProgressZiModule()))
                             <li class="nav-section " data-section="progress-zi">
-                                <button type="button" class="nav-section-toggle {{ ($sidebarProgressZiAttentionCount ?? 0) > 0 ? 'has-alert' : '' }}">
+                                <button type="button" class="nav-section-toggle {{ $sidebarModuleBadge('progress_zi') > 0 ? 'has-alert' : '' }}">
                                     <span>{{ $moduleMenuLabel('progress_zi', 'Progress ZI') }}</span>
+                                    @if($sidebarModuleBadge('progress_zi') > 0)
+                                        <span class="nav-section-badge">{{ $sidebarBadgeText($sidebarModuleBadge('progress_zi')) }}</span>
+                                    @endif
                                     <i class="fas fa-chevron-down section-chevron"></i>
                                 </button>
                                 <ul class="nav nav-pills flex-column nav-section-menu">
@@ -3669,7 +3806,12 @@
                                         <a href="{{ route('progress-zi.dashboard') }}"
                                             class="nav-link {{ request()->routeIs('progress-zi.dashboard') || request()->routeIs('progress-zi.index') ? 'active' : '' }}">
                                             <i class="nav-icon fas fa-chart-line"></i>
-                                            <p>Rekapan ZI</p>
+                                            <p>
+                                                Rekapan ZI
+                                                @if($sidebarSubmoduleBadge('zi', 'rekapan_zi') > 0)
+                                                    <span class="right badge badge-danger">{{ $sidebarBadgeText($sidebarSubmoduleBadge('zi', 'rekapan_zi')) }}</span>
+                                                @endif
+                                            </p>
                                         </a>
                                     </li>
                                     <li class="nav-item nav-item-sub">
@@ -3678,8 +3820,8 @@
                                             <i class="nav-icon fas fa-tasks"></i>
                                             <p>
                                                 Monitoring Kegiatan
-                                                @if(($sidebarProgressZiAttentionCount ?? 0) > 0)
-                                                    <span class="right badge badge-danger">{{ $sidebarProgressZiAttentionCount }}</span>
+                                                @if($sidebarSubmoduleBadge('zi', 'monitoring') > 0)
+                                                    <span class="right badge badge-danger">{{ $sidebarBadgeText($sidebarSubmoduleBadge('zi', 'monitoring')) }}</span>
                                                 @endif
                                             </p>
                                         </a>

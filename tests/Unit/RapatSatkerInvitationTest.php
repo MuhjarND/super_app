@@ -125,7 +125,7 @@ class RapatSatkerInvitationTest extends TestCase
             'waktu_mulai' => '09:00:00',
             'tempat' => 'Ruang Rapat',
             'bersama_satker' => true,
-            'penerima_satker' => 'Ketua',
+            'penerima_satker' => 'Ketua Pengadilan Agama',
         ]);
         $rapat->forceFill(['created_at' => Carbon::parse('2026-08-12 08:00:00')]);
         $rapat->setRelation('pesertas', collect());

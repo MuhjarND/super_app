@@ -54,7 +54,11 @@ class SuratKeluarApprovalService
                 ]
             );
 
-            $suratKeluar->update(['status' => 'draft']);
+            $suratKeluar->update([
+                'status' => ($payload['template_slug'] ?? null) === SuratKeluarEsignService::TEMPLATE_SLUG
+                    ? 'e-sign'
+                    : 'draft',
+            ]);
 
             return $approval;
         });

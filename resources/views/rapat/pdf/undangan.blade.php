@@ -273,6 +273,13 @@
                     1
                 ));
             }
+            // Hindari pengulangan nama institusi saat opsi penerima sudah
+            // berisi "Pengadilan Agama" dan tujuan satker juga memakainya.
+            $recipientDestination = trim((string) preg_replace(
+                '/\bPengadilan\s+Agama(?:\s+Pengadilan\s+Agama)+\b/iu',
+                'Pengadilan Agama',
+                $recipientDestination
+            ));
         } elseif ($singleRecipient) {
             $recipient = $displayRecipients->first();
             $recipientDestination = $recipient->name

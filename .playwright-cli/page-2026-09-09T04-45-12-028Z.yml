@@ -1,0 +1,31 @@
+- main [ref=e2]:
+  - generic [ref=e4]:
+    - img "Logo PAPEDA" [ref=e6]
+    - paragraph [ref=e8]: "\"Administrasi yang tertib adalah awal dari pelayanan yang cepat, akurat, dan terpercaya.\""
+  - generic [ref=e10]:
+    - generic [ref=e11]:
+      - heading "Selamat Datang" [level=1] [ref=e12]
+      - paragraph [ref=e13]: Masuk ke akun Anda untuk melanjutkan.
+    - generic [ref=e14]:
+      - generic [ref=e15]:
+        - generic [ref=e16]: Email atau NIP
+        - generic [ref=e17]:
+          - generic [ref=e18]: 
+          - textbox "Email atau NIP" [active] [ref=e20]:
+            - /placeholder: Masukkan email atau NIP Anda
+      - generic [ref=e21]:
+        - generic [ref=e22]: Password
+        - generic [ref=e23]:
+          - generic [ref=e24]: 
+          - textbox "Password" [ref=e26]:
+            - /placeholder: Masukkan password
+      - generic [ref=e27]:
+        - generic [ref=e28]:
+          - checkbox "Ingat Saya" [ref=e29]
+          - generic [ref=e30]: Ingat Saya
+        - link "Lupa Password?" [ref=e31] [cursor=pointer]:
+          - /url: http://127.0.0.1:8000/password/reset
+      - button " Masuk" [ref=e32] [cursor=pointer]:
+        - generic [ref=e33]: 
+        - generic [ref=e34]: Masuk
+    - generic [ref=e35]: Akses dilindungi untuk kebutuhan kerja internal PTA Papua Barat.

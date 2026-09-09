@@ -237,11 +237,13 @@ class SuratKeluar extends Model
         if ($approval
             && $approval->template_slug === \App\Services\SuratKeluarEsignService::TEMPLATE_SLUG
             && $approval->status === 'pending') {
-            [$class, $label] = ['warning', 'Menunggu E-Sign'];
+            [$class, $label] = ['warning', 'E-Sign'];
         } elseif ($approval
             && $approval->template_slug === \App\Services\SuratKeluarEsignService::TEMPLATE_SLUG
             && $approval->status === 'rejected') {
             [$class, $label] = ['danger', 'E-Sign Ditolak'];
+        } elseif ($this->status === 'e-sign') {
+            [$class, $label] = ['warning', 'E-Sign'];
         } elseif ($this->status === 'lengkap' || $this->hasAvailableFile()) {
             [$class, $label] = ['success', 'Lengkap'];
         } elseif ($approval && $approval->status === 'pending') {
@@ -251,6 +253,7 @@ class SuratKeluar extends Model
         } else {
             $map = [
                 'draft' => ['danger', 'Draft'],
+                'e-sign' => ['warning', 'E-Sign'],
                 'lengkap' => ['success', 'Lengkap'],
             ];
 

@@ -114,4 +114,12 @@ class SuratKeluarEsignPdfTest extends TestCase
         $this->assertStringStartsWith('%PDF-', $previewContent);
         $this->assertGreaterThan(strlen($sourceContent), strlen($previewContent));
     }
+
+    public function test_surat_keluar_has_e_sign_status_badge(): void
+    {
+        $suratKeluar = new SuratKeluar(['status' => 'e-sign']);
+        $suratKeluar->setRelation('templateApproval', null);
+
+        $this->assertStringContainsString('E-Sign', $suratKeluar->status_badge);
+    }
 }
