@@ -15,7 +15,9 @@ class CreateVirtualMeetingsTables extends Migration
             $table->date('tanggal_kegiatan');
             $table->time('waktu_mulai');
             $table->time('waktu_selesai')->nullable();
-            $table->text('zoom_link');
+            $table->text('zoom_link')->nullable();
+            $table->string('meeting_id')->nullable();
+            $table->string('meeting_passcode')->nullable();
             $table->text('catatan')->nullable();
             $table->unsignedBigInteger('created_by');
             $table->unsignedBigInteger('updated_by')->nullable();

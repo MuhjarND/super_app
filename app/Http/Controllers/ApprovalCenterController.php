@@ -328,12 +328,14 @@ class ApprovalCenterController extends Controller
                     ->whereIn('paraf_user_id', $assignmentUserIds);
             });
 
-            if ($user->canApproveSuratKeluarTemplate()) {
-                $workflowQuery->orWhere(function ($approvalQuery) use ($assignmentUserIds) {
-                    $approvalQuery->whereIn('paraf_status', ['not_required', 'approved'])
-                        ->whereIn('approver_id', $assignmentUserIds);
-                });
-            }
+            $workflowQuery->orWhere(function ($approvalQuery) use ($assignmentUserIds, $user) {
+                $approvalQuery->whereIn('paraf_status', ['not_required', 'approved'])
+                    ->whereIn('approver_id', $assignmentUserIds);
+
+                if (!$user->canApproveSuratKeluarTemplate()) {
+                    $approvalQuery->where('template_slug', \App\Services\SuratKeluarEsignService::TEMPLATE_SLUG);
+                }
+            });
         });
     }
 

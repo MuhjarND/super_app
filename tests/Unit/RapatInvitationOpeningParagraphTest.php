@@ -19,7 +19,10 @@ class RapatInvitationOpeningParagraphTest extends TestCase
             'detail_tambahan' => $customOpening,
         ]);
 
-        $this->assertSame($customOpening, $this->openingParagraph($rapat));
+        $this->assertSame(
+            'Berdasarkan hasil evaluasi pimpinan, dengan ini kami mengundang Bapak/Ibu/Saudara/i untuk menghadiri rapat yang akan dilaksanakan pada:',
+            $this->openingParagraph($rapat)
+        );
         $this->assertStringNotContainsString('Dalam rangka pelaksanaan', $this->openingParagraph($rapat));
     }
 
@@ -33,6 +36,7 @@ class RapatInvitationOpeningParagraphTest extends TestCase
         $paragraph = $this->openingParagraph($rapat);
 
         $this->assertStringContainsString('Dalam rangka pelaksanaan Rapat Monitoring dan Evaluasi', $paragraph);
+        $this->assertStringContainsString('kehadiran Bapak/Ibu/Saudara/i', $paragraph);
         $this->assertStringContainsString('yang akan dilaksanakan pada:', $paragraph);
     }
 

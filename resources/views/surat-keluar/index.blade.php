@@ -1157,6 +1157,10 @@
                             class="btn btn-sm btn-outline-success mr-2 js-share-surat d-none">
                             <i class="fas fa-paper-plane mr-1"></i>Kirim
                         </button>
+                        <a href="#" id="requestSuratKeluarEsign"
+                            class="btn btn-sm btn-primary mr-2 d-none">
+                            <i class="fas fa-file-signature mr-1"></i>Ajukan E-Sign
+                        </a>
                         <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
                     </div>
                 </div>
@@ -1361,6 +1365,9 @@
                 let actions = '';
                 if (data.fileUrl) {
                     actions += '<button type="button" class="action-btn detail" onclick="viewFile(\'' + data.fileUrl + '\', ' + data.suratId + ')"><i class="fas fa-eye"></i> Preview</button>';
+                }
+                if (data.esignUrl) {
+                    actions += '<a class="action-btn detail" href="' + escapeHtml(data.esignUrl) + '"><i class="fas fa-file-signature"></i> Ajukan E-Sign</a>';
                 }
                 actions += '<button type="button" class="action-btn detail js-share-surat"' +
                     ' data-share-url="' + escapeHtml(data.shareUrl) + '"' +
@@ -1781,6 +1788,7 @@
             $('#viewFileModal').on('hidden.bs.modal', function () {
                 $('#fileViewer').attr('src', 'about:blank');
                 $('#openSuratKeluarFile').attr('href', '#');
+                $('#requestSuratKeluarEsign').attr('href', '#').addClass('d-none');
             });
 
             window.openCalendarEvent = function (suratId) {
@@ -1866,8 +1874,11 @@
                     .attr('data-share-date', row.data('shareDate') || '')
                     .attr('data-share-access-note', row.data('shareAccessNote') || '')
                     .removeClass('d-none');
+                const esignUrl = row.data('esignUrl') || '';
+                $('#requestSuratKeluarEsign').attr('href', esignUrl || '#').toggleClass('d-none', !esignUrl);
             } else {
                 shareButton.addClass('d-none');
+                $('#requestSuratKeluarEsign').attr('href', '#').addClass('d-none');
             }
             $('#viewFileModal').modal('show');
         }

@@ -783,7 +783,7 @@
                                 <div>{{ $rapat->kategori_surat_label }}</div>
                                 <div class="rapat-meta">{{ $rapat->kategori_surat_kode_label }}</div>
                             </td>
-                            <td>
+                            <td data-order="{{ optional($rapat->tanggal)->format('Y-m-d') ?: '0000-00-00' }} {{ substr((string) $rapat->waktu_mulai, 0, 5) ?: '00:00' }}">
                                 <div>{{ $rapat->tanggal_wit_formatted }}</div>
                                 <div class="rapat-meta">{{ $rapat->waktu_mulai_formatted }} WIT</div>
                             </td>

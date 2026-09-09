@@ -33,6 +33,7 @@ class AgendaPimpinanController extends Controller
         $agendas = $agendaQuery
             ->orderByDesc('tanggal_kegiatan')
             ->orderByDesc('waktu')
+            ->orderByDesc('created_at')
             ->get();
 
         $canManageAgendaDetails = $user->canManageAgendaPimpinanDetails();

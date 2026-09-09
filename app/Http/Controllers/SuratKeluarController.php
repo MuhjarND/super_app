@@ -10,6 +10,7 @@ use App\Services\SuratTemplateDocumentService;
 use App\Services\LeaveDocumentService;
 use App\Services\RapatDocumentService;
 use App\Services\DocumentPreviewService;
+use App\Services\SuratKeluarEsignService;
 use App\Services\WhatsAppNotificationService;
 use App\Support\DocumentFilename;
 use App\User;
@@ -451,6 +452,18 @@ class SuratKeluarController extends Controller
             'status' => 'lengkap',
         ]);
 
+        $esignApproval = $suratKeluar->templateApproval()
+            ->where('template_slug', SuratKeluarEsignService::TEMPLATE_SLUG)
+            ->first();
+        if ($esignApproval && in_array($esignApproval->status, ['pending', 'approved'], true)) {
+            $esignApproval->update([
+                'status' => 'rejected',
+                'note' => 'Berkas sumber diganti. Ajukan e-sign kembali untuk versi PDF terbaru.',
+                'acted_at' => now('Asia/Jayapura'),
+            ]);
+            $suratKeluar->update(['status' => 'draft']);
+        }
+
         $recipientIds = $suratKeluar->penerimaInternal()->pluck('users.id')->all();
         if (!$wasReady) {
             $this->markRecipientsUnread($suratKeluar, $recipientIds);
@@ -491,12 +504,34 @@ class SuratKeluarController extends Controller
 
         abort_unless($hasSignedAccess || ($user && $user->canViewSuratKeluar($suratKeluar)), 403);
 
+        return $this->streamAvailableFile($suratKeluar);
+    }
+
+    public function streamAvailableFile(SuratKeluar $suratKeluar)
+    {
+
         $suratKeluar->syncCompletionStatusFromFile();
+
+        $suratKeluar->loadMissing('templateApproval');
+        if ($suratKeluar->templateApproval
+            && $suratKeluar->templateApproval->template_slug === SuratKeluarEsignService::TEMPLATE_SLUG
+            && $suratKeluar->templateApproval->status === 'approved') {
+            $verification = app(SuratKeluarEsignService::class)->finalVerification($suratKeluar->templateApproval);
+            if ($verification && $verification->file_path && Storage::disk('public')->exists($verification->file_path)) {
+                return response()->file(Storage::disk('public')->path($verification->file_path), [
+                    'Content-Type' => 'application/pdf',
+                    'Content-Disposition' => 'inline; filename="' . DocumentFilename::fromLetter(
+                        $suratKeluar->nomor_surat_formatted,
+                        $suratKeluar->perihal
+                    ) . '"',
+                ]);
+            }
+        }
 
         if ($suratKeluar->file_path) {
             return $this->documentPreviewService->streamPublicFile(
                 $suratKeluar->file_path,
-                $suratKeluar->nomor_surat_formatted . ' - ' . $suratKeluar->perihal
+                DocumentFilename::letterTitle($suratKeluar->nomor_surat_formatted, $suratKeluar->perihal)
             );
         }
 

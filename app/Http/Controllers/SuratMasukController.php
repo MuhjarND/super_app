@@ -321,7 +321,9 @@ class SuratMasukController extends Controller
             'virtual_tanggal_kegiatan' => 'required_if:agenda_virtual,1|nullable|date',
             'virtual_waktu_mulai' => 'required_if:agenda_virtual,1|nullable|date_format:H:i',
             'virtual_waktu_selesai' => 'nullable|date_format:H:i|after:virtual_waktu_mulai',
-            'virtual_zoom_link' => 'required_if:agenda_virtual,1|nullable|url|max:2000',
+            'virtual_zoom_link' => 'nullable|url|max:2000',
+            'virtual_meeting_id' => 'nullable|string|max:255',
+            'virtual_meeting_passcode' => 'nullable|string|max:255',
             'virtual_participant_ids' => 'required_if:agenda_virtual,1|nullable|array|min:1',
             'virtual_participant_ids.*' => 'exists:users,id',
         ]);
@@ -524,6 +526,8 @@ class SuratMasukController extends Controller
             'waktu_mulai' => $request->virtual_waktu_mulai,
             'waktu_selesai' => $request->virtual_waktu_selesai,
             'zoom_link' => $request->virtual_zoom_link,
+            'meeting_id' => $request->virtual_meeting_id,
+            'meeting_passcode' => $request->virtual_meeting_passcode,
             'catatan' => 'Agenda virtual dibuat otomatis dari Surat Masuk ' . $suratMasuk->nomor_surat . '.',
             'created_by' => auth()->id(),
             'updated_by' => auth()->id(),
@@ -639,7 +643,7 @@ class SuratMasukController extends Controller
         }
         return $this->documentPreviewService->streamPublicFile(
             $suratMasuk->file_path,
-            $suratMasuk->nomor_surat . ' - ' . $suratMasuk->perihal,
+            DocumentFilename::letterTitle($suratMasuk->nomor_surat, $suratMasuk->perihal),
             route('surat-masuk.download', $suratMasuk)
         );
     }

@@ -96,7 +96,7 @@
                                     </div>
                                 @endif
                             </td>
-                            <td>
+                            <td data-order="{{ optional($agenda->tanggal_kegiatan)->format('Y-m-d') ?: '0000-00-00' }} {{ substr((string) $agenda->waktu, 0, 5) ?: '00:00' }}">
                                 <div>{{ $agenda->tanggal_formatted }}</div>
                                 <div class="text-muted" style="font-size: 0.78rem;">{{ $agenda->waktu_formatted }} WIT</div>
                                 <div class="text-muted" style="font-size: 0.78rem;">{{ $agenda->tempat }}</div>

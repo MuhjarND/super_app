@@ -33,6 +33,10 @@ Route::get('/verifikasi/persediaan/{pickup}', 'SupplyPickupController@verify')->
 Route::get('/verifikasi/pdf/{token}', 'PdfVerificationController@show')->name('pdf-verification.show');
 Route::get('/verifikasi/pdf/{token}/preview', 'PdfVerificationController@preview')->name('pdf-verification.preview');
 Route::get('/publik/tindak-lanjut/eviden/{token}', 'PublicFollowUpEvidenceController@show')->name('rapat.notulensi.follow-ups.eviden.public');
+Route::get('/s/{token}', 'PublicDocumentShareController@show')
+    ->where('token', '[A-Za-z0-9_-]{23}')
+    ->middleware('throttle:60,1')
+    ->name('document-share.open');
 Route::get('/surat-keluar/{suratKeluar}/file', 'SuratKeluarController@viewFile')->name('surat-keluar.file');
 
 // Authenticated routes
@@ -101,6 +105,9 @@ Route::middleware(['auth'])->group(function () {
     Route::put('/surat-keluar/{suratKeluar}', 'SuratKeluarController@update')->name('surat-keluar.update');
     Route::delete('/surat-keluar/{suratKeluar}', 'SuratKeluarController@destroy')->name('surat-keluar.destroy');
     Route::post('/surat-keluar/{suratKeluar}/upload', 'SuratKeluarController@uploadLampiran')->name('surat-keluar.upload');
+    Route::get('/surat-keluar/{suratKeluar}/e-sign', 'SuratKeluarEsignController@create')->name('surat-keluar.esign.create');
+    Route::post('/surat-keluar/{suratKeluar}/e-sign', 'SuratKeluarEsignController@store')->name('surat-keluar.esign.store');
+    Route::get('/surat-keluar/{suratKeluar}/e-sign/source', 'SuratKeluarEsignController@source')->name('surat-keluar.esign.source');
     Route::put('/surat-keluar/{suratKeluar}/kalender', 'SuratKeluarController@upsertCalendarEvent')->name('surat-keluar.calendar.upsert');
     Route::delete('/surat-keluar/{suratKeluar}/kalender', 'SuratKeluarController@destroyCalendarEvent')->name('surat-keluar.calendar.destroy');
     Route::get('/surat-keluar/preview-nomor', 'SuratKeluarController@previewNomor')->name('surat-keluar.preview-nomor');

@@ -100,7 +100,7 @@ class LeaveValidationService
     protected function validateServiceYears(LeaveRequest $leaveRequest, User $user, LeaveType $leaveType, $startDate)
     {
         $yearsRequired = (int) ($leaveType->service_years_required ?: 0);
-        if ($yearsRequired < 1 || empty($user->tmt_pns)) {
+        if ($yearsRequired < 1) {
             return;
         }
 
@@ -108,15 +108,69 @@ class LeaveValidationService
             return;
         }
 
-        $tmtPns = $this->normalizeDate($user->tmt_pns);
         $start = $this->normalizeDate($startDate);
-        if (!$tmtPns || !$start) {
+        if (!$start) {
             return;
         }
 
-        if ($tmtPns->diffInYears($start) < $yearsRequired) {
-            throw ValidationException::withMessages(['start_date' => 'Masa kerja belum memenuhi syarat untuk jenis cuti ini.']);
+        $serviceMonths = $this->serviceMonthsAt($user, $start);
+        if ($serviceMonths === null) {
+            return;
         }
+
+        $requiredMonths = $yearsRequired * 12;
+        if ($serviceMonths < $requiredMonths) {
+            $actualYears = intdiv($serviceMonths, 12);
+            $actualMonths = $serviceMonths % 12;
+            $actual = $actualYears > 0 ? $actualYears . ' tahun' : '';
+            if ($actualMonths > 0) {
+                $actual .= ($actual !== '' ? ' ' : '') . $actualMonths . ' bulan';
+            }
+            $actual = $actual ?: '0 bulan';
+
+            throw ValidationException::withMessages([
+                'start_date' => sprintf(
+                    'Masa kerja belum memenuhi syarat untuk jenis cuti ini. Minimal %d tahun, masa kerja saat mulai cuti tercatat %s.',
+                    $yearsRequired,
+                    $actual
+                ),
+            ]);
+        }
+    }
+
+    /**
+     * Mengambil masa kerja pada tanggal mulai cuti. Nilai tahun/bulan yang
+     * diinput admin menjadi sumber utama; tmt_pns dipakai sebagai fallback
+     * untuk data pegawai lama yang belum memiliki baseline masa kerja.
+     */
+    protected function serviceMonthsAt(User $user, $referenceDate)
+    {
+        $reference = $this->normalizeDate($referenceDate);
+        if (!$reference) {
+            return null;
+        }
+
+        $hasBaseline = $user->masa_kerja_tahun !== null || $user->masa_kerja_bulan !== null;
+        if ($hasBaseline) {
+            $months = max(0, (int) $user->masa_kerja_tahun) * 12
+                + max(0, min(11, (int) $user->masa_kerja_bulan));
+            $anchor = $this->normalizeDate($user->masa_kerja_acuan);
+
+            if ($anchor) {
+                $months += $anchor->lte($reference)
+                    ? $anchor->diffInMonths($reference)
+                    : -$anchor->diffInMonths($reference);
+            }
+
+            return max(0, $months);
+        }
+
+        $tmtPns = $this->normalizeDate($user->tmt_pns);
+        if (!$tmtPns) {
+            return null;
+        }
+
+        return $tmtPns->gt($reference) ? 0 : $tmtPns->diffInMonths($reference);
     }
 
     protected function isLargeLeaveServiceException(LeaveRequest $leaveRequest)

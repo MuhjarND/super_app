@@ -23,14 +23,14 @@ class SuratTemplateDocumentService
 
     public function attachGeneratedDocument(SuratKeluar $suratKeluar, array $payload, array $options = [])
     {
-        $filename = Str::slug($payload['template_name'] ?? 'template-surat', '-') . '-' . $suratKeluar->id . '.pdf';
+        $filename = DocumentFilename::fromLetter($suratKeluar->nomor_surat_formatted, $suratKeluar->perihal);
         $verification = $this->pdfVerificationService->begin(
             'surat_keluar',
             $payload['template_slug'] ?? 'template_surat',
             $suratKeluar->id,
             ($payload['template_name'] ?? 'Template Surat') . ' - ' . ($suratKeluar->nomor_surat ?: $suratKeluar->id),
             $this->buildSuratSigners($options['approval_signature'] ?? null),
-            ['nomor' => $suratKeluar->nomor_surat]
+            ['nomor' => $suratKeluar->nomor_surat_formatted, 'perihal' => $suratKeluar->perihal]
         );
 
         $pdf = PDF::loadView('surat-template.pdf.document', [
@@ -74,6 +74,10 @@ class SuratTemplateDocumentService
 
     public function streamApprovalPreview(SuratKeluarApproval $approval)
     {
+        if ($approval->template_slug === SuratKeluarEsignService::TEMPLATE_SLUG) {
+            return app(SuratKeluarEsignService::class)->streamApprovalPreview($approval);
+        }
+
         $approval->loadMissing('suratKeluar');
         $suratKeluar = $approval->suratKeluar;
         $verification = $this->pdfVerificationService->begin(
@@ -82,7 +86,7 @@ class SuratTemplateDocumentService
             $suratKeluar->id,
             ($approval->template_name ?: 'Template Surat') . ' - ' . ($suratKeluar->nomor_surat ?: $suratKeluar->id),
             $this->buildSuratSigners($approval->status === 'approved' ? $this->buildApprovalSignature($approval) : null),
-            ['nomor' => $suratKeluar->nomor_surat]
+            ['nomor' => $suratKeluar->nomor_surat_formatted, 'perihal' => $suratKeluar->perihal]
         );
 
         $content = PDF::loadView('surat-template.pdf.document', [
@@ -119,7 +123,7 @@ class SuratTemplateDocumentService
             $suratKeluar->id,
             ($approval->template_name ?: 'Template Surat') . ' - ' . ($suratKeluar->nomor_surat ?: $suratKeluar->id),
             $this->buildSuratSigners($approval->status === 'approved' ? $this->buildApprovalSignature($approval) : null),
-            ['nomor' => $suratKeluar->nomor_surat]
+            ['nomor' => $suratKeluar->nomor_surat_formatted, 'perihal' => $suratKeluar->perihal]
         );
 
         $content = PDF::loadView('surat-template.pdf.document', [

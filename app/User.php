@@ -1030,7 +1030,25 @@ class User extends Authenticatable
         return $this->canAccessMeetingApproval()
             || $this->canAccessLeaveApproval()
             || $this->canApproveSuratKeluarTemplate()
-            || $this->hasPendingSuratTugasParaf();
+            || $this->hasPendingSuratTugasParaf()
+            || $this->hasPendingSuratKeluarEsign();
+    }
+
+    public function hasPendingSuratKeluarEsign()
+    {
+        if (!\Illuminate\Support\Facades\Schema::hasTable('surat_keluar_approvals')) {
+            return false;
+        }
+
+        $query = SuratKeluarApproval::where('template_slug', \App\Services\SuratKeluarEsignService::TEMPLATE_SLUG)
+            ->where('status', 'pending')
+            ->whereIn('approver_id', $this->effectiveAssignmentUserIds());
+
+        if (\Illuminate\Support\Facades\Schema::hasColumn('surat_keluar_approvals', 'paraf_status')) {
+            $query->whereIn('paraf_status', ['not_required', 'approved']);
+        }
+
+        return $query->exists();
     }
 
     public function hasPendingSuratTugasParaf()

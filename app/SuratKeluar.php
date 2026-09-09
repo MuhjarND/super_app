@@ -39,6 +39,11 @@ class SuratKeluar extends Model
         'is_satker_collective' => 'boolean',
     ];
 
+    public function getPublicShareUrlAttribute()
+    {
+        return app(\App\Services\DocumentShareLinkService::class)->outgoingUrl($this);
+    }
+
     public function scopeForLetterYear($query, $year = null)
     {
         $year = $year ?: now('Asia/Jayapura')->year;
@@ -190,6 +195,15 @@ class SuratKeluar extends Model
 
     public function syncCompletionStatusFromFile()
     {
+        $approval = $this->relationLoaded('templateApproval')
+            ? $this->templateApproval
+            : $this->templateApproval()->first();
+        if ($approval
+            && $approval->template_slug === \App\Services\SuratKeluarEsignService::TEMPLATE_SLUG
+            && $approval->status !== 'approved') {
+            return $this;
+        }
+
         if ($this->status !== 'lengkap' && $this->hasAvailableFile()) {
             $this->forceFill(['status' => 'lengkap'])->save();
             $this->status = 'lengkap';
@@ -220,7 +234,15 @@ class SuratKeluar extends Model
             ? $this->templateApproval
             : $this->templateApproval()->first();
 
-        if ($this->status === 'lengkap' || $this->hasAvailableFile()) {
+        if ($approval
+            && $approval->template_slug === \App\Services\SuratKeluarEsignService::TEMPLATE_SLUG
+            && $approval->status === 'pending') {
+            [$class, $label] = ['warning', 'Menunggu E-Sign'];
+        } elseif ($approval
+            && $approval->template_slug === \App\Services\SuratKeluarEsignService::TEMPLATE_SLUG
+            && $approval->status === 'rejected') {
+            [$class, $label] = ['danger', 'E-Sign Ditolak'];
+        } elseif ($this->status === 'lengkap' || $this->hasAvailableFile()) {
             [$class, $label] = ['success', 'Lengkap'];
         } elseif ($approval && $approval->status === 'pending') {
             [$class, $label] = ['warning', 'Pending Approval'];

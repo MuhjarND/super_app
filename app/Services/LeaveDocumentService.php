@@ -582,6 +582,7 @@ class LeaveDocumentService
             $this->buildApprovalSigners($leaveRequest),
             [
                 'nomor' => $leaveRequest->letter_number ?: 'Belum terbit',
+                'perihal' => optional($leaveRequest->suratKeluar)->perihal ?: $this->buildSuratKeluarPerihal($leaveRequest),
                 'periode' => $leaveRequest->period_label,
                 'jenis_cuti' => optional($leaveRequest->leaveType)->name,
             ]

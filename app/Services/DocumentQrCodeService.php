@@ -2,6 +2,9 @@
 
 namespace App\Services;
 
+use BaconQrCode\Common\ErrorCorrectionLevel;
+use BaconQrCode\Encoder\Encoder;
+
 class DocumentQrCodeService
 {
     protected $logoDataUri;
@@ -22,6 +25,88 @@ class DocumentQrCodeService
         }
 
         return 'data:image/svg+xml;base64,' . base64_encode($svg);
+    }
+
+    /**
+     * Generate QR sebagai PNG tanpa ketergantungan Imagick.
+     *
+     * FPDI/FPDF hanya dapat menempelkan gambar raster. Instalasi produksi
+     * aplikasi memakai GD, sehingga matriks QR dirender langsung ke PNG dan
+     * tetap diberi logo PAPEDA di bagian tengah.
+     */
+    public function pngBinary($url, $size = 600)
+    {
+        if (!function_exists('imagecreatetruecolor')) {
+            throw new \RuntimeException('Ekstensi GD diperlukan untuk membuat barcode e-sign.');
+        }
+
+        $size = max(240, (int) $size);
+        $matrix = Encoder::encode((string) $url, ErrorCorrectionLevel::H(), 'UTF-8')->getMatrix();
+        $matrixSize = $matrix->getWidth();
+        $quietZone = 4;
+        $moduleCount = $matrixSize + ($quietZone * 2);
+        $moduleSize = max(1, (int) floor($size / $moduleCount));
+        $canvasSize = $moduleSize * $moduleCount;
+        $image = imagecreatetruecolor($canvasSize, $canvasSize);
+        $white = imagecolorallocate($image, 255, 255, 255);
+        $black = imagecolorallocate($image, 17, 24, 39);
+        imagefilledrectangle($image, 0, 0, $canvasSize, $canvasSize, $white);
+
+        for ($y = 0; $y < $matrixSize; $y++) {
+            for ($x = 0; $x < $matrixSize; $x++) {
+                if ($matrix->get($x, $y) !== 1) {
+                    continue;
+                }
+
+                $left = ($x + $quietZone) * $moduleSize;
+                $top = ($y + $quietZone) * $moduleSize;
+                imagefilledrectangle($image, $left, $top, $left + $moduleSize - 1, $top + $moduleSize - 1, $black);
+            }
+        }
+
+        $logoPath = public_path('logo_qr.png');
+        if (is_file($logoPath)) {
+            $logo = @imagecreatefromstring((string) file_get_contents($logoPath));
+            if ($logo) {
+                $logoWidth = max(1, (int) round($canvasSize * 0.20));
+                $logoHeight = max(1, (int) round(imagesy($logo) * ($logoWidth / max(1, imagesx($logo)))));
+                $padding = max(3, (int) round($canvasSize * 0.018));
+                $backgroundLeft = (int) floor(($canvasSize - $logoWidth) / 2) - $padding;
+                $backgroundTop = (int) floor(($canvasSize - $logoHeight) / 2) - $padding;
+                imagefilledrectangle(
+                    $image,
+                    $backgroundLeft,
+                    $backgroundTop,
+                    $backgroundLeft + $logoWidth + ($padding * 2),
+                    $backgroundTop + $logoHeight + ($padding * 2),
+                    $white
+                );
+                imagecopyresampled(
+                    $image,
+                    $logo,
+                    $backgroundLeft + $padding,
+                    $backgroundTop + $padding,
+                    0,
+                    0,
+                    $logoWidth,
+                    $logoHeight,
+                    imagesx($logo),
+                    imagesy($logo)
+                );
+                imagedestroy($logo);
+            }
+        }
+
+        ob_start();
+        imagepng($image, null, 8);
+        $binary = ob_get_clean();
+        imagedestroy($image);
+
+        if (!$binary) {
+            throw new \RuntimeException('Barcode e-sign gagal dibuat.');
+        }
+
+        return $binary;
     }
 
     public function logoDataUri()

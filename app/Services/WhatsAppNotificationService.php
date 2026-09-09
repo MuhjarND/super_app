@@ -494,21 +494,24 @@ class WhatsAppNotificationService
     {
         $approval->loadMissing('suratKeluar');
         $suratKeluar = $approval->suratKeluar;
+        $isPdfEsign = $approval->template_slug === SuratKeluarEsignService::TEMPLATE_SLUG;
         $message = $this->wrap([
             'Yth. Bapak/Ibu ' . $targetUser->name . ',',
-            'Surat Tugas telah diparaf dan memerlukan persetujuan serta tanda tangan Anda.',
+            $isPdfEsign
+                ? 'Terdapat PDF surat keluar yang memerlukan persetujuan dan tanda tangan elektronik Anda.'
+                : 'Surat Tugas telah diparaf dan memerlukan persetujuan serta tanda tangan Anda.',
             '',
             'Nomor Surat: ' . optional($suratKeluar)->nomor_surat_formatted,
-            'Perihal: ' . (optional($suratKeluar)->perihal ?: 'Surat Tugas'),
-            'Status: Menunggu Persetujuan',
+            'Perihal: ' . (optional($suratKeluar)->perihal ?: ($isPdfEsign ? 'Surat Keluar' : 'Surat Tugas')),
+            'Status: ' . ($isPdfEsign ? 'Menunggu E-Sign' : 'Menunggu Persetujuan'),
             '',
             'Silakan periksa dan proses melalui tautan berikut:',
             route('surat-keluar.approval.show', $approval),
         ]);
 
         return $this->sendToUser($targetUser, $message, [
-            'module' => 'surat_tugas',
-            'event' => 'surat_tugas_approval_pending',
+            'module' => $isPdfEsign ? 'persuratan' : 'surat_tugas',
+            'event' => $isPdfEsign ? 'surat_keluar_esign_pending' : 'surat_tugas_approval_pending',
             'notifiable_type' => get_class($approval),
             'notifiable_id' => $approval->id,
         ]);
@@ -891,8 +894,19 @@ class WhatsAppNotificationService
             'Agenda: ' . $meeting->judul,
             'Tanggal: ' . $meeting->tanggal_formatted,
             'Waktu: ' . $meeting->waktu_mulai_formatted . ' WIT' . ($meeting->waktu_selesai ? ' - ' . $meeting->waktu_selesai_formatted . ' WIT' : ''),
-            'Tautan Zoom: ' . $meeting->zoom_link,
         ];
+
+        if ($meeting->zoom_link) {
+            $lines[] = 'Tautan Meeting: ' . $meeting->zoom_link;
+        }
+
+        if ($meeting->meeting_id) {
+            $lines[] = 'Meeting ID: ' . $meeting->meeting_id;
+        }
+
+        if ($meeting->meeting_passcode) {
+            $lines[] = 'Passcode: ' . $meeting->meeting_passcode;
+        }
 
         if ($meeting->catatan) {
             $lines[] = 'Catatan: ' . $meeting->catatan;

@@ -23,6 +23,11 @@ class SuratMasuk extends Model
 
     protected $dates = ['tanggal_surat'];
 
+    public function getPublicShareUrlAttribute()
+    {
+        return app(\App\Services\DocumentShareLinkService::class)->incomingUrl($this);
+    }
+
     public function scopeForLetterYear($query, $year = null)
     {
         $year = $year ?: now('Asia/Jayapura')->year;

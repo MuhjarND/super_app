@@ -251,10 +251,28 @@
             : 11;
         $isSatkerInvitation = $isSatkerInvitation ?? false;
         $penerimaSatker = $penerimaSatker ?? '';
+        $isCollectiveSatkerInvitation = $isSatkerInvitation
+            && preg_match('/^Seluruh\s+Satker\s+/iu', (string) $tujuanSurat);
         if ($tujuanManual) {
             $recipientDestination = trim(
                 ($isSatkerInvitation && !empty($penerimaSatker) ? $penerimaSatker . ' ' : '') . $tujuanSurat
             );
+            // Surat keluar kolektif tetap menyimpan tujuan lengkap untuk
+            // administrasi, tetapi frasa "Seluruh Satker" tidak perlu
+            // dicetak ulang pada alamat tujuan undangan.
+            if ($isCollectiveSatkerInvitation) {
+                $recipientDestination = trim((string) preg_replace(
+                    '/\bSeluruh\s+Satker\s+/iu',
+                    '',
+                    $recipientDestination
+                ));
+                $recipientDestination = trim((string) preg_replace(
+                    '/\bSewilayah\s+Hukum\b/iu',
+                    'Pengadilan Agama Sewilayah Hukum',
+                    $recipientDestination,
+                    1
+                ));
+            }
         } elseif ($singleRecipient) {
             $recipient = $displayRecipients->first();
             $recipientDestination = $recipient->name
@@ -307,6 +325,9 @@
     </table>
 
     <div class="tujuan">
+        @if($isCollectiveSatkerInvitation)
+            <div>Kepada</div>
+        @endif
         <div class="recipient-destination">Yth. <span class="recipient-name">{!! nl2br($keepInstitutionTogether($recipientDestination)) !!}</span></div>
         @if(!$tujuanManual && !$singleRecipient && $showRecipientListInLetter && $recipientSummary)
             <div class="recipient-inline">{!! $keepInstitutionTogether($recipientSummary) !!}</div>
@@ -317,7 +338,12 @@
 
     <p class="salam">Assalamu'alaikum warahmatullahi wabarakatuh.</p>
 
-    <p class="paragraf">{!! nl2br($keepInstitutionTogether($openingParagraph)) !!}</p>
+    @php
+        $normalizeInvitationSalutation = function ($text) {
+            return preg_replace('#(?<!Bapak/Ibu/)Saudara(?!/i)#u', 'Bapak/Ibu/Saudara/i', (string) $text);
+        };
+    @endphp
+    <p class="paragraf">{!! nl2br($keepInstitutionTogether($normalizeInvitationSalutation($openingParagraph))) !!}</p>
 
     <div class="detail-wrap">
         <table class="detail-table">
@@ -363,8 +389,8 @@
         </table>
     </div>
 
-    <p class="penutup">{!! nl2br($keepInstitutionTogether($rapat->penutup_undangan ?: 'Sehubungan dengan hal tersebut, dimohon kehadiran Saudara tepat pada waktunya.')) !!}</p>
-    <p class="penutup">Demikian undangan ini disampaikan, atas perhatian dan kehadiran Saudara diucapkan terima kasih.</p>
+    <p class="penutup">{!! nl2br($keepInstitutionTogether($normalizeInvitationSalutation($rapat->penutup_undangan ?: 'Sehubungan dengan hal tersebut, dimohon kehadiran Bapak/Ibu/Saudara/i tepat pada waktunya.'))) !!}</p>
+    <p class="penutup">Demikian undangan ini disampaikan, atas perhatian dan kehadiran Bapak/Ibu/Saudara/i diucapkan terima kasih.</p>
     <p class="salam">Wassalamu'alaikum warahmatullahi wabarakatuh.</p>
 
     <table class="ttd-table">

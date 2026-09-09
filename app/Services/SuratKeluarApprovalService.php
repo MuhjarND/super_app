@@ -14,14 +14,16 @@ use Illuminate\Support\Facades\URL;
 class SuratKeluarApprovalService
 {
     protected $documentService;
+    protected $esignService;
     protected $auditService;
     protected $whatsAppService;
 
-    public function __construct(SuratTemplateDocumentService $documentService, ActivityAuditService $auditService, WhatsAppNotificationService $whatsAppService)
+    public function __construct(SuratTemplateDocumentService $documentService, ActivityAuditService $auditService, WhatsAppNotificationService $whatsAppService, SuratKeluarEsignService $esignService)
     {
         $this->documentService = $documentService;
         $this->auditService = $auditService;
         $this->whatsAppService = $whatsAppService;
+        $this->esignService = $esignService;
     }
 
     public function syncForTemplate(SuratKeluar $suratKeluar, array $payload, User $approver, User $requester)
@@ -177,6 +179,10 @@ class SuratKeluarApprovalService
                 'acted_at' => now(),
             ]);
 
+            if ($approval->template_slug === SuratKeluarEsignService::TEMPLATE_SLUG) {
+                $this->esignService->finalize($approval->fresh(['suratKeluar', 'approver.jabatan']));
+            }
+
             $approval->suratKeluar()->update(['status' => 'lengkap']);
         });
 
@@ -291,10 +297,13 @@ class SuratKeluarApprovalService
             return;
         }
 
+        $isPdfEsign = $approval->template_slug === SuratKeluarEsignService::TEMPLATE_SLUG;
         $approval->approver->notify(new SuratTugasNotification(
             $approval->suratKeluar,
-            'Surat Tugas menunggu persetujuan',
-            'Draft Surat Tugas telah diparaf dan menunggu persetujuan serta tanda tangan Anda.',
+            $isPdfEsign ? 'PDF surat keluar menunggu e-sign' : 'Surat Tugas menunggu persetujuan',
+            $isPdfEsign
+                ? 'Terdapat PDF surat keluar yang menunggu persetujuan dan tanda tangan elektronik Anda.'
+                : 'Draft Surat Tugas telah diparaf dan menunggu persetujuan serta tanda tangan Anda.',
             route('surat-keluar.approval.show', $approval),
             'approver'
         ));
@@ -303,7 +312,8 @@ class SuratKeluarApprovalService
 
     protected function notifyTemplateWorkflow(SuratKeluarApproval $approval, $approved, $note = null)
     {
-        if ((string) $approval->template_slug !== 'surat-tugas') {
+        $isPdfEsign = (string) $approval->template_slug === SuratKeluarEsignService::TEMPLATE_SLUG;
+        if ((string) $approval->template_slug !== 'surat-tugas' && !$isPdfEsign) {
             return;
         }
 
@@ -314,10 +324,16 @@ class SuratKeluarApprovalService
             try {
                 $approval->requester->notify(new SuratTugasNotification(
                     $suratKeluar,
-                    $approved ? 'Surat Tugas telah disetujui' : 'Surat Tugas perlu diperbaiki',
-                    $approved
-                        ? 'Surat Tugas yang diajukan telah disetujui dan siap ditindaklanjuti.'
-                        : 'Surat Tugas yang diajukan belum dapat disetujui. Mohon meninjau catatan perbaikan.',
+                    $isPdfEsign
+                        ? ($approved ? 'E-sign surat keluar selesai' : 'E-sign surat keluar ditolak')
+                        : ($approved ? 'Surat Tugas telah disetujui' : 'Surat Tugas perlu diperbaiki'),
+                    $isPdfEsign
+                        ? ($approved
+                            ? 'PDF surat keluar telah ditandatangani dan versi final terverifikasi sudah tersedia.'
+                            : 'Permohonan e-sign ditolak. Tinjau catatan penanda tangan lalu ajukan kembali.')
+                        : ($approved
+                            ? 'Surat Tugas yang diajukan telah disetujui dan siap ditindaklanjuti.'
+                            : 'Surat Tugas yang diajukan belum dapat disetujui. Mohon meninjau catatan perbaikan.'),
                     route('surat-keluar.index'),
                     'requester'
                 ));
@@ -329,10 +345,36 @@ class SuratKeluarApprovalService
                 ]);
             }
 
-            $this->whatsAppService->notifySuratTugasRequester($approval, $approval->requester, $approved, $note);
+            if (!$isPdfEsign) {
+                $this->whatsAppService->notifySuratTugasRequester($approval, $approval->requester, $approved, $note);
+            }
         }
 
         if (!$approved) {
+            return;
+        }
+
+        if ($isPdfEsign) {
+            foreach ($suratKeluar->penerimaInternal->unique('id') as $recipient) {
+                try {
+                    $recipient->notify(new SuratTugasNotification(
+                        $suratKeluar,
+                        'Surat keluar bertanda tangan telah tersedia',
+                        'PDF surat keluar versi final dengan e-sign dan Validasi PDF sudah dapat dibuka.',
+                        URL::temporarySignedRoute('surat-keluar.file', now()->addDays(7), ['suratKeluar' => $suratKeluar->id]),
+                        'recipient'
+                    ));
+                } catch (\Throwable $e) {
+                    Log::warning('Outgoing e-sign recipient notification skipped', [
+                        'approval_id' => $approval->id,
+                        'user_id' => $recipient->id,
+                        'error' => $e->getMessage(),
+                    ]);
+                }
+
+                $this->whatsAppService->notifySuratKeluarRecipient($suratKeluar, $recipient);
+            }
+
             return;
         }
 

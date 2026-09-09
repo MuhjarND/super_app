@@ -406,7 +406,9 @@ class UnifiedActionCenterService
     {
         $canAccessPersuratan = $user->canAccessPersuratanMenu();
 
-        if (!$canAccessPersuratan && !$user->hasPendingSuratTugasParaf()) {
+        if (!$canAccessPersuratan
+            && !$user->hasPendingSuratTugasParaf()
+            && !$user->hasPendingSuratKeluarEsign()) {
             return collect();
         }
 
@@ -507,7 +509,9 @@ class UnifiedActionCenterService
         }
         }
 
-        if ($canAccessPersuratan || $user->hasPendingSuratTugasParaf()) {
+        if ($canAccessPersuratan
+            || $user->hasPendingSuratTugasParaf()
+            || $user->hasPendingSuratKeluarEsign()) {
             $assignmentUserIds = $user->effectiveAssignmentUserIds();
             $approvalQuery = SuratKeluarApproval::with(['suratKeluar.creator.unit', 'requester.unit', 'approver', 'parafUser'])
                 ->where('status', 'pending')
@@ -522,12 +526,14 @@ class UnifiedActionCenterService
                             ->whereIn('paraf_user_id', $assignmentUserIds);
                     });
 
-                    if ($user->canApproveSuratKeluarTemplate()) {
-                        $workflowQuery->orWhere(function ($approvalStepQuery) use ($assignmentUserIds) {
-                            $approvalStepQuery->whereIn('paraf_status', ['not_required', 'approved'])
-                                ->whereIn('approver_id', $assignmentUserIds);
-                        });
-                    }
+                    $workflowQuery->orWhere(function ($approvalStepQuery) use ($assignmentUserIds, $user) {
+                        $approvalStepQuery->whereIn('paraf_status', ['not_required', 'approved'])
+                            ->whereIn('approver_id', $assignmentUserIds);
+
+                        if (!$user->canApproveSuratKeluarTemplate()) {
+                            $approvalStepQuery->where('template_slug', \App\Services\SuratKeluarEsignService::TEMPLATE_SLUG);
+                        }
+                    });
                 });
             }
 

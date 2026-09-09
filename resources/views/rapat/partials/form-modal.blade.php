@@ -248,7 +248,7 @@
 
                             <div id="{{ $prefix }}PenutupUndanganGroup" class="rapat-conditional-field" style="display:none;">
                                 <label>Isi Penutup Undangan <span class="text-danger">*</span></label>
-                                <textarea class="form-control" name="penutup_undangan" id="{{ $prefix }}PenutupUndangan" rows="3" placeholder="Contoh: Sehubungan dengan hal tersebut, dimohon kehadiran Saudara tepat pada waktunya."></textarea>
+                                <textarea class="form-control" name="penutup_undangan" id="{{ $prefix }}PenutupUndangan" rows="3" placeholder="Contoh: Sehubungan dengan hal tersebut, dimohon kehadiran Bapak/Ibu/Saudara/i tepat pada waktunya."></textarea>
                                 <small class="form-hint">Teks ini menggantikan kalimat penutup pertama pada PDF undangan.</small>
                             </div>
 

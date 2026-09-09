@@ -8,10 +8,17 @@ class DocumentFilename
 {
     public static function fromLetter($number, $subject, $extension = 'pdf')
     {
-        $number = trim((string) $number) ?: 'Tanpa Nomor';
-        $subject = trim(preg_replace('/\s+/u', ' ', (string) $subject)) ?: 'Tanpa Perihal';
+        return static::fromTitle(static::letterTitle($number, $subject), $extension);
+    }
 
-        return static::fromTitle($number . ' - ' . $subject, $extension);
+    public static function letterTitle($number, $subject)
+    {
+        $number = trim((string) $number);
+        $subject = trim(preg_replace('/\s+/u', ' ', (string) $subject)) ?: 'Tanpa Perihal';
+        $leadingNumber = preg_split('#[\\/]#', $number, 2)[0] ?? '';
+        $leadingNumber = trim($leadingNumber) ?: 'Tanpa Nomor';
+
+        return $leadingNumber . ' - ' . $subject;
     }
 
     public static function fromTitle($title, $extension = 'pdf')

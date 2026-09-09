@@ -296,11 +296,12 @@
                                     <i class="fas fa-download mr-1"></i> Download
                                 </a>
                                 <button type="button" class="btn btn-sm btn-outline-success ml-1 js-share-surat-masuk"
-                                    data-share-url="{{ route('surat-masuk.show', $suratMasuk) }}"
+                                    data-share-url="{{ $suratMasuk->public_share_url }}"
                                     data-share-number="{{ $suratMasuk->nomor_surat }}"
                                     data-share-sender="{{ $suratMasuk->pengirim }}"
                                     data-share-subject="{{ $suratMasuk->perihal }}"
-                                    data-share-date="{{ optional($suratMasuk->tanggal_surat)->translatedFormat('d F Y') }}">
+                                    data-share-date="{{ optional($suratMasuk->tanggal_surat)->translatedFormat('d F Y') }}"
+                                    data-share-access-note="Tautan dapat dibuka tanpa login dan berlaku selama 7 hari.">
                                     <i class="fas fa-paper-plane mr-1"></i> Kirim / Bagikan
                                 </button>
                                 @if($latestDisposisi = $suratMasuk->disposisis->sortByDesc('created_at')->first())

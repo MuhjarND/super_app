@@ -1373,8 +1373,18 @@
                                     </div>
                                 </div>
                                 <div class="form-group">
-                                    <label>Link Zoom <span class="text-danger">*</span></label>
-                                    <input type="url" class="form-control virtual-required" name="virtual_zoom_link" placeholder="https://zoom.us/j/...">
+                                    <label>Link Meeting <span class="text-muted">(opsional)</span></label>
+                                    <input type="url" class="form-control" name="virtual_zoom_link" placeholder="https://zoom.us/j/...">
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group col-md-6">
+                                        <label>Meeting ID</label>
+                                        <input type="text" class="form-control" name="virtual_meeting_id" placeholder="Contoh: 123 456 7890" maxlength="255">
+                                    </div>
+                                    <div class="form-group col-md-6">
+                                        <label>Passcode / Password Meeting</label>
+                                        <input type="text" class="form-control" name="virtual_meeting_passcode" placeholder="Masukkan passcode meeting" maxlength="255">
+                                    </div>
                                 </div>
                                 <div class="form-group mb-0">
                                     <label>Peserta <span class="text-danger">*</span></label>
@@ -2075,7 +2085,7 @@
                 $('#createVirtualMeetingFields .virtual-required').prop('required', checked);
 
                 if (!checked) {
-                    $('#createVirtualMeetingFields input[type="url"], #createVirtualMeetingFields input[name="virtual_waktu_selesai"]').val('');
+                    $('#createVirtualMeetingFields input[type="url"], #createVirtualMeetingFields input[name="virtual_waktu_selesai"], #createVirtualMeetingFields input[name="virtual_meeting_id"], #createVirtualMeetingFields input[name="virtual_meeting_passcode"]').val('');
                     $('#createVirtualParticipants').val(null).trigger('change');
                 }
             }
@@ -2309,11 +2319,12 @@
             }
             $('#detailShowBtn').attr('href', d.showUrl);
             $('#detailShareBtn')
-                .attr('data-share-url', d.showUrl)
+                .attr('data-share-url', d.shareUrl)
                 .attr('data-share-number', d.nomor || '')
                 .attr('data-share-sender', d.pengirim || '')
                 .attr('data-share-subject', d.perihal || '')
-                .attr('data-share-date', d.shareDate || d.tanggal || '');
+                .attr('data-share-date', d.shareDate || d.tanggal || '')
+                .attr('data-share-access-note', 'Tautan dapat dibuka tanpa login dan berlaku selama 7 hari.');
             window.renderSuratHistory(String(suratId), '#detailHistory');
 
             if (d.filePath) {

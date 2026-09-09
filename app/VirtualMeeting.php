@@ -14,6 +14,8 @@ class VirtualMeeting extends Model
         'waktu_mulai',
         'waktu_selesai',
         'zoom_link',
+        'meeting_id',
+        'meeting_passcode',
         'catatan',
         'created_by',
         'updated_by',

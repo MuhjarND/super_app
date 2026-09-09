@@ -33,6 +33,7 @@
                         @endphp
                         <tr class="main-row {{ $needsDisposition ? 'surat-needs-disposition' : '' }}" data-surat-id="{{ $surat->id }}" data-creator="{{ optional($surat->creator)->name ?: '-' }}"
                             data-show-url="{{ route('surat-masuk.show', $surat) }}"
+                            data-share-url="{{ $surat->public_share_url }}"
                             data-download-url="{{ route('surat-masuk.download', $surat) }}"
                             data-print-url="{{ $latestDisposisi ? route('disposisi.print', $latestDisposisi) : '' }}"
                             data-has-disposition-history="{{ $surat->disposisis->isNotEmpty() ? 1 : 0 }}"
@@ -170,11 +171,12 @@
                                         </button>
 
                                         <button type="button" class="dropdown-item js-share-surat-masuk"
-                                            data-share-url="{{ route('surat-masuk.show', $surat) }}"
+                                            data-share-url="{{ $surat->public_share_url }}"
                                             data-share-number="{{ $surat->nomor_surat }}"
                                             data-share-sender="{{ $surat->pengirim }}"
                                             data-share-subject="{{ $surat->perihal }}"
-                                            data-share-date="{{ optional($surat->tanggal_surat)->translatedFormat('d F Y') }}">
+                                            data-share-date="{{ optional($surat->tanggal_surat)->translatedFormat('d F Y') }}"
+                                            data-share-access-note="Tautan dapat dibuka tanpa login dan berlaku selama 7 hari.">
                                             <i class="fas fa-paper-plane"></i> Kirim / Bagikan
                                         </button>
 

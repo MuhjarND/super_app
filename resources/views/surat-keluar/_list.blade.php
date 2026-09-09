@@ -18,25 +18,27 @@
                 <tbody>
                     @foreach($suratKeluar as $surat)
                         @php
-                            $hasShareableFile = $surat->file_path || $surat->templateApproval || $surat->rapat || $surat->leaveRequest || ($surat->pdf_verifications_count ?? 0) > 0;
-                            $shareUrl = $hasShareableFile
-                                ? \Illuminate\Support\Facades\URL::temporarySignedRoute('surat-keluar.file', now()->addDays(7), ['suratKeluar' => $surat->id])
-                                : route('surat-keluar.index', ['search' => $surat->nomor_surat]);
+                            $shareUrl = $surat->public_share_url;
                             $shareRecipient = $surat->opsi_penerima === 'internal'
                                 ? $surat->penerimaInternal->pluck('name')->implode(', ')
                                 : ($surat->penerima_external ?: '-');
+                            $canManageSurat = auth()->user()->canModifySuratKeluar($surat);
+                            $isPdfUpload = $surat->file_path && strtolower(pathinfo($surat->file_path, PATHINFO_EXTENSION)) === 'pdf';
+                            $canRequestEsign = $canManageSurat && $isPdfUpload
+                                && (!$surat->templateApproval || $surat->templateApproval->template_slug === \App\Services\SuratKeluarEsignService::TEMPLATE_SLUG);
                         @endphp
                         <tr class="main-row" data-surat-id="{{ $surat->id }}"
                             data-update-url="{{ route('surat-keluar.update', $surat) }}"
                             data-delete-url="{{ route('surat-keluar.destroy', $surat) }}"
                             data-file-url="{{ ($surat->file_path || $surat->templateApproval || $surat->rapat || $surat->leaveRequest || ($surat->pdf_verifications_count ?? 0) > 0) ? route('surat-keluar.file', $surat) : '' }}"
+                            data-esign-url="{{ $canRequestEsign ? route('surat-keluar.esign.create', $surat) : '' }}"
                             data-share-url="{{ $shareUrl }}"
                             data-share-label="Surat Keluar"
                             data-share-number="{{ $surat->nomor_surat_formatted }}"
                             data-share-recipient="{{ $shareRecipient }}"
                             data-share-subject="{{ $surat->perihal }}"
                             data-share-date="{{ optional($surat->tanggal_surat)->translatedFormat('d F Y') }}"
-                            data-share-access-note="{{ $hasShareableFile ? 'Tautan berkas dapat dibuka tanpa login dan berlaku selama 7 hari.' : 'Surat belum memiliki berkas. Penerima harus login dan memiliki hak akses untuk membuka datanya.' }}"
+                            data-share-access-note="Tautan dapat dibuka tanpa login dan berlaku selama 7 hari."
                             data-creator="{{ optional($surat->creator)->name ?: '-' }}"
                             data-tahun-surat="{{ $surat->tahun_surat }}"
                             data-nomenklatur-jabatan="{{ $surat->nomenklatur_jabatan }}"
@@ -51,7 +53,7 @@
                             data-perihal="{{ $surat->perihal }}"
                             data-tanggal-surat="{{ optional($surat->tanggal_surat)->format('Y-m-d') }}"
                             data-has-lampiran="{{ $surat->has_lampiran ? 'ya' : 'tidak' }}"
-                            data-can-manage="{{ auth()->user()->canModifySuratKeluar($surat) ? 1 : 0 }}"
+                            data-can-manage="{{ $canManageSurat ? 1 : 0 }}"
                             data-can-calendar="{{ auth()->user()->isSuperAdmin() || (int) $surat->created_by === (int) auth()->id() ? 1 : 0 }}"
                             data-calendar-exists="{{ $surat->calendarEvent ? 1 : 0 }}"
                             data-calendar-action-url="{{ route('surat-keluar.calendar.upsert', $surat) }}"

@@ -167,10 +167,11 @@
 
 @section('content')
 @include('admin._alerts')
+@php($isPdfEsign = $suratKeluarApproval->template_slug === \App\Services\SuratKeluarEsignService::TEMPLATE_SLUG)
 
 <div class="d-flex justify-content-between align-items-center mb-3 surat-keluar-approval-top">
     <div>
-        <h3 class="mb-1">Approval Surat Keluar</h3>
+        <h3 class="mb-1">{{ $isPdfEsign ? 'Approval E-Sign PDF Surat Keluar' : 'Approval Surat Keluar' }}</h3>
         <p class="text-muted mb-0">{{ optional($suratKeluarApproval->suratKeluar)->nomor_surat_formatted ?: '-' }}</p>
     </div>
     <div class="app-action-group">
@@ -186,7 +187,7 @@
                 <div class="surat-keluar-approval-section-title">Informasi Dokumen</div>
                 <div class="surat-keluar-approval-meta">
                     <div class="surat-keluar-approval-meta-item">
-                        <strong>Template</strong>
+                        <strong>{{ $isPdfEsign ? 'Jenis Dokumen' : 'Template' }}</strong>
                         <span>{{ $suratKeluarApproval->template_name ?: '-' }}</span>
                     </div>
                     <div class="surat-keluar-approval-meta-item">
@@ -270,15 +271,15 @@
                 <div class="card surat-keluar-approval-card border-0 mb-0">
                     <div class="card-body">
                         <div class="surat-keluar-approval-section-title">Persetujuan</div>
-                        <button type="button" class="btn btn-success btn-block" data-toggle="modal" data-target="#suratKeluarApprovalSignatureModal">Approve</button>
+                        <button type="button" class="btn btn-success btn-block" data-toggle="modal" data-target="#suratKeluarApprovalSignatureModal">{{ $isPdfEsign ? 'Tandatangani & Approve' : 'Approve' }}</button>
                     </div>
                 </div>
                 <form action="{{ route('surat-keluar.approval.reject', $suratKeluarApproval) }}" method="POST" class="card surat-keluar-approval-card border-0 mb-0">
                     @csrf
                     <div class="card-body">
                         <div class="surat-keluar-approval-section-title">Penolakan</div>
-                        <textarea name="note" class="form-control mb-3" rows="3" placeholder="Catatan penolakan" required></textarea>
-                        <button type="submit" class="btn btn-danger btn-block">Reject</button>
+                        <textarea name="note" class="form-control mb-3" rows="3" placeholder="{{ $isPdfEsign ? 'Catatan revisi' : 'Catatan penolakan' }}" required></textarea>
+                        <button type="submit" class="btn btn-danger btn-block">{{ $isPdfEsign ? 'Tolak & Minta Revisi' : 'Reject' }}</button>
                     </div>
                 </form>
             </div>
@@ -287,7 +288,7 @@
                 <div class="modal-dialog modal-dialog-centered">
                     <div class="modal-content">
                         <div class="modal-header">
-                            <h5 class="modal-title">Approve Surat Keluar</h5>
+                            <h5 class="modal-title">{{ $isPdfEsign ? 'Tandatangani PDF Surat Keluar' : 'Approve Surat Keluar' }}</h5>
                             <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
                         </div>
                         <form action="{{ route('surat-keluar.approval.approve', $suratKeluarApproval) }}" method="POST">
@@ -301,7 +302,7 @@
                             </div>
                             <div class="modal-footer">
                                 <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Batal</button>
-                                <button type="submit" class="btn btn-success">Simpan & Approve</button>
+                                <button type="submit" class="btn btn-success">{{ $isPdfEsign ? 'Tandatangani & Approve' : 'Simpan & Approve' }}</button>
                             </div>
                         </form>
                     </div>
@@ -316,6 +317,9 @@
                 <strong>Preview Dokumen</strong>
                 <a href="{{ route('surat-keluar.approval.preview', $suratKeluarApproval) }}" target="_blank" class="btn btn-outline-primary btn-sm"><i class="fas fa-external-link-alt mr-1"></i> Buka PDF</a>
             </div>
+            @if($isPdfEsign && $suratKeluarApproval->status !== 'approved')
+                <div class="px-3 py-2 border-bottom small text-muted"><i class="fas fa-file-signature mr-1"></i>Preview menampilkan posisi TTE yang diajukan pada PDF sebelum Anda menyetujui atau meminta revisi.</div>
+            @endif
             <div class="card-body p-0">
                 <iframe src="{{ route('surat-keluar.approval.preview', $suratKeluarApproval) }}" class="surat-keluar-preview-frame"></iframe>
             </div>

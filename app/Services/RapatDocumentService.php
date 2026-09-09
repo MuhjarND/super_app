@@ -331,7 +331,10 @@ class RapatDocumentService
             $rapat->id,
             'Undangan Rapat - ' . ($rapat->judul ?: 'Rapat'),
             $this->buildRapatSigners($rapat),
-            ['nomor' => $suratKeluar->nomor_surat ?: $rapat->nomor_undangan]
+            [
+                'nomor' => $suratKeluar->nomor_surat_formatted ?: $rapat->nomor_undangan,
+                'perihal' => $suratKeluar->perihal ?: $rapat->judul,
+            ]
         );
 
         $content = $this->buildUndanganPdfContent($rapat, $signed, $verification);
@@ -374,7 +377,10 @@ class RapatDocumentService
             $rapat->id,
             'Undangan Rapat - ' . ($rapat->judul ?: 'Rapat'),
             $this->buildRapatSigners($rapat),
-            ['nomor' => $suratKeluar->nomor_surat ?: $rapat->nomor_undangan]
+            [
+                'nomor' => $suratKeluar->nomor_surat_formatted ?: $rapat->nomor_undangan,
+                'perihal' => $suratKeluar->perihal ?: $rapat->judul,
+            ]
         );
         $filename = DocumentFilename::fromLetter(
             $suratKeluar->nomor_surat_formatted,
@@ -510,7 +516,10 @@ class RapatDocumentService
             $rapat->id,
             'Undangan Rapat - ' . ($rapat->judul ?: 'Rapat'),
             $this->buildRapatSigners($rapat),
-            ['nomor' => $suratKeluar->nomor_surat ?: $rapat->nomor_undangan]
+            [
+                'nomor' => $suratKeluar->nomor_surat_formatted ?: $rapat->nomor_undangan,
+                'perihal' => $suratKeluar->perihal ?: $rapat->judul,
+            ]
         );
         $content = $this->buildUndanganPdfContent($rapat, $signed, $verification);
         $this->pdfVerificationService->finalize(
@@ -618,7 +627,8 @@ class RapatDocumentService
             'Undangan Rapat Satuan Kerja - ' . ($destination ?: ($rapat->judul ?: 'Rapat')),
             $this->buildRapatSigners($rapat),
             [
-                'nomor' => $letter->nomor_surat,
+                'nomor' => $letter->nomor_surat_formatted,
+                'perihal' => $letter->perihal ?: $rapat->judul,
                 'surat_keluar_id' => $letter->id,
                 'tujuan' => $destination,
             ]
@@ -1036,12 +1046,21 @@ class RapatDocumentService
         $customOpening = trim((string) $rapat->detail_tambahan);
 
         if ($customOpening !== '') {
-            return $customOpening;
+            return $this->normalizeInvitationSalutation($customOpening);
         }
 
         return 'Dalam rangka pelaksanaan ' . $rapat->judul
             . ' di lingkungan Pengadilan Tinggi Agama Papua Barat, dengan ini kami mengharapkan '
-            . 'kehadiran Saudara pada kegiatan dimaksud yang akan dilaksanakan pada:';
+            . 'kehadiran Bapak/Ibu/Saudara/i pada kegiatan dimaksud yang akan dilaksanakan pada:';
+    }
+
+    protected function normalizeInvitationSalutation($text)
+    {
+        return preg_replace(
+            '#(?<!Bapak/Ibu/)Saudara(?!/i)#u',
+            'Bapak/Ibu/Saudara/i',
+            (string) $text
+        );
     }
 
     protected function isKetuaOrWakil($user)

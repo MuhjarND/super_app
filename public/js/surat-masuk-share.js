@@ -63,7 +63,7 @@
             '          <div class="col-6 mb-2"><a id="suratMasukShareEmail" class="btn btn-block btn-outline-secondary" style="border-radius:11px;"><i class="fas fa-envelope mr-2"></i>Email</a></div>',
             '          <div class="col-6 mb-2"><button type="button" id="suratMasukCopyLink" class="btn btn-block btn-outline-primary" style="border-radius:11px;"><i class="fas fa-link mr-2"></i>Salin Link</button></div>',
             '        </div>',
-            '        <div id="suratShareAccessNote" class="small text-muted mt-2"><i class="fas fa-lock mr-1"></i><span>Penerima harus login dan memiliki hak akses untuk membuka surat.</span></div>',
+            '        <div id="suratShareAccessNote" class="small text-muted mt-2"><i class="fas fa-link mr-1"></i><span>Tautan dapat dibuka tanpa login dan berlaku selama 7 hari.</span></div>',
             '      </div>',
             '    </div>',
             '  </div>',
@@ -84,7 +84,7 @@
         document.getElementById('suratMasukShareWhatsapp').href = 'https://wa.me/?text=' + encodeURIComponent(textWithUrl);
         document.getElementById('suratMasukShareTelegram').href = 'https://t.me/share/url?url=' + encodeURIComponent(payload.url) + '&text=' + encodeURIComponent(shareText(payload, false));
         document.getElementById('suratMasukShareEmail').href = 'mailto:?subject=' + encodeURIComponent(shareTitle(payload)) + '&body=' + encodeURIComponent(textWithUrl);
-        document.querySelector('#suratShareAccessNote span').textContent = payload.accessNote || 'Penerima harus login dan memiliki hak akses untuk membuka surat.';
+        document.querySelector('#suratShareAccessNote span').textContent = payload.accessNote || 'Tautan dapat dibuka tanpa login dan berlaku selama 7 hari.';
     }
 
     function feedback(message, success) {

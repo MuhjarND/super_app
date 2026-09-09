@@ -117,6 +117,41 @@ class RapatSatkerInvitationTest extends TestCase
         $this->assertStringNotContainsString('Kepada Yth.', $html);
     }
 
+    public function test_collective_satker_pdf_does_not_repeat_seluruh_satker_in_address(): void
+    {
+        $rapat = new Rapat([
+            'judul' => 'Rapat Bersama Satker',
+            'tanggal' => '2026-08-12',
+            'waktu_mulai' => '09:00:00',
+            'tempat' => 'Ruang Rapat',
+            'bersama_satker' => true,
+            'penerima_satker' => 'Ketua',
+        ]);
+        $rapat->forceFill(['created_at' => Carbon::parse('2026-08-12 08:00:00')]);
+        $rapat->setRelation('pesertas', collect());
+        $rapat->setRelation('approvals', collect());
+        $rapat->setRelation('approver1', null);
+        $rapat->setRelation('approver2', null);
+        $rapat->setRelation('creator', null);
+        $rapat->setRelation('kategoriSuratKode', null);
+        $rapat->setRelation('suratKeluar', null);
+
+        $letter = new SuratKeluar([
+            'nomor_surat' => '103/KPTA.W31-A/UND.OT1.6/VIII/2026',
+            'opsi_penerima' => 'external',
+            'penerima_external' => 'Seluruh Satker Sewilayah Hukum PTA Papua Barat',
+        ]);
+        $letter->forceFill(['is_satker_collective' => true]);
+
+        $data = $this->service()->buildPdfViewData($rapat, false, null, 'satker', $letter);
+        $this->assertTrue((bool) $data['suratKeluar']->is_satker_collective);
+        $html = view('rapat.pdf.undangan', $data)->render();
+
+        $this->assertStringContainsString('<div>Kepada</div>', $html);
+        $this->assertStringContainsString('Yth. <span class="recipient-name">Ketua Pengadilan Agama Sewilayah Hukum PTA Papua Barat</span>', $html);
+        $this->assertStringNotContainsString('Ketua Seluruh Satker', $html);
+    }
+
     protected function targets(array $satkers, $allSatkerCount)
     {
         $method = new ReflectionMethod(RapatDocumentService::class, 'buildSatkerInvitationTargets');

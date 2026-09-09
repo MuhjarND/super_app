@@ -88,11 +88,11 @@ class RapatInvitationPdfLayoutTest extends TestCase
 
         $this->assertStringContainsString('Mohon hadir 15 menit sebelum kegiatan dimulai.', $html);
         $this->assertStringNotContainsString(
-            'Sehubungan dengan hal tersebut, dimohon kehadiran Saudara tepat pada waktunya.',
+            'Sehubungan dengan hal tersebut, dimohon kehadiran Bapak/Ibu/Saudara/i tepat pada waktunya.',
             $html
         );
         $this->assertStringContainsString(
-            'Demikian undangan ini disampaikan, atas perhatian dan kehadiran Saudara diucapkan terima kasih.',
+            'Demikian undangan ini disampaikan, atas perhatian dan kehadiran Bapak/Ibu/Saudara/i diucapkan terima kasih.',
             $html
         );
     }
@@ -124,7 +124,7 @@ class RapatInvitationPdfLayoutTest extends TestCase
             'signatureImage' => null,
             'kopImage' => null,
             'lampiranLabel' => '-',
-            'openingParagraph' => 'Dalam rangka pelaksanaan Rapat Pengujian Tata Letak di lingkungan Pengadilan Tinggi Agama Papua Barat, dengan ini kami mengharapkan kehadiran Saudara pada kegiatan dimaksud yang akan dilaksanakan pada:',
+            'openingParagraph' => 'Dalam rangka pelaksanaan Rapat Pengujian Tata Letak di lingkungan Pengadilan Tinggi Agama Papua Barat, dengan ini kami mengharapkan kehadiran Bapak/Ibu/Saudara/i pada kegiatan dimaksud yang akan dilaksanakan pada:',
             'signatoryTitle' => ['line1' => 'Sekretaris,', 'line2' => 'Pengadilan Tinggi Agama Papua Barat'],
             'pdfVerification' => $pdfVerification,
         ];

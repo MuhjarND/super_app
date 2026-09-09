@@ -65,9 +65,11 @@
                         @endif
                     </div>
                     <div class="virtual-meeting-actions">
-                        <a href="{{ $meeting->zoom_link }}" target="_blank" rel="noopener" class="btn btn-primary btn-sm">
-                            <i class="fas fa-video mr-1"></i> Buka Zoom
-                        </a>
+                        @if($meeting->zoom_link)
+                            <a href="{{ $meeting->zoom_link }}" target="_blank" rel="noopener" class="btn btn-primary btn-sm">
+                                <i class="fas fa-video mr-1"></i> Buka Meeting
+                            </a>
+                        @endif
                         @if($canManage)
                             <button type="button" class="btn btn-outline-primary btn-sm" data-toggle="modal" data-target="#editVirtualMeeting{{ $meeting->id }}">
                                 <i class="fas fa-pen mr-1"></i> Edit
@@ -90,6 +92,16 @@
                 </div>
                 <div class="virtual-meeting-participants">
                     <strong>Peserta:</strong> {{ $meeting->participants->pluck('name')->implode(', ') ?: '-' }}
+                    @if($meeting->meeting_id || $meeting->meeting_passcode)
+                        <div class="mt-1">
+                            @if($meeting->meeting_id)
+                                <strong>Meeting ID:</strong> {{ $meeting->meeting_id }}
+                            @endif
+                            @if($meeting->meeting_passcode)
+                                <span class="{{ $meeting->meeting_id ? 'ml-3' : '' }}"><strong>Passcode:</strong> {{ $meeting->meeting_passcode }}</span>
+                            @endif
+                        </div>
+                    @endif
                     @if($meeting->catatan)
                         <div class="mt-1"><strong>Catatan:</strong> {{ $meeting->catatan }}</div>
                     @endif
@@ -127,8 +139,18 @@
                                         </div>
                                     </div>
                                     <div class="form-group">
-                                        <label>Link Zoom</label>
-                                        <input type="url" name="zoom_link" class="form-control" value="{{ $meeting->zoom_link }}" required>
+                                        <label>Link Meeting <span class="text-muted">(opsional)</span></label>
+                                        <input type="url" name="zoom_link" class="form-control" value="{{ $meeting->zoom_link }}" placeholder="https://zoom.us/j/...">
+                                    </div>
+                                    <div class="form-row">
+                                        <div class="form-group col-md-6">
+                                            <label>Meeting ID</label>
+                                            <input type="text" name="meeting_id" class="form-control" value="{{ $meeting->meeting_id }}" maxlength="255">
+                                        </div>
+                                        <div class="form-group col-md-6">
+                                            <label>Passcode / Password Meeting</label>
+                                            <input type="text" name="meeting_passcode" class="form-control" value="{{ $meeting->meeting_passcode }}" maxlength="255">
+                                        </div>
                                     </div>
                                     <div class="form-group">
                                         <label>Peserta</label>

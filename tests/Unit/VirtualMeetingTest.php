@@ -25,6 +25,19 @@ class VirtualMeetingTest extends TestCase
         $this->assertStringContainsString('09:00 WIT - 11:30 WIT', $meeting->jadwal_formatted);
     }
 
+    public function test_virtual_meeting_accepts_optional_access_credentials()
+    {
+        $meeting = new VirtualMeeting([
+            'zoom_link' => null,
+            'meeting_id' => '123 456 7890',
+            'meeting_passcode' => 'Papeda2026',
+        ]);
+
+        $this->assertNull($meeting->zoom_link);
+        $this->assertSame('123 456 7890', $meeting->meeting_id);
+        $this->assertSame('Papeda2026', $meeting->meeting_passcode);
+    }
+
     /**
      * @dataProvider managerRoleProvider
      */

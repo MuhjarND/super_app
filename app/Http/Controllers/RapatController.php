@@ -61,6 +61,7 @@ class RapatController extends Controller
         $rapats = $rapatQuery
             ->orderByDesc('tanggal')
             ->orderByDesc('waktu_mulai')
+            ->orderByDesc('created_at')
             ->get();
 
         $kategoriSuratOptions = $this->documentService->getKategoriSuratLeafOptions();

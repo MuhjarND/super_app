@@ -43,7 +43,7 @@ class SuratKeluarApprovalController extends Controller
 
         $canAct = $suratKeluarApproval->status === 'pending'
             && $suratKeluarApproval->isParafReady()
-            && ($user->isSuperAdmin() || $isApprover);
+            && $this->canProcessApproval($suratKeluarApproval, $user);
         $canParaf = $suratKeluarApproval->status === 'pending'
             && $suratKeluarApproval->paraf_status === 'pending'
             && ($user->isSuperAdmin() || $isParafUser);
@@ -64,8 +64,7 @@ class SuratKeluarApprovalController extends Controller
     public function approve(ApprovalActionRequest $request, SuratKeluarApproval $suratKeluarApproval)
     {
         $user = auth()->user();
-        abort_unless($user->canApproveSuratKeluarTemplate(), 403);
-        abort_unless($user->isSuperAdmin() || $user->canActAsAssignedUser($suratKeluarApproval->approver_id), 403);
+        abort_unless($this->canProcessApproval($suratKeluarApproval, $user), 403);
         $this->approvalService->approve($suratKeluarApproval, $user, $request->note);
 
         return back()->with('success', 'Surat keluar berhasil di-approve.');
@@ -74,13 +73,30 @@ class SuratKeluarApprovalController extends Controller
     public function reject(ApprovalActionRequest $request, SuratKeluarApproval $suratKeluarApproval)
     {
         $user = auth()->user();
-        abort_unless($user->canApproveSuratKeluarTemplate(), 403);
-        abort_unless($user->isSuperAdmin() || $user->canActAsAssignedUser($suratKeluarApproval->approver_id), 403);
+        abort_unless($this->canProcessApproval($suratKeluarApproval, $user), 403);
 
         $request->validate(['note' => 'required|string|max:2000']);
         $this->approvalService->reject($suratKeluarApproval, $user, $request->note);
 
-        return back()->with('success', 'Surat keluar berhasil ditolak.');
+        return back()->with('success', $suratKeluarApproval->template_slug === \App\Services\SuratKeluarEsignService::TEMPLATE_SLUG
+            ? 'Permohonan e-sign ditolak dan dikembalikan untuk revisi.'
+            : 'Surat keluar berhasil ditolak.');
+    }
+
+    protected function canProcessApproval(SuratKeluarApproval $approval, $user)
+    {
+        if ($user->isSuperAdmin()) {
+            return true;
+        }
+
+        if (!$user->canActAsAssignedUser($approval->approver_id)) {
+            return false;
+        }
+
+        // Pegawai yang dituju pada pengajuan e-sign boleh memproses tugasnya
+        // walaupun akun tersebut tidak memakai role approval umum.
+        return $approval->template_slug === \App\Services\SuratKeluarEsignService::TEMPLATE_SLUG
+            || $user->canApproveSuratKeluarTemplate();
     }
 
     public function approveParaf(ApprovalActionRequest $request, SuratKeluarApproval $suratKeluarApproval)
