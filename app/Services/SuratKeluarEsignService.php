@@ -14,6 +14,19 @@ class SuratKeluarEsignService
     public const TEMPLATE_SLUG = 'uploaded-pdf-esign';
     public const DOCUMENT_TYPE = 'surat_keluar_esign';
 
+    /**
+     * Nama berkas TTE yang tersedia di public/tte.
+     *
+     * Pemetaan dipusatkan di satu tempat agar daftar penandatangan, preview,
+     * dan hasil akhir PDF selalu menggunakan aset yang sama.
+     */
+    protected const TTE_FILENAMES = [
+        'ketua' => 'KETUA.png',
+        'wakil_ketua' => 'WAKIL.png',
+        'panitera' => 'PANITERA.png',
+        'plt_sekretaris' => 'PLT_SEKRETARIS.png',
+    ];
+
     protected $pdfVerificationService;
 
     public function __construct(PdfVerificationService $pdfVerificationService)
@@ -31,25 +44,25 @@ class SuratKeluarEsignService
         $files = [
             'ketua' => [
                 'label' => 'Ketua',
-                'filename' => 'TTE_KETUA.png',
+                'filename' => self::TTE_FILENAMES['ketua'],
                 'jabatan_codes' => ['KPTA'],
                 'roles' => ['ketua'],
             ],
             'wakil_ketua' => [
                 'label' => 'Wakil Ketua',
-                'filename' => 'TTE_WAKIL.png',
+                'filename' => self::TTE_FILENAMES['wakil_ketua'],
                 'jabatan_codes' => ['WKPTA'],
                 'roles' => ['wakil_ketua'],
             ],
             'panitera' => [
                 'label' => 'Panitera',
-                'filename' => 'TTE_PANITERA.png',
+                'filename' => self::TTE_FILENAMES['panitera'],
                 'jabatan_codes' => ['PAN'],
                 'roles' => ['panitera'],
             ],
             'plt_sekretaris' => [
                 'label' => 'PLT. Sekretaris',
-                'filename' => 'PLT SEKRETARIS.png',
+                'filename' => self::TTE_FILENAMES['plt_sekretaris'],
                 'jabatan_codes' => ['SEK'],
                 'roles' => ['sekretaris'],
             ],
@@ -121,32 +134,18 @@ class SuratKeluarEsignService
 
     public function tteDefinition($key)
     {
-        $definitions = [
-            'ketua' => 'TTE_KETUA.png',
-            'wakil_ketua' => 'TTE_WAKIL.png',
-            'panitera' => 'TTE_PANITERA.png',
-            'plt_sekretaris' => 'PLT SEKRETARIS.png',
-        ];
-
-        if (!isset($definitions[$key])) {
+        if (!isset(self::TTE_FILENAMES[$key])) {
             return null;
         }
 
-        $filename = $definitions[$key];
+        $filename = self::TTE_FILENAMES[$key];
         $path = $this->ttePath($key);
         return is_file($path) ? ['key' => $key, 'filename' => $filename, 'path' => $path] : null;
     }
 
     protected function ttePath($key)
     {
-        $filenames = [
-            'ketua' => 'TTE_KETUA.png',
-            'wakil_ketua' => 'TTE_WAKIL.png',
-            'panitera' => 'TTE_PANITERA.png',
-            'plt_sekretaris' => 'PLT SEKRETARIS.png',
-        ];
-
-        return public_path('tte/' . ($filenames[$key] ?? ''));
+        return public_path('tte/' . (self::TTE_FILENAMES[$key] ?? ''));
     }
 
     public function isEligible(SuratKeluar $suratKeluar)

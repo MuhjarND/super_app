@@ -17,9 +17,17 @@ class SuratKeluarEsignPdfTest extends TestCase
     {
         $service = new SuratKeluarEsignService(app(PdfVerificationService::class));
 
-        foreach (['ketua', 'wakil_ketua', 'panitera', 'plt_sekretaris'] as $key) {
+        $expectedFilenames = [
+            'ketua' => 'KETUA.png',
+            'wakil_ketua' => 'WAKIL.png',
+            'panitera' => 'PANITERA.png',
+            'plt_sekretaris' => 'PLT_SEKRETARIS.png',
+        ];
+
+        foreach ($expectedFilenames as $key => $filename) {
             $tte = $service->tteDefinition($key);
             $this->assertNotNull($tte);
+            $this->assertSame($filename, $tte['filename']);
             $this->assertFileExists($tte['path']);
         }
     }
