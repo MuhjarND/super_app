@@ -145,7 +145,21 @@
             border-right: 1px solid var(--sidebar-border);
             box-shadow: none !important;
             width: var(--sidebar-width) !important;
+            height: 100vh;
+            min-height: 0;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
             transition: width 0.2s ease, transform 0.2s ease;
+        }
+
+        .main-sidebar > .sidebar {
+            flex: 1 1 auto;
+            min-height: 0;
+            height: auto !important;
+            overflow-x: hidden;
+            overflow-y: auto;
+            padding-bottom: 24px !important;
         }
 
         .main-sidebar .brand-link {
@@ -337,6 +351,48 @@
 
         .sidebar .nav-section-toggle.has-alert .section-chevron {
             color: #dc2626;
+        }
+
+        /* Badge angka menu utama disembunyikan di desktop agar sidebar tetap
+         * ringkas; section tetap diberi aksen merah saat ada notifikasi aktif.
+         */
+        .sidebar .nav-section-toggle .nav-section-badge {
+            display: none !important;
+        }
+
+        .sidebar .nav-section-toggle.has-alert,
+        .sidebar .nav-section-toggle.has-alert:hover {
+            background: linear-gradient(135deg, #fef2f2, #fff1f2);
+            color: #dc2626;
+            box-shadow: inset 0 0 0 1px rgba(239, 68, 68, 0.12);
+        }
+
+        .sidebar .nav-section-toggle.has-alert .section-chevron {
+            color: #dc2626;
+        }
+
+        /* Pada mobile, badge section membantu pengguna menemukan modul yang
+         * memiliki tindak lanjut. Desktop memakai dropdown notifikasi header.
+         */
+        @media (max-width: 991.98px) {
+            .sidebar .nav-section-toggle .nav-section-badge {
+                display: inline-flex !important;
+            }
+
+            .sidebar .nav-section-toggle.has-alert {
+                background: linear-gradient(135deg, #fef2f2, #fff1f2);
+                color: #dc2626;
+                box-shadow: inset 0 0 0 1px rgba(239, 68, 68, 0.12);
+            }
+
+            .sidebar .nav-section-toggle.has-alert:hover {
+                background: linear-gradient(135deg, #fee2e2, #ffe4e6);
+                color: #b91c1c;
+            }
+
+            .sidebar .nav-section-toggle.has-alert .section-chevron {
+                color: #dc2626;
+            }
         }
 
         .sidebar .nav-section-toggle .section-chevron {
@@ -4693,6 +4749,13 @@
                 const $section = $(this);
                 const sectionKey = $section.data('section');
                 if (!sectionKey) {
+                    return;
+                }
+
+                // Jangan biarkan menu pada halaman aktif tersembunyi karena
+                // state collapse lama yang tersimpan di browser.
+                if ($section.find('.nav-link.active').length) {
+                    $section.removeClass('is-collapsed');
                     return;
                 }
 

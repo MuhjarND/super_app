@@ -18,6 +18,12 @@
     .zi-panel-head h5 { margin:0; font-size:.92rem; font-weight:800; color:#0f172a; }
     .zi-panel-body { padding:14px 18px 16px; }
     .zi-progress-list, .zi-attention-list, .zi-trend-list { display:grid; gap:10px; }
+    .zi-member-list { display:flex; flex-wrap:wrap; gap:5px; margin-top:7px; }
+    .zi-member-chip { display:flex; align-items:center; gap:6px; min-width:0; max-width:100%; padding:4px 7px; border:1px solid #e2e8f0; border-radius:9px; background:#f8fafc; color:#475569; font-size:.68rem; font-weight:700; line-height:1.3; }
+    .zi-member-avatar { display:inline-flex; align-items:center; justify-content:center; width:19px; height:19px; flex:0 0 19px; border-radius:6px; background:#e0e7ff; color:#4338ca; font-size:.54rem; font-weight:900; }
+    .zi-member-name { min-width:0; overflow-wrap:anywhere; }
+    .zi-member-empty { color:#94a3b8; font-size:.7rem; }
+    .zi-progress-item > div:first-child { min-width:0; }
     .zi-progress-item { display:grid; grid-template-columns:1fr auto; gap:12px; align-items:center; padding:10px 0; border-bottom:1px solid #f1f5f9; }
     .zi-progress-item:last-child { border-bottom:none; }
     .zi-progress-bar { width:100%; height:8px; background:#e2e8f0; border-radius:999px; overflow:hidden; margin-top:6px; }
@@ -142,7 +148,8 @@
                                 <div>
                                     <div class="zi-attention-title">{{ $item['name'] }}</div>
                                     <div class="zi-trend-meta">{{ $item['code'] }}</div>
-                                    <div class="zi-attention-meta">PIC: {{ $item['pic'] ?: '-' }} &bull; {{ $item['coverage']['covered'] }}/{{ $item['coverage']['total'] }} sub poin</div>
+                                    <div class="zi-attention-meta">{{ $item['coverage']['covered'] }}/{{ $item['coverage']['total'] }} sub poin</div>
+                                    @include('progress-zi.partials.member-list', ['members' => $item['pic_members'] ?? [], 'variant' => 'inline'])
                                     <div class="zi-progress-bar"><span style="width: {{ min(100, max(0, $item['score'])) }}%"></span></div>
                                 </div>
                                 <div>{!! '<span class="badge badge-' . ($item['score'] >= 100 ? 'success' : ($item['score'] >= 50 ? 'warning' : 'secondary')) . ' app-status-badge">' . rtrim(rtrim(number_format($item['score'], 1), '0'), '.') . '%</span>' !!}</div>
@@ -195,7 +202,8 @@
                         <div>
                             <div class="zi-attention-title">{{ $item['name'] }}</div>
                             <div class="zi-trend-meta">{{ $item['group_label'] }} &bull; {{ $item['code'] }}</div>
-                            <div class="zi-attention-meta">PIC: {{ $item['pic'] ?: '-' }} &bull; {{ $item['coverage']['covered'] }}/{{ $item['coverage']['total'] }} sub poin</div>
+                            <div class="zi-attention-meta">{{ $item['coverage']['covered'] }}/{{ $item['coverage']['total'] }} sub poin</div>
+                            @include('progress-zi.partials.member-list', ['members' => $item['pic_members'] ?? [], 'variant' => 'inline'])
                             <div class="zi-progress-bar"><span style="width: {{ min(100, max(0, $item['score'])) }}%"></span></div>
                         </div>
                         <div>{!! '<span class="badge badge-' . ($item['score'] >= 100 ? 'success' : ($item['score'] >= 50 ? 'warning' : 'secondary')) . ' app-status-badge">' . rtrim(rtrim(number_format($item['score'], 1), '0'), '.') . '%</span>' !!}</div>

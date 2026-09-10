@@ -51,6 +51,16 @@
     .zi-kpi-chip.is-danger { border-color:#fecaca; background:#fef2f2; color:#b91c1c; }
     .zi-kpi-chip.is-success { border-color:#bbf7d0; background:#f0fdf4; color:#15803d; }
     .zi-kpi-chip.is-progress { border-color:#c7d2fe; background:#eef2ff; color:#4338ca; }
+    .zi-area-members { max-width:52%; min-width:0; }
+    .zi-member-list { display:grid; gap:6px; min-width:0; }
+    .zi-member-list--inline { display:flex; align-items:center; flex-wrap:wrap; gap:6px; }
+    .zi-member-chip { display:flex; align-items:flex-start; gap:7px; min-width:0; padding:6px 8px; border:1px solid #e2e8f0; border-radius:10px; background:#f8fafc; color:#334155; font-size:.72rem; font-weight:700; line-height:1.35; }
+    .zi-member-avatar { display:inline-flex; align-items:center; justify-content:center; width:22px; height:22px; flex:0 0 22px; border-radius:7px; background:#e0e7ff; color:#4338ca; font-size:.59rem; font-weight:900; }
+    .zi-member-name { min-width:0; overflow-wrap:anywhere; }
+    .zi-member-empty { color:#94a3b8; font-size:.72rem; font-weight:600; }
+    .zi-area-members .zi-member-list { display:flex; flex-wrap:wrap; justify-content:flex-end; gap:5px; }
+    .zi-area-members .zi-member-chip { align-items:center; padding:4px 7px; font-size:.67rem; background:#fff; }
+    .zi-area-members .zi-member-avatar { width:19px; height:19px; flex-basis:19px; border-radius:6px; font-size:.54rem; }
     .zi-detail-toggle { font-size:.72rem; font-weight:700; color:#4f46e5; cursor:pointer; display:inline-flex; align-items:center; gap:4px; margin-top:6px; }
     .zi-detail-toggle:hover { text-decoration:underline; }
     .zi-indicator-collapse { display:none; }
@@ -108,6 +118,8 @@
         .zi-action-group form .btn { display:block; }
         .zi-area-head { align-items:flex-start; flex-direction:column; }
         .zi-area-meta { width:100%; justify-content:flex-start; }
+        .zi-area-members { max-width:100%; width:100%; }
+        .zi-area-members .zi-member-list { justify-content:flex-start; }
         .zi-preview-layout { grid-template-columns:1fr; }
         .zi-preview-sidebar { border-right:none; border-bottom:1px solid #e2e8f0; max-height:200px; }
     }
@@ -243,7 +255,9 @@
                         </div>
                         <div class="zi-area-meta">
                             <span class="zi-kpi-chip {{ $coverageClass }}"><i class="fas fa-check-circle"></i>{{ $coveredSubPoints }}/{{ $totalSubPoints }}</span>
-                            <span class="zi-kpi-chip"><i class="fas fa-user-tie"></i>{{ $area->pic_names !== '-' ? $area->pic_names : '-' }}</span>
+                            <div class="zi-area-members">
+                                @include('progress-zi.partials.member-list', ['members' => $area->pics, 'fallback' => $area->pic, 'variant' => 'inline'])
+                            </div>
                             <span class="zi-area-toggle"><i class="fas fa-chevron-down"></i></span>
                         </div>
                     </div>

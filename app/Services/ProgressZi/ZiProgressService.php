@@ -157,6 +157,7 @@ class ZiProgressService
                 'code' => $area->code,
                 'score' => $this->calculateAreaScore($area, $period),
                 'pic' => $area->pic_names,
+                'pic_members' => $area->pics->isNotEmpty() ? $area->pics->values() : ($area->pic ? collect([$area->pic]) : collect()),
                 'coverage' => $this->buildSubPointCoverage(collect([$area])),
             ];
         })->sortByDesc('score')->values();

@@ -247,6 +247,7 @@ class ProgressZiReportController extends Controller
                 'code' => $area->code,
                 'name' => $area->name,
                 'pic' => $area->pic_names,
+                'pic_members' => $area->pics->isNotEmpty() ? $area->pics->values() : ($area->pic ? collect([$area->pic]) : collect()),
                 'score' => $this->progressService->calculateAreaScore($area, $selectedPeriod),
             ];
         });

@@ -25,6 +25,14 @@
     .zi-area-code { font-size:.7rem; font-weight:800; letter-spacing:.06em; color:#4f46e5; text-transform:uppercase; }
     .zi-area-name { font-size:.88rem; font-weight:800; margin-top:2px; color:#0f172a; }
     .zi-area-pic { font-size:.72rem; color:#64748b; font-weight:700; line-height:1.45; margin-top:7px; }
+    .zi-member-list { display:grid; gap:6px; min-width:0; }
+    .zi-member-list--inline { display:flex; align-items:center; flex-wrap:wrap; gap:6px; }
+    .zi-member-chip { display:flex; align-items:flex-start; gap:7px; min-width:0; padding:6px 8px; border:1px solid #e2e8f0; border-radius:10px; background:#f8fafc; color:#334155; font-size:.72rem; font-weight:700; line-height:1.35; }
+    .zi-member-list--inline .zi-member-chip { align-items:center; padding:5px 8px; background:#fff; }
+    .zi-member-avatar { display:inline-flex; align-items:center; justify-content:center; width:22px; height:22px; flex:0 0 22px; border-radius:7px; background:#e0e7ff; color:#4338ca; font-size:.59rem; font-weight:900; letter-spacing:.02em; }
+    .zi-member-name { min-width:0; overflow-wrap:anywhere; }
+    .zi-member-empty { color:#94a3b8; font-size:.72rem; font-weight:600; }
+    .zi-member-heading { display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:8px; color:#64748b; font-size:.68rem; font-weight:800; letter-spacing:.06em; text-transform:uppercase; }
     .zi-area-stats { display:flex; align-items:center; gap:6px; flex-wrap:wrap; margin-top:8px; }
     .zi-count-chip { display:inline-flex; align-items:center; gap:5px; padding:4px 8px; border-radius:999px; background:#f8fafc; border:1px solid #e2e8f0; color:#334155; font-size:.7rem; font-weight:700; }
     .zi-guide-summary { display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:10px; margin-bottom:14px; }
@@ -110,7 +118,7 @@
                             <a href="{{ route('progress-zi.guidelines.index', ['group_type' => $selectedGroupType, 'area_id' => $area->id]) }}" class="zi-area-card {{ optional($selectedArea)->id === $area->id ? 'active' : '' }}">
                                 <div class="zi-area-code">{{ $area->code }}</div>
                                 <div class="zi-area-name">{{ $area->name }}</div>
-                                <div class="zi-area-pic"><i class="fas fa-user-tie mr-1"></i>{{ $area->pic_names !== '-' ? $area->pic_names : 'PIC belum ditentukan' }}</div>
+                                @include('progress-zi.partials.member-list', ['members' => $area->pics, 'fallback' => $area->pic])
                                 <div class="zi-area-stats">
                                     <span class="zi-count-chip">{{ $pointCount }} poin</span>
                                     <span class="zi-count-chip">{{ $subPointCount }} sub</span>
@@ -126,8 +134,8 @@
         <div class="zi-guide-panel">
             <div class="zi-guide-panel-head">
                 <h5>{{ optional($selectedArea)->name ?: 'Pilih Area' }}</h5>
-                @if($selectedArea && $selectedArea->pic_names !== '-')
-                    <span class="zi-count-chip"><i class="fas fa-user-tie"></i>{{ $selectedArea->pic_names }}</span>
+                @if($selectedArea)
+                    <span class="zi-count-chip"><i class="fas fa-user-tie"></i>{{ $selectedArea->pics->isNotEmpty() ? $selectedArea->pics->count() : ($selectedArea->pic ? 1 : 0) }} anggota</span>
                 @endif
             </div>
             <div class="zi-guide-panel-body">
@@ -146,6 +154,8 @@
                         <div class="zi-guide-kpi"><strong>{{ $selectedSubPointCount }}</strong><span>Sub Poin Acuan</span></div>
                         <div class="zi-guide-kpi"><strong>{{ $selectedIndicatorCount }}</strong><span>Indikator Penilaian</span></div>
                     </div>
+                    <div class="zi-member-heading"><span><i class="fas fa-users mr-1"></i>Anggota area</span><span>{{ $selectedArea->pics->isNotEmpty() ? $selectedArea->pics->count() : ($selectedArea->pic ? 1 : 0) }} orang</span></div>
+                    @include('progress-zi.partials.member-list', ['members' => $selectedArea->pics, 'fallback' => $selectedArea->pic])
 
                     @forelse($selectedArea->guidelinePoints as $point)
                         <div class="zi-point-card">

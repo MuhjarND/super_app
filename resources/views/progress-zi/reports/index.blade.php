@@ -26,6 +26,11 @@
     .zi-filter-grid { display:grid; grid-template-columns:repeat(6, minmax(0,1fr)); gap:12px; }
     .zi-table-title { font-weight:700; color:#0f172a; }
     .zi-table-meta { color:#64748b; font-size:.75rem; margin-top:4px; }
+    .zi-member-list { display:flex; flex-wrap:wrap; gap:5px; margin-top:5px; }
+    .zi-member-chip { display:flex; align-items:center; gap:6px; min-width:0; max-width:100%; padding:4px 7px; border:1px solid #e2e8f0; border-radius:9px; background:#f8fafc; color:#475569; font-size:.68rem; font-weight:700; line-height:1.3; }
+    .zi-member-avatar { display:inline-flex; align-items:center; justify-content:center; width:19px; height:19px; flex:0 0 19px; border-radius:6px; background:#e0e7ff; color:#4338ca; font-size:.54rem; font-weight:900; }
+    .zi-member-name { min-width:0; overflow-wrap:anywhere; }
+    .zi-member-empty { color:#94a3b8; font-size:.7rem; }
     @media (max-width: 991.98px) {
         .zi-report-kpis,
         .zi-report-grid,
