@@ -26,6 +26,17 @@
         <label>Stok <span class="text-danger">*</span></label>
         <input type="number" name="stock" min="0" class="form-control" value="{{ $fieldValue('stock', 0) }}" required>
     </div>
+    <div class="col-md-3 mb-3">
+        <div class="custom-control custom-checkbox mt-4">
+            <input type="checkbox" class="custom-control-input supply-unit-stock-toggle" id="has_unit_stock_{{ $isEdit && $item ? $item->id : 'create' }}" name="has_unit_stock" value="1" {{ $fieldValue('has_unit_stock', false) ? 'checked' : '' }}>
+            <label class="custom-control-label" for="has_unit_stock_{{ $isEdit && $item ? $item->id : 'create' }}">Kelola stok dalam satuan</label>
+        </div>
+    </div>
+    <div class="col-md-2 mb-3 supply-unit-stock-field {{ $fieldValue('has_unit_stock', false) ? '' : 'd-none' }}">
+        <label>Jumlah satuan</label>
+        <input type="number" name="unit_stock" min="0" class="form-control" value="{{ $fieldValue('unit_stock', 0) }}">
+        <small class="form-text text-muted">Dikurangi otomatis saat barang diambil.</small>
+    </div>
     <div class="col-md-2 mb-3">
         <label>Harga Satuan</label>
         <input type="number" name="unit_price" min="0" step="0.01" class="form-control" value="{{ $fieldValue('unit_price') }}" placeholder="Opsional">
@@ -54,3 +65,15 @@
         </div>
     </div>
 </div>
+
+<script>
+    (function () {
+        var toggle = document.getElementById('has_unit_stock_{{ $isEdit && $item ? $item->id : 'create' }}');
+        if (!toggle) return;
+        var field = toggle.closest('.row').querySelector('.supply-unit-stock-field');
+        toggle.addEventListener('change', function () {
+            field.classList.toggle('d-none', !toggle.checked);
+            if (!toggle.checked) field.querySelector('input').value = 0;
+        });
+    }());
+</script>

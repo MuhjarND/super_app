@@ -358,6 +358,20 @@
         color: #e11d48;
     }
 
+    .supply-stock-status {
+        display: block;
+        margin-top: 3px;
+        color: #dc2626;
+        font-size: .68rem;
+        font-weight: 900;
+    }
+
+    .supply-unit-stock-label {
+        color: var(--supply-muted);
+        font-size: .72rem;
+        font-weight: 800;
+    }
+
     .supply-qty-control {
         display: grid;
         grid-template-columns: 34px minmax(0, 1fr) 34px;

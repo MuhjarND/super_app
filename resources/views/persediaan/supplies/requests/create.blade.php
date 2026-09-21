@@ -39,7 +39,8 @@
                         @if($items->count())
                             <div class="supply-shop-grid">
                                 @foreach($items as $index => $item)
-                                    @php($initialQty = (string) $selectedItemId === (string) $item->id && (int) $item->stock > 0 ? 1 : 0)
+                                    @php($availableStock = $item->available_request_stock)
+                                    @php($initialQty = (string) $selectedItemId === (string) $item->id && $availableStock > 0 ? 1 : 0)
                                     <div class="supply-shop-card {{ $initialQty > 0 ? 'is-selected' : '' }}" data-supply-card data-supply-search="{{ \Illuminate\Support\Str::lower(trim($item->name . ' ' . $item->code . ' ' . $item->description)) }}">
                                         <div class="supply-shop-image">
                                             @if($item->image_url)
@@ -53,14 +54,20 @@
                                                 <div class="supply-shop-name">{{ $item->name }}</div>
                                                 <div class="supply-shop-meta-row mt-2">
                                                     <span class="inventory-module-muted">{{ $item->code ?: '-' }}</span>
-                                                    <span class="supply-stock-pill {{ $item->is_low_stock ? 'low' : '' }}">{{ $item->stock_label }}</span>
+                                                    <div class="text-right">
+                                                        <span class="supply-stock-pill {{ ($item->is_empty_stock || $item->is_low_stock || $availableStock <= 0) ? 'low' : '' }}">{{ $item->stock_label }}</span>
+                                                        @if($item->stock_status_label)<span class="supply-stock-status">{{ $item->stock_status_label }}</span>@endif
+                                                        @if($item->has_unit_stock)
+                                                            <span class="supply-unit-stock-label d-block">Satuan: {{ $item->unit_stock_label }}</span>
+                                                        @endif
+                                                    </div>
                                                 </div>
                                             </div>
 
                                             <input type="hidden" name="items[{{ $index }}][supply_item_id]" value="{{ $item->id }}">
                                             <div class="supply-qty-control">
                                                 <button type="button" class="supply-qty-btn" data-qty-minus aria-label="Kurangi {{ $item->name }}">-</button>
-                                                <input type="number" name="items[{{ $index }}][quantity]" class="supply-qty-input" value="{{ $initialQty }}" min="0" max="{{ $item->stock }}" data-qty-input data-stock="{{ $item->stock }}">
+                                                <input type="number" name="items[{{ $index }}][quantity]" class="supply-qty-input" value="{{ $initialQty }}" min="0" max="{{ $availableStock }}" data-qty-input data-stock="{{ $availableStock }}">
                                                 <button type="button" class="supply-qty-btn plus" data-qty-plus aria-label="Tambah {{ $item->name }}">+</button>
                                             </div>
                                         </div>

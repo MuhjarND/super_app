@@ -12,6 +12,8 @@ class SupplyItem extends Model
         'name',
         'unit',
         'stock',
+        'has_unit_stock',
+        'unit_stock',
         'unit_price',
         'minimum_stock',
         'description',
@@ -23,6 +25,8 @@ class SupplyItem extends Model
 
     protected $casts = [
         'stock' => 'integer',
+        'has_unit_stock' => 'boolean',
+        'unit_stock' => 'integer',
         'unit_price' => 'decimal:2',
         'minimum_stock' => 'integer',
         'is_active' => 'boolean',
@@ -50,7 +54,37 @@ class SupplyItem extends Model
 
     public function getIsLowStockAttribute()
     {
-        return (int) $this->minimum_stock > 0 && (int) $this->stock <= (int) $this->minimum_stock;
+        return (int) $this->stock > 0
+            && (int) $this->minimum_stock > 0
+            && (int) $this->stock <= (int) $this->minimum_stock;
+    }
+
+    public function getIsEmptyStockAttribute()
+    {
+        return (int) $this->stock <= 0;
+    }
+
+    public function getStockStatusLabelAttribute()
+    {
+        if ($this->is_empty_stock) {
+            return 'Habis';
+        }
+
+        return $this->is_low_stock ? 'Hampir habis' : null;
+    }
+
+    public function getUnitStockLabelAttribute()
+    {
+        return number_format((int) $this->unit_stock, 0, ',', '.') . ' ' . $this->unit;
+    }
+
+    public function getAvailableRequestStockAttribute()
+    {
+        if (!$this->has_unit_stock) {
+            return (int) $this->stock;
+        }
+
+        return min((int) $this->stock, (int) $this->unit_stock);
     }
 
     public function getImageUrlAttribute()

@@ -34,6 +34,8 @@ class SupplyItemController extends Controller
 
         $validated = $this->validatePayload($request);
         $validated['is_active'] = $request->has('is_active');
+        $validated['has_unit_stock'] = $request->boolean('has_unit_stock');
+        $validated['unit_stock'] = $validated['has_unit_stock'] ? (int) ($validated['unit_stock'] ?? 0) : 0;
         $validated['created_by'] = auth()->id();
         $validated['updated_by'] = auth()->id();
 
@@ -53,6 +55,8 @@ class SupplyItemController extends Controller
 
         $validated = $this->validatePayload($request, $supplyItem->id);
         $validated['is_active'] = $request->has('is_active');
+        $validated['has_unit_stock'] = $request->boolean('has_unit_stock');
+        $validated['unit_stock'] = $validated['has_unit_stock'] ? (int) ($validated['unit_stock'] ?? 0) : 0;
         $validated['updated_by'] = auth()->id();
 
         if ($request->hasFile('image')) {
@@ -77,6 +81,8 @@ class SupplyItemController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'unit' => ['required', 'string', 'max:50'],
             'stock' => ['required', 'integer', 'min:0'],
+            'has_unit_stock' => ['nullable', 'boolean'],
+            'unit_stock' => ['nullable', 'integer', 'min:0'],
             'unit_price' => ['nullable', 'numeric', 'min:0', 'max:999999999999.99'],
             'minimum_stock' => ['nullable', 'integer', 'min:0'],
             'description' => ['nullable', 'string'],

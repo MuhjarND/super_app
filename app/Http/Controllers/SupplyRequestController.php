@@ -153,7 +153,16 @@ class SupplyRequestController extends Controller
                             ]);
                         }
 
+                        if ($item->has_unit_stock && (int) $item->unit_stock < (int) $requestItem->quantity_requested) {
+                            throw ValidationException::withMessages([
+                                'stock' => 'Stok satuan ' . $item->name . ' hanya tersedia ' . $item->unit_stock_label . '.',
+                            ]);
+                        }
+
                         $item->decrement('stock', (int) $requestItem->quantity_requested);
+                        if ($item->has_unit_stock) {
+                            $item->decrement('unit_stock', (int) $requestItem->quantity_requested);
+                        }
                     }
 
                     $requestItem->update([
@@ -322,6 +331,13 @@ class SupplyRequestController extends Controller
             if ((int) $requestItem->item->stock < (int) $requestItem->quantity_requested) {
                 throw ValidationException::withMessages([
                     'stock' => 'Stok ' . $requestItem->item->name . ' hanya tersedia ' . $requestItem->item->stock_label . '.',
+                ]);
+            }
+
+            if ($requestItem->item->has_unit_stock
+                && (int) $requestItem->item->unit_stock < (int) $requestItem->quantity_requested) {
+                throw ValidationException::withMessages([
+                    'stock' => 'Stok satuan ' . $requestItem->item->name . ' hanya tersedia ' . $requestItem->item->unit_stock_label . '.',
                 ]);
             }
         }

@@ -73,7 +73,11 @@
                                             <div class="supply-item-name">{{ $item->name }}</div>
                                             <div class="supply-item-meta">{{ $item->code ?: '-' }}</div>
                                         </div>
-                                        <span class="supply-stock-pill {{ $item->is_low_stock ? 'low' : '' }}">{{ $item->stock_label }}</span>
+                                        <div class="text-right">
+                                            <span class="supply-stock-pill {{ ($item->is_empty_stock || $item->is_low_stock) ? 'low' : '' }}">{{ $item->stock_label }}</span>
+                                            @if($item->stock_status_label)<span class="supply-stock-status">{{ $item->stock_status_label }}</span>@endif
+                                            @if($item->has_unit_stock)<span class="supply-unit-stock-label">Satuan: {{ $item->unit_stock_label }}</span>@endif
+                                        </div>
                                     </div>
                                     @if($item->description)
                                         <p class="supply-item-meta mb-2">{{ \Illuminate\Support\Str::limit($item->description, 45) }}</p>

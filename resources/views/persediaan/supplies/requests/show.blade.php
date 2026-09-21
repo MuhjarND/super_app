@@ -135,7 +135,15 @@
                                     </td>
                                     <td data-label="Diminta">{{ $item->quantity_label }}</td>
                                     <td data-label="Diserahkan">{{ number_format($item->quantity_fulfilled, 0, ',', '.') }} {{ $item->unit_snapshot }}</td>
-                                    <td data-label="Stok">{{ $item->item ? $item->item->stock_label : '-' }}</td>
+                                    <td data-label="Stok">
+                                        @if($item->item)
+                                            <span class="supply-stock-pill {{ ($item->item->is_empty_stock || $item->item->is_low_stock) ? 'low' : '' }}">{{ $item->item->stock_label }}</span>
+                                            @if($item->item->stock_status_label)<span class="supply-stock-status">{{ $item->item->stock_status_label }}</span>@endif
+                                            @if($item->item->has_unit_stock)<span class="supply-unit-stock-label d-block">Satuan: {{ $item->item->unit_stock_label }}</span>@endif
+                                        @else
+                                            -
+                                        @endif
+                                    </td>
                                 </tr>
                             @endforeach
                         </tbody>

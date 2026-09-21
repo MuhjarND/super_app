@@ -35,6 +35,7 @@
                         <th>Nama Barang</th>
                         <th>Satuan</th>
                         <th>Stok</th>
+                        <th>Stok Satuan</th>
                         <th>Min</th>
                         <th>Status</th>
                         <th width="80"></th>
@@ -56,7 +57,17 @@
                                 @if($item->description)<div class="inventory-module-muted">{{ $item->description }}</div>@endif
                             </td>
                             <td data-label="Satuan">{{ $item->unit }}</td>
-                            <td data-label="Stok"><span class="supply-stock-pill {{ $item->is_low_stock ? 'low' : '' }}">{{ $item->stock_label }}</span></td>
+                            <td data-label="Stok">
+                                <span class="supply-stock-pill {{ ($item->is_empty_stock || $item->is_low_stock) ? 'low' : '' }}">{{ $item->stock_label }}</span>
+                                @if($item->stock_status_label)<span class="supply-stock-status">{{ $item->stock_status_label }}</span>@endif
+                            </td>
+                            <td data-label="Stok Satuan">
+                                @if($item->has_unit_stock)
+                                    <span class="supply-stock-pill {{ $item->unit_stock <= 0 ? 'low' : '' }}">{{ $item->unit_stock_label }}</span>
+                                @else
+                                    <span class="inventory-module-muted">Tidak digunakan</span>
+                                @endif
+                            </td>
                             <td data-label="Min">{{ number_format($item->minimum_stock, 0, ',', '.') }}</td>
                             <td data-label="Status">
                                 <span class="badge badge-{{ $item->is_active ? 'success' : 'secondary' }} app-status-badge">{{ $item->is_active ? 'Aktif' : 'Nonaktif' }}</span>
@@ -69,7 +80,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="8" class="text-center py-4">
+                            <td colspan="9" class="text-center py-4">
                                 <div class="inventory-module-empty border-0 bg-transparent p-0">
                                     <i class="far fa-folder-open"></i> Belum ada barang persediaan
                                 </div>
