@@ -34,10 +34,10 @@ class WhatsAppMagicLoginController extends Controller
         $destinationUrl = $magicToken ? $magicToken->destination_url : null;
 
         if (!$user) {
-            $signedPayload = $magicLinkService->resolveSignedToken($token);
-            if ($signedPayload) {
-                $user = User::find($signedPayload['user_id']);
-                $destinationUrl = $signedPayload['destination_url'];
+            $tokenPayload = $magicLinkService->resolveToken($token);
+            if ($tokenPayload) {
+                $user = User::find($tokenPayload['user_id']);
+                $destinationUrl = $tokenPayload['destination_url'];
             }
         }
 

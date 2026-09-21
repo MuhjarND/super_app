@@ -57,6 +57,7 @@ class WhatsAppMagicLoginTest extends TestCase
         preg_match('/https?:\/\/\S+/', $message, $matches);
 
         $magicUrl = $matches[0];
+        $this->assertSame(22, strlen(basename(parse_url($magicUrl, PHP_URL_PATH))));
         $response = $this->get($magicUrl);
 
         $response->assertRedirect($destination);
@@ -71,7 +72,7 @@ class WhatsAppMagicLoginTest extends TestCase
         $this->assertNotNull(WhatsAppMagicLoginToken::first()->fresh()->used_at);
     }
 
-    public function testSignedMagicLinkStillWorksWhenAuditRecordIsUnavailable()
+    public function testShortMagicLinkStillWorksWhenAuditRecordIsUnavailable()
     {
         $user = factory(User::class)->create(['no_hp' => '081234567890']);
         $destination = route('dashboard');
@@ -88,7 +89,7 @@ class WhatsAppMagicLoginTest extends TestCase
         $this->assertAuthenticatedAs($user);
     }
 
-    public function testSignedMagicLinkRejectsAnAlteredToken()
+    public function testMagicLinkRejectsAnAlteredToken()
     {
         $user = factory(User::class)->create(['no_hp' => '081234567890']);
         $message = app(WhatsAppMagicLinkService::class)
@@ -104,7 +105,7 @@ class WhatsAppMagicLoginTest extends TestCase
         $this->assertGuest();
     }
 
-    public function testSignedMagicLinkExpiresAfterFourteenDays()
+    public function testMagicLinkExpiresAfterFourteenDays()
     {
         Carbon::setTestNow(Carbon::parse('2026-07-23 10:00:00', 'Asia/Jayapura'));
 
