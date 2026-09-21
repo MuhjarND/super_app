@@ -12,10 +12,12 @@
 <div class="inventory-module-hero d-flex justify-content-between align-items-center flex-wrap gap-2">
     <h1 class="inventory-module-title mb-0">Ajukan Persediaan</h1>
     <div class="supply-action-row">
-        <a href="{{ route('persediaan.requests.index') }}" class="btn btn-sm btn-outline-secondary"><i class="fas fa-arrow-left mr-1"></i> Kembali</a>
-        <button type="button" class="btn btn-sm btn-outline-primary" data-toggle="modal" data-target="#customSupplyItemModal">
-            <i class="fas fa-plus mr-1"></i> Barang Baru
-        </button>
+        <div class="supply-custom-request-action">
+            <button type="button" class="btn btn-sm supply-custom-request-btn" data-toggle="modal" data-target="#customSupplyItemModal" title="Ajukan barang jika tidak ada di katalog">
+                <i class="fas fa-plus mr-1"></i> MENGAJUKAN BARANG
+            </button>
+            <small>Jika barang tidak ada di katalog</small>
+        </div>
     </div>
 </div>
 

@@ -215,6 +215,40 @@
         background: #fff;
     }
 
+    .supply-custom-request-action {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 4px;
+    }
+
+    .supply-action-row .supply-custom-request-btn {
+        min-height: 36px;
+        padding: 8px 18px;
+        border: 0;
+        border-radius: 10px;
+        background: linear-gradient(135deg, #6366f1, #4f46e5);
+        color: #fff !important;
+        font-size: .76rem;
+        font-weight: 700;
+        line-height: 1.2;
+        box-shadow: 0 2px 8px rgba(79, 70, 229, .15);
+    }
+
+    .supply-action-row .supply-custom-request-btn:hover {
+        background: linear-gradient(135deg, #4f46e5, #4338ca);
+        color: #fff !important;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 14px rgba(79, 70, 229, .2);
+    }
+
+    .supply-custom-request-action small {
+        color: var(--supply-muted);
+        font-size: .68rem;
+        font-weight: 700;
+        line-height: 1.2;
+    }
+
     .supply-search-bar {
         position: relative;
     }
