@@ -66,6 +66,28 @@ class SuratTemplateController extends Controller
                 ->map(function ($template) {
                     return $this->applySystemTemplateOverrides($template);
                 });
+
+            // Keep the built-in catalogue visible even when the optional
+            // surat_templates table has not been seeded with system rows yet.
+            $storedSlugs = $templates->pluck('slug')->filter()->values()->all();
+            $catalogTemplates = collect($this->defaultTemplates())
+                ->filter(function ($template) use ($storedSlugs, $request) {
+                    if (in_array($template['slug'] ?? null, $storedSlugs, true)) {
+                        return false;
+                    }
+                    if ($request->filled('status') && ($template['status'] ?? 'active') !== $request->status) {
+                        return false;
+                    }
+                    if (!$request->filled('search')) {
+                        return true;
+                    }
+                    $search = mb_strtolower(trim($request->search));
+                    return str_contains(mb_strtolower($template['name'] ?? ''), $search)
+                        || str_contains(mb_strtolower($template['category'] ?? ''), $search)
+                        || str_contains(mb_strtolower($template['description'] ?? ''), $search);
+                })
+                ->values();
+            $templates = $templates->concat($catalogTemplates)->values();
         } else {
             $templates = collect($this->defaultTemplates())
                 ->filter(function ($template) use ($request) {
@@ -175,6 +197,14 @@ class SuratTemplateController extends Controller
             return redirect()
                 ->route('surat-keluar.index')
                 ->with('success', 'Surat tugas berhasil dibuat dan masuk ke tindak lanjut approval dengan nomor ' . $suratKeluar->nomor_surat_formatted . '.');
+        }
+
+        if ($this->isPerbaikanPresensiTemplate($template)) {
+            $suratKeluar = $this->createSuratKeluarFromTemplate($prefill);
+
+            return redirect()
+                ->route('surat-keluar.index')
+                ->with('success', 'Surat Keterangan Perbaikan Presensi berhasil dibuat dan dikirim ke approval pimpinan satker dengan nomor ' . $suratKeluar->nomor_surat_formatted . '.');
         }
 
         return redirect()
@@ -513,6 +543,10 @@ class SuratTemplateController extends Controller
 
     protected function prepareFieldValuesForTemplate($template, array $fields)
     {
+        if ($this->isPerbaikanPresensiTemplate($template)) {
+            return $this->preparePerbaikanPresensiFields($fields);
+        }
+
         if (!$this->isSuratTugasTemplate($template)) {
             return $fields;
         }
@@ -734,6 +768,61 @@ class SuratTemplateController extends Controller
     protected function isSuratTugasTemplate($template)
     {
         return (string) data_get($template, 'slug') === 'surat-tugas';
+    }
+
+    protected function isPerbaikanPresensiTemplate($template)
+    {
+        return (string) data_get($template, 'slug') === 'surat-keterangan-perbaikan-presensi';
+    }
+
+    protected function preparePerbaikanPresensiFields(array $fields)
+    {
+        $tanggal = !empty($fields['tanggal_surat']) ? Carbon::parse($fields['tanggal_surat']) : now();
+        $defaults = SuratTemplateCatalog::resolveSuratKeluarDefaults(SuratTemplateCatalog::find('surat-keterangan-perbaikan-presensi'));
+        $generated = SuratKeluar::generateNomorSurat(
+            $defaults['nomenklatur_jabatan'] ?? 'ketua',
+            $defaults['kategori_kode'] ?? 'KP',
+            null,
+            null,
+            null,
+            (int) $tanggal->format('Y'),
+            (int) $tanggal->format('n')
+        );
+
+        $pembuat = auth()->user()->loadMissing('jabatan');
+        $pegawai = !empty($fields['pegawai_id'])
+            ? User::with('jabatan')->active()->find($fields['pegawai_id'])
+            : null;
+        $penandaTangan = !empty($fields['penanda_tangan_id'])
+            ? User::with('jabatan')->active()->find($fields['penanda_tangan_id'])
+            : null;
+
+        $fields['nomor_surat'] = $generated['nomor'];
+        $fields['tanggal_surat'] = $tanggal->format('Y-m-d');
+        $fields['tempat_surat'] = 'Manokwari';
+        $fields['zona_waktu'] = trim((string) ($fields['zona_waktu'] ?? '')) ?: 'WIT';
+        $fields['nama_pembuat_keterangan'] = $pembuat->name;
+        $fields['nip_pembuat_keterangan'] = $pembuat->nip ?: '-';
+        $fields['jabatan_pembuat_keterangan'] = optional($pembuat->jabatan)->nama ?: ($pembuat->jabatan_keterangan ?: '-');
+        $fields['nama_pegawai'] = optional($pegawai)->name ?: '-';
+        $fields['nip_pegawai'] = optional($pegawai)->nip ?: '-';
+        $fields['jabatan_pegawai'] = optional(optional($pegawai)->jabatan)->nama ?: (optional($pegawai)->jabatan_keterangan ?: '-');
+        $fields['unit_kerja'] = optional($pegawai)->unit ? optional($pegawai->unit)->nama : (optional($pegawai)->unit_kerja ?: '-');
+        $fields['satuan_kerja'] = 'Pengadilan Tinggi Agama Papua Barat';
+        $fields['jabatan_pimpinan_satker'] = optional(optional($penandaTangan)->jabatan)->nama ?: (optional($penandaTangan)->jabatan_keterangan ?: 'Ketua');
+        $fields['nama_pimpinan_satker'] = optional($penandaTangan)->name ?: '-';
+        $fields['nip_pimpinan_satker'] = optional($penandaTangan)->nip ?: '-';
+        $fields['tanda_tangan_pembuat_keterangan'] = '';
+        $fields['tanda_tangan_pimpinan_satker'] = '';
+        $fields['alasan_penolakan'] = '-';
+        $fields['penanda_tangan'] = [
+            'id' => optional($penandaTangan)->id,
+            'nama' => optional($penandaTangan)->name ?: 'Ketua',
+            'nip' => optional($penandaTangan)->nip ?: '-',
+            'jabatan_ttd' => $fields['jabatan_pimpinan_satker'],
+        ];
+
+        return $fields;
     }
 
     protected function parseLineItems($value)

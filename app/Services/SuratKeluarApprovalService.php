@@ -187,7 +187,17 @@ class SuratKeluarApprovalService
                 $this->esignService->finalize($approval->fresh(['suratKeluar', 'approver.jabatan']));
             }
 
-            $approval->suratKeluar()->update(['status' => 'lengkap']);
+            if ($approval->template_slug === SuratKeteranganPerbaikanPresensiDocumentService::SLUG) {
+                $approval->loadMissing(['suratKeluar', 'approver.jabatan']);
+                $generatedPath = app(SuratKeteranganPerbaikanPresensiDocumentService::class)
+                    ->make($approval->suratKeluar, $approval);
+                $approval->suratKeluar()->update([
+                    'status' => 'lengkap',
+                    'file_path' => $generatedPath,
+                ]);
+            } else {
+                $approval->suratKeluar()->update(['status' => 'lengkap']);
+            }
         });
 
         $approval->loadMissing('suratKeluar', 'requester', 'approver');
@@ -317,7 +327,8 @@ class SuratKeluarApprovalService
     protected function notifyTemplateWorkflow(SuratKeluarApproval $approval, $approved, $note = null)
     {
         $isPdfEsign = (string) $approval->template_slug === SuratKeluarEsignService::TEMPLATE_SLUG;
-        if ((string) $approval->template_slug !== 'surat-tugas' && !$isPdfEsign) {
+        $isPresensi = (string) $approval->template_slug === SuratKeteranganPerbaikanPresensiDocumentService::SLUG;
+        if ((string) $approval->template_slug !== 'surat-tugas' && !$isPdfEsign && !$isPresensi) {
             return;
         }
 
@@ -328,16 +339,22 @@ class SuratKeluarApprovalService
             try {
                 $approval->requester->notify(new SuratTugasNotification(
                     $suratKeluar,
-                    $isPdfEsign
+                    $isPresensi
+                        ? ($approved ? 'Surat keterangan perbaikan presensi disetujui' : 'Surat keterangan perbaikan presensi ditolak')
+                        : ($isPdfEsign
                         ? ($approved ? 'E-sign surat keluar selesai' : 'E-sign surat keluar ditolak')
-                        : ($approved ? 'Surat Tugas telah disetujui' : 'Surat Tugas perlu diperbaiki'),
-                    $isPdfEsign
+                        : ($approved ? 'Surat Tugas telah disetujui' : 'Surat Tugas perlu diperbaiki')),
+                    $isPresensi
+                        ? ($approved
+                            ? 'Surat keterangan sudah disetujui pimpinan satker dan DOCX bertanda tangan sudah tersedia.'
+                            : 'Surat keterangan ditolak. Tinjau catatan pimpinan lalu ajukan perbaikan.')
+                        : ($isPdfEsign
                         ? ($approved
                             ? 'PDF surat keluar telah ditandatangani dan versi final terverifikasi sudah tersedia.'
                             : 'Permohonan e-sign ditolak. Tinjau catatan penanda tangan lalu ajukan kembali.')
                         : ($approved
                             ? 'Surat Tugas yang diajukan telah disetujui dan siap ditindaklanjuti.'
-                            : 'Surat Tugas yang diajukan belum dapat disetujui. Mohon meninjau catatan perbaikan.'),
+                            : 'Surat Tugas yang diajukan belum dapat disetujui. Mohon meninjau catatan perbaikan.')),
                     route('surat-keluar.index'),
                     'requester'
                 ));
@@ -349,12 +366,16 @@ class SuratKeluarApprovalService
                 ]);
             }
 
-            if (!$isPdfEsign) {
+            if (!$isPdfEsign && !$isPresensi) {
                 $this->whatsAppService->notifySuratTugasRequester($approval, $approval->requester, $approved, $note);
             }
         }
 
         if (!$approved) {
+            return;
+        }
+
+        if ($isPresensi) {
             return;
         }
 

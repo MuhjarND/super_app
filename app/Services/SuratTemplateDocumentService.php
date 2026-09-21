@@ -63,13 +63,29 @@ class SuratTemplateDocumentService
             return null;
         }
 
+        $image = $this->resolveApprovalSignatureImage($approval);
+
         return [
-            'image' => $this->qrCodeService->dataUri(URL::signedRoute('surat-keluar.signature.verify', ['approval' => $approval->id]), 120),
+            'image' => $image,
+            'kind' => $approval->template_slug === 'surat-keterangan-perbaikan-presensi' ? 'stamp' : 'qr',
             'name' => $approval->signer_name_snapshot ?: optional($approval->approver)->name ?: '-',
             'title' => $approval->signer_title_snapshot ?: optional(optional($approval->approver)->jabatan)->nama ?: '-',
             'nip' => optional($approval->approver)->nip ?: '-',
             'signed_at' => $approval->acted_at ? $approval->acted_at->copy()->timezone('Asia/Jayapura')->translatedFormat('d F Y H:i') . ' WIT' : '-',
         ];
+    }
+
+    protected function resolveApprovalSignatureImage(SuratKeluarApproval $approval)
+    {
+        if ($approval->template_slug === 'surat-keterangan-perbaikan-presensi') {
+            $stamp = public_path('kpta + stempel.png');
+            if (is_file($stamp)) {
+                $mime = mime_content_type($stamp) ?: 'image/png';
+                return 'data:' . $mime . ';base64,' . base64_encode(file_get_contents($stamp));
+            }
+        }
+
+        return $this->qrCodeService->dataUri(URL::signedRoute('surat-keluar.signature.verify', ['approval' => $approval->id]), 120);
     }
 
     public function streamApprovalPreview(SuratKeluarApproval $approval)
@@ -98,6 +114,7 @@ class SuratTemplateDocumentService
             'kopImage' => $this->resolveKopImage(),
             'signatoryTitle' => $this->resolveSignatoryTitle($suratKeluar),
             'approvalSignature' => $approval->status === 'approved' ? $this->buildApprovalSignature($approval) : null,
+            'approvalNote' => $approval->note,
             'pdfVerification' => $this->pdfVerificationService->viewData($verification),
         ])->setPaper('a4', 'portrait')->output();
 
@@ -135,6 +152,7 @@ class SuratTemplateDocumentService
             'kopImage' => $this->resolveKopImage(),
             'signatoryTitle' => $this->resolveSignatoryTitle($suratKeluar),
             'approvalSignature' => $approval->status === 'approved' ? $this->buildApprovalSignature($approval) : null,
+            'approvalNote' => $approval->note,
             'pdfVerification' => $this->pdfVerificationService->viewData($verification),
         ])->setPaper('a4', 'portrait')->output();
 

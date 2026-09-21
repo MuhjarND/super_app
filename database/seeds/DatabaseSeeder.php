@@ -29,6 +29,10 @@ class DatabaseSeeder extends Seeder
             ]);
         }
 
+        if (Schema::hasTable('surat_templates')) {
+            $this->call([SuratTemplateSeeder::class]);
+        }
+
         $this->seedKategoriSurat();
         $this->seedKategoriRapat();
 

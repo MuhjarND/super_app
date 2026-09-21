@@ -389,6 +389,7 @@
                 $templateBody = data_get($template, 'template_body', '');
                 $samplePath = data_get($template, 'sample_file_path');
                 $isStoredTemplate = $template instanceof \App\SuratTemplate;
+                $directHandoffTemplate = in_array($templateSlug, ['surat-tugas', 'surat-keterangan-perbaikan-presensi'], true);
                 $fieldSchemaJson = json_encode($fieldSchema, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
                 $fieldLabels = collect($fieldSchema)->pluck('label')->filter()->values();
             @endphp
@@ -439,11 +440,13 @@
                             <h5 class="modal-title">Gunakan {{ $templateName }}</h5>
                             <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
                         </div>
-                        <form method="POST" action="{{ $templateSlug === 'surat-tugas' ? route('surat-template.handoff', $templateSlug) : route('surat-template.preview', $templateSlug) }}">
+                        <form method="POST" action="{{ $directHandoffTemplate ? route('surat-template.handoff', $templateSlug) : route('surat-template.preview', $templateSlug) }}">
                             @csrf
                             <div class="modal-body">
-                                @if($templateSlug !== 'surat-tugas')
+                                @if(!$directHandoffTemplate)
                                     <div class="alert alert-light border small">Isi field berikut untuk membuat preview surat dari template yang dipilih.</div>
+                                @elseif($templateSlug === 'surat-keterangan-perbaikan-presensi')
+                                    <div class="alert alert-info border small">Surat akan langsung dibuat dengan nomor Surat Keluar dan dikirim ke approval pimpinan satuan kerja. Tanda tangan serta stempel tampil setelah disetujui.</div>
                                 @endif
                                 @if($templateSlug === 'surat-tugas')
                                     @include('surat-template.partials.surat-tugas-fields', [
@@ -486,7 +489,7 @@
                             </div>
                             <div class="modal-footer">
                                 <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Batal</button>
-                                <button type="submit" class="btn btn-primary">{{ $templateSlug === 'surat-tugas' ? 'Buat Surat Tugas' : 'Buat Preview' }}</button>
+                                <button type="submit" class="btn btn-primary">{{ $templateSlug === 'surat-tugas' ? 'Buat Surat Tugas' : ($templateSlug === 'surat-keterangan-perbaikan-presensi' ? 'Ajukan untuk Approval' : 'Buat Preview') }}</button>
                             </div>
                         </form>
                     </div></div>

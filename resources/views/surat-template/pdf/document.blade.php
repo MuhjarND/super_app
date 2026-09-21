@@ -22,6 +22,20 @@
         table.info { width: 100%; border-collapse: collapse; margin-top: 18px; }
         table.info td { border: 1px solid #d1d5db; padding: 6px 8px; vertical-align: top; }
         table.info td.label { width: 26%; background: #f9fafb; font-weight: 600; }
+        .approval-box { width: 100%; border-collapse: collapse; margin-top: 20px; page-break-inside: avoid; }
+        .approval-box th, .approval-box td { border: 1px solid #111827; padding: 5px 8px; vertical-align: top; }
+        .approval-box th { text-align: center; font-size: 12px; }
+        .approval-options { width: 58%; line-height: 1.8; }
+        .approval-sign { width: 42%; text-align: center; line-height: 1.35; }
+        .stamp-signature { width: 82px; height: 82px; object-fit: contain; display: block; margin: 3px auto; }
+        .stamp-placeholder { height: 88px; }
+        .suket-presensi { font-size: 10px; line-height: 1.35; }
+        .suket-presensi .body { font-size: 10px; }
+        .suket-presensi .body p { margin-bottom: 6px; }
+        .suket-presensi .footer { margin-top: 10px; }
+        .suket-presensi .approval-box { margin-top: 10px; }
+        .suket-presensi .stamp-signature { width: 66px; height: 66px; }
+        .suket-presensi .stamp-placeholder { height: 68px; }
     </style>
 </head>
 <body>
@@ -33,6 +47,14 @@
                 'fieldValues' => $fieldValues,
                 'kopImage' => $kopImage,
                 'signatoryTitle' => $signatoryTitle,
+            ])
+        @elseif($templateSlug === 'surat-keterangan-perbaikan-presensi')
+            @include('surat-template.pdf.suket-perbaikan-presensi', [
+                'suratKeluar' => $suratKeluar,
+                'fieldValues' => $fieldValues,
+                'kopImage' => $kopImage,
+                'approvalSignature' => $approvalSignature ?? null,
+                'approvalNote' => $approvalNote ?? null,
             ])
         @else
             @if($kopImage)
