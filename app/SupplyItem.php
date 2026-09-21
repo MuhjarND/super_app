@@ -8,9 +8,11 @@ class SupplyItem extends Model
 {
     protected $fillable = [
         'code',
+        'account_code',
         'name',
         'unit',
         'stock',
+        'unit_price',
         'minimum_stock',
         'description',
         'image_path',
@@ -21,6 +23,7 @@ class SupplyItem extends Model
 
     protected $casts = [
         'stock' => 'integer',
+        'unit_price' => 'decimal:2',
         'minimum_stock' => 'integer',
         'is_active' => 'boolean',
     ];

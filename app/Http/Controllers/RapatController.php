@@ -7,7 +7,6 @@ use App\Http\Requests\UpdateRapatRequest;
 use App\Rapat;
 use App\Services\RapatApprovalService;
 use App\Services\RapatDocumentService;
-use App\Services\WhatsAppNotificationService;
 use App\User;
 use App\ZiActivity;
 use App\ZiGuidelineSubPoint;
@@ -20,18 +19,15 @@ class RapatController extends Controller
 {
     protected $approvalService;
     protected $documentService;
-    protected $whatsAppService;
 
     public function __construct(
         RapatApprovalService $approvalService,
-        RapatDocumentService $documentService,
-        WhatsAppNotificationService $whatsAppService
+        RapatDocumentService $documentService
     )
     {
         $this->middleware('auth');
         $this->approvalService = $approvalService;
         $this->documentService = $documentService;
-        $this->whatsAppService = $whatsAppService;
     }
 
     public function index(\Illuminate\Http\Request $request)
@@ -167,11 +163,6 @@ class RapatController extends Controller
                 report($exception);
             }
 
-            $rapat->forceFill(['participant_notified_at' => null])->save();
-            $this->whatsAppService->notifyRapatParticipants(
-                $rapat->fresh(['pesertas', 'kategoriSuratKode', 'suratKeluar']),
-                true
-            );
         } else {
             $this->dispatchCreateOrUpdateNotifications($rapat);
         }
@@ -402,18 +393,11 @@ class RapatController extends Controller
         })->implode(', ');
     }
 
-    protected function dispatchCreateOrUpdateNotifications(Rapat $rapat, $skipApprovalAndParticipantNotification = false)
+    protected function dispatchCreateOrUpdateNotifications(Rapat $rapat)
     {
-        if ($skipApprovalAndParticipantNotification) {
-            return;
-        }
-
         if ($rapat->status === 'pending_approval') {
             $this->approvalService->notifyCurrentPendingApprover($rapat);
-            return;
         }
-
-        // Participant invitations are sent only by the final approval workflow.
     }
 
     protected function syncProgressZiContext(Rapat $rapat, $request)

@@ -51,9 +51,21 @@ class InventoryPermissionTest extends TestCase
         $finance = $this->userWithPosition('KASUBAG_LAPKEU');
 
         $this->assertTrue($turt->canManageInventoryModule());
+        $this->assertTrue($turt->canPrintSupplyOpname());
         $this->assertFalse($turt->canScheduleInventoryMaintenance());
         $this->assertTrue($finance->canManageInventoryModule());
+        $this->assertFalse($finance->canPrintSupplyOpname());
         $this->assertFalse($finance->canScheduleInventoryMaintenance());
+    }
+
+    public function test_operator_persediaan_can_print_opname()
+    {
+        $user = new User();
+        $user->setRelation('jabatan', null);
+        $user->setRelation('activeJabatanDelegations', collect());
+        $user->setRelation('roles', collect([$this->role('operator_persediaan')]));
+
+        $this->assertTrue($user->canPrintSupplyOpname());
     }
 
     public function positionProvider()

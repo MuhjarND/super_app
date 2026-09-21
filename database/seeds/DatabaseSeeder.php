@@ -31,6 +31,7 @@ class DatabaseSeeder extends Seeder
 
         $this->seedKategoriSurat();
         $this->seedKategoriRapat();
+
     }
 
     protected function seedUnits()

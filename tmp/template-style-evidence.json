@@ -1,0 +1,170 @@
+{
+  "input": "C:\\xampp\\htdocs\\super3\\public\\templates\\BA OPNAME FISIK PERSEDIAAN.docx",
+  "fonts_by_char_count": {
+    "Bookman Old Style": 204
+  },
+  "direct_run_formatting_runs": 1029,
+  "direct_paragraph_formatting_paragraphs": 55,
+  "heading_like_paragraphs_not_heading_style": [
+    {
+      "para_index": 1,
+      "text": "BERITA ACARA PEMERIKSAAN OPNAME FISIK PERSEDIAAN",
+      "style": "No Spacing"
+    },
+    {
+      "para_index": 2,
+      "text": "BULAN AGUSTUS 2026",
+      "style": "No Spacing"
+    },
+    {
+      "para_index": 3,
+      "text": "Nomor :         /SEK.PTA.W31-A/PL1.1.1/IX/2026",
+      "style": "No Spacing"
+    },
+    {
+      "para_index": 53,
+      "text": "Lampiran\t: BERITA ACARA OPNAME FISIK BARANG PERSEDIAAN",
+      "style": "Normal"
+    },
+    {
+      "para_index": 54,
+      "text": "Nomor\t\t:            /SEK.PTA.W31-A/PL1.1.1/IX/2026",
+      "style": "Normal"
+    },
+    {
+      "para_index": 55,
+      "text": "Tanggal\t\t:  9 September 2026",
+      "style": "Normal"
+    },
+    {
+      "para_index": 57,
+      "text": "HASIL OPNAME FISIK",
+      "style": "Normal"
+    },
+    {
+      "para_index": 127,
+      "text": "Barang Konsumsi",
+      "style": "Normal"
+    },
+    {
+      "para_index": 128,
+      "text": "Barang Konsumsi",
+      "style": "Normal"
+    },
+    {
+      "para_index": 129,
+      "text": "117111",
+      "style": "Normal"
+    },
+    {
+      "para_index": 676,
+      "text": "Jumlah per Akun",
+      "style": "Normal"
+    },
+    {
+      "para_index": 677,
+      "text": "Jumlah per Akun",
+      "style": "Normal"
+    },
+    {
+      "para_index": 678,
+      "text": "Jumlah per Akun",
+      "style": "Normal"
+    },
+    {
+      "para_index": 679,
+      "text": "Jumlah per Akun",
+      "style": "Normal"
+    },
+    {
+      "para_index": 680,
+      "text": "Jumlah per Akun",
+      "style": "Normal"
+    },
+    {
+      "para_index": 681,
+      "text": "Jumlah per Akun",
+      "style": "Normal"
+    },
+    {
+      "para_index": 682,
+      "text": "Jumlah per Akun",
+      "style": "Normal"
+    },
+    {
+      "para_index": 683,
+      "text": "11.287.000",
+      "style": "Normal"
+    },
+    {
+      "para_index": 685,
+      "text": "Barang untuk Pemeliharaan",
+      "style": "Normal"
+    },
+    {
+      "para_index": 686,
+      "text": "Barang untuk Pemeliharaan",
+      "style": "Normal"
+    }
+  ],
+  "examples": {
+    "direct_run_formatting": [
+      {
+        "para_index": 1,
+        "run_text": "BERITA ACARA PEMERIKSAAN OPNAME FISIK PERSEDIAAN",
+        "style": "No Spacing"
+      },
+      {
+        "para_index": 2,
+        "run_text": "BULAN AGUSTUS 2026",
+        "style": "No Spacing"
+      },
+      {
+        "para_index": 3,
+        "run_text": "Nomor",
+        "style": "No Spacing"
+      },
+      {
+        "para_index": 3,
+        "run_text": " : ",
+        "style": "No Spacing"
+      },
+      {
+        "para_index": 3,
+        "run_text": "        /SEK.PTA.",
+        "style": "No Spacing"
+      }
+    ],
+    "direct_paragraph_formatting": [
+      {
+        "para_index": 12,
+        "text": "Nama \t\t: Raswin, S.H.I.",
+        "style": "List Paragraph"
+      },
+      {
+        "para_index": 13,
+        "text": "NIP \t\t: 198104152011011006",
+        "style": "Normal"
+      },
+      {
+        "para_index": 14,
+        "text": "Jabatan \t: Ketua",
+        "style": "Normal"
+      },
+      {
+        "para_index": 15,
+        "text": "",
+        "style": "Normal"
+      },
+      {
+        "para_index": 16,
+        "text": "Nama \t\t: Ummu Mukhlisa, S.H., M.H.",
+        "style": "List Paragraph"
+      }
+    ]
+  },
+  "notes": [
+    "Direct formatting is not always wrong, but it often causes inconsistent output when templates change.",
+    "Heading-like paragraphs not using Heading styles can break TOC and accessibility."
+  ]
+}

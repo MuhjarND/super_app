@@ -36,7 +36,7 @@
                         <th>Nama Barang</th>
                         <th>Jumlah</th>
                         <th>Pegawai</th>
-                        <th>Validasi QR</th>
+                        <th>Tanda tangan</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -54,14 +54,23 @@
                             </td>
                             <td data-label="Jumlah">{{ $pickup->quantity_label }}</td>
                             <td data-label="Pegawai">{{ optional($pickup->user)->name ?: '-' }}</td>
-                            <td data-label="Validasi">
+                            <td data-label="Tanda tangan">
                                 @php
                                     $pickupVerificationUrl = \Illuminate\Support\Facades\URL::signedRoute('persediaan.pickups.verify', ['pickup' => $pickup->id]);
-                                    $pickupQr = app(\App\Services\DocumentQrCodeService::class)->dataUri($pickupVerificationUrl, 96);
+                                    $signatureExists = $pickup->receiver_signature_path
+                                        && \Illuminate\Support\Facades\Storage::disk('public')->exists($pickup->receiver_signature_path);
                                 @endphp
-                                <a href="{{ $pickupVerificationUrl }}" target="_blank" title="Buka validasi penerimaan">
-                                    <img src="{{ $pickupQr }}" alt="QR validasi penerimaan" class="supply-signature-thumb" style="width:54px;height:54px;padding:0;border:0;">
-                                </a>
+                                @if($signatureExists)
+                                    <a href="{{ $pickupVerificationUrl }}" target="_blank" class="d-inline-flex align-items-center" title="Lihat bukti penerimaan">
+                                        <img src="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($pickup->receiver_signature_path) }}" alt="Tanda tangan penerima" class="supply-signature-thumb">
+                                        <span class="sr-only">Lihat bukti penerimaan</span>
+                                    </a>
+                                @else
+                                    <span class="badge badge-warning">Belum ada tanda tangan</span>
+                                @endif
+                                <div class="inventory-module-muted mt-1">
+                                    <a href="{{ $pickupVerificationUrl }}" target="_blank">Lihat bukti</a>
+                                </div>
                             </td>
                         </tr>
                     @empty

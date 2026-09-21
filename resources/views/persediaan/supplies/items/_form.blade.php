@@ -6,13 +6,17 @@
 @endphp
 
 <div class="row">
-    <div class="col-md-3 mb-3">
+    <div class="col-md-2 mb-3">
         <label>Kode</label>
         <input type="text" name="code" class="form-control" value="{{ $fieldValue('code') }}" placeholder="ATK-001">
     </div>
-    <div class="col-md-5 mb-3">
+    <div class="col-md-4 mb-3">
         <label>Nama Barang <span class="text-danger">*</span></label>
         <input type="text" name="name" class="form-control" value="{{ $fieldValue('name') }}" required placeholder="Kertas HVS A4">
+    </div>
+    <div class="col-md-2 mb-3">
+        <label>Kode Akun</label>
+        <input type="text" name="account_code" class="form-control" value="{{ $fieldValue('account_code') }}" placeholder="117111">
     </div>
     <div class="col-md-2 mb-3">
         <label>Satuan <span class="text-danger">*</span></label>
@@ -22,11 +26,15 @@
         <label>Stok <span class="text-danger">*</span></label>
         <input type="number" name="stock" min="0" class="form-control" value="{{ $fieldValue('stock', 0) }}" required>
     </div>
-    <div class="col-md-3 mb-3">
+    <div class="col-md-2 mb-3">
+        <label>Harga Satuan</label>
+        <input type="number" name="unit_price" min="0" step="0.01" class="form-control" value="{{ $fieldValue('unit_price') }}" placeholder="Opsional">
+    </div>
+    <div class="col-md-2 mb-3">
         <label>Minimum</label>
         <input type="number" name="minimum_stock" min="0" class="form-control" value="{{ $fieldValue('minimum_stock', 0) }}">
     </div>
-    <div class="col-md-5 mb-3">
+    <div class="col-md-3 mb-3">
         <label>Catatan</label>
         <input type="text" name="description" class="form-control" value="{{ $fieldValue('description') }}" placeholder="Opsional">
     </div>

@@ -18,6 +18,9 @@
         @if($canManage)
             <a href="{{ route('persediaan.items.index') }}" class="btn btn-sm btn-outline-dark"><i class="fas fa-warehouse mr-1"></i> Kelola</a>
         @endif
+        @if(auth()->user()->canPrintSupplyOpname())
+            <a href="{{ route('persediaan.opname.index') }}" class="btn btn-sm btn-outline-success"><i class="fas fa-clipboard-check mr-1"></i> BA Opname</a>
+        @endif
     </div>
 </div>
 

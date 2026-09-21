@@ -950,6 +950,20 @@ class User extends Authenticatable
         return $this->hasRole('operator_persediaan');
     }
 
+    /**
+     * Users who may prepare and print the monthly physical inventory opname
+     * report.  The Kasubag TURT is resolved by structural position so the
+     * permission also follows an active jabatan assignment.
+     */
+    public function canPrintSupplyOpname()
+    {
+        if ($this->isSuperAdmin() || $this->hasRole('operator_persediaan')) {
+            return true;
+        }
+
+        return $this->hasJabatanKode(['KASUBAG_TURT']);
+    }
+
     public function canAccessLeaveModule()
     {
         if ($this->isSuperAdmin()) {

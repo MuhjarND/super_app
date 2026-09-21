@@ -81,6 +81,8 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/pengajuan/{supplyRequest}/reject', 'SupplyRequestController@reject')->name('requests.reject');
         Route::post('/pengajuan/{supplyRequest}/cancel', 'SupplyRequestController@cancel')->name('requests.cancel');
         Route::get('/barang-diambil', 'SupplyPickupController@index')->name('pickups.index');
+        Route::get('/opname', 'SupplyOpnameController@index')->name('opname.index');
+        Route::post('/opname/cetak', 'SupplyOpnameController@download')->name('opname.download');
         Route::get('/dev', function () {
             return redirect()->route('persediaan.index');
         })->name('dev');

@@ -92,9 +92,6 @@ class RapatApprovalService
         $this->refreshRapatStatus($rapat, $fallbackStatus);
         $rapat->refresh();
 
-        if ($rapat->status === 'pending_approval' && $rapat->participant_notified_at) {
-            $rapat->forceFill(['participant_notified_at' => null])->save();
-        }
     }
 
     public function approve(RapatApproval $approval, User $actor, $catatan = null, $signatureData = null)
@@ -145,7 +142,6 @@ class RapatApprovalService
                 report($exception);
             }
 
-            $this->whatsAppService->notifyRapatParticipants($approval->rapat);
             return;
         }
 

@@ -115,11 +115,11 @@ class WhatsAppNotificationService
         $log->update([
             'status' => 'queued',
             'scheduled_at' => $now,
-            'response_body' => 'Pesan disiapkan untuk pengiriman langsung.',
+            'response_body' => 'Pesan diproses untuk pengiriman langsung.',
         ]);
 
-        $this->waitForMinimumInterval();
-
+        // Pengiriman dibuat langsung tanpa jeda buatan agar proses utama
+        // seperti upload berkas dan pembuatan rapat tidak tertahan.
         return $this->deliver($log->fresh());
     }
 
@@ -717,69 +717,6 @@ class WhatsAppNotificationService
         ]);
     }
 
-    public function notifyRapatParticipants(Rapat $rapat, $isUpdate = false)
-    {
-        $rapat->loadMissing(['kategoriSuratKode', 'pesertas.jabatan', 'pesertas.roles', 'suratKeluar']);
-
-        if ($rapat->participant_notified_at) {
-            return false;
-        }
-
-        $lines = [
-            'Yth. Bapak/Ibu,',
-            $isUpdate
-                ? 'Dengan hormat, berikut disampaikan pembaruan undangan rapat yang telah disetujui.'
-                : 'Dengan hormat, berikut disampaikan undangan rapat yang telah disetujui.',
-            '',
-            'Judul: ' . $rapat->judul,
-            'Nomor Undangan: ' . $rapat->nomor_undangan,
-            'Kategori Surat: ' . $rapat->kategori_surat_label,
-            'Tanggal: ' . $this->formatDateValue($rapat->tanggal),
-            'Waktu: ' . $rapat->waktu_mulai_formatted . ' WIT',
-            'Tempat: ' . $rapat->tempat,
-        ];
-
-        if ($rapat->jenis_pakaian) {
-            $lines[] = 'Pakaian: ' . $rapat->jenis_pakaian;
-        }
-
-        if ($rapat->is_virtual) {
-            $lines[] = 'Meeting ID: ' . $rapat->meeting_id;
-            $lines[] = 'Passcode: ' . $rapat->meeting_passcode;
-        }
-
-        if ($rapat->deskripsi) {
-            $lines[] = 'Deskripsi: ' . trim(preg_replace('/\s+/', ' ', $rapat->deskripsi));
-        }
-
-        $users = $rapat->pesertas->filter(function ($user) {
-            return !empty($user->no_hp);
-        });
-
-        $fileUrl = $rapat->suratKeluar
-            ? $this->suratKeluarFileUrl($rapat->suratKeluar)
-            : route('rapat.undangan.preview', $rapat);
-        $lines[] = '';
-        $lines[] = 'Mohon kehadiran tepat waktu sesuai jadwal yang telah ditetapkan.';
-        $lines[] = 'File Undangan:';
-        $lines[] = $fileUrl;
-
-        $result = $this->sendBulk($users, $this->wrap($lines), [
-            'module' => 'rapat',
-            'event' => $isUpdate ? 'participant_invitation_updated' : 'participant_invitation',
-            'notifiable_type' => get_class($rapat),
-            'notifiable_id' => $rapat->id,
-        ]);
-
-        if ($result['attempted'] > 0 || !$this->isConfigured()) {
-            $rapat->forceFill([
-                'participant_notified_at' => Carbon::now('Asia/Jayapura'),
-            ])->save();
-        }
-
-        return $result['success'] > 0;
-    }
-
     public function notifyAttendanceReminder(Rapat $rapat, $users = null)
     {
         $rapat->loadMissing(['pesertas', 'internalAttendances']);
@@ -1194,26 +1131,6 @@ class WhatsAppNotificationService
         }
 
         return null;
-    }
-
-    protected function waitForMinimumInterval()
-    {
-        $lastAttempt = WhatsAppNotificationLog::whereNotNull('attempted_at')
-            ->orderByDesc('attempted_at')
-            ->value('attempted_at');
-
-        if (!$lastAttempt) {
-            return;
-        }
-
-        $interval = max(1, (int) config('services.whatsapp.minimum_interval_seconds', 20));
-        $elapsed = Carbon::now('Asia/Jayapura')->timestamp
-            - Carbon::parse($lastAttempt, 'Asia/Jayapura')->timestamp;
-        $remaining = $interval - max(0, $elapsed);
-
-        if ($remaining > 0) {
-            sleep($remaining);
-        }
     }
 
     protected function applyWorkingTime(Carbon $time)

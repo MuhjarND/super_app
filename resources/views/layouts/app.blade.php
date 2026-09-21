@@ -3864,6 +3864,15 @@
                                             </a>
                                         </li>
                                     @endif
+                                    @if($isSidebarSuperAdmin || $sidebarUser->canPrintSupplyOpname())
+                                        <li class="nav-item nav-item-sub">
+                                            <a href="{{ route('persediaan.opname.index') }}"
+                                                class="nav-link {{ request()->routeIs('persediaan.opname.*') ? 'active' : '' }}">
+                                                <i class="nav-icon fas fa-clipboard-check"></i>
+                                                <p>BA Opname Fisik</p>
+                                            </a>
+                                        </li>
+                                    @endif
                                 </ul>
                             </li>
                         @endif

@@ -170,6 +170,7 @@ class MobileModuleMenuController extends Controller
                     $this->item('Pengajuan', route('persediaan.requests.index'), 'fas fa-clipboard-list', 'blue'),
                     $this->item('Barang Diambil', route('persediaan.pickups.index'), 'fas fa-box-open', 'orange'),
                     ($isSuperAdmin || $user->canManageSupplyModule()) ? $this->item('Master Barang', route('persediaan.items.index'), 'fas fa-boxes', 'slate') : null,
+                    ($isSuperAdmin || $user->canPrintSupplyOpname()) ? $this->item('BA Opname Fisik', route('persediaan.opname.index'), 'fas fa-clipboard-check', 'green') : null,
                 ])) : [],
             ],
             'perpustakaan' => [

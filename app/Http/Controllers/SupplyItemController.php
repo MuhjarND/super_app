@@ -73,9 +73,11 @@ class SupplyItemController extends Controller
     {
         $validated = $request->validate([
             'code' => ['nullable', 'string', 'max:80', Rule::unique('supply_items', 'code')->ignore($ignoreId)],
+            'account_code' => ['nullable', 'string', 'max:40'],
             'name' => ['required', 'string', 'max:255'],
             'unit' => ['required', 'string', 'max:50'],
             'stock' => ['required', 'integer', 'min:0'],
+            'unit_price' => ['nullable', 'numeric', 'min:0', 'max:999999999999.99'],
             'minimum_stock' => ['nullable', 'integer', 'min:0'],
             'description' => ['nullable', 'string'],
             'image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],

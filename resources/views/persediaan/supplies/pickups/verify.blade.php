@@ -14,6 +14,9 @@
         .head p { margin: 0; opacity: .86; font-size: 14px; }
         .body { padding: 26px 28px; }
         .valid { display: inline-block; margin-bottom: 20px; padding: 8px 13px; border-radius: 999px; background: #dcfce7; color: #166534; font-weight: 700; font-size: 13px; }
+        .signature-box { margin-top: 24px; padding-top: 20px; border-top: 1px solid #e5e7eb; }
+        .signature-box h2 { margin: 0 0 10px; color: #64748b; font-size: 13px; font-weight: 700; }
+        .signature-box img { display: block; width: min(100%, 360px); height: 130px; object-fit: contain; object-position: left center; padding: 10px; border: 1px solid #dfe5f4; border-radius: 12px; background: #fff; }
         dl { margin: 0; display: grid; grid-template-columns: 165px 1fr; gap: 12px 18px; }
         dt { color: #64748b; font-size: 13px; }
         dd { margin: 0; font-weight: 700; font-size: 14px; overflow-wrap: anywhere; }
@@ -34,6 +37,12 @@
                 <dt>Tanggal diterima</dt><dd>{{ $pickup->pickup_date ? $pickup->pickup_date->translatedFormat('d F Y') : '-' }}</dd>
                 <dt>Dicatat oleh</dt><dd>{{ optional($pickup->creator)->name ?: '-' }}</dd>
             </dl>
+            @if($pickup->receiver_signature_path && \Illuminate\Support\Facades\Storage::disk('public')->exists($pickup->receiver_signature_path))
+                <div class="signature-box">
+                    <h2>Tanda tangan penerima</h2>
+                    <img src="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($pickup->receiver_signature_path) }}" alt="Tanda tangan penerima">
+                </div>
+            @endif
         </div>
     </section>
 </main>
