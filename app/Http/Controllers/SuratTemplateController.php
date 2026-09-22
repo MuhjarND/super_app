@@ -528,12 +528,19 @@ class SuratTemplateController extends Controller
         $replacements = [];
 
         foreach ($fields as $key => $value) {
+            // Field hasil persiapan template dapat memuat metadata terstruktur
+            // (contoh: penanda_tangan). Metadata tersebut dipakai oleh alur
+            // approval dan tidak boleh diteruskan ke htmlspecialchars().
+            if (is_array($value) || (is_object($value) && !method_exists($value, '__toString'))) {
+                continue;
+            }
+
             $formatted = $value;
             if ($this->looksLikeDate($value)) {
                 $formatted = Carbon::parse($value)->translatedFormat('d F Y');
             }
 
-            $replacements['{{' . $key . '}}'] = e($formatted);
+            $replacements['{{' . $key . '}}'] = e((string) ($formatted ?? ''));
         }
 
         $rendered = strtr($templateBody, $replacements);
