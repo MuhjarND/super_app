@@ -53,10 +53,10 @@
                                         </div>
                                         <div class="supply-shop-body">
                                             <div>
-                                                <div class="supply-shop-name">{{ $item->name }}</div>
+                                                <div class="supply-shop-name" title="{{ $item->name }}">{{ $item->name }}</div>
                                                 <div class="supply-shop-meta-row mt-2">
                                                     <span class="inventory-module-muted">{{ $item->code ?: '-' }}</span>
-                                                    <div class="text-right">
+                                                    <div class="supply-stock-summary">
                                                         <span class="supply-stock-pill {{ ($item->is_empty_stock || $item->is_low_stock || $availableStock <= 0) ? 'low' : '' }}">{{ $item->stock_label }}</span>
                                                         @if($item->stock_status_label)<span class="supply-stock-status">{{ $item->stock_status_label }}</span>@endif
                                                         @if($item->has_unit_stock)

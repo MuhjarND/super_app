@@ -70,10 +70,10 @@
                                 <div class="supply-item-card">
                                     <div class="supply-shop-meta-row align-items-start mb-2">
                                         <div>
-                                            <div class="supply-item-name">{{ $item->name }}</div>
+                                            <div class="supply-item-name" title="{{ $item->name }}">{{ $item->name }}</div>
                                             <div class="supply-item-meta">{{ $item->code ?: '-' }}</div>
                                         </div>
-                                        <div class="text-right">
+                                        <div class="supply-stock-summary">
                                             <span class="supply-stock-pill {{ ($item->is_empty_stock || $item->is_low_stock) ? 'low' : '' }}">{{ $item->stock_label }}</span>
                                             @if($item->stock_status_label)<span class="supply-stock-status">{{ $item->stock_status_label }}</span>@endif
                                             @if($item->has_unit_stock)<span class="supply-unit-stock-label">Satuan: {{ $item->unit_stock_label }}</span>@endif

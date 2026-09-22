@@ -360,11 +360,45 @@
         line-height: 1.28;
     }
 
+    .supply-shop-name {
+        display: -webkit-box;
+        height: 3.84em;
+        overflow: hidden;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 3;
+    }
+
     .supply-shop-meta-row {
         display: flex;
         align-items: center;
         justify-content: space-between;
         gap: 8px;
+    }
+
+    .supply-stock-summary {
+        display: flex;
+        flex: 0 0 96px;
+        min-width: 96px;
+        min-height: 42px;
+        flex-direction: column;
+        align-items: flex-end;
+        justify-content: flex-start;
+        text-align: right;
+    }
+
+    .supply-stock-summary .supply-stock-pill {
+        min-width: 78px;
+    }
+
+    .supply-stock-summary .supply-stock-status {
+        min-height: 13px;
+    }
+
+    .supply-stock-summary .supply-unit-stock-label {
+        max-width: 96px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
     }
 
     .supply-item-meta {
