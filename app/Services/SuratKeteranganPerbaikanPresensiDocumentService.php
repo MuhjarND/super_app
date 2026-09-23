@@ -6,6 +6,7 @@ use App\SuratKeluar;
 use App\SuratKeluarApproval;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\URL;
 use ZipArchive;
 use DOMDocument;
 use DOMElement;
@@ -14,21 +15,31 @@ use DOMXPath;
 /**
  * Creates the approved DOCX for Surat Keterangan Perbaikan Presensi.
  * The supplied DOCX remains the layout authority; this service only fills
- * placeholders, checks the approval option, and inserts the approved stamp.
+ * placeholders, checks the approval option, and inserts a QR signature link.
  */
 class SuratKeteranganPerbaikanPresensiDocumentService
 {
     const TEMPLATE = 'templates/surat-keterangan-perbaikan-presensi.docx';
-    const STAMP = 'kpta + stempel.png';
     const SLUG = 'surat-keterangan-perbaikan-presensi';
+
+    protected $qrCodeService;
+
+    public function __construct(DocumentQrCodeService $qrCodeService)
+    {
+        $this->qrCodeService = $qrCodeService;
+    }
 
     public function make(SuratKeluar $suratKeluar, SuratKeluarApproval $approval)
     {
         $template = public_path(self::TEMPLATE);
-        $stamp = public_path(self::STAMP);
-        if (!is_file($template) || !is_file($stamp)) {
-            throw new \RuntimeException('Template atau gambar tanda tangan KPTA tidak ditemukan.');
+        if (!is_file($template)) {
+            throw new \RuntimeException('Template Surat Keterangan Perbaikan Presensi tidak ditemukan.');
         }
+
+        $qrBinary = $this->qrCodeService->pngBinary(
+            URL::signedRoute('surat-keluar.signature.verify', ['approval' => $approval->id]),
+            600
+        );
 
         $source = new ZipArchive();
         if ($source->open($template) !== true) {
@@ -55,8 +66,8 @@ class SuratKeteranganPerbaikanPresensiDocumentService
 
         $this->setApprovalState($xpath, $approval);
         $rels = $this->loadXml($relsXml);
-        $relationshipId = $this->addImageRelationship($rels);
-        $this->insertStamp($xpath, $relationshipId, $stamp);
+        $relationshipId = $this->addImageRelationship($rels, 'media/ttd-qr.png');
+        $this->insertApprovalQr($xpath, $relationshipId, $qrBinary);
         $types = $this->loadXml($typesXml);
         $this->ensurePngContentType($types);
 
@@ -87,7 +98,7 @@ class SuratKeteranganPerbaikanPresensiDocumentService
                 $writer->addFromString($name, $source->getFromIndex($index));
             }
         }
-        $writer->addFile($stamp, 'word/media/kpta-stempel.png');
+        $writer->addFromString('word/media/ttd-qr.png', $qrBinary);
         $writer->close();
         $source->close();
 
@@ -107,6 +118,11 @@ class SuratKeteranganPerbaikanPresensiDocumentService
 
         $values['nomor_surat'] = $suratKeluar->nomor_surat_formatted;
         $values['tanggal_surat'] = optional($suratKeluar->tanggal_surat)->format('d/m/Y') ?: now()->format('d/m/Y');
+        if (!empty($values['tanggal_waktu_presensi'])) {
+            $presensi = Carbon::parse($values['tanggal_waktu_presensi']);
+            $values['tanggal_presensi'] = $presensi->format('Y-m-d');
+            $values['waktu_presensi'] = $presensi->format('H:i');
+        }
         if (!empty($values['tanggal_presensi']) && preg_match('/^\d{4}-\d{2}-\d{2}$/', (string) $values['tanggal_presensi'])) {
             $values['tanggal_presensi'] = Carbon::parse($values['tanggal_presensi'])->format('d/m/Y');
         }
@@ -181,7 +197,7 @@ class SuratKeteranganPerbaikanPresensiDocumentService
         }
     }
 
-    protected function addImageRelationship(DOMDocument $rels)
+    protected function addImageRelationship(DOMDocument $rels, $target)
     {
         $root = $rels->documentElement;
         $max = 0;
@@ -197,7 +213,7 @@ class SuratKeteranganPerbaikanPresensiDocumentService
         $relationship = $rels->createElementNS('http://schemas.openxmlformats.org/package/2006/relationships', 'Relationship');
         $relationship->setAttribute('Id', 'rId' . ($max + 1));
         $relationship->setAttribute('Type', 'http://schemas.openxmlformats.org/officeDocument/2006/relationships/image');
-        $relationship->setAttribute('Target', 'media/kpta-stempel.png');
+        $relationship->setAttribute('Target', $target);
         $root->appendChild($relationship);
 
         return 'rId' . ($max + 1);
@@ -217,7 +233,7 @@ class SuratKeteranganPerbaikanPresensiDocumentService
         $root->appendChild($default);
     }
 
-    protected function insertStamp(DOMXPath $xpath, $relationshipId, $imagePath)
+    protected function insertApprovalQr(DOMXPath $xpath, $relationshipId, $imageBinary)
     {
         foreach ($xpath->query('//w:p') as $paragraph) {
             $text = $xpath->evaluate('string(.)', $paragraph);
@@ -229,7 +245,7 @@ class SuratKeteranganPerbaikanPresensiDocumentService
                 $paragraph->removeChild($run);
             }
 
-            $dimensions = @getimagesize($imagePath);
+            $dimensions = @getimagesizefromstring($imageBinary);
             $width = 900000;
             $height = $dimensions && !empty($dimensions[0])
                 ? (int) round($width * ((float) $dimensions[1] / (float) $dimensions[0]))
@@ -246,10 +262,10 @@ class SuratKeteranganPerbaikanPresensiDocumentService
         return '<w:r xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:wp="http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing" xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:pic="http://schemas.openxmlformats.org/drawingml/2006/picture">'
             . '<w:drawing><wp:inline distT="0" distB="0" distL="0" distR="0">'
             . '<wp:extent cx="' . $width . '" cy="' . $height . '"/>'
-            . '<wp:docPr id="42" name="KPTA dan Stempel"/>'
+            . '<wp:docPr id="42" name="QR Tanda Tangan Pimpinan"/>'
             . '<wp:cNvGraphicFramePr><a:graphicFrameLocks noChangeAspect="1"/></wp:cNvGraphicFramePr>'
             . '<a:graphic><a:graphicData uri="http://schemas.openxmlformats.org/drawingml/2006/picture">'
-            . '<pic:pic><pic:nvPicPr><pic:cNvPr id="0" name="kpta-stempel.png"/><pic:cNvPicPr/></pic:nvPicPr>'
+            . '<pic:pic><pic:nvPicPr><pic:cNvPr id="0" name="ttd-qr.png"/><pic:cNvPicPr/></pic:nvPicPr>'
             . '<pic:blipFill><a:blip r:embed="' . $relationshipId . '"/><a:stretch><a:fillRect/></a:stretch></pic:blipFill>'
             . '<pic:spPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="' . $width . '" cy="' . $height . '"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></pic:spPr>'
             . '</pic:pic></a:graphicData></a:graphic></wp:inline></w:drawing></w:r>';

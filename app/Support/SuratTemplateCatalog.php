@@ -74,13 +74,14 @@ class SuratTemplateCatalog
                 ],
                 'field_schema' => [
                     ['name' => 'pegawai_id', 'label' => 'Pegawai yang Diperbaiki Presensinya', 'type' => 'user_select', 'required' => true],
-                    ['name' => 'tanggal_presensi', 'label' => 'Tanggal Presensi', 'type' => 'date', 'required' => true],
-                    ['name' => 'waktu_presensi', 'label' => 'Waktu Hadir/Pulang', 'type' => 'text', 'required' => true],
-                    ['name' => 'zona_waktu', 'label' => 'Zona Waktu', 'type' => 'text', 'required' => false],
-                    ['name' => 'status_presensi', 'label' => 'Status Presensi', 'type' => 'text', 'required' => true],
+                    ['name' => 'tanggal_waktu_presensi', 'label' => 'Tanggal dan Waktu Presensi', 'type' => 'datetime-local', 'required' => true],
+                    ['name' => 'status_presensi', 'label' => 'Status Presensi', 'type' => 'select', 'required' => true, 'options' => [
+                        ['value' => 'Kehadiran', 'label' => 'Kehadiran'],
+                        ['value' => 'Kepulangan', 'label' => 'Kepulangan'],
+                    ]],
                     ['name' => 'penanda_tangan_id', 'label' => 'Pimpinan Satker/Pejabat Penanda Tangan', 'type' => 'user_select', 'required' => true],
                 ],
-                'template_body' => '<p><strong>SURAT KETERANGAN</strong></p><p>Nomor : {{nomor_surat}}</p><p>Yang bertanda tangan di bawah ini menerangkan bahwa:</p><p>Nama: {{nama_pegawai}}<br>NIP/NRP: {{nip_pegawai}}<br>Jabatan: {{jabatan_pegawai}}<br>Unit Kerja: {{unit_kerja}}<br>Satuan Kerja: {{satuan_kerja}}<br>Tanggal Presensi: {{tanggal_presensi}}<br>Hadir/pulang pukul: {{waktu_presensi}} {{zona_waktu}}</p><p>adalah benar bertugas sesuai dengan jam kerja yang berlaku pada tanggal dan waktu yang tercantum.</p><p>Saya bertanggung jawab penuh atas kebenaran informasi {{status_presensi}} nama tersebut di atas dan mohon dilakukan perbaikan catatan jam kerja pada SIKEP.</p><p>Demikian surat keterangan ini dibuat dan untuk dipergunakan sebagaimana mestinya.</p>',
+                'template_body' => '<p><strong>SURAT KETERANGAN</strong></p><p>Nomor : {{nomor_surat}}</p><p>Yang bertanda tangan di bawah ini menerangkan bahwa:</p><p>Nama: {{nama_pegawai}}<br>NIP/NRP: {{nip_pegawai}}<br>Jabatan: {{jabatan_pegawai}}<br>Unit Kerja: {{unit_kerja}}<br>Satuan Kerja: {{satuan_kerja}}<br>Tanggal Presensi: {{tanggal_presensi}}<br>Hadir/pulang pukul: {{waktu_presensi}} {{zona_waktu}}</p><p>adalah benar bertugas sesuai dengan jam kerja yang berlaku pada tanggal dan waktu yang tercantum.</p><p>Saya bertanggung jawab penuh atas kebenaran informasi {{status_presensi}} atas nama tersebut di atas dan mohon dilakukan perbaikan catatan jam kerja pada SIKEP.</p><p>Demikian surat keterangan ini dibuat dan untuk dipergunakan sebagaimana mestinya.</p>',
             ],
             [
                 'id' => 'default-surat-perintah',

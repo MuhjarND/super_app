@@ -2,8 +2,10 @@
     $approved = !empty($approvalSignature);
     $field = function ($key, $fallback = '-') use ($fieldValues) {
         $value = data_get($fieldValues, $key);
-        return $value === null || trim((string) $value) === '' ? $fallback : $value;
+        return is_scalar($value) && trim((string) $value) !== '' ? $value : $fallback;
     };
+    $tanggalPresensi = $field('tanggal_presensi');
+    $tanggalPresensi = $tanggalPresensi !== '-' ? \Carbon\Carbon::parse($tanggalPresensi)->format('d/m/Y') : '-';
 @endphp
 
 <div class="suket-presensi">
@@ -16,19 +18,22 @@
 
 <div class="body">
     <p>Yang bertanda tangan di bawah ini</p>
-    <p>Nama&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: {{ $field('nama_pembuat_keterangan') }}<br>
-        NIP/NRP&nbsp;&nbsp;&nbsp;&nbsp;: {{ $field('nip_pembuat_keterangan') }}<br>
-        Jabatan&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: {{ $field('jabatan_pembuat_keterangan') }}</p>
+    <table class="identity-table">
+        <tr><td class="identity-label">Nama</td><td class="identity-colon">:</td><td>{{ $field('nama_pembuat_keterangan') }}</td></tr>
+        <tr><td class="identity-label">NIP/NRP</td><td class="identity-colon">:</td><td>{{ $field('nip_pembuat_keterangan') }}</td></tr>
+        <tr><td class="identity-label">Jabatan</td><td class="identity-colon">:</td><td>{{ $field('jabatan_pembuat_keterangan') }}</td></tr>
+    </table>
     <p>dengan ini menyatakan bahwa nama di bawah ini,</p>
-    <p>Nama&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: {{ $field('nama_pegawai') }}<br>
-        NIP/NRP&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: {{ $field('nip_pegawai') }}<br>
-        Jabatan&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: {{ $field('jabatan_pegawai') }}<br>
-        Unit Kerja&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: {{ $field('unit_kerja') }}<br>
-        Satuan Kerja&nbsp;&nbsp;&nbsp;&nbsp;: {{ $field('satuan_kerja') }}<br>
-        Tanggal Presensi&nbsp;: {{ $field('tanggal_presensi') !== '-' ? \Carbon\Carbon::parse($field('tanggal_presensi'))->format('d/m/Y') : '-' }}<br>
-        Hadir/pulang pukul : {{ $field('waktu_presensi') }} {{ $field('zona_waktu') }}</p>
+    <table class="identity-table identity-table-subject">
+        <tr><td class="identity-label">Nama</td><td class="identity-colon">:</td><td>{{ $field('nama_pegawai') }}</td></tr>
+        <tr><td class="identity-label">NIP/NRP</td><td class="identity-colon">:</td><td>{{ $field('nip_pegawai') }}</td></tr>
+        <tr><td class="identity-label">Jabatan</td><td class="identity-colon">:</td><td>{{ $field('jabatan_pegawai') }}</td></tr>
+        <tr><td class="identity-label">Unit Kerja</td><td class="identity-colon">:</td><td>{{ $field('unit_kerja') }}</td></tr>
+        <tr><td class="identity-label">Satuan Kerja</td><td class="identity-colon">:</td><td>{{ $field('satuan_kerja') }}</td></tr>
+        <tr><td class="identity-label">Tanggal dan Waktu Presensi</td><td class="identity-colon">:</td><td>{{ $tanggalPresensi }} pukul {{ $field('waktu_presensi') }} {{ $field('zona_waktu') }}</td></tr>
+    </table>
     <p>adalah benar bertugas sesuai dengan jam kerja yang berlaku pada tanggal dan waktu yang tercantum.</p>
-    <p>Saya bertanggung jawab penuh atas kebenaran Informasi {{ $field('status_presensi') }} nama tersebut di atas, sehubungan dengan hal tersebut mohon bantuannya untuk dilakukan perbaikan catatan jam kerja pada Sistem Informasi Manajemen Kepegawaian (SIKEP).</p>
+    <p>Saya bertanggung jawab penuh atas kebenaran informasi {{ $field('status_presensi') }} atas nama tersebut di atas. Sehubungan dengan hal tersebut, mohon bantuannya untuk dilakukan perbaikan catatan jam kerja pada Sistem Informasi Manajemen Kepegawaian (SIKEP).</p>
     <p>Demikian surat keterangan ini dibuat dan untuk dipergunakan sebagaimana mestinya.</p>
 </div>
 
@@ -52,9 +57,10 @@
         <td class="approval-sign">
             {{ $field('jabatan_pimpinan_satker', 'Ketua') }},<br>
             @if($approved && !empty($approvalSignature['image']))
-                <img class="stamp-signature" src="{{ $approvalSignature['image'] }}" alt="Tanda tangan dan stempel pimpinan">
+                <img class="signature-qr" src="{{ $approvalSignature['image'] }}" alt="QR tanda tangan pimpinan">
+                <div class="qr-caption">Pindai untuk verifikasi</div>
             @else
-                <div class="stamp-placeholder"></div>
+                <div class="signature-placeholder"></div>
             @endif
             <strong>{{ $field('nama_pimpinan_satker') }}</strong><br>
             NIP. {{ $field('nip_pimpinan_satker') }}

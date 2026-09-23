@@ -27,15 +27,21 @@
         .approval-box th { text-align: center; font-size: 12px; }
         .approval-options { width: 58%; line-height: 1.8; }
         .approval-sign { width: 42%; text-align: center; line-height: 1.35; }
-        .stamp-signature { width: 82px; height: 82px; object-fit: contain; display: block; margin: 3px auto; }
-        .stamp-placeholder { height: 88px; }
+        .signature-qr { width: 82px; height: 82px; object-fit: contain; display: block; margin: 4px auto 2px; }
+        .signature-placeholder { height: 88px; }
         .suket-presensi { font-size: 10px; line-height: 1.35; }
         .suket-presensi .body { font-size: 10px; }
-        .suket-presensi .body p { margin-bottom: 6px; }
+        .suket-presensi .body p { margin: 0 0 7px; text-align: justify; }
+        .suket-presensi .identity-table { width: 100%; border-collapse: collapse; margin: 0 0 8px; }
+        .suket-presensi .identity-table td { border: 0; padding: 1px 0; vertical-align: top; line-height: 1.35; }
+        .suket-presensi .identity-label { width: 25%; }
+        .suket-presensi .identity-colon { width: 3%; text-align: center; }
+        .suket-presensi .identity-table-subject { margin-bottom: 9px; }
         .suket-presensi .footer { margin-top: 10px; }
         .suket-presensi .approval-box { margin-top: 10px; }
-        .suket-presensi .stamp-signature { width: 66px; height: 66px; }
-        .suket-presensi .stamp-placeholder { height: 68px; }
+        .suket-presensi .signature-qr { width: 72px; height: 72px; }
+        .suket-presensi .signature-placeholder { height: 74px; }
+        .suket-presensi .qr-caption { font-size: 7.5px; color: #4b5563; margin-bottom: 2px; }
     </style>
 </head>
 <body>

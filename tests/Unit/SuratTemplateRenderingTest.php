@@ -32,4 +32,18 @@ class SuratTemplateRenderingTest extends TestCase
         $this->assertStringContainsString('22 September 2026', $rendered);
         $this->assertStringContainsString('<p>-</p>', $rendered);
     }
+
+    public function testPresensiFormUsesCombinedDateTimeAndConstrainedStatusOptions()
+    {
+        $template = SuratTemplateCatalog::find('surat-keterangan-perbaikan-presensi');
+        $schema = collect($template['field_schema']);
+
+        $dateTimeField = $schema->firstWhere('name', 'tanggal_waktu_presensi');
+        $statusField = $schema->firstWhere('name', 'status_presensi');
+
+        $this->assertSame('datetime-local', $dateTimeField['type']);
+        $this->assertSame(['Kehadiran', 'Kepulangan'], array_column($statusField['options'], 'value'));
+        $this->assertNull($schema->firstWhere('name', 'tanggal_presensi'));
+        $this->assertNull($schema->firstWhere('name', 'waktu_presensi'));
+    }
 }

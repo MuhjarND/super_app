@@ -446,7 +446,7 @@
                                 @if(!$directHandoffTemplate)
                                     <div class="alert alert-light border small">Isi field berikut untuk membuat preview surat dari template yang dipilih.</div>
                                 @elseif($templateSlug === 'surat-keterangan-perbaikan-presensi')
-                                    <div class="alert alert-info border small">Surat akan langsung dibuat dengan nomor Surat Keluar dan dikirim ke approval pimpinan satuan kerja. Tanda tangan serta stempel tampil setelah disetujui.</div>
+                                    <div class="alert alert-info border small">Surat akan langsung dibuat dengan nomor Surat Keluar dan dikirim ke approval pimpinan satuan kerja. QR/barcode tanda tangan tampil setelah disetujui dan dapat dipindai untuk verifikasi.</div>
                                 @endif
                                 @if($templateSlug === 'surat-tugas')
                                     @include('surat-template.partials.surat-tugas-fields', [
@@ -479,8 +479,19 @@
                                                         <option value="{{ $user->id }}">{{ $user->name }}{{ optional($user->jabatan)->nama ? ' - ' . optional($user->jabatan)->nama : '' }}</option>
                                                     @endforeach
                                                 </select>
+                                            @elseif($fieldType === 'select')
+                                                <select name="fields[{{ $fieldName }}]" class="form-control" {{ $required ? 'required' : '' }}>
+                                                    <option value="">-- Pilih {{ $fieldLabel }} --</option>
+                                                    @foreach(($field['options'] ?? []) as $option)
+                                                        @php
+                                                            $optionValue = is_array($option) ? ($option['value'] ?? '') : $option;
+                                                            $optionLabel = is_array($option) ? ($option['label'] ?? $optionValue) : $option;
+                                                        @endphp
+                                                        <option value="{{ $optionValue }}">{{ $optionLabel }}</option>
+                                                    @endforeach
+                                                </select>
                                             @else
-                                                <input type="{{ $fieldType === 'date' ? 'date' : 'text' }}" name="fields[{{ $fieldName }}]" class="form-control" {{ $required ? 'required' : '' }}>
+                                                <input type="{{ in_array($fieldType, ['date', 'datetime-local', 'time'], true) ? $fieldType : 'text' }}" name="fields[{{ $fieldName }}]" class="form-control" {{ $required ? 'required' : '' }}>
                                             @endif
                                         </div>
                                     @endforeach

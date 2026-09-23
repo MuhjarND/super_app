@@ -473,12 +473,20 @@ class SuratTemplateController extends Controller
             $baseRule = !empty($field['required']) ? 'required' : 'nullable';
             $type = $field['type'] ?? 'text';
 
-            if ($type === 'date') {
+            if (in_array($type, ['date', 'datetime-local', 'time'], true)) {
                 $dateRule = $baseRule . '|date';
                 if ($name === 'tanggal_selesai') {
                     $dateRule .= '|after_or_equal:fields.tanggal_mulai';
                 }
                 $rules['fields.' . $name] = $dateRule;
+            } elseif ($type === 'select') {
+                $allowedOptions = collect($field['options'] ?? [])->map(function ($option) {
+                    return is_array($option) ? ($option['value'] ?? null) : $option;
+                })->filter(function ($option) {
+                    return $option !== null && $option !== '';
+                })->values()->all();
+
+                $rules['fields.' . $name] = [$baseRule, Rule::in($allowedOptions)];
             } elseif ($type === 'user_multi') {
                 $rules['fields.' . $name] = $baseRule . '|array|min:1';
                 $rules['fields.' . $name . '.*'] = Rule::exists('users', 'id')->where('status_aktif_pegawai', true);
@@ -807,6 +815,15 @@ class SuratTemplateController extends Controller
         $fields['nomor_surat'] = $generated['nomor'];
         $fields['tanggal_surat'] = $tanggal->format('Y-m-d');
         $fields['tempat_surat'] = 'Manokwari';
+
+        // Form input uses one local date-time field; keep the legacy date/time
+        // keys populated so existing PDF/DOCX templates remain compatible.
+        if (!empty($fields['tanggal_waktu_presensi'])) {
+            $presensi = Carbon::parse($fields['tanggal_waktu_presensi']);
+            $fields['tanggal_presensi'] = $presensi->format('Y-m-d');
+            $fields['waktu_presensi'] = $presensi->format('H:i');
+        }
+
         $fields['zona_waktu'] = trim((string) ($fields['zona_waktu'] ?? '')) ?: 'WIT';
         $fields['nama_pembuat_keterangan'] = $pembuat->name;
         $fields['nip_pembuat_keterangan'] = $pembuat->nip ?: '-';
@@ -874,6 +891,12 @@ class SuratTemplateController extends Controller
 
     protected function createSuratKeluarFromTemplate(array $prefill)
     {
+        if (empty($prefill['klasifikasi_kode_id'])) {
+            throw ValidationException::withMessages([
+                'template' => ['Klasifikasi surat belum tersedia. Jalankan seeder KlasifikasiKodeSeeder atau pilih klasifikasi yang valid terlebih dahulu.'],
+            ]);
+        }
+
         return SuratKeluar::withNomorUrutLock($prefill['tahun_surat'], function () use ($prefill) {
             $previewNomor = (string) $prefill['field_values']['nomor_surat'];
             $nomorUrut = SuratKeluar::nextNomorUrut($prefill['tahun_surat']);
@@ -924,13 +947,37 @@ class SuratTemplateController extends Controller
     protected function resolveHierarchyForTemplateDefaults(array $defaults)
     {
         $kode = strtoupper(trim((string) ($defaults['kategori_kode'] ?? '')));
-        if ($kode !== 'KP7.1') {
+        if ($kode === '') {
             return [];
         }
 
         $klasifikasi = KlasifikasiKode::where('tipe', 'klasifikasi')
-            ->whereRaw('UPPER(kode) = ?', ['KP'])
+            ->whereRaw('UPPER(kode) = ?', [$kode])
             ->first();
+
+        // KP7.1 is a child activity code used by Surat Tugas; its parent
+        // classification is KP. Other templates such as the attendance
+        // correction letter use the classification code directly (KP).
+        if (!$klasifikasi && $kode === 'KP7.1') {
+            $klasifikasi = KlasifikasiKode::where('tipe', 'klasifikasi')
+                ->whereRaw('UPPER(kode) = ?', ['KP'])
+                ->first();
+        }
+
+        if (!$klasifikasi) {
+            return [];
+        }
+
+        if ($kode !== 'KP7.1') {
+            return [
+                'klasifikasi_id' => $klasifikasi->id,
+                'fungsi_id' => null,
+                'kegiatan_id' => null,
+                'klasifikasi_kode' => $klasifikasi->kode,
+                'fungsi_kode' => null,
+                'kegiatan_kode' => null,
+            ];
+        }
 
         $fungsi = $klasifikasi
             ? KlasifikasiKode::where('tipe', 'fungsi')->where('parent_id', $klasifikasi->id)->whereRaw('UPPER(kode) = ?', ['KP7'])->first()

@@ -67,7 +67,7 @@ class SuratTemplateDocumentService
 
         return [
             'image' => $image,
-            'kind' => $approval->template_slug === 'surat-keterangan-perbaikan-presensi' ? 'stamp' : 'qr',
+            'kind' => 'qr',
             'name' => $approval->signer_name_snapshot ?: optional($approval->approver)->name ?: '-',
             'title' => $approval->signer_title_snapshot ?: optional(optional($approval->approver)->jabatan)->nama ?: '-',
             'nip' => optional($approval->approver)->nip ?: '-',
@@ -77,14 +77,6 @@ class SuratTemplateDocumentService
 
     protected function resolveApprovalSignatureImage(SuratKeluarApproval $approval)
     {
-        if ($approval->template_slug === 'surat-keterangan-perbaikan-presensi') {
-            $stamp = public_path('kpta + stempel.png');
-            if (is_file($stamp)) {
-                $mime = mime_content_type($stamp) ?: 'image/png';
-                return 'data:' . $mime . ';base64,' . base64_encode(file_get_contents($stamp));
-            }
-        }
-
         return $this->qrCodeService->dataUri(URL::signedRoute('surat-keluar.signature.verify', ['approval' => $approval->id]), 120);
     }
 
