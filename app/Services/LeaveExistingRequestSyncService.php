@@ -80,9 +80,9 @@ class LeaveExistingRequestSyncService
 
             $newApprovedDays = $newDays;
             $newAccountedDays = max(0, $newDays - (
-                in_array($request->status, $this->reservedStatuses(), true) && $request->travel_leave_requested ? 1 : 0
+                in_array($request->status, $this->reservedStatuses(), true) ? $request->requestedTravelLeaveDays() : 0
             ) - (
-                in_array($request->status, $this->usedStatuses(), true) && $request->travel_leave_granted ? 1 : 0
+                in_array($request->status, $this->usedStatuses(), true) ? $request->approvedTravelLeaveDays() : 0
             ));
 
             $requestChanged = (int) $request->requested_days !== $newDays
@@ -203,11 +203,11 @@ class LeaveExistingRequestSyncService
     protected function accountedDays(LeaveRequest $request, $effectiveDays)
     {
         if (in_array($request->status, $this->reservedStatuses(), true)) {
-            return max(0, (int) $effectiveDays - ($request->travel_leave_requested ? 1 : 0));
+            return max(0, (int) $effectiveDays - $request->requestedTravelLeaveDays());
         }
 
         if (in_array($request->status, $this->usedStatuses(), true)) {
-            return max(0, (int) $effectiveDays - ($request->travel_leave_granted ? 1 : 0));
+            return max(0, (int) $effectiveDays - $request->approvedTravelLeaveDays());
         }
 
         return 0;

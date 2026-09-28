@@ -109,6 +109,20 @@ class LeaveTravelBalanceTest extends TestCase
         $this->assertSame(0, (int) $balance->fresh()->remaining_balance);
     }
 
+    public function test_requested_travel_days_can_be_more_than_one(): void
+    {
+        [$request, $balance] = $this->makeRequestAndBalance(8, 6);
+        $request->travel_leave_days = 2;
+        $service = app(LeaveBalanceService::class);
+
+        $this->assertSame(6, $request->requestedBalanceDays());
+
+        $service->reserve($request);
+
+        $this->assertSame(6, (int) $balance->fresh()->reserved_days);
+        $this->assertSame(0, (int) $balance->fresh()->remaining_balance);
+    }
+
     public function test_travel_leave_description_is_shown_in_pdf_context_before_and_after_approval(): void
     {
         [$request] = $this->makeRequestAndBalance();

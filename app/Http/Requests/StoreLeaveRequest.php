@@ -35,6 +35,7 @@ class StoreLeaveRequest extends FormRequest
             'is_abroad' => 'nullable|boolean',
             'abroad_country' => 'nullable|required_if:is_abroad,1|string|max:100',
             'travel_leave_requested' => 'nullable|boolean',
+            'travel_leave_days' => 'nullable|required_if:travel_leave_requested,1|integer|min:1|max:365',
             'travel_leave_proof' => 'nullable|required_if:travel_leave_requested,1|file|max:10240|mimes:pdf,jpg,jpeg,png,doc,docx',
             '_leave_form_mode' => 'nullable|string|in:create,edit',
             '_leave_request_id' => 'nullable|integer',
@@ -48,6 +49,8 @@ class StoreLeaveRequest extends FormRequest
             'letter_number.required' => 'Nomor surat satuan kerja wajib diisi.',
             'letter_number.unique' => 'Nomor surat satuan kerja tersebut sudah digunakan pada pengajuan cuti lain.',
             'travel_leave_proof.required_if' => 'Bukti cuti perjalanan wajib dilampirkan.',
+            'travel_leave_days.required_if' => 'Jumlah hari cuti perjalanan wajib diisi jika cuti perjalanan diajukan.',
+            'travel_leave_days.min' => 'Jumlah hari cuti perjalanan minimal 1 hari.',
         ];
     }
 }

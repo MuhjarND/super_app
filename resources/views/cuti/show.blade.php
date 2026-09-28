@@ -238,8 +238,8 @@
                     <strong>Perhitungan cuti perjalanan:</strong>
                     total pengajuan {{ $leaveRequest->requested_days ?: 0 }} hari terdiri dari
                     {{ $leaveRequest->requestedBalanceDays() }} hari yang memotong saldo
-                    + 1 hari cuti perjalanan. Saldo yang dicadangkan hanya
-                    {{ $leaveRequest->requestedBalanceDays() }} hari. Keputusan pemberian 1 hari perjalanan dilakukan pada approval terakhir.
+                    + {{ $leaveRequest->requestedTravelLeaveDays() }} hari cuti perjalanan. Saldo yang dicadangkan hanya
+                    {{ $leaveRequest->requestedBalanceDays() }} hari. Keputusan pemberian cuti perjalanan dilakukan pada approval terakhir.
                 </div>
             @endif
             <div class="leave-approval-actions">
@@ -304,11 +304,11 @@
                     @if(!$leaveRequest->travel_leave_requested)
                         Tidak diajukan
                     @elseif($leaveRequest->travel_leave_granted)
-                        Diberikan ({{ $leaveRequest->approvedBalanceDays() }} hari saldo + 1 hari perjalanan)
+                        Diberikan ({{ $leaveRequest->approvedBalanceDays() }} hari saldo + {{ $leaveRequest->approvedTravelLeaveDays() }} hari perjalanan)
                     @elseif(in_array($leaveRequest->status, [\App\LeaveRequest::STATUS_APPROVED, \App\LeaveRequest::STATUS_COMPLETED], true))
                         Tidak diberikan
                     @else
-                        Diajukan ({{ $leaveRequest->requestedBalanceDays() }} hari saldo + 1 hari perjalanan)
+                        Diajukan ({{ $leaveRequest->requestedBalanceDays() }} hari saldo + {{ $leaveRequest->requestedTravelLeaveDays() }} hari perjalanan)
                     @endif
                 </div>
             </div>
@@ -453,9 +453,9 @@
                             <div class="form-group border rounded p-3 bg-light">
                                 <div class="form-check">
                                     <input type="checkbox" name="grant_travel_leave" value="1" class="form-check-input" id="grantTravelLeave" checked>
-                                    <label class="form-check-label font-weight-bold" for="grantTravelLeave">Berikan 1 hari cuti perjalanan</label>
+                                    <label class="form-check-label font-weight-bold" for="grantTravelLeave">Berikan {{ $leaveRequest->requestedTravelLeaveDays() }} hari cuti perjalanan</label>
                                 </div>
-                                <small class="text-muted d-block mt-1">Total {{ $leaveRequest->requested_days ?: 0 }} hari terdiri dari {{ $leaveRequest->requestedBalanceDays() }} hari pemotongan saldo + 1 hari perjalanan. Jika tidak diberikan, seluruh {{ $leaveRequest->requested_days ?: 0 }} hari akan dihitung sebagai cuti biasa dan harus didukung saldo yang cukup.</small>
+                                <small class="text-muted d-block mt-1">Total {{ $leaveRequest->requested_days ?: 0 }} hari terdiri dari {{ $leaveRequest->requestedBalanceDays() }} hari pemotongan saldo + {{ $leaveRequest->requestedTravelLeaveDays() }} hari perjalanan. Jika tidak diberikan, seluruh {{ $leaveRequest->requested_days ?: 0 }} hari akan dihitung sebagai cuti biasa dan harus didukung saldo yang cukup.</small>
                             </div>
                         @endif
                         @include('partials.profile-signature-notice')

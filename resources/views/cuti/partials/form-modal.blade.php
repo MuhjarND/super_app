@@ -104,10 +104,15 @@
                                 class="form-check-input" id="{{ $modalId }}TravelLeave"
                                 {{ !$isEdit && old('travel_leave_requested') ? 'checked' : '' }}
                                 data-leave-travel-toggle>
-                            <label class="form-check-label" for="{{ $modalId }}TravelLeave">Ajukan cuti perjalanan (+1 hari)</label>
+                            <label class="form-check-label" for="{{ $modalId }}TravelLeave">Ajukan cuti perjalanan</label>
                         </div>
-                        <small class="text-muted d-block">Hanya berlaku bagi pegawai yang menempuh perjalanan selama 2 hari.</small>
-                        <small class="text-muted d-block">Satu hari perjalanan termasuk dalam total tanggal cuti. Contoh: pengajuan 8 hari akan memotong saldo 7 hari + 1 hari perjalanan, lalu diputuskan oleh pejabat pada approval terakhir.</small>
+                    </div>
+
+                    <div class="form-group d-none" data-leave-travel-days>
+                        <label>Jumlah Hari Cuti Perjalanan <span class="text-danger">*</span></label>
+                        <input type="number" name="travel_leave_days" class="form-control" min="1" max="365"
+                            value="{{ !$isEdit ? old('travel_leave_days', 1) : '' }}"
+                            data-leave-travel-days-input>
                     </div>
 
                     <div class="form-group" data-leave-travel-proof>

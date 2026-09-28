@@ -42,6 +42,11 @@ class LeaveValidationService
                 'end_date' => 'Rentang tanggal yang dipilih tidak memiliki hari cuti efektif setelah hari libur dan cuti bersama dikeluarkan.',
             ]);
         }
+        if ($leaveRequest->requestedTravelLeaveDays() > $requestedDays) {
+            throw ValidationException::withMessages([
+                'travel_leave_days' => 'Jumlah hari cuti perjalanan tidak boleh melebihi total hari cuti efektif.',
+            ]);
+        }
         $leaveRequest->workday_count = $requestedDays;
         $leaveRequest->requested_days = $requestedDays;
 
@@ -52,7 +57,8 @@ class LeaveValidationService
             $leaveRequest->requestedBalanceDays(),
             $leaveRequest->start_date,
             $leaveRequest->travel_leave_requested,
-            $requestedDays
+            $requestedDays,
+            $leaveRequest->requestedTravelLeaveDays()
         );
         $childNumberContext = !is_null(optional($user)->jumlah_anak)
             ? ((int) $user->jumlah_anak + 1)
@@ -184,7 +190,7 @@ class LeaveValidationService
             || str_contains($purpose, 'kelahiran anak ke-4');
     }
 
-    protected function validateBalance(User $user, LeaveType $leaveType, $requestedDays, $startDate, $includesTravelLeave = false, $totalDays = null)
+    protected function validateBalance(User $user, LeaveType $leaveType, $requestedDays, $startDate, $includesTravelLeave = false, $totalDays = null, $travelDays = 0)
     {
         if (!$leaveType->requires_balance) {
             return;
@@ -198,9 +204,10 @@ class LeaveValidationService
         if (($balance['remaining_balance'] ?? 0) < $requestedDays) {
             $message = $includesTravelLeave
                 ? sprintf(
-                    'Saldo cuti tidak mencukupi. Total pengajuan %d hari terdiri dari %d hari pemotongan saldo + 1 hari cuti perjalanan, sedangkan saldo tersedia %d hari.',
+                    'Saldo cuti tidak mencukupi. Total pengajuan %d hari terdiri dari %d hari pemotongan saldo + %d hari cuti perjalanan, sedangkan saldo tersedia %d hari.',
                     (int) $totalDays,
                     $requestedDays,
+                    (int) $travelDays,
                     (int) ($balance['remaining_balance'] ?? 0)
                 )
                 : sprintf(

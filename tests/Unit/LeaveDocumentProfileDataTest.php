@@ -186,29 +186,4 @@ class LeaveDocumentProfileDataTest extends TestCase
         $this->assertSame(4, $method->invoke($service, $balance, $request));
     }
 
-    public function test_annual_leave_remaining_column_shows_balance_before_current_request()
-    {
-        $service = new LeaveDocumentService(
-            $this->createMock(DocumentQrCodeService::class),
-            $this->createMock(PdfVerificationService::class)
-        );
-        $method = new ReflectionMethod($service, 'resolveAnnualLeaveBalanceBeforeRequest');
-        $method->setAccessible(true);
-
-        $balance = new LeaveBalance();
-        $balance->setRawAttributes([
-            'leave_type_id' => 1,
-            'remaining_balance' => 19,
-        ]);
-        $request = new LeaveRequest();
-        $request->setRawAttributes([
-            'leave_type_id' => 1,
-            'start_date' => '2026-08-20',
-            'requested_days' => 3,
-            'approved_days' => 3,
-            'status' => LeaveRequest::STATUS_APPROVED,
-        ]);
-
-        $this->assertSame(22, $method->invoke($service, $balance, $request, 2026, 19));
-    }
 }

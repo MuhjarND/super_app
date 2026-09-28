@@ -126,7 +126,7 @@ body { margin: 0; }
                 {{ $leaveRequest->documentLeaveBalanceDays() }}
                 {{ in_array(optional($leaveRequest->leaveType)->code, [\App\LeaveType::CODE_SAKIT, \App\LeaveType::CODE_ALASAN_PENTING], true) ? 'Hari Kalender' : 'Hari Kerja' }}
                 @if($leaveRequest->showsTravelLeaveInDocument())
-                    <br>+ 1 hari cuti perjalanan
+                    <br>+ {{ $leaveRequest->status === \App\LeaveRequest::STATUS_APPROVED || $leaveRequest->status === \App\LeaveRequest::STATUS_COMPLETED ? $leaveRequest->approvedTravelLeaveDays() : $leaveRequest->requestedTravelLeaveDays() }} hari cuti perjalanan
                 @endif
             </td>
             <td width="18%" class="center">Tanggal Cuti</td>

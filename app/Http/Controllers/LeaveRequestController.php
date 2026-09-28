@@ -113,6 +113,7 @@ class LeaveRequestController extends Controller
             'is_abroad' => $request->boolean('is_abroad'),
             'abroad_country' => $request->boolean('is_abroad') ? $request->abroad_country : null,
             'travel_leave_requested' => $request->boolean('travel_leave_requested'),
+            'travel_leave_days' => $request->boolean('travel_leave_requested') ? (int) $request->input('travel_leave_days', 1) : 0,
             'travel_leave_granted' => false,
             'contact_phone' => auth()->user()->no_hp,
             'status_asn_snapshot' => auth()->user()->status_asn ?? 'PNS',
@@ -158,6 +159,9 @@ class LeaveRequestController extends Controller
         $leaveRequest->is_abroad = $request->boolean('is_abroad');
         $leaveRequest->abroad_country = $leaveRequest->is_abroad ? $request->abroad_country : null;
         $leaveRequest->travel_leave_requested = $request->boolean('travel_leave_requested');
+        $leaveRequest->travel_leave_days = $leaveRequest->travel_leave_requested
+            ? (int) $request->input('travel_leave_days', 1)
+            : 0;
         $leaveRequest->travel_leave_granted = false;
         $leaveRequest->contact_phone = auth()->user()->no_hp;
         $leaveRequest->updated_by = auth()->id();

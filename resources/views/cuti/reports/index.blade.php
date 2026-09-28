@@ -31,7 +31,7 @@
                             <td>
                                 {{ $leaveRequest->requested_days }} hari
                                 @if($leaveRequest->travel_leave_requested)
-                                    <br><small class="text-info">Termasuk 1 hari cuti perjalanan</small>
+                                    <br><small class="text-info">Termasuk {{ $leaveRequest->requestedTravelLeaveDays() }} hari cuti perjalanan</small>
                                 @endif
                             </td>
                             <td>{!! $leaveRequest->status_badge !!}</td>

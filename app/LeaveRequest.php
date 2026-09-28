@@ -7,8 +7,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class LeaveRequest extends Model
 {
-    protected $fillable = ['request_number','letter_number','user_id','leave_type_id','delegate_approval_id','status_asn_snapshot','unit_snapshot','jabatan_snapshot','approver_chain_snapshot','start_date','end_date','requested_days','approved_days','workday_count','purpose','leave_address','is_abroad','abroad_country','travel_leave_requested','travel_leave_granted','contact_phone','needs_document_verification','needs_ppk_approval','is_deferred','deferred_reason','revision_number','revision_note','status','submitted_at','applicant_signature_path','applicant_signature_mime','applicant_signature_size','verified_at','approved_at','rejected_at','cancelled_at','completed_at','locked_at','created_by','updated_by'];
-    protected $casts = ['approver_chain_snapshot' => 'array','start_date' => 'date','end_date' => 'date','requested_days' => 'integer','approved_days' => 'integer','workday_count' => 'integer','is_abroad' => 'boolean','travel_leave_requested' => 'boolean','travel_leave_granted' => 'boolean','needs_document_verification' => 'boolean','needs_ppk_approval' => 'boolean','is_deferred' => 'boolean','revision_number' => 'integer','submitted_at' => 'datetime','applicant_signature_size' => 'integer','verified_at' => 'datetime','approved_at' => 'datetime','rejected_at' => 'datetime','cancelled_at' => 'datetime','completed_at' => 'datetime','locked_at' => 'datetime'];
+    protected $fillable = ['request_number','letter_number','user_id','leave_type_id','delegate_approval_id','status_asn_snapshot','unit_snapshot','jabatan_snapshot','approver_chain_snapshot','start_date','end_date','requested_days','approved_days','workday_count','purpose','leave_address','is_abroad','abroad_country','travel_leave_requested','travel_leave_days','travel_leave_granted','contact_phone','needs_document_verification','needs_ppk_approval','is_deferred','deferred_reason','revision_number','revision_note','status','submitted_at','applicant_signature_path','applicant_signature_mime','applicant_signature_size','verified_at','approved_at','rejected_at','cancelled_at','completed_at','locked_at','created_by','updated_by'];
+    protected $casts = ['approver_chain_snapshot' => 'array','start_date' => 'date','end_date' => 'date','requested_days' => 'integer','approved_days' => 'integer','workday_count' => 'integer','is_abroad' => 'boolean','travel_leave_requested' => 'boolean','travel_leave_days' => 'integer','travel_leave_granted' => 'boolean','needs_document_verification' => 'boolean','needs_ppk_approval' => 'boolean','is_deferred' => 'boolean','revision_number' => 'integer','submitted_at' => 'datetime','applicant_signature_size' => 'integer','verified_at' => 'datetime','approved_at' => 'datetime','rejected_at' => 'datetime','cancelled_at' => 'datetime','completed_at' => 'datetime','locked_at' => 'datetime'];
 
     public const STATUS_DRAFT = 'draft';
     public const STATUS_SUBMITTED = 'submitted';
@@ -40,14 +40,32 @@ class LeaveRequest extends Model
         return (int) ($this->requested_days ?: $this->workday_count ?: 0);
     }
 
+    /**
+     * Data lama belum memiliki travel_leave_days, sehingga tetap dibaca
+     * sebagai 1 hari agar perhitungan historis tidak berubah.
+     */
+    public function requestedTravelLeaveDays()
+    {
+        return $this->travel_leave_requested
+            ? max(1, (int) ($this->travel_leave_days ?: 1))
+            : 0;
+    }
+
+    public function approvedTravelLeaveDays()
+    {
+        return $this->travel_leave_granted
+            ? $this->requestedTravelLeaveDays()
+            : 0;
+    }
+
     public function requestedBalanceDays()
     {
-        return max(0, $this->regularLeaveDays() - ($this->travel_leave_requested ? 1 : 0));
+        return max(0, $this->regularLeaveDays() - $this->requestedTravelLeaveDays());
     }
 
     public function approvedBalanceDays()
     {
-        return max(0, $this->regularLeaveDays() - ($this->travel_leave_granted ? 1 : 0));
+        return max(0, $this->regularLeaveDays() - $this->approvedTravelLeaveDays());
     }
 
     public function requestedTotalDays()

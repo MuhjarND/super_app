@@ -439,6 +439,7 @@
                             data-is-abroad="{{ $leaveRequest->is_abroad ? 1 : 0 }}"
                             data-abroad-country="{{ e($leaveRequest->abroad_country) }}"
                             data-travel-leave-requested="{{ $leaveRequest->travel_leave_requested ? 1 : 0 }}"
+                            data-travel-leave-days="{{ $leaveRequest->travel_leave_requested ? $leaveRequest->requestedTravelLeaveDays() : 1 }}"
                             data-has-travel-leave-proof="{{ $leaveRequest->documents->where('document_type', \App\LeaveRequestDocument::TYPE_TRAVEL_LEAVE_PROOF)->isNotEmpty() ? 1 : 0 }}"
                             data-documents='@json($documents)'
                         >
@@ -555,6 +556,7 @@
             is_abroad: @json(old('is_abroad')),
             abroad_country: @json(old('abroad_country')),
             travel_leave_requested: @json(old('travel_leave_requested')),
+            travel_leave_days: @json(old('travel_leave_days', 1)),
         };
         var queryOpen = @json(request('open'));
         var queryEdit = @json(request('edit'));
@@ -609,6 +611,7 @@
             editForm.find('input[name="is_abroad"]').prop('checked', Number(data.is_abroad || 0) === 1);
             editForm.find('input[name="abroad_country"]').val(data.abroad_country || '');
             editForm.find('input[name="travel_leave_requested"]').prop('checked', Number(data.travel_leave_requested || 0) === 1);
+            editForm.find('input[name="travel_leave_days"]').val(data.travel_leave_days || 1);
             editForm.find('input[name="travel_leave_proof"]').attr('data-has-existing-proof', Number(data.has_travel_leave_proof || 0) === 1 ? '1' : '0');
             toggleAbroadFields(editForm);
             toggleTravelLeaveFields(editForm);
@@ -643,6 +646,7 @@
                 is_abroad: row.data('is-abroad'),
                 abroad_country: row.data('abroad-country'),
                 travel_leave_requested: row.data('travel-leave-requested'),
+                travel_leave_days: row.data('travel-leave-days'),
                 has_travel_leave_proof: row.data('has-travel-leave-proof'),
                 documents: row.data('documents')
             };
@@ -669,11 +673,16 @@
                 var form = checkbox.closest('form');
                 var proofWrapper = form.find('[data-leave-travel-proof]');
                 var proofInput = proofWrapper.find('input[name="travel_leave_proof"]');
+                var daysWrapper = form.find('[data-leave-travel-days]');
+                var daysInput = daysWrapper.find('[data-leave-travel-days-input]');
                 var hasExistingProof = Number(proofInput.attr('data-has-existing-proof') || 0) === 1;
                 proofWrapper.toggleClass('d-none', !checkbox.is(':checked'));
                 proofInput.prop('required', checkbox.is(':checked') && !hasExistingProof);
+                daysWrapper.toggleClass('d-none', !checkbox.is(':checked'));
+                daysInput.prop('required', checkbox.is(':checked'));
                 if (!checkbox.is(':checked')) {
                     proofInput.val('');
+                    daysInput.val('1');
                 }
             });
         }
@@ -728,6 +737,7 @@
                 is_abroad: oldValues.is_abroad,
                 abroad_country: oldValues.abroad_country,
                 travel_leave_requested: oldValues.travel_leave_requested,
+                travel_leave_days: oldValues.travel_leave_days,
                 has_travel_leave_proof: (getRowDataById(oldLeaveId) || {}).has_travel_leave_proof || 0,
                 documents: (getRowDataById(oldLeaveId) || {}).documents || []
             });

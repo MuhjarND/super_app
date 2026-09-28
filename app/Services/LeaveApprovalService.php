@@ -185,6 +185,7 @@ class LeaveApprovalService
                 $decisionApproval = $linkedApproval ?: $approval;
                 $decisionApproval->meta_json = array_merge($decisionApproval->meta_json ?: [], [
                     'travel_leave_requested' => (bool) $leaveRequest->travel_leave_requested,
+                    'travel_leave_days' => (int) $leaveRequest->requestedTravelLeaveDays(),
                     'travel_leave_granted' => $travelLeaveGranted,
                 ]);
                 $decisionApproval->save();
