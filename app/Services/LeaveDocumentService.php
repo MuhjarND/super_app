@@ -424,52 +424,51 @@ class LeaveDocumentService
             ? app(LeaveBalanceService::class)->annualCarryForwardBreakdown($currentBalance->toArray(), $currentYear)
             : [];
 
+        // Data lama mungkin belum memiliki rekap annual_recap pada saldo
+        // tahun berjalan. Dalam kondisi itu, tetap gunakan saldo historis
+        // yang tersimpan sebagai sumber carry-forward agar tabel PDF tidak
+        // kehilangan sisa cuti tahun sebelumnya.
+        $annualRecap = $currentBalance ? data_get($currentBalance->meta_json, 'annual_recap') : null;
+        if (!$annualRecap && array_sum(array_map('intval', $carryForwardByYear)) === 0) {
+            foreach ([$currentYear - 2, $currentYear - 1] as $historicalYear) {
+                $historicalBalance = $tahunan
+                    ? LeaveBalance::where('user_id', $leaveRequest->user_id)
+                        ->where('leave_type_id', $tahunan->id)
+                        ->where('year', $historicalYear)
+                        ->first()
+                    : null;
+                if ($historicalBalance && (int) $historicalBalance->remaining_balance > 0) {
+                    $carryForwardByYear[$historicalYear] = (int) $historicalBalance->remaining_balance;
+                }
+            }
+        }
+
+        $requestDays = $this->resolveAnnualRequestDays($leaveRequest, $tahunan, $currentYear);
+        $buckets = $this->buildAnnualLeaveBuckets($currentBalance, $carryForwardByYear, $currentYear, $requestDays);
+        $requestDaysRemaining = $requestDays;
+
         foreach ($years as $year) {
             $balance = $tahunan
                 ? LeaveBalance::where('user_id', $leaveRequest->user_id)->where('leave_type_id', $tahunan->id)->where('year', $year)->first()
                 : null;
-            $carryForwardRemaining = (int) ($carryForwardByYear[$year] ?? $carryForwardByYear[(string) $year] ?? 0);
-            $hasCarryForward = $year !== $currentYear && $carryForwardRemaining > 0;
+            $remainingBeforeRequest = (int) ($buckets[$year]['before'] ?? 0);
+            $takenDays = min($requestDaysRemaining, $remainingBeforeRequest);
+            $requestDaysRemaining -= $takenDays;
+            $remainingAfterRequest = max(0, $remainingBeforeRequest - $takenDays);
 
             if ($year < $currentYear) {
-                // Baris tahun sebelumnya harus menunjukkan saldo tahun itu,
-                // bukan saldo gabungan tahun berjalan. Jika carry-forward
-                // tersedia, nilainya menjadi sumber utama; bila tidak,
-                // gunakan saldo historis yang tersimpan pada tahun tersebut.
-                $historicalRemaining = $balance && (int) $balance->remaining_balance <= 0
-                    ? 0
-                    : ($hasCarryForward
-                        ? $carryForwardRemaining
-                        : $this->resolveCurrentAnnualLeaveBalance($balance, $leaveRequest));
-                $usage = $this->resolveHistoricalAnnualLeaveUsage(
-                    $leaveRequest,
-                    $year,
-                    $balance,
-                    $tahunan ? $tahunan->id : $leaveRequest->leave_type_id
-                );
-                $note = $this->buildHistoricalAnnualLeaveNote(
-                    $historicalRemaining,
-                    $usage['used'],
-                    $usage['reserved']
-                );
-
                 $rows[] = [
                     'year' => $year,
-                    'remaining' => $historicalRemaining,
-                    'used' => $usage['used'],
-                    'note' => $note,
+                    'remaining' => $remainingBeforeRequest,
+                    'used' => $takenDays,
+                    'note' => $this->buildAnnualLeaveRequestNote($remainingBeforeRequest, $takenDays, $remainingAfterRequest),
                 ];
-
                 continue;
             }
 
-            $remainingAfterRequest = $this->resolveCurrentAnnualLeaveBalance($balance, $leaveRequest);
-            $remainingBeforeRequest = $this->resolveAnnualLeaveBalanceBeforeRequest(
-                $balance,
-                $leaveRequest,
-                $year,
-                $remainingAfterRequest
-            );
+            $currentRequestNote = $requestDays > 0
+                ? $this->buildAnnualLeaveRequestNote($remainingBeforeRequest, $takenDays, $remainingAfterRequest)
+                : $this->buildAnnualLeaveNote($balance, $leaveRequest, $year, $this->resolveCurrentAnnualLeaveBalance($balance, $leaveRequest));
 
             $rows[] = [
                 'year' => $year,
@@ -477,11 +476,93 @@ class LeaveDocumentService
                 // pengajuan/pemakaian cuti tahun berjalan.
                 'remaining' => $remainingBeforeRequest,
                 'used' => $balance ? $balance->used_days : 0,
-                'note' => $this->buildAnnualLeaveNote($balance, $leaveRequest, $year, $remainingAfterRequest),
+                'note' => $currentRequestNote,
             ];
         }
 
         return $rows;
+    }
+
+    protected function resolveAnnualRequestDays(LeaveRequest $leaveRequest, $annualLeaveType, $currentYear)
+    {
+        if (!$annualLeaveType
+            || (int) $leaveRequest->leave_type_id !== (int) $annualLeaveType->id
+            || (int) optional($leaveRequest->start_date)->year !== (int) $currentYear) {
+            return 0;
+        }
+
+        $balanceStatuses = [
+            LeaveRequest::STATUS_SUBMITTED,
+            LeaveRequest::STATUS_UNDER_REVIEW,
+            LeaveRequest::STATUS_VERIFIED,
+            LeaveRequest::STATUS_APPROVED,
+            LeaveRequest::STATUS_COMPLETED,
+        ];
+
+        return in_array($leaveRequest->status, $balanceStatuses, true)
+            ? max(0, (int) $leaveRequest->balanceDaysForCurrentStatus())
+            : 0;
+    }
+
+    protected function buildAnnualLeaveBuckets($currentBalance, array $carryForwardByYear, $currentYear, $requestDays)
+    {
+        $previousYear = $currentYear - 1;
+        $twoYearsAgo = $currentYear - 2;
+        $carryForwardBuckets = [
+            $twoYearsAgo => max(0, (int) ($carryForwardByYear[$twoYearsAgo] ?? $carryForwardByYear[(string) $twoYearsAgo] ?? 0)),
+            $previousYear => max(0, (int) ($carryForwardByYear[$previousYear] ?? $carryForwardByYear[(string) $previousYear] ?? 0)),
+        ];
+        $currentYearBalance = $currentBalance
+            ? max(0, (int) $currentBalance->opening_balance
+                + (int) $currentBalance->entitlement
+                + (int) $currentBalance->adjustment_plus
+                - (int) $currentBalance->adjustment_minus)
+            : 0;
+        $totalConsumed = $currentBalance
+            ? max(0, (int) $currentBalance->used_days + (int) $currentBalance->reserved_days)
+            : 0;
+        // Older rows can have only remaining_balance populated. Recover the
+        // current-year bucket from it when the component fields are empty.
+        if ($currentBalance && $currentYearBalance === 0 && (int) $currentBalance->remaining_balance > 0) {
+            $currentYearBalance = max(
+                0,
+                (int) $currentBalance->remaining_balance
+                    + $totalConsumed
+                    - array_sum($carryForwardBuckets)
+            );
+        }
+        $previousConsumption = max(0, $totalConsumed - $requestDays);
+
+        foreach ($carryForwardBuckets as $year => $amount) {
+            $consumed = min($previousConsumption, $amount);
+            $carryForwardBuckets[$year] = $amount - $consumed;
+            $previousConsumption -= $consumed;
+        }
+
+        $currentYearBefore = max(0, $currentYearBalance - $previousConsumption);
+
+        return [
+            $twoYearsAgo => ['before' => $carryForwardBuckets[$twoYearsAgo]],
+            $previousYear => ['before' => $carryForwardBuckets[$previousYear]],
+            $currentYear => ['before' => $currentYearBefore],
+        ];
+    }
+
+    protected function buildAnnualLeaveRequestNote($remainingBeforeRequest, $takenDays, $remainingAfterRequest)
+    {
+        $remainingBeforeRequest = max(0, (int) $remainingBeforeRequest);
+        $takenDays = max(0, (int) $takenDays);
+        $remainingAfterRequest = max(0, (int) $remainingAfterRequest);
+
+        if ($remainingBeforeRequest === 0) {
+            return '0';
+        }
+
+        if ($takenDays > 0) {
+            return sprintf('Diambil %d hari sisa %d', $takenDays, $remainingAfterRequest);
+        }
+
+        return (string) $remainingBeforeRequest;
     }
 
     protected function resolveCurrentAnnualLeaveBalance($balance, LeaveRequest $leaveRequest = null)

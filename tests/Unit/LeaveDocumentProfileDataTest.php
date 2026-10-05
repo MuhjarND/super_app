@@ -236,4 +236,54 @@ class LeaveDocumentProfileDataTest extends TestCase
         $this->assertSame('Diambil 8 hari sisa 4', $method->invoke($service, 4, 8, 0));
     }
 
+    public function test_annual_leave_buckets_allocate_oldest_carry_forward_first()
+    {
+        $service = new LeaveDocumentService(
+            $this->createMock(DocumentQrCodeService::class),
+            $this->createMock(PdfVerificationService::class)
+        );
+        $method = new ReflectionMethod($service, 'buildAnnualLeaveBuckets');
+        $method->setAccessible(true);
+
+        $balance = new LeaveBalance();
+        $balance->setRawAttributes([
+            'opening_balance' => 0,
+            'entitlement' => 12,
+            'adjustment_plus' => 0,
+            'adjustment_minus' => 0,
+            'used_days' => 0,
+            'reserved_days' => 0,
+        ]);
+
+        $buckets = $method->invoke($service, $balance, [2025 => 4, 2026 => 0], 2026, 9);
+
+        $this->assertSame(4, $buckets[2025]['before']);
+        $this->assertSame(12, $buckets[2026]['before']);
+    }
+
+    public function test_annual_leave_buckets_keep_current_year_balance_when_no_carry_forward_exists()
+    {
+        $service = new LeaveDocumentService(
+            $this->createMock(DocumentQrCodeService::class),
+            $this->createMock(PdfVerificationService::class)
+        );
+        $method = new ReflectionMethod($service, 'buildAnnualLeaveBuckets');
+        $method->setAccessible(true);
+
+        $balance = new LeaveBalance();
+        $balance->setRawAttributes([
+            'opening_balance' => 0,
+            'entitlement' => 7,
+            'adjustment_plus' => 0,
+            'adjustment_minus' => 0,
+            'used_days' => 0,
+            'reserved_days' => 0,
+        ]);
+
+        $buckets = $method->invoke($service, $balance, [], 2026, 2);
+
+        $this->assertSame(0, $buckets[2025]['before']);
+        $this->assertSame(7, $buckets[2026]['before']);
+    }
+
 }
