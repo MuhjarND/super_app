@@ -212,4 +212,28 @@ class LeaveDocumentProfileDataTest extends TestCase
         $this->assertSame(22, $method->invoke($service, $balance, $request, 2026, 19));
     }
 
+    public function test_historical_annual_leave_note_is_zero_when_balance_is_exhausted()
+    {
+        $service = new LeaveDocumentService(
+            $this->createMock(DocumentQrCodeService::class),
+            $this->createMock(PdfVerificationService::class)
+        );
+        $method = new ReflectionMethod($service, 'buildHistoricalAnnualLeaveNote');
+        $method->setAccessible(true);
+
+        $this->assertSame('0', $method->invoke($service, 0, 12, 0));
+    }
+
+    public function test_historical_annual_leave_note_matches_usage_and_remaining_balance()
+    {
+        $service = new LeaveDocumentService(
+            $this->createMock(DocumentQrCodeService::class),
+            $this->createMock(PdfVerificationService::class)
+        );
+        $method = new ReflectionMethod($service, 'buildHistoricalAnnualLeaveNote');
+        $method->setAccessible(true);
+
+        $this->assertSame('Diambil 8 hari sisa 4', $method->invoke($service, 4, 8, 0));
+    }
+
 }

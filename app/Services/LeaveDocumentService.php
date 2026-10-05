@@ -428,25 +428,48 @@ class LeaveDocumentService
             $balance = $tahunan
                 ? LeaveBalance::where('user_id', $leaveRequest->user_id)->where('leave_type_id', $tahunan->id)->where('year', $year)->first()
                 : null;
-            $remainingAfterRequest = $this->resolveCurrentAnnualLeaveBalance($balance, $leaveRequest);
             $carryForwardRemaining = (int) ($carryForwardByYear[$year] ?? $carryForwardByYear[(string) $year] ?? 0);
             $hasCarryForward = $year !== $currentYear && $carryForwardRemaining > 0;
-            if ($hasCarryForward) {
-                // Nilai carry-forward adalah saldo yang masih tersisa dari
-                // tahun tersebut pada awal tahun berjalan.
-                $remainingAfterRequest = $carryForwardRemaining;
+
+            if ($year < $currentYear) {
+                // Baris tahun sebelumnya harus menunjukkan saldo tahun itu,
+                // bukan saldo gabungan tahun berjalan. Jika carry-forward
+                // tersedia, nilainya menjadi sumber utama; bila tidak,
+                // gunakan saldo historis yang tersimpan pada tahun tersebut.
+                $historicalRemaining = $balance && (int) $balance->remaining_balance <= 0
+                    ? 0
+                    : ($hasCarryForward
+                        ? $carryForwardRemaining
+                        : $this->resolveCurrentAnnualLeaveBalance($balance, $leaveRequest));
+                $usage = $this->resolveHistoricalAnnualLeaveUsage(
+                    $leaveRequest,
+                    $year,
+                    $balance,
+                    $tahunan ? $tahunan->id : $leaveRequest->leave_type_id
+                );
+                $note = $this->buildHistoricalAnnualLeaveNote(
+                    $historicalRemaining,
+                    $usage['used'],
+                    $usage['reserved']
+                );
+
+                $rows[] = [
+                    'year' => $year,
+                    'remaining' => $historicalRemaining,
+                    'used' => $usage['used'],
+                    'note' => $note,
+                ];
+
+                continue;
             }
 
+            $remainingAfterRequest = $this->resolveCurrentAnnualLeaveBalance($balance, $leaveRequest);
             $remainingBeforeRequest = $this->resolveAnnualLeaveBalanceBeforeRequest(
                 $balance,
                 $leaveRequest,
                 $year,
                 $remainingAfterRequest
             );
-            $note = $this->buildAnnualLeaveNote($balance, $leaveRequest, $year, $remainingAfterRequest);
-            if ($hasCarryForward && !$balance) {
-                $note = (string) $carryForwardRemaining;
-            }
 
             $rows[] = [
                 'year' => $year,
@@ -454,7 +477,7 @@ class LeaveDocumentService
                 // pengajuan/pemakaian cuti tahun berjalan.
                 'remaining' => $remainingBeforeRequest,
                 'used' => $balance ? $balance->used_days : 0,
-                'note' => $note,
+                'note' => $this->buildAnnualLeaveNote($balance, $leaveRequest, $year, $remainingAfterRequest),
             ];
         }
 
@@ -497,6 +520,56 @@ class LeaveDocumentService
         }
 
         return $remainingAfterRequest + $leaveRequest->balanceDaysForCurrentStatus();
+    }
+
+    protected function resolveHistoricalAnnualLeaveUsage(LeaveRequest $leaveRequest, $year, $balance = null, $leaveTypeId = null)
+    {
+        $used = $balance ? max(0, (int) $balance->used_days) : 0;
+        $reserved = $balance ? max(0, (int) $balance->reserved_days) : 0;
+
+        // Rekap lama bisa belum memiliki leave_balances. Ambil pemakaian dari
+        // pengajuan tahun tersebut agar keterangan tetap informatif.
+        if (!$balance || ($used === 0 && $reserved === 0)) {
+            $requests = LeaveRequest::where('user_id', $leaveRequest->user_id)
+                ->where('leave_type_id', $leaveTypeId ?: $leaveRequest->leave_type_id)
+                ->whereYear('start_date', $year)
+                ->whereNotIn('status', [
+                    LeaveRequest::STATUS_DRAFT,
+                    LeaveRequest::STATUS_REJECTED,
+                    LeaveRequest::STATUS_CHANGED,
+                    LeaveRequest::STATUS_DEFERRED,
+                    LeaveRequest::STATUS_CANCELLED,
+                ])
+                ->get();
+
+            if ($requests->isNotEmpty()) {
+                $used = (int) $requests->sum(function (LeaveRequest $request) {
+                    return $request->balanceDaysForCurrentStatus();
+                });
+            }
+        }
+
+        return ['used' => $used, 'reserved' => $reserved];
+    }
+
+    protected function buildHistoricalAnnualLeaveNote($remaining, $used, $reserved = 0)
+    {
+        $remaining = max(0, (int) $remaining);
+        if ($remaining === 0) {
+            return '0';
+        }
+
+        $used = max(0, (int) $used);
+        if ($used > 0) {
+            return sprintf('Diambil %d hari sisa %d', $used, $remaining);
+        }
+
+        $reserved = max(0, (int) $reserved);
+        if ($reserved > 0) {
+            return sprintf('Diambil %d hari sisa %d', $reserved, $remaining);
+        }
+
+        return (string) $remaining;
     }
 
     protected function buildParaf($approval = null)
