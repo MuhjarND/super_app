@@ -53,7 +53,7 @@ class AgendaPimpinan extends Model
 
     public function scopeVisibleTo($query, User $user)
     {
-        if ($user->canManageAgendaPimpinanParticipants()) {
+        if ($user->isPimpinan() || $user->canManageAgendaPimpinanParticipants()) {
             return $query;
         }
 

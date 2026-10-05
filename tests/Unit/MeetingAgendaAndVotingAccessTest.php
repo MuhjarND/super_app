@@ -3,6 +3,7 @@
 namespace Tests\Unit;
 
 use App\AgendaPimpinan;
+use App\Jabatan;
 use App\Role;
 use App\User;
 use App\VirtualMeeting;
@@ -26,6 +27,20 @@ class MeetingAgendaAndVotingAccessTest extends TestCase
         $user->setRelation('agendaPimpinans', collect());
 
         $this->assertFalse($user->canAccessAgendaPimpinan());
+    }
+
+    public function test_pimpinan_can_access_the_full_agenda_without_management_permissions()
+    {
+        $user = $this->userWithRole('pegawai');
+        $jabatan = new Jabatan();
+        $jabatan->forceFill(['kode' => 'KPTA', 'nama' => 'Ketua']);
+        $user->setRelation('jabatan', $jabatan);
+        $user->setRelation('agendaPimpinans', collect());
+
+        $this->assertTrue($user->isPimpinan());
+        $this->assertTrue($user->canAccessAgendaPimpinan());
+        $this->assertFalse($user->canManageAgendaPimpinanDetails());
+        $this->assertFalse($user->canManageAgendaPimpinanParticipants());
     }
 
     public function test_tagged_user_can_access_virtual_meeting_without_management_permissions()

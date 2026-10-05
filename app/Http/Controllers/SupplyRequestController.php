@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Services\SignaturePadService;
+use App\Services\SupplyRequestDocumentService;
 use App\Services\WhatsAppNotificationService;
 use App\SupplyItem;
 use App\SupplyPickup;
@@ -53,6 +54,60 @@ class SupplyRequestController extends Controller
         $requests = $query->paginate(15);
 
         return view('persediaan.supplies.requests.index', compact('requests', 'canManage'));
+    }
+
+    public function report(Request $request)
+    {
+        abort_unless(auth()->user()->canPrintSupplyRequestForms(), 403);
+
+        if (!$this->moduleReady()) {
+            return response()->view('persediaan.supplies.setup');
+        }
+
+        $canManage = auth()->user()->canPrintSupplyRequestForms();
+        $filters = $this->reportFilters($request, $canManage);
+        $requests = $this->filteredReportQuery($filters, $canManage)->paginate(20);
+        $users = $canManage
+            ? User::whereIn('id', SupplyRequest::query()->select('user_id')->distinct())
+                ->orderBy('name')
+                ->get(['id', 'name', 'nip'])
+            : collect([auth()->user()]);
+
+        return view('persediaan.supplies.requests.report', compact('requests', 'users', 'canManage', 'filters'));
+    }
+
+    public function reportPdf(Request $request, SupplyRequestDocumentService $documents)
+    {
+        abort_unless(auth()->user()->canPrintSupplyRequestForms(), 403);
+
+        if (!$this->moduleReady()) {
+            abort(503, 'Modul persediaan belum siap.');
+        }
+
+        $canManage = auth()->user()->canPrintSupplyRequestForms();
+        $filters = $this->reportFilters($request, $canManage);
+        $requests = $this->filteredReportQuery($filters, $canManage)->get();
+
+        if ($requests->isEmpty()) {
+            return redirect()
+                ->route('persediaan.requests.report', $request->query())
+                ->with('warning', 'Tidak ada pengajuan persediaan pada filter yang dipilih.');
+        }
+
+        return $documents->makePdf($requests)->download(
+            $documents->filename(null, $filters['month'], $filters['user_id'])
+        );
+    }
+
+    public function print(SupplyRequestDocumentService $documents, SupplyRequest $supplyRequest)
+    {
+        abort_unless(auth()->user()->canPrintSupplyRequestForms(), 403);
+
+        $supplyRequest->load(['requester', 'items']);
+
+        return $documents->makePdf($supplyRequest)->download(
+            $documents->filename($supplyRequest)
+        );
     }
 
     public function create(Request $request)
@@ -367,6 +422,47 @@ class SupplyRequestController extends Controller
         }
 
         abort_unless((int) $supplyRequest->user_id === (int) auth()->id(), 403);
+    }
+
+    protected function reportFilters(Request $request, $canManage)
+    {
+        $validated = $request->validate([
+            'month' => ['nullable', 'date_format:Y-m'],
+            'user_id' => ['nullable', 'integer', 'exists:users,id'],
+        ]);
+
+        return [
+            'month' => $validated['month'] ?? null,
+            'user_id' => $canManage ? ($validated['user_id'] ?? null) : auth()->id(),
+        ];
+    }
+
+    protected function filteredReportQuery(array $filters, $canManage)
+    {
+        $query = SupplyRequest::with(['requester', 'items'])
+            ->orderByRaw('COALESCE(submitted_at, created_at)')
+            ->orderBy('id');
+
+        if (!$canManage) {
+            $query->where('user_id', auth()->id());
+        } elseif (!empty($filters['user_id'])) {
+            $query->where('user_id', $filters['user_id']);
+        }
+
+        if (!empty($filters['month'])) {
+            $period = Carbon::createFromFormat('!Y-m', $filters['month'], 'Asia/Jayapura');
+            $from = $period->copy()->startOfMonth();
+            $to = $period->copy()->endOfMonth();
+            $query->where(function ($builder) use ($from, $to) {
+                $builder->whereBetween('submitted_at', [$from, $to])
+                    ->orWhere(function ($fallback) use ($from, $to) {
+                        $fallback->whereNull('submitted_at')
+                            ->whereBetween('created_at', [$from, $to]);
+                    });
+            });
+        }
+
+        return $query;
     }
 
     protected function moduleReady()

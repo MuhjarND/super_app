@@ -13,6 +13,9 @@
     <h1 class="inventory-module-title mb-0">{{ $canManage ? 'Pengajuan Persediaan' : 'Pengajuan Saya' }}</h1>
     <div class="supply-action-row">
         <a href="{{ route('persediaan.requests.create') }}" class="btn btn-sm app-create-btn"><i class="fas fa-shopping-cart mr-1"></i> Ajukan</a>
+        @if(auth()->user()->canPrintSupplyRequestForms())
+            <a href="{{ route('persediaan.requests.report') }}" class="btn btn-sm btn-outline-primary"><i class="fas fa-print mr-1"></i> Cetak Formulir</a>
+        @endif
         <a href="{{ route('persediaan.pickups.index') }}" class="btn btn-sm btn-outline-primary"><i class="fas fa-box-open mr-1"></i> Pengambilan</a>
         <a href="{{ route('persediaan.requests.create') }}" class="btn btn-sm btn-outline-secondary"><i class="fas fa-arrow-left mr-1"></i> Kembali</a>
     </div>
@@ -58,6 +61,9 @@
                             <td data-label="Aksi">
                                 <div class="app-action-group">
                                     <a href="{{ route('persediaan.requests.show', $request) }}" class="app-icon-btn detail" data-mobile-label="Detail" title="Detail"><i class="fas fa-eye"></i></a>
+                                    @if(auth()->user()->canPrintSupplyRequestForms())
+                                        <a href="{{ route('persediaan.requests.print', $request) }}" class="app-icon-btn detail" data-mobile-label="Cetak" title="Cetak formulir"><i class="fas fa-print"></i></a>
+                                    @endif
                                     @if(!$canManage && $request->status === \App\SupplyRequest::STATUS_PENDING)
                                         <form method="POST" action="{{ route('persediaan.requests.cancel', $request) }}" onsubmit="return confirm('Batalkan pengajuan ini?')" class="mb-0">
                                             @csrf

@@ -411,18 +411,50 @@ class LeaveDocumentService
         $years = [$currentYear - 2, $currentYear - 1, $currentYear];
         $rows = [];
 
+        // Rekap tahun berjalan menyimpan sisa dari dua tahun sebelumnya.
+        // Gunakan rekap ini agar tahun carry-forward tetap tampil walaupun
+        // belum ada baris leave_balances tersendiri untuk tahun tersebut.
+        $currentBalance = $tahunan
+            ? LeaveBalance::where('user_id', $leaveRequest->user_id)
+                ->where('leave_type_id', $tahunan->id)
+                ->where('year', $currentYear)
+                ->first()
+            : null;
+        $carryForwardByYear = $currentBalance
+            ? app(LeaveBalanceService::class)->annualCarryForwardBreakdown($currentBalance->toArray(), $currentYear)
+            : [];
+
         foreach ($years as $year) {
             $balance = $tahunan
                 ? LeaveBalance::where('user_id', $leaveRequest->user_id)->where('leave_type_id', $tahunan->id)->where('year', $year)->first()
                 : null;
             $remainingAfterRequest = $this->resolveCurrentAnnualLeaveBalance($balance, $leaveRequest);
+            $carryForwardRemaining = (int) ($carryForwardByYear[$year] ?? $carryForwardByYear[(string) $year] ?? 0);
+            $hasCarryForward = $year !== $currentYear && $carryForwardRemaining > 0;
+            if ($hasCarryForward) {
+                // Nilai carry-forward adalah saldo yang masih tersisa dari
+                // tahun tersebut pada awal tahun berjalan.
+                $remainingAfterRequest = $carryForwardRemaining;
+            }
+
+            $remainingBeforeRequest = $this->resolveAnnualLeaveBalanceBeforeRequest(
+                $balance,
+                $leaveRequest,
+                $year,
+                $remainingAfterRequest
+            );
+            $note = $this->buildAnnualLeaveNote($balance, $leaveRequest, $year, $remainingAfterRequest);
+            if ($hasCarryForward && !$balance) {
+                $note = (string) $carryForwardRemaining;
+            }
+
             $rows[] = [
                 'year' => $year,
-                // Kolom SISA pada formulir menunjukkan saldo setelah
-                // pengajuan/pemakaian cuti, bukan saldo sebelum pengajuan.
-                'remaining' => $remainingAfterRequest,
+                // Kolom SISA pada formulir menunjukkan saldo sebelum
+                // pengajuan/pemakaian cuti tahun berjalan.
+                'remaining' => $remainingBeforeRequest,
                 'used' => $balance ? $balance->used_days : 0,
-                'note' => $this->buildAnnualLeaveNote($balance, $leaveRequest, $year, $remainingAfterRequest),
+                'note' => $note,
             ];
         }
 
@@ -441,6 +473,30 @@ class LeaveDocumentService
         // pengajuan pertama kali dikirim dapat menjadi usang setelah tanggal,
         // cuti bersama, atau rekap saldo diperbarui.
         return max(0, (int) $balance->remaining_balance);
+    }
+
+    protected function resolveAnnualLeaveBalanceBeforeRequest($balance, LeaveRequest $leaveRequest, $year, $remainingAfterRequest)
+    {
+        $remainingAfterRequest = max(0, (int) $remainingAfterRequest);
+        if (!$balance) {
+            return $remainingAfterRequest;
+        }
+
+        $isCurrentAnnualRequest = (int) $leaveRequest->leave_type_id === (int) $balance->leave_type_id
+            && (int) $year === (int) optional($leaveRequest->start_date)->year;
+        $balanceDeductedStatuses = [
+            LeaveRequest::STATUS_SUBMITTED,
+            LeaveRequest::STATUS_UNDER_REVIEW,
+            LeaveRequest::STATUS_VERIFIED,
+            LeaveRequest::STATUS_APPROVED,
+            LeaveRequest::STATUS_COMPLETED,
+        ];
+
+        if (!$isCurrentAnnualRequest || !in_array($leaveRequest->status, $balanceDeductedStatuses, true)) {
+            return $remainingAfterRequest;
+        }
+
+        return $remainingAfterRequest + $leaveRequest->balanceDaysForCurrentStatus();
     }
 
     protected function buildParaf($approval = null)

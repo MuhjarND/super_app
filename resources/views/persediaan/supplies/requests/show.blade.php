@@ -55,6 +55,9 @@
     </div>
     <div class="supply-action-row">
         <a href="{{ route('persediaan.requests.index') }}" class="btn btn-sm btn-outline-secondary"><i class="fas fa-arrow-left mr-1"></i> Kembali</a>
+        @if(auth()->user()->canPrintSupplyRequestForms())
+            <a href="{{ route('persediaan.requests.print', $supplyRequest) }}" class="btn btn-sm btn-outline-primary"><i class="fas fa-print mr-1"></i> Cetak Formulir</a>
+        @endif
         @if($canManage && $supplyRequest->status === \App\SupplyRequest::STATUS_PENDING)
             <button type="button" class="btn btn-sm app-create-btn" data-toggle="modal" data-target="#fulfillSupplyRequestModal">
                 <i class="fas fa-box-open mr-1"></i> Serahkan

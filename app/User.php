@@ -556,7 +556,8 @@ class User extends Authenticatable
 
     public function canAccessAgendaPimpinan()
     {
-        return $this->canManageAgendaPimpinanParticipants()
+        return $this->isPimpinan()
+            || $this->canManageAgendaPimpinanParticipants()
             || $this->hasTaggedAgendaPimpinan();
     }
 
@@ -948,6 +949,13 @@ class User extends Authenticatable
         }
 
         return $this->hasRole('operator_persediaan');
+    }
+
+    /** Only the supply operator or an active Kasubag TURT may print request forms. */
+    public function canPrintSupplyRequestForms()
+    {
+        return $this->hasRole('operator_persediaan')
+            || $this->hasJabatanKode('KASUBAG_TURT');
     }
 
     /**

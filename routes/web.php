@@ -75,7 +75,10 @@ Route::middleware(['auth'])->group(function () {
         Route::put('/barang/{supplyItem}', 'SupplyItemController@update')->name('items.update');
         Route::get('/pengajuan', 'SupplyRequestController@index')->name('requests.index');
         Route::get('/pengajuan/create', 'SupplyRequestController@create')->name('requests.create');
+        Route::get('/pengajuan/laporan', 'SupplyRequestController@report')->name('requests.report');
+        Route::get('/pengajuan/laporan/pdf', 'SupplyRequestController@reportPdf')->name('requests.report.pdf');
         Route::post('/pengajuan', 'SupplyRequestController@store')->name('requests.store');
+        Route::get('/pengajuan/{supplyRequest}/cetak', 'SupplyRequestController@print')->name('requests.print');
         Route::get('/pengajuan/{supplyRequest}', 'SupplyRequestController@show')->name('requests.show');
         Route::post('/pengajuan/{supplyRequest}/fulfill', 'SupplyRequestController@fulfill')->name('requests.fulfill');
         Route::post('/pengajuan/{supplyRequest}/reject', 'SupplyRequestController@reject')->name('requests.reject');

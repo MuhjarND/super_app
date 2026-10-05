@@ -68,6 +68,20 @@ class InventoryPermissionTest extends TestCase
         $this->assertTrue($user->canPrintSupplyOpname());
     }
 
+    public function test_only_supply_operator_and_turt_can_print_request_forms()
+    {
+        $this->assertTrue($this->userWithPosition('KASUBAG_TURT')->canPrintSupplyRequestForms());
+        foreach (['KASUBAG_LAPKEU', 'KASUBAG_KEPEG', 'SEK', 'KPTA'] as $code) {
+            $this->assertFalse($this->userWithPosition($code)->canPrintSupplyRequestForms());
+        }
+
+        foreach (['operator_persediaan' => true, 'pegawai' => false, 'super_admin' => false, 'admin' => false] as $role => $expected) {
+            $user = $this->userWithPosition('STAF');
+            $user->setRelation('roles', collect([$this->role($role)]));
+            $this->assertSame($expected, $user->canPrintSupplyRequestForms());
+        }
+    }
+
     public function positionProvider()
     {
         return [
