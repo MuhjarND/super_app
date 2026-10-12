@@ -1214,7 +1214,7 @@
                     <a href="{{ route('mobile.menu.show', 'master-data') }}" class="mobile-app-tile">
                         @if($mobileBadge('master-data') > 0)<span class="mobile-app-badge">{{ $mobileBadge('master-data') > 99 ? '99+' : $mobileBadge('master-data') }}</span>@endif
                         <span class="mobile-app-icon master"><i class="fas fa-database"></i></span>
-                        <span class="mobile-app-title">{{ $mobileModuleLabel('master_data', 'Master Data') }}</span>
+                        <span class="mobile-app-title">{{ $mobileModuleLabel('master_data', 'Administrasi Pengguna') }}</span>
                     </a>
                 @endif
             </div>

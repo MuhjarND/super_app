@@ -38,6 +38,12 @@ class TwoFactorChallengeController extends Controller
         $remember = (bool) $request->session()->pull('auth.2fa:remember', false);
         $user = User::find($userId);
 
+        if ($user && !$user->canLogin()) {
+            $request->session()->forget(['auth.2fa:user_id', 'auth.2fa:remember']);
+            return redirect()->route('login')
+                ->withErrors(['login' => User::INACTIVE_ACCOUNT_MESSAGE]);
+        }
+
         if (!$user || !$user->hasTwoFactorEnabled()) {
             $request->session()->forget('auth.2fa:user_id');
             return redirect()->route('login');

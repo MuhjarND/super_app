@@ -7,7 +7,6 @@ use App\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Schema;
 
 class AutoLoginController extends Controller
 {
@@ -85,11 +84,7 @@ class AutoLoginController extends Controller
             return null;
         }
 
-        if (Schema::hasColumn('users', 'status_aktif_pegawai') && (int) $user->status_aktif_pegawai !== 1) {
-            return null;
-        }
-
-        if (Schema::hasColumn('users', 'is_active') && isset($user->is_active) && (int) $user->is_active !== 1) {
+        if (!$user->canLogin()) {
             return null;
         }
 

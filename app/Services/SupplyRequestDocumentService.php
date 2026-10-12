@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\SupplyRequest;
 use Barryvdh\DomPDF\Facade as PDF;
+use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Support\Collection;
 
 class SupplyRequestDocumentService
@@ -14,10 +15,35 @@ class SupplyRequestDocumentService
             ? $requests->values()
             : collect([$requests]);
 
+        // Load the saved handover signatures for both individual and batch
+        // printing, including requests created before PDF printing existed.
+        $requests = new EloquentCollection($requests->all());
+        $requests->loadMissing(['requester', 'items', 'pickups']);
+        $requestSignatures = $requests->map(function (SupplyRequest $request) {
+            return $this->resolveRequestSignatures($request);
+        })->all();
+
         return PDF::loadView('persediaan.supplies.requests.pdf', [
             'requests' => $requests,
             'kopImage' => $this->resolveKopImage(),
+            'requestSignatures' => $requestSignatures,
         ])->setPaper('a4', 'portrait');
+    }
+
+    protected function resolveRequestSignatures(SupplyRequest $request)
+    {
+        // One signature is stored on every item in the same handover. Print
+        // it only once, without substituting the user's profile signature.
+        return $request->pickups->sortBy('id')
+            ->pluck('receiver_signature_path')
+            ->filter()
+            ->unique()
+            ->map(function ($path) {
+                return app(SignaturePadService::class)->toDataUri($path);
+            })
+            ->filter()
+            ->values()
+            ->all();
     }
 
     public function filename(SupplyRequest $request = null, $month = null, $userId = null)

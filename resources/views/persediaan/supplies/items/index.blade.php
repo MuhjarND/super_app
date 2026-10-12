@@ -58,8 +58,8 @@
                             </td>
                             <td data-label="Satuan">{{ $item->unit }}</td>
                             <td data-label="Stok">
-                                <span class="supply-stock-pill {{ ($item->is_empty_stock || $item->is_low_stock) ? 'low' : '' }}">{{ $item->stock_label }}</span>
-                                @if($item->stock_status_label)<span class="supply-stock-status">{{ $item->stock_status_label }}</span>@endif
+                                <span class="supply-stock-pill {{ ($item->stock <= 0 || $item->is_low_stock) ? 'low' : '' }}">{{ $item->stock_label }}</span>
+                                @if($item->stock_status_label)<span class="supply-stock-status {{ $item->stock_status_label === 'Tersedia' ? 'text-success' : '' }}">{{ $item->stock_status_label }}</span>@endif
                             </td>
                             <td data-label="Stok Satuan">
                                 @if($item->has_unit_stock)

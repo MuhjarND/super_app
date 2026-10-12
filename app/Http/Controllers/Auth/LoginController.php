@@ -79,8 +79,27 @@ class LoginController extends Controller
         ];
     }
 
+    protected function attemptLogin(Request $request)
+    {
+        $credentials = $this->credentials($request);
+        $user = $this->guard()->getProvider()->retrieveByCredentials($credentials);
+        if ($user && !$user->canLogin()) {
+            return false;
+        }
+
+        return $this->guard()->attempt($credentials, $request->filled('remember'));
+    }
+
     protected function authenticated(Request $request, $user)
     {
+        if (!$user->canLogin()) {
+            Auth::logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+            return redirect()->route('login')
+                ->withErrors(['login' => \App\User::INACTIVE_ACCOUNT_MESSAGE]);
+        }
+
         if ($user->hasTwoFactorEnabled()) {
             $remember = (bool) $request->boolean('remember');
 

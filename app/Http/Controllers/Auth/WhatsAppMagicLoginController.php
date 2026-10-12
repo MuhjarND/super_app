@@ -46,6 +46,11 @@ class WhatsAppMagicLoginController extends Controller
                 ->withErrors(['magic_link' => 'Tautan WhatsApp tidak valid atau telah kedaluwarsa.']);
         }
 
+        if (!$user->canLogin()) {
+            return redirect()->route('login')
+                ->withErrors(['magic_link' => User::INACTIVE_ACCOUNT_MESSAGE]);
+        }
+
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();

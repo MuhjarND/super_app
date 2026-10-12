@@ -7,6 +7,8 @@ use Illuminate\Notifications\Notifiable;
 
 class User extends Authenticatable
 {
+    public const INACTIVE_ACCOUNT_MESSAGE = 'Akun Anda sudah nonaktif. Silakan hubungi administrator.';
+
     protected $effectiveJabatansCache = null;
     protected $effectiveAssignmentUserIdsCache = null;
     protected $suratMasukAssignmentUserIdsCache = null;
@@ -227,6 +229,14 @@ class User extends Authenticatable
     public function scopeActive($query)
     {
         return $query->where('status_aktif_pegawai', true);
+    }
+
+    public function canLogin()
+    {
+        // Legacy installations may not yet have the employee status column.
+        // When present, both status flags must explicitly permit login.
+        return (!array_key_exists('status_aktif_pegawai', $this->attributes) || (bool) $this->status_aktif_pegawai)
+            && (!array_key_exists('is_active', $this->attributes) || (int) $this->is_active === 1);
     }
 
     public function hasRole($role)

@@ -3499,6 +3499,15 @@
                                             </a>
                                         </li>
                                     @endif
+                                    @if($isSidebarSuperAdmin)
+                                        <li class="nav-item nav-item-sub">
+                                            <a href="{{ route('admin.kategori-surats.index') }}"
+                                                class="nav-link {{ request()->routeIs('admin.kategori-surats.*') ? 'active' : '' }}">
+                                                <i class="nav-icon far fa-folder"></i>
+                                                <p>Kategori Surat</p>
+                                            </a>
+                                        </li>
+                                    @endif
                                 </ul>
                             </li>
                         @endif
@@ -3598,6 +3607,22 @@
                                             </a>
                                         </li>
                                     @endif
+                                    @if($isSidebarSuperAdmin)
+                                        <li class="nav-item nav-item-sub">
+                                            <a href="{{ route('admin.kategori-rapats.index') }}"
+                                                class="nav-link {{ request()->routeIs('admin.kategori-rapats.*') ? 'active' : '' }}">
+                                                <i class="nav-icon far fa-comments"></i>
+                                                <p>Kategori Rapat</p>
+                                            </a>
+                                        </li>
+                                        <li class="nav-item nav-item-sub">
+                                            <a href="{{ route('admin.dasar-hukums.index') }}"
+                                                class="nav-link {{ request()->routeIs('admin.dasar-hukums.*') ? 'active' : '' }}">
+                                                <i class="nav-icon fas fa-balance-scale"></i>
+                                                <p>Dasar Hukum</p>
+                                            </a>
+                                        </li>
+                                    @endif
                                 </ul>
                             </li>
                         @endif
@@ -3657,6 +3682,27 @@
                                     </li>
                                     @endif
                                     @if($isSidebarSuperAdmin || $sidebarUser->canManageLeaveMasterData())
+                                        <li class="nav-item nav-item-sub">
+                                            <a href="{{ route('cuti.master.types.index') }}"
+                                                class="nav-link {{ request()->routeIs('cuti.master.types.*') ? 'active' : '' }}">
+                                                <i class="nav-icon far fa-list-alt"></i>
+                                                <p>Jenis Cuti</p>
+                                            </a>
+                                        </li>
+                                        <li class="nav-item nav-item-sub">
+                                            <a href="{{ route('cuti.master.policies.index') }}"
+                                                class="nav-link {{ request()->routeIs('cuti.master.policies.*') ? 'active' : '' }}">
+                                                <i class="nav-icon fas fa-sliders-h"></i>
+                                                <p>Kebijakan Cuti</p>
+                                            </a>
+                                        </li>
+                                        <li class="nav-item nav-item-sub">
+                                            <a href="{{ route('cuti.master.delegations.index') }}"
+                                                class="nav-link {{ request()->routeIs('cuti.master.delegations.*') ? 'active' : '' }}">
+                                                <i class="nav-icon fas fa-people-arrows"></i>
+                                                <p>Delegasi Approval</p>
+                                            </a>
+                                        </li>
                                         <li class="nav-item nav-item-sub">
                                             <a href="{{ route('cuti.master.holidays.index') }}"
                                                 class="nav-link {{ request()->routeIs('cuti.master.holidays.*') ? 'active' : '' }}">
@@ -3918,6 +3964,22 @@
                                             <p>Pedoman ZI</p>
                                         </a>
                                     </li>
+                                    @if($isSidebarSuperAdmin || $sidebarUser->canManageProgressZiMasterData())
+                                        <li class="nav-item nav-item-sub">
+                                            <a href="{{ route('progress-zi.periods.index') }}"
+                                                class="nav-link {{ request()->routeIs('progress-zi.periods.*') ? 'active' : '' }}">
+                                                <i class="nav-icon far fa-calendar-alt"></i>
+                                                <p>Periode ZI</p>
+                                            </a>
+                                        </li>
+                                        <li class="nav-item nav-item-sub">
+                                            <a href="{{ route('progress-zi.areas.index') }}"
+                                                class="nav-link {{ request()->routeIs('progress-zi.areas.*') ? 'active' : '' }}">
+                                                <i class="nav-icon fas fa-layer-group"></i>
+                                                <p>Area ZI</p>
+                                            </a>
+                                        </li>
+                                    @endif
                                 </ul>
                             </li>
                         @endif
@@ -3925,7 +3987,7 @@
                         @if($showDesktopModule('master_data') && $isSidebarSuperAdmin)
                             <li class="nav-section " data-section="master-data">
                                 <button type="button" class="nav-section-toggle">
-                                    <span>{{ $moduleMenuLabel('master_data', 'Master Data') }}</span>
+                                    <span>{{ $moduleMenuLabel('master_data', 'Administrasi Pengguna') }}</span>
                                     <i class="fas fa-chevron-down section-chevron"></i>
                                 </button>
                                 <ul class="nav nav-pills flex-column nav-section-menu">
@@ -3950,64 +4012,6 @@
                                             <p>Unit Kerja</p>
                                         </a>
                                     </li>
-                                    <li class="nav-item nav-item-sub">
-                                        <a href="{{ route('admin.kategori-surats.index') }}"
-                                            class="nav-link {{ request()->routeIs('admin.kategori-surats.*') ? 'active' : '' }}">
-                                            <i class="nav-icon far fa-folder"></i>
-                                            <p>Kategori Surat</p>
-                                        </a>
-                                    </li>
-                                    <li class="nav-item nav-item-sub">
-                                        <a href="{{ route('admin.kategori-rapats.index') }}"
-                                            class="nav-link {{ request()->routeIs('admin.kategori-rapats.*') ? 'active' : '' }}">
-                                            <i class="nav-icon far fa-comments"></i>
-                                            <p>Kategori Rapat</p>
-                                        </a>
-                                    </li>
-                                    <li class="nav-item nav-item-sub">
-                                        <a href="{{ route('admin.dasar-hukums.index') }}"
-                                            class="nav-link {{ request()->routeIs('admin.dasar-hukums.*') ? 'active' : '' }}">
-                                            <i class="nav-icon fas fa-balance-scale"></i>
-                                            <p>Dasar Hukum</p>
-                                        </a>
-                                    </li>
-                                    <li class="nav-item nav-item-sub">
-                                        <a href="{{ route('cuti.master.types.index') }}"
-                                            class="nav-link {{ request()->routeIs('cuti.master.types.*') ? 'active' : '' }}">
-                                            <i class="nav-icon far fa-list-alt"></i>
-                                            <p>Jenis Cuti</p>
-                                        </a>
-                                    </li>
-                                    <li class="nav-item nav-item-sub">
-                                        <a href="{{ route('cuti.master.policies.index') }}"
-                                            class="nav-link {{ request()->routeIs('cuti.master.policies.*') ? 'active' : '' }}">
-                                            <i class="nav-icon fas fa-sliders-h"></i>
-                                            <p>Kebijakan Cuti</p>
-                                        </a>
-                                    </li>
-                                    <li class="nav-item nav-item-sub">
-                                        <a href="{{ route('cuti.master.delegations.index') }}"
-                                            class="nav-link {{ request()->routeIs('cuti.master.delegations.*') ? 'active' : '' }}">
-                                            <i class="nav-icon fas fa-people-arrows"></i>
-                                            <p>Delegasi Approval</p>
-                                        </a>
-                                    </li>
-                                    @if($isSidebarSuperAdmin || $sidebarUser->canManageProgressZiMasterData())
-                                        <li class="nav-item nav-item-sub">
-                                            <a href="{{ route('progress-zi.periods.index') }}"
-                                                class="nav-link {{ request()->routeIs('progress-zi.periods.*') ? 'active' : '' }}">
-                                                <i class="nav-icon far fa-calendar-alt"></i>
-                                                <p>Periode ZI</p>
-                                            </a>
-                                        </li>
-                                        <li class="nav-item nav-item-sub">
-                                            <a href="{{ route('progress-zi.areas.index') }}"
-                                                class="nav-link {{ request()->routeIs('progress-zi.areas.*') ? 'active' : '' }}">
-                                                <i class="nav-icon fas fa-layer-group"></i>
-                                                <p>Area ZI</p>
-                                            </a>
-                                        </li>
-                                    @endif
                                 </ul>
                             </li>
                         @endif

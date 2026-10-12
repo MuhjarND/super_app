@@ -74,8 +74,8 @@
                                             <div class="supply-item-meta">{{ $item->code ?: '-' }}</div>
                                         </div>
                                         <div class="supply-stock-summary">
-                                            <span class="supply-stock-pill {{ ($item->is_empty_stock || $item->is_low_stock) ? 'low' : '' }}">{{ $item->stock_label }}</span>
-                                            @if($item->stock_status_label)<span class="supply-stock-status">{{ $item->stock_status_label }}</span>@endif
+                                            <span class="supply-stock-pill {{ ($item->stock <= 0 || $item->is_low_stock) ? 'low' : '' }}">{{ $item->stock_label }}</span>
+                                            @if($item->stock_status_label)<span class="supply-stock-status {{ $item->stock_status_label === 'Tersedia' ? 'text-success' : '' }}">{{ $item->stock_status_label }}</span>@endif
                                             @if($item->has_unit_stock)<span class="supply-unit-stock-label">Satuan: {{ $item->unit_stock_label }}</span>@endif
                                         </div>
                                     </div>

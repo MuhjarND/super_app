@@ -61,13 +61,18 @@ class SupplyItem extends Model
 
     public function getIsEmptyStockAttribute()
     {
-        return (int) $this->stock <= 0;
+        return (int) $this->stock <= 0
+            && (!$this->has_unit_stock || (int) $this->unit_stock <= 0);
     }
 
     public function getStockStatusLabelAttribute()
     {
         if ($this->is_empty_stock) {
             return 'Habis';
+        }
+
+        if ((int) $this->stock <= 0) {
+            return 'Tersedia';
         }
 
         return $this->is_low_stock ? 'Hampir habis' : null;

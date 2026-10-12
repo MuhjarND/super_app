@@ -65,9 +65,17 @@
             margin: 24px 0 0 auto;
             text-align: center;
             font-size: 10px;
+            page-break-inside: avoid;
         }
         .signature .place-date { margin-bottom: 3px; }
-        .signature .label { margin-bottom: 33px; }
+        .signature .label { margin-bottom: 3px; }
+        .signature .signature-space { min-height: 55px; }
+        .signature .signature-image {
+            display: inline-block;
+            max-width: 170px;
+            max-height: 55px;
+            vertical-align: middle;
+        }
         .signature .line {
             border-bottom: 1px solid #111827;
             height: 1px;
@@ -84,12 +92,13 @@
             ? $request->items->values()
             : collect($request->items ?: [])->values();
         $rowCount = max(12, $items->count());
+        $signatures = $requestSignatures[$loop->index] ?? [];
         $requestDate = $request->submitted_at ?: $request->created_at;
         $requestDateLabel = $requestDate
             ? \Carbon\Carbon::parse($requestDate)->locale('id')->translatedFormat('d F Y')
             : '-';
     @endphp
-    <section class="sheet">
+    <div class="sheet">
         <img class="kop" src="{{ $kopImage }}" alt="Kop Pengadilan Tinggi Agama Papua Barat">
         <div class="title">FORMULIR PERMINTAAN ALAT TULIS KANTOR (ATK)</div>
         <div class="number">NOMOR : {{ $request->request_number }}</div>
@@ -119,13 +128,18 @@
         <div class="signature">
             <div class="place-date">Manokwari, {{ $requestDateLabel }}</div>
             <div class="label">Pemohon</div>
+            <div class="signature-space">
+                @foreach($signatures as $signature)
+                    <img class="signature-image" src="{{ $signature }}" alt="Tanda tangan penerima barang">
+                @endforeach
+            </div>
             <div class="line"></div>
             <div class="name">{{ optional($request->requester)->name ?: '-' }}</div>
             @if(optional($request->requester)->nip)
                 <div class="nip">NIP. {{ $request->requester->nip }}</div>
             @endif
         </div>
-    </section>
+    </div>
 @endforeach
 </body>
 </html>
