@@ -17,3 +17,7 @@ use Illuminate\Support\Facades\Route;
 Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
+
+Route::post('/chatbot/agenda', 'ChatbotAgendaController@index')
+    ->middleware(\App\Http\Middleware\EnsureChatbotApiKey::class)
+    ->name('chatbot.agenda');
