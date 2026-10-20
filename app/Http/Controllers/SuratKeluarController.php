@@ -123,7 +123,7 @@ class SuratKeluarController extends Controller
         $kodeKegiatan = KlasifikasiKode::where('tipe', 'kegiatan')->get();
         $kodeTransaksi = KlasifikasiKode::where('tipe', 'transaksi')->get();
         $canCreateSuratKeluar = $user->canCreateSuratKeluar();
-        $users = $canCreateSuratKeluar ? User::active()->ordered()->get() : collect();
+        $users = $canCreateSuratKeluar ? User::active()->with(['unit', 'jabatan.unit'])->ordered()->get() : collect();
 
         $kodeFungsiOptions = $kodeFungsi->map(function ($k) {
             return [

@@ -120,15 +120,27 @@
             box-shadow: 0 8px 18px rgba(99, 102, 241, 0.12);
         }
 
+        .recipient-group-toolbar {
+            display: flex;
+            flex-wrap: nowrap;
+            align-items: center;
+            gap: 6px;
+            overflow-x: auto;
+            margin-bottom: 10px;
+            padding-bottom: 4px;
+        }
+
         .recipient-select-all {
             display: flex;
+            flex: 0 0 auto;
             align-items: center;
             gap: 8px;
             width: max-content;
             border: 1px solid #dbe3ef;
             border-radius: 999px;
             padding: 7px 12px;
-            margin: 0 0 10px;
+            margin: 0;
+            white-space: nowrap;
             background: #ffffff;
             color: #475569;
             font-size: 0.82rem;
@@ -138,6 +150,17 @@
 
         .recipient-select-all input {
             accent-color: #5b4df5;
+        }
+
+        .recipient-select-all:has(input:checked) {
+            border-color: #6957f5;
+            background: #f1efff;
+            color: #4f46e5;
+        }
+
+        .recipient-select-all:has(input:disabled) {
+            opacity: .5;
+            cursor: not-allowed;
         }
 
         #createInternalGroup > label:first-child,
@@ -861,18 +884,7 @@
 
                         <div class="form-group" id="createInternalGroup" style="display: none;">
                             <label>Penerima Internal <span class="text-danger">*</span></label>
-                            <label class="recipient-select-all">
-                                <input type="checkbox" id="selectAll"> <span>Pilih Semua</span>
-                            </label>
-                            <select class="form-control select2 surat-recipient-select" name="penerima_internal[]" id="penerimaInternal" multiple>
-                                <?php $__currentLoopData = $users; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $u): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                                    <option value="<?php echo e($u->id); ?>"><?php echo e($u->name); ?>
-
-                                        <?php echo e($u->jabatan ? '(' . $u->jabatan->nama . ')' : ''); ?>
-
-                                    </option>
-                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
-                            </select>
+                            @include('surat-keluar._recipient-picker', ['prefix' => 'create'])
                         </div>
 
                         <div class="form-group" id="createExternalGroup" style="display: none;">
@@ -989,14 +1001,7 @@
 
                         <div class="form-group" id="editInternalGroup" style="display: none;">
                             <label>Penerima Internal <span class="text-danger">*</span></label>
-                            <label class="recipient-select-all">
-                                <input type="checkbox" id="selectAllEdit"> <span>Pilih Semua</span>
-                            </label>
-                            <select class="form-control select2 surat-recipient-select" name="penerima_internal[]" id="editPenerimaInternal" multiple>
-                                <?php $__currentLoopData = $users; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $u): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                                    <option value="<?php echo e($u->id); ?>"><?php echo e($u->name); ?><?php echo e($u->jabatan ? ' (' . $u->jabatan->nama . ')' : ''); ?></option>
-                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
-                            </select>
+                            @include('surat-keluar._recipient-picker', ['prefix' => 'edit'])
                         </div>
 
                         <div class="form-group" id="editExternalGroup" style="display: none;">
@@ -1195,6 +1200,7 @@
 <?php $__env->stopSection(); ?>
 
 <?php $__env->startPush('scripts'); ?>
+    <script src="{{ asset('js/surat-keluar-recipients.js') }}?v={{ filemtime(public_path('js/surat-keluar-recipients.js')) }}"></script>
     <script src="{{ asset('js/surat-masuk-share.js') }}?v={{ filemtime(public_path('js/surat-masuk-share.js')) }}"></script>
     <script src="{{ asset('js/surat-keluar-share.js') }}?v={{ filemtime(public_path('js/surat-keluar-share.js')) }}"></script>
     <!-- DataTables JS -->
@@ -1590,16 +1596,6 @@
 
             $('input[name="opsi_penerima"]', '#createForm, #editForm').on('change', function () {
                 togglePenerimaFields($(this).closest('form').attr('id') === 'createForm' ? 'create' : 'edit');
-            });
-
-            $('#selectAll').on('change', function () {
-                $('#penerimaInternal option').prop('selected', $(this).is(':checked'));
-                $('#penerimaInternal').trigger('change');
-            });
-
-            $('#selectAllEdit').on('change', function () {
-                $('#editPenerimaInternal option').prop('selected', $(this).is(':checked'));
-                $('#editPenerimaInternal').trigger('change');
             });
 
             $('#createForm').on('submit', function (e) {

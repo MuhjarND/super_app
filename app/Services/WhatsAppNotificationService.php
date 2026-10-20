@@ -252,7 +252,7 @@ class WhatsAppNotificationService
 
     public function notifySuratMasuk($suratMasuk, $targetUser)
     {
-        $url = url('/surat-masuk/' . $suratMasuk->id);
+        $url = route('surat-masuk.index');
         $message = $this->wrap([
             'Yth. Bapak/Ibu,',
             'Dengan hormat, disampaikan informasi surat masuk sebagai berikut:',
@@ -263,7 +263,7 @@ class WhatsAppNotificationService
             'Tanggal Surat: ' . $this->formatDateValue($suratMasuk->tanggal_surat),
             'Sifat: ' . ucfirst((string) $suratMasuk->sifat),
             '',
-            'Silakan meninjau surat melalui tautan berikut:',
+            'Silakan membuka daftar Surat Masuk melalui tautan berikut:',
             $url,
         ]);
 
@@ -279,7 +279,7 @@ class WhatsAppNotificationService
     {
         $suratMasuk = $disposisi->suratMasuk;
         $dari = $disposisi->dariUser;
-        $url = url('/surat-masuk/' . $suratMasuk->id);
+        $url = route('surat-masuk.index');
         $tipe = $disposisi->tipe === 'naikan' ? 'Surat dinaikkan' : 'Disposisi surat';
 
         $lines = [
@@ -310,7 +310,7 @@ class WhatsAppNotificationService
         }
 
         $lines[] = '';
-        $lines[] = 'Mohon menindaklanjuti disposisi melalui tautan berikut:';
+        $lines[] = 'Mohon menindaklanjuti disposisi melalui daftar Surat Masuk:';
         $lines[] = $url;
 
         return $this->sendToUser($targetUser, $this->wrap($lines), [
@@ -333,8 +333,8 @@ class WhatsAppNotificationService
             'Prioritas: ' . ($disposisi->priority_level === 'high' ? 'Tinggi' : ($disposisi->priority_level === 'low' ? 'Rendah' : 'Normal')),
             'Target tindak lanjut: ' . ($disposisi->target_tindak_lanjut_at ? $this->formatDateTimeValue($disposisi->target_tindak_lanjut_at) : '-'),
             '',
-            'Mohon segera menindaklanjuti pada aplikasi:',
-            url('/surat-masuk/' . optional($suratMasuk)->id),
+            'Mohon segera menindaklanjuti melalui daftar Surat Masuk:',
+            route('surat-masuk.index'),
         ]);
 
         return $this->sendToUser($targetUser, $message, [

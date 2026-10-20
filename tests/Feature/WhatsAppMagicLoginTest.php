@@ -3,6 +3,10 @@
 namespace Tests\Feature;
 
 use App\Services\WhatsAppMagicLinkService;
+use App\Services\WhatsAppNotificationService;
+use App\Services\WebPushNotificationService;
+use App\Disposisi;
+use App\SuratMasuk;
 use App\User;
 use App\WhatsAppMagicLoginToken;
 use Carbon\Carbon;
@@ -222,5 +226,65 @@ class WhatsAppMagicLoginTest extends TestCase
             'https://papeda.pta-papuabarat.go.id/cuti/123?mode=approval',
             WhatsAppMagicLoginToken::first()->destination_url
         );
+    }
+
+    /** @dataProvider incomingLetterNotificationTypes */
+    public function test_incoming_letter_notification_auto_login_opens_the_letter_list($method, $type, $event)
+    {
+        $user = factory(User::class)->create(['no_hp' => '081234567890']);
+        $letter = new SuratMasuk([
+            'nomor_surat' => '123/TEST/X/2026',
+            'pengirim' => 'Pengirim Pengujian',
+            'perihal' => 'Surat untuk ditindaklanjuti',
+            'tanggal_surat' => '2026-10-19',
+            'sifat' => 'biasa',
+        ]);
+        $letter->id = 123;
+        $disposition = new Disposisi(['tipe' => $type, 'petunjuk' => 'Untuk perhatian']);
+        $disposition->id = 456;
+        $disposition->setRelation('suratMasuk', $letter);
+        $disposition->setRelation('dariUser', $user);
+        $message = null;
+        $pushPayload = null;
+        $push = $this->getMockBuilder(WebPushNotificationService::class)
+            ->onlyMethods(['sendToUser'])->getMock();
+        $push->expects($this->once())->method('sendToUser')
+            ->willReturnCallback(function ($target, $payload) use (&$pushPayload) {
+                $pushPayload = $payload;
+                return 1;
+            });
+        $this->app->instance(WebPushNotificationService::class, $push);
+        $service = $this->getMockBuilder(WhatsAppNotificationService::class)
+            ->setConstructorArgs([app(WhatsAppMagicLinkService::class)])
+            ->onlyMethods(['send'])->getMock();
+        $service->expects($this->once())->method('send')
+            ->willReturnCallback(function ($phone, $text, $context) use (&$message, $user, $event) {
+                $this->assertSame($user->no_hp, $phone);
+                $this->assertSame($event, $context['event']);
+                $message = $text;
+                return true;
+            });
+
+        $this->assertTrue($service->{$method}($method === 'notifySuratMasuk' ? $letter : $disposition, $user));
+        $this->assertStringContainsString('daftar Surat Masuk', $message);
+        $this->assertStringNotContainsString('/surat-masuk/123', $message);
+        $this->assertSame(1, WhatsAppMagicLoginToken::count());
+        $this->assertSame(route('surat-masuk.index'), WhatsAppMagicLoginToken::first()->destination_url);
+        preg_match('/https?:\/\/\S+/', $message, $matches);
+        $this->assertStringContainsString('/masuk/whatsapp/', $matches[0]);
+        $this->assertSame($matches[0], $pushPayload['url']);
+
+        $this->get($matches[0])->assertRedirect(route('surat-masuk.index'));
+        $this->assertAuthenticatedAs($user);
+    }
+
+    public function incomingLetterNotificationTypes()
+    {
+        return [
+            'new incoming letter' => ['notifySuratMasuk', 'disposisi', 'surat_masuk'],
+            'disposition' => ['notifyDisposisi', 'disposisi', 'disposisi'],
+            'escalation' => ['notifyDisposisi', 'naikan', 'disposisi'],
+            'reminder' => ['notifyDisposisiReminder', 'disposisi', 'disposisi_reminder'],
+        ];
     }
 }
