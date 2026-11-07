@@ -225,15 +225,6 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/', 'ProgressZiDashboardController@index')->name('dashboard');
         Route::get('/dashboard', 'ProgressZiDashboardController@index')->name('index');
         Route::get('/guidelines', 'ProgressZiGuidelineController@index')->name('guidelines.index');
-        Route::post('/guidelines/areas/{ziArea}/points', 'ProgressZiGuidelineController@storePoint')->name('guidelines.points.store');
-        Route::put('/guidelines/points/{ziGuidelinePoint}', 'ProgressZiGuidelineController@updatePoint')->name('guidelines.points.update');
-        Route::delete('/guidelines/points/{ziGuidelinePoint}', 'ProgressZiGuidelineController@destroyPoint')->name('guidelines.points.destroy');
-        Route::post('/guidelines/points/{ziGuidelinePoint}/sub-points', 'ProgressZiGuidelineController@storeSubPoint')->name('guidelines.sub-points.store');
-        Route::put('/guidelines/sub-points/{ziGuidelineSubPoint}', 'ProgressZiGuidelineController@updateSubPoint')->name('guidelines.sub-points.update');
-        Route::delete('/guidelines/sub-points/{ziGuidelineSubPoint}', 'ProgressZiGuidelineController@destroySubPoint')->name('guidelines.sub-points.destroy');
-        Route::post('/guidelines/sub-points/{ziGuidelineSubPoint}/indicators', 'ProgressZiGuidelineController@storeIndicator')->name('guidelines.indicators.store');
-        Route::put('/guidelines/indicators/{ziGuidelineIndicator}', 'ProgressZiGuidelineController@updateIndicator')->name('guidelines.indicators.update');
-        Route::delete('/guidelines/indicators/{ziGuidelineIndicator}', 'ProgressZiGuidelineController@destroyIndicator')->name('guidelines.indicators.destroy');
         Route::get('/verifications', 'ProgressZiDashboardController@verifications')->name('verifications.index');
         Route::get('/verifications/pdf', 'ProgressZiDashboardController@verificationsPdf')->name('verifications.pdf');
         Route::get('/verifications/excel', 'ProgressZiDashboardController@verificationsExcel')->name('verifications.excel');
@@ -257,13 +248,10 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/activities/{ziActivity}/submit-review', 'ProgressZiMasterController@submitLeadershipReview')->name('activities.submit-review');
         Route::post('/activities/{ziActivity}/evidences', 'ProgressZiRealizationController@storeEvidenceFromActivity')->name('activities.evidences.store');
         Route::post('/sub-points/{ziGuidelineSubPoint}/evidences', 'ProgressZiRealizationController@storeEvidenceFromSubPoint')->name('sub-points.evidences.store');
-        Route::post('/activities/{ziActivity}/indicators', 'ProgressZiMasterController@storeIndicator')->name('indicators.store');
-        Route::put('/indicators/{ziIndicator}', 'ProgressZiMasterController@updateIndicator')->name('indicators.update');
 
         Route::post('/activities/{ziActivity}/realizations', 'ProgressZiRealizationController@store')->name('realizations.store');
         Route::put('/realizations/{ziRealization}', 'ProgressZiRealizationController@update')->name('realizations.update');
         Route::post('/realizations/{ziRealization}/evidences', 'ProgressZiRealizationController@storeEvidence')->name('evidences.store');
-        Route::post('/indicators/{ziIndicator}/review', 'ProgressZiRealizationController@reviewIndicator')->name('indicators.review');
         Route::post('/evidences/{ziEvidence}/review', 'ProgressZiRealizationController@reviewEvidence')->name('evidences.review');
         Route::get('/evidences/{ziEvidence}/file', 'ProgressZiRealizationController@file')->name('evidences.file');
         Route::get('/activities/{ziActivity}/evidences/bundle', 'ProgressZiRealizationController@bundle')->name('activities.evidences.bundle');
@@ -297,6 +285,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/{voting}', 'VotingController@show')->name('show');
         Route::get('/{voting}/edit', 'VotingController@edit')->name('edit');
         Route::put('/{voting}', 'VotingController@update')->name('update');
+        Route::patch('/{voting}/status', 'VotingController@updateStatus')->name('status');
         Route::post('/{voting}/send-whatsapp', 'VotingController@sendWhatsapp')->name('send-whatsapp');
         Route::delete('/{voting}', 'VotingController@destroy')->name('destroy');
         Route::get('/{voting}/stats', 'VotingController@stats')->name('stats');

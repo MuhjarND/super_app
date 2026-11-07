@@ -1042,16 +1042,16 @@
                     <h5 class="modal-title"><i class="fas fa-upload mr-2"></i>Upload Berkas Surat</h5>
                     <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
                 </div>
-                <form id="uploadForm" enctype="multipart/form-data">
+                <form id="uploadForm" enctype="multipart/form-data" novalidate>
                     <?php echo csrf_field(); ?>
                     <div class="modal-body">
                         <input type="hidden" name="surat_id" id="uploadSuratId">
                         <div class="form-group">
-                            <label>Berkas Surat <span class="text-danger">*</span></label>
-                            <input type="file" class="form-control-file" name="file" required
+                            <label for="outgoingLetterFile">Berkas Surat <span class="text-danger">*</span></label>
+                            <input id="outgoingLetterFile" type="file" class="form-control-file" name="file" required aria-describedby="outgoingFileHelp"
                                 accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.jpg,.jpeg,.png,.webp,.txt,.csv,.zip,.rar">
-                            <small class="text-muted d-block mt-1">
-                                Dokumen, gambar, spreadsheet, presentasi, teks, atau arsip ZIP/RAR (maks. 10 MB).
+                            <small id="outgoingFileHelp" class="text-muted d-block mt-1">
+                                Dokumen, gambar, spreadsheet, presentasi, teks, atau arsip ZIP/RAR (maks. 3 MB).
                             </small>
                         </div>
                     </div>
@@ -1718,6 +1718,14 @@
             // Upload form
             $('#uploadForm').on('submit', function (e) {
                 e.preventDefault();
+                const fileInput = document.getElementById('outgoingLetterFile');
+                if (!fileInput.files.length || fileInput.files[0].size > 3 * 1024 * 1024) {
+                    showToast(!fileInput.files.length ? 'Pilih berkas surat terlebih dahulu.' : 'Ukuran berkas surat keluar maksimal 3 MB.', 'error');
+                    fileInput.setAttribute('aria-invalid', 'true');
+                    fileInput.focus();
+                    return;
+                }
+                fileInput.removeAttribute('aria-invalid');
                 let formData = new FormData(this);
                 let suratId = $('#uploadSuratId').val();
                 let btn = $('#btnUpload');
@@ -1735,7 +1743,7 @@
                         location.reload();
                     },
                     error: function (xhr) {
-                        let msg = xhr.responseJSON?.message || 'Gagal upload file.';
+                        let msg = xhr.responseJSON?.errors?.file?.[0] || xhr.responseJSON?.message || 'Gagal upload file.';
                         showToast(msg, 'error');
                     },
                     complete: function () {

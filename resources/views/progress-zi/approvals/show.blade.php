@@ -94,7 +94,7 @@
                 <div class="mb-3">
                     <div class="small text-muted">Sub Poin Pedoman</div>
                     <div class="font-weight-bold">
-                        {{ optional(optional($activity->guidelineSubPoint)->point)->code }}.{{ optional($activity->guidelineSubPoint)->code }}
+                        {{ optional(optional($activity->guidelineSubPoint)->point)->code }}.{{ optional($activity->guidelineSubPoint)->display_code }}
                         {{ optional($activity->guidelineSubPoint)->title }}
                     </div>
                 </div>
@@ -105,20 +105,47 @@
                         <div class="text-muted mt-1">{{ $activity->description }}</div>
                     @endif
                 </div>
+                <div class="mb-3">
+                    <strong>Daftar Eviden</strong>
+                    @if($activity->guidelineSubPoint && $activity->guidelineSubPoint->evidence_guide)
+                        <details class="border rounded p-3 mt-2 mb-3">
+                            <summary class="font-weight-bold">Panduan Penyusunan Eviden</summary>
+                            <div class="mt-3">@include('progress-zi.partials.evidence-guide', ['guide' => $activity->guidelineSubPoint->evidence_guide])</div>
+                        </details>
+                    @endif
+                    <p class="small text-muted mt-1">Buka tautan Google Drive untuk memeriksa isi eviden. Akses mengikuti pengaturan berbagi pemilik dokumen.</p>
+                    @forelse($evidences as $evidence)
+                        <div class="border rounded p-3 mb-2">
+                            <div class="font-weight-bold">{{ $evidence->title }}</div>
+                            <div class="small text-muted">{{ $evidence->source_reference_label }} · {{ $evidence->status_label }}</div>
+                            @if($evidence->description)
+                                <div class="small mt-2"><strong>Catatan Eviden:</strong><div style="white-space:pre-wrap; overflow-wrap:anywhere;">{{ $evidence->description }}</div></div>
+                            @endif
+                            @if($evidence->preview_url)
+                                <a href="{{ $evidence->preview_url }}" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-outline-primary mt-2">{{ $evidence->drive_url ? 'Buka Google Drive' : 'Buka Eviden Lama' }} <i class="fas fa-external-link-alt ml-1"></i></a>
+                            @endif
+                        </div>
+                    @empty
+                        <div class="text-muted">Belum ada eviden.</div>
+                    @endforelse
+                </div>
+                @php
+                    $hasLegacyEvidences = $evidences->contains(function ($evidence) { return !$evidence->drive_url; });
+                @endphp
                 <div class="card shadow-sm border-0 mb-0 zi-approval-card">
                     <div class="card-header bg-white">
                         <div class="d-flex justify-content-between align-items-center zi-approval-preview-head" style="gap:12px;">
-                            <strong>Preview Dokumen</strong>
+                            <strong>{{ $hasLegacyEvidences ? 'Ringkasan dan Eviden Lama' : 'Ringkasan Eviden' }}</strong>
                             <a href="{{ route('progress-zi.approvals.bundle', $approval) }}" target="_blank" class="btn btn-sm btn-outline-primary">
                                 <i class="fas fa-external-link-alt mr-1"></i>Buka PDF
                             </a>
                         </div>
                     </div>
                     <div class="card-body p-0">
-                        @if($bundlePreviewUrl || $previewUrl)
+                        @if($hasLegacyEvidences && ($bundlePreviewUrl || $previewUrl))
                             <iframe id="ziApprovalPreviewFrame" class="zi-approval-preview-frame" src="{{ $bundlePreviewUrl ?: $previewUrl }}"></iframe>
                         @else
-                            <div class="p-4 text-muted">Belum ada dokumen yang bisa dipreview langsung.</div>
+                            <div class="p-3 text-muted">Ringkasan PDF memuat daftar tautan eviden. Gunakan tombol Buka Google Drive di atas untuk memeriksa isi file atau folder.</div>
                         @endif
                     </div>
                 </div>

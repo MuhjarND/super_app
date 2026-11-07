@@ -436,8 +436,8 @@ class SuratKeluarController extends Controller
         abort_unless(auth()->user()->canModifySuratKeluar($suratKeluar), 403);
 
         $request->validate([
-            'file' => 'required|file|mimes:pdf,doc,docx,xls,xlsx,ppt,pptx,jpg,jpeg,png,webp,txt,csv,zip,rar|max:10240',
-        ]);
+            'file' => 'required|file|mimes:pdf,doc,docx,xls,xlsx,ppt,pptx,jpg,jpeg,png,webp,txt,csv,zip,rar|max:3072',
+        ], ['file.max' => 'Ukuran berkas surat keluar maksimal 3 MB.']);
 
         $wasReady = $suratKeluar->isReadyForRecipientNotification();
 

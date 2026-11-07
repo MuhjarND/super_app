@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Pedoman ZI')
+@section('title', 'Panduan Eviden ZI')
 
 @push('styles')
 <style>
@@ -70,445 +70,66 @@
 
 @section('content')
 <div class="zi-guide-shell">
+    <div class="zi-guide-topbar">
+        <div>
+            <h5 class="mb-1">Panduan Penyusunan Eviden ZI</h5>
+            <div class="small text-muted">Acuan tetap dari PANDUAN PENYUSUNAN EVIDEN.xlsx. Pilih area untuk membaca panduan setiap poin eviden.</div>
+        </div>
+        <a href="{{ route('progress-zi.activities.index', ['area_id' => optional($selectedArea)->id, 'group_type' => $selectedGroupType]) }}" class="btn btn-primary btn-sm">Kumpulkan Eviden</a>
+    </div>
+    <details class="border rounded bg-white p-3">
+        <summary class="font-weight-bold">Petunjuk umum penyusunan eviden</summary>
+        <div class="mt-3 small" style="white-space:pre-wrap;">{{ app(\App\Services\ProgressZi\ZiEvidenceGuideService::class)->document()['introduction'] }}</div>
+    </details>
     <div class="zi-group-grid">
         @foreach($groupOptions as $groupType => $groupLabel)
-            @php
-                $groupAreas = $groupedAreas->get($groupType, collect());
-            @endphp
+            @php $groupAreas = $groupedAreas->get($groupType, collect()); @endphp
             <a href="{{ route('progress-zi.guidelines.index', ['group_type' => $groupType]) }}" class="zi-group-card {{ $selectedGroupType === $groupType ? 'active' : '' }}">
                 <div class="zi-group-eyebrow">Kelompok ZI</div>
                 <div class="zi-group-title">{{ $groupLabel }}</div>
-                <div class="zi-group-meta">
-                    <span class="zi-group-stat"><i class="fas fa-layer-group"></i>{{ $groupAreas->count() }} area</span>
-                    <span class="zi-group-stat"><i class="fas fa-book-open"></i>{{ $groupAreas->sum(function ($area) { return $area->guidelinePoints->count(); }) }} poin</span>
-                </div>
+                <div class="zi-group-meta"><span class="zi-group-stat">{{ $groupAreas->count() }} area</span></div>
             </a>
         @endforeach
     </div>
-
-    <div class="zi-guide-topbar">
-        <h5 style="margin:0; font-size:.92rem; font-weight:800; color:#0f172a;">Pedoman Zona Integritas</h5>
-        @if($canManage && $selectedArea)
-            <button class="app-create-btn" data-toggle="modal" data-target="#createPointModal">
-                <i class="fas fa-plus"></i>Tambah Poin
-            </button>
-        @endif
-    </div>
-
     <div class="zi-guide-layout">
         <div class="zi-guide-panel">
-            <div class="zi-guide-panel-head">
-                <h5>{{ $groupOptions[$selectedGroupType] ?? 'Area ZI' }}</h5>
-            </div>
-            <div class="zi-guide-panel-body">
-                <div class="zi-area-list">
-                    @if($visibleAreas->isEmpty())
-                        <div class="zi-guide-empty">Belum ada area ZI yang tersedia.</div>
-                    @else
-                        @foreach($visibleAreas as $area)
-                            @php
-                                $pointCount = $area->guidelinePoints->count();
-                                $subPointCount = $area->guidelinePoints->sum(function ($point) { return $point->subPoints->count(); });
-                                $indicatorCount = $area->guidelinePoints->sum(function ($point) {
-                                    return $point->subPoints->sum(function ($subPoint) {
-                                        return $subPoint->indicators->count();
-                                    });
-                                });
-                            @endphp
-                            <a href="{{ route('progress-zi.guidelines.index', ['group_type' => $selectedGroupType, 'area_id' => $area->id]) }}" class="zi-area-card {{ optional($selectedArea)->id === $area->id ? 'active' : '' }}">
-                                <div class="zi-area-code">{{ $area->code }}</div>
-                                <div class="zi-area-name">{{ $area->name }}</div>
-                                @include('progress-zi.partials.member-list', ['members' => $area->pics, 'fallback' => $area->pic])
-                                <div class="zi-area-stats">
-                                    <span class="zi-count-chip">{{ $pointCount }} poin</span>
-                                    <span class="zi-count-chip">{{ $subPointCount }} sub</span>
-                                    <span class="zi-count-chip">{{ $indicatorCount }} indikator</span>
-                                </div>
-                            </a>
-                        @endforeach
-                    @endif
-                </div>
+            <div class="zi-guide-panel-head"><h5>{{ $groupOptions[$selectedGroupType] ?? 'Area ZI' }}</h5></div>
+            <div class="zi-guide-panel-body zi-area-list">
+                @forelse($visibleAreas as $area)
+                    <a href="{{ route('progress-zi.guidelines.index', ['area_id' => $area->id, 'group_type' => $selectedGroupType]) }}" class="zi-area-card {{ optional($selectedArea)->id === $area->id ? 'active' : '' }}">
+                        <div class="zi-area-code">{{ $area->code }}</div>
+                        <div class="zi-area-name">{{ $area->name }}</div>
+                        <div class="small text-muted mt-2">{{ $area->guidelinePoints->sum(function ($point) { return $point->subPoints->count(); }) }} poin eviden</div>
+                    </a>
+                @empty
+                    <div class="zi-guide-empty">Belum ada panduan untuk kelompok ini.</div>
+                @endforelse
             </div>
         </div>
-
         <div class="zi-guide-panel">
-            <div class="zi-guide-panel-head">
-                <h5>{{ optional($selectedArea)->name ?: 'Pilih Area' }}</h5>
-                @if($selectedArea)
-                    <span class="zi-count-chip"><i class="fas fa-user-tie"></i>{{ $selectedArea->pics->isNotEmpty() ? $selectedArea->pics->count() : ($selectedArea->pic ? 1 : 0) }} anggota</span>
-                @endif
-            </div>
+            <div class="zi-guide-panel-head"><h5>{{ optional($selectedArea)->name ?: 'Pilih Area' }}</h5></div>
             <div class="zi-guide-panel-body">
                 @if($selectedArea)
-                    @php
-                        $selectedPointCount = $selectedArea->guidelinePoints->count();
-                        $selectedSubPointCount = $selectedArea->guidelinePoints->sum(function ($point) { return $point->subPoints->count(); });
-                        $selectedIndicatorCount = $selectedArea->guidelinePoints->sum(function ($point) {
-                            return $point->subPoints->sum(function ($subPoint) {
-                                return $subPoint->indicators->count();
-                            });
-                        });
-                    @endphp
-                    <div class="zi-guide-summary">
-                        <div class="zi-guide-kpi"><strong>{{ $selectedPointCount }}</strong><span>Poin Area</span></div>
-                        <div class="zi-guide-kpi"><strong>{{ $selectedSubPointCount }}</strong><span>Sub Poin Acuan</span></div>
-                        <div class="zi-guide-kpi"><strong>{{ $selectedIndicatorCount }}</strong><span>Indikator Penilaian</span></div>
-                    </div>
-                    <div class="zi-member-heading"><span><i class="fas fa-users mr-1"></i>Anggota area</span><span>{{ $selectedArea->pics->isNotEmpty() ? $selectedArea->pics->count() : ($selectedArea->pic ? 1 : 0) }} orang</span></div>
-                    @include('progress-zi.partials.member-list', ['members' => $selectedArea->pics, 'fallback' => $selectedArea->pic])
-
-                    @forelse($selectedArea->guidelinePoints as $point)
+                    @foreach($selectedArea->guidelinePoints as $point)
                         <div class="zi-point-card">
-                            <div class="zi-point-head">
-                                <div>
-                                    <div class="zi-point-label">{{ $point->code }}</div>
-                                    <div class="zi-point-title">{{ $point->title }}</div>
-                                    @if($point->description)
-                                        <div class="zi-point-desc">{{ $point->description }}</div>
-                                    @endif
-                                </div>
-                                @if($canManage)
-                                    <div class="zi-inline-actions">
-                                        <button class="btn btn-light btn-sm" data-toggle="modal" data-target="#createSubPointModal{{ $point->id }}">
-                                            <i class="fas fa-plus mr-1"></i>Sub Poin
-                                        </button>
-                                        <button class="btn btn-light btn-sm" data-toggle="modal" data-target="#editPointModal{{ $point->id }}">
-                                            <i class="fas fa-pen mr-1"></i>Edit
-                                        </button>
-                                        <form method="POST" action="{{ route('progress-zi.guidelines.points.destroy', $point) }}" onsubmit="return confirm('Hapus poin pedoman ini?')">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button class="btn btn-danger btn-sm">
-                                                <i class="fas fa-trash mr-1"></i>Hapus
-                                            </button>
-                                        </form>
-                                    </div>
-                                @endif
-                            </div>
+                            <div class="zi-point-head"><div class="zi-point-title">{{ $point->title }}</div></div>
                             <div class="zi-subpoint-list">
-                                @forelse($point->subPoints as $subPoint)
+                                @foreach($point->subPoints as $subPoint)
+                                    @php $guide = $subPoint->evidence_guide; @endphp
                                     <div class="zi-subpoint-card">
-                                        <div class="zi-subpoint-head">
-                                            <div>
-                                                <div class="zi-subpoint-code">{{ strtolower($subPoint->code) }}</div>
-                                                <div class="zi-subpoint-title">{{ $subPoint->title }}</div>
-                                                @if($subPoint->description)
-                                                    <div class="zi-subpoint-desc">{{ $subPoint->description }}</div>
-                                                @endif
-                                            </div>
-                                            @if($canManage)
-                                                <div class="zi-inline-actions">
-                                                    <button class="btn btn-light btn-sm" data-toggle="modal" data-target="#createIndicatorModal{{ $subPoint->id }}">
-                                                        <i class="fas fa-plus mr-1"></i>Indikator
-                                                    </button>
-                                                    <button class="btn btn-light btn-sm" data-toggle="modal" data-target="#editSubPointModal{{ $subPoint->id }}">
-                                                        <i class="fas fa-pen mr-1"></i>Edit
-                                                    </button>
-                                                    <form method="POST" action="{{ route('progress-zi.guidelines.sub-points.destroy', $subPoint) }}" onsubmit="return confirm('Hapus sub poin pedoman ini?')">
-                                                        @csrf
-                                                        @method('DELETE')
-                                                        <button class="btn btn-danger btn-sm">
-                                                            <i class="fas fa-trash mr-1"></i>Hapus
-                                                        </button>
-                                                    </form>
-                                                </div>
-                                            @endif
-                                        </div>
-
-                                        <div class="zi-indicator-list">
-                                            @forelse($subPoint->indicators as $indicator)
-                                                <div class="zi-indicator-card">
-                                                    <div class="d-flex justify-content-between align-items-start" style="gap:10px;">
-                                                        <div class="zi-indicator-label mb-0">{{ $indicator->code ? 'Indikator ' . $indicator->code : 'Indikator Penilaian' }}</div>
-                                                        @if($canManage)
-                                                            <div class="zi-inline-actions">
-                                                                <button class="btn btn-light btn-sm" data-toggle="modal" data-target="#editIndicatorModal{{ $indicator->id }}">
-                                                                    <i class="fas fa-pen mr-1"></i>Edit
-                                                                </button>
-                                                                <form method="POST" action="{{ route('progress-zi.guidelines.indicators.destroy', $indicator) }}" onsubmit="return confirm('Hapus indikator penilaian ini?')">
-                                                                    @csrf
-                                                                    @method('DELETE')
-                                                                    <button class="btn btn-danger btn-sm">
-                                                                        <i class="fas fa-trash mr-1"></i>Hapus
-                                                                    </button>
-                                                                </form>
-                                                            </div>
-                                                        @endif
-                                                    </div>
-                                                    @if($indicator->is_periodic)
-                                                        <div class="zi-periodic-chip"><i class="fas fa-sync-alt"></i>Berkala</div>
-                                                    @endif
-                                                    <div class="zi-indicator-text">{{ $indicator->indicator_text }}</div>
-                                                    <div class="zi-indicator-meta">
-                                                        @if($indicator->evidence_example)
-                                                            <div class="zi-indicator-meta-item"><strong>Contoh:</strong> {{ $indicator->evidence_example }}</div>
-                                                        @endif
-                                                        @if($indicator->implementation_note)
-                                                            <div class="zi-indicator-meta-item"><strong>Catatan:</strong> {{ $indicator->implementation_note }}</div>
-                                                        @endif
-                                                    </div>
-                                                </div>
-
-                                                @if($canManage)
-                                                    <div class="modal fade" id="editIndicatorModal{{ $indicator->id }}" tabindex="-1">
-                                                        <div class="modal-dialog">
-                                                            <div class="modal-content">
-                                                                <div class="modal-header">
-                                                                    <h5 class="modal-title">Edit Indikator Penilaian</h5>
-                                                                    <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
-                                                                </div>
-                                                                <form method="POST" action="{{ route('progress-zi.guidelines.indicators.update', $indicator) }}">
-                                                                    @csrf
-                                                                    @method('PUT')
-                                                                    <div class="modal-body">
-                                                                        <div class="form-group">
-                                                                            <label>Kode</label>
-                                                                            <input type="text" name="code" class="form-control" value="{{ $indicator->code }}">
-                                                                        </div>
-                                                                        <div class="form-group">
-                                                                            <label>Indikator Penilaian</label>
-                                                                            <textarea name="indicator_text" rows="3" class="form-control" required>{{ $indicator->indicator_text }}</textarea>
-                                                                        </div>
-                                                                        <div class="form-group">
-                                                                            <label>Contoh Eviden</label>
-                                                                            <textarea name="evidence_example" rows="2" class="form-control">{{ $indicator->evidence_example }}</textarea>
-                                                                        </div>
-                                                                        <div class="form-group">
-                                                                            <label>Catatan Implementasi</label>
-                                                                            <textarea name="implementation_note" rows="2" class="form-control">{{ $indicator->implementation_note }}</textarea>
-                                                                        </div>
-                                                                        <div class="custom-control custom-switch mb-3">
-                                                                            <input class="custom-control-input" type="checkbox" id="indicatorPeriodic{{ $indicator->id }}" name="is_periodic" value="1" {{ $indicator->is_periodic ? 'checked' : '' }}>
-                                                                            <label class="custom-control-label" for="indicatorPeriodic{{ $indicator->id }}">Agenda kegiatan harus dilakukan berkala</label>
-                                                                        </div>
-                                                                        <div class="form-group mb-0">
-                                                                            <label>Urutan</label>
-                                                                            <input type="number" name="sort_order" class="form-control" value="{{ $indicator->sort_order }}" min="0">
-                                                                        </div>
-                                                                    </div>
-                                                                    <div class="modal-footer">
-                                                                        <button type="button" class="btn btn-light" data-dismiss="modal">Batal</button>
-                                                                        <button class="btn btn-primary">Simpan</button>
-                                                                    </div>
-                                                                </form>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                @endif
-                                            @empty
-                                                <div class="text-muted small">Belum ada indikator penilaian untuk sub poin ini.</div>
-                                            @endforelse
-                                        </div>
+                                        <div class="zi-subpoint-code">Poin Eviden {{ $guide && $guide['code'] !== '-' ? strtoupper($guide['code']) : '' }}</div>
+                                        <div class="zi-subpoint-title mb-3">{{ $guide['title'] ?? $subPoint->title }}</div>
+                                        @include('progress-zi.partials.evidence-guide', ['guide' => $guide])
                                     </div>
-
-                                    @if($canManage)
-                                        <div class="modal fade" id="editSubPointModal{{ $subPoint->id }}" tabindex="-1">
-                                            <div class="modal-dialog">
-                                                <div class="modal-content">
-                                                    <div class="modal-header">
-                                                        <h5 class="modal-title">Edit Sub Poin</h5>
-                                                        <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
-                                                    </div>
-                                                    <form method="POST" action="{{ route('progress-zi.guidelines.sub-points.update', $subPoint) }}">
-                                                        @csrf
-                                                        @method('PUT')
-                                                        <div class="modal-body">
-                                                            <div class="form-group">
-                                                                <label>Kode</label>
-                                                                <input type="text" name="code" class="form-control" value="{{ $subPoint->code }}" required>
-                                                            </div>
-                                                            <div class="form-group">
-                                                                <label>Judul Sub Poin</label>
-                                                                <textarea name="title" rows="3" class="form-control" required>{{ $subPoint->title }}</textarea>
-                                                            </div>
-                                                            <div class="form-group">
-                                                                <label>Deskripsi Tambahan</label>
-                                                                <textarea name="description" rows="2" class="form-control">{{ $subPoint->description }}</textarea>
-                                                            </div>
-                                                            <div class="form-group mb-0">
-                                                                <label>Urutan</label>
-                                                                <input type="number" name="sort_order" class="form-control" value="{{ $subPoint->sort_order }}" min="0">
-                                                            </div>
-                                                        </div>
-                                                        <div class="modal-footer">
-                                                            <button type="button" class="btn btn-light" data-dismiss="modal">Batal</button>
-                                                            <button class="btn btn-primary">Simpan</button>
-                                                        </div>
-                                                    </form>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <div class="modal fade" id="createIndicatorModal{{ $subPoint->id }}" tabindex="-1">
-                                            <div class="modal-dialog">
-                                                <div class="modal-content">
-                                                    <div class="modal-header">
-                                                        <h5 class="modal-title">Tambah Indikator Penilaian</h5>
-                                                        <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
-                                                    </div>
-                                                    <form method="POST" action="{{ route('progress-zi.guidelines.indicators.store', $subPoint) }}">
-                                                        @csrf
-                                                        <div class="modal-body">
-                                                            <div class="form-group">
-                                                                <label>Kode</label>
-                                                                <input type="text" name="code" class="form-control" placeholder="1">
-                                                            </div>
-                                                            <div class="form-group">
-                                                                <label>Indikator Penilaian</label>
-                                                                <textarea name="indicator_text" rows="3" class="form-control" required></textarea>
-                                                            </div>
-                                                            <div class="form-group">
-                                                                <label>Contoh Eviden</label>
-                                                                <textarea name="evidence_example" rows="2" class="form-control"></textarea>
-                                                            </div>
-                                                            <div class="form-group">
-                                                                <label>Catatan Implementasi</label>
-                                                                <textarea name="implementation_note" rows="2" class="form-control"></textarea>
-                                                            </div>
-                                                            <div class="custom-control custom-switch mb-3">
-                                                                <input class="custom-control-input" type="checkbox" id="createIndicatorPeriodic{{ $subPoint->id }}" name="is_periodic" value="1">
-                                                                <label class="custom-control-label" for="createIndicatorPeriodic{{ $subPoint->id }}">Agenda kegiatan harus dilakukan berkala</label>
-                                                            </div>
-                                                            <div class="form-group mb-0">
-                                                                <label>Urutan</label>
-                                                                <input type="number" name="sort_order" class="form-control" value="{{ $subPoint->indicators->count() + 1 }}" min="0">
-                                                            </div>
-                                                        </div>
-                                                        <div class="modal-footer">
-                                                            <button type="button" class="btn btn-light" data-dismiss="modal">Batal</button>
-                                                            <button class="btn btn-primary">Simpan</button>
-                                                        </div>
-                                                    </form>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    @endif
-                                @empty
-                                    <div class="zi-guide-empty">Belum ada sub poin untuk poin ini.</div>
-                                @endforelse
+                                @endforeach
                             </div>
                         </div>
-
-                        @if($canManage)
-                            <div class="modal fade" id="editPointModal{{ $point->id }}" tabindex="-1">
-                                <div class="modal-dialog">
-                                    <div class="modal-content">
-                                        <div class="modal-header">
-                                            <h5 class="modal-title">Edit Poin Pedoman</h5>
-                                            <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
-                                        </div>
-                                        <form method="POST" action="{{ route('progress-zi.guidelines.points.update', $point) }}">
-                                            @csrf
-                                            @method('PUT')
-                                            <div class="modal-body">
-                                                <div class="form-group">
-                                                    <label>Kode Poin</label>
-                                                    <input type="text" name="code" class="form-control" value="{{ $point->code }}" required>
-                                                </div>
-                                                <div class="form-group">
-                                                    <label>Judul Poin</label>
-                                                    <input type="text" name="title" class="form-control" value="{{ $point->title }}" required>
-                                                </div>
-                                                <div class="form-group">
-                                                    <label>Deskripsi</label>
-                                                    <textarea name="description" rows="3" class="form-control">{{ $point->description }}</textarea>
-                                                </div>
-                                                <div class="form-group mb-0">
-                                                    <label>Urutan</label>
-                                                    <input type="number" name="sort_order" class="form-control" value="{{ $point->sort_order }}" min="0">
-                                                </div>
-                                            </div>
-                                            <div class="modal-footer">
-                                                <button type="button" class="btn btn-light" data-dismiss="modal">Batal</button>
-                                                <button class="btn btn-primary">Simpan</button>
-                                            </div>
-                                        </form>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="modal fade" id="createSubPointModal{{ $point->id }}" tabindex="-1">
-                                <div class="modal-dialog">
-                                    <div class="modal-content">
-                                        <div class="modal-header">
-                                            <h5 class="modal-title">Tambah Sub Poin</h5>
-                                            <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
-                                        </div>
-                                        <form method="POST" action="{{ route('progress-zi.guidelines.sub-points.store', $point) }}">
-                                            @csrf
-                                            <div class="modal-body">
-                                                <div class="form-group">
-                                                    <label>Kode</label>
-                                                    <input type="text" name="code" class="form-control" placeholder="a" required>
-                                                </div>
-                                                <div class="form-group">
-                                                    <label>Judul Sub Poin</label>
-                                                    <textarea name="title" rows="3" class="form-control" required></textarea>
-                                                </div>
-                                                <div class="form-group">
-                                                    <label>Deskripsi Tambahan</label>
-                                                    <textarea name="description" rows="2" class="form-control"></textarea>
-                                                </div>
-                                                <div class="form-group mb-0">
-                                                    <label>Urutan</label>
-                                                    <input type="number" name="sort_order" class="form-control" value="{{ $point->subPoints->count() + 1 }}" min="0">
-                                                </div>
-                                            </div>
-                                            <div class="modal-footer">
-                                                <button type="button" class="btn btn-light" data-dismiss="modal">Batal</button>
-                                                <button class="btn btn-primary">Simpan</button>
-                                            </div>
-                                        </form>
-                                    </div>
-                                </div>
-                            </div>
-                        @endif
-                    @empty
-                        <div class="zi-guide-empty">Belum ada poin pedoman untuk area ini.</div>
-                    @endforelse
+                    @endforeach
                 @else
-                    <div class="zi-guide-empty">Pilih area di panel kiri.</div>
+                    <div class="zi-guide-empty">Panduan belum tersedia.</div>
                 @endif
             </div>
         </div>
     </div>
 </div>
-
-@if($canManage && $selectedArea)
-    <div class="modal fade" id="createPointModal" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Tambah Poin Pedoman</h5>
-                    <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
-                </div>
-                <form method="POST" action="{{ route('progress-zi.guidelines.points.store', $selectedArea) }}">
-                    @csrf
-                    <div class="modal-body">
-                        <div class="form-group">
-                            <label>Kode Poin</label>
-                            <input type="text" name="code" class="form-control" placeholder="I" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Judul Poin</label>
-                            <input type="text" name="title" class="form-control" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Deskripsi</label>
-                            <textarea name="description" rows="3" class="form-control"></textarea>
-                        </div>
-                        <div class="form-group mb-0">
-                            <label>Urutan</label>
-                            <input type="number" name="sort_order" class="form-control" value="{{ $selectedArea->guidelinePoints->count() + 1 }}" min="0">
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-light" data-dismiss="modal">Batal</button>
-                        <button class="btn btn-primary">Simpan</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-@endif
 @endsection

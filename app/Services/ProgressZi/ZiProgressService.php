@@ -18,6 +18,8 @@ class ZiProgressService
             return false;
         }
 
+        if ($subPoint->evidence_guide_key) { return false; }
+
         $indicators = $subPoint->relationLoaded('indicators')
             ? $subPoint->indicators
             : $subPoint->indicators()->get();
@@ -36,6 +38,10 @@ class ZiProgressService
         $subPointActivities = $activities->where('zi_guideline_sub_point_id', $subPoint->id)->values();
         if ($subPointActivities->isEmpty()) {
             return false;
+        }
+
+        if ($subPoint->evidence_guide_key) {
+            return $subPointActivities->contains(function ($activity) { return $activity->evidence_count > 0; });
         }
 
         if (!$this->subPointRequiresPeriodic($subPoint)) {
@@ -99,6 +105,11 @@ class ZiProgressService
 
     public function calculateActivityScore(ZiActivity $activity)
     {
+        if (optional($activity->guidelineSubPoint)->evidence_guide_key) {
+            if (!$activity->evidence_count) { return 0; }
+            $approval = $activity->latestApproval;
+            return $approval && $approval->status === 'approved' ? 100 : 0;
+        }
         $indicators = $activity->relationLoaded('indicators') ? $activity->indicators : $activity->indicators()->get();
         if ($indicators->isEmpty()) { return 0; }
         return round($indicators->avg(function ($indicator) { return $this->scoreFromIndicatorStatus($indicator->status); }), 1);
@@ -106,6 +117,21 @@ class ZiProgressService
 
     public function calculateAreaScore(ZiArea $area, ZiPeriod $period = null)
     {
+        $area->loadMissing('guidelinePoints.subPoints');
+        $guidePoints = $area->guidelinePoints->flatMap(function ($point) {
+            return $point->subPoints->whereNotNull('evidence_guide_key');
+        });
+        if ($guidePoints->isNotEmpty()) {
+            $activities = $area->activities()->with('guidelineSubPoint', 'latestApproval', 'realizations.evidences');
+            if ($period) { $activities->where('zi_period_id', $period->id); }
+            $activities = $activities->get();
+            return round($guidePoints->avg(function ($point) use ($activities) {
+                $scores = $activities->where('zi_guideline_sub_point_id', $point->id)->map(function ($activity) {
+                    return $this->calculateActivityScore($activity);
+                });
+                return $scores->max() ?: 0;
+            }), 1);
+        }
         $query = $area->activities();
         if ($period) { $query->where('zi_period_id', $period->id); }
         $activities = $query->with('indicators')->get();
@@ -115,9 +141,30 @@ class ZiProgressService
 
     public function calculatePeriodScore(ZiPeriod $period)
     {
-        $areas = ZiArea::whereHas('activities', function ($query) use ($period) { $query->where('zi_period_id', $period->id); })->get();
+        $areas = ZiArea::whereHas('guidelinePoints.subPoints', function ($query) { $query->whereNotNull('evidence_guide_key'); })->get();
+        if ($areas->isNotEmpty()) { return $this->calculateGuideScoreForAreas($areas, $period); }
+        if ($areas->isEmpty()) {
+            $areas = ZiArea::whereHas('activities', function ($query) use ($period) { $query->where('zi_period_id', $period->id); })->get();
+        }
         if ($areas->isEmpty()) { return 0; }
         return round($areas->avg(function ($area) use ($period) { return $this->calculateAreaScore($area, $period); }), 1);
+    }
+
+    public function calculateGuideScoreForAreas(Collection $areas, ZiPeriod $period = null)
+    {
+        $points = ZiGuidelineSubPoint::whereNotNull('evidence_guide_key')->whereHas('point', function ($query) use ($areas) {
+            $query->whereIn('zi_area_id', $areas->pluck('id'));
+        })->get();
+        if ($points->isEmpty()) { return 0; }
+        $activities = ZiActivity::whereIn('zi_guideline_sub_point_id', $points->pluck('id'))->with('guidelineSubPoint', 'latestApproval', 'realizations.evidences');
+        if ($period) { $activities->where('zi_period_id', $period->id); }
+        $activities = $activities->get();
+        $approved = $points->filter(function ($point) use ($activities) {
+            return $activities->where('zi_guideline_sub_point_id', $point->id)->contains(function ($activity) {
+                return $this->calculateActivityScore($activity) === 100;
+            });
+        })->count();
+        return round($approved / $points->count() * 100, 1);
     }
 
     public function buildDashboard(?ZiPeriod $period = null)
@@ -144,7 +191,10 @@ class ZiProgressService
                 }
             },
             'activities.latestApproval',
-        ])->whereHas('guidelinePoints.subPoints')
+            'activities.realizations.evidences',
+            'guidelinePoints.subPoints' => function ($query) { $query->whereNotNull('evidence_guide_key'); },
+            'guidelinePoints' => function ($query) { $query->whereHas('subPoints', function ($sub) { $sub->whereNotNull('evidence_guide_key'); }); },
+        ])->whereHas('guidelinePoints.subPoints', function ($query) { $query->whereNotNull('evidence_guide_key'); })
             ->orderByRaw("FIELD(group_type, 'pengungkit', 'reform', 'hasil')")
             ->orderBy('code')
             ->get();
@@ -175,9 +225,7 @@ class ZiProgressService
                 'area_count' => $groupedAreas->count(),
                 'sub_point_count' => $coverage['total'],
                 'sub_point_covered_count' => $coverage['covered'],
-                'score' => round($groupedAreas->avg(function ($area) use ($period) {
-                    return $this->calculateAreaScore($area, $period);
-                }), 1),
+                'score' => $this->calculateGuideScoreForAreas($groupedAreas, $period),
             ];
         });
         $overdueActivities = $activities->filter(function ($activity) { return $activity->target_end_date && $activity->target_end_date->lt(today()) && !in_array($activity->status, ['sudah_terlaksana', 'selesai'], true); })->sortBy('target_end_date')->values();

@@ -30,7 +30,7 @@
         <div class="d-flex justify-content-between align-items-end flex-wrap" style="gap:16px;">
             <div>
                 <div class="zi-verify-title">Verifikasi Progress ZI</div>
-                <div class="zi-verify-subtitle">Review indikator dan eviden yang masih perlu validasi, revisi, atau penolakan.</div>
+                <div class="zi-verify-subtitle">Periksa eviden sesuai panduan penyusunan dan tinjau catatan perbaikannya.</div>
             </div>
             <div class="d-flex align-items-center flex-wrap" style="gap:10px; min-width:280px;">
                 <form method="GET" class="d-flex align-items-center flex-wrap mb-0" style="gap:10px;">
@@ -49,7 +49,7 @@
     </div>
 
     <div class="zi-verify-kpis">
-        <div class="zi-verify-kpi"><strong>{{ $indicators->count() }}</strong><span>Indikator Perlu Review</span></div>
+        <div class="zi-verify-kpi"><strong>{{ $indicators->count() }}</strong><span>Riwayat Indikator Lama</span></div>
         <div class="zi-verify-kpi"><strong>{{ $evidences->count() }}</strong><span>Eviden Perlu Review</span></div>
         <div class="zi-verify-kpi"><strong>{{ $indicators->where('status', 'ditolak')->count() }}</strong><span>Indikator Ditolak</span></div>
         <div class="zi-verify-kpi"><strong>{{ $evidences->whereIn('status', ['revisi', 'tidak_valid'])->count() }}</strong><span>Eviden Revisi / Tidak Valid</span></div>
@@ -59,8 +59,8 @@
         <div class="zi-verify-panel">
             <div class="zi-verify-panel-head">
                 <div>
-                    <h5>Indikator Perlu Review</h5>
-                    <p>Prioritaskan indikator yang belum terpenuhi, sebagian terpenuhi, atau ditolak.</p>
+                    <h5>Riwayat Indikator Lama</h5>
+                    <p>Data sebelum penggunaan panduan tetap. Pengumpulan baru mengikuti Panduan Eviden ZI.</p>
                 </div>
             </div>
             <div class="table-responsive">
@@ -122,6 +122,12 @@
                                 <td>
                                     <a href="{{ route('progress-zi.activities.show', $evidence->realization->activity) }}"><strong>{{ $evidence->title }}</strong></a>
                                     <div class="small text-muted">{{ $evidence->source_reference_label }}</div>
+                                    @if($evidence->description)
+                                        <div class="small mt-2"><strong>Catatan Eviden:</strong><div class="text-muted" style="white-space:pre-wrap; overflow-wrap:anywhere;">{{ $evidence->description }}</div></div>
+                                    @endif
+                                    @if($evidence->drive_url && $evidence->preview_url)
+                                        <a href="{{ $evidence->preview_url }}" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-outline-primary mt-2">Buka Google Drive</a>
+                                    @endif
                                 </td>
                                 <td>
                                     {{ optional(optional($evidence->realization)->activity)->name }}

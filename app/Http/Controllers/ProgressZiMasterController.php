@@ -4,14 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\Concerns\InteractsWithProgressZi;
 use App\Services\ProgressZi\ZiActivityApprovalService;
-use App\Services\ProgressZi\ZiEvidenceSourceService;
-use App\Services\ProgressZi\ZiEvidenceRecommendationService;
 use App\Services\RapatDocumentService;
 use App\ZiActivity;
 use App\ZiArea;
-use App\ZiGuidelineIndicator;
 use App\ZiGuidelineSubPoint;
-use App\ZiIndicator;
 use App\ZiPeriod;
 use App\User;
 use Illuminate\Http\Request;
@@ -21,21 +17,15 @@ class ProgressZiMasterController extends Controller
 {
     use InteractsWithProgressZi;
 
-    protected $evidenceSourceService;
-    protected $recommendationService;
     protected $rapatDocumentService;
     protected $activityApprovalService;
 
     public function __construct(
-        ZiEvidenceSourceService $evidenceSourceService,
-        ZiEvidenceRecommendationService $recommendationService,
         RapatDocumentService $rapatDocumentService,
         ZiActivityApprovalService $activityApprovalService
     )
     {
         $this->middleware('auth');
-        $this->evidenceSourceService = $evidenceSourceService;
-        $this->recommendationService = $recommendationService;
         $this->rapatDocumentService = $rapatDocumentService;
         $this->activityApprovalService = $activityApprovalService;
     }
@@ -152,6 +142,8 @@ class ProgressZiMasterController extends Controller
             'pic',
             'pics',
             'guidelinePoints.subPoints.indicators',
+            'guidelinePoints.subPoints' => function ($query) { $query->whereNotNull('evidence_guide_key'); },
+            'guidelinePoints' => function ($query) { $query->whereHas('subPoints', function ($sub) { $sub->whereNotNull('evidence_guide_key'); }); },
             'activities' => function ($query) use ($selectedPeriod, $request) {
                 if ($selectedPeriod) {
                     $query->where('zi_period_id', $selectedPeriod->id);
@@ -168,7 +160,8 @@ class ProgressZiMasterController extends Controller
             'activities.indicators',
             'activities.realizations.evidences',
             'activities.latestApproval',
-        ])->orderByRaw("FIELD(group_type, 'pengungkit', 'reform', 'hasil')")
+        ])->whereHas('guidelinePoints.subPoints', function ($query) { $query->whereNotNull('evidence_guide_key'); })
+            ->orderByRaw("FIELD(group_type, 'pengungkit', 'reform', 'hasil')")
             ->orderBy('code');
 
         if ($request->filled('area_id')) {
@@ -202,22 +195,6 @@ class ProgressZiMasterController extends Controller
             }
         }
 
-        $subPointRecommendations = [];
-        foreach ($areas as $area) {
-            foreach ($area->guidelinePoints as $point) {
-                foreach ($point->subPoints as $subPoint) {
-                    $subPointRecommendations[$subPoint->id] = $this->recommendationService
-                        ->recommendForSubPoint($area, $subPoint, auth()->user())
-                        ->values()
-                        ->all();
-                }
-            }
-        }
-
-        $evidenceSourceOptions = collect($this->evidenceSourceService->buildOptionsForUser(auth()->user()))
-            ->flatten(1)
-            ->values();
-
         return view('progress-zi.activities.index', [
             'areas' => $areas,
             'groupedAreas' => $groupedAreas,
@@ -228,7 +205,6 @@ class ProgressZiMasterController extends Controller
             'selectedPeriod' => $selectedPeriod,
             'users' => User::active()->ordered()->get(),
             'guidelineSubPoints' => $this->guidelineSubPointOptions(),
-            'evidenceSourceOptions' => $evidenceSourceOptions,
             'kategoriSuratOptions' => $this->rapatDocumentService->getKategoriSuratLeafOptions(),
             'meetingParticipants' => User::with(['unit', 'jabatan', 'roles'])->active()->ordered()->get(),
             'meetingApprovers' => User::withRoleOrDelegatedJabatan(['admin', 'approval', 'super_admin'])
@@ -236,7 +212,6 @@ class ProgressZiMasterController extends Controller
                 ->with('jabatan')
                 ->ordered()
                 ->get(),
-            'subPointRecommendations' => $subPointRecommendations,
             'filters' => $request->only(['period_id', 'area_id', 'status', 'pic_user_id', 'group_type']),
             'canManage' => auth()->user()->canManageProgressZiMasterData(),
         ]);
@@ -289,6 +264,7 @@ class ProgressZiMasterController extends Controller
     protected function guidelineSubPointOptions()
     {
         return ZiGuidelineSubPoint::with(['point.area'])
+            ->whereNotNull('evidence_guide_key')
             ->whereHas('point.area')
             ->orderBy('id')
             ->get();
@@ -306,53 +282,4 @@ class ProgressZiMasterController extends Controller
         return $subPoint->id;
     }
 
-    public function storeIndicator(Request $request, ZiActivity $ziActivity)
-    {
-        abort_unless(auth()->user()->canManageProgressZiActivity($ziActivity), 403);
-        $request->validate(['zi_guideline_indicator_id' => 'nullable|exists:zi_guideline_indicators,id', 'name' => 'required|string|max:255', 'description' => 'nullable|string', 'weight' => 'nullable|numeric|min:0', 'target_fulfillment_text' => 'nullable|string|max:255', 'is_evidence_required' => 'nullable|boolean', 'minimum_evidence_count' => 'nullable|integer|min:0', 'status' => 'required|in:belum_diisi,belum_terpenuhi,sebagian_terpenuhi,terpenuhi,diverifikasi,ditolak']);
-        $guidelineIndicatorId = $this->validatedGuidelineIndicatorId($ziActivity, $request->zi_guideline_indicator_id);
-        $ziActivity->indicators()->create($request->only(['name', 'description', 'weight', 'target_fulfillment_text', 'minimum_evidence_count', 'status']) + ['zi_guideline_indicator_id' => $guidelineIndicatorId, 'is_evidence_required' => $request->boolean('is_evidence_required', true), 'created_by' => auth()->id(), 'updated_by' => auth()->id()]);
-        return redirect()->route('progress-zi.activities.index', [
-            'period_id' => $ziActivity->zi_period_id,
-            'area_id' => $ziActivity->zi_area_id,
-        ])->with('success', 'Indikator berhasil ditambahkan.');
-    }
-
-    public function updateIndicator(Request $request, ZiIndicator $ziIndicator)
-    {
-        $activity = $ziIndicator->activity()->with('area', 'guidelineSubPoint')->first();
-        abort_unless(auth()->user()->canManageProgressZiActivity($activity), 403);
-        $request->validate(['zi_guideline_indicator_id' => 'nullable|exists:zi_guideline_indicators,id', 'name' => 'required|string|max:255', 'description' => 'nullable|string', 'weight' => 'nullable|numeric|min:0', 'target_fulfillment_text' => 'nullable|string|max:255', 'is_evidence_required' => 'nullable|boolean', 'minimum_evidence_count' => 'nullable|integer|min:0', 'status' => 'required|in:belum_diisi,belum_terpenuhi,sebagian_terpenuhi,terpenuhi,diverifikasi,ditolak']);
-        $guidelineIndicatorId = $this->validatedGuidelineIndicatorId($activity, $request->zi_guideline_indicator_id);
-        $ziIndicator->update($request->only(['name', 'description', 'weight', 'target_fulfillment_text', 'minimum_evidence_count', 'status']) + ['zi_guideline_indicator_id' => $guidelineIndicatorId, 'is_evidence_required' => $request->boolean('is_evidence_required', true), 'updated_by' => auth()->id()]);
-        return redirect()->route('progress-zi.activities.index', [
-            'period_id' => $activity->zi_period_id,
-            'area_id' => $activity->zi_area_id,
-        ])->with('success', 'Indikator berhasil diperbarui.');
-    }
-
-    protected function guidelineIndicatorOptionsForActivity(ZiActivity $activity)
-    {
-        if (!$activity->guidelineSubPoint) {
-            return collect();
-        }
-
-        return ZiGuidelineIndicator::where('zi_guideline_sub_point_id', $activity->zi_guideline_sub_point_id)
-            ->orderBy('sort_order')
-            ->orderBy('id')
-            ->get();
-    }
-
-    protected function validatedGuidelineIndicatorId(ZiActivity $activity, $guidelineIndicatorId)
-    {
-        if (!$guidelineIndicatorId) {
-            return null;
-        }
-
-        abort_unless($activity->guidelineSubPoint, 422, 'Kegiatan belum memiliki acuan sub poin pedoman.');
-        $guidelineIndicator = ZiGuidelineIndicator::findOrFail($guidelineIndicatorId);
-        abort_unless((int) $guidelineIndicator->zi_guideline_sub_point_id === (int) $activity->zi_guideline_sub_point_id, 422, 'Indikator pedoman tidak sesuai dengan acuan kegiatan.');
-
-        return $guidelineIndicator->id;
-    }
 }

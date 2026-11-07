@@ -76,7 +76,7 @@
                     <thead>
                         <tr>
                             <th style="width:28%;">Pedoman</th>
-                            <th style="width:26%;">Indikator Penilaian</th>
+                            <th style="width:26%;">Panduan Penyusunan Eviden</th>
                             <th style="width:30%;">Kegiatan Terkait</th>
                             <th style="width:16%;">Status Keterhubungan</th>
                         </tr>
@@ -93,18 +93,11 @@
                                 @endphp
                                 <tr>
                                     <td>
-                                        <div class="zi-matrix-guideline">Poin {{ $point->code }} / Sub {{ strtoupper($subPoint->code) }}</div>
+                                        <div class="zi-matrix-guideline">Poin {{ $subPoint->evidence_guide['point_code'] ?? $point->code }} / Eviden {{ strtoupper($subPoint->display_code) }}</div>
                                         <div class="zi-matrix-indicator mt-1">{{ $subPoint->title }}</div>
                                     </td>
                                     <td>
-                                        @forelse($subPoint->indicators as $indicator)
-                                            <div class="mb-2">
-                                                <div class="zi-matrix-guideline" style="font-size:.8rem;">{{ $indicator->code ?: 'Indikator' }}</div>
-                                                <div class="zi-matrix-indicator">{{ $indicator->indicator_text }}</div>
-                                            </div>
-                                        @empty
-                                            <div class="zi-matrix-empty">Belum ada indikator penilaian.</div>
-                                        @endforelse
+                                        <details><summary>Baca panduan</summary><div class="mt-2">@include('progress-zi.partials.evidence-guide', ['guide' => $subPoint->evidence_guide])</div></details>
                                     </td>
                                     <td>
                                         @forelse($activities as $activity)
@@ -112,10 +105,7 @@
                                                 <div class="zi-matrix-activity-title"><a href="{{ route('progress-zi.activities.show', $activity) }}">{{ $activity->name }}</a></div>
                                                 <div class="zi-matrix-activity-meta">
                                                     PIC {{ optional($activity->pic)->name ?: '-' }} • {!! $activity->status_badge !!}
-                                                    <br>Indikator terkait:
-                                                    {{ $activity->indicators->count() }}
-                                                    @php $linkedIndicators = $activity->indicators->whereNotNull('zi_guideline_indicator_id')->count(); @endphp
-                                                    • Terhubung ke pedoman: {{ $linkedIndicators }}
+                                                    <br>{{ $activity->evidence_count }} eviden terkumpul
                                                 </div>
                                             </div>
                                         @empty

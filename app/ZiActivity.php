@@ -22,6 +22,9 @@ class ZiActivity extends Model
 
     public function getProgressScoreAttribute()
     {
+        if (optional($this->guidelineSubPoint)->evidence_guide_key) {
+            return app(\App\Services\ProgressZi\ZiProgressService::class)->calculateActivityScore($this);
+        }
         $indicators = $this->relationLoaded('indicators') ? $this->indicators : $this->indicators()->get();
         if ($indicators->isEmpty()) { return 0; }
         return round($indicators->avg(function ($indicator) { return $indicator->progress_score; }), 1);
@@ -54,6 +57,10 @@ class ZiActivity extends Model
         }
 
         $point = $this->guidelineSubPoint->point;
+        $guide = $this->guidelineSubPoint->evidence_guide;
+        if ($guide) {
+            return 'Poin ' . strtoupper($guide['point_code']) . ' / Eviden ' . strtoupper($guide['code']);
+        }
         if (!$point) {
             return $this->guidelineSubPoint->title;
         }
@@ -95,7 +102,7 @@ class ZiActivity extends Model
     {
         $map = [
             'dijadwalkan' => 'Dijadwalkan',
-            'diupload' => 'Diupload',
+            'diupload' => 'Eviden Tersedia',
             'dalam_proses_review' => 'Dalam Proses Review',
             'selesai' => 'Selesai',
         ];
@@ -107,7 +114,7 @@ class ZiActivity extends Model
     {
         $map = [
             'dijadwalkan' => ['info', 'Dijadwalkan'],
-            'diupload' => ['primary', 'Diupload'],
+            'diupload' => ['primary', 'Eviden Tersedia'],
             'dalam_proses_review' => ['warning', 'Dalam Proses Review'],
             'selesai' => ['success', 'Selesai'],
         ];

@@ -1,0 +1,25 @@
+.voting-live { --vote-brand: #4f46e5; --vote-ink: #0f172a; --vote-muted: #64748b; --vote-border: #e5e7eb; }
+.voting-live-toolbar { display:flex; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:16px; color:var(--vote-muted); font-size:.85rem; }
+.voting-live-toolbar button { padding:7px 12px; border:1px solid var(--vote-border); border-radius:10px; background:#fff; color:var(--vote-ink); cursor:pointer; }
+.voting-live-toolbar button:hover { background:#eef2ff; border-color:var(--vote-brand); }
+.voting-live :focus-visible { outline:3px solid #a5b4fc; outline-offset:3px; }
+.voting-live-connection { min-height:22px; }
+.voting-live-connection[data-state="error"] { color:#b45309; }
+.voting-live-complete { color:#047857; font-weight:700; margin-bottom:12px; }
+.voting-result-card { border:1px solid var(--vote-border); border-radius:16px; padding:18px; margin-bottom:16px; background:#fff; color:var(--vote-ink); min-width:0; }
+.voting-result-header { display:flex; justify-content:space-between; align-items:start; gap:12px; margin-bottom:18px; }
+.voting-result-header h2 { font-size:1rem; line-height:1.45; margin:0 0 5px; font-weight:800; overflow-wrap:anywhere; }
+.voting-result-meta { color:var(--vote-muted); font-size:.8rem; }
+.voting-result-total { white-space:nowrap; padding:5px 9px; background:#f8fafc; border:1px solid var(--vote-border); border-radius:10px; font-size:.8rem; }
+.voting-choice-result { margin-bottom:14px; }
+.voting-choice-result:last-child { margin-bottom:0; }
+.voting-choice-header { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:7px; }
+.voting-choice-identity { display:flex; align-items:center; gap:10px; min-width:0; font-size:.9rem; overflow-wrap:anywhere; }
+.voting-choice-image { width:42px; height:42px; flex:0 0 42px; border-radius:10px; object-fit:cover; }
+.voting-choice-count { font-size:.85rem; white-space:nowrap; }
+.voting-choice-track { height:12px; background:#eef2f7; border-radius:99px; overflow:hidden; }
+.voting-choice-fill { height:100%; background:var(--vote-brand); border-radius:99px; transition:width .3s ease; }
+.voting-choice-result[data-leading="true"] .voting-choice-fill { background:#059669; }
+.voting-pending-name { padding:7px 0; border-bottom:1px solid #eef2f7; overflow-wrap:anywhere; }
+@media(max-width:600px) { .voting-choice-header { align-items:flex-start; flex-direction:column; gap:5px; } .voting-result-card { padding:14px; } }
+@media(prefers-reduced-motion:reduce) { .voting-choice-fill { transition:none; } }

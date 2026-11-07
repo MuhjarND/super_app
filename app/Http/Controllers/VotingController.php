@@ -7,6 +7,7 @@ use App\User;
 use App\Voting;
 use App\VotingCandidate;
 use App\VotingItem;
+use App\Services\VotingStatsService;
 use App\VotingParticipant;
 use App\VotingVote;
 use App\Services\WhatsAppNotificationService;
@@ -14,6 +15,7 @@ use Barryvdh\DomPDF\Facade as PDF;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Illuminate\Http\Request;
 
 class VotingController extends Controller
 {
@@ -93,17 +95,21 @@ class VotingController extends Controller
             'creator',
             'items.candidates',
             'participantPivots.user.jabatan',
-            'votes',
         ]);
+        $voting->loadCount('votes');
 
         $canManage = $user->canManageVoting();
 
-        return view('rapat.voting.show', compact('voting', 'canManage'));
+        $stats = app(VotingStatsService::class)->build($voting);
+        return view('rapat.voting.show', compact('voting', 'canManage', 'stats'));
     }
 
     public function edit(Voting $voting)
     {
         abort_unless(auth()->user()->canManageVoting(), 403);
+        if ($voting->votes()->exists()) {
+            return redirect()->route('rapat.voting.show', $voting)->with('error', 'Pilihan dan peserta dikunci karena suara sudah masuk. Status voting masih dapat diubah.');
+        }
 
         $voting->load(['items.candidates', 'participants']);
         $users = User::with('jabatan')->active()->ordered()->get();
@@ -124,6 +130,10 @@ class VotingController extends Controller
         $data = $request->validated();
 
         DB::transaction(function () use ($voting, $data) {
+            $voting = Voting::whereKey($voting->id)->lockForUpdate()->firstOrFail();
+            if ($voting->votes()->exists()) {
+                throw \Illuminate\Validation\ValidationException::withMessages(['items' => 'Voting sudah menerima suara. Pilihan dan peserta tidak dapat diubah.']);
+            }
             $oldImagePaths = $this->candidateImagePaths($voting);
 
             $voting->update([
@@ -163,49 +173,26 @@ class VotingController extends Controller
     public function stats(Voting $voting)
     {
         abort_unless(auth()->user()->canAccessVoting(), 403);
+        return response()->json(app(VotingStatsService::class)->build($voting))
+            ->header('Cache-Control', 'no-store, private');
+    }
 
-        $voting->load(['items.candidates.votes', 'participantPivots.user']);
-
-        $items = $voting->items->map(function ($item) {
-            $totalVotes = $item->votes()->count();
-
-            return [
-                'id' => $item->id,
-                'judul' => $item->judul,
-                'total_votes' => $totalVotes,
-                'candidates' => $item->candidates->map(function ($candidate) use ($totalVotes) {
-                    $count = $candidate->votes()->count();
-                    return [
-                        'id' => $candidate->id,
-                        'nama' => $candidate->nama_snapshot,
-                        'image_url' => $candidate->image_url,
-                        'count' => $count,
-                        'percentage' => $totalVotes > 0 ? round(($count / $totalVotes) * 100, 2) : 0,
-                    ];
-                })->sortByDesc('count')->values(),
-            ];
-        })->values();
-
-        $pending = $voting->participantPivots
-            ->filter(function ($participant) {
-                return !$participant->voted_at;
-            })
-            ->map(function ($participant) {
-                return [
-                    'id' => $participant->user_id,
-                    'name' => $participant->user->name,
-                ];
-            })
-            ->values();
-
-        return response()->json([
-            'total_participants' => $voting->participantPivots->count(),
-            'total_voted' => $voting->participantPivots->whereNotNull('voted_at')->count(),
-            'pending_count' => $pending->count(),
-            'pending' => $pending,
-            'items' => $items,
-            'all_voted' => $pending->count() === 0 && $voting->participantPivots->count() > 0,
-        ]);
+    public function updateStatus(Request $request, Voting $voting)
+    {
+        abort_unless(auth()->user()->canManageVoting(), 403);
+        $data = $request->validate(['status' => 'required|in:draft,aktif,selesai']);
+        DB::transaction(function () use ($voting, $data) {
+            $locked = Voting::whereKey($voting->id)->lockForUpdate()->firstOrFail();
+            if ($data['status'] === 'draft' && $locked->votes()->exists()) {
+                throw \Illuminate\Validation\ValidationException::withMessages(['status' => 'Voting yang sudah menerima suara tidak dapat dikembalikan ke draft.']);
+            }
+            $locked->update(['status' => $data['status'], 'updated_by' => auth()->id()]);
+        });
+        $voting->refresh();
+        if ($voting->status === 'aktif' && !$voting->participant_notified_at) {
+            $this->whatsAppService->notifyVotingParticipants($voting->fresh(['participantPivots.user', 'items']));
+        }
+        return back()->with('success', 'Status voting berhasil diperbarui.');
     }
 
     public function resultsPdf(Voting $voting)
@@ -240,7 +227,7 @@ class VotingController extends Controller
         );
     }
 
-    protected function syncItems(Voting $voting, array $items)
+    protected function syncItems(Voting $voting, array $items, array $retainedChoices = [])
     {
         foreach (array_values($items) as $index => $itemData) {
             $item = VotingItem::create([
@@ -248,8 +235,27 @@ class VotingController extends Controller
                 'judul' => $itemData['judul'],
                 'deskripsi' => $itemData['deskripsi'] ?? null,
                 'urutan' => $index + 1,
+                'uses_candidates' => (bool) ($itemData['uses_candidates'] ?? true),
             ]);
 
+            if (!$item->uses_candidates) {
+                $order = 0;
+                foreach ($itemData['options'] as $key => $label) {
+                    $file = $itemData['option_images'][$key] ?? null;
+                    $existingId = $itemData['existing_option_image_ids'][$key] ?? null;
+                    $existing = $existingId ? ($retainedChoices[$existingId] ?? null) : null;
+                    $image = $file ? [
+                        'image_path' => $this->storeCandidateImage($file),
+                        'image_name' => $file->getClientOriginalName(),
+                        'image_mime' => $file->getMimeType(),
+                        'image_size' => $file->getSize(),
+                    ] : ($existing ? $existing->only(['image_path', 'image_name', 'image_mime', 'image_size']) : []);
+                    $item->candidates()->create(array_merge([
+                        'user_id' => null, 'nama_snapshot' => trim($label), 'urutan' => ++$order,
+                    ], $image));
+                }
+                continue;
+            }
             $this->syncCandidates(
                 $item,
                 $itemData['candidate_ids'],
@@ -261,11 +267,15 @@ class VotingController extends Controller
 
     protected function replaceItems(Voting $voting, array $items)
     {
+        $voting->loadMissing('items.candidates');
+        $retainedChoices = $voting->items->flatMap(function ($item) {
+            return $item->candidates;
+        })->keyBy('id')->all();
         $voting->items()->each(function ($item) {
             $item->candidates()->delete();
         });
         $voting->items()->delete();
-        $this->syncItems($voting, $items);
+        $this->syncItems($voting, $items, $retainedChoices);
     }
 
     protected function syncCandidates(VotingItem $item, array $candidateIds, array $candidateImages = [], array $existingCandidateImages = [])
@@ -331,10 +341,12 @@ class VotingController extends Controller
 
     protected function storeCandidateImage($file)
     {
-        $extension = strtolower($file->getClientOriginalExtension() ?: 'jpg');
+        $extension = strtolower($file->extension() ?: 'jpg');
         $path = 'voting/candidates/' . date('Y/m') . '/' . (string) Str::uuid() . '.' . $extension;
 
-        Storage::disk('public')->put($path, file_get_contents($file->getRealPath()));
+        if (!Storage::disk('public')->put($path, file_get_contents($file->getRealPath()))) {
+            throw new \RuntimeException('Gambar voting tidak dapat disimpan. Silakan coba kembali.');
+        }
 
         return $path;
     }

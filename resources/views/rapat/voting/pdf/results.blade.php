@@ -34,14 +34,15 @@
     </table>
 
     @foreach($voting->items as $item)
+        @php($hasImages = $item->uses_candidates || $item->candidates->contains(function ($choice) { return !empty($choice->image_path); }))
         <div class="section">
             <div class="section-title">{{ $item->judul }}</div>
             <table>
                 <thead>
                     <tr>
                         <th style="width:35px;">No</th>
-                        <th style="width:70px;">Gambar</th>
-                        <th>Kandidat</th>
+                        @if($hasImages)<th style="width:70px;">Gambar</th>@endif
+                        <th>{{ $item->uses_candidates ? 'Kandidat' : 'Pilihan Jawaban' }}</th>
                         <th style="width:100px;">Suara</th>
                     </tr>
                 </thead>
@@ -49,13 +50,13 @@
                     @foreach($item->candidates->sortByDesc(function ($candidate) { return $candidate->votes->count(); })->values() as $index => $candidate)
                         <tr>
                             <td>{{ $index + 1 }}</td>
-                            <td>
+                            @if($hasImages)<td>
                                 @if($candidate->image_path && file_exists(public_path('storage/' . $candidate->image_path)))
                                     <img src="{{ public_path('storage/' . $candidate->image_path) }}" class="candidate-image">
                                 @else
                                     -
                                 @endif
-                            </td>
+                            </td>@endif
                             <td>{{ $candidate->nama_snapshot }}</td>
                             <td>{{ $candidate->votes->count() }}</td>
                         </tr>

@@ -3,10 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Voting;
-use App\VotingVote;
-use Carbon\Carbon;
+use App\Services\VotingBallotService;
+use App\Services\VotingStatsService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 
 class VotingPublicController extends Controller
@@ -39,45 +38,11 @@ class VotingPublicController extends Controller
             'choices' => ['required', 'array'],
         ];
 
-        foreach ($voting->items as $item) {
-            $rules['choices.' . $item->id] = ['required', 'exists:voting_candidates,id'];
-        }
-
         $data = $request->validate($rules, [
             'participant_id.required' => 'Peserta voting wajib dipilih.',
         ]);
 
-        $participantPivot = $voting->participantPivots()->where('user_id', $data['participant_id'])->first();
-        if (!$participantPivot) {
-            return response()->json(['message' => 'Peserta tidak terdaftar pada voting ini.'], 422);
-        }
-
-        if ($participantPivot->voted_at) {
-            return response()->json(['message' => 'Peserta tersebut sudah melakukan voting.'], 422);
-        }
-
-        DB::transaction(function () use ($voting, $data, $participantPivot) {
-            foreach ($voting->items as $item) {
-                $candidateId = (int) $data['choices'][$item->id];
-                $candidate = $item->candidates()->where('id', $candidateId)->first();
-
-                if (!$candidate) {
-                    abort(422, 'Pilihan kandidat tidak valid.');
-                }
-
-                VotingVote::create([
-                    'voting_id' => $voting->id,
-                    'voting_item_id' => $item->id,
-                    'voting_candidate_id' => $candidate->id,
-                    'user_id' => $participantPivot->user_id,
-                    'voted_at' => Carbon::now('Asia/Jayapura'),
-                ]);
-            }
-
-            $participantPivot->update([
-                'voted_at' => Carbon::now('Asia/Jayapura'),
-            ]);
-        });
+        app(VotingBallotService::class)->submit($voting, $data['participant_id'], $data['choices']);
 
         return response()->json([
             'success' => true,
@@ -89,60 +54,21 @@ class VotingPublicController extends Controller
     public function results($publicCode)
     {
         $voting = $this->findVoting($publicCode);
-        $voting->load(['items.candidates.votes', 'participantPivots.user']);
-
-        return view('rapat.voting.public-results', compact('voting'));
+        abort_if($voting->status === 'draft', 404);
+        $stats = app(VotingStatsService::class)->build($voting);
+        return view('rapat.voting.public-results', compact('voting', 'stats'));
     }
 
     public function stats($publicCode)
     {
         $voting = $this->findVoting($publicCode);
-        $voting->load(['items.candidates.votes', 'participantPivots.user']);
-
-        $items = $voting->items->map(function ($item) {
-            $totalVotes = $item->votes()->count();
-
-            return [
-                'id' => $item->id,
-                'judul' => $item->judul,
-                'total_votes' => $totalVotes,
-                'candidates' => $item->candidates->map(function ($candidate) use ($totalVotes) {
-                    $count = $candidate->votes()->count();
-                    return [
-                        'id' => $candidate->id,
-                        'nama' => $candidate->nama_snapshot,
-                        'image_url' => $candidate->image_url,
-                        'count' => $count,
-                        'percentage' => $totalVotes > 0 ? round(($count / $totalVotes) * 100, 2) : 0,
-                    ];
-                })->sortByDesc('count')->values(),
-            ];
-        })->values();
-
-        $pending = $voting->participantPivots
-            ->filter(function ($participant) {
-                return !$participant->voted_at;
-            })
-            ->map(function ($participant) {
-                return [
-                    'name' => $participant->user->name,
-                ];
-            })
-            ->values();
-
-        return response()->json([
-            'title' => $voting->judul,
-            'total_participants' => $voting->participantPivots->count(),
-            'total_voted' => $voting->participantPivots->whereNotNull('voted_at')->count(),
-            'pending_count' => $pending->count(),
-            'pending' => $pending,
-            'items' => $items,
-            'all_voted' => $pending->count() === 0 && $voting->participantPivots->count() > 0,
-        ]);
+        abort_if($voting->status === 'draft', 404);
+        return response()->json(app(VotingStatsService::class)->build($voting))
+            ->header('Cache-Control', 'no-store, private');
     }
 
     protected function findVoting($publicCode)
     {
-        return Voting::with(['items.candidates', 'participantPivots.user'])->where('public_code', $publicCode)->firstOrFail();
+        return Voting::where('public_code', $publicCode)->firstOrFail();
     }
 }

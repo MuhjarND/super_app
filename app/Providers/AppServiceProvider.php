@@ -33,6 +33,7 @@ class AppServiceProvider extends ServiceProvider
     public function register()
     {
         $this->app->singleton(MobileNotificationBadgeService::class);
+        $this->app->singleton(\App\Services\ProgressZi\ZiEvidenceGuideService::class);
 
         spl_autoload_register(function ($class) {
             $prefix = 'Picqer\\Barcode\\';

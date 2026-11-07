@@ -19,19 +19,34 @@
 </head>
 <body>
     <div class="title">Bundel Eviden Progress ZI</div>
-    <div class="subtitle">Dokumen gabungan eviden untuk sub poin monitoring Zona Integritas.</div>
+    <div class="subtitle">Daftar tautan Google Drive dan lampiran eviden lama untuk sub poin monitoring Zona Integritas. Isi dokumen Google Drive diperiksa melalui tautannya sesuai izin akses yang diberikan.</div>
 
     <div class="box">
         <div class="label">Area</div>
         <div class="value">{{ optional($activity->area)->code }} - {{ optional($activity->area)->name }}</div>
 
         <div class="label">Sub Poin Pedoman</div>
-        <div class="value">{{ optional(optional($activity->guidelineSubPoint)->point)->code }}.{{ optional($activity->guidelineSubPoint)->code }} {{ optional($activity->guidelineSubPoint)->title }}</div>
+        <div class="value">{{ optional(optional($activity->guidelineSubPoint)->point)->code }}.{{ optional($activity->guidelineSubPoint)->display_code }} {{ optional($activity->guidelineSubPoint)->title }}</div>
 
         <div class="label">Kegiatan</div>
         <div class="value">{{ $activity->name }}</div>
     </div>
 
+    @php $guide = $activity->guidelineSubPoint ? $activity->guidelineSubPoint->evidence_guide : null; @endphp
+    @if($guide)
+        <div class="box">
+            <div class="section" style="margin-top:0;">Panduan Penyusunan Eviden</div>
+            @if($guide['notes'] ?? $guide['guidance'])
+                <div class="label">Catatan/Keterangan/Penjelasan</div>
+                <div style="white-space:pre-wrap;">{{ $guide['notes'] ?? $guide['guidance'] }}</div>
+            @endif
+            @if($guide['explanation'])
+                <div class="label" style="margin-top:8px;">Penjelasan pemenuhan</div>
+                <div style="white-space:pre-wrap;">{{ $guide['explanation'] }}</div>
+            @endif
+            <div class="muted" style="margin-top:8px;">Sumber: PANDUAN PENYUSUNAN EVIDEN.xlsx, Interpretasi_LKE ZI, baris {{ $guide['source_row'] }}.</div>
+        </div>
+    @endif
     <div class="section">Daftar Eviden</div>
     <table>
         <thead>
@@ -48,8 +63,12 @@
                     <td>{{ $index + 1 }}</td>
                     <td>
                         <strong>{{ $evidence->title }}</strong>
+                        @if($evidence->drive_url && $evidence->preview_url)
+                            <div class="muted" style="word-wrap:break-word;"><a href="{{ $evidence->preview_url }}">{{ $evidence->drive_url }}</a></div>
+                        @endif
                         @if($evidence->description)
-                            <div class="muted">{{ $evidence->description }}</div>
+                            <div class="muted"><strong>Catatan Eviden:</strong></div>
+                            <div class="muted" style="white-space:pre-wrap; word-wrap:break-word;">{{ $evidence->description }}</div>
                         @endif
                     </td>
                     <td>{{ $evidence->source_reference_label }}</td>

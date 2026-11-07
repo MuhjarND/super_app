@@ -74,6 +74,11 @@ class ZiEvidenceBundleService
 
     protected function resolveEvidencePdfPath($evidence)
     {
+        // Drive evidence is listed on the cover; never fetch external/private documents.
+        if ($evidence->drive_url) {
+            return null;
+        }
+
         if ($evidence->file_path) {
             return $this->resolveStorageAttachmentPath(
                 $evidence->file_path,
@@ -214,7 +219,7 @@ class ZiEvidenceBundleService
             $pageCount = $pdf->setSourceFile($sourceFile);
 
             for ($pageNumber = 1; $pageNumber <= $pageCount; $pageNumber++) {
-                $templateId = $pdf->importPage($pageNumber);
+                $templateId = $pdf->importPage($pageNumber, \setasign\Fpdi\PdfReader\PageBoundaries::CROP_BOX, true, true);
                 $size = $pdf->getTemplateSize($templateId);
                 $orientation = $size['width'] > $size['height'] ? 'L' : 'P';
 

@@ -4,6 +4,7 @@
 
 @push('styles')
 <style>
+    #uploadEvidenceForm { display:flex; flex-direction:column; min-height:0; }
     .zi-monitor-shell { display:grid; gap:16px; }
     .zi-group-grid { display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:12px; }
     .zi-group-card { display:block; padding:16px 18px; border:1px solid #dbeafe; border-radius:16px; background:linear-gradient(180deg, #f8fbff 0%, #ffffff 100%); color:#0f172a; box-shadow:0 4px 12px rgba(15,23,42,.04); transition:all .16s ease; }
@@ -225,24 +226,9 @@
         </div>
         @foreach($visibleAreas as $area)
                 @php
-                    $totalSubPoints = $area->guidelinePoints->sum(function ($point) { return $point->subPoints->count(); });
-                    $coveredSubPoints = $area->guidelinePoints->sum(function ($point) use ($area) {
-                        return $point->subPoints->filter(function ($subPoint) use ($area) {
-                            $subPointActivities = $area->activities->where('zi_guideline_sub_point_id', $subPoint->id)->values();
-                            $rapatActivities = $subPointActivities->filter(function ($activity) {
-                                return $activity->source_type === 'rapat' || $activity->source_reference_type === 'rapat';
-                            });
-                            $requiresPeriodic = $subPoint->indicators->contains(function ($indicator) {
-                                return (bool) $indicator->is_periodic;
-                            });
-
-                            if ($requiresPeriodic) {
-                                return $rapatActivities->count() > 1;
-                            }
-
-                            return $subPointActivities->isNotEmpty();
-                        })->count();
-                    });
+                    $coverage = app(\App\Services\ProgressZi\ZiProgressService::class)->buildSubPointCoverage(collect([$area]));
+                    $totalSubPoints = $coverage['total'];
+                    $coveredSubPoints = $coverage['covered'];
                     $coverageClass = $coveredSubPoints === 0 ? 'is-danger' : ($coveredSubPoints === $totalSubPoints && $totalSubPoints > 0 ? 'is-success' : 'is-progress');
                     $canManageArea = auth()->user()->canManageProgressZiArea($area);
                     $canCreateMeeting = $canManageArea && auth()->user()->canManageRapat();
@@ -281,7 +267,7 @@
                                     $rapatActivities = $subPointActivities->filter(function ($activity) {
                                         return $activity->source_type === 'rapat' || $activity->source_reference_type === 'rapat';
                                     })->values();
-                                    $requiresPeriodic = $subPoint->indicators->contains(function ($indicator) {
+                                    $requiresPeriodic = !$subPoint->evidence_guide_key && $subPoint->indicators->contains(function ($indicator) {
                                         return (bool) $indicator->is_periodic;
                                     });
                                     $periodicCompleted = !$requiresPeriodic || $rapatActivities->count() > 1 || ($latestApproval && $latestApproval->status === 'approved');
@@ -302,7 +288,7 @@
                                         $statusLabel = 'Dalam Proses Review';
                                     } elseif ($evidenceCount > 0) {
                                         $statusClass = 'primary';
-                                        $statusLabel = 'Diupload';
+                                        $statusLabel = 'Eviden Tersedia';
                                     } else {
                                         $statusClass = 'info';
                                         $statusLabel = 'Dijadwalkan';
@@ -314,7 +300,7 @@
                                 <div class="zi-subpoint-row">
                                     <div class="zi-subpoint-left">
                                         <div class="zi-subpoint-line">
-                                            <div class="zi-subpoint-code-inline">{{ strtolower($subPoint->code) }}.</div>
+                                            <div class="zi-subpoint-code-inline">{{ $subPoint->evidence_guide['code'] ?? strtolower($subPoint->code) }}.</div>
                                             <div>
                                                 <div class="zi-subpoint-title">{{ $subPoint->title }}</div>
                                                 <div class="zi-status-wrap" style="margin-top:6px;">
@@ -326,7 +312,7 @@
                                                         @endif
                                                     @endif
                                                     @if($canPreview)
-                                                        <a href="#" class="zi-preview-link zi-open-preview" data-title="Preview - {{ $subPoint->title }}" data-url="{{ $latestActivity->monitoring_preview_url }}" data-preview-list="#ziPreviewListTemplate{{ $subPoint->id }}">
+                                                        <a href="#" class="zi-preview-link zi-open-preview" data-title="Preview - {{ $subPoint->title }}" data-url="{{ route('progress-zi.activities.evidences.bundle', $latestActivity) }}" data-preview-list="#ziPreviewListTemplate{{ $subPoint->id }}">
                                                             <i class="fas fa-eye"></i> Preview
                                                         </a>
                                                         <a href="{{ route('progress-zi.activities.evidences.bundle', $latestActivity) }}" target="_blank" class="zi-preview-link">
@@ -334,26 +320,10 @@
                                                         </a>
                                                     @endif
                                                 </div>
-                                                @if($subPoint->indicators->count())
-                                                    <a class="zi-detail-toggle" onclick="this.nextElementSibling.classList.toggle('show')">
-                                                        <i class="fas fa-info-circle"></i> Indikator ({{ $subPoint->indicators->count() }})
-                                                    </a>
-                                                    <div class="zi-indicator-collapse">
-                                                        <div class="zi-indicator-list">
-                                                            @foreach($subPoint->indicators as $indicator)
-                                                                <div class="zi-indicator-item">
-                                                                    @if($indicator->is_periodic)
-                                                                        <div class="zi-periodic-chip"><i class="fas fa-sync-alt"></i>Berkala</div>
-                                                                    @endif
-                                                                    <div class="zi-indicator-title">{{ $indicator->indicator_text }}</div>
-                                                                    @if($indicator->evidence_example)
-                                                                        <div class="zi-indicator-meta"><strong>Contoh:</strong> {{ $indicator->evidence_example }}</div>
-                                                                    @endif
-                                                                </div>
-                                                            @endforeach
-                                                        </div>
-                                                    </div>
-                                                @endif
+                                                <details class="mt-2 border rounded p-3">
+                                                    <summary class="font-weight-bold text-primary">Panduan Penyusunan Eviden</summary>
+                                                    <div class="mt-3">@include('progress-zi.partials.evidence-guide', ['guide' => $subPoint->evidence_guide])</div>
+                                                </details>
                                             </div>
                                         </div>
                                     </div>
@@ -362,9 +332,9 @@
                                             <button type="button" class="btn btn-primary btn-sm zi-open-meeting-modal"
                                                 data-toggle="modal" data-target="#createRapatModal"
                                                 data-area-id="{{ $area->id }}" data-area-name="{{ $area->code }} - {{ $area->name }}"
-                                                data-subpoint-id="{{ $subPoint->id }}" data-subpoint-code="{{ strtolower($subPoint->code) }}"
+                                                data-subpoint-id="{{ $subPoint->id }}" data-subpoint-code="{{ strtolower($subPoint->display_code) }}"
                                                 data-subpoint-title="{{ $subPoint->title }}" data-period-id="{{ optional($selectedPeriod)->id }}"
-                                                data-default-title="Rapat Monitoring dan Evaluasi - {{ $subPoint->title }}"
+                                                data-default-title="{{ \Illuminate\Support\Str::limit('Rapat Monitoring dan Evaluasi - ' . $subPoint->title, 252) }}"
                                                 {{ $canCreateMeeting ? '' : 'disabled' }}>
                                                 <i class="fas fa-calendar-plus mr-1"></i>Kegiatan
                                             </button>
@@ -374,9 +344,9 @@
                                                 data-period-id="{{ optional($selectedPeriod)->id }}" data-subpoint-id="{{ $subPoint->id }}"
                                                 data-area-name="{{ $area->code }} - {{ $area->name }}" data-subpoint-title="{{ $subPoint->title }}"
                                                 data-existing-evidence="#ziEvidenceListTemplate{{ $subPoint->id }}"
-                                                data-recommendations="#ziRecommendationListTemplate{{ $subPoint->id }}"
+                                                data-guide="#ziEvidenceGuideTemplate{{ $subPoint->id }}"
                                                 {{ $canUploadEvidence ? '' : 'disabled' }}>
-                                                <i class="fas fa-upload mr-1"></i>Eviden
+                                                <i class="fas fa-link mr-1"></i>Eviden
                                             </button>
                                             <form method="POST" action="{{ $latestActivity ? route('progress-zi.activities.submit-review', $latestActivity) : '#' }}" class="d-inline">
                                                 @csrf
@@ -387,6 +357,9 @@
                                         </div>
                                     </div>
                                 </div>
+                                <template id="ziEvidenceGuideTemplate{{ $subPoint->id }}">
+                                    @include('progress-zi.partials.evidence-guide', ['guide' => $subPoint->evidence_guide])
+                                </template>
                                 <div class="d-none" id="ziEvidenceListTemplate{{ $subPoint->id }}">
                                     @forelse($allEvidences as $evidence)
                                         <div class="zi-modal-evidence-card">
@@ -398,10 +371,14 @@
                                                 {!! $evidence->status_badge !!}
                                             </div>
                                             @if($evidence->description)
-                                                <div class="small text-muted mt-2">{{ $evidence->description }}</div>
+                                                <div class="small mt-2"><strong>Catatan Eviden:</strong><div class="text-muted" style="white-space:pre-wrap; overflow-wrap:anywhere;">{{ $evidence->description }}</div></div>
                                             @endif
                                             @if($evidence->preview_url)
+                                                @if($evidence->drive_url)
+                                                <a href="{{ $evidence->preview_url }}" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-outline-primary mt-2">Buka Google Drive <i class="fas fa-external-link-alt ml-1"></i></a>
+                                                @else
                                                 <button type="button" class="btn btn-sm btn-outline-primary mt-2 zi-open-preview" data-title="{{ $evidence->title }}" data-url="{{ $evidence->preview_url }}" data-preview-list="#ziPreviewListTemplate{{ $subPoint->id }}">Preview Eviden</button>
+                                                @endif
                                             @endif
                                         </div>
                                     @empty
@@ -415,32 +392,19 @@
                                         })->values();
                                     @endphp
                                     @forelse($previewableEvidences as $evidence)
+                                        @if($evidence->drive_url)
+                                        <a class="zi-preview-item" href="{{ $evidence->preview_url }}" target="_blank" rel="noopener noreferrer">
+                                            <div class="zi-preview-item-title">{{ $evidence->title }} <i class="fas fa-external-link-alt ml-1"></i></div>
+                                            <div class="zi-preview-item-meta">Buka Google Drive</div>
+                                        </a>
+                                        @else
                                         <button type="button" class="zi-preview-item" data-url="{{ $evidence->preview_url }}" data-title="{{ $evidence->title }}">
                                             <div class="zi-preview-item-title">{{ $evidence->title }}</div>
                                             <div class="zi-preview-item-meta">{{ $evidence->source_reference_label }}</div>
                                         </button>
+                                        @endif
                                     @empty
                                         <div class="text-muted small">Belum ada eviden yang bisa dipreview.</div>
-                                    @endforelse
-                                </div>
-                                <div class="d-none" id="ziRecommendationListTemplate{{ $subPoint->id }}">
-                                    @php
-                                        $recommendations = $subPointRecommendations[$subPoint->id] ?? [];
-                                    @endphp
-                                    @forelse($recommendations as $recommendation)
-                                        <button type="button"
-                                            class="zi-suggestion-btn zi-apply-recommendation"
-                                            data-linked-source="{{ $recommendation['linked_source'] }}"
-                                            data-title="{{ $recommendation['title'] }}"
-                                            data-description="{{ $recommendation['meta'] }}">
-                                            <div class="zi-suggestion-type"><i class="fas fa-magic"></i>{{ $recommendation['type'] }}</div>
-                                            <div class="zi-suggestion-title">{{ $recommendation['title'] }}</div>
-                                            @if(!empty($recommendation['meta']))
-                                                <div class="zi-suggestion-meta">{{ $recommendation['meta'] }}</div>
-                                            @endif
-                                        </button>
-                                    @empty
-                                        <div class="text-muted small">Belum ada saran eviden otomatis untuk sub poin ini.</div>
                                     @endforelse
                                 </div>
                             @empty
@@ -472,55 +436,45 @@
 @endif
 
 <div class="modal fade" id="uploadEvidenceModal" tabindex="-1">
-    <div class="modal-dialog modal-lg">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Upload Eviden Sub Poin</h5>
+                <h5 class="modal-title">Tautkan Eviden Google Drive</h5>
                 <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
             </div>
-            <form method="POST" action="#" id="uploadEvidenceForm" enctype="multipart/form-data">
+            <form method="POST" action="#" id="uploadEvidenceForm">
                 @csrf
                 <input type="hidden" name="zi_period_id" id="uploadEvidencePeriodId">
                 <input type="hidden" name="zi_area_id" id="uploadEvidenceAreaId">
+                <input type="hidden" name="evidence_sub_point_id" id="evidenceSubPointId">
                 <div class="modal-body">
+                    @if(old('evidence_sub_point_id') && $errors->any())
+                        <div class="alert alert-danger" role="alert">
+                            @foreach($errors->all() as $error)<div>{{ $error }}</div>@endforeach
+                        </div>
+                    @endif
                     <div class="alert alert-light border mb-3">
                         <div class="small text-muted">Sub Poin</div>
                         <div class="font-weight-bold" id="uploadEvidenceSubPoint">-</div>
                         <div class="small text-muted mt-1" id="uploadEvidenceArea">-</div>
                     </div>
-                    <div class="form-group">
-                        <label>Mode Eviden</label>
-                        <select class="form-control" name="mode" id="uploadEvidenceMode" required>
-                            <option value="manual">Upload Manual</option>
-                            <option value="linked">Hubungkan dari Modul Lain</option>
-                        </select>
-                    </div>
+                    <input type="hidden" name="mode" value="google_drive">
+                    <details class="border rounded p-3 mb-3" id="evidenceGuideDetails" open>
+                        <summary class="font-weight-bold">Panduan Penyusunan Eviden</summary>
+                        <div class="mt-3" id="evidenceGuideContent"></div>
+                    </details>
                     <div class="form-group">
                         <label>Judul Eviden</label>
-                        <input type="text" class="form-control" name="title" id="uploadEvidenceTitle">
+                        <input type="text" class="form-control" name="title" id="uploadEvidenceTitle" maxlength="255">
                     </div>
                     <div class="form-group">
-                        <label>Deskripsi</label>
-                        <textarea class="form-control" name="description" rows="2"></textarea>
+                        <label for="evidenceNotes">Catatan Eviden <span class="text-muted font-weight-normal">(opsional)</span></label>
+                        <textarea class="form-control" name="description" id="evidenceNotes" rows="3" placeholder="Tambahkan penjelasan isi folder, periode dokumen, atau hal yang perlu diperhatikan pemeriksa."></textarea>
                     </div>
-                    <div class="form-group" id="uploadEvidenceFileGroup">
-                        <label>File Eviden</label>
-                        <input type="file" class="form-control-file" name="file" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx,.xls,.xlsx">
-                    </div>
-                    <div class="form-group d-none" id="uploadEvidenceLinkedGroup">
-                        <label>Sumber Eviden Terhubung</label>
-                        <select class="form-control" name="linked_source" id="uploadEvidenceLinkedSource">
-                            <option value="">-- Pilih Eviden --</option>
-                            @foreach($evidenceSourceOptions as $option)
-                                <option value="{{ $option['value'] }}">{{ $option['label'] }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div class="border rounded p-3 bg-light mb-3">
-                        <div class="small text-muted mb-2">Saran Eviden Otomatis</div>
-                        <div class="zi-suggestion-list" id="recommendedEvidenceList">
-                            <div class="text-muted small">Belum ada rekomendasi eviden.</div>
-                        </div>
+                    <div class="form-group">
+                        <label for="evidenceDriveUrl">Tautan File / Folder Google Drive <span class="text-danger">*</span></label>
+                        <input type="url" class="form-control" name="drive_url" id="evidenceDriveUrl" required maxlength="2048" placeholder="https://drive.google.com/drive/folders/..." aria-describedby="evidenceDriveHelp">
+                        <small id="evidenceDriveHelp" class="form-text text-muted">Tempel tautan file atau folder Google Drive, termasuk Google Docs, Sheets, dan Slides. Pastikan akun pemeriksa diberi akses lihat melalui menu Bagikan di Google Drive.</small>
                     </div>
                     <div class="border rounded p-3 bg-light">
                         <div class="small text-muted mb-2">Eviden yang Sudah Ada</div>
@@ -577,12 +531,6 @@
             });
         }
 
-        function toggleEvidenceMode() {
-            var mode = document.getElementById('uploadEvidenceMode').value;
-            document.getElementById('uploadEvidenceFileGroup').classList.toggle('d-none', mode !== 'manual');
-            document.getElementById('uploadEvidenceLinkedGroup').classList.toggle('d-none', mode !== 'linked');
-        }
-
         document.querySelectorAll('.zi-open-meeting-modal').forEach(function (button) {
             button.addEventListener('click', function () {
                 ensureProgressZiContextFields();
@@ -610,6 +558,10 @@
                 var subPointId = button.getAttribute('data-subpoint-id');
                 var areaId = button.getAttribute('data-area-id');
                 var periodId = button.getAttribute('data-period-id');
+                document.getElementById('uploadEvidenceForm').reset();
+                var guideTemplate = document.querySelector(button.getAttribute('data-guide'));
+                document.getElementById('evidenceGuideContent').innerHTML = guideTemplate ? guideTemplate.innerHTML : '';
+                document.getElementById('evidenceGuideDetails').open = true;
 
                 if (activityId) {
                     document.getElementById('uploadEvidenceForm').setAttribute('action', '{{ url('progress-zi/activities') }}/' + activityId + '/evidences');
@@ -617,26 +569,21 @@
                     document.getElementById('uploadEvidenceForm').setAttribute('action', '{{ url('progress-zi/sub-points') }}/' + subPointId + '/evidences');
                 }
                 document.getElementById('uploadEvidencePeriodId').value = periodId || '';
+                document.getElementById('evidenceSubPointId').value = subPointId || '';
                 document.getElementById('uploadEvidenceAreaId').value = areaId || '';
                 document.getElementById('uploadEvidenceSubPoint').textContent = button.getAttribute('data-subpoint-title') || '-';
                 document.getElementById('uploadEvidenceArea').textContent = button.getAttribute('data-area-name') || '-';
-                document.getElementById('uploadEvidenceTitle').value = 'Eviden - ' + (button.getAttribute('data-subpoint-title') || '');
-                document.getElementById('uploadEvidenceLinkedSource').value = '';
-                document.getElementById('uploadEvidenceMode').value = 'manual';
-                toggleEvidenceMode();
+                document.getElementById('uploadEvidenceTitle').value = ('Eviden - ' + (button.getAttribute('data-subpoint-title') || '')).slice(0, 255);
 
                 var targetSelector = button.getAttribute('data-existing-evidence');
                 var template = targetSelector ? document.querySelector(targetSelector) : null;
                 document.getElementById('existingEvidenceList').innerHTML = template ? template.innerHTML : '<div class="text-muted small">Belum ada eviden.</div>';
 
-                var recommendationSelector = button.getAttribute('data-recommendations');
-                var recommendationTemplate = recommendationSelector ? document.querySelector(recommendationSelector) : null;
-                document.getElementById('recommendedEvidenceList').innerHTML = recommendationTemplate ? recommendationTemplate.innerHTML : '<div class="text-muted small">Belum ada rekomendasi eviden.</div>';
             });
         });
 
         document.addEventListener('click', function (event) {
-            var previewItem = event.target.closest('.zi-preview-item');
+            var previewItem = event.target.closest('button.zi-preview-item');
             if (previewItem) {
                 event.preventDefault();
                 document.querySelectorAll('#ziEvidencePreviewList .zi-preview-item').forEach(function (item) {
@@ -666,26 +613,6 @@
             }
             $('#ziEvidencePreviewModal').modal('show');
         });
-
-        document.addEventListener('click', function (event) {
-            var trigger = event.target.closest('.zi-apply-recommendation');
-            if (!trigger) {
-                return;
-            }
-
-            event.preventDefault();
-            document.getElementById('uploadEvidenceMode').value = 'linked';
-            toggleEvidenceMode();
-            document.getElementById('uploadEvidenceLinkedSource').value = trigger.getAttribute('data-linked-source') || '';
-            document.getElementById('uploadEvidenceTitle').value = trigger.getAttribute('data-title') || '';
-            var descriptionField = document.querySelector('#uploadEvidenceForm textarea[name="description"]');
-            if (descriptionField && !descriptionField.value) {
-                descriptionField.value = trigger.getAttribute('data-description') || '';
-            }
-        });
-
-        document.getElementById('uploadEvidenceMode').addEventListener('change', toggleEvidenceMode);
-        toggleEvidenceMode();
 
         @if(auth()->user()->canManageRapat())
             $('#createRapatModal').on('shown.bs.modal', function () {
@@ -726,6 +653,18 @@
                     }
                 });
             });
+        @endif
+        @if(old('evidence_sub_point_id') && $errors->any())
+            var previousSubPoint = @json((string) old('evidence_sub_point_id'));
+            var previousButton = Array.from(document.querySelectorAll('.zi-open-evidence-modal')).find(function (button) {
+                return button.getAttribute('data-subpoint-id') === previousSubPoint;
+            });
+            if (previousButton) {
+                previousButton.click();
+                document.getElementById('uploadEvidenceTitle').value = @json(old('title', ''));
+                document.getElementById('evidenceDriveUrl').value = @json(old('drive_url', ''));
+                document.querySelector('#uploadEvidenceForm textarea[name="description"]').value = @json(old('description', ''));
+            }
         @endif
     })();
 </script>

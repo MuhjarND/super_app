@@ -11,7 +11,10 @@ class VotingItem extends Model
         'judul',
         'deskripsi',
         'urutan',
+        'uses_candidates',
     ];
+
+    protected $casts = ['uses_candidates' => 'boolean'];
 
     public function voting()
     {

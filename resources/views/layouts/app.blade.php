@@ -3961,7 +3961,7 @@
                                         <a href="{{ route('progress-zi.guidelines.index') }}"
                                             class="nav-link {{ request()->routeIs('progress-zi.guidelines.*') ? 'active' : '' }}">
                                             <i class="nav-icon fas fa-book-open"></i>
-                                            <p>Pedoman ZI</p>
+                                            <p>Panduan Eviden ZI</p>
                                         </a>
                                     </li>
                                     @if($isSidebarSuperAdmin || $sidebarUser->canManageProgressZiMasterData())

@@ -12,11 +12,22 @@ class ZiGuidelineSubPoint extends Model
         'title',
         'description',
         'sort_order',
+        'evidence_guide_key',
     ];
 
     public function point()
     {
         return $this->belongsTo(ZiGuidelinePoint::class, 'zi_guideline_point_id');
+    }
+
+    public function getEvidenceGuideAttribute()
+    {
+        return app(\App\Services\ProgressZi\ZiEvidenceGuideService::class)->forSubPoint($this);
+    }
+
+    public function getDisplayCodeAttribute()
+    {
+        return $this->evidence_guide['code'] ?? $this->code;
     }
 
     public function indicators()

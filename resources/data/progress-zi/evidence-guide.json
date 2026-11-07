@@ -1,0 +1,1996 @@
+{
+  "source_name": "PANDUAN PENYUSUNAN EVIDEN.xlsx",
+  "source_sha256": "59662ec2f0c598fc2cf2c8df881f276923a57e85ad12b86d4f2fcf6cf60e8d89",
+  "sheet": "Interpretasi_LKE ZI",
+  "introduction": "Prinsip Justifikasi (Judgment evaluator) dalam Pendekatan pemenuhan evidance dalam pengukuran indikator :\n1) Pelakanaan Pembangunan ZI merupakan miniatur pelaksanaan RB pada unit kerja, karenanya ukuran pelaksanaan atas pemenuhan indikator pengukuran dimaksudkan pada pelaksanaan di unit kerja pembangunan ZI\n2) Keterbatasan dalam pelaksanaan evaluasi/penilaian,  waktu pelaksanaan penilaian di triwulan I-II, sehingga kegiatan pembangunan dalam proses (belum sepenuhnya terlaksana/berjalan) karenanya untuk mendapat gambaran pelaksanaan pembangunan ZI, evidance tidak terbatas pada tahun penilaian (tahun berjraalan) tetapi pada periode pembangunan ditahun sebelumnya;\n3) Evidance dalam Pemenuhan indikator pengukuran merupakan pendekatan dalam pencapaian tujuan pembangunan karenanya bersifat kualitatif, karenanya perlu konsensus evaluator atas judgment pemenuhan evidance dalam pengukuran indkator agar terdapat kesepahaman evaluator dan evaluate (yang dievaluasi)\n4) Krangka Logis LKE, Bahwa secara umum LKE dibangun menggunakan pendekatan logis PDCA (Plan-Do-Check-Action) sehingga evaluator dalam melakukan penilaian (Judgment) memperhatikan krangka logis LKE tersebut \n5) Reform merupakan pengukuran keberhasilan program yang telah dijalankan dan dijelaskan pada aspek pemenuhan, sehingga evidance pada aspek reform merupakan hasil/implementasi dari pelaksanaan pada aspek pemenuhan",
+  "areas": [
+    {
+      "key": "pengungkit-1",
+      "group": "pengungkit",
+      "code": "1",
+      "title": "MANAJEMEN PERUBAHAN",
+      "source_row": 7,
+      "guidance": "Tujuan :\nmentransformasi  sistem dan mekanisme kerja organisasi serta mindset (pola pikir) dan  cultureset (cara  kerja)  individu  ASN  menjadi  lebih  adaptif,  inovatif,  responsive, profesional,  dan  berintegritas\nKondisi yg ingin diwujudkan :\n1) Perubahan pola pikir dan budaya kerja di unit\n2) Menurunnya risiko kegagalan akibat resistensi thd perubahan;\n3) Terimplementasinya core value ASN Berakhlak (SE MenpanRB No. 20 Tahun 2021)",
+      "points": [
+        {
+          "key": "row-8",
+          "code": "i",
+          "title": "Penyusunan Tim Kerja",
+          "source_row": 8,
+          "guidance": "",
+          "entries": [
+            {
+              "key": "row-9",
+              "code": "a",
+              "title": "Unit kerja telah membentuk tim untuk melakukan pembangunan Zona Integritas",
+              "source_row": 9,
+              "explanation": "Ya, jika Tim telah dibentuk di dalam unit kerja.",
+              "guidance": "Pemenuhan formal ; \nSK Tim Kerja Pembangunan ZI menuju WBK/WBBM",
+              "answer_format": "Ya/Tidak",
+              "supporting_data": [],
+              "images": []
+            },
+            {
+              "key": "row-10",
+              "code": "b",
+              "title": "Penentuan anggota Tim dipilih melalui prosedur/mekanisme yang jelas",
+              "source_row": 10,
+              "explanation": "a. Jika dengan prosedur/mekanisme yang jelas dan mewakili seluruh unsur dalam unit kerja\nb. Jika sebagian menggunakan prosedur yang mewakili sebagian besar unsur dalam unit kerja\nc. Jika tidak di seleksi.",
+              "guidance": "Terdapat evidance atas pelaksanaan kegiatan yang meyakinkan bahwa penetuan anggota Tim Kerja (point a) telah didasarkan atas kriteria yang jelas \nal. terdapat prasarat yang ditetapkan dalam penetuan tim kerja; penentuan tim dilakukan melalui mekanisme al: Pengusulan per bagian, penentuannya susunan tim dibahas dalam Rapat dst",
+              "answer_format": "A/B/C",
+              "supporting_data": [],
+              "images": []
+            }
+          ]
+        },
+        {
+          "key": "row-11",
+          "code": "ii",
+          "title": "Rencana Pembangunan Zona Integritas",
+          "source_row": 11,
+          "guidance": "",
+          "entries": [
+            {
+              "key": "row-12",
+              "code": "a",
+              "title": "Terdapat dokumen rencana kerja pembangunan Zona Integritas menuju WBK/WBBM",
+              "source_row": 12,
+              "explanation": "Ya, jika memiliki  rencana kerja pembangunan Zona Integritas.",
+              "guidance": "Pemenuhan formal ; \nDokumen rencana kerja telah disusun oleh Tim Kerja pembangunan ZI menuju WBK/WBBM dan telah diformalkan",
+              "answer_format": "Ya/Tidak",
+              "supporting_data": [],
+              "images": []
+            },
+            {
+              "key": "row-13",
+              "code": "b",
+              "title": "Dalam dokumen pembangunan terdapat target-target prioritas yang relevan dengan tujuan pembangunan WBK/WBBM",
+              "source_row": 13,
+              "explanation": "a. Jika semua target-target prioritas relevan dengan tujuanpembangunan WBK/WBBM\nb. Jika sebagian target-target prioritas relevan dengan tujuan pembangunan WBK/WBBM\nc. Jika tidak ada target-target prioritas yang relevan dengan tujuan pembangunan WBK/WBBM",
+              "guidance": "Dalam dokumen rencana kerja telah memuat target relevan dengan tujuan pembangunan WBK/WBBM dengan konkrit sehingga dapat dijadikan acuan dalam pelaksanaan evaluasi;\ne.g. Terget idealnya per kegiatan dengan tingkat capaian dalam rentang waktu target",
+              "answer_format": "A/B/C",
+              "supporting_data": [],
+              "images": []
+            },
+            {
+              "key": "row-14",
+              "code": "c",
+              "title": "Terdapat mekanisme atau media untuk mensosialisasikan pembangunan WBK/WBBM",
+              "source_row": 14,
+              "explanation": "a. Jika telah dilakukan pengelolaan media/aktivitas interaktif yang efektif untuk menginformasikan pembangunan ZI kepada internal dan stakeholder secara berkala\nb. Jika pengelolaan media/aktivitas interaktif dilakukan secara terbatas dan tidak secara berkala\nc. Jika pengelolaan media/aktivitas interaktif belum dilakukan",
+              "guidance": "Terdapat mekanisme atau media untuk mensosialisasikan pembangunan ZI kepada internal dan stakeholders:\nInternal : Sosialisasimelalui kegiatan rapat-rapat pimpan dan seluruh pegawai atau publikasi program ZI unit yang dapat dilakukan dalam bentuk offline maupun luring al, melalui group group media sosial internal; \nStakeholeders : Sosialisasi dan publiksasi program pembangunan ZI unit kerja melalui papan pengumuman yang ada dipengadilan, Paflet, spanduk dan baner-baner (offline) atau melalui luring dengan website dan media sosial;\nInteraktif : Jika sosialisasi/publikasi telah dikelola melalui media sosial yang memungkinkan respons atas tanggapan dan pertanyaan penerima layanan seketika;",
+              "answer_format": "A/B/C",
+              "supporting_data": [],
+              "images": []
+            }
+          ]
+        },
+        {
+          "key": "row-15",
+          "code": "iii",
+          "title": "Pemantauan dan Evaluasi Pembangunan WBK/WBBM",
+          "source_row": 15,
+          "guidance": "",
+          "entries": [
+            {
+              "key": "row-16",
+              "code": "a",
+              "title": "Seluruh kegiatan pembangunan sudah dilaksanakan sesuai dengan rencana",
+              "source_row": 16,
+              "explanation": "a. Jika semua kegiatan pembangunan telah dilaksanakan sesuai dengan rencana\nb. Jika sebagian besar kegiatan pembangunan telah dilaksanakan sesuai dengan rencana\nc. Jika sebagian kecil kegiatan pembangunan telah dilaksanakan sesuai dengan rencana\nd. Jika belum ada kegiatan pembangunan yang dilakukan sesuai dengan rencana",
+              "guidance": "Target relevan dalam dokumen perencanaan kerja tercapai, dapat dikur melalui tingkat pencapaian/pelasanaan kegiatan dalam dalam rentang target (waktu dan kegiatan) pada dokumen rencana kerja. Capaiaan terbaik adalah seluruh kegiatan dalam rentang waktu target (waktu dan kegiatan) terlaksana seluruhnya (100%)",
+              "answer_format": "A/B/C/D",
+              "supporting_data": [],
+              "images": []
+            },
+            {
+              "key": "row-17",
+              "code": "b",
+              "title": "Terdapat monitoring dan evaluasi terhadap pembangunan Zona Integritas",
+              "source_row": 17,
+              "explanation": "a. Jika monitoring dan evaluasi melibatkan pimpinan dan dilakukan secara berkala\nb. Jika monitoring dan evaluasi melibatkan pimpinan tetapi tidak secara berkala\nc. Jika monitoring dan evaluasi tidak melibatkan pimpinan dan tidak secara berkala\nd. Jika tidak terdapat monitoring dan evaluasi terhadap pembangunan zona integritas",
+              "guidance": "Terdapat pelaksanaan kegiatan monitoring dan evaluasi terhadap pembangunan ZI (persiapan dan pelaksanaan kegiatan dalam rangka pembangunan ZI unit kerja) dengan pelibatan pimpinan secara berkala\nBerkala : karena rencana kegiatan time line nya per tahun maka pelaksanaan monev sekurang-kurangnya per-semeter;",
+              "answer_format": "A/B/C/D",
+              "supporting_data": [],
+              "images": []
+            },
+            {
+              "key": "row-18",
+              "code": "c",
+              "title": "Hasil Monitoring dan Evaluasi telah ditindaklanjuti",
+              "source_row": 18,
+              "explanation": "a. Jika semua catatan/rekomendasi hasil  monitoring dan evaluasi tim internal atas persiapan dan pelaksanaan kegiatan Unit WBK/WBBM telah ditindaklanjuti\nb. Jika sebagian besar catatan/rekomendasi hasil monitoring danevaluasi tim internal atas persiapan dan pelaksanaan kegiatanUnit WBK/WBBM telah ditindaklanjuti\nc. Jika sebagian kecil catatan/rekomendasi hasil monitoring dan evaluasi tim internal atas persiapan dan pelaksanaan kegiatan Unit WBK/WBBM telah ditindaklanjuti\nd. Jika catatan/rekomendasi hasil monitoring dan evaluasi tim internal atas persiapan dan pelaksanaan kegiatan Unit WBK/WBBM belum ditindaklanjuti",
+              "guidance": "Bukti pelaksanaan TL catatan/rekomendasi hasil monev Pembangunan ZI (point b)\nJika TL Hasil Monev tidak menyisakan catatan/rekomendasi TL  pastikan bahwa Monev telah dilaksanakan Nilai standard B;\njika tidak ada evidance judgment evaluator nilai D",
+              "answer_format": "A/B/C/D",
+              "supporting_data": [],
+              "images": []
+            }
+          ]
+        },
+        {
+          "key": "row-19",
+          "code": "iv",
+          "title": "Perubahan pola pikir dan budaya kerja",
+          "source_row": 19,
+          "guidance": "",
+          "entries": [
+            {
+              "key": "row-20",
+              "code": "a",
+              "title": "Pimpinan berperan sebagai role model dalam pelaksanaan Pembangunan WBK/WBBM",
+              "source_row": 20,
+              "explanation": "ya, jika pimpinan menjadi contoh pelaksanaan nilai-nilai organisasi.",
+              "guidance": "role model : Pimpinan menjadi panutan/contoh keteladanan bagi bawahannya;\nPimpinan : Pimpinan di unit kerja adalah Ketua/Kepala dan Wakil ketua/kepala Pengadailan;\nPembuktian atas peran pimpinan sebagai role model antara lain pada bidang kedisiplinan al. ketaatan pada waktu kerja- absensi; etos kerja al. membimbing, mengarahkan dan memberi contoh dalam pelaksanaan tusi bawahanya dll",
+              "answer_format": "Ya/Tidak",
+              "supporting_data": [],
+              "images": []
+            },
+            {
+              "key": "row-21",
+              "code": "b",
+              "title": "Sudah ditetapkan agen perubahan",
+              "source_row": 21,
+              "explanation": "a. Jika agen perubahan telah ditetapkan dan  berkontribusi terhadap perubahan pada unit kerjanya\nb. Jika agen perubahan telah ditetapkan namun belum berkontribusi terhadap perubahan pada unit kerjanya\nc. Jika belum terdapat agen perubahan",
+              "guidance": "Kriteria : Permenpan No. 27 Tahun 2014 tentang Pedoman Pembangunan Agen Perubahan di Instansi Pemerintah\nPemenuhan formal : \nAgen perubahan individu/tim yang dipilih dan ditetapkan oleh pimpinan sebagai pelopor perubahan di unit kerja; Penetapan formal dilakukan dengan surat keputusan, minimal berisi tentang daftar individu yang ditetapkan sebagai Agen Perubahan, peran, tugas dan fungsi Agen Perubahan serta jangka waktu Agen Perubahan\nKontribusi terhadap perubahan : Agen telah menjalankan program pembaruan dan atau inovasi yang berkontribusi pada perubahan di unit kerja;\nKontribusi pada perubahan antara lain dapat diketahui melalui Rencana Aksi Agen Perubahan dan Monev atas pelaksanaan Rencana Aksi",
+              "answer_format": "A/B/C",
+              "supporting_data": [],
+              "images": []
+            },
+            {
+              "key": "row-22",
+              "code": "c",
+              "title": "Telah dibangun budaya kerja dan pola pikir di lingkungan organisasi",
+              "source_row": 22,
+              "explanation": "a. Jika telah dilakukan upaya pembangunan budaya kerja dan pola pikir dan mampu mengurangi resistensi atas perubahan\nb. Jika telah dilakukan upaya pembangunan budaya kerja dan pola pikir tapi masih terdapat resistensi atas perubahan\nc. Jika belum terdapat upaya pembangunan budaya kerja dan pola pikir",
+              "guidance": "Terdapat upaya pembangunan budaya kerja dan pola pikir :\nal. budaya kerja telah diinternalisasikan dalam kebijakan internal al. melalui penilaian kinerja menjadi dasar pelaksanaan reward/punishment; penagakan disiplin kerja; pelaksanaan kegiatan bimtek/ pelatihan/ sosialisasi layanan prima\nJudgement : \na) budaya kerja yang terintenalisasi dalam kebijakan internal dilaksanakan secara konsisten al. penilaian kinerja menjadi pertimbangan utama dalam kegiatan reward and panisment, dalam bidang kedisiplinan implementasinya dengan sistem punishment yaitu pemotongan tunjangan kinerja; kegiatan apel di awal dan akhir pekan, Rapat bulanan dst \nb) kegiatan pembangunan budaya kerja melalui sosialisasi, bimtek dan atau pelatihan dilakukan secara berkala dan telah melibatkan/menjangkau seluruh aparatur di unit kerja maka dianggap mampu mengurangi resistensi",
+              "answer_format": "A/B/C",
+              "supporting_data": [],
+              "images": []
+            },
+            {
+              "key": "row-23",
+              "code": "d",
+              "title": "Anggota organisasi terlibat dalam pembangunan Zona Integritas menuju WBK/WBBM",
+              "source_row": 23,
+              "explanation": "a. Jika semua anggota terlibat dalam pembangunan Zona Integritas menuju WBK/WBBM dan usulan-usulan dari anggota diakomodasikan dalam keputusan\nb. Jika sebagian besar anggota terlibat dalam pembangunan Zona Integritas menuju WBK/WBBM\nc. Jika sebagian kecil anggota terlibat dalam pembangunan Zona Integritas menuju WBK/WBBM\nd. Jika belum ada anggota terlibat dalam pembangunan Zona Integritas menuju WBK/WBBM",
+              "guidance": "Bukti keterlibatan pegawai di unit kerja adalah dalam bentuk keikutsertaan/pelibatan dalam kegiatan-kegiatan sosialisasi, bimtek, atau pelatihan dalam pembangunan ZI di unit kerja:\nal. Pakta integritas pembangunan ZI menjadi komitmen bagi seluruh pegawai;",
+              "answer_format": "A/B/C/D",
+              "supporting_data": [],
+              "images": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "pengungkit-2",
+      "group": "pengungkit",
+      "code": "2",
+      "title": "PENATAAN TATALAKSANA",
+      "source_row": 24,
+      "guidance": "Tujuan : meningkatkan efisiensi dan efektivitas sistem, proses, dan prosedur kerja yang jelas, efektif, efisien, dan terukur \nKondisi yg ingin diwujudkan :\n1) Meningkatnya penggunaan TI\n2) Meningkatnya efisiensi dan efektivitas proses manajemen pemerintahan\n3) Meningkatnya kinerja",
+      "points": [
+        {
+          "key": "row-25",
+          "code": "i",
+          "title": "Prosedur Operasional Tetap (SOP) Kegiatan Utama",
+          "source_row": 25,
+          "guidance": "Kriteria :\nPermenpan No. 19 Tahun 2018 ttg Penyusunan Peta Proses Bisnis Instansi Pemerintah\nPenyusunan peta proses bisnis dimulai dari visi, misi, dan tujuan dan sasaran instansi pemerintah sehingga dapat diketahui aktivitas2 (proses kerja) yang ada dalam instansi pemerintah tersebut yang kemudian diturunkan ke dalam fungsi dan proses bisnis untuk mencapainya; Proses kerja/aktivitas tersebut kemudian dikategorikan ke dalam kelompok (folder) berdasarkan kegiatan bukan berdasarkan unit organisasi;",
+          "entries": [
+            {
+              "key": "row-26",
+              "code": "a",
+              "title": "SOP mengacu pada peta proses bisnis instansi",
+              "source_row": 26,
+              "explanation": "a. Jika semua SOP unit telah mengacu peta proses bisnis dan juga melakukan inovasi yang selaras\nb. Jika semua SOP unit telah mengacu peta proses bisnis\nc. Jika sebagian SOP unit telah mengacu peta proses bisnis\nd. Jika belum terdapat SOP unit yang mengacu peta proses bisnis",
+              "guidance": "SOP yang ada harus dapat digambarkan hubungannya dengan line proses unit (level 0, level 1, level n ) minimal daftar SOP telah dikelompokan berdasarkan kegiatan proses manajerial, proses utama dan proses lainnya;\nsecara sederhana gambaran Peta Proses Binis memuat : \nSupplier --> Input ---> Proses ---> Output ---->Customer\n(Alur Peta proses utama : Input, Proses, dan Output)",
+              "answer_format": "A/B/C/D",
+              "supporting_data": [],
+              "images": []
+            },
+            {
+              "key": "row-27",
+              "code": "b",
+              "title": "Prosedur operasional tetap (SOP) telah diterapkan",
+              "source_row": 27,
+              "explanation": "a. Jika unit telah menerapkan seluruh SOP yang ditetapkan organisasi dan juga melakukan inovasi pada SOP yang diterapkan\nb. Jika unit telah menerapkan seluruh SOP yang ditetapkan organisasi\nc. Jika unit telah menerapkan sebagian besar SOP yang ditetapkan organisasi\nd. Jika unit telah menerapkan sebagian kecil SOP yang ditetapkan organisasi\ne. Jika unit belum menerapkan SOP yang telah ditetapkan organisasi",
+              "guidance": "bukti penerapan pelaksanaan seluruh SOP al. terdapat dokumen SOP dalam bentuk dokumen, paflet di setiap bagian pada unit kerja, terdapat laporan monev berkala atas SOP yang ada\n\nMonitoring SOP dilaksanakan secara reguler setiap 6 bulan sekali yang secara umum melekat pasa saat SOP dilaksanakan oleh Pelaksananya. untuk membantu dokumentasi dalam melakukan monitoring dpt digunakan tabel berikut :\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n(Permenpan No. 35 Th 2012 ttg Pedoman Penyusunan SOP AP)",
+              "answer_format": "A/B/C/D/E",
+              "supporting_data": [],
+              "images": [
+                {
+                  "path": "images/progress-zi/guide/row-27-3.png",
+                  "source_row": 27,
+                  "alt": "Gambar contoh dari panduan, baris 27"
+                }
+              ]
+            },
+            {
+              "key": "row-28",
+              "code": "c",
+              "title": "Prosedur operasional tetap (SOP) telah dievaluasi",
+              "source_row": 28,
+              "explanation": "a. Jika seluruh SOP utama telah dievaluasi dan telah ditindaklanjuti berupa perbaikan SOP atau usulan perbaikan SOP\nb. Jika sebagian besar SOP utama telah dievaluasi dan telah ditindaklanjuti berupa perbaikan SOP atau usulan perbaikan SOP\nc. Jika sebagian besar SOP utama telah dievaluasi tetapi belum ditindaklanjuti\nd. Jika sebagian kecil SOP utama telah dievaluasi\ne. Jika SOP belum pernah dievaluasi",
+              "guidance": "bukti pelaksanaan evaluasi SOP utama adalah al. laporan hasil evaluasi SOP utama dan tindaklanjutnya\ntindak lanjut evaluasi SOP: perubahan/penyesuaian SOP; atau penambahan SOP baru\n\nEvaluasi SOP AP secara reguler dilaksanakan dalam kurun waktu 1 (satu) tahun dan secara insidentil dapat dilakukan sesuai kebutuhan organisasi yang bersangkutan\nEvaluasi --> tindak lanjut dari monitoring dapat meliputi Substansi SOP atau berkaitan dengan Proses Penerapannya\nUntuk membantu evaluasi dpt menggunakan tabel berikut :\n\n\n\n\n\n\n\n\n\n\n\n\n\n(Permenpan No. 35 Th 2012 ttg Pedoman Penyusunan SOP AP)",
+              "answer_format": "A/B/C/D/E",
+              "supporting_data": [],
+              "images": [
+                {
+                  "path": "images/progress-zi/guide/row-28-4.png",
+                  "source_row": 28,
+                  "alt": "Gambar contoh dari panduan, baris 28"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "key": "row-29",
+          "code": "ii",
+          "title": "Sistem Pemerintahan Berbasis Elektronik (SPBE)",
+          "source_row": 29,
+          "guidance": "",
+          "entries": [
+            {
+              "key": "row-30",
+              "code": "a",
+              "title": "Sistem pengukuran kinerja unit sudah menggunakan teknologi informasi",
+              "source_row": 30,
+              "explanation": "a. Jika unit memiliki sistem pengukuran kinerja (e-performance/e-sakip) yang menggunakan teknologi informasi dan juga melakukan inovasi\nb. Jika unit memiliki sistem pengukuran kinerja (e-performance/e-sakip) yang menggunakan teknologi informasi\nc. Jika belum memiliki sistem pengukuran kinerja (e-performance/e-sakip) yang menggunakan teknologi informasi",
+              "guidance": "Sistem pengukuran kinerja unit jika telah menggunakan e-sakip dapat menyertakan capture e-sakip; dan untuk kinerja teknis menggunakan Capture SIPP",
+              "answer_format": "A/B/C",
+              "supporting_data": [],
+              "images": []
+            },
+            {
+              "key": "row-31",
+              "code": "b",
+              "title": "Operasionalisasi manajemen SDM sudah menggunakan teknologi informasi",
+              "source_row": 31,
+              "explanation": "a. Jika unit memiliki operasionalisasi manajemen SDM yang menggunakan teknologi informasi dan juga melakukan inovasi\nb. Jika unit memiliki operasionalisasi manajemen SDM yang menggunakan teknologi informasi secara terpusat\nc. Jika belum menggunakan teknologi informasi dalam operasionalisasi manajemen SDM",
+              "guidance": "Pembuktian bahwa Operasionalisasi Manajemen SDM menggunakan TI dengan capture Aplikasi SIKEP telah berjalan dan update;\nInovasi TI pada operasionalisasi Manajemen SDM mencakup aspek manajerial yaitu pada aspek Perencanaan, Pelaksanaan, evaluasi, monitoring dan TL pengelolaan SDM. \nNilai optimal jika unit telah mengembangkan TI dalam pengelolaan SDM selain System yang digunakan terpusat al. SIPP dan SIKEP",
+              "answer_format": "A/B/C",
+              "supporting_data": [],
+              "images": []
+            },
+            {
+              "key": "row-32",
+              "code": "c",
+              "title": "Pemberian pelayanan kepada publik sudah menggunakan teknologi informasi",
+              "source_row": 32,
+              "explanation": "a. Jika unit memberikan pelayanan kepada publik dengan menggunakan teknologi informasi terpusat/unit sendiri dan terdapat inovasi\nb. Jika unit memberikan pelayanan kepada publik dengan menggunakan teknologi informasi secara terpusat\nc. Jika belum memberikan pelayanan kepada publik dengan menggunakan teknologi informasi",
+              "guidance": "Pembuktian penggunaan TI terpusat dalam pemberian layanan al. penyampaian jadwal sidang, pendaftaran layanan online dst; dan untuk pemenuhan optimal jika satker melakukan/membuat sendiri pengembangan yang merupakan inovasi layanan kepada stakeholders menggunakan TI",
+              "answer_format": "A/B/C",
+              "supporting_data": [],
+              "images": []
+            },
+            {
+              "key": "row-33",
+              "code": "d",
+              "title": "Telah dilakukan monitoring dan dan evaluasi terhadap pemanfaatan teknologi informasi dalam pengukuran kinerja unit, operasionalisasi SDM, dan pemberian layanan kepada publik",
+              "source_row": 33,
+              "explanation": "a. Jika laporan monitoring dan evaluasi terhadap pemanfaatan teknologi informasi dalam pengukuran kinerja unit, operasionalisasi SDM, dan pemberian layanan kepada publik sudah dilakukan secara berkala\nb. Jika laporan monitoring dan evaluasi terhadap pemanfaatan teknologi informasi dalam pengukuran kinerja unit, operasionalisasi SDM, dan pemberian layanan kepada publik sudah dilakukan tetapi tidak secara berkala\nc. Jika tidak terdapat monitoring dan evaluasi terhadap pemanfaatan teknologi informasi dalam pengukuran kinerja unit, operasionalisasi SDM, dan pemberian layanan kepada publik",
+              "guidance": "nilai optimal untuk pelaksanaan monitoring dan evaluasi komulatif terhadap pengukuran kinerja, operasionalisasi SDM dan pemberian layanan kepada publik dilakukan secara berkala\npelaksanaan monev berkala dpt diyakinkan melalui adanya jadwal pelaksanaan monev dalam dok. rencana kerja; laporan pelaksanan monev dll",
+              "answer_format": "A/B/C",
+              "supporting_data": [],
+              "images": []
+            }
+          ]
+        },
+        {
+          "key": "row-34",
+          "code": "iii",
+          "title": "Keterbukaan Informasi Publik",
+          "source_row": 34,
+          "guidance": "",
+          "entries": [
+            {
+              "key": "row-35",
+              "code": "a",
+              "title": "Kebijakan tentang  keterbukaan informasi publik telah diterapkan",
+              "source_row": 35,
+              "explanation": "a. Jika sudah terdapat Pejabat Pengelola Informasi Publik (PPID) yang menyebarkan seluruh informasi yang dapat diakses secara mutakhir dan lengkap\nb. Jika sudah terdapat PPID yang menyebarkan sebagian informasi yang dapat diakses secara mutakhir dan lengkap\nc. Jika belum ada PPID dan belum melakukan penyebaran informasi publik",
+              "guidance": "Kriteria : SK KMA 2-144 Th 2022 tentang Standar Pelayanan Informasi Publik di Pengadilan \nPemenuhan formal :\nPejabat Penelola Informasi dan Dokumentasi (PPID) telah dibentuk di unit melalui penetapan pimpinan unit kerja melalui SK PPID adalah Pejabat yang bertangungjawab di bidang koordinasi penyimpanan, pendokumentasian, penyediaan, dan/atau Pelayanan Informasi Publik yang berkaitan dengan penyelenggaraan tugas dan fungsi pengadilan serta informasi lain yang berkaitan dengan kepentingan publik\nStruktur Pelaksana PPID di pengadilan :\n1. Dewan Perimbangan - Pimpinan Pengadilan dan Panitera\n2. Atasan Pejabat PPID - Sekretaris\n3. PPID - Panmud Hukum yang melaksanakan tugas dan fungsi koordinasi layanan Informasi\n4. PPID Pelaksana - Para Panmud & Para Kabag atau Kasub Bag.\n5. Petugas Layanan Informasi - Aparatur Pengadilan yg ditunjuk oleh atasan PPID",
+              "answer_format": "A/B/C",
+              "supporting_data": [],
+              "images": []
+            },
+            {
+              "key": "row-36",
+              "code": "b",
+              "title": "Telah dilakukan monitoring dan evaluasi pelaksanaan kebijakan keterbukaan informasi publik",
+              "source_row": 36,
+              "explanation": "a. Jika dilakukan monitoring dan evaluasi pelaksanaan kebijakan keterbukaan informasi publik dan telah ditindaklanjuti\nb. Jika monitoring dan evaluasi pelaksanaan kebijakan keterbukaan informasi publik telah dilakukan tetapi belum ditindaklanjuti\nc. Jika monitoring dan evaluasi pelaksanaan kebijakan keterbukaan informasi publik belum dilakukan",
+              "guidance": "Dilakukan kegiatan Monev pelaksanaan kebijakan keterbukaan informasi publik yang telah berjalan pada unit kerja\nMonev mencakup pelaksanaan keibajakan keterbukaan informasi yang dijalankan oleh petugas PPID dalam mengelola dan meyebar informasi publik di unit kerja\nBentuk pelaksanaan monev dapat dilakukan oleh tim khusus di unit atau evalausi bersama dalam forum rapat evaluasi di unit kerja",
+              "answer_format": "A/B/C",
+              "supporting_data": [],
+              "images": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "pengungkit-3",
+      "group": "pengungkit",
+      "code": "3",
+      "title": "PENATAAN SISTEM MANAJEMEN SDM APARATUR",
+      "source_row": 37,
+      "guidance": "tujuan  :\nmeningkatkan  profesionalisme  SDM  aparatur  pada  Zona  Integritas Menuju  WBK/WBBM\nTarget yang ingin diwujudkan :\n1) meningkatnya ketaatan terhadap pengelolaan SDM aparatur;\n2) meningkatnya  transparansi  dan  akuntabilitas  pengelolaan  SDM \naparatur;\n3) meningkatnya disiplin SDM aparatur;\n4) meningkatnya efektivitas manajemen SDM aparatur;\n5) meningkatnya profesionalisme SDM.",
+      "points": [
+        {
+          "key": "row-38",
+          "code": "i",
+          "title": "Perencanaan Kebutuhan Pegawai sesuai dengan Kebutuhan Organisasi",
+          "source_row": 38,
+          "guidance": "",
+          "entries": [
+            {
+              "key": "row-39",
+              "code": "a",
+              "title": "Kebutuhan pegawai yang disusun oleh unit kerja mengacu kepada peta jabatan dan hasil analisis beban kerja untuk masing-masing jabatan",
+              "source_row": 39,
+              "explanation": "Ya, jika kebutuhan pegawai yang disusun oleh unit kerja mengacu kepada peta jabatan dan hasil analisis beban kerja untuk masing-masing jabatan.",
+              "guidance": "Regulasi : SK Sekma Nomor 415/SEK/SK/V/2019 tentang Pedoman Pelaksanaan Analisis Beban Kerja di lingkungan MA dan Badan Peradilan dibawahnya\nUnit  kerja  telah  membuat  rencana  kebutuhan  pegawai  di  unit kerjanya  dalam  hal  rasio  dengan  beban  kerja  dan  kualifikasi pendidikan;\nEvidance : al. Dokumen rencana kebutuhan pegawai; Dokumen Peta Jabatan dan Analisis Beban Kerja (ABK)",
+              "answer_format": "Ya/Tidak",
+              "supporting_data": [],
+              "images": []
+            },
+            {
+              "key": "row-40",
+              "code": "b",
+              "title": "Penempatan pegawai hasil rekrutmen murni mengacu kepada kebutuhan pegawai yang telah disusun per jabatan",
+              "source_row": 40,
+              "explanation": "a. Jika semua penempatan pegawai hasil rekrutmen murni mengacu kepada kebutuhan pegawai yang telah disusun per jabatan\nb. Jika sebagian besar penempatan pegawai hasil rekrutmen murni mengacu kepada kebutuhan pegawai yang telah disusun per jabatan\nc. Jika sebagian kecil penempatan pegawai hasil rekrutmen murni mengacu kepada kebutuhan pegawai yang telah disusun per jabatan\nd. Jika penempatan pegawai hasil rekrutmen murni tidak mengacu kepada kebutuhan pegawai yang telah disusun per jabatan",
+              "guidance": "Penempatan pegawai yang telah disusun tentu mengacu pada kewenangan yang ada di unit kerja;\nEvidance : SK Penempatan",
+              "answer_format": "A/B/C/D",
+              "supporting_data": [],
+              "images": []
+            },
+            {
+              "key": "row-41",
+              "code": "c",
+              "title": "Telah dilakukan monitoring dan dan evaluasi terhadap penempatan pegawai rekrutmen untuk memenuhi kebutuhan jabatan dalam organisasi telah memberikan perbaikan terhadap kinerja unit kerja",
+              "source_row": 41,
+              "explanation": "Ya, jika sudah dilakukan monitoring dan evaluasi terhadap penempatan pegawai hasil rekrutmen untuk memenuhi kebutuhan jabatan dalam organisasi telah memberikan perbaikan terhadap kinerja unit kerja.",
+              "guidance": "Monev terhadap penempatan pegawai rekruitmen baru dalam konteks kewenangan yang ada di unit kerja;",
+              "answer_format": "Ya/Tidak",
+              "supporting_data": [],
+              "images": []
+            }
+          ]
+        },
+        {
+          "key": "row-42",
+          "code": "ii",
+          "title": "Pola Mutasi Internal",
+          "source_row": 42,
+          "guidance": "",
+          "entries": [
+            {
+              "key": "row-43",
+              "code": "a",
+              "title": "Dalam melakukan pengembangan karier pegawai, telah dilakukan mutasi pegawai antar jabatan",
+              "source_row": 43,
+              "explanation": "Ya, jika dilakukan mutasi pegawai antar jabatan sebagai wujud dari pengembangan karier pegawai.",
+              "guidance": "mutasi di unit kerja terbatas pada keweangan yang diberikan;\ndalam hal promosi kewenangan satker tentu terbatas pada pengusulan;\nevidance : al. SK Mutasi, dokumen rapat pimpinan/baperjakat dalam kegiatan promosi",
+              "answer_format": "Ya/Tidak",
+              "supporting_data": [],
+              "images": []
+            },
+            {
+              "key": "row-44",
+              "code": "b",
+              "title": "Dalam melakukan mutasi pegawai antar jabatan telah memperhatikan kompetensi jabatan dan mengikuti pola mutasi yang telah ditetapkan",
+              "source_row": 44,
+              "explanation": "a. Jika semua mutasi pegawai antar jabatan telah memperhatikan kompetensi jabatan dan mengikuti pola mutasi yang telah ditetapkan organisasi dan juga unit kerja memberikan pertimbangan terkait hal ini\nb. Jika semua mutasi pegawai antar jabatan telah memperhatikan kompetensi jabatan dan mengikuti pola mutasi yang telah ditetapkan organisasi\nc. Jika sebagian besar mutasi pegawai antar jabatan telah memperhatikan kompetensi jabatan dan mengikuti pola mutasi yang telah ditetapkan organisasi\nd. Jika sebagian kecil semua mutasi pegawai antar jabatan telah memperhatikan kompetensi jabatan dan mengikuti pola mutasi yang telah ditetapkan organisasi\ne. Jika mutasi pegawai antar jabatan belum memperhatikan kompetensi jabatan dan mengikuti pola mutasi yang telah ditetapkan organisasi",
+              "guidance": "Dokumen pertimbangan/baperjakat/rapat pimpinan",
+              "answer_format": "A/B/C/D/E",
+              "supporting_data": [],
+              "images": []
+            },
+            {
+              "key": "row-45",
+              "code": "c",
+              "title": "Telah dilakukan monitoring dan evaluasi terhadap kegiatan mutasi yang telah dilakukan dalam kaitannya dengan perbaikan kinerja",
+              "source_row": 45,
+              "explanation": "Ya, jika sudah dilakukan monitoring dan evaluasi terhadap kegiatan mutasi yang telah dilakukan dalam kaitannya dengan perbaikan kinerja.",
+              "guidance": "Pelaksanaan kegiatan monitoring dan evaluasi atas kegiatan mutasi yang telah dilakukan",
+              "answer_format": "Ya/Tidak",
+              "supporting_data": [],
+              "images": []
+            }
+          ]
+        },
+        {
+          "key": "row-46",
+          "code": "iii",
+          "title": "Pengembangan Pegawai Berbasis Kompetensi",
+          "source_row": 46,
+          "guidance": "",
+          "entries": [
+            {
+              "key": "row-47",
+              "code": "a",
+              "title": "Unit Kerja melakukan Training Need Analysis Untuk pengembangan kompetensi",
+              "source_row": 47,
+              "explanation": "Ya, jika sudah dilakukan Training Need Analysis Untuk pengembangan kompetensi.",
+              "guidance": "Kriteria : \nPP No. 17 Tahun 2020 ttg Perubahan PP 11 Tahun 2017 ttg Manajemen PNS; \nPerka BKN No. 22 Th. 2013 ttg Pedoman Penyusunan Penembangan PNS\nPasal 203 ayat 4 - 4(a) PP No. 17 th 2020\nPengembangan kompetensi bagi setiap PNS ≥ 20 Jam/thn melalui pendekatan sistem pembelajaran terintegrasi (corporate university)\n\nTerdapat dokumen maping kebutuhan pengembangan kompetensi untuk seluruh pegawai\nMaping kebutuhan pengambangan kompentensi menjadi dasar penyusunan perencanaan kegiatan pengembangan kompetensi pegawai\nPengembangan kompetensi pegawai tidak terbatas pada kegiatan kdiklatan melainkan dapat dalam bentuk kegiatan mandiri di unit kerja al. PKS/DDTK; Bimtek, Sosialisasi dst",
+              "answer_format": "Ya/Tidak",
+              "supporting_data": [],
+              "images": []
+            },
+            {
+              "key": "row-48",
+              "code": "b",
+              "title": "Dalam menyusun rencana pengembangan kompetensi pegawai, telah mempertimbangkan hasil pengelolaan kinerja pegawai",
+              "source_row": 48,
+              "explanation": "a. Jika semua rencana pengembangan kompetensi pegawai mempertimbangkan hasil pengelolaan kinerja pegawai\nb. Jika sebagian besar rencana pengembangan kompetensi pegawai mempertimbangkan hasil pengelolaan kinerja pegawai\nc. Jika sebagian kecil rencana pengembangan kompetensi pegawai mempertimbangkan hasil pengelolaan kinerja pegawai\nd. Jika belum ada rencana pengembangan kompetensi pegawai yang mempertimbangkan hasil pengelolaan kinerja pegawai",
+              "guidance": "Dokumen TNA telah mempertimbangkan pengelolaan kinerja pegawai al. dapat ditunjukan melalui rencana pengembangan kompetensi mengakomodir peningkatan ketrampilan dan keahlian teknis sesuai bidang/tusi pegawai\n\n\n\n\n\n\n\n\n\n\n\n\n\n(Anak Lamp.I-c Perka BKN No. 22 th 2013 )",
+              "answer_format": "A/B/C/D",
+              "supporting_data": [],
+              "images": [
+                {
+                  "path": "images/progress-zi/guide/row-48-5.png",
+                  "source_row": 48,
+                  "alt": "Gambar contoh dari panduan, baris 48"
+                }
+              ]
+            },
+            {
+              "key": "row-49",
+              "code": "c",
+              "title": "Tingkat kesenjangan kompetensi pegawai yang ada dengan standar kompetensi yang ditetapkan untuk masing-masing jabatan",
+              "source_row": 49,
+              "explanation": "a. Jika persentase kesenjangan kompetensi pegawai dengan standar kompetensi yang ditetapkan sebesar <25%\nb. Jika persentase kesenjangan kompetensi pegawai dengan standar kompetensi yang ditetapkan sebesar >25%-50%\nc. Jika  sebagian besar kompetensi pegawai dengan standar kompetensi yang ditetapkan untuk masing-masing jabatan >50% -75%\nd. Jika persentase kesenjangan kompetensi pegawai dengan standar kompetensi yang ditetapkan sebesar >75%-100%",
+              "guidance": "Kriteria : Permenpan No. 38 Tahun 2017 tentang Standar Kompetensi Jabatan; Perka BKN No. 22 Th. 2013 ttg Pedoman Penyusunan Penembangan PNS\nKesenjangan kompetensi pegawai diukur berdasarkan kompetensi jabatan yang ada diunit kerja; kompetensi jabatan dapat berdasarkan pada kamus kompentensi dan atau kompetensi jabatan pada ABK;\nal. % formasi jabatan strukural dan fungsional yang ada di unit kerja telah di isi sesuai dengan kompetensi/keahlian yang telah sesuai/disyaratkan dalam kamus kompentensi dan atau kompetensi jabatan pada ABK \n\n\n\n\n\n\n\n\n\n\n\n\n\n(Anak Lamp.I-d Perka BKN No. 22 th 2013)",
+              "answer_format": "A/B/C/D",
+              "supporting_data": [],
+              "images": [
+                {
+                  "path": "images/progress-zi/guide/row-49-6.png",
+                  "source_row": 49,
+                  "alt": "Gambar contoh dari panduan, baris 49"
+                }
+              ]
+            },
+            {
+              "key": "row-50",
+              "code": "d",
+              "title": "Pegawai di Unit Kerja telah memperoleh kesempatan/hak untuk mengikuti diklat maupun pengembangan kompetensi lainnya",
+              "source_row": 50,
+              "explanation": "a. Jika seluruh pegawai di Unit Kerja telah memperoleh kesempatan/hak untuk mengikuti diklat maupun pengembangan kompetensi lainnya\nb. Jika sebagian besar pegawai di Unit Kerja telah memperoleh kesempatan/hak untuk mengikuti diklat maupun pengembangan kompetensi lainnya\nc. Jika sebagian kecil pegawai di Unit Kerja telah memperoleh kesempatan/hak untuk mengikuti diklat maupun pengembangan kompetensi lainnya\nd. Jika belum ada pegawai di Unit Kerja telah memperoleh kesempatan/hak untuk mengikuti diklat maupun pengembangan kompetensi lainnya",
+              "guidance": "Kesempatan memperoleh diklat pengembangan kompetensi sama bagi seluruh pegawai;\nUkuran pemenuhan dapat dibuktikan al. melalui keikutsertaan pegawai dalam kegiatan pengembangan kompetensi tidak terbatas hanya pada kegiatan diklat tetapi juga kegiatan pengembangan kompetensi mandiri yang dilakukan di unit kerja\nEvidance keikutsertaan aparatur dalam kegiatan2 pengembangan kompetensi yang tidak terbatas pada pengusulan pegawai ybs untuk mengikuti pengembangan kompetensi (Pelatihan/bimtek/in-house training/sosialisasi/kursus/dll) yang diselenggarakan oleh unit external (diluar satker)",
+              "answer_format": "A/B/C/D",
+              "supporting_data": [],
+              "images": []
+            },
+            {
+              "key": "row-51",
+              "code": "e",
+              "title": "Dalam pelaksanaan pengembangan kompetensi, unit kerja melakukan upaya pengembangan kompetensi kepada pegawai (seperti pengikutsertaan pada lembaga pelatihan, in-house training, coaching, atau mentoring)",
+              "source_row": 51,
+              "explanation": "a. Jika unit kerja melakukan upaya pengembangan kompetensi kepada seluruh pegawai\nb. Jika unit kerja melakukan upaya pengembangan kompetensi kepada sebagian besar pegawai\nc. Jika unit kerja melakukan upaya pengembangan kompetensi kepada sebagian kecil pegawai\nd. Jika unit kerja belum melakukan upaya pengembangan kompetensi kepada pegawai",
+              "guidance": "Penilaian optimal : Jika upaya pengembangan kompetensi pegawai telah dilakukan di unit kerja secara mandiri tidak terbatas hanya melalui pengusulan peserta untuk mengikuti kegiatan pengembangan kompetensi dan telah melibatkan seluruh pegawai",
+              "answer_format": "A/B/C/D",
+              "supporting_data": [],
+              "images": []
+            },
+            {
+              "key": "row-52",
+              "code": "f",
+              "title": "Telah dilakukan monitoring dan evaluasi terhadap hasil pengembangan kompetensi dalam kaitannya dengan perbaikan kinerja",
+              "source_row": 52,
+              "explanation": "a. Jika monitoring dan evaluasi terhadap hasil pengembangan kompetensi dalam kaitannya dengan perbaikan kinerja telah dilakukan secara berkala\nb. Jika monitoring dan evaluasi terhadap hasil pengembangan kompetensi dalam kaitannya dengan perbaikan kinerja telah dilakukan namun tidak secara berkala\nc. Jika monitoring dan evaluasi terhadap hasil pengembangan kompetensi dalam kaitannya dengan perbaikan kinerja belum dilakukan",
+              "guidance": "Dilakukan monitoring dan evaluasi atas setiap hasil pengembangan kompetensi \nEvidance : Laporan kegiatan monitoring dan evaluasi atas kegiatan pengembangan komptensi pada unit kerja secara berkala (minimal 1 tahun sekali) berupa pendataan/rekapitulasi pelaksanaan kegiatan pengembangan pegawai (tidak hanya terbatas pada kegiatan kediklatan) dan dievaluasi hubungannya dengan perbaikan kinerja",
+              "answer_format": "A/B/C",
+              "supporting_data": [],
+              "images": []
+            }
+          ]
+        },
+        {
+          "key": "row-53",
+          "code": "iv",
+          "title": "Penetapan Kinerja Individu",
+          "source_row": 53,
+          "guidance": "",
+          "entries": [
+            {
+              "key": "row-54",
+              "code": "a",
+              "title": "Terdapat penetapan kinerja individu yang terkait dengan perjanjian kinerja organisasi",
+              "source_row": 54,
+              "explanation": "a. Jika seluruh penetapan kinerja individu terkait dengan kinerja organisasi serta perjanjian kinerja selaras dengan sasaran kinerja pegawai (SKP)\nb. Jika sebagian besar penetapan kinerja individu terkait dengan kinerja organisasi\nc. Jika sebagian kecil penetapan kinerja individu terkait dengan kinerja organisasi\nd. Jika belum ada penetapan kinerja individu terkait dengan kinerja organisasi",
+              "guidance": "SKP pada seluruh Pegawai telah disusun dan ditetapkan\nEvidance : SKP Tahun berjalan Pimpinan (Ketua, Wakil Ketua, Panitera dan Sekretaris) dan PK unit Kerja",
+              "answer_format": "A/B/C/D",
+              "supporting_data": [],
+              "images": []
+            },
+            {
+              "key": "row-55",
+              "code": "b",
+              "title": "Ukuran kinerja individu telah memiliki kesesuaian dengan indikator kinerja individu level diatasnya",
+              "source_row": 55,
+              "explanation": "a. Jika seluruh ukuran kinerja individu telah memiliki kesesuaian dengan indikator kinerja individu level diatasnya serta menggambarkan logic model\nb. Jika sebagian besar ukuran kinerja individu telah memiliki kesesuaian dengan indikator kinerja individu level diatasnya\nc. Jika sebagian kecil ukuran kinerja individu telah memiliki kesesuaian dengan indikator kinerja individu level diatasnya\nd. Jika ukuran kinerja individu belum memiliki kesesuaian dengan indikator kinerja individu level diatasnya",
+              "guidance": "Kesesuaian ukuran kinerja individu dengan level diatas dapat diperoleh dengan perbandingan SKP bawah --> SKP Atasanya\nDokumen SKP berjenjang\nEvidance : \nSKP Ketua -> SKP Wakil Ketua, Panitera dan Sekretaris\nSKP Panitera -> SKP Panmud, SKP PP, SKP Jurusita\nSKP Sekretaris -> SKP Kabag/Kasub, SKP Staf",
+              "answer_format": "A/B/C/D",
+              "supporting_data": [],
+              "images": []
+            },
+            {
+              "key": "row-56",
+              "code": "c",
+              "title": "Pengukuran kinerja individu dilakukan secara periodik",
+              "source_row": 56,
+              "explanation": "a. Jika pengukuran kinerja individu dilakukan secara bulanan\nb. Jika pengukuran kinerja individu dilakukan secara triwulanan\nc. Jika pengukuran kinerja individu dilakukan secara semesteran\nd. Jika pengukuran kinerja individu dilakukan secara tahunan\ne. Jika pengukuran kinerja individu belum dilakukan",
+              "guidance": "Periodesasi pengukuran kinerja individu dilakuan melalui data penyampaian PKP pegawai yang saat ini telah menjadi salah satu dasar dalam pembayaran tunjangan kinerja\nEveidance : Rekapitulasi PKP",
+              "answer_format": "A/B/C/D/E",
+              "supporting_data": [],
+              "images": []
+            },
+            {
+              "key": "row-57",
+              "code": "d",
+              "title": "Hasil penilaian kinerja individu telah dijadikan dasar untuk pemberian reward",
+              "source_row": 57,
+              "explanation": "Ya, jika hasil hasil penilaian kinerja individu telah dijadikan dasar untuk pemberian reward (Seperti: pengembangan karir individu, atau penghargaan)",
+              "guidance": "Kriteria : Perma 3 Tahun 2020 tentang Petunjuk Teknis Pemeberian Tunjangan Kinerja Pegawai MA dan Badan Peradilan dibawahnya\nPKP menjadi salah satu dasar dalam pemberian reward (tukin)\nEvidance: Dokumen dukung pengajuan Tunjangan Kinerja",
+              "answer_format": "Ya/Tidak",
+              "supporting_data": [],
+              "images": []
+            }
+          ]
+        },
+        {
+          "key": "row-58",
+          "code": "v",
+          "title": "Penegakan Aturan Disiplin/Kode Etik/Kode Perilaku Pegawai",
+          "source_row": 58,
+          "guidance": "",
+          "entries": [
+            {
+              "key": "row-59",
+              "code": "a",
+              "title": "Aturan disiplin/kode etik/kode perilaku telah dilaksanakan/diimplementasikan",
+              "source_row": 59,
+              "explanation": "a. Jika unit kerja telah mengimplementasikan seluruh aturan disiplin/kode etik/kode perilaku yang ditetapkan organisasi dan juga membuat inovasi terkait aturan disiplin/kode etik/kode perilaku yang sesuai dengan karakteristik unit kerja\nb. Jika unit kerja telah mengimplementasikan seluruh aturan disiplin/kode etik/kode perilaku yang ditetapkan organisasi\nc. Jika unit kerja telah mengimplementasikan sebagian aturan disiplin/kode etik/kode perilaku yang ditetapkan organisasi\nd. Jika unit kerja belum mengimplementasikan aturan disiplin/kode etik/kode perilaku yang ditetapkan organisasi",
+              "guidance": "Kriteria : kode etik Pegawai; Kode etik dan prilaku bagi hakim, Kode etik PP dan Jurusita;  \nBentuk implementasi al : Pelaksanaan kegiatan sosialisasi aturan disiplin/kode etik/ kode perilaku; penegakan aturan disiplin dalam bentuk pengenaan sanksi bagi aparatur yang melanggar al; kekdisiplinan teguran, pemotongan tunjangan dst",
+              "answer_format": "A/B/C/D",
+              "supporting_data": [],
+              "images": []
+            }
+          ]
+        },
+        {
+          "key": "row-60",
+          "code": "vi",
+          "title": "Sistem Informasi Kepegawaian",
+          "source_row": 60,
+          "guidance": "",
+          "entries": [
+            {
+              "key": "row-61",
+              "code": "a",
+              "title": "Data informasi kepegawaian unit kerja telah dimutakhirkan secara berkala",
+              "source_row": 61,
+              "explanation": "a. Jika data informasi kepegawaian unit kerja dapat diakses oleh pegawai dan dimutakhirkan setiap ada perubahan data pegawai\nb. Jika data informasi kepegawaian unit kerja dapat diakses oleh pegawai dan  dimutakhirkan namun secara berkala\nc. Jika data informasi kepegawaian unit kerja belum dimutakhirkan",
+              "guidance": "Pastikan bahwa seluruh pegawai dapat mengkases SIKEP dengan user masing-masing pegawai\nEvidance : Capture Aplikasi SIKEP dengan akses User oleh salah seorang pegawai",
+              "answer_format": "A/B/C",
+              "supporting_data": [],
+              "images": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "pengungkit-4",
+      "group": "pengungkit",
+      "code": "4",
+      "title": "PENGUATAN AKUNTABILITAS",
+      "source_row": 62,
+      "guidance": "Regulasi : SK SEKMA No.2049 Th 2022 ttg Pedoman Pelaksanaan SAKIP",
+      "points": [
+        {
+          "key": "row-63",
+          "code": "i",
+          "title": "Keterlibatan Pimpinan",
+          "source_row": 63,
+          "guidance": "",
+          "entries": [
+            {
+              "key": "row-64",
+              "code": "a",
+              "title": "Unit kerja telah melibatkan pimpinan secara langsung pada saat penyusunan perencanaan",
+              "source_row": 64,
+              "explanation": "a. Jika pimpinan selalu terlibat dalam seluruh tahapan penyusunan perencanaan\nb. Jika pimpinan ikut terlibat dalam sebagian tahapan penyusunan perencanaan\nc. Jika tidak ada keterlibatan pimpinan dalam penyusunan perencanaan (hanya menandatangani)",
+              "guidance": "Eviden terkait penyusunan rencana kerja anggaran, melalui keterlibatan secara langsung dan berjenjang dapat dibuktikan melalui keikut sertaan pimpinan dalam kegiatan/rapat pembahasan dan atau telaah/catatan pimpinan  yg diberikan.",
+              "answer_format": "A/B/C",
+              "supporting_data": [],
+              "images": []
+            },
+            {
+              "key": "row-65",
+              "code": "b",
+              "title": "Unit kerja telah melibatkan secara langsung pimpinan saat penyusunan penetapan kinerja",
+              "source_row": 65,
+              "explanation": "a. Jika pimpinan selalu terlibat dalam seluruh tahapan penyusunan perjanjian kinerja\nb. Jika pimpinan terlibat dalam sebagian tahapan penyusunan perjanjian kinerja\nc. Jika tidak ada keterlibatan pimpinan dalam penyusunan perjanjian kinerja",
+              "guidance": "Pimpinan ikut serta dalam pembahasan PK dan dokumen PK telah ditetapkan/ditandatangani pimpinan diatasnya\nEvidance : bukti keterlibatan pimpinan dalam penyusunan dan penetapan kinerja dalam Rapat-rapat pembahasan Indikator Kinerja unit kerja (laporan/notulensi rapat dan dokumentasi kegiatan)",
+              "answer_format": "A/B/C",
+              "supporting_data": [],
+              "images": []
+            },
+            {
+              "key": "row-66",
+              "code": "c",
+              "title": "Pimpinan memantau pencapaian kinerja secara berkala",
+              "source_row": 66,
+              "explanation": "a. Jika pimpinan selalu terlibat dalam seluruh pemantauan pencapaian kinerja dan menindaklanjuti hasil pemantauan\nb. Jika pimpinan unit kerja terlibat dalam seluruh pemantauan pencapaian kinerja tetapi tidak ada tindak lanjut hasil pemantauan\nc. Jika pimpinan unit kerja terlibat dalam sebagian pemantauan pencapaian kinerja\nd. Jika tidak ada keterlibatan pimpinan dalam pemantauan pencapaian kinerja",
+              "guidance": "Monitoring dan Evaluasi secara berkelanjutan dilakukan secara bersama-sama dengan keterlibatan Pimpinan secara langsung.\nBentuk pemantauan al. melalui pembahasan capaian kinerja yang diperjanjikan secara berkala",
+              "answer_format": "A/B/C/D",
+              "supporting_data": [],
+              "images": []
+            }
+          ]
+        },
+        {
+          "key": "row-67",
+          "code": "ii",
+          "title": "Pengelolaan Akuntabilitas Kinerja",
+          "source_row": 67,
+          "guidance": "",
+          "entries": [
+            {
+              "key": "row-68",
+              "code": "a",
+              "title": "Dokumen perencanaan kinerja sudah ada",
+              "source_row": 68,
+              "explanation": "ya, jika unit kerja memiliki dokumen perencanaan kinerja lengkap",
+              "guidance": "Pemenuhan dokumen Perencanaan Kinerja Th. 2023 telah ada/dibuat\n - Renstra 2020-2024 dan reviunya \n - IKU Tahun 2023 \n - RKT Tahun 2023\n - PK tahun 2023",
+              "answer_format": "Ya/Tidak",
+              "supporting_data": [],
+              "images": []
+            },
+            {
+              "key": "row-69",
+              "code": "b",
+              "title": "Perencanaan kinerja telah berorientasi hasil",
+              "source_row": 69,
+              "explanation": "ya, jika perencanaan kinerja telah berorientasi hasil",
+              "guidance": "justifikasi mengacu pada hasil evaluasi LKjIP",
+              "answer_format": "Ya/Tidak",
+              "supporting_data": [],
+              "images": []
+            },
+            {
+              "key": "row-70",
+              "code": "c",
+              "title": "Terdapat penetapan Indikator Kinerja Utama (IKU)",
+              "source_row": 70,
+              "explanation": "ya, jika unit kerja memiliki IKU",
+              "guidance": "Regulasi : SK SEKMA No.2049 Th 2022 ttg Pedoman Pelaksanaan SAKIP\nPemenuhan formal : \nTerdapat dokumen IKU yang telah ditetapkan oleh Pimpinan unit kerja (update)",
+              "answer_format": "Ya/Tidak",
+              "supporting_data": [],
+              "images": []
+            },
+            {
+              "key": "row-71",
+              "code": "d",
+              "title": "Indikator kinerja telah telah memenuhi kriteria SMART",
+              "source_row": 71,
+              "explanation": "a. Jika seluruh indikator kinerja telah SMART\nb. Jika sebagian besar indikator kinerja telah SMART\nc. Jika sebagian kecil indikator kinerja telah SMART\nd. Jika belum ada indikator kinerja yang SMART",
+              "guidance": "justifikasi mengacu pada hasil evaluasi LKjIP",
+              "answer_format": "A/B/C/D",
+              "supporting_data": [],
+              "images": []
+            },
+            {
+              "key": "row-72",
+              "code": "e",
+              "title": "Laporan kinerja telah disusun tepat waktu",
+              "source_row": 72,
+              "explanation": "Ya, jika unit kerja telah menyusun laporan kinerja tepat waktu",
+              "guidance": "Berdasarkan tanggal penyampaian dan pelaporan SAKIP\nEvidance : bukti penyampaian/pelaporan AKIP unit kerja",
+              "answer_format": "Ya/Tidak",
+              "supporting_data": [],
+              "images": []
+            },
+            {
+              "key": "row-73",
+              "code": "f",
+              "title": "Laporan kinerja telah memberikan informasi tentang kinerja",
+              "source_row": 73,
+              "explanation": "a. Jika seluruh pelaporan kinerja telah memberikan informasi tentang kinerja\nb. Jika sebagian pelaporan kinerja belum memberikan informasi tentang kinerja\nc. Jika seluruh pelaporan kinerja belum memberikan informasi tentang kinerja",
+              "guidance": "justifikasi mengacu pada hasil evaluasi LKjIP\nEvidance : LHE SAKIP tahun terkahir",
+              "answer_format": "A/B/C",
+              "supporting_data": [],
+              "images": []
+            },
+            {
+              "key": "row-74",
+              "code": "g",
+              "title": "Terdapat sistem informasi/mekanisme informasi kinerja",
+              "source_row": 74,
+              "explanation": "ya, jika Terdapat sistem Informasi/Mekanisme Informasi Kienerja\nTidak, jika belum terdapat sistem Informasi/Mekanisme Informasi Kienerja",
+              "guidance": "Terdapat Sistem Informasi (aplikasi) yang dibangun terkait pengumpulan data Kinerja dan atau mekanisme baku yang dibuat melalui SOP atas pengumpulan data kinerja\nEvidance :\nCapture aplikasi sistem informasi data kinerja dan atau SOP terkait mekanisme pengumpulan data kinerja",
+              "answer_format": "Ya/Tidak",
+              "supporting_data": [],
+              "images": []
+            },
+            {
+              "key": "row-75",
+              "code": "h",
+              "title": "Unit kerja telah berupaya meningkatkan kapasitas SDM yang menangangi akuntabilitas kinerja",
+              "source_row": 75,
+              "explanation": "a. Jika seluruh SDM pengelola akuntabilitas kinerja kompeten\nb. Jika sebagian SDM pengelola akuntabilitas kinerja kompeten\nc. Jika seluruh SDM pengelola akuntabilitas kinerja belum ada yang kompeten",
+              "guidance": "Terdapat upaya pengembangan kompetensi SDM yang menangani akuntabilitas kinerja. Upaya pengembangan kompetensi al : pelaksanaan kegiatan mandiri pengembangan kompetensi (bimtek, pks/ddtk, inhouse training) bagi SDM yang menangani akuntabilitas kinerja atau mengikutsertakan aparatur untuk mengikuti diklat dst\nKompetensi SDM pengelola akuntabilitas kinerja secara formal pemenuhannya melalui sertifikasi keikutsertaan dalam kegiatan pelatihan, bimtek dst akuntabiltias kinerja",
+              "answer_format": "A/B/C",
+              "supporting_data": [],
+              "images": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "pengungkit-5",
+      "group": "pengungkit",
+      "code": "5",
+      "title": "PENGUATAN PENGAWASAN",
+      "source_row": 76,
+      "guidance": "",
+      "points": [
+        {
+          "key": "row-77",
+          "code": "i",
+          "title": "Pengendalian Gratifikasi",
+          "source_row": 77,
+          "guidance": "",
+          "entries": [
+            {
+              "key": "row-78",
+              "code": "a",
+              "title": "Telah dilakukan public campaign tentang pengendalian gratifikasi",
+              "source_row": 78,
+              "explanation": "a. Jika public campaign telah dilakukan secara berkala\nb. Jika public campaign dilakukan tidak secara berkala\nc. Jika belum dilakukan public campaign",
+              "guidance": "Pembuktian palaksanaan kampanye/sosialisasi/publikasi publik (public campaign) pengendalian gratifikasi secara berkala telah al. kegiatan kampanye terakomodir dalam rencana kerja dan bukti pelaksanaan dapat dalam bentuk dokumentasi kegiatan dan atau bukti adanya pamflet/banner dan animasi dst ajakan penolakan gratifikasi",
+              "answer_format": "A/B/C",
+              "supporting_data": [],
+              "images": []
+            },
+            {
+              "key": "row-79",
+              "code": "b",
+              "title": "Pengendalian gratifikasi telah diimplementasikan",
+              "source_row": 79,
+              "explanation": "a. Jika Unit Pengendalian Gratifikasi, pengendalian gratifikasi telahmenjadi bagian dari prosedur\nb. Jika Unit Pengendalian Gratifikasi, upaya pengendalian gratifikasi telah mulai dilakukan\nc. Jika telah membentuk Unit Pengendalian Gratifikasi tetapi belum terdapat prosedur pengendalian\nd. Jika belum memiliki Unit Pengendalian Gratifikasi",
+              "guidance": "Kriteria : SK Kepala Badan Pengawasan No. 28/BP/SK/III/2021 tentang Juknis Pelaksanaan Pengendalian Gratifikasi pada MA dan Badan Peradilan dibawahnya\nPemenuhan indikator : UPG unit telah dibentuk di unit kerja\nmenjadi bagian dari prosedur : implementasi kebijakan pengendalian gratifikasi disamping telah diimplementasikan juga telah distandarkan pelaksanaannya melalui SOP",
+              "answer_format": "A/B/C/D",
+              "supporting_data": [],
+              "images": []
+            }
+          ]
+        },
+        {
+          "key": "row-80",
+          "code": "ii",
+          "title": "Penerapan Sistem Pengendalian Intern Pemerintah (SPIP)",
+          "source_row": 80,
+          "guidance": "",
+          "entries": [
+            {
+              "key": "row-81",
+              "code": "a",
+              "title": "Telah dibangun lingkungan pengendalian",
+              "source_row": 81,
+              "explanation": "a. Jika unit kerja membangun seluruh lingkungan pengendalian sesuai dengan yang ditetapkan organisasi dan juga membuat inovasi terkait lingkungan pengendalian yang sesuai dengan karakteristik unit kerja\nb. Jika unit kerja membangun seluruh lingkungan pengendalian sesuai dengan yang ditetapkan organisasi\nc. Jika unit kerja membangun sebagian besar lingkungan pengendalian sesuai dengan yang ditetapkan organisasi\nd. Jika unit kerja membangun sebagian kecil lingkungan pengendalian sesuai dengan yang ditetapkan organisasi\ne. Jika unit kerja belum membangun lingkungan pengendalian",
+              "guidance": "Pendekatan pembangunan Lingkungan pengendalian dapat dilihat dari adanya kebijakan pada komponen/aspek terkait al :\n1. Integritas dan nilai etika\n2. Komiten terhadap kompetensi\n3. Kepemimpinan yang kondusif\n4. Struktur organisasi \n5. Pendelegasian wewenang & tanggungjawab\n6. Kebijakan SDM\n7. Peran APIP yang Efektif\n8. Hubungan Kerja yang Baik dengan Instansi Pemerintah Terkait",
+              "answer_format": "A/B/C/D/E",
+              "supporting_data": [],
+              "images": [
+                {
+                  "path": "images/progress-zi/guide/row-81-7.png",
+                  "source_row": 81,
+                  "alt": "Gambar contoh dari panduan, baris 81"
+                },
+                {
+                  "path": "images/progress-zi/guide/row-81-8.png",
+                  "source_row": 81,
+                  "alt": "Gambar contoh dari panduan, baris 81"
+                }
+              ]
+            },
+            {
+              "key": "row-82",
+              "code": "b",
+              "title": "Telah dilakukan penilaian risiko atas pelaksanaan kebijakan",
+              "source_row": 82,
+              "explanation": "a. Jika unit kerja melakukan penilaian risiko atas seluruh pelaksanaan kebijakan sesuai dengan yang ditetapkan organisasi dan juga membuat inovasi terkait lingkungan pengendalian yang sesuai dengan karakteristik unit kerja; \nb. Jika unit kerja melakukan penilaian risiko atas seluruh pelaksanaan kebijakan sesuai dengan yang ditetapkan organisasi\nc. Jika melakukan penilaian risiko atas sebagian besar pelaksanaan kebijakan sesuai dengan yang ditetapkan organisasi\nd. Jika melakukan penilaian risiko atas sebagian kecil pelaksanaan kebijakan sesuai dengan yang ditetapkan organisasi\ne. Jika unit kerja belum melakukan penilaian resiko",
+              "guidance": "Kriteria : SK Sekma No. 475/SEK/SK/VII/2019 tentang Pedoman Manajemen Risiko di Lingkungan Mahkamah Agung dan Badan Peradilan dibawahnya;\nPembuktian atas pelaksanaan penilaian risiko mengacu pada ketentuan diatas adalah unit kerja telah membuat/mengisi :\nForm 1 : Formulir register risiko \nForm 2 : Formulir Status risiko yang melekat/bawaan",
+              "answer_format": "A/B/C/D/E",
+              "supporting_data": [],
+              "images": [
+                {
+                  "path": "images/progress-zi/guide/row-82-2.jpg",
+                  "source_row": 82,
+                  "alt": "Gambar contoh dari panduan, baris 82"
+                }
+              ]
+            },
+            {
+              "key": "row-83",
+              "code": "c",
+              "title": "Telah dilakukan kegiatan pengendalian untuk meminimalisir risiko yang telah diidentifikasi",
+              "source_row": 83,
+              "explanation": "a. Jika unit kerja melakukan kegiatan pengendalian untuk meminimalisir resiko sesuai dengan yang ditetapkan organisasi dan juga membuat inovasi terkait kegiatan pengendalian untuk meminimalisir resiko yang sesuai dengan karakteristik unit kerja\nb. Jika unit kerja melakukan kegiatan pengendalian untuk meminimalisir resiko sesuai dengan yang ditetapkan organisasi\nc. Jika unit kerja belum melakukan kegiatan pengendalian untuk meminimalisir resiko",
+              "guidance": "Kriteria : SK Sekma No. 475/SEK/SK/VII/2019 tentang Pedoman Manajemen Risiko di Lingkungan Mahkamah Agung dan Badan Peradilan dibawahnya;\nPembuktian atas pelaksanaan penilaian risiko mengacu pada ketentuan diatas adalah unit kerja telah membuat/mengisi :\nForm 1 : Formulir register risiko \nForm 2 : Formulir Status risiko yang melekat/bawaan\nForm 3 : Formulir Status risiko sisa (residual risk)\nForm 4 : Formulir Pemetaan SPIP\nKegiatan penangnan risiko dapat berupa dokumen al. CPAR (Corrective, Preventive, Action and Request)",
+              "answer_format": "A/B/C",
+              "supporting_data": [],
+              "images": []
+            },
+            {
+              "key": "row-84",
+              "code": "d",
+              "title": "SPI telah diinformasikan dan dikomunikasikan kepada seluruh pihak terkait",
+              "source_row": 84,
+              "explanation": "a. Jika SPI telah diinformasikan dan dikomunikasikan kepada seluruh pihak terkait\nb. Jika SPI telah diinformasikan dan dikomunikasikan kepada sebagian pihak terkait\nc. Jika SPI belum diinformasikan dan dikomunikasikan kepada pihak terkait",
+              "guidance": "Terdapat media sosialisasi dan publikasi pelaksanaan SPI dan atau bukti pelaksanaan kegiatan yang melibatkan seluruh pihak terkait",
+              "answer_format": "A/B/C",
+              "supporting_data": [],
+              "images": []
+            }
+          ]
+        },
+        {
+          "key": "row-85",
+          "code": "iii",
+          "title": "Pengaduan Masyarakat",
+          "source_row": 85,
+          "guidance": "",
+          "entries": [
+            {
+              "key": "row-86",
+              "code": "a",
+              "title": "Kebijakan Pengaduan masyarakat telah diimplementasikan",
+              "source_row": 86,
+              "explanation": "a. Jika unit kerja mengimplementasikan seluruh kebijakan pengaduan masyarakat sesuai dengan yang ditetapkan organisasi dan juga membuat inovasi terkait pengaduan masyarakat yang sesuai dengan karakteristik unit kerja\nb. Jika unit kerja telah mengimplementasikan seluruh kebijakan pengaduan masyarakat sesuai dengan yang ditetapkan organisasi \nc. Jika unit kerja belum mengimplementasikan kebijakan pengaduan masyarakat",
+              "guidance": "Kriteria : PERMA 09 Tahun 2016 Pedoman penanganan pengaduan (Whitleblowing System) di Mahkamah Agung dan Badan Peradilan yang berada dibawahnya\nImplementasi kebijakan pengaduan al: SK Tim Pengelola Meja Pengaduan; Aplikasi SIWAS user meja pangaduan dan Ketua/Kepala unit kerja; klarifikasi/konfirmasi melalui aplikasi SIWAS dst",
+              "answer_format": "A/B/C",
+              "supporting_data": [],
+              "images": []
+            },
+            {
+              "key": "row-87",
+              "code": "b",
+              "title": "pengaduan masyarakat dtindaklanjuti",
+              "source_row": 87,
+              "explanation": "ya,pengaduan masyaakat ditindaklanjuti",
+              "guidance": "",
+              "answer_format": "Ya/Tidak",
+              "supporting_data": [],
+              "images": []
+            },
+            {
+              "key": "row-88",
+              "code": "c",
+              "title": "Telah dilakukan monitoring dan evaluasi atas penanganan pengaduan masyarakat",
+              "source_row": 88,
+              "explanation": "a. Jika penanganan pengaduan masyarakat dimonitoring dan evaluasi secara berkala\nb. Jika penanganan pengaduan masyarakat dimonitoring dan evaluasi tetapi tidak secara berkala\nc. Jika penanganan pengaduan masyarakat belum di monitoring dan evaluasi",
+              "guidance": "Pelaksanan monitoring dan evaluasi atas system pananganan pengaduan yang dijalankan di unit kerja secara berkala al. evaluasi dapat dilakukan pada pelaksanaan kebijakan penanganan pengaduan dari kegiatan sosialisasi, pelaksanaan tugas pengelola meja pengaduan, hasil penanganan pengaduan (klarifikasi, konfirmasi, telaah dan pemeriksaan dan pelaporan)",
+              "answer_format": "A/B/C",
+              "supporting_data": [],
+              "images": []
+            },
+            {
+              "key": "row-89",
+              "code": "d",
+              "title": "Hasil evaluasi atas penanganan pengaduan masyarakat telah ditindaklanjuti",
+              "source_row": 89,
+              "explanation": "a. Jika seluruh hasil evaluasi atas penanganan pengaduan telah ditindaklanjuti oleh unit kerja\nb. Jika sebagian hasil evaluasi atas penanganan pengaduan telah ditindaklanjuti oleh unit kerja\nc. Jika hasil evaluasi atas penanganan pengaduan belum ditindaklanjuti",
+              "guidance": "Dokumen tindak lanjut atas pelaksanaan kegiatan monev diatas",
+              "answer_format": "A/B/C",
+              "supporting_data": [],
+              "images": []
+            }
+          ]
+        },
+        {
+          "key": "row-90",
+          "code": "iv",
+          "title": "Whistle-Blowing System",
+          "source_row": 90,
+          "guidance": "",
+          "entries": [
+            {
+              "key": "row-92",
+              "code": "a",
+              "title": "Whistle Blowing System telah diterapkan",
+              "source_row": 92,
+              "explanation": "a. Jika unit kerja menerapkan seluruh kebijakan Whistle Blowing System sesuai dengan yang ditetapkan organisasi dan juga membuat inovasi terkait pelaksanaan Whistle Blowing System yang sesuai dengan karakteristik unit kerja\nb. Jika unit kerja menerapkan kebijakan Whistle Blowing System sesuai dengan yang ditetapkan organisasi\nc. Jika unit kerja belum menerapkan kebijakan Whistle Blowing System",
+              "guidance": "Kebijakan whistle blowing system pada lembaga dijalankan melalui sistem yang terpadu dengan penanganan pengaduan melalui Aplikasi SIWAS;\nPelaksanaan whisle blowing system dalam penanganan dibedakan dengan penanganan dalam pengaduan umum, dimana fokus penangan pada Whistle blowing system pada materi aduan atas pelanggaran yang terjadi dengan jaminan perlindungan atas identitas pelapor yang merupakan aparatur internal;\nBentuk penerapan kebijakan : al. terdapat sosialisasi kebijakan dan penanganan whistel blowing kepada petugas dan aparatur di unit kerja",
+              "answer_format": "A/B/C",
+              "supporting_data": [],
+              "images": []
+            },
+            {
+              "key": "row-93",
+              "code": "b",
+              "title": "Telah dilakukan evaluasi atas penerapan Whistle Blowing System",
+              "source_row": 93,
+              "explanation": "a. Jika penerapan Whistle Blowing System dimonitoring dan evaluasi secara berkala\nb. Jika penerapan Whistle Blowing System dimonitoring dan evaluasi tidak secara berkala\nc. Jika penerapan Whistle Blowing System belum di monitoring dan evaluasi",
+              "guidance": "Pelaksanan monitoring dan evaluasi atas Whistleblowing system yang dijalankan di unit kerja secara berkala al. evaluasi dapat dilakukan pada pelaksanaan kebijakan dari kegiatan sosialisasi, pelaksanaan tugas pengelola meja pengaduan, hasil penanganan (klarifikasi, konfirmasi, telaah dan pemeriksaan dan pelaporan)",
+              "answer_format": "A/B/C",
+              "supporting_data": [],
+              "images": []
+            },
+            {
+              "key": "row-94",
+              "code": "c",
+              "title": "Hasil evaluasi atas penerapan Whistle Blowing System telah ditindaklanjuti",
+              "source_row": 94,
+              "explanation": "a. Jika seluruh hasil evaluasi atas penerapan Whistle Blowing System telah ditindaklanjuti oleh unit kerja\nb. Jika sebagian hasil evaluasi atas penerapan Whistle Blowing System telah ditindaklanjuti oleh unit kerja\nc. Jika hasil evaluasi atas penerapan Whistle Blowing System belum ditindaklanjuti",
+              "guidance": "Dokumen tindak lanjut atas pelaksanaan kegiatan monev diatas",
+              "answer_format": "A/B/C",
+              "supporting_data": [],
+              "images": []
+            }
+          ]
+        },
+        {
+          "key": "row-95",
+          "code": "v",
+          "title": "Penanganan Benturan Kepentingan",
+          "source_row": 95,
+          "guidance": "",
+          "entries": [
+            {
+              "key": "row-96",
+              "code": "a",
+              "title": "Telah terdapat identifikasi/pemetaan benturan kepentingan dalam tugas fungsi utama",
+              "source_row": 96,
+              "explanation": "a. Jika terdapat  identifikasi/pemetaan benturan kepentingan pada seluruh tugas fungsi utama\nb. Jika terdapat  identifikasi/pemetaan benturan kepentingan tetapi pada sebagian besar tugas fungsi utama\nc. Jika terdapat  identifikasi/pemetaan benturan kepentingan tetapi pada sebagian kecil tugas fungsi utama\nd. Jika belum terdapat  identifikasi/pemetaan benturan kepentingan dalam tugas fungsi utama",
+              "guidance": "Kriteria : Permenpan No. 37 Than 2012 tentang Pedoman Umum Penanganan Benturan Kepentingan;\nPeraturasn SEKMA No 59a/Sek/SK/11/2014 tentang pedoman Penanganan Benturan Kepentingan di Lingkungan Mahkamah Agung dan badan Peradilan dibawahnya\n\nPemenuhan indikator ini al. bahwa pada unit kerja terdapat dokumen identifikasi/pemetaan benturan kepetingan pada tusi utama (mapping aktivitas/kegiatan dalam pelaksanan tusi) yang berpotensi menghadapi benturan kepentingan",
+              "answer_format": "A/B/C/D",
+              "supporting_data": [],
+              "images": []
+            },
+            {
+              "key": "row-97",
+              "code": "b",
+              "title": "Penanganan Benturan Kepentingan telah disosialisasikan/internalisasi",
+              "source_row": 97,
+              "explanation": "a. Jika penanganan Benturan Kepentingan disosialiasikan/diinternalisasikan ke seluruh layanan\nb. Jika penanganan Benturan Kepentingan disosialiasikan/diinternalisasikan ke sebagian besar layanan\nc.  Jika penanganan Benturan Kepentingan disosialiasikan/diinternalisasikan ke sebagian kecil layanan\nd.  Jika penanganan Benturan Kepentingan belum disosialiasikan/diinternalisasikan ke seluruh layanan",
+              "guidance": "Pemenuhan indikator al : pelaksanaan kegiatan sosialsisasi benturan kepentingan yang telah terindentifikasi dan bentuk internalisasinya telah dibuat mekanisme pelaporan dan strategi dalam pencegahan potensi benturan kepentingan dimaksud",
+              "answer_format": "A/B/C/D",
+              "supporting_data": [],
+              "images": []
+            },
+            {
+              "key": "row-98",
+              "code": "c",
+              "title": "Penanganan Benturan Kepentingan telah diimplementasikan",
+              "source_row": 98,
+              "explanation": "a. Jika penanganan Benturan Kepentingan diimplementasikan ke seluruh layanan\nb. Jika penanganan Benturan Kepentingan diimplementasikan ke sebagian besar layanan\nc. Jika penanganan Benturan Kepentingan diimplementasikan ke sebagian kecil layanan\nd. Jika penanganan Benturan Kepentingan belum diimplementasikan ke seluruh layanan",
+              "guidance": "Bentuk implementasi atas penanganan benturan kepentingan al. Form Surat pernyataan bebas dari benturan kepentingan; penanganan benturan kepentingan telah masuk dalam SOP pelaksanaan tusi dst",
+              "answer_format": "A/B/C/D",
+              "supporting_data": [],
+              "images": []
+            },
+            {
+              "key": "row-99",
+              "code": "d",
+              "title": "Telah dilakukan evaluasi atas Penanganan Benturan Kepentingan",
+              "source_row": 99,
+              "explanation": "a. Jika penanganan Benturan Kepentingan dievaluasi secara berkala oleh unit kerja\nb. Jika penanganan Benturan Kepentingan dievaluasi tetapi tidak secara berkala oleh unit kerja\nc. Jika penanganan Benturan Kepentingan belum dievaluasi oleh unit kerja",
+              "guidance": "Kegiatan evaluasi berkala atas identifikasi benturan kepentingan",
+              "answer_format": "A/B/C",
+              "supporting_data": [],
+              "images": []
+            },
+            {
+              "key": "row-100",
+              "code": "e",
+              "title": "Hasil evaluasi atas Penanganan Benturan Kepentingan telah ditindaklanjuti",
+              "source_row": 100,
+              "explanation": "a. Jika seluruh hasil evaluasi atas Penanganan Benturan Kepentingan telah ditindaklanjuti oleh unit kerja\nb. Jika sebagian hasil evaluasi atas Penanganan Benturan Kepentingan telah ditindaklanjuti oleh unit kerja\nc. Jika belum ada hasil evaluasi atas Penanganan Benturan Kepentingan yang ditindaklanjuti unit kerja",
+              "guidance": "Tindak lanjut hasil evaluasi",
+              "answer_format": "A/B/C",
+              "supporting_data": [],
+              "images": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "pengungkit-6",
+      "group": "pengungkit",
+      "code": "6",
+      "title": "PENINGKATAN KUALITAS PELAYANAN PUBLIK",
+      "source_row": 101,
+      "guidance": "",
+      "points": [
+        {
+          "key": "row-102",
+          "code": "i",
+          "title": "Standar Pelayanan",
+          "source_row": 102,
+          "guidance": "",
+          "entries": [
+            {
+              "key": "row-103",
+              "code": "a",
+              "title": "Terdapat kebijakan standar pelayanan",
+              "source_row": 103,
+              "explanation": "a. Terdapat penetapan Standar Pelayanan terhadap seluruh jenis pelayanan, dan sesuai asas serta komponen standar pelayanan publik yang berlaku\nb. Terdapat penetapan Standar Pelayanan terhadap sebagian jenis pelayanan, dan sesuai asas serta komponen standar pelayanan publik yang berlaku\nc. Terdapat penetapan Standar Pelayanan terhadap seluruh jenis pelayanan, namun tidak sesuai asas serta komponen standar pelayanan publik yang berlaku\nd. Terdapat penetapan Standar Pelayanan terhadap sebagian jenis pelayanan, namun tidak sesuai asas serta komponen standar pelayanan publik yang berlaku\ne. Standar Pelayanan belum ditetapkan",
+              "guidance": "Kriteria : Permenpan No. 15 Tahun 2014 tentang Pedoman Standar Pelayanan; SK KMA No. 026 Tahun 2012 tentang Standar pelayanan peradilan\nPemenuhan indikator ini al: terdapat standar pelayanan yang telah ditetapkan di unit kerja atas seluruh jenis pelayanan",
+              "answer_format": "A/B/C/D/E",
+              "supporting_data": [],
+              "images": []
+            },
+            {
+              "key": "row-104",
+              "code": "b",
+              "title": "Standar pelayanan telah dimaklumatkan",
+              "source_row": 104,
+              "explanation": "a. Standar pelayanan telah dimaklumatkan pada seluruh jenis pelayanan dan dipublikasikan di website dan media lainnya\nb. Standar pelayanan telah dimaklumatkan pada sebagian besar jenis pelayanan dan dipublikasikan minimal di website\nc. Standar pelayanan telah dimaklumatkan pada sebagian kecil  jenis pelayanan dan belum dipublikasikan\nd. Standar pelayanan belum dimaklumatkan pada seluruh jenis pelayanan dan belum dipublikasikan",
+              "guidance": "Pemenuhan indikator ini al : terdapat maklumat pelayanan yang telah dipublikasikan secara luas",
+              "answer_format": "A/B/C/D",
+              "supporting_data": [],
+              "images": []
+            },
+            {
+              "key": "row-105",
+              "code": "c",
+              "title": "Dilakukan reviu dan perbaikan atas standar pelayanan",
+              "source_row": 105,
+              "explanation": "a. Dilakukan reviu dan perbaikan atas standar pelayanan dan dilakukan dengan melibatkan stakeholders (antara lain : tokoh masyarakat,  akademisi, dunia usaha, dan lembaga swadaya masyarakat), serta memanfaatkan masukan hasil SKM dan pengaduan masyarakat\nb. Dilakukan reviu dan perbaikan atas standar pelayanan dan dilakukan dengan memanfaatkan masukan hasil SKM dan pengaduan masyarakat, namun tanpa melibatkan stakeholders\nc. Dilakukan reviu dan perbaikan atas standar pelayanan, namun  dilakukan tanpa memanfaatkan masukan hasil SKM dan pengaduan masyarakat, serta tanpa melibatkan stakeholders\nd. Belum dilakukan reviu dan perbaikan atas standar pelayanan",
+              "guidance": "Pemenuhan indikator ini al : pelaksanaan kegiatan reviu dan perbaikan standar palayanan yang melibatkan stakeholders",
+              "answer_format": "A/B/C/D",
+              "supporting_data": [],
+              "images": []
+            },
+            {
+              "key": "row-106",
+              "code": "d",
+              "title": "telah melakukan publikasi atas standar pelayanan dan maklumat pelayanan",
+              "source_row": 106,
+              "explanation": "ya,telah melakukan publikasi atas tandar pelayanan dan maklumat pelayanan",
+              "guidance": "Kegiatan publikasi standar pelayanan melalui berbagai media",
+              "answer_format": "Ya/Tidak",
+              "supporting_data": [],
+              "images": []
+            }
+          ]
+        },
+        {
+          "key": "row-107",
+          "code": "ii",
+          "title": "Budaya Pelayanan Prima",
+          "source_row": 107,
+          "guidance": "",
+          "entries": [
+            {
+              "key": "row-108",
+              "code": "a",
+              "title": "Telah dilakukan berbagai upaya peningkatan kemampuan dan/atau kompetensi tentang penerapan budaya pelayanan prima",
+              "source_row": 108,
+              "explanation": "a. Telah dilakukan pelatihan/sosialisasi pelayanan prima secara berkelanjutan dan terjadwal, sehingga seluruh petugas/pelaksana layanan memiliki kompetensi sesuai kebutuhan jenis layanan serta telah dan terdapat monev yang melihat kemampuan/kecakapan petugas/pelaksana layanan\nb. Telah dilakukan pelatihan/sosialisasi pelayanan prima, dan  seluruh petugas/pelaksana layanan memiliki kompetensi sesuai kebutuhan jenis layanan\nc. Telah dilakukan pelatihan/sosialisasi pelayanan prima, akan tetapi baru sebagian besar petugas/pelaksana layanan memiliki kompetensi sesuai kebutuhan jenis layanan \nd. Telah dilakukan pelatihan/sosialisasi pelayanan prima namun secara terbatas, sehingga hanya sebagian kecil petugas/pelaksana layanan yang memiliki kompetensi sesuai kebutuhan jenis layanan \ne. Belum dilakukan pelatihan/sosialisasi pelayanan prima, dan seluruh petugas/pelaksana layanan belum memiliki kompetensi sesuai kebutuhan jenis layanan",
+              "guidance": "Pemenuhan indikator : al. Pelaksanaan kegiatan sosialisasi/pelatihan Pelayanan Prima kepada pegawai",
+              "answer_format": "A/B/C/D/E",
+              "supporting_data": [],
+              "images": []
+            },
+            {
+              "key": "row-109",
+              "code": "b",
+              "title": "Informasi tentang pelayanan mudah diakses melalui berbagai media",
+              "source_row": 109,
+              "explanation": "a. Seluruh Informasi tentang pelayanan dapat diakses secara online (website/media sosial) dan terhubung dengan sistem informasi pelayanan publik nasional\nb. Seluruh Informasi tentang pelayanan dapat diakses secara online (website/media sosial), namun belum terhubung dengan sistem informasi pelayanan publik nasional\nc. Seluruh Informasi tentang pelayanan belum online, hanya dapat diakses di tempat layanan (intranet dan non elektronik)\nd. Informasi tentang pelayanan sulit diakses",
+              "guidance": "Kriteria : Permenapan No. 13 Tahun 2017 tentang PEDOMAN PENYELENGGARAAN SISTEM INFORMASI PELAYANAN PUBLIK NASIONAL \nPemenuhan indikator : al. Seluruh informasi pelayanan tersedia dan update melalui media (website/media sosial); dan untuk pemenuhan optimal jika seluruh layanan tersebut terhubung dengan sistem informasi pelayanan publik nasional (SIPPN)",
+              "answer_format": "A/B/C/D",
+              "supporting_data": [],
+              "images": []
+            },
+            {
+              "key": "row-110",
+              "code": "c",
+              "title": "Telah terdapat sistem pemberian penghargaan dan sanksi bagi petugas pemberi pelayanan",
+              "source_row": 110,
+              "explanation": "a. Telah terdapat kebijakan pemberian penghargaan dan sanksi yang minimal memenuhi unsur penilaian: disiplin, kinerja, dan hasil penilaian pengguna layanan, dan telah diterapkan secara rutin/berkelanjutan\nb. Telah terdapat kebijakan pemberian penghargaan dan sanksi yang minimal memenuhi unsur penilaian: disiplin, kinerja, dan hasil penilaian pengguna layanan, namun belum diterapkan secara rutin/berkelanjutan\nc. Telah terdapat kebijakan pemberian penghargaan dan sanksi, namun belum memenuhi unsur penilaian minimal : disiplin, kinerja, dan hasil penilaian pengguna layanan\nd. Belum terdapat kebijakan pemberian penghargaan dan sanksi",
+              "guidance": "Kebijakan pemberian reward dan panishment bagi petugas pemberi layanan;",
+              "answer_format": "A/B/C/D",
+              "supporting_data": [],
+              "images": []
+            },
+            {
+              "key": "row-111",
+              "code": "d",
+              "title": "Telah terdapat sistem pemberian kompensasi kepada penerima layanan bila layanan tidak sesuai standar",
+              "source_row": 111,
+              "explanation": "a. Telah terdapat sistem pemberian kompensasi bila layanan tidak sesuai standar bagi penerima layanan di seluruh jenis layanan\nb. Telah terdapat sistem pemberian kompensasi bila layanan tidak sesuai standar bagi penerima layanan di sebagian besar jenis layanan \nc. Telah terdapat sistem pemberian kompensasi bila layanan tidak sesuai standar bagi penerima layanan di sebagian kecil jenis layanan \nd. Belum terdapat sistem pemberian kompensasi bila layanan tidak sesuai standar",
+              "guidance": "Kebijakan pemberian Kompensasi kepada penerima layanan diseluruh jenis layanan jika pemberian layanan tidak sesuai standar layanan",
+              "answer_format": "A/B/C/D",
+              "supporting_data": [],
+              "images": []
+            },
+            {
+              "key": "row-112",
+              "code": "e",
+              "title": "Terdapat sarana layanan terpadu/terintegrasi",
+              "source_row": 112,
+              "explanation": "a. Jika seluruh pelayanan sudah dilakukan secara terpadu/terintegrasi\nb. Jika sebagian besar pelayanan sudah dilakukan secara terpadu/terintegrasi\nc. Jika sebagian kecil pelayanan sudah dilakukan secara terpadu/terintegrasi\nd. Jika tidak ada pelayanan yang dilakukan secara terpadu/terintegrasi",
+              "guidance": "Sarana pelayanan terpadu (PTSP)",
+              "answer_format": "A/B/C/D",
+              "supporting_data": [],
+              "images": []
+            },
+            {
+              "key": "row-113",
+              "code": "f",
+              "title": "Terdapat inovasi pelayanan",
+              "source_row": 113,
+              "explanation": "a. Jika unit kerja telah memiliki inovasi pelayanan yang  berbeda dengan unit kerja lain dan mendekatkan pelayanan dengan masyarakat serta telah direplikasi\nb. Jika unit kerja telah memiliki inovasi pelayanan yang  berbeda dengan unit kerja lain dan mendekatkan pelayanan dengan masyarakat\nc. Jika unit kerja memiliki inovasi yang merupakan replikasi dan pengembangan dari inovasi yang sudah ada \nd. Jika unit kerja telah memiliki inovasi akan tetapi merupakan pelaksanaan inovasi dari instansi pemerintah \ne. Jika  unit kerja belum memiliki inovasi pelayanan",
+              "guidance": "Inovasi dalam pelayanan yang dimaksudkan untuk mendekatkan pelayanan dengan masyarakat al. melalui sarana elektronik dan media sosial",
+              "answer_format": "A/B/C/D/E",
+              "supporting_data": [],
+              "images": []
+            }
+          ]
+        },
+        {
+          "key": "row-114",
+          "code": "iii",
+          "title": "Pengelolaan Pengaduan",
+          "source_row": 114,
+          "guidance": "",
+          "entries": [
+            {
+              "key": "row-115",
+              "code": "a",
+              "title": "Terdapat media pengaduan dan konsultasi pelayanan yang terintegrasi dengan SP4N-Lapor!",
+              "source_row": 115,
+              "explanation": "a. Terdapat media konsultasi dan pengaduan secara offline dan online, tersedia petugas khusus yang menangani, dan terintegrasi dengan SP4N-LAPOR!\nb. Terdapat media konsultasi dan pengaduan secara offline dan online, tersedia petugas khusus yang menangani namun belum terintegrasi dengan SP4N-LAPOR!\nc. Terdapat media konsultasi dan pengaduan secara offline dan online, namun belum tersedia petugas khusus yang menangani\nd. Hanya terdapat media konsultasi dan pengaduan secara offline\ne. Tidak terdapat media konsultasi dan pengaduan",
+              "guidance": "Pemenuhan indikator : terdapat di unit kerja media pengaduan dan konsultasi pelayanan oleh petugas khusus yang ditunjuk dan pemenuhan optimalnya telah terintegrasi dengan SP4N-LAPOR\n\nInfor data update terakhir sampai saat ini sudah terdapat 510 satuan kerja yang telah terhubung (terkoneksi) dengan aplikasi LAPOR kemenpan",
+              "answer_format": "A/B/C/D/E",
+              "supporting_data": [],
+              "images": []
+            },
+            {
+              "key": "row-116",
+              "code": "b",
+              "title": "Terdapat unit yang mengelola pengaduan dan konsultasi pelayanan",
+              "source_row": 116,
+              "explanation": "a. Terdapat unit pengelola khusus untuk konsultasi dan pengaduan, serta surat penugasan pengelola SP4N-LAPOR! di level unit kerja\nb. Terdapat SK pengelola SP4N-LAPOR! di level instansi dan/atau surat penugasan pengelola SP4N-LAPOR! di level unit kerja, namun unit pengelola khusus untuk konsultasi dan pengaduan belum ada\nc. Belum terdapat unit pengelola khusus untuk konsultasi dan pengaduan, serta belum terdapat SK pengelola SP4N-LAPOR! di level instansi dan/atau surat penugasan pengelola SP4N-LAPOR! di level unit kerja",
+              "guidance": "Pemenuhan formal :\nTelah dibentuk/ditunjuk petugas/pengelola khusus yang melakukan penanganan atas konsultasi dan pengaduan dan petugas pengelola Aplikasi Lapor pada unit kerja.\nSaat ini telah terhubung dengan Aplikasi Lapor berdasarkan data terakhir pada Badan Pegnawasan ada di ± 510 satker",
+              "answer_format": "A/B/C",
+              "supporting_data": [],
+              "images": []
+            },
+            {
+              "key": "row-117",
+              "code": "c",
+              "title": "Telah dilakukan evaluasi atas penanganan keluhan/masukan dan konsultasi",
+              "source_row": 117,
+              "explanation": "a. Evaluasi atas penanganan keluhan/masukan dan konsultasi dilakukan secara berkala\nb. Evaluasi  atas penanganan keluhan/masukan dan konsultasi dilakukan  tidak berkala\nc. Belum dilakukan evaluasi penanganan keluhan/masukan dan konsultasi",
+              "guidance": "Terdapat kegiatan pelaksanaan evaluasi atas pengangan keluhan/masukan dan konsultasi secara berkala",
+              "answer_format": "A/B/C",
+              "supporting_data": [],
+              "images": []
+            }
+          ]
+        },
+        {
+          "key": "row-118",
+          "code": "iv",
+          "title": "Penilaian Kepuasan terhadap Pelayanan",
+          "source_row": 118,
+          "guidance": "",
+          "entries": [
+            {
+              "key": "row-119",
+              "code": "a",
+              "title": "Telah dilakukan survey kepuasan masyarakat terhadap pelayanan",
+              "source_row": 119,
+              "explanation": "a. Survei kepuasan masyarakat terhadap pelayanan dilakukan minimal 4 kali dalam setahun\nb. Survei kepuasan masyarakat terhadap pelayanan dilakukan minimal 3 kali dalam setahun\nc. Survei kepuasan masyarakat terhadap pelayanan dilakukan minimal 2 kali dalam setahun\nd. Survei kepuasan masyarakat terhadap pelayanan dilakukan minimal 1 kali dalam setahun\ne. Belum dilakukan survei kepuasan masyarakat terhadap pelayanan",
+              "guidance": "Kriteria : Permenpan No.14 tahun 2017 ttg Pedoman Penyusunan Survei Kepuasan Masyarakat Unit Penyelenggara Pelayanan Publik\nPemenuhan indikator : pelaksanaan survei kepuasan masyarakat terhadap pelayanan dilakukan secara berkala",
+              "answer_format": "A/B/C/D/E",
+              "supporting_data": [],
+              "images": []
+            },
+            {
+              "key": "row-120",
+              "code": "b",
+              "title": "Hasil survei kepuasan masyarakat dapat diakses secara terbuka",
+              "source_row": 120,
+              "explanation": "a. Hasil survei kepuasan masyarakat dapat diakses secara  online (website, media sosial, dll) dan offline\nb. Hasil survei kepuasan masyarakat hanya dapat diakses secara offline di tempat layanan\nc. Hasil survei kepuasan masyarakat tidak dipublikasi",
+              "guidance": "Publikasi survei form dapat mengacu pada kriteria diatas",
+              "answer_format": "A/B/C",
+              "supporting_data": [],
+              "images": []
+            },
+            {
+              "key": "row-121",
+              "code": "c",
+              "title": "Dilakukan tindak lanjut atas hasil survei kepuasan masyarakat",
+              "source_row": 121,
+              "explanation": "a. Jika dilakukan tindak lanjut atas seluruh hasil survei kepuasan masyarakat\nb. Jika dilakukan tindak lanjut atas sebagian besar hasil survei kepuasan masyarakat\nc. Jika dilakukan tindak lanjut atas sebagian kecil hasil survei kepuasan masyarakat\nd. Jika belum dilakukan tindak lanjut atas hasil survei kepuasan masyarakat",
+              "guidance": "Terdapat bukti atas pelaksanaaan TL hasil survei IKM",
+              "answer_format": "A/B/C/D",
+              "supporting_data": [],
+              "images": []
+            }
+          ]
+        },
+        {
+          "key": "row-122",
+          "code": "v",
+          "title": "Pemanfaatan Teknologi Informasi",
+          "source_row": 122,
+          "guidance": "",
+          "entries": [
+            {
+              "key": "row-123",
+              "code": "a",
+              "title": "Telah menerapkan teknologi informasi dalam memberikan pelayanan",
+              "source_row": 123,
+              "explanation": "a. Terdapat pelayanan yang menggunakan teknologi informasi pada seluruh proses pemberian layanan\nb. Terdapat pelayanan yang menggunakan teknologi informasi pada sebagian besar proses pemberian layanan\nc. Terdapat pelayanan yang menggunakan teknologi informasi pada sebagian kecil proses pemberian layanan\nd. Terdapat pelayanan yang belum menggunakan teknologi informasi pada proses pemberian pelayanan",
+              "guidance": "Pemenuhan indikator : al. penggunaan TI dalam pemberian layanan dan untuk hasil optimal bahwa seluruh peroses pemberian layanan dalam Standar layanan telah menggunakan TI",
+              "answer_format": "A/B/C/D",
+              "supporting_data": [],
+              "images": []
+            },
+            {
+              "key": "row-124",
+              "code": "c",
+              "title": "Telah membangun database pelayanan yang terintegrasi",
+              "source_row": 124,
+              "explanation": "Ya,jika tela membangun database pelayanan yang terintegrasi",
+              "guidance": "",
+              "answer_format": "Ya/Tidak",
+              "supporting_data": [],
+              "images": []
+            },
+            {
+              "key": "row-125",
+              "code": "b",
+              "title": "Telah dilakukan perbaikan secara terus menerus",
+              "source_row": 125,
+              "explanation": "a. Perbaikan dilakukan secara terus-menerus\nb. Perbaikan dilakukan tidak secara terus menerus\nc. Belum dilakukan perbaikan",
+              "guidance": "Terdapat upaya perbaiak atas penggunaan TI dalam pemberian layanan secara terus menerus",
+              "answer_format": "A/B/C",
+              "supporting_data": [],
+              "images": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "reform-1",
+      "group": "reform",
+      "code": "1",
+      "title": "MANAJEMEN PERUBAHAN",
+      "source_row": 127,
+      "guidance": "",
+      "points": [
+        {
+          "key": "row-128",
+          "code": "i",
+          "title": "Komitmen dalam perubahan",
+          "source_row": 128,
+          "guidance": "Ukuran keberhasilan:\n1) Agen perubahan telah membuat perubahan yang konkret;\n2) Perubahan yang dibuat Agen Perubahan telah terintegrasi dalam sistem manajemen",
+          "entries": [
+            {
+              "key": "row-129",
+              "code": "a",
+              "title": "Agen perubahan telah membuat perubahan yang konkret di Instansi (dalam 1 tahun)",
+              "source_row": 129,
+              "explanation": "Misalkan dengan kebijakan 1 Agen 1 Perubahan Persentase diperoleh dari Jumlah Perubahan yang dibuat dibagi dengan Jumlah Agen Perubahan",
+              "guidance": "",
+              "answer_format": "%",
+              "supporting_data": [
+                {
+                  "label": "- Jumlah Agen Perubahan",
+                  "source_row": 130,
+                  "explanation": "",
+                  "guidance": ""
+                },
+                {
+                  "label": "- Jumlah Perubahan yang dibuat",
+                  "source_row": 131,
+                  "explanation": "",
+                  "guidance": ""
+                }
+              ],
+              "images": []
+            },
+            {
+              "key": "row-132",
+              "code": "b",
+              "title": "Perubahan yang dibuat Agen Perubahan telah terintegrasi dalam sistem manajemen",
+              "source_row": 132,
+              "explanation": "",
+              "guidance": "",
+              "answer_format": "%",
+              "supporting_data": [
+                {
+                  "label": "- Jumlah Perubahan yang dibuat",
+                  "source_row": 133,
+                  "explanation": "",
+                  "guidance": ""
+                },
+                {
+                  "label": "- Jumlah Perubahan yang telah diintegrasikan dalam sistem manajemen",
+                  "source_row": 134,
+                  "explanation": "",
+                  "guidance": ""
+                }
+              ],
+              "images": []
+            }
+          ]
+        },
+        {
+          "key": "row-135",
+          "code": "ii",
+          "title": "Komitmen Pimpinan",
+          "source_row": 135,
+          "guidance": "",
+          "entries": [
+            {
+              "key": "row-136",
+              "code": "-",
+              "title": "Pimpinan memiliki komitmen terhadap pelaksanaan reformasi birokrasi, dengan adanya target capaian reformasi yang jelas di dokumen perencanaan",
+              "source_row": 136,
+              "explanation": "a. Target capaian zona integritas sudah ada di dokumen perencanaan unit kerja dan sebagian besar (diatas 80%) sudah tercapai\nb. Target capaian zona integritas sudah ada di dokumen perencanaan unit kerja dan sebagian (diatas 50%) sudah tercapai\nc. Target capaian zona integritas sudah ada di dokumen perencanaan unit kerja dan sebagian kecil (dibawah 50%) sudah tercapai\nd. Target capaian zona integritassudah ada di dokumen perencanaan unit kerja, namun belum ada yang tercapai (masih dalam tahap pembangunan)\ne. Tidak ada target capaian zona integritasdi dokumen perencanaan unit kerja",
+              "guidance": "Ukuran capaian target : capaian atas rencana kerja Pembangunan ZI menuju WBK/WBBM unit kerja",
+              "answer_format": "A/B/C/D/E",
+              "supporting_data": [],
+              "images": []
+            }
+          ]
+        },
+        {
+          "key": "row-137",
+          "code": "iii",
+          "title": "Membangun Budaya Kerja",
+          "source_row": 137,
+          "guidance": "",
+          "entries": [
+            {
+              "key": "row-138",
+              "code": "-",
+              "title": "Instansi membangun budaya kerja positif dan menerapkan nilai-nilai organisasi dalam pelaksanaan tugas sehari-hari",
+              "source_row": 138,
+              "explanation": "a. Budaya kerja dan nilai-nilai organisasi telah dinternalisasi ke seluruh anggota organisasi, dan penerapannya dituangkan dalam standar operasional pelaksanaan kegiatan/tugas \nb. Budaya kerja dan nilai-nilai organisasi telah dinternalisasi ke seluruh anggota organisasi, namun belum dituangkan dalam standar operasional pelaksanaan kegiatan/tugas\nc. Budaya kerja dan nilai-nilai organisasi telah disusun, namun belum dinternalisasi ke seluruh anggota organisasi\nd. Belum menyusun budaya kerja dan nilai-nilai organisasi",
+              "guidance": "Nilai-nilai organisasi dalam membangun budaya kerja acuannya saat ini adalah SE-MenpanRB No. 20 Tahun 2021 ttg Implementasi Core Value ASN \nBerAHLAK - Berorientasi Pelayanan, Akuntabel, Kompeten, Harmonis, Loyal, Adaptif dan Kolaboratif\nbentuk Internalisasi : al. sosialisasi/publikasi nilai-nilai organisasi, dan core Value ASN",
+              "answer_format": "A/B/C/D",
+              "supporting_data": [],
+              "images": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "reform-2",
+      "group": "reform",
+      "code": "2",
+      "title": "PENATAAN TATALAKSANA",
+      "source_row": 139,
+      "guidance": "",
+      "points": [
+        {
+          "key": "row-140",
+          "code": "i",
+          "title": "Peta Proses Bisnis Mempengaruhi Penyederhanaan Jabatan",
+          "source_row": 140,
+          "guidance": "",
+          "entries": [
+            {
+              "key": "row-141",
+              "code": "-",
+              "title": "Telah disusun peta proses bisnis dengan adanya penyederhanaan jabatan",
+              "source_row": 141,
+              "explanation": "a. Peta proses bisnis telah disusun dan mempengaruhi penyederhanaan seluruh jabatan\nb. Peta proses bisnis telah disusun dan mempengaruhi penyederhanaan sebagian besar (lebih dari 50%) jabatan\nc. Peta proses bisnis telah disusun dan mempengaruhi penyederhanaan sebagian kecil (kurang dari 50%)  jabatan\nd. Peta proses bisnis telah disusun dan belum mempengaruhi penyederhanaan jabatan",
+              "guidance": "Kriteria :  Permenpan 17 Tahun 2021 ttg Penyetaraan jabatan administasi ke dlam jabatan fungsional dan Permenpan No. 7 th 2022 ttg Sistem Kierja pada Instansi Pemeritah untuk penyederhanaan Birokrasi\nJudgment evaluator : \nJika mangacu pada kriteria diatas ukuran pemenuhan atas indikator ini adalah penyususun peta proses bisnis berdampak pada penyederhanaan jabatan; \nEvidancenya : Gambaran peta proses bisnis yang disusun dan terdapat dokumen penyetaraan jabatan administrasi ke dalam jabatan fungsional di unit kerja \nexp. Fungsional Pranata Keuangan dan Analisis Pengelolaan Keuangan APBN",
+              "answer_format": "A/B/C/D",
+              "supporting_data": [],
+              "images": []
+            }
+          ]
+        },
+        {
+          "key": "row-142",
+          "code": "ii",
+          "title": "Sistem Pemerintahan Berbasis Elektronik (SPBE) yang Terintegrasi",
+          "source_row": 142,
+          "guidance": "",
+          "entries": [
+            {
+              "key": "row-143",
+              "code": "a",
+              "title": "Implementasi SPBE telah terintegrasi dan mampu mendorong pelaksanaan pelayanan publik yang lebih cepat dan efisien",
+              "source_row": 143,
+              "explanation": "a. Implementasi SPBE telah terintegrasi dan mampu mendorong pelaksanaan pelayanan publik yang lebih cepat dan efisien \nb. Implementasi SPBE telah mampu mendorong pelaksanaan pelayanan publik yang lebih cepat dan efisien, namun belum terintegrasi (parsial)\nc. Implementasi SPBE belum mendorong pelaksanaan pelayanan publik yang lebih cepat dan efisien",
+              "guidance": "Kriteria : Permenpan No. 5 tahun 2018 tentang Pedoman Evaluasi SPBE \nJudgment Pemenuhan indikator : al. e-goverment telah terintegrasi dalam pelaksanaan pelayanan publik melalui penggunaan media ex. PTSP online, Jadwal Sidang Online dan Informasi perkara yang terintegrasi pada Aplkasi SIPP dst.\nIsatilah SPBE = e-Goverment \nSPBE = suatu sistem tata kelola pemerintah yang memanfaatkan teknologi informasi secara menyeluruh dan terpadu dalam pelaksanaan administrasi pemerintahan dan penyelenggaraan pelayanan publik yang dilakukan pada suatu instansi pemerintahan",
+              "answer_format": "A/B/C",
+              "supporting_data": [],
+              "images": []
+            },
+            {
+              "key": "row-144",
+              "code": "b",
+              "title": "Implementasi SPBE telah terintegrasi dan mampu mendorong pelaksanaan pelayanan internal organisasi yang lebih cepat dan efisien",
+              "source_row": 144,
+              "explanation": "a. Implementasi SPBE telah terintegrasi dan mampu mendorong pelaksanaan pelayanan internal unit kerja yang lebih cepat dan efisien \nb. Implementasi SPBE telah mampu mendorong pelaksanaan pelayanan internal unit kerja yang lebih cepat dan efisien, namun belum terintegrasi (parsial)\nc. Implementasi SPBE belum mendorong pelaksanaan pelayanan internal unit kerja yang lebih cepat dan efisien",
+              "guidance": "Judment evalutor untuk nialai optimal dapat didasarkan pada Penggunaan TI pada seluruh aspek layanan internal berarti telah menunjukan implementasi SPBE telah mendorong unit kerja lebih cepat dan efisien;\nevidance pembuktian  : al. Aplikasi SIKEP, Pelaksanaan Kenaikan Pangkat Otomatis; dan penggunaan IT dalam layanan internal",
+              "answer_format": "A/B/C",
+              "supporting_data": [],
+              "images": []
+            }
+          ]
+        },
+        {
+          "key": "row-145",
+          "code": "iii",
+          "title": "Transformasi Digital Memberikan Nilai Manfaat",
+          "source_row": 145,
+          "guidance": "",
+          "entries": [
+            {
+              "key": "row-146",
+              "code": "a",
+              "title": "Transformasi digital pada bidang proses bisnis utama telah mampu memberikan nilai manfaat bagi unit kerja secara optimal",
+              "source_row": 146,
+              "explanation": "a. Kriteria huruf b telah terpenuhi dan penerapan atau penggunaan dari manfaat/dampak dari transformasi digital pada bidang proses bisnis utama bagi unit kerja telah dilakukan validasi dan evaluasi serta ditindaklanjuti secara berkelanjutan\nb. Kriteria huruf c telah terpenuhi dan manfaat/dampak dari transformasi digital pada bidang proses bisnis utama telah diterapkan/digunakan oleh unit kerja sesuai dengan sasaran dan target manfaat/dampak\nc. Kriteria huruf d telah terpenuhi dan manfaat/dampak dari transformasi digital pada bidang proses bisnis utama telah mampu direalisasikan pada unit kerja sesuai dengan sasaran dan target manfaat/dampak\nd. Kriteria huruf e telah terpenuhi dan kapabilitas prakiraan dan pelacakan terhadap sasaran dan target manfaat/dampak dari transformasi digital pada bidang proses bisnis utama\ne. Sasaran dan target manfaat/dampak dari transformasi digital pada bidang proses bisnis utama telah direncanakan, didefinisikan, dan ditetapkan",
+              "guidance": "Pemenuhan optimal indikator ini didasarkan judment evaluator bahwa dalam proses bisnis utama sesuai tusi unit telah dilakukan transformasi digital yang telah memberi manfaat bagi unit kerja dan telah divalidasi dan evaluasi serta ditindaklanjuti secara berkelanjutan;\nTransformasi digital pada probis utama dimaksudkan sebagai upaya penyederhanaan bisnis proses layanan utama melalui penggunaan Teknologi informasi;",
+              "answer_format": "A/B/C/D/E",
+              "supporting_data": [],
+              "images": []
+            },
+            {
+              "key": "row-147",
+              "code": "b",
+              "title": "Transformasi digital pada bidang administrasi pemerintahan telah mampu memberikan nilai manfaat bagi unit kerja secara optimal",
+              "source_row": 147,
+              "explanation": "a. Kriteria huruf b telah terpenuhi dan penerapan atau penggunaan dari manfaat/dampak dari transformasi digital pada bidang administrasi pemerintahan bagi unit kerja telah dilakukan validasi dan evaluasi serta ditindaklanjuti secara berkelanjutan\nb. Kriteria huruf c telah terpenuhi dan manfaat/dampak dari transformasi digital pada bidang administrasi pemerintahan telah diterapkan/digunakan oleh unit kerja sesuai dengan sasaran dan target manfaat/dampak\nc. Kriteria huruf d telah terpenuhi dan manfaat/dampak dari transformasi digital pada bidang administrasi pemerintahan telah mampu direalisasikan pada unit kerja sesuai dengan sasaran dan target manfaat/dampak\nd. Kriteria huruf e telah terpenuhi dan kapabilitas prakiraan dan pelacakan terhadap sasaran dan target manfaat/dampak dari transformasi digital pada bidang administrasi pemerintahan\ne. Sasaran dan target manfaat/dampak dari transformasi digital pada bidang administrasi pemerintahan telah direncanakan, didefinisikan, dan ditetapkan",
+              "guidance": "Pemenuhan optimal indikator ini didasarkan judment evaluator bahwa pada bidang administrasi sesuai tusi unit telah dilakukan transformasi digital yang telah memberi manfaat bagi unit kerja dan telah divalidasi dan evaluasi serta ditindaklanjuti secara berkelanjutan;\nEvidance : al. Aplikasi umum, persuratan dst\nTransformasi digital pada bidang administrasi dimaksudkan sebagai upaya penyederhanaan bisnis proses adminstrasi perkantoran melalui penggunaan Teknologi informasi;",
+              "answer_format": "A/B/C/D/E",
+              "supporting_data": [],
+              "images": []
+            },
+            {
+              "key": "row-148",
+              "code": "c",
+              "title": "Transformasi digital pada bidang pelayanan publik telah mampu memberikan nilai manfaat bagi unit kerja secara optimal",
+              "source_row": 148,
+              "explanation": "a. Kriteria huruf b telah terpenuhi dan penerapan atau penggunaan dari manfaat/dampak dari transformasi digital pada bidang pelayanan publik bagi unit kerja telah dilakukan validasi dan evaluasi serta ditindaklanjuti secara berkelanjutan\nb. Kriteria huruf c telah terpenuhi dan manfaat/dampak dari transformasi digital pada bidang pelayanan publik telah diterapkan/digunakan oleh unit kerja sesuai dengan sasaran dan target manfaat/dampak\nc. Kriteria huruf d telah terpenuhi dan manfaat/dampak dari transformasi digital pada bidang pelayanan publik telah mampu direalisasikan pada unit kerja sesuai dengan sasaran dan target manfaat/dampak\nd. Kriteria huruf e telah terpenuhi dan kapabilitas prakiraan dan pelacakan terhadap sasaran dan target manfaat/dampak dari transformasi digital pada bidang pelayanan publik\ne. Sasaran dan target manfaat/dampak dari transformasi digital pada bidang pelayanan publik telah direncanakan, didefinisikan, dan ditetapkan",
+              "guidance": "Pemenuhan optimal indikator ini didasarkan judment evaluator bahwa pada bidang palayanan publik sesuai tusi unit telah dilakukan transformasi digital yang telah memberi manfaat bagi unit kerja dan telah divalidasi dan evaluasi serta ditindaklanjuti secara berkelanjutan;\nEvidance : al. penggunaan Aplikasi dan media sosial dalam pemberian layanan publik \nTransformasi digital pada bidang pelayanan publik dimaksudkan sebagai upaya penyederhanaan bisnis proses Pelayanan publik melalui penggunaan Teknologi informasi;",
+              "answer_format": "A/B/C/D/E",
+              "supporting_data": [],
+              "images": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "reform-3",
+      "group": "reform",
+      "code": "3",
+      "title": "PENATAAN SISTEM MANAJEMEN SDM APARATUR",
+      "source_row": 149,
+      "guidance": "",
+      "points": [
+        {
+          "key": "row-150",
+          "code": "i",
+          "title": "Kinerja Individu",
+          "source_row": 150,
+          "guidance": "",
+          "entries": [
+            {
+              "key": "row-151",
+              "code": "a",
+              "title": "Ukuran kinerja individu telah berorientasi hasil (outcome) sesuai pada levelnya",
+              "source_row": 151,
+              "explanation": "a. Seluruh ukuran kinerja individu telah berorientasi hasil (outcome) sesuai pada levelnya\nb. Sebagian ukuran kinerja individu telah berorientasi hasil (outcome) sesuai pada levelnya\nc. Tidak ada ukuran kinerja individu yang berorientasi hasil (outcome)",
+              "guidance": "ukuran kinerja individu tidak hanya berfokus pada penggunaan Input, tetapi sudah dioreintasikan pada apa yang akan dihasilkan",
+              "answer_format": "A/B/C",
+              "supporting_data": [],
+              "images": []
+            }
+          ]
+        },
+        {
+          "key": "row-152",
+          "code": "ii",
+          "title": "Assessment Pegawai",
+          "source_row": 152,
+          "guidance": "",
+          "entries": [
+            {
+              "key": "row-153",
+              "code": "a",
+              "title": "Hasil assement telah dijadikan pertimbangan untuk mutasi dan pengembangan karir pegawai",
+              "source_row": 153,
+              "explanation": "a. Seluruh hasil assessment dijadikan dasar mutasi internal dan pengembangan kompetensi pegawai\nb. Hasil assessment belum seluruhnya dijadikan mutasi internal dan pengembangan kompetensi pegawai\nc. Hasil assessment belum dijadikan dasar mutasi internal dan pengembangan kompetensi pegawai",
+              "guidance": "Judment pemenuhan : al hasil  assessment  telah  dijadikan \npertimbangan untuk mutasi dan pengembangan karir pegawai\nAssesment dalam batas kewenangan/kegiatan di unit kerja al. rapat pimpinan/keputusan forum baperjakat dan sejenisnya menjadi dasar pengusulan promosi dan mutasi pegawai",
+              "answer_format": "A/B/C",
+              "supporting_data": [],
+              "images": []
+            }
+          ]
+        },
+        {
+          "key": "row-154",
+          "code": "iii",
+          "title": "Pelanggaran Disiplin Pegawai",
+          "source_row": 154,
+          "guidance": "",
+          "entries": [
+            {
+              "key": "row-155",
+              "code": "a",
+              "title": "Penurunan pelanggaran disiplin pegawai",
+              "source_row": 155,
+              "explanation": "Persentase pernurunan pelanggaran disiplin pegawai diperoleh dari Jumlah pelanggaran tahun sebelumnya dikurangi Jumlah pelanggaran tahun ini kemudian dibagi dengan Jumlah pelanggaran tahun sebelumnya",
+              "guidance": "Pelanggaran disiplin yang menurun dari tahun sebelumnya pada seluruh aspek pelanggaran kedisiplinan termasuk tingkat kehadiran",
+              "answer_format": "%",
+              "supporting_data": [
+                {
+                  "label": "- Jumlah pelanggaran tahun sebelumnya",
+                  "source_row": 156,
+                  "explanation": "",
+                  "guidance": ""
+                },
+                {
+                  "label": "- Jumlah pelanggaran tahun ini",
+                  "source_row": 157,
+                  "explanation": "",
+                  "guidance": ""
+                },
+                {
+                  "label": "- Jumlah pelanggaran yang telah diberikan sanksi/hukuman",
+                  "source_row": 158,
+                  "explanation": "",
+                  "guidance": ""
+                }
+              ],
+              "images": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "reform-4",
+      "group": "reform",
+      "code": "4",
+      "title": "PENGUATAN AKUNTABILITAS",
+      "source_row": 159,
+      "guidance": "",
+      "points": [
+        {
+          "key": "row-160",
+          "code": "i",
+          "title": "Meningkatnya capaian kinerja unit kerja",
+          "source_row": 160,
+          "guidance": "",
+          "entries": [
+            {
+              "key": "row-161",
+              "code": "-",
+              "title": "Persentase Sasaran dengan capaian 100% atau lebih",
+              "source_row": 161,
+              "explanation": "Persentase diperoleh dari Jumlah Sasaran Kinerja yang tercapai 100% atau lebih dibagi dengan Jumlah Sasaran Kinerja",
+              "guidance": "Pencapaian sasaran kinerja instansi dalam dokumen SAKIP",
+              "answer_format": "%",
+              "supporting_data": [
+                {
+                  "label": "- Jumlah Sasaran Kinerja",
+                  "source_row": 162,
+                  "explanation": "",
+                  "guidance": ""
+                },
+                {
+                  "label": "- Jumlah Sasaran Kinerja yang tercapai 100% atau lebih",
+                  "source_row": 163,
+                  "explanation": "",
+                  "guidance": ""
+                }
+              ],
+              "images": []
+            }
+          ]
+        },
+        {
+          "key": "row-164",
+          "code": "ii",
+          "title": "Pemberian Reward and Punishment",
+          "source_row": 164,
+          "guidance": "",
+          "entries": [
+            {
+              "key": "row-165",
+              "code": "-",
+              "title": "Hasil Capaian/Monitoring Perjanjian Kinerja telah dijadikan dasar sebagai pemberian reward and punishment bagi organisasi",
+              "source_row": 165,
+              "explanation": "a. Seluruh capaian kinerja (Perjanjian Kinerja) merupakan unsur dalam pemberian reward and punishment\nb. Sebagian besar Capaian Kinerja (lebih dari 50% Perjanjian kinerja) merupakan unsur dalam pemberian reward and punishment\nc. Sebagian kecil Capaian Kinerja (kurang dari 50% Perjanjian kinerja) merupakan unsur dalam pemberian reward and punishment\nd. Capaian Kinerja (Perjanjian kinerja) belum menjadi unsur dalam pemberian reward and punishment",
+              "guidance": "Capaian kinerja dalam perjanjian kinerja unit menjadi dasar pemberian reward dan panishment bagi unit kerja;\nPemenuhan indikator : terdapat bentuk reward bagi unit kerja yang mencapai kinerja terbaik dan punishment bagi unit kerja yang gagal mencapai target kinerja dan atau kinerja terendah",
+              "answer_format": "A/B/C/D",
+              "supporting_data": [],
+              "images": []
+            }
+          ]
+        },
+        {
+          "key": "row-166",
+          "code": "iii",
+          "title": "Kerangka Logis Kinerja",
+          "source_row": 166,
+          "guidance": "",
+          "entries": [
+            {
+              "key": "row-167",
+              "code": "-",
+              "title": "Apakah terdapat penjenjangan kinerja ((Kerangka Logis Kinerja) yang mengacu pada kinerja utama  organisasi dan dijadikan dalam penentuan kinerja seluruh pegawai?",
+              "source_row": 167,
+              "explanation": "a. terdapat Kerangka Logis kinerja yang mengacu pada kinerja utama organisasi  dan digunakan dalam penjabaran kinerja seluruh pegawai\nb. terdapat  Kerangka Logis kinerja yang mengacu pada kinerja utama organisasi namun belum digunakan dalam penjabaran kinerja seluruh pegawai\nc. Kerangka Logis kinerja ada namun belum mengacu pada kinerja utama organisasi dan belum digunakan dalam penjabaran kinerja seluruh pegawai\nd. Kerangka Logis kinerja belum ada",
+              "guidance": "Permenpan No. 8 Tahun 2021 tentang  Sistem Manajemen Kinerja Pegawai Negeri Sipil\nKrangka logis kinerja telah diturunkan dalam SKP dan PKP individu pegawai",
+              "answer_format": "A/B/C/D",
+              "supporting_data": [],
+              "images": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "reform-5",
+      "group": "reform",
+      "code": "5",
+      "title": "PENGUATAN PENGAWASAN",
+      "source_row": 168,
+      "guidance": "",
+      "points": [
+        {
+          "key": "row-169",
+          "code": "i",
+          "title": "Mekanisme Pengendalian",
+          "source_row": 169,
+          "guidance": "",
+          "entries": [
+            {
+              "key": "row-170",
+              "code": "-",
+              "title": "Telah dilakukan mekanisme pengendalian aktivitas secara berjenjang",
+              "source_row": 170,
+              "explanation": "a. Terdapat pengendalian aktivitas utama organisasi yang tersistem mulai dari perencanaan, penilaian risiko, pelaksanaan, monitoring, dan pelaporan oleh penanggung jawab aktivitas serta pimpinan unit kerja dan telah menghasilkan peningkatan kinerja, mekanise kerja baru yang lebih efektif, efisien, dan terkendali\nb. Terdapat pengendalian aktivitas utama organisasi yang tersistem mulai dari perencanaan, penilaian risiko, pelaksanaan, monitoring, dan pelaporan oleh penanggung jawab aktivitas serta pimpinan unit kerja namun belum berdampak pada peningkatan kinerja unit kerja\nc.Terdapat pengendalian aktivitas utama organisasi yang tersistem mulai dari perencanaan, penilaian risiko, pelaksanaan, monitoring, dan pelaporan oleh penanggung jawab aktivitas\nd. Terdapat pengendalian aktivitas utama organisasi tetapi tidak tersistem\ne. Tidak terdapat pengendalian atas aktivitas utama organisasi",
+              "guidance": "Bentuk pengendalian aktivitas utama organisasi yang telah dibangun dalam sistem penanganan perkara adalah fungsi pengawasan yang dilakukan oleh Pimpinan melalui aplikasi monitoring penyelesaian perkara yang dimonitor oleh pimpinan setiap saat secara berjenjang;\nProses utama peradilan al. penerimaan perkara, pemeriksaan perkara, minutasi dan penyampaian produk (putusan/penetapan)",
+              "answer_format": "A/B/C/D/E",
+              "supporting_data": [],
+              "images": []
+            }
+          ]
+        },
+        {
+          "key": "row-171",
+          "code": "ii",
+          "title": "Penanganan Pengaduan Masyarakat",
+          "source_row": 171,
+          "guidance": "",
+          "entries": [
+            {
+              "key": "row-172",
+              "code": "-",
+              "title": "Persentase penanganan pengaduan masyarakat",
+              "source_row": 172,
+              "explanation": "Penilaian ini menghitung realisasi penanganan pengaduan masyarakat yang harus diselesaikan",
+              "guidance": "",
+              "answer_format": "%",
+              "supporting_data": [
+                {
+                  "label": "- Jumlah pengaduan masyarakat yang harus ditindaklanjuti",
+                  "source_row": 173,
+                  "explanation": "",
+                  "guidance": ""
+                },
+                {
+                  "label": "- Jumlah pengaduan masyarakat yang sedang diproses",
+                  "source_row": 174,
+                  "explanation": "",
+                  "guidance": ""
+                },
+                {
+                  "label": "- Jumlah pengaduan masyarakat yang  selesai ditindaklanjuti",
+                  "source_row": 175,
+                  "explanation": "",
+                  "guidance": ""
+                }
+              ],
+              "images": []
+            }
+          ]
+        },
+        {
+          "key": "row-177",
+          "code": "iii.i",
+          "title": "Penyampaian Laporan Harta Kekayaan / Penyampaian Laporan Harta Kekayaan Pejabat Negara (LHKPN)",
+          "source_row": 177,
+          "guidance": "",
+          "entries": [
+            {
+              "key": "row-178",
+              "code": "-",
+              "title": "Persentase penyampaian LHKPN",
+              "source_row": 178,
+              "explanation": "Kewajiban Penyelenggara Negara untuk melaporkan harta kekayaan diatur dalam: \n1. Undang-Undang No. 28 Tahun 1999\n2. Undang-Undang No. 30 Tahun 2002\n3. Undang-Undang No. 10 Tahun 2015\n4. Peraturan Komisi Pemberantasan Korupsi No. 07 Tahun 2016\n5. Instruksi Presiden No. 5 Tahun 2004\n6. SE MenPANRB No. SE/03/M.PAN/01/2005",
+              "guidance": "",
+              "answer_format": "%",
+              "supporting_data": [
+                {
+                  "label": "Jumlah yang harus melaporkan",
+                  "source_row": 179,
+                  "explanation": "",
+                  "guidance": ""
+                },
+                {
+                  "label": "- Kepala satuan kerja",
+                  "source_row": 180,
+                  "explanation": "",
+                  "guidance": ""
+                },
+                {
+                  "label": "- Pejabat yang diwajibkan menyampaikan LHKPN",
+                  "source_row": 181,
+                  "explanation": "",
+                  "guidance": ""
+                },
+                {
+                  "label": "- Lainnya",
+                  "source_row": 182,
+                  "explanation": "",
+                  "guidance": ""
+                },
+                {
+                  "label": "Jumlah yang sudah melaporkan",
+                  "source_row": 183,
+                  "explanation": "",
+                  "guidance": ""
+                }
+              ],
+              "images": []
+            }
+          ]
+        },
+        {
+          "key": "row-184",
+          "code": "iii.ii",
+          "title": "Penyampaian Laporan Harta Kekayaan / Penyampaian Laporan Harta Kekayaan Aparatur Sipil Negara (LHKASN)",
+          "source_row": 184,
+          "guidance": "",
+          "entries": [
+            {
+              "key": "row-185",
+              "code": "-",
+              "title": "Persentase penyampaian LHKASN",
+              "source_row": 185,
+              "explanation": "Penyampaian LHKASN diatur dalam:\n1. Undang-Undang No. 28 Tahun 1999\n2. Undang-Undang No. 30 Tahun 2002\n3. Undang-Undang No. 10 Tahun 2015\n4. SE MenPANRB No. 1 Tahun 2015",
+              "guidance": "",
+              "answer_format": "%",
+              "supporting_data": [
+                {
+                  "label": "Jumlah yang harus melaporkan (ASN tidak wajib LHKPN)",
+                  "source_row": 186,
+                  "explanation": "",
+                  "guidance": ""
+                },
+                {
+                  "label": "- Pejabat administrator (eselon III)",
+                  "source_row": 187,
+                  "explanation": "",
+                  "guidance": ""
+                },
+                {
+                  "label": "- Pejabat Penawas (eselon IV)",
+                  "source_row": 188,
+                  "explanation": "",
+                  "guidance": ""
+                },
+                {
+                  "label": "- Jumlah Fungsional dan Pelaksana",
+                  "source_row": 189,
+                  "explanation": "",
+                  "guidance": ""
+                },
+                {
+                  "label": "Jumlah yang sudah melaporkan",
+                  "source_row": 190,
+                  "explanation": "",
+                  "guidance": ""
+                }
+              ],
+              "images": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "reform-6",
+      "group": "reform",
+      "code": "6",
+      "title": "PENINGKATAN KUALITAS PELAYANAN PUBLIK",
+      "source_row": 191,
+      "guidance": "",
+      "points": [
+        {
+          "key": "row-192",
+          "code": "i",
+          "title": "Upaya dan/atau Inovasi Pelayanan Publik",
+          "source_row": 192,
+          "guidance": "",
+          "entries": [
+            {
+              "key": "row-193",
+              "code": "a",
+              "title": "Upaya dan/atau inovasi telah mendorong perbaikan pelayanan publik pada:\n1. Kesesuaian Persyaratan\n2. Kemudahan Sistem, Mekanisme, dan Prosedur\n3. Kecepatan Waktu Penyelesaian\n4. Kejelasan Biaya/Tarif, Gratis\n5. Kualitas Produk Spesifikasi Jenis Pelayanan\n6. Kompetensi Pelaksana/Web\n7. Perilaku Pelaksana/Web\n8. Kualitas Sarana dan prasarana\n9. Penanganan Pengaduan, Saran dan Masukan",
+              "source_row": 193,
+              "explanation": "a. Upaya dan/atau inovasi yang dilakukan telah mendorong perbaikan seluruh pelayanan publik yang prima (lebih Cepat dan mudah) \nb. Upaya dan/atau inovasi yang dilakukan belum seluruhnya memberikan dampak pada perbaikan pelayanan public yang prima (Cepat dan mudah) \nc. Upaya dan/atau inovasi yang dilakukan belum sesuai kebutuhan \nd. Belum ada inovasi",
+              "guidance": "Judment untuk pemenuhan nilai optimal adalah keyakinan bahwa inovasi dalam layanan yang dilakukan di unit kerja telah mampu memberi dampak pada proses layanan yang lebih cepat dan mudah dari layanan konvensional sebelum adanya inovasi;\nSifat utama inovasi melalui tranformasi digital adalah adanya kemudahan proses dan cepat dalam penyampaian layanan.\nJustifikasi evaluator : jika ada inovasi atas layanan di unit umumnya sudah pasti mendorong perbaikan dalam pelayanan, tinggal memastikan untuk pemenuhan optimal apakah seluruh layanan (fokus pada layanan utama) dipengaruhi/menggunakan inovasi tsb.",
+              "answer_format": "A/B/C/D",
+              "supporting_data": [],
+              "images": []
+            },
+            {
+              "key": "row-194",
+              "code": "b",
+              "title": "Upaya dan/atau inovasi pada perijinan/pelayanan telah dipermudah:\n1. Waktu lebih cepat\n2. Pelayanan Publik yang terpadu\n3. Alur lebih pendek/singkat\n4 Terintegrasi dengan aplikasi",
+              "source_row": 194,
+              "explanation": "Persentase diperoleh dari Jumlah perijinan/pelayanan yang telah dipermudah dibagi dengan Jumlah perijinan/pelayanan yang terdata/terdaftar",
+              "guidance": "Jumlah pelayanan mengacu pada standar pelayanan utama yang telah dimaklumatkan sebagai janji layanan",
+              "answer_format": "%",
+              "supporting_data": [
+                {
+                  "label": "- Jumlah perijinan/pelayanan yang terdata/terdaftar",
+                  "source_row": 195,
+                  "explanation": "",
+                  "guidance": ""
+                },
+                {
+                  "label": "- Jumlah perijinan/pelayanan yang telah dipermudah",
+                  "source_row": 196,
+                  "explanation": "",
+                  "guidance": ""
+                }
+              ],
+              "images": []
+            }
+          ]
+        },
+        {
+          "key": "row-197",
+          "code": "ii",
+          "title": "Penanganan Pengaduan Pelayanan dan Konsultasi",
+          "source_row": 197,
+          "guidance": "",
+          "entries": [
+            {
+              "key": "row-198",
+              "code": "-",
+              "title": "Penanganan pengaduan pelayanan dilakukan melalui berbagai kanal/media secara responsive dan bertanggung jawab",
+              "source_row": 198,
+              "explanation": "a. Pengaduan pelayanan  dan konsultasi telah direspon dengan cepat melalui berbagai kanal/media\nb. Pengaduan pelayanan dan konsultasi telah direspon dengan cepat melalui kanal/media yang terbatas\nc. Pengaduan pelayanan dan konsultasi direspon lambat melalui berbagai kanal/media\nd. Pengaduan pelayanan dan konsultasi direspon lambat dan kanal/media terbatas",
+              "guidance": "Pemenuhan optimal pada indikator ini : adalah adanya sarana media yang digunakan untuk melakukan konsultasi pelayanan dan memberi respon cepat atas setiap keluhan dan pengaduan stakeholder atas layanan pada berbagai media",
+              "answer_format": "A/B/C/D",
+              "supporting_data": [],
+              "images": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "hasil-i",
+      "group": "hasil",
+      "code": "i",
+      "title": "BIROKRASI YANG BERSIH DAN AKUNTABEL",
+      "source_row": 202,
+      "guidance": "",
+      "points": [
+        {
+          "key": "row-202",
+          "code": "i",
+          "title": "BIROKRASI YANG BERSIH DAN AKUNTABEL",
+          "source_row": 202,
+          "guidance": "",
+          "entries": [
+            {
+              "key": "row-203",
+              "code": "a",
+              "title": "Nilai Survey Persepsi Korupsi (Survei Eksternal)",
+              "source_row": 203,
+              "explanation": "Diisi dengan nilai hasil Survei Eksternal atas Persepsi Anti Korupsi (Indeks Persepsi Anti Korupsi / IPAK)",
+              "guidance": "Tab Uji ValidisiSurvei",
+              "answer_format": "Nilai\n(0-4)",
+              "supporting_data": [],
+              "images": []
+            },
+            {
+              "key": "row-204",
+              "code": "b",
+              "title": "Capaian Kinerja Lebih Baik dari pada Capaian Kinerja Sebelumnya",
+              "source_row": 204,
+              "explanation": "a. Target kinerja utama tercapai lebih dari 100% dan lebih baik dari capaian kinerja utama tahun sebelumnya serta lebih baik dari capaian kinerja nasional/rata-rata capaian kinerja unit yang sejenis;\nb.Target kinerja utama tercapai 100% dan lebih baik dari capaian kinerja utama tahun sebelumnya;\nc.Target kinerja utama tercapai 100% atau lebih, namun tidak lebih baik dari capaian kinerja utama tahun sebelumnya;\nd. Kinerja utama sudah orientasi hasil akan tetapi masih terdapat target kinerja utama yang tidak tercapai;\ne. Kinerja utama tidak berorientasi hasil",
+              "guidance": "Capaian kinerja unit kerja yang dimaksudkan adalah capaian kinerja yang diperjanjikan pada dokumen SAKIP; sehingga pembanding capaian kinerja tentu didasarkan pada capaian ditahun terakhir dengan capaian ditahun sebelumnya;\n\nKriteria ukuran capaian kinerja pembanding untuk nilai optimal dapat dipilih berdasarkan data yang tersedia antara capaian kinerja nasional atau menggunakan rata-rata kinerja unit sejenis tergantung ketersediaan data pembandingnya;\n  \nJudgment evaluator saat ini menggunakan capaian kinerja unit sejenis berdasarkan ukuran capaian rata-rata nilai evaluasi SAKIP pada satker di secara Nasional akan dirilis oleh Dirjen denan kelas dan cluster sesuai kriteria yang dibangun Dirjen masing-masing\noleh karena itu sebelum nilai rata-rata nasional dikeluarkan atau dirilis oleh Dirjen masing-masing maka justifikasi nilai yang dapat dipilih maksimal B)\nCapaian kinerja utama dihitung dari capaian rerata Sasaran (dari komulasi indikator pada sasaran kinerja yang sama) kinerja pada dokumen Laporan LKJiP",
+              "answer_format": "A/B/C/D/E",
+              "supporting_data": [],
+              "images": [
+                {
+                  "path": "images/progress-zi/guide/row-201-1.png",
+                  "source_row": 201,
+                  "alt": "Gambar contoh dari panduan, baris 201"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "hasil-ii",
+      "group": "hasil",
+      "code": "ii",
+      "title": "PELAYANAN PUBLIK YANG PRIMA",
+      "source_row": 205,
+      "guidance": "",
+      "points": [
+        {
+          "key": "row-205",
+          "code": "ii",
+          "title": "PELAYANAN PUBLIK YANG PRIMA",
+          "source_row": 205,
+          "guidance": "",
+          "entries": [
+            {
+              "key": "row-206",
+              "code": "a",
+              "title": "Nilai Persepsi Kualitas Pelayanan (Survei Eksternal)",
+              "source_row": 206,
+              "explanation": "Diisi dengan Nilai Hasil Survei Eksternal Kualitas Pelayanan (Indeks Persepsi Kualitas Pelayanan Publik / IPKP)",
+              "guidance": "Tab Uji ValidisiSurvei",
+              "answer_format": "Nilai\n(0-4)",
+              "supporting_data": [],
+              "images": []
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "group_images": {}
+}

@@ -102,7 +102,7 @@
         <div class="zi-kpi"><div class="zi-kpi-icon"><i class="fas fa-check-double"></i></div><div><div class="value">{{ $dashboard['summary']['sub_point_covered_count'] }}/{{ $dashboard['summary']['sub_point_count'] }}</div><div class="label">Sub Poin</div></div></div>
         <div class="zi-kpi"><div class="zi-kpi-icon"><i class="fas fa-sync-alt"></i></div><div><div class="value">{{ $dashboard['summary']['periodic_sub_point_count'] }}</div><div class="label">Berkala</div></div></div>
         <div class="zi-kpi"><div class="zi-kpi-icon"><i class="fas fa-tasks"></i></div><div><div class="value">{{ $dashboard['summary']['activity_count'] }}</div><div class="label">Kegiatan</div></div></div>
-        <div class="zi-kpi"><div class="zi-kpi-icon"><i class="fas fa-chart-line"></i></div><div><div class="value">{{ rtrim(rtrim(number_format($dashboard['summary']['period_score'], 1), '0'), '.') }}%</div><div class="label">Nilai Periode</div></div></div>
+        <div class="zi-kpi"><div class="zi-kpi-icon"><i class="fas fa-chart-line"></i></div><div><div class="value">{{ rtrim(rtrim(number_format($dashboard['summary']['period_score'], 1), '0'), '.') }}%</div><div class="label">Progres Eviden Disetujui</div></div></div>
     </div>
 
     <div class="zi-panel zi-wide-panel">
@@ -229,7 +229,7 @@
                 </div>
                 <div class="zi-chart-grid">
                     <div class="zi-chart-box"><strong>{{ $dashboard['summary']['overdue_count'] }}</strong><span>Overdue</span></div>
-                    <div class="zi-chart-box"><strong>{{ $dashboard['summary']['indicator_attention_count'] }}</strong><span>Indikator Perhatian</span></div>
+                    <div class="zi-chart-box"><strong>{{ max(0, $dashboard['summary']['sub_point_count'] - $dashboard['summary']['sub_point_covered_count']) }}</strong><span>Poin Tanpa Eviden</span></div>
                     <div class="zi-chart-box"><strong>{{ $dashboard['summary']['evidence_attention_count'] }}</strong><span>Eviden Perhatian</span></div>
                     <div class="zi-chart-box"><strong>{{ $dashboard['summary']['evidence_count'] }}</strong><span>Total Eviden</span></div>
                 </div>
@@ -239,19 +239,13 @@
             <div class="zi-panel-head"><h5>Perhatian</h5><a href="{{ route('approval.index') }}" class="btn btn-light btn-sm">Approval</a></div>
             <div class="zi-panel-body">
                 <div class="zi-attention-list">
-                    @foreach($dashboard['indicator_attention'] as $indicator)
-                        <div class="zi-attention-item">
-                            <div class="zi-attention-title">Indikator: {{ $indicator->name }}</div>
-                            <div class="zi-attention-meta">{{ optional(optional($indicator->activity)->area)->name }} &bull; {{ optional($indicator->activity)->name }} &bull; {!! $indicator->status_badge !!}</div>
-                        </div>
-                    @endforeach
                     @foreach($dashboard['evidence_attention'] as $evidence)
                         <div class="zi-attention-item">
                             <div class="zi-attention-title">Eviden: {{ $evidence->title }}</div>
                             <div class="zi-attention-meta">{{ optional(optional($evidence->realization)->activity)->name }} &bull; {{ $evidence->source_reference_label }} &bull; {!! $evidence->status_badge !!}</div>
                         </div>
                     @endforeach
-                    @if($dashboard['indicator_attention']->isEmpty() && $dashboard['evidence_attention']->isEmpty())
+                    @if($dashboard['evidence_attention']->isEmpty())
                         <div class="text-muted">Belum ada item perhatian.</div>
                     @endif
                 </div>

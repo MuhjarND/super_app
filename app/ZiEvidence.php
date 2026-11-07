@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class ZiEvidence extends Model
 {
     protected $table = 'zi_evidences';
-    protected $fillable = ['zi_activity_realization_id', 'title', 'description', 'evidence_type', 'source_type', 'source_reference_type', 'source_reference_id', 'file_path', 'file_name', 'mime_type', 'file_size', 'status', 'is_auto_linked', 'uploaded_by'];
+    protected $fillable = ['zi_activity_realization_id', 'title', 'description', 'evidence_type', 'source_type', 'source_reference_type', 'source_reference_id', 'drive_url', 'file_path', 'file_name', 'mime_type', 'file_size', 'status', 'is_auto_linked', 'uploaded_by'];
     protected $casts = ['is_auto_linked' => 'boolean', 'file_size' => 'integer'];
 
     public function realization() { return $this->belongsTo(ZiActivityRealization::class, 'zi_activity_realization_id'); }
@@ -31,12 +31,16 @@ class ZiEvidence extends Model
 
     public function getSourceReferenceLabelAttribute()
     {
+        if ($this->evidence_type === 'google_drive') { return 'Google Drive'; }
         $map = ['manual' => 'Upload Manual', 'surat_masuk' => 'Surat Masuk', 'surat_keluar' => 'Surat Keluar', 'disposisi' => 'Disposisi', 'rapat' => 'Undangan Rapat', 'rapat_notulensi' => 'Notulensi', 'rapat_laporan' => 'Laporan Tindak Lanjut', 'leave_request' => 'Cuti'];
         return $map[$this->source_reference_type ?: 'manual'] ?? ucfirst((string) $this->source_reference_type);
     }
 
     public function getPreviewUrlAttribute()
     {
+        if ($this->drive_url) {
+            return (new \App\Rules\GoogleDriveUrl)->passes('drive_url', $this->drive_url) ? $this->drive_url : null;
+        }
         if ($this->file_path) { return route('progress-zi.evidences.file', $this); }
         switch ($this->source_reference_type) {
             case 'surat_masuk': return route('surat-masuk.preview', $this->source_reference_id);

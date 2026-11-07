@@ -101,7 +101,11 @@ class ProgressZiReportController extends Controller
             'activities.guidelineSubPoint.point',
             'activities.pic',
             'activities.indicators.guidelineIndicator',
-        ])->orderBy('code')->get();
+            'activities.realizations.evidences',
+            'activities.latestApproval',
+            'guidelinePoints.subPoints' => function ($query) { $query->whereNotNull('evidence_guide_key'); },
+            'guidelinePoints' => function ($query) { $query->whereHas('subPoints', function ($sub) { $sub->whereNotNull('evidence_guide_key'); }); },
+        ])->whereHas('guidelinePoints.subPoints', function ($query) { $query->whereNotNull('evidence_guide_key'); })->orderBy('code')->get();
 
         if ($request->filled('area_id')) {
             $areas = $areas->where('id', (int) $request->area_id)->values();

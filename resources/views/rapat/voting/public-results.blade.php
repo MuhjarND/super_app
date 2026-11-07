@@ -1,84 +1,24 @@
 <!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{{ $voting->judul }} | Hasil Voting</title>
+<html lang="id"><head>
+    <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{ $voting->judul }} | Hasil Voting Langsung</title>
     @include('partials.app-icons')
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ asset('css/voting-live.css') }}">
     <style>
-        body{margin:0;font-family:'Inter',sans-serif;background:#f8fafc;color:#0f172a;}
-        .container{max-width:1080px;margin:0 auto;padding:20px 16px 40px;}
-        .hero{background:linear-gradient(135deg,#111827,#4338ca);color:#fff;border-radius:24px;padding:22px;}
-        .hero h1{margin:10px 0 6px;font-size:1.6rem;}
-        .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-top:16px;}
-        .stat{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.16);border-radius:16px;padding:12px 14px;}
-        .stat .label{font-size:.74rem;color:rgba(255,255,255,.76);}
-        .stat .value{font-size:1.2rem;font-weight:800;margin-top:4px;}
-        .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:14px;margin-top:18px;}
-        .card{background:#fff;border:1px solid #e2e8f0;border-radius:18px;padding:16px;box-shadow:0 8px 24px rgba(15,23,42,.05);}
-        .bar{width:100%;background:#e2e8f0;height:16px;border-radius:999px;overflow:hidden;}
-        .fill{height:100%;background:linear-gradient(90deg,#4f46e5,#38bdf8);transition:width .45s ease;}
-        .fill.leading{background:linear-gradient(90deg,#f97316,#ef4444);}
-        .candidate-head{display:flex;justify-content:space-between;gap:12px;align-items:center;font-size:.88rem;font-weight:700;margin-bottom:6px;}
-        .candidate-name{display:flex;align-items:center;gap:10px;min-width:0;}
-        .candidate-img{width:44px;height:44px;border-radius:12px;object-fit:cover;background:#eef2ff;border:1px solid #dbe4ff;flex:0 0 auto;}
-        .pending{margin-top:18px;}
+        *{box-sizing:border-box}body{margin:0;font-family:Inter,system-ui,sans-serif;background:#f8fafc;color:#0f172a}.results-shell{max-width:1080px;margin:auto;padding:28px 18px}.results-heading{margin-bottom:24px}.results-heading h1{font-size:clamp(1.5rem,4vw,2rem);line-height:1.3;overflow-wrap:anywhere}.results-heading p{color:#64748b}.results-eyebrow{color:#4338ca;font-size:.8rem;font-weight:800;letter-spacing:.08em}.results-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:20px 0}.results-stat{padding:16px;border:1px solid #e5e7eb;border-radius:14px;background:#fff}.results-stat span{display:block;font-size:.85rem;color:#64748b}.results-stat strong{font-size:1.7rem}.results-pending{background:#fff;border:1px solid #e5e7eb;border-radius:16px;padding:18px}.results-pending h2{font-size:1rem}.results-pending-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:0 18px}@media(max-width:480px){.results-shell{padding:18px 12px}.results-stat{padding:10px}.results-stat strong{font-size:1.4rem}}
     </style>
-</head>
-<body>
-    <div class="container">
-        <div class="hero">
-            <div style="font-size:.72rem;font-weight:800;">HASIL VOTING PUBLIK</div>
-            <h1>{{ $voting->judul }}</h1>
-            <div>{{ $voting->deskripsi }}</div>
-            <div class="stats">
-                <div class="stat"><div class="label">Peserta</div><div class="value" id="totalParticipants">{{ $voting->participantPivots->count() }}</div></div>
-                <div class="stat"><div class="label">Sudah Voting</div><div class="value" id="totalVoted">{{ $voting->participantPivots->whereNotNull('voted_at')->count() }}</div></div>
-                <div class="stat"><div class="label">Belum Voting</div><div class="value" id="pendingCount">{{ $voting->participantPivots->whereNull('voted_at')->count() }}</div></div>
-            </div>
-        </div>
-
-        <div class="grid" id="resultsGrid"></div>
-        <div class="card pending">
-            <strong>Peserta Belum Voting</strong>
-            <div id="pendingParticipants" class="mt-2"></div>
-        </div>
+</head><body>
+<main class="results-shell voting-live" data-voting-live data-stats-url="{{ route('rapat.voting.public.stats', $voting->public_code) }}">
+    <header class="results-heading"><span class="results-eyebrow">HASIL E-VOTING LANGSUNG</span><h1>{{ $voting->judul }}</h1><p>{{ $voting->deskripsi }}</p></header>
+    <div class="results-stats">
+        <div class="results-stat"><span>Peserta terdaftar</span><strong data-live-count="total_participants">{{ $stats['total_participants'] }}</strong></div>
+        <div class="results-stat"><span>Sudah voting</span><strong data-live-count="total_voted">{{ $stats['total_voted'] }}</strong></div>
+        <div class="results-stat"><span>Belum voting</span><strong data-live-count="pending_count">{{ $stats['pending_count'] }}</strong></div>
     </div>
-
-    <script>
-        function renderStats(data) {
-            document.getElementById('totalParticipants').textContent = data.total_participants;
-            document.getElementById('totalVoted').textContent = data.total_voted;
-            document.getElementById('pendingCount').textContent = data.pending_count;
-
-            document.getElementById('pendingParticipants').innerHTML = data.pending.length
-                ? data.pending.map(p => '<div class="mb-1">' + p.name + '</div>').join('')
-                : '<div style="color:#166534;font-weight:700;">Semua peserta sudah voting.</div>';
-
-            const grid = document.getElementById('resultsGrid');
-            grid.innerHTML = data.items.map(function (item) {
-                const topCount = item.candidates.length ? item.candidates[0].count : 0;
-                const bars = item.candidates.map(function (candidate) {
-                    const leading = candidate.count === topCount && candidate.count > 0 ? 'leading' : '';
-                    const image = candidate.image_url ? '<img src="' + candidate.image_url + '" class="candidate-img" alt="">' : '';
-                    return '<div style="margin-bottom:12px;">'
-                        + '<div class="candidate-head"><span class="candidate-name">' + image + '<span>' + candidate.nama + '</span></span><span>' + candidate.count + ' (' + candidate.percentage + '%)</span></div>'
-                        + '<div class="bar"><div class="fill ' + leading + '" style="width:' + candidate.percentage + '%"></div></div>'
-                        + '</div>';
-                }).join('');
-                return '<div class="card"><div style="font-size:1rem;font-weight:800;margin-bottom:6px;">' + item.judul + '</div><div style="font-size:.8rem;color:#64748b;margin-bottom:12px;">Total suara: ' + item.total_votes + '</div>' + bars + '</div>';
-            }).join('');
-        }
-
-        function fetchStats() {
-            fetch('{{ route('rapat.voting.public.stats', $voting->public_code) }}')
-                .then(response => response.json())
-                .then(renderStats);
-        }
-
-        fetchStats();
-        setInterval(fetchStats, 5000);
-    </script>
-</body>
-</html>
+    @include('rapat.voting.partials.live-results')
+    <section class="results-pending"><h2>Peserta belum voting</h2><div class="results-pending-list" data-live-pending>
+        @forelse($stats['pending'] as $person)<div class="voting-pending-name">{{ $person['name'] }}</div>@empty<p>{{ $stats['total_participants'] ? 'Semua peserta sudah voting.' : 'Belum ada peserta.' }}</p>@endforelse
+    </div></section>
+</main>
+<script src="{{ asset('js/voting-live.js') }}" defer></script>
+</body></html>
