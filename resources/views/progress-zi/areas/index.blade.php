@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('progress-zi.layout')
 
 @section('title', 'Master Area ZI')
 
@@ -56,7 +56,7 @@
 </style>
 @endpush
 
-@section('content')
+@section('zi-content')
 <div class="card shadow-sm border-0 mb-3">
     <div class="card-body d-flex justify-content-between align-items-center flex-wrap zi-area-top" style="gap:12px;">
         <div>

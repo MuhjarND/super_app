@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('progress-zi.layout')
 
 @section('title', 'Panduan Eviden ZI')
 
@@ -68,7 +68,7 @@
 </style>
 @endpush
 
-@section('content')
+@section('zi-content')
 <div class="zi-guide-shell">
     <div class="zi-guide-topbar">
         <div>

@@ -1,0 +1,153 @@
+/* Loaded by the ZI layout only. The application shell keeps its existing theme. */
+.zi-workspace { --zi-indigo:#4f46e5; --zi-teal:#0f766e; --zi-violet:#7c3aed; --zi-amber:#b45309; --zi-rose:#be123c; --zi-green:#047857; color:#0f172a; font-size:14px; line-height:1.5; padding:28px 12px 20px; }
+.zi-workspace *, .zi-workspace *::before, .zi-workspace *::after { box-sizing:border-box; }
+.zi-workspace h1, .zi-workspace h2, .zi-workspace h3, .zi-workspace h4, .zi-workspace h5 { color:#0f172a; font-weight:750; letter-spacing:-.025em; }
+.zi-workspace h1, .zi-workspace .zi-monitor-title h1 { font-size:34px !important; line-height:1.25; margin:0; }
+.zi-workspace h2 { font-size:21px; }
+.zi-workspace h3 { font-size:18px; }
+.zi-workspace .text-muted { color:#64748b !important; }
+.zi-workspace .btn { --zi-button:#4f46e5; background:var(--zi-button) !important; border:1px solid transparent !important; color:#fff !important; border-radius:9px; padding:9px 14px; font-size:13px; line-height:1.4; font-weight:650; box-shadow:none; white-space:normal; }
+.zi-workspace .btn:hover { filter:brightness(.92); transform:none; }
+.zi-workspace .btn:focus-visible, .zi-workspace a:focus-visible, .zi-workspace summary:focus-visible { outline:3px solid #a5b4fc; outline-offset:3px; }
+.zi-workspace .btn-sm { padding:7px 10px; font-size:12px; }
+.zi-workspace .btn-primary, .zi-workspace .btn-outline-primary { --zi-button:#4f46e5; }
+.zi-workspace .btn-success, .zi-workspace .btn-outline-success { --zi-button:#047857; }
+.zi-workspace .btn-info, .zi-workspace .btn-outline-info, .zi-workspace .zi-btn-teal { --zi-button:#0f766e; }
+.zi-workspace .zi-btn-violet, .zi-workspace .zi-open-meeting-modal { --zi-button:#7c3aed; }
+.zi-workspace .zi-open-evidence-modal { --zi-button:#0f766e; }
+.zi-workspace .btn-warning, .zi-workspace .btn-outline-warning { --zi-button:#b45309; }
+.zi-workspace .btn-danger, .zi-workspace .btn-outline-danger { --zi-button:#be123c; }
+.zi-workspace .btn-light, .zi-workspace .btn-secondary, .zi-workspace .btn-outline-secondary, .zi-workspace .btn-default { --zi-button:#475569; }
+.zi-workspace .btn-link { --zi-button:#4f46e5; text-decoration:none; }
+.zi-workspace .btn:disabled, .zi-workspace .btn.disabled { background:#e2e8f0 !important; color:#64748b !important; opacity:1; cursor:not-allowed; filter:none; }
+.zi-workspace .app-create-btn, .zi-workspace .app-icon-btn { background:#4f46e5 !important; border:1px solid transparent !important; color:#fff !important; box-shadow:none; }
+.zi-workspace .app-icon-btn.edit { background:#0f766e !important; }
+.zi-workspace .app-create-btn:focus-visible, .zi-workspace .app-icon-btn:focus-visible { outline:3px solid #a5b4fc; outline-offset:3px; }
+.zi-workspace .close { background:#475569; color:#fff; opacity:1; text-shadow:none; border-radius:8px; padding:4px 9px; margin:0; align-self:center; font-size:22px; }
+.zi-workspace .form-control { min-height:40px; height:auto; border:1px solid #cbd5e1; border-radius:9px; background:#fff; color:#0f172a; font-size:13px; padding:9px 11px; }
+.zi-workspace .form-control:focus { border-color:#818cf8; box-shadow:0 0 0 3px #eef2ff; }
+.zi-workspace label { color:#334155; font-size:13px; font-weight:650; }
+.zi-workspace .card, .zi-workspace .zi-panel { border:1px solid #e2e8f0 !important; border-radius:14px; background:#fff; box-shadow:0 3px 12px rgba(15,23,42,.025) !important; }
+.zi-workspace .zi-panel { overflow:hidden; }
+.zi-page-head { display:flex; justify-content:space-between; gap:20px; align-items:center; margin-bottom:24px; }
+.zi-page-head p { margin:6px 0 0; color:#64748b; font-size:14px; }
+.zi-head-actions { display:flex; flex-wrap:wrap; gap:10px; align-items:center; }
+.zi-head-actions form { display:flex; gap:8px; align-items:center; }
+.zi-head-actions select { max-width:230px; }
+.zi-summary-band { display:grid; grid-template-columns:1.5fr .8fr 1fr .85fr; padding:24px; margin-bottom:24px; }
+.zi-summary-cell { padding:0 24px; border-left:1px solid #e2e8f0; display:flex; flex-direction:column; justify-content:center; gap:12px; }
+.zi-summary-cell:first-child { padding-left:0; border:0; }
+.zi-summary-cell:last-child { padding-right:0; }
+.zi-summary-cell > i { color:var(--zi-accent); font-size:27px; }
+.zi-summary-cell strong { font-size:23px; line-height:1.3; }
+.zi-summary-cell .zi-score { font-size:36px; color:#4f46e5; font-weight:800; }
+.zi-summary-cell small { color:#64748b; font-size:12px; }
+.zi-progress-track { height:8px; border-radius:20px; overflow:hidden; background:#e2e8f0; }
+.zi-progress-track span { display:block; height:100%; background:#059669; border-radius:20px; }
+.zi-tabs { display:flex; flex-wrap:wrap; align-items:center; gap:8px; padding-bottom:14px; margin-bottom:20px; border-bottom:1px solid #e2e8f0; }
+.zi-tabs .btn { min-width:110px; }
+.zi-tabs .btn[aria-current="page"] { box-shadow:0 3px 0 #0f172a; }
+.zi-tabs .zi-tab-count { margin-left:auto; color:#64748b; font-size:13px; }
+.zi-dashboard-grid { display:grid; grid-template-columns:minmax(0,3fr) minmax(270px,1fr); gap:18px; align-items:start; }
+.zi-panel-heading { padding:18px 20px; margin:0; font-size:19px !important; }
+.zi-dashboard-area-table { width:100%; border-collapse:separate; border-spacing:0; font-size:14px; }
+.zi-dashboard-area-table th { background:#f1f5f9; color:#334155; font-weight:700; padding:12px; }
+.zi-dashboard-area-table td { padding:10px 12px; border-top:1px solid #f1f5f9; vertical-align:middle; }
+.zi-dashboard-area-table th:first-child, .zi-dashboard-area-table td:first-child { padding-left:20px; }
+.zi-dashboard-area-table td:first-child { width:44%; }
+.zi-dashboard-area-table tbody tr:hover { background:#f8fafc; }
+.zi-area-name { display:flex; align-items:center; gap:12px; font-weight:700; color:#0f172a; }
+.zi-area-number { display:inline-flex; flex-shrink:0; align-items:center; justify-content:center; width:34px; height:34px; border-radius:9px; color:var(--zi-accent); background:var(--zi-tint); font-size:14px; font-weight:750; }
+.zi-tone-0 { --zi-accent:#4f46e5; --zi-tint:#eef2ff; }
+.zi-tone-1 { --zi-accent:#0f766e; --zi-tint:#ccfbf1; }
+.zi-tone-2 { --zi-accent:#7c3aed; --zi-tint:#f3e8ff; }
+.zi-tone-3 { --zi-accent:#b45309; --zi-tint:#fef3c7; }
+.zi-tone-4 { --zi-accent:#be123c; --zi-tint:#ffe4e6; }
+.zi-tone-5 { --zi-accent:#047857; --zi-tint:#d1fae5; }
+.zi-row-progress { display:flex; align-items:center; gap:12px; min-width:110px; }
+.zi-row-progress .zi-progress-track { flex:1; }
+.zi-dashboard-area-table .zi-member-list { margin:0; display:flex; flex-wrap:wrap; gap:5px; }
+.zi-dashboard-area-table .zi-member-chip { display:flex; align-items:center; gap:6px; padding:0; border:0; background:none; color:#475569; font-size:12px; }
+.zi-workspace .zi-member-avatar { display:inline-flex; align-items:center; justify-content:center; width:24px; height:24px; flex-shrink:0; border-radius:50%; background:#eef2ff; color:#4f46e5; font-size:9px; font-weight:750; }
+.zi-workspace .zi-member-name { overflow-wrap:anywhere; }
+.zi-workspace .zi-member-empty { color:#64748b; font-size:12px; }
+.zi-followup { padding:0 20px 20px; }
+.zi-empty-state { text-align:center; padding:20px 0; color:#64748b; }
+.zi-empty-state > i { font-size:35px; margin-bottom:16px; }
+.zi-empty-state strong { display:block; color:#0f172a; margin-bottom:4px; }
+.zi-flow { padding-top:20px; border-top:1px solid #e2e8f0; }
+.zi-flow h3 { margin-bottom:16px; }
+.zi-flow ol { list-style:none; padding:0; margin:0; display:grid; gap:14px; }
+.zi-flow li { display:flex; align-items:center; gap:12px; font-size:13px; }
+.zi-flow .zi-area-number { width:28px; height:28px; border-radius:50%; }
+.zi-followup-item { padding:12px 0; border-bottom:1px solid #e2e8f0; overflow-wrap:anywhere; }
+.zi-extra-details { margin-top:20px; padding:18px 20px; }
+.zi-extra-details summary { font-weight:700; cursor:pointer; }
+.zi-extra-metrics { display:flex; flex-wrap:wrap; gap:24px; margin-top:16px; color:#64748b; }
+.zi-extra-metrics strong { display:block; color:#0f172a; font-size:21px; }
+/* Monitoring retains its existing forms, permissions and Bootstrap modal behavior. */
+.zi-workspace .zi-monitor-shell { display:grid; gap:18px; }
+.zi-workspace .zi-monitor-hero { border:0; border-radius:0; background:none; box-shadow:none; padding:0 0 4px; }
+.zi-workspace .zi-monitor-hero::after { display:none; }
+.zi-workspace .zi-monitor-title p { font-size:14px; margin-top:7px; }
+.zi-workspace .zi-monitor-filter { box-shadow:none; border-radius:12px; padding:16px; }
+.zi-workspace .zi-monitor-filter .row { align-items:end; }
+.zi-workspace .zi-monitor-filter .form-control { border-color:#cbd5e1; border-radius:9px; }
+.zi-workspace .zi-area-card { border-radius:14px; box-shadow:none; }
+.zi-workspace .zi-area-head { padding:20px; background:#fff; }
+.zi-workspace .zi-area-code { color:var(--zi-accent); font-size:12px; }
+.zi-workspace .zi-area-title { font-size:19px; }
+.zi-workspace .zi-area-toggle { background:var(--zi-accent); color:#fff; border:0; }
+.zi-workspace .zi-area-body { padding:0; background:#fff; }
+.zi-workspace .zi-point-card { border:0; border-radius:0; margin:0; box-shadow:none; }
+.zi-workspace .zi-point-head { background:#fff; padding:20px; border-top:1px solid #e2e8f0; border-bottom:0; }
+.zi-workspace .zi-point-title { font-size:17px; }
+.zi-workspace .zi-point-code-inline { font-size:17px; }
+.zi-workspace .zi-subpoint-row { padding:20px; align-items:flex-start; gap:20px; }
+.zi-workspace .zi-subpoint-title { font-size:14px; font-weight:500; }
+.zi-workspace .zi-subpoint-code-inline { background:#ccfbf1; border-radius:6px; padding:1px 7px; min-width:27px; text-align:center; }
+.zi-workspace .zi-subpoint-right { padding-top:3px; }
+.zi-workspace .zi-action-group { gap:6px; }
+.zi-workspace .zi-inline-guide { border:0 !important; padding:0 !important; border-radius:0 !important; }
+.zi-workspace .zi-inline-guide > summary { color:#0f766e !important; font-size:12px; cursor:pointer; font-weight:650; }
+.zi-workspace .zi-evidence-guide { background:#f0fdfa; border-left:3px solid #0f766e; border-radius:0 9px 9px 0; padding:16px; font-size:13px !important; line-height:1.65; }
+.zi-workspace .zi-evidence-guide > strong { color:#115e59; }
+.zi-workspace #evidenceGuideDetails { border:1px solid #99f6e4 !important; border-radius:10px !important; background:#f0fdfa; padding:16px !important; }
+.zi-workspace #evidenceGuideDetails > summary { color:#0f766e; font-size:14px; cursor:pointer; }
+.zi-workspace #evidenceGuideDetails .zi-evidence-guide { border:0; padding:0; border-radius:0; }
+.zi-workspace #uploadEvidenceModal .modal-dialog { width:550px; max-width:100% !important; margin:0 0 0 auto !important; height:100%; max-height:none; }
+.zi-workspace #uploadEvidenceModal .modal-content { height:100%; max-height:100%; border-radius:0 !important; border:0; box-shadow:-8px 0 30px rgba(15,23,42,.08); }
+.zi-workspace #uploadEvidenceModal .modal-header { align-items:center; padding:20px 24px; }
+.zi-workspace #uploadEvidenceModal .modal-title { font-size:21px !important; color:#0f172a; }
+.zi-workspace #uploadEvidenceModal .modal-body { padding:20px 24px; overflow-y:auto; }
+.zi-workspace #uploadEvidenceModal .modal-footer { padding:16px 24px; }
+.zi-workspace #uploadEvidenceForm { flex:1; overflow:hidden; }
+.zi-workspace #uploadEvidenceModal.fade .modal-dialog { transform:translateX(30px); }
+.zi-workspace #uploadEvidenceModal.show .modal-dialog { transform:translateX(0); }
+body:has(.zi-workspace #uploadEvidenceModal.show) .modal-backdrop.show { opacity:.12; }
+.zi-workspace .zi-preview-link { background:#4f46e5; color:#fff; border-radius:8px; padding:5px 9px; }
+.zi-workspace .zi-preview-item, .zi-workspace .zi-suggestion-btn { border:0; background:#475569; color:#fff; }
+.zi-workspace .zi-preview-item.active { background:#4f46e5; }
+.zi-workspace .zi-preview-item-title, .zi-workspace .zi-suggestion-title, .zi-workspace .zi-suggestion-type { color:inherit; }
+.zi-workspace .zi-preview-item-meta, .zi-workspace .zi-suggestion-meta { color:#e2e8f0; }
+@media (max-width:1100px) { .zi-dashboard-grid { grid-template-columns:minmax(0,1fr); } .zi-summary-cell { padding:0 16px; } .zi-summary-cell strong { font-size:19px; } .zi-workspace .zi-subpoint-row { flex-direction:column; } .zi-workspace .zi-subpoint-right { width:100%; } }
+@media (max-width:767.98px) {
+    .zi-workspace { padding:16px 0; }
+    .zi-workspace h1, .zi-workspace .zi-monitor-title h1 { font-size:24px !important; }
+    .zi-page-head { align-items:stretch; flex-direction:column; gap:14px; }
+    .zi-head-actions { display:grid; grid-template-columns:minmax(0,1fr); align-items:stretch; }
+    .zi-head-actions form { display:grid; grid-template-columns:minmax(0,1fr) auto; width:100%; }
+    .zi-head-actions select { width:100%; max-width:none; min-width:0; }
+    .zi-summary-band { grid-template-columns:1fr 1fr; gap:20px 0; padding:20px; }
+    .zi-summary-cell { padding:0 14px; } .zi-summary-cell:nth-child(3) { border:0; padding-left:0; }
+    .zi-summary-cell strong { font-size:18px; } .zi-summary-cell .zi-score { font-size:30px; }
+    .zi-tabs .btn { min-width:0; flex:1; } .zi-tabs .zi-tab-count { width:100%; margin-left:0; }
+    .zi-dashboard-area-table, .zi-dashboard-area-table tbody, .zi-dashboard-area-table tr, .zi-dashboard-area-table td { display:block; width:100%; }
+    .zi-dashboard-area-table thead { display:none; } .zi-dashboard-area-table tbody tr { display:grid; grid-template-columns:1fr 1fr; padding:16px 20px; border-top:1px solid #e2e8f0; gap:12px; }
+    .zi-dashboard-area-table td { padding:0 !important; border:0; } .zi-dashboard-area-table td:first-child { width:100%; grid-column:1/-1; }
+    .zi-dashboard-area-table td::before { content:attr(data-label); display:block; font-size:11px; color:#64748b; margin-bottom:3px; }
+    .zi-dashboard-area-table td:last-child { grid-column:1/-1; } .zi-dashboard-area-table td:last-child .btn { display:block; }
+    .zi-workspace .zi-area-title { font-size:17px; } .zi-workspace .zi-monitor-filter .form-group { margin-bottom:12px !important; }
+    .zi-workspace #uploadEvidenceModal .modal-dialog { width:100%; }
+}
+@media (prefers-reduced-motion:reduce) { .zi-workspace *, .zi-workspace *::before, .zi-workspace *::after { transition:none !important; animation:none !important; } }

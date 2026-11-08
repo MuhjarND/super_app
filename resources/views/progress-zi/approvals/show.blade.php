@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('progress-zi.layout')
 
 @section('title', 'Review Pimpinan Progress ZI')
 
@@ -39,7 +39,7 @@
 </style>
 @endpush
 
-@section('content')
+@section('zi-content')
 <div class="row">
     <div class="col-lg-4 mb-3 mb-lg-0">
         <div class="card shadow-sm border-0 zi-approval-card">
@@ -122,7 +122,7 @@
                                 <div class="small mt-2"><strong>Catatan Eviden:</strong><div style="white-space:pre-wrap; overflow-wrap:anywhere;">{{ $evidence->description }}</div></div>
                             @endif
                             @if($evidence->preview_url)
-                                <a href="{{ $evidence->preview_url }}" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-outline-primary mt-2">{{ $evidence->drive_url ? 'Buka Google Drive' : 'Buka Eviden Lama' }} <i class="fas fa-external-link-alt ml-1"></i></a>
+                                <a href="{{ $evidence->preview_url }}" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-primary mt-2">{{ $evidence->drive_url ? 'Buka Google Drive' : 'Buka Eviden Lama' }} <i class="fas fa-external-link-alt ml-1"></i></a>
                             @endif
                         </div>
                     @empty
@@ -136,7 +136,7 @@
                     <div class="card-header bg-white">
                         <div class="d-flex justify-content-between align-items-center zi-approval-preview-head" style="gap:12px;">
                             <strong>{{ $hasLegacyEvidences ? 'Ringkasan dan Eviden Lama' : 'Ringkasan Eviden' }}</strong>
-                            <a href="{{ route('progress-zi.approvals.bundle', $approval) }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                            <a href="{{ route('progress-zi.approvals.bundle', $approval) }}" target="_blank" class="btn btn-sm btn-primary">
                                 <i class="fas fa-external-link-alt mr-1"></i>Buka PDF
                             </a>
                         </div>

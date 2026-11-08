@@ -201,6 +201,7 @@ class ZiProgressService
         $coverage = $this->buildSubPointCoverage($areas);
         $areaProgress = $areas->map(function ($area) use ($period) {
             return [
+                'id' => $area->id,
                 'group_type' => $area->group_type,
                 'group_label' => $area->group_label,
                 'name' => $area->name,

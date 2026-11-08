@@ -44,7 +44,6 @@
                 <div class="label" style="margin-top:8px;">Penjelasan pemenuhan</div>
                 <div style="white-space:pre-wrap;">{{ $guide['explanation'] }}</div>
             @endif
-            <div class="muted" style="margin-top:8px;">Sumber: PANDUAN PENYUSUNAN EVIDEN.xlsx, Interpretasi_LKE ZI, baris {{ $guide['source_row'] }}.</div>
         </div>
     @endif
     <div class="section">Daftar Eviden</div>

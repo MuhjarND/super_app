@@ -34,8 +34,6 @@
                 <figcaption class="small text-muted">Gambar contoh dari panduan. Klik gambar untuk memperbesar.</figcaption>
             </figure>
         @endforeach
-        @if($guide['answer_format'])<div class="small text-muted mb-2">Format penilaian pada panduan: {{ $guide['answer_format'] }}</div>@endif
-        <div class="small text-muted border-top pt-2">Sumber: PANDUAN PENYUSUNAN EVIDEN.xlsx · Interpretasi_LKE ZI · baris {{ $guide['source_row'] }}</div>
     </div>
 @else
     <div class="small text-muted">Panduan untuk poin ini belum tersedia.</div>

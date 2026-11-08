@@ -213,7 +213,6 @@ class MobileModuleMenuController extends Controller
                 'items' => ($isSuperAdmin || $user->canAccessProgressZiModule()) ? array_values(array_filter([
                     $this->item('Rekapan ZI', route('progress-zi.dashboard'), 'fas fa-chart-line', 'indigo'),
                     $this->item('Monitoring', route('progress-zi.activities.index'), 'fas fa-tasks', 'orange'),
-                    $this->item('Pedoman ZI', route('progress-zi.guidelines.index'), 'fas fa-book-open', 'blue'),
                     $this->item('Laporan', route('progress-zi.reports.index'), 'far fa-chart-bar', 'red'),
                     $this->item('Verifikasi', route('progress-zi.verifications.index'), 'fas fa-clipboard-check', 'green'),
                     ($isSuperAdmin || $user->canManageProgressZiMasterData()) ? $this->item('Periode ZI', route('progress-zi.periods.index'), 'far fa-calendar-alt', 'slate') : null,

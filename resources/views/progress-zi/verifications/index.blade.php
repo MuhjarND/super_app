@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('progress-zi.layout')
 
 @section('title', 'Verifikasi Progress ZI')
 
@@ -24,7 +24,7 @@
 </style>
 @endpush
 
-@section('content')
+@section('zi-content')
 <div class="zi-verify-shell">
     <div class="zi-verify-hero">
         <div class="d-flex justify-content-between align-items-end flex-wrap" style="gap:16px;">
@@ -126,7 +126,7 @@
                                         <div class="small mt-2"><strong>Catatan Eviden:</strong><div class="text-muted" style="white-space:pre-wrap; overflow-wrap:anywhere;">{{ $evidence->description }}</div></div>
                                     @endif
                                     @if($evidence->drive_url && $evidence->preview_url)
-                                        <a href="{{ $evidence->preview_url }}" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-outline-primary mt-2">Buka Google Drive</a>
+                                        <a href="{{ $evidence->preview_url }}" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-primary mt-2">Buka Google Drive</a>
                                     @endif
                                 </td>
                                 <td>

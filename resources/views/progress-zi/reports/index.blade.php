@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('progress-zi.layout')
 
 @section('title', 'Laporan Progress ZI')
 
@@ -39,7 +39,7 @@
 </style>
 @endpush
 
-@section('content')
+@section('zi-content')
 <div class="zi-report-shell">
     <div class="zi-report-hero">
         <div class="d-flex justify-content-between align-items-end flex-wrap" style="gap:16px;">
@@ -123,7 +123,7 @@
                 </div>
                 <div class="form-group mb-0 d-flex align-items-end" style="gap:10px;">
                     <button class="btn btn-primary"><i class="fas fa-filter mr-1"></i>Filter</button>
-                    <a href="{{ route('progress-zi.reports.index') }}" class="btn btn-outline-secondary">Reset</a>
+                    <a href="{{ route('progress-zi.reports.index') }}" class="btn btn-secondary">Reset</a>
                 </div>
             </form>
         </div>

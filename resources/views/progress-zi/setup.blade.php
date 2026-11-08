@@ -1,8 +1,8 @@
-@extends('layouts.app')
+@extends('progress-zi.layout')
 
 @section('title', 'Progress ZI')
 
-@section('content')
+@section('zi-content')
 <div class="row justify-content-center">
     <div class="col-lg-8">
         <div class="card shadow-sm border-0">

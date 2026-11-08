@@ -1,6 +1,6 @@
-@extends('layouts.app')
+@extends('progress-zi.layout')
 @section('title', 'Eviden Kegiatan ZI')
-@section('content')
+@section('zi-content')
 <div class="card shadow-sm border-0 mb-3">
     <div class="card-body">
         <h4>{{ $activity->name }}</h4>
@@ -23,7 +23,7 @@
                 <div class="mt-2"><strong>Catatan Eviden:</strong><div style="white-space:pre-wrap; overflow-wrap:anywhere;">{{ $evidence->description }}</div></div>
             @endif
             @if($evidence->preview_url)
-                <a href="{{ $evidence->preview_url }}" target="_blank" rel="noopener noreferrer" class="btn btn-outline-primary btn-sm mt-3">Buka Eviden</a>
+                <a href="{{ $evidence->preview_url }}" target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-sm mt-3">Buka Eviden</a>
             @endif
         </div></div>
     @endforeach

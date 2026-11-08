@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('progress-zi.layout')
 
 @section('title', 'Matriks Pedoman vs Kegiatan')
 
@@ -25,7 +25,7 @@
 </style>
 @endpush
 
-@section('content')
+@section('zi-content')
 <div class="zi-matrix-shell">
     <div class="zi-matrix-hero">
         <div class="zi-matrix-title">Matriks Pedoman vs Kegiatan</div>

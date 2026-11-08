@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('progress-zi.layout')
 
 @section('title', 'Monitoring Kegiatan ZI')
 
@@ -133,39 +133,27 @@
 </style>
 @endpush
 
-@section('content')
+@section('zi-content')
 <div class="zi-monitor-shell">
     <div class="zi-monitor-hero">
         <div class="zi-monitor-title">
-            <h1>Monitoring Progress ZI</h1>
+            <h1>Monitoring Kegiatan ZI</h1>
             <p>
-                Kelola kegiatan, eviden, dan review setiap sub poin Zona Integritas dengan tampilan yang lebih mudah dipindai.
+                Kelola pemenuhan eviden sesuai panduan setiap area.
                 @if($selectedPeriod)
                     Periode: <strong>{{ $selectedPeriod->name }}</strong>.
                 @endif
             </p>
         </div>
-        <div class="zi-monitor-tools">
-            <span class="zi-monitor-pill"><i class="fas fa-layer-group"></i>{{ count($groupOptions) }} kelompok</span>
-            <span class="zi-monitor-pill"><i class="fas fa-map-marked-alt"></i>{{ $visibleAreas->count() }} area tampil</span>
-        </div>
     </div>
 
-    <div class="zi-group-grid">
+    <nav class="zi-tabs mb-0" aria-label="Kelompok ZI">
         @foreach($groupOptions as $groupType => $groupLabel)
-            @php
-                $groupAreas = $groupedAreas->get($groupType, collect());
-            @endphp
-            <a href="{{ route('progress-zi.activities.index', ['group_type' => $groupType]) }}" class="zi-group-card {{ $selectedGroupType === $groupType ? 'active' : '' }}">
-                <div class="zi-group-eyebrow">Kelompok ZI</div>
-                <div class="zi-group-title">{{ $groupLabel }}</div>
-                <div class="zi-group-meta">
-                    <span class="zi-group-stat"><i class="fas fa-layer-group"></i>{{ $groupAreas->count() }} area</span>
-                    <span class="zi-group-stat"><i class="fas fa-tasks"></i>{{ $groupAreas->sum(function ($area) { return $area->activities->count(); }) }} kegiatan</span>
-                </div>
-            </a>
+            <a href="{{ route('progress-zi.activities.index', ['group_type' => $groupType, 'period_id' => optional($selectedPeriod)->id]) }}"
+               class="btn {{ $groupType === 'reform' ? 'zi-btn-teal' : ($groupType === 'hasil' ? 'btn-warning' : 'btn-primary') }}"
+               @if($selectedGroupType === $groupType) aria-current="page" @endif>{{ $groupLabel }}</a>
         @endforeach
-    </div>
+    </nav>
 
     <div class="zi-monitor-filter">
         <form method="GET" class="row">
@@ -233,8 +221,8 @@
                     $canManageArea = auth()->user()->canManageProgressZiArea($area);
                     $canCreateMeeting = $canManageArea && auth()->user()->canManageRapat();
                 @endphp
-                <div class="zi-area-card">
-                    <div class="zi-area-head" data-toggle="collapse" data-target="#ziAreaBody{{ $area->id }}" aria-expanded="false" aria-controls="ziAreaBody{{ $area->id }}">
+                <div class="zi-area-card zi-tone-{{ $loop->index % 6 }}">
+                    <div class="zi-area-head" data-toggle="collapse" data-target="#ziAreaBody{{ $area->id }}" aria-expanded="{{ $loop->first ? 'true' : 'false' }}" aria-controls="ziAreaBody{{ $area->id }}">
                         <div>
                             <div class="zi-area-code">{{ $area->group_label }} &bull; {{ $area->code }}</div>
                             <div class="zi-area-title">{{ $area->name }}</div>
@@ -248,7 +236,7 @@
                         </div>
                     </div>
 
-                    <div id="ziAreaBody{{ $area->id }}" class="collapse">
+                    <div id="ziAreaBody{{ $area->id }}" class="collapse {{ $loop->first ? 'show' : '' }}">
                         <div class="zi-area-body">
                             @forelse($area->guidelinePoints as $point)
                         <div class="zi-point-card">
@@ -320,7 +308,7 @@
                                                         </a>
                                                     @endif
                                                 </div>
-                                                <details class="mt-2 border rounded p-3">
+                                                <details class="mt-2 zi-inline-guide">
                                                     <summary class="font-weight-bold text-primary">Panduan Penyusunan Eviden</summary>
                                                     <div class="mt-3">@include('progress-zi.partials.evidence-guide', ['guide' => $subPoint->evidence_guide])</div>
                                                 </details>
@@ -375,9 +363,9 @@
                                             @endif
                                             @if($evidence->preview_url)
                                                 @if($evidence->drive_url)
-                                                <a href="{{ $evidence->preview_url }}" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-outline-primary mt-2">Buka Google Drive <i class="fas fa-external-link-alt ml-1"></i></a>
+                                                <a href="{{ $evidence->preview_url }}" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-primary mt-2">Buka Google Drive <i class="fas fa-external-link-alt ml-1"></i></a>
                                                 @else
-                                                <button type="button" class="btn btn-sm btn-outline-primary mt-2 zi-open-preview" data-title="{{ $evidence->title }}" data-url="{{ $evidence->preview_url }}" data-preview-list="#ziPreviewListTemplate{{ $subPoint->id }}">Preview Eviden</button>
+                                                <button type="button" class="btn btn-sm btn-primary mt-2 zi-open-preview" data-title="{{ $evidence->title }}" data-url="{{ $evidence->preview_url }}" data-preview-list="#ziPreviewListTemplate{{ $subPoint->id }}">Preview Eviden</button>
                                                 @endif
                                             @endif
                                         </div>
@@ -439,8 +427,8 @@
     <div class="modal-dialog modal-lg modal-dialog-scrollable">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Tautkan Eviden Google Drive</h5>
-                <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+                <h5 class="modal-title">Kumpulkan eviden</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Tutup"><span>&times;</span></button>
             </div>
             <form method="POST" action="#" id="uploadEvidenceForm">
                 @csrf
@@ -453,7 +441,7 @@
                             @foreach($errors->all() as $error)<div>{{ $error }}</div>@endforeach
                         </div>
                     @endif
-                    <div class="alert alert-light border mb-3">
+                    <div class="zi-evidence-context mb-3">
                         <div class="small text-muted">Sub Poin</div>
                         <div class="font-weight-bold" id="uploadEvidenceSubPoint">-</div>
                         <div class="small text-muted mt-1" id="uploadEvidenceArea">-</div>
@@ -464,17 +452,17 @@
                         <div class="mt-3" id="evidenceGuideContent"></div>
                     </details>
                     <div class="form-group">
-                        <label>Judul Eviden</label>
+                        <label for="uploadEvidenceTitle">Judul Eviden</label>
                         <input type="text" class="form-control" name="title" id="uploadEvidenceTitle" maxlength="255">
-                    </div>
-                    <div class="form-group">
-                        <label for="evidenceNotes">Catatan Eviden <span class="text-muted font-weight-normal">(opsional)</span></label>
-                        <textarea class="form-control" name="description" id="evidenceNotes" rows="3" placeholder="Tambahkan penjelasan isi folder, periode dokumen, atau hal yang perlu diperhatikan pemeriksa."></textarea>
                     </div>
                     <div class="form-group">
                         <label for="evidenceDriveUrl">Tautan File / Folder Google Drive <span class="text-danger">*</span></label>
                         <input type="url" class="form-control" name="drive_url" id="evidenceDriveUrl" required maxlength="2048" placeholder="https://drive.google.com/drive/folders/..." aria-describedby="evidenceDriveHelp">
                         <small id="evidenceDriveHelp" class="form-text text-muted">Tempel tautan file atau folder Google Drive, termasuk Google Docs, Sheets, dan Slides. Pastikan akun pemeriksa diberi akses lihat melalui menu Bagikan di Google Drive.</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="evidenceNotes">Catatan Eviden <span class="text-muted font-weight-normal">(opsional)</span></label>
+                        <textarea class="form-control" name="description" id="evidenceNotes" rows="3" placeholder="Tambahkan penjelasan isi folder, periode dokumen, atau hal yang perlu diperhatikan pemeriksa."></textarea>
                     </div>
                     <div class="border rounded p-3 bg-light">
                         <div class="small text-muted mb-2">Eviden yang Sudah Ada</div>
@@ -495,7 +483,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="ziEvidencePreviewTitle">Preview Eviden</h5>
-                <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Tutup"><span>&times;</span></button>
             </div>
             <div class="modal-body p-0">
                 <div class="zi-preview-layout">
