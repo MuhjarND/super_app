@@ -287,7 +287,6 @@ class RapatNotulensiController extends Controller
         $pdf = PDF::loadView('rapat.notulensi.pdf', [
             'notulensi' => $notulensi,
             'rapat' => $notulensi->rapat,
-            'kopImage' => $this->resolveKopImage(),
             'dokumentasiImages' => $this->resolveDocumentationImages($notulensi),
             'uraianKegiatanRows' => $this->resolveUraianKegiatanRows($notulensi),
             'notulisSignature' => app(RapatDocumentService::class)->buildNotulensiSignatureData($notulensi),
@@ -656,15 +655,4 @@ class RapatNotulensiController extends Controller
         return $this->resolveDocumentationImages($notulensi);
     }
 
-    protected function resolveKopImage()
-    {
-        foreach (['kop_absen.jpg', 'kop_undangan.png'] as $filename) {
-            $path = public_path($filename);
-            if (is_file($path)) {
-                return 'data:' . mime_content_type($path) . ';base64,' . base64_encode(file_get_contents($path));
-            }
-        }
-
-        return null;
-    }
 }

@@ -97,7 +97,7 @@
             <div class="zi-guide-panel-body zi-area-list">
                 @forelse($visibleAreas as $area)
                     <a href="{{ route('progress-zi.guidelines.index', ['area_id' => $area->id, 'group_type' => $selectedGroupType]) }}" class="zi-area-card {{ optional($selectedArea)->id === $area->id ? 'active' : '' }}">
-                        <div class="zi-area-code">{{ $area->code }}</div>
+                        <div class="zi-area-code">{{ $area->display_code }}</div>
                         <div class="zi-area-name">{{ $area->name }}</div>
                         <div class="small text-muted mt-2">{{ $area->guidelinePoints->sum(function ($point) { return $point->subPoints->count(); }) }} poin eviden</div>
                     </a>

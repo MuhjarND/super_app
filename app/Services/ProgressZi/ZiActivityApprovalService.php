@@ -23,7 +23,7 @@ class ZiActivityApprovalService
     public function submit(ZiActivity $activity, User $requester, $requestNotes = null)
     {
         if (!$this->isReadyForReview($activity)) {
-            abort(422, 'Kegiatan belum siap direview pimpinan. Pastikan kegiatan sudah dijadwalkan dan eviden sudah tersedia.');
+            abort(422, 'Eviden belum siap direview. Pastikan eviden sudah tersedia.');
         }
 
         $existingPending = $activity->approvals()->where('status', 'pending')->latest('id')->first();
@@ -32,7 +32,7 @@ class ZiActivityApprovalService
         }
 
         $approver = $this->resolveApprover();
-        abort_unless($approver, 422, 'Belum ada user approval yang bisa menerima review pimpinan Progress ZI.');
+        abort_unless($approver, 422, 'Belum ada Sekretaris atau Panitera aktif yang dapat menerima review eviden ZI.');
 
         $approval = DB::transaction(function () use ($activity, $requester, $requestNotes, $approver) {
             $approval = $activity->approvals()->create([
@@ -59,12 +59,14 @@ class ZiActivityApprovalService
 
     public function approve(ZiActivityApproval $approval, User $approver, $reviewNotes = null)
     {
-        abort_unless($approver->canActAsAssignedUser($approval->approver_id) || $approver->isSuperAdmin(), 403);
-        abort_unless($approval->status === 'pending', 422, 'Approval ini sudah diproses.');
+        abort_unless($approver->canVerifyProgressZi(), 403);
         $previousStatus = $approval->status;
 
-        DB::transaction(function () use ($approval, $approver, $reviewNotes) {
+        $approval = DB::transaction(function () use ($approval, $approver, $reviewNotes) {
+            $approval = ZiActivityApproval::whereKey($approval->id)->lockForUpdate()->firstOrFail();
+            abort_unless($approval->status === 'pending', 422, 'Review ini sudah diproses.');
             $approval->update([
+                'approver_id' => $approver->id,
                 'status' => 'approved',
                 'review_notes' => $reviewNotes,
                 'acted_at' => now(),
@@ -74,6 +76,7 @@ class ZiActivityApprovalService
                 'status' => 'selesai',
                 'updated_by' => $approver->id,
             ]);
+            return $approval;
         });
 
         $approval->loadMissing('activity.area', 'requester', 'approver');
@@ -96,12 +99,14 @@ class ZiActivityApprovalService
 
     public function reject(ZiActivityApproval $approval, User $approver, $reviewNotes = null)
     {
-        abort_unless($approver->canActAsAssignedUser($approval->approver_id) || $approver->isSuperAdmin(), 403);
-        abort_unless($approval->status === 'pending', 422, 'Approval ini sudah diproses.');
+        abort_unless($approver->canVerifyProgressZi(), 403);
         $previousStatus = $approval->status;
 
-        DB::transaction(function () use ($approval, $approver, $reviewNotes) {
+        $approval = DB::transaction(function () use ($approval, $approver, $reviewNotes) {
+            $approval = ZiActivityApproval::whereKey($approval->id)->lockForUpdate()->firstOrFail();
+            abort_unless($approval->status === 'pending', 422, 'Review ini sudah diproses.');
             $approval->update([
+                'approver_id' => $approver->id,
                 'status' => 'rejected',
                 'review_notes' => $reviewNotes,
                 'acted_at' => now(),
@@ -111,6 +116,7 @@ class ZiActivityApprovalService
                 'status' => 'perlu_perbaikan',
                 'updated_by' => $approver->id,
             ]);
+            return $approval;
         });
 
         $approval->loadMissing('activity.area', 'requester', 'approver');
@@ -146,20 +152,35 @@ class ZiActivityApprovalService
 
     protected function resolveApprover()
     {
+        return $this->reviewers()->first();
+    }
+
+    public function reviewers()
+    {
         return User::active()
-            ->withRoleOrDelegatedJabatan(['approval', 'super_admin'])
+            ->withRoleOrDelegatedJabatan(['sekretaris', 'panitera'])
+            ->with(['roles', 'jabatan', 'activeJabatanDelegations.jabatan'])
             ->ordered()
-            ->first();
+            ->get()->filter(function ($user) { return $user->canVerifyProgressZi(); })->values();
+    }
+
+    public function reassignPendingReviews()
+    {
+        $reviewers = $this->reviewers();
+        if ($reviewers->isEmpty()) { return 0; }
+        return ZiActivityApproval::where('status', 'pending')
+            ->whereNotIn('approver_id', $reviewers->pluck('id'))
+            ->update(['approver_id' => $reviewers->first()->id, 'updated_at' => now()]);
     }
 
     protected function notifyPendingReview(ZiActivityApproval $approval)
     {
-        if ($approval->approver) {
+        foreach ($this->reviewers() as $reviewer) {
             try {
-                $approval->approver->notify(new ProgressZiWorkflowNotification(
+                $reviewer->notify(new ProgressZiWorkflowNotification(
                     $approval->activity,
-                    'Review pimpinan Progress ZI menunggu tindakan Anda',
-                    'Terdapat kegiatan Progress ZI yang memerlukan review pimpinan.',
+                    'Review eviden ZI menunggu tindakan Anda',
+                    'Eviden ZI dapat direview salah satu dari Sekretaris atau Panitera.',
                     route('progress-zi.approvals.show', $approval),
                     'approver',
                     'pending'
@@ -167,12 +188,12 @@ class ZiActivityApprovalService
             } catch (\Throwable $e) {
                 Log::warning('Progress ZI pending notification skipped', [
                     'approval_id' => $approval->id,
-                    'user_id' => $approval->approver_id,
+                    'user_id' => $reviewer->id,
                     'error' => $e->getMessage(),
                 ]);
             }
 
-            $this->whatsAppService->notifyProgressZiApprovalPending($approval);
+            $this->whatsAppService->notifyProgressZiApprovalPending($approval, $reviewer);
         }
     }
 
@@ -189,10 +210,10 @@ class ZiActivityApprovalService
         }
 
         $targets = $targets->unique('id')->values();
-        $title = $approved ? 'Review pimpinan Progress ZI disetujui' : 'Review pimpinan Progress ZI perlu perbaikan';
+        $title = $approved ? 'Review eviden Progress ZI disetujui' : 'Review eviden Progress ZI perlu perbaikan';
         $message = $approved
             ? 'Kegiatan Progress ZI telah disetujui dan dinyatakan selesai.'
-            : 'Kegiatan Progress ZI dikembalikan untuk perbaikan. Mohon meninjau catatan review pimpinan.';
+            : 'Kegiatan Progress ZI dikembalikan untuk perbaikan. Mohon meninjau catatan review eviden.';
 
         foreach ($targets as $target) {
             try {

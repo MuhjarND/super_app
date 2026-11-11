@@ -250,7 +250,6 @@ class RapatLaporanService
         $pdf = PDF::loadView('rapat.notulensi.pdf', [
             'notulensi' => $notulensi,
             'rapat' => $notulensi->rapat,
-            'kopImage' => $this->resolvePublicImage(['kop_absen.jpg', 'kop_undangan.png', 'kop_undangan.jpg', 'kop_undangan.jpeg']),
             'dokumentasiImages' => $notulensiController->resolveDocumentationImagesForExport($notulensi),
             'uraianKegiatanRows' => $notulensiController->resolveUraianKegiatanRowsForExport($notulensi),
             'notulisSignature' => $documentService->buildNotulensiSignatureData($notulensi),

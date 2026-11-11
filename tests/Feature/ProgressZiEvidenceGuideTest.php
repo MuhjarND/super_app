@@ -131,6 +131,67 @@ class ProgressZiEvidenceGuideTest extends TestCase
         $this->assertSame(113, \App\ZiEvidenceGuide::count());
     }
 
+    public function test_two_progress_bars_count_points_and_distinguish_pending_review_from_work_in_progress()
+    {
+        app(ZiEvidenceGuideService::class)->sync();
+        $points = ZiGuidelineSubPoint::whereNotNull('evidence_guide_key')->orderBy('id')->take(5)->get();
+        $make = function ($point, $status, $files = 1) {
+            $activity = $this->activity($point->point->area, $point);
+            $realization = $activity->realizations()->create(['realization_date' => '2026-11-08', 'implementation_summary' => 'Pengumpulan']);
+            for ($i = 0; $i < $files; $i++) {
+                $realization->evidences()->create(['title' => 'Eviden ' . $i, 'evidence_type' => 'google_drive', 'status' => 'terhubung']);
+            }
+            if ($status) { $activity->approvals()->create(['approver_id' => 1, 'status' => $status, 'requested_at' => now()]); }
+            return $activity;
+        };
+        $make($points[0], 'approved');
+        $make($points[1], 'pending', 2);
+        $make($points[2], null);
+        $make($points[3], 'rejected');
+        $make($points[4], 'pending', 0);
+        $make($points[1], 'pending'); // A second activity/file must not create an extra point.
+        $areas = ZiArea::with(['guidelinePoints.subPoints', 'activities.latestApproval', 'activities.realizations.evidences', 'activities.guidelineSubPoint'])->get();
+        $service = app(ZiProgressService::class);
+        $progress = $service->buildEvidenceProgress($areas);
+        $this->assertSame(113, $progress['total']);
+        $this->assertSame(4, $progress['collected']);
+        $this->assertSame(1, $progress['approved']);
+        $this->assertSame(3, $progress['in_progress']);
+        $this->assertSame(0.9, $progress['approved_percent']);
+        $this->assertSame(2.7, $progress['in_progress_percent']);
+        $areaProgress = $service->buildEvidenceProgress($areas->where('id', $points[0]->point->zi_area_id));
+        $this->assertSame(12, $areaProgress['total']);
+        $this->assertSame(8.3, $areaProgress['approved_percent']);
+        $this->assertSame(25.0, $areaProgress['in_progress_percent']);
+        $emptyAreaProgress = $service->buildEvidenceProgress($areas->where('id', '!=', $points[0]->point->zi_area_id));
+        $this->assertSame(0, $emptyAreaProgress['collected']);
+        $review = $service->summarizeEvidenceReview($areas->flatMap(function ($area) { return $area->activities; }));
+        $this->assertSame(2, $review['point_count']);
+        $this->assertSame(1, $review['pending_point_count']);
+        $this->assertSame(1, $review['unsubmitted_point_count']);
+        $this->assertSame(4, $review['evidence_count']);
+    }
+
+    public function test_progress_bars_use_the_selected_period_and_handle_an_empty_dataset()
+    {
+        $service = app(ZiProgressService::class);
+        $this->assertSame(0, $service->buildEvidenceProgress(collect())['approved_percent']);
+        $this->assertSame(0, $service->buildEvidenceProgress(collect())['in_progress_percent']);
+        app(ZiEvidenceGuideService::class)->sync();
+        $point = ZiGuidelineSubPoint::whereNotNull('evidence_guide_key')->firstOrFail();
+        $current = $this->activity($point->point->area, $point);
+        $otherPeriod = ZiPeriod::create(['name' => 'Periode Lain', 'year' => 2027]);
+        $other = ZiActivity::create(['zi_period_id' => $otherPeriod->id, 'zi_area_id' => $point->point->zi_area_id,
+            'zi_guideline_sub_point_id' => $point->id, 'name' => 'Eviden periode lain']);
+        $other->realizations()->create(['realization_date' => '2027-01-01', 'implementation_summary' => 'Periode lain'])
+            ->evidences()->create(['title' => 'Tidak ikut periode aktif', 'evidence_type' => 'google_drive', 'status' => 'terhubung']);
+        $areas = ZiArea::with(['guidelinePoints.subPoints', 'activities' => function ($query) use ($current) {
+            $query->where('zi_period_id', $current->zi_period_id);
+        }, 'activities.latestApproval', 'activities.realizations.evidences'])->get();
+        $this->assertSame(0, $service->buildEvidenceProgress($areas)['collected']);
+        $this->assertSame(0, $service->summarizeEvidenceReview($areas->flatMap(function ($area) { return $area->activities; }))['point_count']);
+    }
+
     protected function activity(ZiArea $area, ZiGuidelineSubPoint $subPoint)
     {
         $period = ZiPeriod::firstOrCreate(['name' => 'Evaluasi ZI 2026'], ['year' => 2026]);

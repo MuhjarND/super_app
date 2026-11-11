@@ -416,10 +416,6 @@ class AppServiceProvider extends ServiceProvider
                 $ziApprovalQuery = ZiActivityApproval::with(['activity.area'])
                     ->where('status', 'pending');
 
-                if (!$user->isSuperAdmin()) {
-                    $ziApprovalQuery->whereIn('approver_id', $user->effectiveAssignmentUserIds());
-                }
-
                 $counts['sidebarProgressZiApprovalPendingCount'] = (clone $ziApprovalQuery)->count();
 
                 foreach ((clone $ziApprovalQuery)->latest('requested_at')->take(5)->get() as $approval) {
@@ -428,9 +424,9 @@ class AppServiceProvider extends ServiceProvider
                         'icon' => 'fas fa-clipboard-check',
                         'icon_bg' => '#fee2e2',
                         'icon_color' => '#b91c1c',
-                        'title' => 'Review pimpinan Progress ZI',
+                        'title' => 'Review eviden Progress ZI',
                         'subtitle' => optional($approval->activity)->name ?: 'Progress ZI',
-                        'description' => optional(optional($approval->activity)->area)->name ?: 'Ada tindak lanjut ZI yang menunggu review pimpinan.',
+                        'description' => optional(optional($approval->activity)->area)->name ?: 'Ada tindak lanjut ZI yang menunggu review eviden.',
                         'time' => optional($approval->requested_at ?: $approval->created_at)->diffForHumans(),
                         'url' => route('progress-zi.approvals.show', $approval),
                         'sort_at' => optional($approval->requested_at ?: $approval->created_at)->timestamp ?: 0,

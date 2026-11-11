@@ -1,6 +1,6 @@
 @extends('progress-zi.layout')
 
-@section('title', 'Review Pimpinan Progress ZI')
+@section('title', 'Review Eviden Progress ZI')
 
 @push('styles')
 <style>
@@ -47,7 +47,12 @@
                 <h3 class="card-title mb-0">Status Review</h3>
             </div>
             <div class="card-body">
+                <p class="text-muted small">Review cukup diproses salah satu dari Sekretaris atau Panitera.</p>
                 <div class="mb-3">{!! $approval->status_badge !!}</div>
+                @if($approval->status !== 'pending')
+                    <div class="small text-muted">Direview oleh</div>
+                    <div class="font-weight-bold mb-3">{{ optional($approval->approver)->name ?: '-' }}</div>
+                @endif
                 <div class="small text-muted">Diminta oleh</div>
                 <div class="font-weight-bold mb-3">{{ optional($approval->requester)->name ?: '-' }}</div>
                 <div class="small text-muted">Diminta pada</div>
@@ -57,7 +62,7 @@
                     <div class="border rounded p-2 mb-3">{{ $approval->request_notes }}</div>
                 @endif
 
-                @if($approval->status === 'pending')
+                @if($approval->status === 'pending' && auth()->user()->canVerifyProgressZi())
                     <form method="POST" action="{{ route('progress-zi.approvals.approve', $approval) }}" class="mb-3 zi-approval-actions">
                         @csrf
                         <div class="form-group">
@@ -84,7 +89,7 @@
     <div class="col-lg-8">
         <div class="card shadow-sm border-0 zi-approval-card">
             <div class="card-header bg-white">
-                <h3 class="card-title mb-0">Review Pimpinan Progress ZI</h3>
+                <h3 class="card-title mb-0">Review Eviden Progress ZI</h3>
             </div>
             <div class="card-body">
                 <div class="mb-3">

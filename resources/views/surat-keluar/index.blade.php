@@ -1115,7 +1115,8 @@
                             </div>
                             <div class="form-group col-md-6">
                                 <label for="calendarEndTime">Waktu Selesai</label>
-                                <input type="time" class="form-control" name="end_time" id="calendarEndTime">
+                                <input type="time" class="form-control" name="end_time" id="calendarEndTime" aria-describedby="calendarTimeHelp">
+                                <small class="text-muted d-block mt-1" id="calendarTimeHelp">Opsional. Jika diisi, waktu mulai juga wajib diisi.</small>
                             </div>
                         </div>
                         <div class="form-group">

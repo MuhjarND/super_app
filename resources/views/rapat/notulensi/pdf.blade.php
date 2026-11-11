@@ -16,16 +16,6 @@
             margin: 0;
         }
 
-        .kop {
-            width: 100%;
-            margin-bottom: 10px;
-        }
-
-        .kop img {
-            width: 100%;
-            height: auto;
-        }
-
         .title-band {
             background: #7bc043;
             text-align: center;
@@ -282,11 +272,7 @@
     'pdfVerificationQrSize' => 44,
     'pdfVerificationBottom' => '-2cm',
 ])
-    @if($kopImage)
-        <div class="kop">
-            <img src="{{ $kopImage }}" alt="Kop Notulen">
-        </div>
-    @endif
+    @include('rapat.partials.letterhead')
 
     <div class="title-band">NOTULEN AGENDA</div>
 

@@ -18,6 +18,15 @@ class ZiArea extends Model
     public function pics() { return $this->belongsToMany(User::class, 'zi_area_pic')->withTimestamps()->orderByRaw('CASE WHEN hirarki IS NULL THEN 1 ELSE 0 END')->orderBy('hirarki')->orderBy('name'); }
     public function activities() { return $this->hasMany(ZiActivity::class, 'zi_area_id'); }
     public function guidelinePoints() { return $this->hasMany(ZiGuidelinePoint::class, 'zi_area_id')->orderBy('sort_order')->orderBy('id'); }
+    public function getDisplayCodeAttribute()
+    {
+        if (preg_match('/^PANDUAN-[PRH]-(\d+|[IVX]+)$/i', trim((string) $this->code), $matches)) {
+            $number = ctype_digit($matches[1]) ? (int) $matches[1]
+                : (['I' => 1, 'II' => 2, 'III' => 3, 'IV' => 4, 'V' => 5, 'VI' => 6][strtoupper($matches[1])] ?? null);
+            if ($number) { return 'AREA ' . $number; }
+        }
+        return $this->code;
+    }
     public function getStatusBadgeAttribute() { return '<span class="badge badge-' . ($this->is_active ? 'success' : 'secondary') . ' app-status-badge">' . ($this->is_active ? 'Aktif' : 'Nonaktif') . '</span>'; }
     public function getGroupLabelAttribute()
     {

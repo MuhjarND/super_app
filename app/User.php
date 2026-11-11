@@ -776,7 +776,7 @@ class User extends Authenticatable
 
     public function canAccessProgressZiModule()
     {
-        if ($this->isSuperAdmin()) {
+        if ($this->isSuperAdmin() || $this->canVerifyProgressZi()) {
             return true;
         }
 
@@ -815,18 +815,10 @@ class User extends Authenticatable
 
     public function canVerifyProgressZi()
     {
-        if ($this->isSuperAdmin()) {
-            return true;
-        }
-
-        return $this->hasAnyRole([
-            'admin',
-            'approval',
-            'sekretaris',
-            'panitera',
-            'kabag',
-            'kasubag',
-        ]);
+        return $this->canLogin() && (
+            $this->hasAnyRole(['sekretaris', 'panitera'])
+            || $this->hasJabatanKode(['SEK', 'PAN'])
+        );
     }
 
     public function canManageProgressZiActivity($activity = null)
@@ -1059,7 +1051,8 @@ class User extends Authenticatable
 
     public function canAccessApprovalCenter()
     {
-        return $this->canAccessMeetingApproval()
+        return $this->canVerifyProgressZi()
+            || $this->canAccessMeetingApproval()
             || $this->canAccessLeaveApproval()
             || $this->canApproveSuratKeluarTemplate()
             || $this->hasPendingSuratTugasParaf()

@@ -581,9 +581,23 @@ class SuratKeluarController extends Controller
             'start_date' => 'required|date',
             'end_date' => 'nullable|date|after_or_equal:start_date',
             'start_time' => 'nullable|date_format:H:i|required_with:end_time',
-            'end_time' => 'nullable|date_format:H:i|required_with:start_time',
+            'end_time' => 'nullable|date_format:H:i',
             'location' => 'nullable|string|max:255',
             'notes' => 'nullable|string|max:1000',
+        ], [
+            'type.required' => 'Pilih tipe agenda terlebih dahulu.',
+            'type.in' => 'Tipe agenda yang dipilih tidak valid.',
+            'start_date.required' => 'Tanggal mulai wajib diisi.',
+            'start_date.date' => 'Tanggal mulai tidak valid.',
+            'end_date.date' => 'Tanggal selesai tidak valid.',
+            'end_date.after_or_equal' => 'Tanggal selesai harus sama dengan atau setelah tanggal mulai.',
+            'start_time.required_with' => 'Waktu mulai wajib diisi jika waktu selesai diisi.',
+            'start_time.date_format' => 'Waktu mulai harus menggunakan format jam:menit (contoh 10:00).',
+            'end_time.date_format' => 'Waktu selesai harus menggunakan format jam:menit (contoh 16:00).',
+            'location.string' => 'Tempat harus berupa teks.',
+            'location.max' => 'Tempat maksimal 255 karakter.',
+            'notes.string' => 'Keterangan harus berupa teks.',
+            'notes.max' => 'Keterangan maksimal 1000 karakter.',
         ]);
 
         if (!empty($data['start_time']) && !empty($data['end_time'])) {

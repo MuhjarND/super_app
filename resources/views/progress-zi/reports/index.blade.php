@@ -86,7 +86,7 @@
                     <select name="area_id" class="form-control">
                         <option value="">Semua Area</option>
                         @foreach($areas as $area)
-                            <option value="{{ $area->id }}" {{ (string) $filters['area_id'] === (string) $area->id ? 'selected' : '' }}>{{ $area->code }} - {{ $area->name }}</option>
+                            <option value="{{ $area->id }}" {{ (string) $filters['area_id'] === (string) $area->id ? 'selected' : '' }}>{{ $area->display_code }} - {{ $area->name }}</option>
                         @endforeach
                     </select>
                 </div>

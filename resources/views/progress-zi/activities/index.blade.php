@@ -147,13 +147,7 @@
         </div>
     </div>
 
-    <nav class="zi-tabs mb-0" aria-label="Kelompok ZI">
-        @foreach($groupOptions as $groupType => $groupLabel)
-            <a href="{{ route('progress-zi.activities.index', ['group_type' => $groupType, 'period_id' => optional($selectedPeriod)->id]) }}"
-               class="btn {{ $groupType === 'reform' ? 'zi-btn-teal' : ($groupType === 'hasil' ? 'btn-warning' : 'btn-primary') }}"
-               @if($selectedGroupType === $groupType) aria-current="page" @endif>{{ $groupLabel }}</a>
-        @endforeach
-    </nav>
+    @include('progress-zi.partials.group-tabs', ['tabsRoute' => 'progress-zi.activities.index', 'tabsPeriod' => $selectedPeriod, 'tabsSelected' => $selectedGroupType, 'tabsClass' => 'mb-0'])
 
     <div class="zi-monitor-filter">
         <form method="GET" class="row">
@@ -172,7 +166,7 @@
                 <select class="form-control" name="area_id">
                     <option value="">Semua Area</option>
                     @foreach($visibleAreas as $area)
-                        <option value="{{ $area->id }}" {{ (string) ($filters['area_id'] ?? '') === (string) $area->id ? 'selected' : '' }}>{{ $area->code }} - {{ $area->name }}</option>
+                        <option value="{{ $area->id }}" {{ (string) ($filters['area_id'] ?? '') === (string) $area->id ? 'selected' : '' }}>{{ $area->display_code }} - {{ $area->name }}</option>
                     @endforeach
                 </select>
             </div>
@@ -220,20 +214,22 @@
                     $coverageClass = $coveredSubPoints === 0 ? 'is-danger' : ($coveredSubPoints === $totalSubPoints && $totalSubPoints > 0 ? 'is-success' : 'is-progress');
                     $canManageArea = auth()->user()->canManageProgressZiArea($area);
                     $canCreateMeeting = $canManageArea && auth()->user()->canManageRapat();
+                    $areaReviews = app(\App\Services\ProgressZi\ZiProgressService::class)->summarizeEvidenceReview($area->activities);
                 @endphp
                 <div class="zi-area-card zi-tone-{{ $loop->index % 6 }}">
-                    <div class="zi-area-head" data-toggle="collapse" data-target="#ziAreaBody{{ $area->id }}" aria-expanded="{{ $loop->first ? 'true' : 'false' }}" aria-controls="ziAreaBody{{ $area->id }}">
-                        <div>
-                            <div class="zi-area-code">{{ $area->group_label }} &bull; {{ $area->code }}</div>
-                            <div class="zi-area-title">{{ $area->name }}</div>
+                    <div class="zi-area-head">
+                        <div class="zi-area-identity">
+                            <span class="zi-area-number">{{ str_pad($loop->iteration, 2, '0', STR_PAD_LEFT) }}</span>
+                            <div><div class="zi-area-code">{{ $area->group_label }} &bull; {{ $area->display_code }}</div><h2 class="zi-area-title">{{ $area->name }}</h2></div>
                         </div>
-                        <div class="zi-area-meta">
+                        <div class="zi-area-review">
                             <span class="zi-kpi-chip {{ $coverageClass }}"><i class="fas fa-check-circle"></i>{{ $coveredSubPoints }}/{{ $totalSubPoints }}</span>
-                            <div class="zi-area-members">
-                                @include('progress-zi.partials.member-list', ['members' => $area->pics, 'fallback' => $area->pic, 'variant' => 'inline'])
-                            </div>
-                            <span class="zi-area-toggle"><i class="fas fa-chevron-down"></i></span>
+                            @if($areaReviews['point_count'])<span class="zi-review-note"><i class="far fa-clock" aria-hidden="true"></i> {{ $areaReviews['point_count'] }} poin belum direview</span>@endif
                         </div>
+                        <div class="zi-area-members">
+                            @include('progress-zi.partials.member-list', ['members' => $area->pics, 'fallback' => $area->pic, 'variant' => 'compact', 'memberListId' => 'ziMonitorMembers' . $area->id, 'areaTitle' => $area->name])
+                        </div>
+                        <button type="button" class="zi-area-toggle" data-toggle="collapse" data-target="#ziAreaBody{{ $area->id }}" aria-expanded="{{ $loop->first ? 'true' : 'false' }}" aria-controls="ziAreaBody{{ $area->id }}" aria-label="Buka atau tutup kegiatan {{ $area->name }}"><i class="fas fa-chevron-down" aria-hidden="true"></i></button>
                     </div>
 
                     <div id="ziAreaBody{{ $area->id }}" class="collapse {{ $loop->first ? 'show' : '' }}">
@@ -319,7 +315,7 @@
                                         <div class="zi-action-group">
                                             <button type="button" class="btn btn-primary btn-sm zi-open-meeting-modal"
                                                 data-toggle="modal" data-target="#createRapatModal"
-                                                data-area-id="{{ $area->id }}" data-area-name="{{ $area->code }} - {{ $area->name }}"
+                                                data-area-id="{{ $area->id }}" data-area-name="{{ $area->display_code }} - {{ $area->name }}"
                                                 data-subpoint-id="{{ $subPoint->id }}" data-subpoint-code="{{ strtolower($subPoint->display_code) }}"
                                                 data-subpoint-title="{{ $subPoint->title }}" data-period-id="{{ optional($selectedPeriod)->id }}"
                                                 data-default-title="{{ \Illuminate\Support\Str::limit('Rapat Monitoring dan Evaluasi - ' . $subPoint->title, 252) }}"
@@ -330,7 +326,7 @@
                                                 data-toggle="modal" data-target="#uploadEvidenceModal"
                                                 data-activity-id="{{ optional($latestActivity)->id }}" data-area-id="{{ $area->id }}"
                                                 data-period-id="{{ optional($selectedPeriod)->id }}" data-subpoint-id="{{ $subPoint->id }}"
-                                                data-area-name="{{ $area->code }} - {{ $area->name }}" data-subpoint-title="{{ $subPoint->title }}"
+                                                data-area-name="{{ $area->display_code }} - {{ $area->name }}" data-subpoint-title="{{ $subPoint->title }}"
                                                 data-existing-evidence="#ziEvidenceListTemplate{{ $subPoint->id }}"
                                                 data-guide="#ziEvidenceGuideTemplate{{ $subPoint->id }}"
                                                 {{ $canUploadEvidence ? '' : 'disabled' }}>

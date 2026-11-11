@@ -7,5 +7,8 @@
 @section('content')
     <div class="zi-workspace">
         @yield('zi-content')
+        @if(request()->routeIs('progress-zi.dashboard', 'progress-zi.index', 'progress-zi.activities.index'))
+            @include('progress-zi.partials.member-modal')
+        @endif
     </div>
 @endsection

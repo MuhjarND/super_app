@@ -581,18 +581,19 @@ class WhatsAppNotificationService
         ]);
     }
 
-    public function notifyProgressZiApprovalPending(ZiActivityApproval $approval)
+    public function notifyProgressZiApprovalPending(ZiActivityApproval $approval, User $recipient = null)
     {
         $approval->loadMissing(['activity.area', 'activity.pic', 'requester', 'approver']);
 
-        if (!$approval->approver) {
+        $recipient = $recipient ?: $approval->approver;
+        if (!$recipient) {
             return false;
         }
 
         $activity = $approval->activity;
         $message = $this->wrap([
             'Yth. Bapak/Ibu,',
-            'Dengan hormat, terdapat kegiatan Progress ZI yang memerlukan review pimpinan.',
+            'Dengan hormat, terdapat eviden ZI yang memerlukan review Sekretaris atau Panitera. Cukup salah satu reviewer memproses.',
             '',
             'Aktivitas: ' . optional($activity)->name,
             'Area: ' . optional(optional($activity)->area)->name,
@@ -604,7 +605,7 @@ class WhatsAppNotificationService
             route('progress-zi.approvals.show', $approval),
         ]);
 
-        return $this->sendToUser($approval->approver, $message, [
+        return $this->sendToUser($recipient, $message, [
             'module' => 'progress_zi',
             'event' => 'zi_review_pending',
             'notifiable_type' => get_class($approval),

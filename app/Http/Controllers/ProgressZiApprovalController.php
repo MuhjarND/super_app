@@ -24,13 +24,7 @@ class ProgressZiApprovalController extends Controller
 
     public function show(ZiActivityApproval $ziActivityApproval)
     {
-        $this->abortUnlessCanVerifyProgressZi();
-        $user = auth()->user();
-
-        abort_unless(
-            $user->canActAsAssignedUser($ziActivityApproval->approver_id) || $user->isSuperAdmin(),
-            403
-        );
+        $this->authorizeReviewView($ziActivityApproval);
 
         $ziActivityApproval->load([
             'approver.jabatan',
@@ -62,13 +56,7 @@ class ProgressZiApprovalController extends Controller
 
     public function bundle(ZiActivityApproval $ziActivityApproval)
     {
-        $this->abortUnlessCanVerifyProgressZi();
-        $user = auth()->user();
-
-        abort_unless(
-            $user->canActAsAssignedUser($ziActivityApproval->approver_id) || $user->isSuperAdmin(),
-            403
-        );
+        $this->authorizeReviewView($ziActivityApproval);
 
         $bundle = $this->bundleService->createBundle($ziActivityApproval->activity);
         $response = response()->file($bundle['path'], [
@@ -90,7 +78,7 @@ class ProgressZiApprovalController extends Controller
 
         $this->approvalService->approve($ziActivityApproval, auth()->user(), $request->review_notes);
 
-        return redirect()->route('progress-zi.approvals.show', $ziActivityApproval)->with('success', 'Review pimpinan berhasil disetujui.');
+        return redirect()->route('progress-zi.approvals.show', $ziActivityApproval)->with('success', 'Review eviden berhasil disetujui.');
     }
 
     public function reject(ZiActivityApproval $ziActivityApproval, Request $request)
@@ -100,6 +88,13 @@ class ProgressZiApprovalController extends Controller
 
         $this->approvalService->reject($ziActivityApproval, auth()->user(), $request->review_notes);
 
-        return redirect()->route('progress-zi.approvals.show', $ziActivityApproval)->with('success', 'Review pimpinan dikembalikan untuk perbaikan.');
+        return redirect()->route('progress-zi.approvals.show', $ziActivityApproval)->with('success', 'Review eviden dikembalikan untuk perbaikan.');
+    }
+
+    protected function authorizeReviewView(ZiActivityApproval $approval)
+    {
+        $user = auth()->user();
+        abort_unless($user->canVerifyProgressZi() || $user->isSuperAdmin()
+            || ($approval->status !== 'pending' && $user->canActAsAssignedUser($approval->approver_id)), 403);
     }
 }

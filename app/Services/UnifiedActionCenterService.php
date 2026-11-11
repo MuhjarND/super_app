@@ -738,10 +738,9 @@ class UnifiedActionCenterService
 
         $items = collect();
 
-        if ($user->canVerifyProgressZi() || $user->isSuperAdmin()) {
+        if ($user->canVerifyProgressZi()) {
             $approvalQuery = ZiActivityApproval::with(['activity.area', 'requester.unit'])
-                ->where('status', 'pending')
-                ->whereIn('approver_id', $user->effectiveAssignmentUserIds());
+                ->where('status', 'pending');
 
             $items = $items->merge($approvalQuery->latest('requested_at')->take(10)->get()->map(function ($approval) {
                 return $this->makeItem([
@@ -749,16 +748,16 @@ class UnifiedActionCenterService
                     'module_key' => 'progress_zi',
                     'module_label' => 'Progress ZI',
                     'module_icon' => 'fas fa-chart-line',
-                    'type_label' => 'Review Pimpinan',
+                    'type_label' => 'Review Eviden',
                     'title' => optional($approval->activity)->name ?: 'Aktivitas ZI',
                     'subtitle' => optional(optional($approval->activity)->area)->name ?: 'Progress ZI',
-                    'description' => 'Review kegiatan ZI menunggu persetujuan pimpinan.',
+                    'description' => 'Review kegiatan ZI menunggu persetujuan Sekretaris atau Panitera.',
                     'status_key' => 'waiting',
                     'priority_key' => 'high',
                     'target_at' => $approval->requested_at ?: $approval->created_at,
                     'is_overdue' => optional($approval->requested_at ?: $approval->created_at)->lt(now('Asia/Jayapura')->subDays(2)),
                     'assignee_id' => $approval->approver_id,
-                    'assignee_name' => optional($approval->approver)->name ?: '-',
+                    'assignee_name' => 'Sekretaris / Panitera',
                     'action_url' => route('progress-zi.approvals.show', $approval),
                     'action_text' => 'Buka Review',
                     'unit_label' => optional(optional($approval->requester)->unit)->nama ?: '-',
@@ -1100,10 +1099,10 @@ class UnifiedActionCenterService
                 'module_key' => 'progress_zi',
                 'module_label' => 'Progress ZI',
                 'module_icon' => 'fas fa-chart-line',
-                'type_label' => $isApproved ? 'Review Pimpinan Selesai' : 'Review Pimpinan Perlu Revisi',
+                'type_label' => $isApproved ? 'Review Eviden Selesai' : 'Review Eviden Perlu Revisi',
                 'title' => optional($approval->activity)->name ?: 'Aktivitas ZI',
                 'subtitle' => optional(optional($approval->activity)->area)->name ?: 'Progress ZI',
-                'description' => $isApproved ? 'Kegiatan ZI telah disetujui pimpinan.' : ($approval->review_notes ?: 'Kegiatan ZI perlu diperbaiki.'),
+                'description' => $isApproved ? 'Kegiatan ZI telah disetujui reviewer.' : ($approval->review_notes ?: 'Kegiatan ZI perlu diperbaiki.'),
                 'status_key' => $isApproved ? 'done' : 'revision',
                 'priority_key' => 'low',
                 'target_at' => $approval->acted_at ?: $approval->updated_at,

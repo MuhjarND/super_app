@@ -87,7 +87,7 @@
                         @endif
                         @foreach($groupAreas as $area)
                         <tr>
-                            <td data-label="Kode"><strong>{{ $area->code }}</strong></td>
+                            <td data-label="Kode"><strong>{{ $area->display_code }}</strong></td>
                             <td data-label="Kelompok">{!! $area->group_badge !!}</td>
                             <td data-label="Nama Area">{{ $area->name }}</td>
                             <td data-label="PIC Area">{{ $area->pic_names }}</td>

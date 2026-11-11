@@ -167,6 +167,67 @@ class ZiProgressService
         return round($approved / $points->count() * 100, 1);
     }
 
+    public function buildEvidenceProgress(Collection $areas)
+    {
+        $total = 0;
+        $collected = 0;
+        $approved = 0;
+        foreach ($areas as $area) {
+            $activities = $area->relationLoaded('activities') ? $area->activities : collect();
+            $points = $area->relationLoaded('guidelinePoints') ? $area->guidelinePoints : collect();
+            foreach ($points as $point) {
+                $subPoints = $point->relationLoaded('subPoints') ? $point->subPoints : collect();
+                foreach ($subPoints as $subPoint) {
+                    $total++;
+                    $withEvidence = $activities->where('zi_guideline_sub_point_id', $subPoint->id)
+                        ->filter(function ($activity) { return $activity->evidence_count > 0; });
+                    if ($withEvidence->isEmpty()) { continue; }
+                    $collected++;
+                    if ($withEvidence->contains(function ($activity) { return optional($activity->latestApproval)->status === 'approved'; })) {
+                        $approved++;
+                    }
+                }
+            }
+        }
+        $inProgress = max(0, $collected - $approved);
+        return [
+            'total' => $total, 'collected' => $collected, 'approved' => $approved, 'in_progress' => $inProgress,
+            'approved_percent' => $total ? round($approved / $total * 100, 1) : 0,
+            'in_progress_percent' => $total ? round($inProgress / $total * 100, 1) : 0,
+        ];
+    }
+
+    public function summarizeEvidenceReview(Collection $activities)
+    {
+        $unreviewed = $activities->filter(function ($activity) {
+            $status = optional($activity->latestApproval)->status;
+            return $activity->zi_guideline_sub_point_id && $activity->evidence_count > 0
+                && (!$status || $status === 'pending');
+        });
+        // Several files or activities can fulfil the same point. Count that point once.
+        $items = $unreviewed->groupBy('zi_guideline_sub_point_id')->map(function ($pointActivities) {
+            $pending = $pointActivities->first(function ($activity) {
+                return optional($activity->latestApproval)->status === 'pending';
+            });
+            $activity = $pending ?: $pointActivities->sortByDesc('id')->first();
+            return [
+                'activity' => $activity,
+                'title' => optional($activity->guidelineSubPoint)->title ?: $activity->name,
+                'status' => $pending ? 'pending' : 'not_submitted',
+                'label' => $pending ? 'Menunggu review' : 'Belum diajukan review',
+                'evidence_count' => (int) $pointActivities->sum(function ($item) { return $item->evidence_count; }),
+            ];
+        })->values();
+
+        return [
+            'point_count' => $items->count(),
+            'pending_point_count' => $items->where('status', 'pending')->count(),
+            'unsubmitted_point_count' => $items->where('status', 'not_submitted')->count(),
+            'evidence_count' => $items->sum('evidence_count'),
+            'items' => $items,
+        ];
+    }
+
     public function buildDashboard(?ZiPeriod $period = null)
     {
         $periodId = optional($period)->id;
@@ -192,6 +253,8 @@ class ZiProgressService
             },
             'activities.latestApproval',
             'activities.realizations.evidences',
+            'activities.guidelineSubPoint',
+            'activities.area',
             'guidelinePoints.subPoints' => function ($query) { $query->whereNotNull('evidence_guide_key'); },
             'guidelinePoints' => function ($query) { $query->whereHas('subPoints', function ($sub) { $sub->whereNotNull('evidence_guide_key'); }); },
         ])->whereHas('guidelinePoints.subPoints', function ($query) { $query->whereNotNull('evidence_guide_key'); })
@@ -205,11 +268,13 @@ class ZiProgressService
                 'group_type' => $area->group_type,
                 'group_label' => $area->group_label,
                 'name' => $area->name,
-                'code' => $area->code,
+                'code' => $area->display_code,
                 'score' => $this->calculateAreaScore($area, $period),
                 'pic' => $area->pic_names,
                 'pic_members' => $area->pics->isNotEmpty() ? $area->pics->values() : ($area->pic ? collect([$area->pic]) : collect()),
                 'coverage' => $this->buildSubPointCoverage(collect([$area])),
+                'evidence_progress' => $this->buildEvidenceProgress(collect([$area])),
+                'review_summary' => $this->summarizeEvidenceReview($area->activities),
             ];
         })->sortByDesc('score')->values();
         $groupAreaProgress = collect([
@@ -276,6 +341,7 @@ class ZiProgressService
             ]),
             'group_area_progress' => $groupAreaProgress,
             'area_progress' => $areaProgress,
+            'review_summary' => $this->summarizeEvidenceReview($areas->flatMap(function ($area) { return $area->activities; })),
             'overdue_activities' => $overdueActivities,
             'indicator_attention' => $indicatorAttention,
             'evidence_attention' => $evidenceAttention,

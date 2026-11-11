@@ -24,15 +24,6 @@
             margin: 0 0 10pt 0;
         }
 
-        .kop {
-            margin-bottom: 12pt;
-        }
-
-        .kop img {
-            width: 100%;
-            display: block;
-        }
-
         .meta {
             width: 100%;
             border-collapse: collapse;
@@ -289,11 +280,7 @@
         }
     @endphp
 
-    @if($kopImage)
-        <div class="kop">
-            <img src="{{ $kopImage }}" alt="Kop Surat">
-        </div>
-    @endif
+    @include('rapat.partials.letterhead')
 
     <table class="meta">
         <tr>

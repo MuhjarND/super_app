@@ -48,7 +48,7 @@
                 <select name="area_id" class="form-control">
                     <option value="">Semua Area</option>
                     @foreach($areas as $area)
-                        <option value="{{ $area->id }}" {{ (int) $selectedAreaId === (int) $area->id ? 'selected' : '' }}>{{ $area->code }} - {{ $area->name }}</option>
+                        <option value="{{ $area->id }}" {{ (int) $selectedAreaId === (int) $area->id ? 'selected' : '' }}>{{ $area->display_code }} - {{ $area->name }}</option>
                     @endforeach
                 </select>
             </div>
@@ -63,7 +63,7 @@
         <div class="zi-matrix-area">
             <div class="zi-matrix-area-head">
                 <div>
-                    <div class="zi-matrix-area-title">{{ $area->code }} - {{ $area->name }}</div>
+                    <div class="zi-matrix-area-title">{{ $area->display_code }} - {{ $area->name }}</div>
                     <div class="zi-matrix-area-meta">PIC Area: {{ optional($area->pic)->name ?: '-' }} • {{ optional($selectedPeriod)->name ?: 'Semua Periode' }}</div>
                 </div>
                 <div class="d-flex" style="gap:8px; flex-wrap:wrap;">

@@ -718,7 +718,6 @@ class RapatDocumentService
             'signatureImage' => $signed && $signatory && $approvalStep && $approvalStep->status === 'approved'
                 ? $this->qrCodeService->dataUri($this->signatureVerificationUrl($rapat, ['signature' => 'approval']), 120)
                 : null,
-            'kopImage' => $this->resolveKopImage(),
             'lampiranLabel' => $this->resolveLampiranLabel($showLampiranPage, $rapat),
             'openingParagraph' => $this->buildOpeningParagraph($rapat),
             'signatoryTitle' => $this->resolveSignatoryTitle($signatory, $rapat->approval1_jabatan_manual),
@@ -1101,24 +1100,6 @@ class RapatDocumentService
         $mime = mime_content_type($path) ?: 'image/jpeg';
 
         return 'data:' . $mime . ';base64,' . base64_encode(file_get_contents($path));
-    }
-
-    protected function resolveKopImage()
-    {
-        $candidates = [
-            public_path('kop_undangan.png'),
-            public_path('kop_undangan.jpeg'),
-            public_path('kop_undangan.jpg'),
-        ];
-
-        foreach ($candidates as $candidate) {
-            $data = $this->fileToDataUri($candidate);
-            if ($data) {
-                return $data;
-            }
-        }
-
-        return null;
     }
 
     protected function resolveSignatoryTitle($signatory, $manualTitle = null)

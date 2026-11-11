@@ -34,7 +34,7 @@ class ApprovalCenterController extends Controller
         ],
         'progress_zi' => [
             'label' => 'Progress ZI',
-            'description' => 'Review pimpinan atas tindak lanjut sub poin Progress ZI.',
+            'description' => 'Review eviden ZI oleh Sekretaris atau Panitera.',
             'icon' => 'fas fa-chart-line',
         ],
     ];
@@ -126,10 +126,8 @@ class ApprovalCenterController extends Controller
         }
 
         if ($category === 'progress_zi' && Schema::hasTable('zi_activity_approvals')) {
+            if (!$user->canVerifyProgressZi()) { return 0; }
             $query = ZiActivityApproval::where('status', 'pending');
-            if (!$user->isSuperAdmin()) {
-                $query->whereIn('approver_id', $user->effectiveAssignmentUserIds());
-            }
             return $query->count();
         }
 
@@ -172,7 +170,7 @@ class ApprovalCenterController extends Controller
 
         if ($category === 'progress_zi' && Schema::hasTable('zi_activity_approvals')) {
             $query = ZiActivityApproval::whereIn('status', ['approved', 'rejected']);
-            if (!$user->isSuperAdmin()) {
+            if (!$user->canVerifyProgressZi() && !$user->isSuperAdmin()) {
                 $query->whereIn('approver_id', $user->effectiveAssignmentUserIds());
             }
             return $query->count();
@@ -287,14 +285,11 @@ class ApprovalCenterController extends Controller
         }
 
         if ($category === 'progress_zi' && Schema::hasTable('zi_activity_approvals')) {
+            if (!$user->canVerifyProgressZi()) { return collect(); }
             $query = ZiActivityApproval::with(['activity.area', 'activity.guidelineSubPoint.point', 'approver'])
                 ->where('status', 'pending')
                 ->orderByDesc('requested_at')
                 ->orderByDesc('id');
-
-            if (!$user->isSuperAdmin()) {
-                $query->whereIn('approver_id', $user->effectiveAssignmentUserIds());
-            }
 
             return $query->get()->map(function ($approval) {
                 $activity = $approval->activity;
@@ -303,7 +298,7 @@ class ApprovalCenterController extends Controller
                     'number' => optional(optional($activity)->area)->code ?: '-',
                     'date' => optional($approval->requested_at)->translatedFormat('d F Y'),
                     'subtitle' => optional(optional($activity->guidelineSubPoint)->point)->code . '.' . optional($activity->guidelineSubPoint)->code,
-                    'meta' => 'Approver: ' . (optional($approval->approver)->name ?: '-'),
+                    'meta' => 'Reviewer: Sekretaris / Panitera',
                     'count_label' => 'Status: ' . ($approval->status_label ?: 'Pending'),
                     'detail_url' => route('progress-zi.approvals.show', $approval),
                     'status_label' => $approval->status_label,
@@ -385,7 +380,7 @@ class ApprovalCenterController extends Controller
 
         if ($category === 'progress_zi' && Schema::hasTable('zi_activity_approvals')) {
             $query = ZiActivityApproval::with(['activity.area', 'approver'])->whereIn('status', ['approved', 'rejected'])->orderByDesc('acted_at')->orderByDesc('id');
-            if (!$user->isSuperAdmin()) {
+            if (!$user->canVerifyProgressZi() && !$user->isSuperAdmin()) {
                 $query->whereIn('approver_id', $user->effectiveAssignmentUserIds());
             }
 

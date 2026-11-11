@@ -258,7 +258,7 @@ class ProgressZiMasterController extends Controller
         return redirect()->route('progress-zi.activities.index', [
             'period_id' => $ziActivity->zi_period_id,
             'area_id' => $ziActivity->zi_area_id,
-        ])->with('success', 'Review pimpinan berhasil diajukan ke approval.');
+        ])->with('success', 'Review eviden berhasil diajukan ke approval.');
     }
 
     protected function guidelineSubPointOptions()

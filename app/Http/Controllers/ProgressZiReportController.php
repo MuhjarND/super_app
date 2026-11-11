@@ -248,7 +248,7 @@ class ProgressZiReportController extends Controller
         $areasForScore = ZiArea::whereIn('id', $allActivities->pluck('zi_area_id')->unique()->filter()->values())->with(['pic', 'pics'])->orderBy('code')->get();
         $areaScores = $areasForScore->map(function ($area) use ($selectedPeriod) {
             return [
-                'code' => $area->code,
+                'code' => $area->display_code,
                 'name' => $area->name,
                 'pic' => $area->pic_names,
                 'pic_members' => $area->pics->isNotEmpty() ? $area->pics->values() : ($area->pic ? collect([$area->pic]) : collect()),
