@@ -4,6 +4,39 @@
 
 @push('styles')
 @include('persediaan.supplies._styles')
+<style>
+    .supply-item-modal {
+        --supply-item-modal-gap: 3.5rem;
+    }
+
+    .supply-item-modal .modal-dialog-scrollable .modal-content {
+        max-height: calc(100vh - var(--supply-item-modal-gap));
+        max-height: calc(100dvh - var(--supply-item-modal-gap));
+    }
+
+    .supply-item-modal .modal-content > form {
+        display: flex;
+        flex: 1 1 auto;
+        flex-direction: column;
+        min-height: 0;
+        margin: 0;
+        overflow: hidden;
+    }
+
+    .supply-item-modal .modal-body {
+        min-height: 0;
+        overscroll-behavior-y: contain;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    @media (max-width: 991.98px) {
+        .supply-item-modal { --supply-item-modal-gap: 20px; }
+    }
+
+    @media (max-width: 575.98px) {
+        .supply-item-modal { --supply-item-modal-gap: 16px; }
+    }
+</style>
 @endpush
 
 @section('content')
@@ -95,8 +128,8 @@
 
 <div class="mt-3">{{ $items->links() }}</div>
 
-<div class="modal fade" id="createSupplyItemModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-centered">
+<div class="modal fade supply-item-modal" id="createSupplyItemModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">Tambah Barang</h5>
@@ -117,8 +150,8 @@
 </div>
 
 @foreach($items as $item)
-    <div class="modal fade" id="editSupplyItemModal{{ $item->id }}" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal fade supply-item-modal" id="editSupplyItemModal{{ $item->id }}" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title">Edit Barang</h5>
