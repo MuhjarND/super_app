@@ -217,6 +217,11 @@ class UserManagementController extends Controller
 
     protected function validateRequest(Request $request, $userId = null)
     {
+        // "Tidak Ada" ends the delegation even if the old position was submitted.
+        if (!$request->filled('delegasi_tipe')) {
+            $request->merge(['delegasi_tipe' => null, 'delegasi_jabatan_id' => null]);
+        }
+
         $passwordRules = $userId
             ? ['nullable', 'string', 'min:8']
             : ['required', 'string', 'min:8'];
@@ -243,6 +248,11 @@ class UserManagementController extends Controller
             'delegasi_jabatan_id' => ['nullable', 'required_with:delegasi_tipe', 'exists:jabatans,id'],
             'profile_photo' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
             'remove_photo' => ['nullable', 'boolean'],
+        ], [
+            'delegasi_tipe.in' => 'Jenis delegasi harus PLH atau PLT.',
+            'delegasi_tipe.required_with' => 'Pilih jenis delegasi PLH atau PLT.',
+            'delegasi_jabatan_id.required_with' => 'Pilih jabatan delegasi untuk PLH atau PLT.',
+            'delegasi_jabatan_id.exists' => 'Jabatan delegasi yang dipilih tidak tersedia.',
         ]);
     }
 

@@ -480,6 +480,39 @@
 @push('scripts')
     <script>
         (function () {
+            function syncDelegation(typeField) {
+                const positionField = typeField.form.querySelector('[name="delegasi_jabatan_id"]');
+                if (!positionField) {
+                    return;
+                }
+
+                const hasDelegation = typeField.value !== '';
+                if (!hasDelegation) {
+                    positionField.value = '';
+                }
+                positionField.disabled = !hasDelegation;
+                positionField.required = hasDelegation;
+
+                if (window.jQuery && jQuery.fn.select2) {
+                    jQuery(positionField).trigger('change.select2');
+                }
+            }
+
+            document.addEventListener('change', function (event) {
+                if (event.target.matches('[name="delegasi_tipe"]')) {
+                    syncDelegation(event.target);
+                }
+            });
+
+            document.querySelectorAll('[name="delegasi_tipe"]').forEach(syncDelegation);
+            if (window.jQuery) {
+                jQuery(document).on('shown.bs.modal', '.modal', function () {
+                    this.querySelectorAll('[name="delegasi_tipe"]').forEach(syncDelegation);
+                });
+            }
+        })();
+
+        (function () {
             const filterForm = document.getElementById('adminUsersFilter');
             const resultsSelector = '#adminUsersResults';
             const results = () => document.querySelector(resultsSelector);

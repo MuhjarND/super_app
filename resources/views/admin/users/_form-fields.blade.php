@@ -170,6 +170,7 @@
                 </select>
             </div>
         </div>
+        <small class="form-text text-muted">Pilih Tidak Ada lalu Simpan untuk mengakhiri delegasi PLH/PLT. Akun dan jabatan utama tetap aktif.</small>
     </section>
 
     <section class="user-form-section">
