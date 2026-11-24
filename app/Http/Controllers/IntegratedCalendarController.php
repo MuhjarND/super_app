@@ -41,7 +41,9 @@ class IntegratedCalendarController extends Controller
         if ($request->user()->isSuperAdmin()) {
             $titles = $publications->titles(array_column($payload['events'], 'id'));
             foreach ($payload['events'] as &$event) {
-                $event['extendedProps']['public_title'] = $titles->get($event['id']);
+                $title = $titles->get($event['id']);
+                $event['extendedProps']['public_title'] = $title;
+                $event['extendedProps']['bulk_publication_title'] = $title === null ? CalendarPublications::bulkTitle($event) : null;
             }
             unset($event);
         }
@@ -73,5 +75,42 @@ class IntegratedCalendarController extends Controller
         $publications->save($user, $data['event_key'], $data['public_title']);
 
         return response()->json(['public_title' => $data['public_title']]);
+    }
+
+    public function publishBulk(Request $request, CalendarPublications $publications)
+    {
+        $user = $request->user();
+        abort_unless($user->canLogin() && $user->isSuperAdmin() && $user->canAccessIntegratedCalendar(), 403);
+
+        $data = $request->validate([
+            'start' => ['required', 'date_format:Y-m-d'],
+            'end' => ['required', 'date_format:Y-m-d', 'after:start'],
+            'events' => ['required', 'array', 'max:' . CalendarPublications::BULK_LIMIT],
+            'events.*.id' => ['required', 'string', 'max:64', 'distinct', 'regex:' . CalendarPublications::BULK_EVENT_KEY],
+            'events.*.title' => ['required', 'string', 'max:255'],
+        ]);
+
+        $start = CarbonImmutable::parse($data['start'], 'Asia/Jayapura');
+        $end = CarbonImmutable::parse($data['end'], 'Asia/Jayapura');
+        abort_if($start->diffInDays($end) > 42, 422, 'Pilih satu rentang kalender paling lama 42 hari.');
+
+        $reviewed = array_column($data['events'], 'title', 'id');
+        $schedule = $this->calendarService->build($user, [
+            'start' => $start->toDateString(),
+            'end' => $end->subDay()->toDateString(),
+        ], array_keys($reviewed));
+        $current = array_column($schedule['events'], null, 'id');
+        $titles = [];
+
+        foreach ($reviewed as $key => $title) {
+            $event = $current[$key] ?? null;
+            $publicTitle = $event ? CalendarPublications::bulkTitle($event) : null;
+            abort_if($publicTitle !== $title || CarbonImmutable::parse($event['start']) >= $end
+                || CarbonImmutable::parse($event['end']) <= $start, 409, 'Jadwal atau judul berubah. Muat ulang kalender dan tinjau kembali.');
+            $titles[$key] = $publicTitle;
+        }
+
+        $count = $publications->publishNew($user, $titles);
+        return response()->json(['published' => $count, 'skipped' => count($titles) - $count]);
     }
 }

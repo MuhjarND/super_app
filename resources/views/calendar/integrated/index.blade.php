@@ -10,6 +10,13 @@
     <header class="calendar-page-heading">
         <h1>Kalender Terpadu</h1>
         <p>Lihat pembagian waktu kegiatan kantor dalam satu minggu.</p>
+        @if(auth()->user()->isSuperAdmin())
+            <p class="mt-2"><strong>Publikasi ke website PTA:</strong> Gunakan judul kegiatan yang tampil, atau klik satu kegiatan untuk menulis judul publik sendiri.</p>
+            <button type="button" class="btn calendar-button btn-sm mt-2" id="calendarBulkPublication" disabled>
+                <i class="fas fa-check-double mr-1" aria-hidden="true"></i> Publikasikan kegiatan yang tampil
+            </button>
+            <span class="ml-2 small" id="calendarBulkPublicationResult" role="status"></span>
+        @endif
     </header>
 
     <form id="calendarFilterForm" class="calendar-filter-bar" data-skip-loader>
@@ -69,7 +76,7 @@
         <div id="calendarMessage" class="calendar-message" role="status" hidden></div>
         <p class="calendar-tv-hint">Pembaruan otomatis setiap 1 menit · Tekan Esc atau tombol keluar untuk kembali.</p>
     <div class="modal fade" id="calendarEventModal" tabindex="-1" role="dialog" aria-hidden="true">
-        <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+        <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable" role="document">
             <div class="modal-content">
                 <div class="modal-header">
                     <div>
@@ -79,6 +86,16 @@
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
                 </div>
                 <div class="modal-body">
+                    @if(auth()->user()->isSuperAdmin())
+                        <form id="calendarPublicationForm" class="border rounded bg-light p-3 mb-3"
+                              action="{{ route('calendar.integrated.publish') }}" data-skip-loader>
+                            <label class="font-weight-bold" for="calendarPublicTitle">Judul untuk kalender publik</label>
+                            <input type="text" id="calendarPublicTitle" name="public_title" class="form-control" maxlength="255" aria-describedby="calendarPublicationHelp">
+                            <small id="calendarPublicationHelp" class="form-text text-muted">Judul ini, tanggal, dan waktu akan tampil di website PTA. Kosongkan untuk menarik publikasi. Jangan cantumkan data pribadi atau rahasia.</small>
+                            <button type="submit" class="btn btn-primary btn-sm mt-2">Simpan publikasi</button>
+                            <span id="calendarPublicationStatus" class="ml-2 small" role="status"></span>
+                        </form>
+                    @endif
                     <div class="calendar-modal-meta">
                         <div class="calendar-modal-meta-item"><div class="calendar-modal-meta-label">Waktu</div><div class="calendar-modal-meta-value" id="calendarEventTime">-</div></div>
                         <div class="calendar-modal-meta-item"><div class="calendar-modal-meta-label">Kategori</div><div class="calendar-modal-meta-value" id="calendarEventCategory">-</div></div>
@@ -89,22 +106,37 @@
                         <div class="calendar-modal-meta-item"><div class="calendar-modal-meta-label">Aksi</div><div class="calendar-modal-meta-value"><a href="#" class="btn btn-primary btn-sm d-none" id="calendarEventLink" target="_blank" rel="noopener"><i class="fas fa-external-link-alt mr-1"></i> Buka Modul Asal</a><span id="calendarEventLinkFallback">Tidak ada tautan langsung.</span></div></div>
                     </div>
                     <div class="calendar-modal-description" id="calendarEventDescription">-</div>
-                    @if(auth()->user()->isSuperAdmin())
-                        <form id="calendarPublicationForm" class="border-top mt-3 pt-3"
-                              action="{{ route('calendar.integrated.publish') }}" data-skip-loader>
-                            <label for="calendarPublicTitle">Judul untuk kalender publik</label>
-                            <input type="text" id="calendarPublicTitle" name="public_title" class="form-control" maxlength="255">
-                            <small class="form-text text-muted">Judul ini, tanggal, dan waktu akan tampil di website PTA. Kosongkan untuk menarik publikasi. Jangan cantumkan data pribadi atau rahasia.</small>
-                            <button type="submit" class="btn btn-primary btn-sm mt-2">Simpan publikasi</button>
-                            <span id="calendarPublicationStatus" class="ml-2 small" role="status"></span>
-                        </form>
-                    @endif
                 </div>
             </div>
         </div>
     </div>
 
     </div>
+
+    @if(auth()->user()->isSuperAdmin())
+        <div class="modal fade" id="calendarBulkPublicationModal" tabindex="-1" role="dialog"
+             aria-labelledby="calendarBulkPublicationHeading" aria-hidden="true">
+            <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable" role="document">
+                <form id="calendarBulkPublicationForm" class="modal-content" data-skip-loader
+                      action="{{ route('calendar.integrated.publish-bulk') }}" data-limit="{{ \App\Services\CalendarPublications::BULK_LIMIT }}">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="calendarBulkPublicationHeading">Tinjau publikasi ke website PTA</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Tutup"><span aria-hidden="true">&times;</span></button>
+                    </div>
+                    <div class="modal-body">
+                        <p>Pilih kegiatan yang boleh tampil dengan judul aslinya. Hapus centang jika judul memuat data pribadi atau informasi internal.</p>
+                        <p class="small text-muted">Data cuti, kegiatan dari surat internal, dan jadwal yang sudah dipublikasikan tidak disertakan.</p>
+                        <div id="calendarBulkPublicationList" role="group" aria-label="Kegiatan yang ditampilkan"></div>
+                    </div>
+                    <div class="modal-footer">
+                        <span id="calendarBulkPublicationStatus" class="small mr-auto" role="status"></span>
+                        <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-primary">Simpan publikasi terpilih</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    @endif
 
     <details class="calendar-extra">
         <summary>Ringkasan dan agenda mendatang</summary>

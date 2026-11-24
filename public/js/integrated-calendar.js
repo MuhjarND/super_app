@@ -28,6 +28,14 @@
         const publicationForm = document.getElementById('calendarPublicationForm');
         const publicationTitle = document.getElementById('calendarPublicTitle');
         const publicationStatus = document.getElementById('calendarPublicationStatus');
+        const bulkButton = document.getElementById('calendarBulkPublication');
+        const bulkForm = document.getElementById('calendarBulkPublicationForm');
+        const bulkList = document.getElementById('calendarBulkPublicationList');
+        const bulkStatus = document.getElementById('calendarBulkPublicationStatus');
+        const bulkResult = document.getElementById('calendarBulkPublicationResult');
+        let bulkBatch = null;
+        let reviewedBatch = null;
+        let savingBulk = false;
         let selectedEvent = null;
         const fullscreenNotice = 'Fullscreen browser belum dapat diaktifkan. Mode layar TV tetap aktif.';
         const board = display.querySelector('.calendar-board');
@@ -35,6 +43,36 @@
         const witDate = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Jayapura', year: 'numeric', month: '2-digit', day: '2-digit' });
 
         function showMessage(text) { message.textContent = text; message.hidden = !text; }
+        async function savePublication(url, payload) {
+            const response = await fetch(url, {
+                method: 'PUT',
+                credentials: 'same-origin',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                },
+                body: JSON.stringify(payload)
+            });
+            if (response.status === 409) throw new Error('Jadwal atau judul berubah. Buka ulang daftar publikasi untuk meninjau kembali.');
+            if (!response.ok) throw new Error('Publikasi gagal disimpan.');
+            return response.json();
+        }
+        function setBulkBatch(events, range) {
+            if (!bulkButton) return;
+            const start = range.startStr.slice(0, 10);
+            const end = range.endStr.slice(0, 10);
+            const from = Date.parse(start + 'T00:00:00+09:00');
+            const until = Date.parse(end + 'T00:00:00+09:00');
+            bulkBatch = {
+                start: start,
+                end: end,
+                events: events.filter(function (event) {
+                    return event.extendedProps.bulk_publication_title && Date.parse(event.start) < until && Date.parse(event.end) > from;
+                })
+            };
+            bulkButton.disabled = !bulkBatch.events.length;
+        }
         function tvMode() { return document.fullscreenElement === display || display.classList.contains('is-tv-mode'); }
         function witNow() {
             const parts = Object.fromEntries(witDate.formatToParts(new Date()).map(function (p) { return [p.type, p.value]; }));
@@ -128,6 +166,7 @@
             loading: function (loading) { board.setAttribute('aria-busy', String(loading)); },
             events: function (info, success, failure) {
                 if (activeRequest) activeRequest.abort();
+                setBulkBatch([], info);
                 const request = new AbortController(); activeRequest = request;
                 const params = new URLSearchParams(new FormData(form));
                 params.set('start', info.startStr); params.set('end', info.endStr); params.set('_ts', String(Date.now()));
@@ -139,6 +178,7 @@
                 }).then(function (payload) {
                     if (request.signal.aborted) { success([]); return; }
                     const events = Array.from(new Map((payload.events || []).map(function (event) { return [String(event.id), event]; })).values());
+                    setBulkBatch(events, info);
                     showMessage(''); renderSummary(payload.meta || {}); fitEventHours(events); success(events); updateSize();
                 }).catch(function (error) {
                     if (error.name === 'AbortError') { success([]); return; }
@@ -179,23 +219,13 @@
                 publicationStatus.textContent = 'Menyimpan...';
 
                 try {
-                    const response = await fetch(publicationForm.action, {
-                        method: 'PUT',
-                        credentials: 'same-origin',
-                        headers: {
-                            'Accept': 'application/json',
-                            'Content-Type': 'application/json',
-                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-                        },
-                        body: JSON.stringify({
-                            event_key: item.id,
-                            start: item.start.toISOString(),
-                            public_title: publicationTitle.value.trim() || null
-                        })
+                    const data = await savePublication(publicationForm.action, {
+                        event_key: item.id,
+                        start: item.start.toISOString(),
+                        public_title: publicationTitle.value.trim() || null
                     });
-                    if (!response.ok) throw new Error('Gagal menyimpan publikasi');
-                    const data = await response.json();
                     item.setExtendedProp('public_title', data.public_title);
+                    calendar.refetchEvents();
                     if (selectedEvent === item) {
                         publicationStatus.textContent = data.public_title ? 'Publikasi disimpan.' : 'Publikasi ditarik.';
                     }
@@ -203,6 +233,75 @@
                     if (selectedEvent === item) publicationStatus.textContent = 'Publikasi gagal disimpan.';
                 } finally {
                     button.disabled = false;
+                }
+            });
+        }
+        if (bulkForm) {
+            const submit = bulkForm.querySelector('button[type="submit"]');
+            const limit = Number(bulkForm.dataset.limit);
+            const selected = function () { return Array.from(bulkList.querySelectorAll('input:checked')); };
+
+            function updateBulkStatus() {
+                if (savingBulk) return;
+                const count = selected().length;
+                submit.disabled = count === 0 || count > limit;
+                bulkStatus.textContent = count > limit ? 'Pilih maksimal ' + limit + ' kegiatan.' : count + ' kegiatan dipilih.';
+            }
+
+            bulkButton.addEventListener('click', function () {
+                if (savingBulk || !bulkBatch || !bulkBatch.events.length) return;
+                reviewedBatch = bulkBatch;
+                const rows = reviewedBatch.events.map(function (event, index) {
+                    const row = document.createElement('label');
+                    row.className = 'd-flex align-items-start border-bottom py-2 mb-0';
+                    const checkbox = document.createElement('input');
+                    checkbox.type = 'checkbox';
+                    checkbox.className = 'mr-2 mt-1';
+                    checkbox.value = String(index);
+                    checkbox.checked = true;
+                    const text = document.createElement('span');
+                    text.textContent = event.extendedProps.bulk_publication_title;
+                    const details = document.createElement('small');
+                    details.className = 'd-block text-muted';
+                    details.textContent = event.extendedProps.time_label || '';
+                    text.appendChild(details);
+                    row.append(checkbox, text);
+                    return row;
+                });
+                bulkList.replaceChildren(...rows);
+                bulkResult.textContent = '';
+                updateBulkStatus();
+                $('#calendarBulkPublicationModal').modal('show');
+            });
+
+            bulkList.addEventListener('change', updateBulkStatus);
+            bulkForm.addEventListener('submit', async function (event) {
+                event.preventDefault();
+                const checked = selected();
+                if (savingBulk || !reviewedBatch || !checked.length || checked.length > limit || submit.disabled) return;
+                const events = checked.map(function (checkbox) {
+                    const item = reviewedBatch.events[Number(checkbox.value)];
+                    return { id: item.id, title: item.extendedProps.bulk_publication_title };
+                });
+                submit.disabled = true;
+                savingBulk = true;
+                bulkStatus.textContent = 'Menyimpan...';
+
+                try {
+                    const data = await savePublication(bulkForm.action, {
+                        start: reviewedBatch.start, end: reviewedBatch.end, events: events
+                    });
+                    $('#calendarBulkPublicationModal').modal('hide');
+                    bulkResult.textContent = data.published + ' kegiatan dipublikasikan.'
+                        + (data.skipped ? ' ' + data.skipped + ' kegiatan sudah dipublikasikan sebelumnya.' : '');
+                    calendar.refetchEvents();
+                } catch (error) {
+                    savingBulk = false;
+                    updateBulkStatus();
+                    bulkStatus.textContent = error.message;
+                    calendar.refetchEvents();
+                } finally {
+                    savingBulk = false;
                 }
             });
         }

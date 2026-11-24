@@ -10,7 +10,19 @@ use Illuminate\Support\Facades\DB;
 
 class CalendarPublications
 {
+    public const BULK_EVENT_KEY = '/^(rapat|agenda|virtual-meeting|zi)-[1-9][0-9]*$/D';
+    public const BULK_LIMIT = 200;
     private const ZONE = 'Asia/Jayapura';
+
+    public static function bulkTitle(array $event): ?string
+    {
+        if (!preg_match(self::BULK_EVENT_KEY, $event['id']) || !is_string($event['title'] ?? null)) {
+            return null;
+        }
+
+        $title = trim($event['title']);
+        return $title !== '' && mb_strlen($title) <= 255 ? $title : null;
+    }
 
     public function titles(array $keys): Collection
     {
@@ -85,5 +97,23 @@ class CalendarPublications
         }
 
         return $events;
+    }
+
+    public function publishNew(User $publisher, array $titles): int
+    {
+        return DB::transaction(function () use ($publisher, $titles) {
+            $count = 0;
+            $rows = [];
+            foreach ($titles as $key => $title) {
+                if (preg_match('/^agenda-([1-9][0-9]*)$/D', $key, $match)) {
+                    $count += AgendaPimpinan::whereKey((int) $match[1])
+                        ->whereNull('calendar_public_title')->update(['calendar_public_title' => $title]);
+                } else {
+                    $rows[] = ['event_key' => $key, 'public_title' => $title, 'published_by' => $publisher->id];
+                }
+            }
+
+            return $count + ($rows ? DB::table('calendar_publications')->insertOrIgnore($rows) : 0);
+        });
     }
 }

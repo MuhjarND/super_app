@@ -30,6 +30,10 @@ class PublicCalendarTest extends TestCase
             $table->unsignedBigInteger('user_id');
             $table->unsignedBigInteger('role_id');
         });
+        Schema::create('user_jabatan_delegations', function (Blueprint $table) {
+            $table->unsignedBigInteger('user_id');
+            $table->boolean('is_active');
+        });
         Schema::create('agenda_pimpinans', function (Blueprint $table) {
             $table->id();
             $table->date('tanggal_kegiatan');
@@ -118,5 +122,73 @@ class PublicCalendarTest extends TestCase
         $this->getJson($feed)->assertOk()->assertDontSee('Publik rapat-1');
         DB::table('users')->where('id', 1)->update(['status_aktif_pegawai' => false]);
         $this->getJson($feed)->assertOk()->assertExactJson(['events' => []]);
+    }
+
+    public function test_bulk_publication_keeps_reviewed_source_titles_and_excludes_private_modules(): void
+    {
+        DB::table('users')->insert([['id' => 1], ['id' => 2]]);
+        DB::table('roles')->insert(['id' => 1, 'name' => 'admin']);
+        DB::table('role_user')->insert(['user_id' => 1, 'role_id' => 1]);
+        $admin = User::findOrFail(1);
+        $other = User::findOrFail(2)->setRelation('activeJabatanDelegations', collect());
+        $agenda = AgendaPimpinan::create([
+            'judul_agenda' => 'Kunjungan pimpinan', 'tanggal_kegiatan' => '2026-11-25', 'waktu' => '10:00:00',
+        ]);
+
+        $schedule = [];
+        foreach ([
+            'rapat-1' => 'Donor darah',
+            'rapat-2' => 'Rapat dengan judul internal berbeda',
+            'agenda-' . $agenda->id => $agenda->judul_agenda,
+            'cuti-1' => 'Nama pegawai',
+            'surat-tugas-1' => 'Surat tugas internal',
+            'surat-keluar-calendar-1' => 'Surat keluar internal',
+        ] as $key => $title) {
+            $schedule[$key] = [
+                'id' => $key, 'title' => $title, 'start' => '2026-11-25T10:00:00+09:00',
+                'end' => '2026-11-25T11:00:00+09:00', 'allDay' => false, 'extendedProps' => [],
+            ];
+        }
+
+        $calendar = \Mockery::mock(IntegratedCalendarService::class);
+        $calendar->shouldReceive('build')->withArgs(function ($user, $filters, $keys = null) {
+            return $user->id === 1 && in_array($filters['end'], ['2026-11-29', '2026-11-30'], true);
+        })->andReturnUsing(function ($user, $filters, $keys = null) use (&$schedule) {
+            return ['events' => array_values($keys === null ? $schedule : array_intersect_key($schedule, array_flip($keys)))];
+        });
+        $this->app->instance(IntegratedCalendarService::class, $calendar);
+        DB::table('calendar_publications')->insert([
+            'event_key' => 'rapat-2', 'public_title' => 'Judul publik yang sudah disunting', 'published_by' => 1,
+        ]);
+
+        $endpoint = '/kalender-terpadu/publikasi-massal';
+        $range = ['start' => '2026-11-23', 'end' => '2026-11-30'];
+        $reviewed = [['id' => 'rapat-1', 'title' => 'Donor darah']];
+        $this->putJson($endpoint, $range + ['events' => $reviewed])->assertStatus(401);
+        $this->actingAs($other)->putJson($endpoint, $range + ['events' => $reviewed])->assertStatus(403);
+
+        $this->actingAs($admin);
+        $preview = collect($this->getJson('/kalender-terpadu/events?start=2026-11-23&end=2026-11-29')
+            ->assertOk()->json('events'))->keyBy('id');
+        $this->assertSame('Donor darah', $preview['rapat-1']['extendedProps']['bulk_publication_title']);
+        $this->assertNull($preview['rapat-2']['extendedProps']['bulk_publication_title']);
+        foreach (['cuti-1', 'surat-tugas-1', 'surat-keluar-calendar-1'] as $key) {
+            $this->assertNull($preview[$key]['extendedProps']['bulk_publication_title']);
+            $this->putJson($endpoint, $range + ['events' => array_merge($reviewed, [['id' => $key, 'title' => $schedule[$key]['title']]])])
+                ->assertStatus(422);
+        }
+        $this->putJson($endpoint, $range + ['events' => array_merge($reviewed, [['id' => 'agenda-' . $agenda->id, 'title' => 'Judul tidak sesuai']])])
+            ->assertStatus(409);
+        $this->assertDatabaseMissing('calendar_publications', ['event_key' => 'rapat-1']);
+
+        $batch = $range + ['events' => array_merge($reviewed, [
+            ['id' => 'rapat-2', 'title' => $schedule['rapat-2']['title']],
+            ['id' => 'agenda-' . $agenda->id, 'title' => $agenda->judul_agenda],
+        ])];
+        $this->putJson($endpoint, $batch)->assertOk()->assertExactJson(['published' => 2, 'skipped' => 1]);
+        $this->putJson($endpoint, $batch)->assertOk()->assertExactJson(['published' => 0, 'skipped' => 3]);
+        $this->getJson('/api/kalender-publik?month=2026-11')->assertOk()
+            ->assertSee('Donor darah')->assertSee('Kunjungan pimpinan')->assertSee('Judul publik yang sudah disunting')
+            ->assertDontSee('Nama pegawai')->assertDontSee('Surat tugas internal');
     }
 }

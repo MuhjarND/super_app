@@ -65,6 +65,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/kalender-terpadu', 'IntegratedCalendarController@index')->name('calendar.integrated.index');
     Route::get('/kalender-terpadu/events', 'IntegratedCalendarController@events')->name('calendar.integrated.events');
     Route::put('/kalender-terpadu/publikasi', 'IntegratedCalendarController@publish')->name('calendar.integrated.publish');
+    Route::put('/kalender-terpadu/publikasi-massal', 'IntegratedCalendarController@publishBulk')->name('calendar.integrated.publish-bulk');
     Route::prefix('persediaan')->name('persediaan.')->group(function () {
         Route::get('/', function () {
             abort_unless(auth()->user()->canAccessSupplyModule(), 403);
