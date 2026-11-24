@@ -69,6 +69,7 @@
                             data-documentation-action="{{ route('rapat.agenda.documentation', $agenda) }}"
                             data-tanggal-kegiatan="{{ optional($agenda->tanggal_kegiatan)->format('Y-m-d') }}"
                             data-judul-agenda="{{ $agenda->judul_agenda }}"
+                            data-calendar-public-title="{{ $agenda->calendar_public_title }}"
                             data-tempat="{{ $agenda->tempat }}"
                             data-waktu="{{ $agenda->waktu_formatted }}"
                             data-seragam-pakaian="{{ $agenda->seragam_pakaian }}"
@@ -327,6 +328,7 @@
             $('#editAgendaForm').attr('action', row.data('action'));
             $('#editTanggalKegiatan').val(row.data('tanggalKegiatan'));
             $('#editJudulAgenda').val(row.data('judulAgenda'));
+            $('#editCalendarPublicTitle').val(row.attr('data-calendar-public-title'));
             $('#editTempat').val(row.data('tempat'));
             $('#editWaktu').val(row.data('waktu'));
             $('#editNomorNaskahDinas').val(row.data('nomorNaskahDinas'));

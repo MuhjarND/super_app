@@ -89,6 +89,16 @@
                         <div class="calendar-modal-meta-item"><div class="calendar-modal-meta-label">Aksi</div><div class="calendar-modal-meta-value"><a href="#" class="btn btn-primary btn-sm d-none" id="calendarEventLink" target="_blank" rel="noopener"><i class="fas fa-external-link-alt mr-1"></i> Buka Modul Asal</a><span id="calendarEventLinkFallback">Tidak ada tautan langsung.</span></div></div>
                     </div>
                     <div class="calendar-modal-description" id="calendarEventDescription">-</div>
+                    @if(auth()->user()->isSuperAdmin())
+                        <form id="calendarPublicationForm" class="border-top mt-3 pt-3"
+                              action="{{ route('calendar.integrated.publish') }}" data-skip-loader>
+                            <label for="calendarPublicTitle">Judul untuk kalender publik</label>
+                            <input type="text" id="calendarPublicTitle" name="public_title" class="form-control" maxlength="255">
+                            <small class="form-text text-muted">Judul ini, tanggal, dan waktu akan tampil di website PTA. Kosongkan untuk menarik publikasi. Jangan cantumkan data pribadi atau rahasia.</small>
+                            <button type="submit" class="btn btn-primary btn-sm mt-2">Simpan publikasi</button>
+                            <span id="calendarPublicationStatus" class="ml-2 small" role="status"></span>
+                        </form>
+                    @endif
                 </div>
             </div>
         </div>

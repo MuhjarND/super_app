@@ -15,7 +15,7 @@ class SupplyItemController extends Controller
         $this->middleware('auth');
     }
 
-    public function index()
+    public function index(Request $request)
     {
         abort_unless(auth()->user()->canManageSupplyModule(), 403);
 
@@ -23,9 +23,19 @@ class SupplyItemController extends Controller
             return response()->view('persediaan.supplies.setup');
         }
 
-        $items = SupplyItem::orderBy('name')->paginate(20);
+        $search = $request->validate(['search' => ['nullable', 'string', 'max:255']])['search'] ?? '';
+        $query = SupplyItem::orderBy('name')->orderBy('id');
+        if ($search !== '') {
+            $term = '%' . $search . '%';
+            $query->where(function ($query) use ($term) {
+                $query->where('name', 'like', $term)
+                    ->orWhere('code', 'like', $term)
+                    ->orWhere('account_code', 'like', $term);
+            });
+        }
+        $items = $query->paginate(20)->appends(['search' => $search]);
 
-        return view('persediaan.supplies.items.index', compact('items'));
+        return view('persediaan.supplies.items.index', compact('items', 'search'));
     }
 
     public function store(Request $request)

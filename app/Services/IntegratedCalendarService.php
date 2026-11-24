@@ -15,37 +15,34 @@ use Illuminate\Support\Collection;
 
 class IntegratedCalendarService
 {
-    public function build(User $user, array $filters = [])
+    public function build(User $user, array $filters = [], ?array $eventKeys = null)
     {
         $filters = $this->normalizeFilters($filters);
-
         $events = collect();
-
-        if (in_array('rapat', $filters['modules'], true)) {
-            $events = $events->merge($this->buildRapatEvents($user, $filters));
+        $sources = [
+            'rapat' => ['rapat', 'buildRapatEvents'],
+            'agenda' => ['agenda_pimpinan', 'buildAgendaEvents'],
+            'virtual-meeting' => ['virtual_meeting', 'buildVirtualMeetingEvents'],
+            'cuti' => ['cuti', 'buildLeaveEvents'],
+            'zi' => ['zi', 'buildZiEvents'],
+            'surat-tugas' => ['surat_tugas', 'buildSuratTugasEvents'],
+            'surat-keluar-calendar' => [null, 'buildSuratKeluarCalendarEvents'],
+        ];
+        $idsBySource = [];
+        foreach ($eventKeys ?? [] as $key) {
+            if (preg_match('/^([a-z-]+)-([1-9][0-9]*)$/D', $key, $parts) && isset($sources[$parts[1]])) {
+                $idsBySource[$parts[1]][] = (int) $parts[2];
+            }
         }
 
-        if (in_array('agenda_pimpinan', $filters['modules'], true)) {
-            $events = $events->merge($this->buildAgendaEvents($user, $filters));
-        }
+        foreach ($sources as $source => [$module, $builder]) {
+            if (($module && !in_array($module, $filters['modules'], true))
+                || ($eventKeys !== null && empty($idsBySource[$source]))) {
+                continue;
+            }
 
-        if (in_array('virtual_meeting', $filters['modules'], true)) {
-            $events = $events->merge($this->buildVirtualMeetingEvents($user, $filters));
+            $events = $events->merge($this->$builder($user, $filters + ['event_ids' => $idsBySource[$source] ?? null]));
         }
-
-        if (in_array('cuti', $filters['modules'], true)) {
-            $events = $events->merge($this->buildLeaveEvents($user, $filters));
-        }
-
-        if (in_array('zi', $filters['modules'], true)) {
-            $events = $events->merge($this->buildZiEvents($user, $filters));
-        }
-
-        if (in_array('surat_tugas', $filters['modules'], true)) {
-            $events = $events->merge($this->buildSuratTugasEvents($user, $filters));
-        }
-
-        $events = $events->merge($this->buildSuratKeluarCalendarEvents($user, $filters));
 
         if (!empty($filters['status'])) {
             $events = $events->where('status_key', $filters['status'])->values();
@@ -111,6 +108,7 @@ class IntegratedCalendarService
         $query = Rapat::visibleTo($user)
             ->with(['creator.unit', 'kategoriRapat', 'approvals', 'pesertas'])
             ->whereBetween('tanggal', [$filters['start']->toDateString(), $filters['end']->toDateString()]);
+        $this->restrictEventIds($query, $filters);
 
         if ($filters['scope'] === 'mine' && ($user->canManageRapat() || $user->isSuperAdmin())) {
             $query->where(function ($builder) use ($user) {
@@ -167,6 +165,7 @@ class IntegratedCalendarService
         $query = $this->visibleAgendaQuery($user)
             ->with(['creator.unit', 'recipients'])
             ->whereBetween('tanggal_kegiatan', [$filters['start']->toDateString(), $filters['end']->toDateString()]);
+        $this->restrictEventIds($query, $filters);
 
         if ($filters['scope'] === 'mine' && ($user->isSuperAdmin() || $user->canAccessAgendaPimpinan())) {
             $query->where(function ($builder) use ($user) {
@@ -221,6 +220,7 @@ class IntegratedCalendarService
         $query = VirtualMeeting::visibleTo($user)
             ->with(['creator.unit', 'participants'])
             ->whereBetween('tanggal_kegiatan', [$filters['start']->toDateString(), $filters['end']->toDateString()]);
+        $this->restrictEventIds($query, $filters);
 
         if ($filters['scope'] === 'mine') {
             $query->where(function ($builder) use ($user) {
@@ -286,6 +286,7 @@ class IntegratedCalendarService
             ])
             ->whereDate('start_date', '<=', $filters['end']->toDateString())
             ->whereDate('end_date', '>=', $filters['start']->toDateString());
+        $this->restrictEventIds($query, $filters);
 
         if (!$user->isSuperAdmin() && !$user->canApproveLeave()) {
             $query->where('user_id', $user->id);
@@ -350,6 +351,7 @@ class IntegratedCalendarService
             });
 
         $activePeriodId = optional(\App\ZiPeriod::where('is_active', true)->latest('year')->first())->id;
+        $this->restrictEventIds($query, $filters);
         if ($activePeriodId) {
             $query->where('zi_period_id', $activePeriodId);
         }
@@ -427,6 +429,7 @@ class IntegratedCalendarService
             ->whereHas('templateApproval', function ($approvalQuery) {
                 $approvalQuery->where('template_slug', 'surat-tugas');
             });
+        $this->restrictEventIds($query, $filters);
 
         if ($filters['scope'] === 'mine' && ($user->canManageSuratKeluar() || $user->isSuperAdmin())) {
             $query->where(function ($builder) use ($user) {
@@ -519,6 +522,8 @@ class IntegratedCalendarService
                 });
             });
 
+        $this->restrictEventIds($query, $filters);
+
         if ($filters['scope'] === 'mine') {
             $query->whereHas('suratKeluar', function ($suratQuery) use ($user) {
                 $suratQuery->where(function ($builder) use ($user) {
@@ -591,6 +596,13 @@ class IntegratedCalendarService
                 ],
             ]);
         })->values();
+    }
+
+    protected function restrictEventIds($query, array $filters)
+    {
+        if (isset($filters['event_ids'])) {
+            $query->whereKey($filters['event_ids']);
+        }
     }
 
     protected function makeEvent(array $data)

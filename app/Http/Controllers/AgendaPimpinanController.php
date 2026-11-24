@@ -59,6 +59,7 @@ class AgendaPimpinanController extends Controller
         $agenda = AgendaPimpinan::create([
             'tanggal_kegiatan' => $data['tanggal_kegiatan'],
             'judul_agenda' => $data['judul_agenda'],
+            'calendar_public_title' => $data['calendar_public_title'] ?? null,
             'tempat' => $data['tempat'],
             'waktu' => $data['waktu'],
             'nomor_naskah_dinas' => $data['nomor_naskah_dinas'] ?? null,
@@ -91,7 +92,7 @@ class AgendaPimpinanController extends Controller
             'lampiran_link' => $data['lampiran_link'] ?? null,
             'catatan' => $data['catatan'] ?? null,
             'updated_by' => auth()->id(),
-        ]);
+        ] + array_intersect_key($data, ['calendar_public_title' => true]));
 
         $orderedRecipients = $this->syncRecipients($agenda, $data['recipient_ids'] ?? []);
         $agenda->update([
@@ -173,6 +174,7 @@ class AgendaPimpinanController extends Controller
         return $request->validate([
             'tanggal_kegiatan' => ['required', 'date'],
             'judul_agenda' => ['required', 'string', 'max:255'],
+            'calendar_public_title' => ['nullable', 'string', 'max:255'],
             'tempat' => ['required', 'string', 'max:255'],
             'waktu' => ['required', 'date_format:H:i'],
             'nomor_naskah_dinas' => ['nullable', 'string', 'max:255'],

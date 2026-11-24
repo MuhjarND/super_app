@@ -56,8 +56,18 @@
 <div class="inventory-module-shell">
     <div class="inventory-module-board">
         <div class="inventory-module-board-header d-flex justify-content-between align-items-center flex-wrap gap-2">
-            <div class="inventory-module-board-title"><i class="fas fa-boxes text-muted mr-1"></i> Data Barang</div>
-            <span class="inventory-module-chip">{{ $items->total() }}</span>
+            <div class="inventory-module-board-title">
+                <i class="fas fa-boxes text-muted mr-1"></i> Data Barang
+                <span class="inventory-module-chip ml-1">{{ $items->total() }}</span>
+            </div>
+            <form method="GET" action="{{ route('persediaan.items.index') }}" class="form-inline mb-0 supply-filter-form">
+                <label for="supplyItemSearch" class="sr-only">Cari master barang</label>
+                <input type="search" name="search" id="supplyItemSearch" value="{{ $search }}" maxlength="255" class="form-control form-control-sm mr-sm-2" placeholder="Nama barang atau kode">
+                <button type="submit" class="btn btn-sm btn-primary mr-sm-2"><i class="fas fa-search mr-1"></i> Cari</button>
+                @if($search !== '')
+                    <a href="{{ route('persediaan.items.index') }}" class="btn btn-sm btn-outline-secondary">Reset</a>
+                @endif
+            </form>
         </div>
         <div class="inventory-module-board-body p-0">
             <table class="table inventory-module-table supply-table mb-0">
@@ -115,7 +125,7 @@
                         <tr>
                             <td colspan="9" class="text-center py-4">
                                 <div class="inventory-module-empty border-0 bg-transparent p-0">
-                                    <i class="far fa-folder-open"></i> Belum ada barang persediaan
+                                    <i class="far fa-folder-open"></i> {{ $search !== '' ? 'Barang tidak ditemukan.' : 'Belum ada barang persediaan.' }}
                                 </div>
                             </td>
                         </tr>

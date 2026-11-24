@@ -31,6 +31,12 @@
                     </div>
 
                     <div class="form-group">
+                        <label for="{{ $prefix }}CalendarPublicTitle">Judul Kalender Publik (opsional)</label>
+                        <input type="text" name="calendar_public_title" id="{{ $prefix }}CalendarPublicTitle" class="form-control" maxlength="255">
+                        <small class="form-text text-muted">Jika diisi, judul ini, tanggal, dan waktu kegiatan akan tampil di website PTA. Kosongkan agar agenda tetap internal. Jangan tulis data pribadi atau informasi rahasia.</small>
+                    </div>
+
+                    <div class="form-group">
                         <label>Tempat <span class="text-danger">*</span></label>
                         <input type="text" name="tempat" id="{{ $prefix }}Tempat" class="form-control" required>
                     </div>

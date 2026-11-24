@@ -25,6 +25,10 @@
         let resizeFrame = null;
         let wasTvMode = false;
         const fullscreenButton = document.getElementById('calendarFullscreenButton');
+        const publicationForm = document.getElementById('calendarPublicationForm');
+        const publicationTitle = document.getElementById('calendarPublicTitle');
+        const publicationStatus = document.getElementById('calendarPublicationStatus');
+        let selectedEvent = null;
         const fullscreenNotice = 'Fullscreen browser belum dapat diaktifkan. Mode layar TV tetap aktif.';
         const board = display.querySelector('.calendar-board');
         const witTime = new Intl.DateTimeFormat('en-GB', { timeZone: 'Asia/Jayapura', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' });
@@ -144,6 +148,11 @@
             eventClick: function (info) {
                 info.jsEvent.preventDefault();
                 const props = info.event.extendedProps || {};
+                if (publicationForm) {
+                    selectedEvent = info.event;
+                    publicationTitle.value = props.public_title || '';
+                    publicationStatus.textContent = '';
+                }
                 const fields = { calendarEventTitle: info.event.title, calendarEventModule: props.module_label,
                     calendarEventStatus: props.status_label, calendarEventTime: props.time_label, calendarEventCategory: props.kategori,
                     calendarEventUnit: props.unit, calendarEventPic: props.pic, calendarEventLocation: props.location,
@@ -158,6 +167,45 @@
                 $('#calendarEventModal').modal('show');
             }
         });
+
+        if (publicationForm) {
+            publicationForm.addEventListener('submit', async function (event) {
+                event.preventDefault();
+                if (!selectedEvent) return;
+
+                const item = selectedEvent;
+                const button = publicationForm.querySelector('button[type="submit"]');
+                button.disabled = true;
+                publicationStatus.textContent = 'Menyimpan...';
+
+                try {
+                    const response = await fetch(publicationForm.action, {
+                        method: 'PUT',
+                        credentials: 'same-origin',
+                        headers: {
+                            'Accept': 'application/json',
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                        },
+                        body: JSON.stringify({
+                            event_key: item.id,
+                            start: item.start.toISOString(),
+                            public_title: publicationTitle.value.trim() || null
+                        })
+                    });
+                    if (!response.ok) throw new Error('Gagal menyimpan publikasi');
+                    const data = await response.json();
+                    item.setExtendedProp('public_title', data.public_title);
+                    if (selectedEvent === item) {
+                        publicationStatus.textContent = data.public_title ? 'Publikasi disimpan.' : 'Publikasi ditarik.';
+                    }
+                } catch (error) {
+                    if (selectedEvent === item) publicationStatus.textContent = 'Publikasi gagal disimpan.';
+                } finally {
+                    button.disabled = false;
+                }
+            });
+        }
         window.integratedCalendarInstance = calendar;
         calendar.render(); updateClock();
 

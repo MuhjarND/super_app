@@ -545,10 +545,6 @@
         box-shadow: none;
     }
 
-    .supply-search-compact {
-        max-width: 190px;
-    }
-
     .supply-readable-text,
     .supply-note-alert {
         font-size: 0.88rem;

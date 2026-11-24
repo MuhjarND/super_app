@@ -64,6 +64,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/tindak-lanjut-terpadu', 'UnifiedActionCenterController@index')->name('action-center.index');
     Route::get('/kalender-terpadu', 'IntegratedCalendarController@index')->name('calendar.integrated.index');
     Route::get('/kalender-terpadu/events', 'IntegratedCalendarController@events')->name('calendar.integrated.events');
+    Route::put('/kalender-terpadu/publikasi', 'IntegratedCalendarController@publish')->name('calendar.integrated.publish');
     Route::prefix('persediaan')->name('persediaan.')->group(function () {
         Route::get('/', function () {
             abort_unless(auth()->user()->canAccessSupplyModule(), 403);
@@ -84,6 +85,7 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/pengajuan/{supplyRequest}/reject', 'SupplyRequestController@reject')->name('requests.reject');
         Route::post('/pengajuan/{supplyRequest}/cancel', 'SupplyRequestController@cancel')->name('requests.cancel');
         Route::get('/barang-diambil', 'SupplyPickupController@index')->name('pickups.index');
+        Route::get('/barang-diambil/laporan/pdf', 'SupplyPickupController@reportPdf')->name('pickups.report.pdf');
         Route::get('/opname', 'SupplyOpnameController@index')->name('opname.index');
         Route::post('/opname/cetak', 'SupplyOpnameController@download')->name('opname.download');
         Route::get('/dev', function () {

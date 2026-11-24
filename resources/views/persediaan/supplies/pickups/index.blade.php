@@ -8,6 +8,9 @@
 
 @section('content')
 @include('admin._alerts')
+@php
+    $previousFilters = array_filter((array) old(), 'is_string');
+@endphp
 
 <div class="inventory-module-hero d-flex justify-content-between align-items-center flex-wrap gap-2">
     <h1 class="inventory-module-title mb-0">Barang Diambil</h1>
@@ -20,11 +23,29 @@
 
 <div class="inventory-module-shell">
     <div class="inventory-module-board">
-        <div class="inventory-module-board-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <div class="inventory-module-board-header">
             <div class="inventory-module-board-title"><i class="fas fa-history text-muted mr-1"></i> Riwayat Pengambilan</div>
-            <form method="GET" action="{{ route('persediaan.pickups.index') }}" class="form-inline mb-0 supply-filter-form">
-                <input type="text" name="search" value="{{ request('search') }}" class="form-control form-control-sm mr-1 supply-search-compact" placeholder="Cari...">
-                <button type="submit" class="btn btn-sm btn-primary"><i class="fas fa-search"></i></button>
+            <form method="GET" action="{{ route('persediaan.pickups.index') }}" class="supply-filter-form mt-2">
+                <div class="form-row align-items-end">
+                    <div class="col-12 col-md-4 form-group mb-2">
+                        <label for="pickupSearch" class="mb-1">Pencarian</label>
+                        <input type="search" name="search" id="pickupSearch" value="{{ $previousFilters['search'] ?? $filters['search'] ?? '' }}" maxlength="255" class="form-control form-control-sm" placeholder="Nama barang, kode, pegawai, atau no. pengajuan">
+                    </div>
+                    <div class="col-6 col-md-4 form-group mb-2">
+                        <label for="pickupFrom" class="mb-1">Tanggal awal</label>
+                        <input type="date" name="from" id="pickupFrom" value="{{ $previousFilters['from'] ?? $filters['from'] ?? '' }}" class="form-control form-control-sm">
+                    </div>
+                    <div class="col-6 col-md-4 form-group mb-2">
+                        <label for="pickupTo" class="mb-1">Tanggal akhir</label>
+                        <input type="date" name="to" id="pickupTo" value="{{ $previousFilters['to'] ?? $filters['to'] ?? '' }}" class="form-control form-control-sm">
+                    </div>
+                </div>
+                <div class="supply-action-row">
+                    <button type="submit" class="btn btn-sm btn-primary"><i class="fas fa-search mr-1"></i> Tampilkan</button>
+                    <button type="submit" formaction="{{ route('persediaan.pickups.report.pdf') }}" class="btn btn-sm app-create-btn"><i class="fas fa-print mr-1"></i> Cetak PDF</button>
+                    <a href="{{ route('persediaan.pickups.index') }}" class="btn btn-sm btn-outline-secondary">Reset</a>
+                </div>
+                <small class="form-text text-muted">Isi kedua tanggal untuk mencetak laporan.</small>
             </form>
         </div>
         <div class="inventory-module-board-body p-0">
@@ -77,7 +98,7 @@
                         <tr>
                             <td colspan="6" class="text-center py-4">
                                 <div class="inventory-module-empty border-0 bg-transparent p-0">
-                                    <i class="far fa-folder-open"></i> Belum ada pengambilan barang
+                                    <i class="far fa-folder-open"></i> Tidak ada pengambilan barang pada daftar ini.
                                 </div>
                             </td>
                         </tr>
@@ -88,5 +109,5 @@
     </div>
 </div>
 
-<div class="mt-3">{{ $pickups->appends(request()->query())->links() }}</div>
+<div class="mt-3">{{ $pickups->links() }}</div>
 @endsection

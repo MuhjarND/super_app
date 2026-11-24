@@ -11,6 +11,7 @@ class AgendaPimpinan extends Model
         'surat_masuk_id',
         'tanggal_kegiatan',
         'judul_agenda',
+        'calendar_public_title',
         'tempat',
         'waktu',
         'yang_menghadiri',
